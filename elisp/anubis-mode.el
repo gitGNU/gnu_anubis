@@ -80,7 +80,7 @@
   (setq anubis-mode-map (make-sparse-keymap))
   (define-key anubis-mode-map "\t" 'anubis-complete-or-indent)
   (define-key anubis-mode-map "\e\t" 'anubis-indent-line)
-  (define-key anubis-mode-map "?" 'anubis-describe-keywords))
+  (define-key anubis-mode-map "\e?" 'anubis-describe-keywords))
 
 (defvar anubis-section-body-indent 0
   "Indent of a section body in an Anubis rc file")
