@@ -2,7 +2,7 @@
    env.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -77,17 +77,18 @@ static struct option gopt[] = {
   {"show-config-options", no_argument, 0, OPT_SHOW_CONFIG},
   {"relax-perm-check", no_argument, 0, OPT_RELAX_PERM_CHECK},
   {"pid-file", required_argument, 0, OPT_PIDFILE},
-#ifdef WITH_GSASL
   {"mode", required_argument, 0, 'm'},
-#endif
   {0, 0, 0, 0}
 };
+
+int x_argc;
+char **x_argv;
 
 void
 get_options (int argc, char *argv[])
 {
   int c;
-
+  
   while ((c = getopt_long (argc, argv, "m:b:r:l:fisvDc::?",
 			   gopt, &gindex)) != EOF)
     {
@@ -128,17 +129,18 @@ get_options (int argc, char *argv[])
 	  break;
 
 	case 'b':		/* daemon's port number, host name */
-	  parse_mtahost (optarg, session.anubis, &session.anubis_port);
-	  if (strlen (session.anubis) != 0)
+	  parse_mtahost (optarg, &session.anubis, &session.anubis_port);
+	  if (session.anubis && strlen (session.anubis) != 0)
 	    topt |= T_NAMES;
 	  break;
 
 	case 'r':		/* a remote SMTP host name or IP address */
-	  parse_mtaport (optarg, session.mta, &session.mta_port);
+	  parse_mtaport (optarg, &session.mta, &session.mta_port);
 	  break;
 
 	case 'l':		/* a local SMTP mode */
-	  session.execpath = allocbuf (optarg, MAXPATHLEN);
+	  session.execargs = gen_execargs (optarg);
+	  session.execpath = strdup (session.execargs[0]);
 	  topt |= T_LOCAL_MTA;
 	  break;
 
@@ -174,23 +176,9 @@ get_options (int argc, char *argv[])
 	}
     }
 
-  if (topt & T_LOCAL_MTA)
-    {
-      if (optind == argc)
-	{			/* No extra arguments specified. */
-	  if (session.execpath)
-	    {
-	      char *ptr = strrchr (session.execpath, '/');
-	      if (ptr)
-		ptr++;
-	      else
-		ptr = session.execpath;
-	      session.execargs = gen_execargs (ptr);
-	    }
-	}
-      else
-	session.execargs = argv_dup (argc - optind, argv + optind);
-    }
+  x_argc = argc - optind;
+  x_argv = argv + optind;
+  
   return;
 }
 
@@ -226,17 +214,12 @@ get_homedir (char *user, char *buf, int maxsize)
 ******************************/
 
 void
-anubis_getlogin (char *buf, int maxsize)
+anubis_getlogin (char **buf)
 {
   struct passwd *pwd;
-  memset (buf, 0, maxsize);
 
   pwd = getpwuid (getuid ());
-  if (pwd)
-    strncpy (buf, (char *) pwd->pw_name, maxsize - 1);
-  else
-    strncpy (buf, (char *) getlogin (), maxsize - 1);
-  return;
+  assign_string (buf, pwd ? pwd->pw_name : getlogin ());
 }
 
 /*******************
@@ -502,6 +485,8 @@ anubis_set_mode (char *modename)
     anubis_mode = anubis_transparent;
   else if (strcmp (modename, "auth") == 0)
     anubis_mode = anubis_authenticate;
+  else if (strcmp (modename, "mda") == 0)
+    anubis_mode = anubis_mda;
   else
     {
       mprintf (_("Unknown mode: %s"), modename);
