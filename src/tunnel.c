@@ -105,10 +105,9 @@ add_header (ANUBIS_LIST * list, char *line)
 }
 
 void
-collect_headers (MESSAGE * msg)
+collect_headers (MESSAGE * msg, char *line)
 {
   char buf[LINEBUFFER + 1];
-  char *line = NULL;
 
   while (recvline (SERVER, remote_client, buf, sizeof (buf) - 1))
     {
@@ -144,13 +143,13 @@ write_header_line (NET_STREAM sd_server, char *line)
 {
   char *p;
 
-  p = strtok (line, "\n");
+  p = strtok (line, "\r\n");
   do
     {
       swrite (CLIENT, sd_server, p);
       send_eol (CLIENT, sd_server);
     }
-  while ((p = strtok (NULL, "\n")));
+  while ((p = strtok (NULL, "\r\n")));
 }
 
 static void
@@ -733,10 +732,10 @@ process_data (MESSAGE * msg)
 
   alarm (1800);
 
-  collect_headers (msg);
+  collect_headers (msg, NULL);
   collect_body (msg);
 
-  rcfile_process_section (CF_CLIENT, "RULE", NULL, msg);
+  rcfile_call_section (CF_CLIENT, outgoing_mail_rule, NULL, msg);
 
   transfer_header (msg->header);
   transfer_body (msg);
