@@ -1,3 +1,12 @@
+2003-06-19  Wojciech Polak
+
+	* testsuite/etc/mod-header.pat: New file.
+	  Testing the modify header mechanism.
+	* testsuite/etc/mod-header.in: New file.
+	* testsuite/etc/Makefile.am: Updated.
+	* testsuite/anubis/base.exp: Added mod-header.pat.
+	* TODO: Updated.
+
 2003-06-19  Sergey Poznyakoff 
 
 	* TODO: Updated
@@ -5,11 +14,10 @@
 	* src/guile.c: use non-destructive eval
 	* src/headers.h (anubis_regex_replace): New function
 	* src/regex.c: Likewise.
-	* src/message.c (message_modify_body): New function. Implements
-	"modify body [key] text" statement.
+	* src/message.c (message_modify_body): New function.
+	Implements "modify body [key] text" statement.
 	* src/rcfile.y: Minor cleanup
 	(inst_eval): Call message_modify_body().
-
 	* testsuite/anubis/base.exp: Run mod-body test
 	* testsuite/anubis/gpg.exp: Add final newline
 	* testsuite/etc/mod-body.pat: New file

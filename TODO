@@ -22,6 +22,11 @@ control analyzer).
 ** S/MIME support
 ** `reject' action command
 
+* Other stuff
+** An external performance test.
+** anubis-mode.el -- a major mode for editing
+system/user configuration files.
+
 
 Local variables:
 mode: outline
