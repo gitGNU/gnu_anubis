@@ -120,7 +120,7 @@ print_usage(void)
 	puts(_(" -c, --check-config           Run the configuration file syntax checker."));
 	puts(_(" --show-config-options        Print a list of configuration options used\n"
 	       "                              to build GNU Anubis."));
-	puts(_(" --relax-perm-check           Do not check a user config file permissions."));
+	puts(_(" --relax-perm-check           Do not check user configuration file permissions."));
 	puts(_(" --altrc FILE                 Specify alternate system configuration file."));
 	puts(_(" --norc                       Ignore system configuration file."));
 	puts(_(" --version                    Print version number and copyright."));

@@ -462,8 +462,8 @@ anubis_authenticate_mode(NET_STREAM *psd_client, struct sockaddr_in *addr)
 
 	if (!(topt & T_LOCAL_MTA)
 	    && strlen(session.mta) == 0) {
-		anubis_error(HARD, _("The MTA has not been specified. "
-				     "Set the REMOTE-MTA or LOCAL-MTA."));
+		anubis_error(HARD, _("MTA has not been specified. "
+				     "Set either REMOTE-MTA or LOCAL-MTA."));
 		return EXIT_FAILURE;
 	}
 	

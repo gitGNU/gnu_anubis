@@ -54,7 +54,7 @@ esmtp_auth(NET_STREAM sd_server, char *reply)
 		static char ascii_digest[33];
 		memset(digest, 0, 16);
 
-		info(VERBOSE, _("Using the ESMTP CRAM-MD5 authentication..."));
+		info(VERBOSE, _("Using ESMTP authentication mechanism CRAM-MD5..."));
 		swrite(CLIENT, sd_server, "AUTH CRAM-MD5"CRLF);
 		get_response_smtp(CLIENT, sd_server, tmp, LINEBUFFER);
 
@@ -93,7 +93,7 @@ esmtp_auth(NET_STREAM sd_server, char *reply)
 	else
 #endif /* HAVE_TLS or HAVE_SSL */
 	if (strstr(reply, "LOGIN") && (topt & T_SSL_FINISHED)) {
-		info(VERBOSE, _("Using the ESMTP LOGIN authentication..."));
+		info(VERBOSE, _("Using ESMTP authentication mechanism LOGIN..."));
 		swrite(CLIENT, sd_server, "AUTH LOGIN"CRLF);
 		get_response_smtp(CLIENT, sd_server, tmp, LINEBUFFER);
 
