@@ -1,5 +1,5 @@
 /*
-   GNU Anubis v3.9.0 -- an outgoing mail processor and the SMTP tunnel.
+   GNU Anubis v3.9.90 -- an outgoing mail processor and the SMTP tunnel.
    Copyright (C) 2001, 2002, 2003 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
