@@ -101,6 +101,9 @@ main(int argc, char *argv[])
 # if defined(HAVE_LIBGDBM)
 	gdbm_db_init();
 # endif
+# if defined(WITH_MYSQL)
+	mysql_db_init();
+# endif
 #endif
 	
 	/*
