@@ -8,6 +8,14 @@
 	(make_uppercase): New function
 	* src/rcfile.y (rc_set_debug_level): Check for valid input.
 
+	* doc/anubis.texi: Fixed rccol-rcfile confusion. The URL parameter
+	name and its default value are now "rcfile".
+	* src/mysql.c: Likewise.
+	* src/pgsql.c: Likewise.
+	* src/rcfile.c: Likewise.
+	* src/sql.c: Likewise.
+	* src/sql.h: Likewise.
+	
 2004-07-12  Sergey Poznyakoff 
 
 	* src/authmode.c (make_help_message): Fixed mess created
