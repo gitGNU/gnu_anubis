@@ -1,0 +1,716 @@
+# -*- tcl -*-
+# This file is part of GNU Anubis testsuite.
+# Copyright (C) 2003 The Anubis Team.
+#
+# GNU Anubis is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# GNU Anubis is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Anubis; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+proc anubis_init {args} {
+    global TOOL_EXECUTABLE
+    global ANUBIS_TOOL
+    global ANUBIS_RC_DIR
+    global ANUBIS_ETC_DIR
+    global tool
+    global ANUBIS_TOOL_FLAGS
+    global ANUBIS_DATA_DIR
+    global base_dir
+    global top_srcdir
+    global objdir
+    global host_board
+    
+    if [info exists TOOL_EXECUTABLE] {
+	set ANUBIS_TOOL $TOOL_EXECUTABLE
+    }
+
+    if ![info exists ANUBIS_TOOL] {
+	if ![is_remote host] {
+	    set ANUBIS_TOOL [findfile $base_dir/../src/$tool "$base_dir/../src/$tool" [transform $tool]]
+	    set ANUBIS_DATA_DIR "$objdir/data"
+	    set ANUBIS_ETC_DIR "$top_srcdir/testsuite/etc"
+	    set ANUBIS_RC_DIR "$objdir/etc"
+	} else {
+	    if [info exists host_board] {
+		if [board_info $host_board exists top_builddir] {
+		    append ANUBIS_TOOL "[board_info $host_board top_builddir]/$tool/$tool"
+		} elseif [board_info $host_board exists top_srcdir] {
+		    append ANUBIS_TOOL "[board_info $host_board top_srcdir]/$tool/$tool"
+	        }
+	    }
+
+	    if ![info exists ANUBIS_TOOL] {
+		perror "The test suite is not set up for the remote testing"
+	        perror "Please, read file README in $tool/testsuite subdirectory"
+	        perror "for instructions on how to set up it."
+	        exit 1
+	    }
+	    set ANUBIS_ETC_DIR "[board_info $host_board top_srcdir]/testsuite/etc"
+	    set ANUBIS_DATA_DIR "[board_info $host_board objdir]/data"
+	    set ANUBIS_RC_DIR "[board_info $host_board objdir]/etc"
+	}
+
+	set ANUBIS_TOOL_FLAGS "--norc --relax-perm-check"
+    }
+}
+
+proc default_anubis_start {args} {
+    global verbose
+    global ANUBIS_TOOL
+    global ANUBIS_TOOL_FLAGS
+    global expect_out
+    
+    if [info exists ANUBIS_TOOL_FLAGS] {
+	set sw $ANUBIS_TOOL_FLAGS
+    } else {
+	set sw ""
+    }
+
+    verbose "SW $sw"
+    verbose "ARGS $args"
+    if [llength $args] {
+	append sw " " $args
+    } 
+    
+    set cmd "$ANUBIS_TOOL $sw"
+    verbose "Spawning $cmd"
+
+    set res [remote_spawn host $cmd]
+    if { $res < 0 || $res == "" } {
+	perror "Spawning $cmd failed."
+	return 1;
+    }
+
+    return 0
+}
+
+# anubis_exec [-retcode N][-message S][-default (FAIL | XFAIL)][-arg S...]
+#         [-pattern PATTERN-LIST][PATTERN...]
+#
+# Executes $ANUBIS_TOOL and checks whether it returns with the given exit
+# status and its output matches supplied PATTERN.
+# Switches:
+# -retcode N        Expect program to finish with exit code N instead of the
+#                   default 0 (search for word 'Pity' below, though).
+# -arg S            Supply additional arguments to the program.
+# -message S        Set message to output when printing results of the test.
+# -default          Supply the expected testcase result
+proc anubis_exec {args} {
+    global verbose
+    global ANUBIS_TOOL
+    global ANUBIS_TOOL_FLAGS
+    global expect_out
+    
+    if [info exists ANUBIS_TOOL_FLAGS] {
+	set sw $ANUBIS_TOOL_FLAGS
+    } else {
+	set sw ""
+    }
+    
+    anubis_version
+
+    set default 0
+    set message ""
+    set result 0
+    set retcode 0
+    for {set i 0} {$i < [llength $args]} {incr i} {
+	set opt [lindex $args $i]
+	if {"$opt" == "-retcode"} {
+	    incr i
+	    set retcode [lindex $args $i]
+	    verbose "RETCODE $retcode" 1
+	} elseif {"$opt" == "-message"} {
+	    incr i
+	    set message [lindex $args $i]
+	} elseif {"$opt" == "-default"} {
+	    incr i
+	    set default [lindex $args $i]
+	} elseif {"$opt" == "-arg"} {
+	    incr i
+	    append sw " [lindex $args $i]"
+	} elseif {"$opt" == "-arg-list"} {
+	    incr i
+	    set s [lindex $args $i]
+	    for {set j 0} {$j < [llength $s]} {incr j} {
+		append sw " [lindex $s $j]"
+	    }
+	} elseif {"$opt" == "-pattern"} {
+	    incr i
+	    set pattern [lindex $args $i]
+	} else {
+	    break
+	}
+    }	
+
+    if [info exists pattern] {
+	set args [concat $pattern [lrange $args $i end]]
+    } else {
+	set args [lrange $args $i end]
+    }
+
+    # Pity, dejagnu provides no way to retrieve exit status of the process.
+    # This ugly construction is used to work around this. Hopefully, it
+    # should execute on any decent platform...
+    set cmd "sh -c \"$ANUBIS_TOOL $sw\; echo \$?\""
+    verbose "Executing $cmd"
+
+    set res [remote_exec host $cmd]
+
+    lappend args "$retcode"
+	    
+    set output [lindex $res 1]
+
+    if {[llength $args] == 0 && [string length $output] != 0} {
+	verbose "Expected \"[lindex $args 1]\" but founf EOF" 1
+	set result 1
+    }
+
+    for {set i 0} {$result == 0 && $i < [llength $args]} {incr i} {
+	if {[string length $output] == 0} {
+	    verbose "Not enough output from $cmd" 1
+	    verbose "Stopped waiting for \"[lindex $args $i]\"" 1
+	    set result 1
+	    break
+	}
+	set regexp 0
+
+	switch -regexp -- "[lindex $args $i]" {
+	    ^-re     { set regexp 1; incr i }
+	    ^-ex     -
+	    ^--      { incr i }
+	}
+	    
+	set pattern [lindex $args $i]
+	verbose "PATTERN $pattern"
+
+	if {$regexp} {
+	    verbose "does \"$output\" match regular expression \"$pattern\"?" 1
+	    if {![regexp -- "${pattern}(.*)" "$output" dummy output]} {
+		set result 1
+	    }
+	} else {
+	    verbose "does \"$output\" match exact string \"$pattern\"?" 1
+	    if {"$pattern" != ""} {
+		if {[string first "$pattern" "$output"] != 0} {
+		    set result 1
+		}
+		set output [string range $output [string length $pattern] end]
+	    }
+	}
+
+	if {![regexp -- "\[ \t]*\r\n(.*)" "$output" dummy output]} {
+	    set result 1
+	}
+
+	if {$result} {
+	    verbose "NO" 1
+	} else {
+	    verbose "yes" 1
+	}
+    }
+
+    if {$result == 0} {
+	pass "$message"
+    } elseif {$result == 1} {
+	if { "$default" == "" || "$default" != "FAIL" } {
+	    fail "$message"
+	} else {
+	    xfail "$message"
+	    set result 0
+	}
+    } elseif {$result == -2} {
+	fail "$message (timeout)"
+    } elseif {$result == -3} {
+	fail "$message (eof)"
+    } else {
+	fail "$message"
+    }
+
+    return $result
+}
+
+proc anubis_version {} {
+    global ANUBIS_TOOL
+    global ANUBIS_TOOL_FLAGS
+    global ANUBIS_TOOL_VERSION
+    global ANUBIS_CAPABILITY
+    
+    if [info exists ANUBIS_TOOL_VERSION] {
+	return
+    }
+
+    set output [remote_exec host "$ANUBIS_TOOL --show-config-options"]
+    set flg [split [lindex $output 1]]   	
+    for {set i 0} {$i < [llength $flg]} {incr i} {
+	if [regexp "(.*)=(.*)" [lindex $flg $i] var name value] {
+	    set ANUBIS_CAPABILITY($name) $value
+	} else {
+	    set ANUBIS_CAPABILITY([lindex $flg $i]) 1
+	}
+    }
+    if [info exists ANUBIS_CAPABILITY(VERSION)] {
+	set ANUBIS_TOOL_VERSION $ANUBIS_CAPABILITY(VERSION)
+    } else {
+	set ANUBIS_TOOL_VERSION "UNKNOWN"
+    }
+}
+
+proc anubis_send { string } {
+    global suppress_flag;
+    if {[info exists suppress_flag] && $suppress_flag} {
+	return "suppressed";
+    }
+    return [remote_send host "$string"]
+}
+
+proc anubis_command { cmd } {
+    set res [anubis_send "$cmd\n"]
+    anubis_expect 30 {
+	-ex "\r\n" { }
+	default {
+	    perror "anubis_command for target failed";
+	    return -1
+	}
+    }
+    verbose "RESULT: $res" 2
+    return $res
+}
+
+proc anubis_expect { args } {
+    global env
+    if { [lindex $args 0] == "-notransfer" } {
+	set notransfer -notransfer;
+	set args [lrange $args 1 end];
+    } else {
+	set notransfer "";
+    }
+
+    if { [llength $args] == 2  && [lindex $args 0] != "-re" } {
+	set gtimeout [lindex $args 0];
+	set expcode [list [lindex $args 1]];
+    } else {
+	upvar timeout timeout;
+
+	set expcode $args;
+	if [target_info exists anubis,timeout] {
+	    if [info exists timeout] {
+		if { $timeout < [target_info anubis,timeout] } {
+		    set gtimeout [target_info anubis,timeout];
+		} else {
+		    set gtimeout $timeout;
+		}
+	    } else {
+		set gtimeout [target_info anubis,timeout];
+	    }
+	}
+
+	if ![info exists gtimeout] {
+	    global timeout;
+	    if [info exists timeout] {
+		set gtimeout $timeout;
+	    } else {
+		# Eeeeew.
+		set gtimeout 60;
+	    }
+	}
+    }
+
+    global suppress_flag;
+    global remote_suppress_flag;
+    global verbose
+    if [info exists remote_suppress_flag] {
+	set old_val $remote_suppress_flag;
+    }
+    if [info exists suppress_flag] {
+	if { $suppress_flag } {
+	    set remote_suppress_flag 1;
+	}
+    }
+
+    verbose "EXPCODE is $expcode" 4
+    verbose "RUNNING remote_expect host $gtimeout $notransfer" 2
+
+    set code [catch \
+	{uplevel remote_expect host $gtimeout $notransfer $expcode} string];
+    if [info exists old_val] {
+	set remote_suppress_flag $old_val;
+    } else {
+	if [info exists remote_suppress_flag] {
+	    unset remote_suppress_flag;
+	}
+    }
+
+    if {$code == 1} {
+        global errorInfo errorCode;
+
+	return -code error -errorinfo $errorInfo -errorcode $errorCode $string
+    } elseif {$code == 2} {
+	return -code return $string
+    } elseif {$code == 3} {
+	return
+    } elseif {$code > 4} {
+	return -code $code $string
+    }
+}
+
+proc anubis_expect_list {args} {
+    set tmt [lindex $args 0]
+    set pattern [lindex $args 1]
+
+    set result 0
+    for {set i 0} {$i < [llength $pattern]} {incr i} {
+	set regexp 0
+	switch -regexp -- "[lindex ${pattern} $i]" {
+	    ^-re.*$	{ set regexp 1; incr i }
+	    ^--         { incr i }
+	}
+
+	regsub "\[ \t\]*$" [lindex ${pattern} $i] "" pat
+	verbose "i=$i, pat=$pat" 2
+
+	if {$regexp} {
+	   verbose "REGEX for $pat / [llength $pat] " 3
+	   anubis_expect $tmt {
+	       -re $pat { }
+	       default {
+		   set result 1
+		   break
+	       }
+	       timeout {
+		   set result -2
+		   break
+	       }
+	       eof {
+		   set result -3
+		   break
+	       }
+	   }
+       } else {
+	   anubis_expect $tmt {
+	       -ex "$pat" {
+#		   if { $expect_out(buffer) != $expect_out(0,string) } {
+#		       verbose "Got \"$expect_out(buffer)\"" 2
+#		       verbose "instead of expected \"$pat\\r\\n\"" 2
+#		       set result 1
+#		       break
+#		   }
+	       }
+ 	       default {
+		   set result 1
+		   break
+	       }
+	       timeout {
+		   set result -2
+		   break
+	       }
+	       eof {
+		   set result -3
+		   break
+	       }
+	   }
+       }
+       if {$result == 0} {
+	   anubis_expect $tmt {
+	       -re "^\[ \t]*\r\n" { }
+	       default { set result 1 }
+	       timeout { set result -2 }
+	       eof { set result -3 }
+           }
+	}
+    }
+    return $result
+}    
+
+# anubis_test COMMAND PATTERN
+# COMMAND   - Command to send to the program
+# PATTERN   - A list of strings to expect in return
+# Return value:
+#        -3 - eof
+#        -2 - timeout
+#        -1 - generic failure
+#         1 - test fails
+#         0 - test succeeds
+proc anubis_test { args } {
+    global verbose
+    global suppress_flag
+    upvar timeout timeout
+    
+    set command [lindex $args 0]
+    set pattern [lindex $args 1]
+
+    if { [info exists suppress_flag] && $suppress_flag } {
+	set do_suppress 1
+    } else {
+	set do_suppress 0
+    }
+
+    if $verbose>2 then {
+	send_user "Command: \"$command\"\n"
+	send_user "Pattern: \"$pattern\"\n"
+    }
+    
+    set result -1
+    if { "${command}" != "" } {
+	set res [anubis_command "${command}"]
+	if { $res != "" } {
+	    if { ! $do_suppress } {
+		perror "Couldn't send \"$command\": $res.";
+	    }
+	    return $result;
+        }
+    }
+
+    if [info exists timeout] {
+	set tmt $timeout;
+    } else {
+	global timeout;
+	if [info exists timeout] {
+	    set tmt $timeout;
+	} else {
+	    set tmt 60;
+	}
+    }
+
+    set result 0
+    for {set i 0} {$result == 0 && $i < [llength $pattern]} {incr i} {
+	set regexp 0
+	switch -regexp -- "[lindex ${pattern} $i]" {
+	    ^-re.*$	{ set regexp 1; incr i }
+	    ^--         { incr i }
+	}
+
+	regsub "\[ \t\]*$" [lindex ${pattern} $i] "" pat
+	verbose "i=$i, pat=$pat" 2
+
+	if {$regexp} {
+	   verbose "REGEX for $pat / [llength $pat] " 3
+	   anubis_expect $tmt {
+	       -re "$pat\[ \r\t\]*\r\n" { }
+	       default {
+		   set result 1
+		   break
+	       }
+	       timeout {
+		   set result -2
+		   break
+	       }
+	       eof {
+		   set result -3
+		   break
+	       }
+	   }
+       } else {
+	   anubis_expect $tmt {
+	       -ex "$pat" {
+#		   if { $expect_out(buffer) != $expect_out(0,string) } {
+#		       verbose "Got \"$expect_out(buffer)\"" 2
+#		       verbose "instead of expected \"$pat\\r\\n\"" 2
+#		       set result 1
+#		       break
+#		   }
+	       }
+ 	       default {
+		   set result 1
+		   break
+	       }
+	       timeout {
+		   set result -2
+		   break
+	       }
+	       eof {
+		   set result -3
+		   break
+	       }
+	   }
+
+	   if {$result == 0} {
+	       anubis_expect $tmt {
+		   -re "^\[ \t]*\r\n" { }
+		   default { set result 1 }
+		   timeout { set result -2 }
+		   eof { set result -3 }
+	       }
+	   }
+       }
+    }
+    return $result
+}
+
+proc anubis_test_file {args} {
+    global verbose
+    
+    set default ""
+    set message ""
+
+    for {set i 0} {$i < [llength $args]} {incr i} {
+	set a [lindex $args $i]
+	if {"$a" == "-default"} {
+	    incr i
+	    set default [lindex $args $i]
+	} elseif {"$a" == "-pattern"} {
+	    incr i
+	    set pattern [lindex $args $i]
+	} elseif {"$a" == "-message"} {
+	    incr i
+	    set message [lindex $args $i]
+	} else {
+	    set args [lrange $args $i end]
+	    break
+	}
+    }
+    
+    if {"$message" == ""}  {
+	set message "Contents of [lindex $args 0]"
+    }
+
+    if $verbose>2 then {
+	send_user "Message is \"$message\"\n"
+    }
+
+    set filename [lindex $args 0]
+    if ![info exists pattern] {
+        set pattern [lrange $args 1 end]
+    }
+    
+    set res [remote_spawn host "/bin/cat $filename"]
+    if { $res < 0 || $res == "" } {
+	perror "Reading $filename failed."
+	return 1;
+    }
+    set result [anubis_test "" $pattern]
+    if {$result == 0} {
+	pass "$message"
+    } elseif {$result == 1} {
+	if { "$default" == "" || "$default" != "FAIL" } {
+	    fail "$message"
+	} else {
+	    xfail "$message"
+	    set result 0
+	}
+    } elseif {$result == -2} {
+	fail "$message (timeout)"
+    } elseif {$result == -3} {
+	fail "$message (eof)"
+    } else {
+	fail "$message"
+    }
+    return $result
+}
+
+# State map:
+#  0    -- command
+#  1    -- pattern
+proc anubis_pat {patname} {
+    global ANUBIS_ETC_DIR
+    global ANUBIS_RC_DIR
+    
+    verbose "ANUBIS_PAT $patname" 1
+    set chan [open $ANUBIS_ETC_DIR/$patname r]
+    set state 0
+    set options ""
+    set testname ""
+    set mode ""
+    set retcode 0
+    set rcfile ""
+    for {gets $chan line} {![eof $chan]} {gets $chan line} {
+	verbose "LINE $line" 1
+	if { $state == 0 } {
+	    switch -regexp -- "$line" {
+		"^#.*" { }
+		"^:TEST" {
+		    regexp "^:TEST (.*)" $line dummy testname
+		}
+		"^:MODE" {
+		    regexp "^:MODE (.*)" $line dummy mode
+		}
+		"^:OPTIONS" {
+		    regexp "^:OPTIONS (.*)" $line dummy opt
+		    lappend options $opt
+		}
+	        "^:RCFILE" {
+	            regexp "^:RCFILE (.*)" $line dummy rcfile
+	        }
+	        "^:RETCODE" {
+	            regexp "^:RETCODE (.*)" $line dummy retcode
+	        }
+	        "^:PATTERN" {
+		    set state 1
+	        }
+	        "^:END" {
+		    if {$mode == "EXEC"} {
+			set inv anubis_exec
+			if {$options != ""} {
+			    lappend inv -arg $options
+			}
+			if {$rcfile != ""} {
+			    lappend inv -arg "--altrc $ANUBIS_RC_DIR/$rcfile"
+			}
+			if {$retcode != 0} {
+			    lappend inv -retcode $retcode
+			}
+			if {$testname != ""} {
+			    lappend inv -message $testname
+			}
+			eval $inv $pattern
+		    } elseif {$mode == "SPAWN"} {
+			set inv default_anubis_start
+			if {$options != ""} {
+			    lappend inv $options
+			}
+			if {$rcfile != ""} {
+			    lappend inv --altrc "$ANUBIS_RC_DIR/$rcfile"
+			}
+			verbose "RUN $inv"
+			eval $inv
+
+			set file_pattern ""
+			for {set pat $pattern} \
+			    {[llength $pat] > 0} \
+			    {set pat [lrange $pat 1 end]} {
+
+			    set line [lindex $pat 0]
+			    if [regexp "^:EXPECT (.*)" $line dummy expect] {
+				anubis_expect {-re "$expect\[^\n\]*\n"}
+			    } elseif [regexp "^:ADD (.*)" $line dummy expect] {
+				lappend file_pattern $expect
+			    } else {
+				anubis_command "$line"
+				lappend file_pattern $line
+			    }
+			}
+
+			set inv anubis_test_file
+			if {$testname != ""} {
+			    lappend inv -message $testname
+			}
+			lappend inv "$ANUBIS_RC_DIR/mta.log"
+			eval $inv $file_pattern
+		    }
+
+		    ## Reset all variables
+                    set options ""
+                    set testname ""
+                    set mode ""
+                    set retcode 0
+                    set rcfile ""
+	        }
+	    }
+	} else {
+	    switch -regexp -- "$line" {
+		"^:END" { set state 0 }
+		default { lappend pattern $line }
+	    }
+	}    
+    }
+}
+
+# End of anubis.exp
