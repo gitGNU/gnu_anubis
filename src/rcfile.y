@@ -55,7 +55,8 @@ static void rc_stmt_print(RC_STMT *, int);
 static int reg_modifier_add(int *, char *);
 static int check_kw(char *ident);
 static int is_prog_allowed();
-
+static void parse_error(const char *fmt, ...);
+ 
 static RC_SECTION *rc_section;
 static int debug_level;
 static int error_count;
@@ -184,7 +185,7 @@ stmt     : /* empty */ EOL
 asgn_stmt: keyword meq { verbatim(); } arglist
            {
 		   if (!check_kw($1)) {
-			   yyerror(_("unknown keyword"));
+			   parse_error(_("unknown keyword: %s"), $1);
 			   YYERROR;
 		   }
 
@@ -294,7 +295,7 @@ s_msgpart: msgpart
            {
 		   $$ = $1;
 		   if ($$.key)
-			   yyerror("regexp is not allowed in this context");
+			   parse_error("regexp is not allowed in this context");
 	   }
          ;
 
@@ -468,7 +469,7 @@ inst_stmt: STOP
 		   $$->v.inst.part = $2.part;
 		   $$->v.inst.key  = $2.key;
 		   if ($3 == NULL) {
-			   yyerror(_("missing replacement value"));
+			   parse_error(_("missing replacement value"));
 		   }
 		   $$->v.inst.key2 = $3;
 		   $$->v.inst.arg  = NULL;
@@ -485,6 +486,24 @@ modf_stmt: REGEX modlist
          ;
 
 %%
+
+static int
+err_line_num()
+{
+	return yychar == EOL ? cfg_line_num - 1 : cfg_line_num;
+}
+
+void
+parse_error(const char *fmt, ...)
+{
+	char buf[LINEBUFFER];
+	va_list ap;
+
+	va_start(ap, fmt);
+	vsnprintf(buf, sizeof buf, fmt, ap);
+	va_end(ap);
+	anubis_error(SOFT, "%s:%d: %s", cfg_file, err_line_num(), buf);
+}
 
 int
 yyerror(char *s)
@@ -901,7 +920,7 @@ reg_modifier_add(int *flag, char *opt)
 	else if (strcasecmp(opt, "icase") == 0)
 		re_clear_flag(*flag, R_SCASE);
 	else {
-		yyerror(_("Unknown regexp modifier"));
+		parse_error(_("Unknown regexp modifier"));
 		return 1;
 	}
 	return 0;
@@ -1253,6 +1272,6 @@ is_prog_allowed()
 		p = anubis_find_section("RULE");
 	
 	if (!p->allow_prog)
-		yyerror(_("program is not allowed in this section"));
+		parse_error(_("program is not allowed in this section"));
 	return p->allow_prog;
 }
