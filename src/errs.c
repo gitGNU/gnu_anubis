@@ -70,9 +70,10 @@ anubis_error(int method, char *format, ...)
 }
 
 void
-socket_error(void)
+socket_error(const char *msg)
 {
-	anubis_error(HARD, _("Couldn't write on socket! %s."), strerror(errno));
+	anubis_error(HARD, _("Couldn't write to socket: %s."),
+		     msg ? msg : strerror(errno));
 	return;
 }
 
