@@ -137,7 +137,8 @@
 # define _(String) (String)
 # define N_(String) String
 # define textdomain(Domain)
-# define bindtextdomain(Package, Directory);
+# define bindtextdomain(Package, Directory)
+# define ngettext(s,p,n) s
 #endif /* ENABLE_NLS */
 
 #ifdef WITH_GUILE
@@ -338,7 +339,7 @@ void message_add_body(MESSAGE *msg, char *key, char *value);
 void message_add_header(MESSAGE *msg, char *hdr, char *value);
 void message_remove_headers(MESSAGE *msg, char *arg);
 void message_modify_headers(MESSAGE *msg, char *key, char *key2, char *value);
-void message_external_proc(MESSAGE *msg, char *name);
+void message_external_proc(MESSAGE *msg, char **argv);
 void message_init(MESSAGE *msg);
 void message_free(MESSAGE *msg);
 
@@ -346,6 +347,7 @@ void message_free(MESSAGE *msg);
 char **gen_execargs(const char *);
 int  make_local_connection(char *, char **);
 char *external_program(int *, char *, char *, char *, int);
+char *exec_argv(int *rs, char **argv, char *src, char *dst, int dstsize);
 
 /* esmtp.c */
 void esmtp_auth(void *, char *);
