@@ -23,16 +23,18 @@
 ##
 
 sbin_PROGRAMS = anubis
-anubis_LDADD = @LIBOBJS@ @LIBINTL@ $(GUILE_LIBS) @LIBGNUTLS_LIBS@
+anubis_LDADD = @LIBOBJS@ @LIBINTL@ $(GUILE_LIBS) @LIBGNUTLS_LIBS@ @GSASL_LIBS@
 anubis_SOURCES = main.c extern.h headers.h mem.c mem.h env.c errs.c \
 	log.c list.c list.h misc.c regex.c exec.c net.c proxy.c daemon.c \
 	auth.c map.c message.c esmtp.c tunnel.c rc.c rcfile-gram.c \
-	rcfile-lex.c rcfile-gram.h rcfile.h guile.c files.c help.c quit.c
+	rcfile-lex.c rcfile-gram.h rcfile.h guile.c files.c help.c quit.c \
+	transmode.c 
 
 YLWRAP = $(SHELL) $(top_srcdir)/build/ylwrap
 AM_YFLAGS = -dtv
 EXTRA_DIST = rcfile.y rcfile.l snprintf.c obstack.c obstack.h \
-	getopt.h gettext.h
+	getopt.h gettext.h authmode.c gsasl.c anubisdb.c dbtext.c \
+        gdbm.c lbuf.c lbuf.h
 
 BUILT_SOURCES= \
   rcfile-gram.c rcfile-gram.h \
@@ -51,7 +53,7 @@ rcfile-gram.c rcfile-gram.h: $(srcdir)/rcfile.y
 
 localedir = $(datadir)/locale
 DEFS = @DEFS@ -DLOCALEDIR=\"$(localedir)\"
-INCLUDES = @INCLUDES@ @LIBGNUTLS_CFLAGS@ -I$(top_srcdir)/intl
+INCLUDES = @INCLUDES@ @LIBGNUTLS_CFLAGS@ -I$(top_srcdir)/intl 
 
 ## EOF
 
