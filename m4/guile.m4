@@ -1,5 +1,5 @@
 dnl This file is part of GNU mailutils.
-dnl Copyright (C) 2001,2003 Free Software Foundation, Inc.
+dnl Copyright (C) 2001,2003,2004 Free Software Foundation, Inc.
 dnl
 dnl This program is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ else
   ]ifelse([$4], , [:], [$4])[
 fi]])dnl
 
-AC_DEFUN(MU_CHECK_GUILE,
+AC_DEFUN([MU_CHECK_GUILE],
 [
  if test "x$mu_cv_lib_guile" = x; then
    cached=""

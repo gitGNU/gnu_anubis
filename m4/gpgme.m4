@@ -1,12 +1,31 @@
+dnl This file is part of GNU Anubis.
+dnl Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
+dnl
+dnl GNU Anubis is free software; you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation; either version 2 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl GNU Anubis is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with GNU Anubis; if not, write to the Free Software
+dnl Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+dnl
+dnl GNU Anubis is released under the GPL with the additional exemption that
+dnl compiling, linking, and/or using OpenSSL is allowed.
+
 dnl Autoconf macros for libgpgme
 dnl $Id$
-
 
 dnl AM_PATH_GPGME([MINIMUM-VERSION,
 dnl               [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND ]]])
 dnl Test for libgpgme and define GPGME_CFLAGS and GPGME_LIBS
 dnl
-AC_DEFUN(AM_PATH_GPGME,
+AC_DEFUN([AM_PATH_GPGME],
 [ AC_ARG_WITH(gpgme-prefix,
             AC_HELP_STRING([--with-gpgme-prefix=PFX],
                            [prefix where GPGME is installed (optional)]),
