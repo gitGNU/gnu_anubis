@@ -55,7 +55,7 @@ if header[Subject] = clearmsg
  external-body-processor = /usr/bin/formail
 fi
 
-if header[Subject] = external
+if header[Subject] :scase = external
  external-body-processor = /usr/bin/formail
 fi
 
