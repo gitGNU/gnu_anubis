@@ -427,50 +427,23 @@ control_section_init()
 }
 
 /* ************************** The RULE Section *************************** */ 
-#define KW_ADD                      1
-#define KW_REMOVE                   2                
-#define KW_MODIFY                   3
-#define KW_SIGNATURE_FILE_APPEND    4
-#define KW_BODY_APPEND              5
-#define KW_BODY_CLEAR_APPEND        6
-#define KW_ROT13_SUBJECT            7
-#define KW_ROT13_BODY               8 
-#define KW_RM_RRT                   9 
-#define KW_RM_POST                 10  
-#define KW_RM_HEADER               11
-#define KW_RM_LT                   12
-#define KW_RM_RLT                  13
-#define KW_EXTERNAL_BODY_PROCESSOR 14 
+#define KW_SIGNATURE_FILE_APPEND    1
+#define KW_BODY_APPEND              2 
+#define KW_BODY_CLEAR_APPEND        3
+#define KW_ROT13_SUBJECT            4
+#define KW_ROT13_BODY               5 
+#define KW_RM_RRT                   6 
+#define KW_RM_POST                  7  
+#define KW_RM_HEADER                8
+#define KW_RM_LT                    9
+#define KW_RM_RLT                  10
+#define KW_EXTERNAL_BODY_PROCESSOR 11 
 
 int
 rule_parser(int method, int key, char *arg, void *inv_data, void *func_data,
 	    MESSAGE *msg)
 {
 	switch (key) {
-	case KW_ADD:
-		message_add_header(msg, arg);
-		break;
-		
-	case KW_REMOVE:                                
-		message_remove_headers(msg, arg);
-		break;
-		
-	case KW_MODIFY: {
-		char *p = 0;
-		char modify[LINEBUFFER+1];
-
-		p = strstr(arg, " >> "); /* "SPC>>SPC" is a separator */
-		if (p) {
-			p += 4;
-			strncpy(modify, p, LINEBUFFER-2);
-			p -= 4;
-			*p = '\0';
-
-			message_modify_headers(msg, arg, modify);
-		}
-	}
-	break;
-		
 	case KW_SIGNATURE_FILE_APPEND:
 		message_append_signature_file(msg, arg);
 		break;
@@ -515,9 +488,6 @@ rule_parser(int method, int key, char *arg, void *inv_data, void *func_data,
 }
 
 struct rc_kwdef rule_kw[] = {
-	{ "add",                     KW_ADD },                     
-	{ "remove", 		     KW_REMOVE },                  
-	{ "modify",		     KW_MODIFY },                  
 	{ "signature-file-append",   KW_SIGNATURE_FILE_APPEND },   
 	{ "body-append",	     KW_BODY_APPEND },             
 	{ "body-clear-append",	     KW_BODY_CLEAR_APPEND },       
