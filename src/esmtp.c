@@ -40,7 +40,7 @@ static void cram_md5(char *, char *, unsigned char *);
 **********************/
 
 void
-esmtp_auth(void *sd_server, char *reply)
+esmtp_auth(NET_STREAM sd_server, char *reply)
 {
 	char *p = 0;
 	char *b64buf = 0;

@@ -72,8 +72,8 @@ struct message_struct {
 
 #ifdef USE_SSL
 struct secure_struct {
- void *client;
- void *server;
+ NET_STREAM client;
+ NET_STREAM server;
  char *cafile;
  char *cert;
  char *key;
@@ -85,8 +85,8 @@ extern struct options_struct options;
 extern struct session_struct session;
 
 extern unsigned long topt;
-extern void *remote_client;
-extern void *remote_server;
+extern NET_STREAM remote_client;
+extern NET_STREAM remote_server;
 
 extern char *anubis_domain;
 

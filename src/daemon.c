@@ -103,7 +103,7 @@ sig_cld(int code)
 *************************************/
 
 void
-service_unavailable(int sd_client)
+service_unavailable(NET_STREAM *sd_client)
 {
 	char buf[LINEBUFFER+1];
 
@@ -111,8 +111,9 @@ service_unavailable(int sd_client)
 	"421 %s Service not available, closing transmission channel."CRLF,
 		(topt & T_LOCAL_MTA) ? "localhost" : session.mta);
 
-	swrite(SERVER, (void *)sd_client, buf);
-	close_socket(sd_client);
+	swrite(SERVER, *sd_client, buf);
+	stream_close(*sd_client);
+	stream_destroy(sd_client);
 	return;
 }
 
@@ -139,23 +140,25 @@ set_unprivileged_user(void)
 }
 
 int
-anubis_child_main (int sd_client, struct sockaddr_in *addr)
+anubis_child_main (NET_STREAM *sd_client, struct sockaddr_in *addr)
 {
 	int rc;
 
+	topt &= ~T_FOREGROUND;
+	
 #if defined(WITH_GSASL)
 	switch (anubis_mode) {
 	case anubis_transparent:
-		rc = anubis_transparent_mode (sd_client, addr);
+		rc = anubis_transparent_mode(sd_client, addr);
 		break;
 
 	case anubis_authenticate:
-		rc = anubis_authenticate_mode (sd_client, addr);
+		rc = anubis_authenticate_mode(sd_client, addr);
 	}
 #else
-	rc = anubis_transparent_mode (sd_client, addr);
+	rc = anubis_transparent_mode(*sd_client, addr);
 #endif
-	close_socket(sd_client);
+	net_close_stream(sd_client);
 	return rc;
 }
 
@@ -168,7 +171,6 @@ loop(int sd_bind)
 {
 	struct sockaddr_in addr;
 	pid_t childpid = 0;
-	int sd_client = 0;
 	socklen_t addrlen;
 #ifdef USE_LIBWRAP
 	struct request_info req;
@@ -182,29 +184,35 @@ loop(int sd_bind)
 
 	info(VERBOSE, _("GNU Anubis is running..."));
 
-	for (;;)
-	{
-		sd_client = accept(sd_bind, (struct sockaddr *)&addr, &addrlen);
-		if (sd_client < 0) {
+	for (;;) {
+		NET_STREAM sd_client = NULL;
+		int fd = accept(sd_bind, (struct sockaddr *)&addr, &addrlen);
+		if (fd < 0) {
 			if (errno == EINTR)
 				continue;
 			else {
-				anubis_error(SOFT, _("accept() failed: %s."), strerror(errno));
+				anubis_error(SOFT,
+					     _("accept() failed: %s."),
+					     strerror(errno));
 				continue;
 			}
 		}
 
+		/* Create the TCP stream */
+		net_create_stream(&sd_client, fd);
+		
 		/*
 		   Check the TCP wrappers settings.
 		*/
 
 #ifdef USE_LIBWRAP
-		request_init(&req, RQ_DAEMON, "anubis", RQ_FILE, sd_client, 0);
+		request_init(&req, RQ_DAEMON, "anubis", RQ_FILE, fd, 0);
 		fromhost(&req);
 		if (hosts_access(&req) == 0) {
-			info(NORMAL, _("TCP wrappers: connection from %s:%u rejected."),
-				inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
-			service_unavailable(sd_client);
+			info(NORMAL,
+			     _("TCP wrappers: connection from %s:%u rejected."),
+			     inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+			service_unavailable(&sd_client);
 			continue;
 		}
 #endif /* USE_LIBWRAP */
@@ -222,7 +230,7 @@ loop(int sd_bind)
 		if (nchild > MAXCLIENTS) {
 			info(NORMAL, _("Too many clients. Connection from %s:%u rejected."),
 				inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
-			service_unavailable(sd_client);
+			service_unavailable(&sd_client);
 			nchild--;
 		}
 		else {
@@ -231,13 +239,16 @@ loop(int sd_bind)
 
 			childpid = fork();
 			if (childpid == -1)
-				anubis_error(HARD, _("daemon: Can't fork. %s."), strerror(errno));
+				anubis_error(HARD,
+					     _("daemon: Can't fork. %s."),
+					     strerror(errno));
 			else if (childpid == 0) { /* a child process */
 				/* FIXME */
 				signal(SIGCHLD, SIG_IGN);
-				quit(anubis_child_main(sd_client, &addr));
+				quit(anubis_child_main(&sd_client, &addr));
 			}
-			close_socket(sd_client);
+			
+			net_close_stream(&sd_client);
 		}
 		topt &= ~T_ERROR;
 		cleanup_children();
@@ -288,7 +299,7 @@ _stdio_read(void *sd, char *data, size_t size, size_t *nbytes)
 }
 
 static const char *
-_stdio_strerror(int rc)
+_stdio_strerror(void *ignored_data, int rc)
 {
 	return strerror(rc);
 }
@@ -296,8 +307,8 @@ _stdio_strerror(int rc)
 void
 stdinout(void)
 {
-	int sd_client = 0; 
-	int sd_server = 0;
+	NET_STREAM sd_client = NULL; 
+	NET_STREAM sd_server = NULL;
 
 	topt &= ~T_SSL;
 	topt |= T_FOREGROUND;
@@ -314,29 +325,38 @@ stdinout(void)
 		return;
 	}
 
+	net_create_stream(&sd_client, 0);
+	stream_set_read(sd_client, _stdio_read);
+	stream_set_write(sd_client, _stdio_write);
+	stream_set_strerror(sd_client, _stdio_strerror);
+
 	alarm(300);
 	if (topt & T_LOCAL_MTA)
-		sd_server = make_local_connection(session.execpath, session.execargs);
+		sd_server = make_local_connection(session.execpath,
+						  session.execargs);
 	else
-		sd_server = make_remote_connection(session.mta, session.mta_port);
+		sd_server = make_remote_connection(session.mta,
+						   session.mta_port);
 	alarm(0);
 
-	if (sd_server == -1) {
-		service_unavailable(sd_client);
+	if (sd_server == NULL) {
+		service_unavailable(&sd_client);
 		free_mem();
 		return;
 	}
-	remote_client = (void *)sd_client;
-	remote_server = (void *)sd_server;
-	net_set_io(CLIENT, _stdio_read, _stdio_write, NULL, _stdio_strerror);
-	net_set_io(SERVER, _stdio_read, _stdio_write, NULL, _stdio_strerror);
+	stream_set_read(sd_server, _stdio_read);
+	stream_set_write(sd_server, _stdio_write);
+	stream_set_strerror(sd_server, _stdio_strerror);
+
+	remote_client = sd_client;
+	remote_server = sd_server;
+
 	smtp_session_transparent();
 	cleanup_children();
 	
-	close_socket(sd_server);
+	net_close_stream(&sd_server);
 	free_mem();
 	return;
 }
 
 /* EOF */
-

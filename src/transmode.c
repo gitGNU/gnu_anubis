@@ -26,18 +26,18 @@
 #include "extern.h"
 
 int
-anubis_transparent_mode (int sd_client, struct sockaddr_in *addr)
+anubis_transparent_mode(NET_STREAM *psd_client, struct sockaddr_in *addr)
 {
 	int rs = 0;
 	int cs = 0;
-	int sd_server = 0;
+	NET_STREAM sd_server = NULL;
 		
 	rs = auth_ident(addr,
 			session.client,
 			sizeof(session.client));
 
 	if ((topt & T_DROP_UNKNOWN_USER) && !rs) {
-		service_unavailable(sd_client);
+		service_unavailable(psd_client);
 		return 0;
 	}
 	
@@ -107,34 +107,36 @@ anubis_transparent_mode (int sd_client, struct sockaddr_in *addr)
 	
 	alarm(300);
 	if (topt & T_LOCAL_MTA) {
-		sd_server = make_local_connection(session.execpath, session.execargs);
-		if (sd_server == -1) {
-			service_unavailable(sd_client);
+		sd_server = make_local_connection(session.execpath,
+						  session.execargs);
+		if (!sd_server) {
+			service_unavailable(psd_client);
 			return EXIT_FAILURE;
 		}
 	} else {
-		sd_server = make_remote_connection(session.mta, session.mta_port);
-		if (sd_server == -1)
-			service_unavailable(sd_client);
+		sd_server = make_remote_connection(session.mta,
+						   session.mta_port);
+		if (!sd_server)
+			service_unavailable(psd_client);
 	}
 	alarm(0);
 	
 	if (!(topt & T_ERROR)) {
-		remote_client = (void *)sd_client;
-		remote_server = (void *)sd_server;
+		remote_client = *psd_client;
+		remote_server = sd_server;
 		alarm(900);
 		smtp_session_transparent();
 		alarm(0);
 		
 #ifdef USE_SSL
-		net_close(CLIENT, secure.client);
-		net_close(SERVER, secure.server);
+		net_close_stream(&secure.client);
+		net_close_stream(&secure.server);
 		secure.server = 0;
 		secure.client = 0;
 #endif
 	}
-	close_socket(sd_server);
-	close_socket(sd_client);
+	net_close_stream(&sd_server);
+	net_close_stream(psd_client);
 	
 	if (topt & T_ERROR)
 		info(NORMAL, _("Connection terminated."));

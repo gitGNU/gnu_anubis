@@ -149,13 +149,13 @@ sig_local(int code)
 	   by calling cleanup_children() */
 }
 
-int
-make_local_connection(char *exec_path, char **exec_args)
+static int 
+make_local_connection_fd(char *exec_path, char **exec_args)
 {
 	int fd[2];
 	char **pargs;
 	char args[LINEBUFFER+1];
-
+	
 	if (check_filename(exec_path, 0) == 0)
 		return -1;
 
@@ -172,27 +172,40 @@ make_local_connection(char *exec_path, char **exec_args)
 		return -1;
 
 	signal(SIGCHLD, sig_local);
-	switch(fork())
-	{
-		case -1: /* an error */
-			anubis_error(HARD, _("fork() failed."));
-			close(fd[0]);
-			close(fd[1]);
-			return -1;
-		case 0: /* a child process */
-			close(fd[0]);
-			dup2(fd[1], 0);
-			dup2(fd[1], 1);
-			close(fd[1]);
-			execvp(exec_path, exec_args);
-			anubis_error(HARD, _("execvp() failed: %s"), strerror(errno));
-			return -1;
+	switch(fork()) {
+	case -1: /* an error */
+		anubis_error(HARD, _("fork() failed."));
+		close(fd[0]);
+		close(fd[1]);
+		return -1;
+		
+	case 0: /* a child process */
+		close(fd[0]);
+		dup2(fd[1], 0);
+		dup2(fd[1], 1);
+		close(fd[1]);
+		execvp(exec_path, exec_args);
+		anubis_error(HARD, _("execvp() failed: %s"), strerror(errno));
+		return -1;
 	}
 	close(fd[1]);
 #ifdef FD_CLOEXEC
 	fcntl(fd[0], F_SETFD, FD_CLOEXEC);
 #endif /* FD_CLOEXEC */
 	return fd[0];
+}
+
+NET_STREAM
+make_local_connection(char *exec_path, char **exec_args)
+{
+	int fd;
+	NET_STREAM str;
+
+	fd = make_local_connection_fd(exec_path, exec_args);
+	if (fd == -1)
+		return NULL;
+	net_create_stream(&str, fd);
+	return str;
 }
 
 /*************************************
@@ -244,7 +257,7 @@ exec_argv(int *rs, char *path, char **argv, char *src, char *dst, int dstsize)
 	int n;
 	char *buf;
 	
-	fd = make_local_connection(path ? path : argv[0], argv);
+	fd = make_local_connection_fd(path ? path : argv[0], argv);
 	if (fd == -1) {
 		*rs = -1;
 		return 0;

@@ -122,7 +122,7 @@ collect_headers (MESSAGE *msg)
 }
 
 static void
-write_header_line (void *sd_server, char *line)
+write_header_line (NET_STREAM sd_server, char *line)
 {
 	char *p;
 
@@ -134,7 +134,7 @@ write_header_line (void *sd_server, char *line)
 }
 			
 static void
-write_assoc (void *sd_server, ASSOC *entry)
+write_assoc (NET_STREAM sd_server, ASSOC *entry)
 {
 	if (entry->key) {
 		if (strcmp(entry->key, X_ANUBIS_RULE_HEADER) == 0)
@@ -146,7 +146,7 @@ write_assoc (void *sd_server, ASSOC *entry)
 }
 			
 void
-send_header (void *sd_server, LIST *list)
+send_header (NET_STREAM sd_server, LIST *list)
 {
 	ASSOC *p;
 	ITERATOR *itr = iterator_create(list);
@@ -157,7 +157,7 @@ send_header (void *sd_server, LIST *list)
 }
 
 void
-send_string_list (void *sd_server, LIST *list)
+send_string_list (NET_STREAM sd_server, LIST *list)
 {
 	char *p;
 	ITERATOR *itr = iterator_create(list);
@@ -241,7 +241,7 @@ collect_body (MESSAGE *msg)
 }
 
 void
-send_body (MESSAGE *msg, void *sd_server)
+send_body (MESSAGE *msg, NET_STREAM sd_server)
 {
 	char *p;
 
@@ -338,11 +338,6 @@ smtp_begin (void)
 	char command[LINEBUFFER+1];
 
 	get_response_smtp(CLIENT, remote_server, command, sizeof(command) - 1);
-	snprintf(command, sizeof command, "EHLO %s" CRLF, get_localdomain());
-	swrite(CLIENT, remote_server, command);
-	/* FIXME: Eventually start TLS and/or authenticate to the
-	   remote */
-	get_response_smtp(CLIENT, remote_server, command, sizeof(command) - 1);
 }
 
 void
@@ -434,7 +429,9 @@ handle_starttls (char *command)
 			return 0;
 		}
 
-		secure.client = start_ssl_client((int)remote_server);
+		secure.client = start_ssl_client(remote_server,
+						 secure.cafile,
+						 options.termlevel > NORMAL);
 		if (!secure.client || (topt & T_ERROR))
 			return 0;
 		remote_server = (void *)secure.client;
@@ -463,13 +460,17 @@ handle_starttls (char *command)
 		check_filemode(secure.key);
 
 	swrite(SERVER, remote_client, "220 2.0.0 Ready to start TLS"CRLF);
-	secure.server = start_ssl_server((int)remote_client);
+	secure.server = start_ssl_server(remote_client,
+					 secure.cafile,
+					 secure.cert,
+					 secure.key,
+					 options.termlevel > NORMAL);
 	if (!secure.server || (topt & T_ERROR)) {
 		swrite(SERVER, remote_client,
 		       "454 4.3.3 TLS not available"CRLF);
 		return 0;
 	}
-	remote_client = (void *)secure.server;
+	remote_client = secure.server;
 	topt |= T_SSL_FINISHED;
 #else
 	swrite(SERVER, remote_client, "503 5.5.0 TLS not available"CRLF);
@@ -537,8 +538,10 @@ handle_ehlo (char *command, char *reply, size_t reply_size)
 			swrite(SERVER, remote_client, reply);
 			return 1;
 		}
-
-		secure.client = start_ssl_client((int)remote_server);
+		
+		secure.client = start_ssl_client(remote_server,
+						 secure.cafile,
+						 options.termlevel > NORMAL);
 		if (!secure.client || (topt & T_ERROR)) {
 			topt &= ~T_ERROR;
 			topt &= ~T_SSL_ONEWAY;

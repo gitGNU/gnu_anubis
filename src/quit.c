@@ -65,8 +65,9 @@ quit(int code)
 	memset(session.mta_password, 0, sizeof(session.mta_password));
 
 #ifdef USE_SSL
-	net_close(CLIENT, secure.client);
-	net_close(SERVER, secure.server);
+	/*FIXME!!!*/
+	net_close_stream(&secure.client);
+	net_close_stream(&secure.server);
 #endif
 #ifdef HAVE_SYSLOG
 	if ((topt & T_DAEMON) && !(topt & T_FOREGROUND))

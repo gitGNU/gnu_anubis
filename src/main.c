@@ -35,8 +35,8 @@ struct secure_struct secure;
 #endif /* HAVE_TLS or HAVE_SSL */
 
 unsigned long topt;
-void *remote_client;
-void *remote_server;
+NET_STREAM remote_client;
+NET_STREAM remote_server;
 
 char *anubis_domain;   /* Local domain for EHLO in authentication mode */
 

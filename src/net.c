@@ -26,7 +26,6 @@
 #include "extern.h"
 
 static int connect_directly_to(char *, unsigned int);
-static int mread(int, void *, char *);
 
 static struct _debug_cache {
 	int method;
@@ -86,36 +85,24 @@ _debug_printer(int method, int output, unsigned long nleft, char *ptr)
      _debug_printer(method, output, nleft, ptr);\
   } while (0)
 
-int
+NET_STREAM
 make_remote_connection(char *host, unsigned int port)
 {
 	int sd;
+	NET_STREAM str;
 
 #ifdef USE_SOCKS_PROXY
-	char host_backup[65];
-	unsigned int port_backup;
-	memset(host_backup, 0, sizeof(host_backup));
-
-	safe_strcpy(host_backup, host);
-	port_backup = port;
-
-	if (topt & T_SOCKS) { /* SOCKS proxy */
-		strncpy(host_backup, session.socks, 64);
-		port_backup = session.socks_port;
-	}
-
-	sd = connect_directly_to(host_backup, port_backup);
-	if (sd == -1)
-		return -1;
-	if (check_socks_proxy(sd, host, port) == -1)
-		return -1;
-#else
-	sd = connect_directly_to (host, port);
-	if (sd == -1)
-		return -1;
+        if (topt & T_SOCKS) { /* SOCKS proxy */
+                host = session.socks;
+                port = session.socks_port;
+        }
 #endif /* USE_SOCKS_PROXY */
 
-	return sd;
+        if ((sd = connect_directly_to (host, port)) == -1)
+                return NULL;
+
+	net_create_stream(&str, sd);
+	return str;
 }
 
 static int
@@ -230,129 +217,12 @@ bind_and_listen(char *host, unsigned int port)
 	return sd;
 }
 
-static const char *
-_def_strerror(int rc)
-{
-	return strerror(rc);
-}
-
-static int
-_def_write(void *sd, char *data, size_t size, size_t *nbytes)
-{
-	int rc = send((int)sd, data, size, 0);
-	if (rc >= 0) {
-		*nbytes = rc;
-		return 0;
-	}
-	return errno;
-}
-
-static int
-_def_read(void *sd, char *data, size_t size, size_t *nbytes)
-{
-	int rc = recv((int)sd, data, size, 0);
-	if (rc >= 0) {
-		*nbytes = rc;
-		return 0;
-	}
-	return errno;
-}
-
-static int
-_def_close(void *sd)
-{
-	close ((int) sd);
-	return 0;
-}
-
-struct io_data {
-	char buf[LINEBUFFER+1];          /* Input buffer */
-	size_t level;                    /* Buffer fill level */
-	char *read_ptr;                  /* Current buffer pointer */
-
-	net_io_t read;
-	net_io_t write;
-	strerror_t strerror;
-	net_close_t close;
-};
-
-struct io_data io_data[2] = {
-	/* CLIENT */
-	{ "", 0, NULL, _def_read, _def_write, _def_strerror, _def_close },
-	/* SERVER */
-	{ "", 0, NULL, _def_read, _def_write, _def_strerror, _def_close }
-};
-
-void
-net_set_io(int method, net_io_t read, net_io_t write,
-	   net_close_t close, strerror_t strerror)
-{
-	io_data[method].read = read ? read : _def_read;
-	io_data[method].write = write ? write : _def_write;
-	io_data[method].close = close;
-	io_data[method].strerror = strerror ? strerror : _def_strerror;
-}
-
-void
-net_close(int method, void *sd)
-{
-	if (io_data[method].close) {
-		io_data[method].close(sd);
-		net_set_io(method, NULL, NULL, NULL, NULL);
-	}
-}
-
-
-
-struct io_descr {
-	void *stream;
-	
-	net_io_t read;
-	net_io_t write;
-	strerror_t strerror;
-	net_close_t close;
-};
-
-void *
-net_io_get(int method, void *stream)
-{
-	struct io_descr *s = malloc(sizeof *s);
-	s->stream = stream;
-	s->read = io_data[method].read;
-	s->write = io_data[method].write;
-	s->close = io_data[method].close;
-	return s;
-}
-
-int
-net_io_read(void *iod, char *buf, size_t size, size_t *nbytes)
-{
-	struct io_descr *s = iod;
-	return s->read(s->stream, buf, size, nbytes);
-}
-
-int
-net_io_write(void *iod, char *buf, size_t size, size_t *nbytes)
-{
-	struct io_descr *s = iod;
-	return s->write(s->stream, buf, size, nbytes);
-}
-
-int
-net_io_close(void *iod)
-{
-	struct io_descr *s = iod;
-	int rc = s->close(s->stream);
-	free(iod);
-	return rc;
-}
-
 /**************
   Send a data
 ***************/
 
 void
-swrite(int method, void *sd, char *ptr)
+swrite(int method, NET_STREAM sd, char *ptr)
 {
 	int rc;
 	size_t nleft, nwritten = 0;
@@ -360,113 +230,69 @@ swrite(int method, void *sd, char *ptr)
 	if (ptr == 0)
 		return;
 
-	nleft = (unsigned long)strlen(ptr);
-	while (nleft > 0) {
-		rc = io_data[method].write(sd, ptr, nleft, &nwritten);
-		if (rc) {
-			socket_error(io_data[method].strerror(rc));
-			return;
-		}
-		DPRINTF(method, 1, nwritten, ptr);
-		nleft -= nwritten;
-		ptr   += nwritten;
+	nleft = strlen(ptr);
+	rc = stream_write(sd, ptr, nleft, &nwritten);
+	if (rc) {
+		socket_error(stream_strerror(sd, rc));
+		return;
 	}
-	return;
+	DPRINTF(method, 1, nwritten, ptr);
+	if (nwritten != nleft) {
+		/* Should not happen */
+		anubis_error(HARD, _("Short write"));
+	}
 }
 
 /**************
-  Read a data
+  Read data
 ***************/
 
-static int
-mread(int method, void *sd, char *ptr)
-{
-	struct io_data *ip = &io_data[method];
-	if (ip->level <= 0) {
-		int rc = ip->read(sd, ip->buf, LINEBUFFER, &ip->level);
-		if (rc) {
-			socket_error(ip->strerror(rc));
-			return -1;
-		}
-		if (ip->level == 0)
-			return 0;
-		ip->read_ptr = ip->buf;
-	}
-	ip->level--;
-	*ptr = *ip->read_ptr++;
-	return 1;
-}
-
 int
-recvline(int method, void *sd, void *vptr, int maxlen)
+recvline(int method, NET_STREAM sd, void *vptr, size_t maxlen)
 {
-	int n, rc, addc = 0;
-	char c, *ptr;
-
-	ptr = vptr;
-	for (n = 1; n < maxlen; n++) {
-		if ((rc = mread(method, sd, &c)) == 1) {
-			if (c == '\n' && n > 1 && ptr[-1] != '\r') {
-				addc++;
-				*ptr++ = '\r';
-			}
-			*ptr++ = c;
-			if (c == '\n') 
-				break;
-		} else if (rc == 0) {
-			if (n == 1)
-				return 0;
-			else
-				break;
-		} else
-			return -1;
+	int rc;
+	size_t nbytes;
+	
+	rc = stream_readline(sd, vptr, maxlen, &nbytes);
+	if (rc) {
+		socket_error(stream_strerror(sd, rc));
+		return 0; /* FIXME: nbytes? */
 	}
-	*ptr = 0;
-	DPRINTF(method, 0, n + addc, (char *)vptr);
-	return n;
+	DPRINTF(method, 0, nbytes, (char *)vptr);
+	return nbytes;
 }
 
 #define INIT_RECVLINE_SIZE 81
 
 int
-recvline_ptr(int method, void *sd, char **vptr, size_t *maxlen)
+recvline_ptr(int method, NET_STREAM sd, char **vptr, size_t *maxlen)
 {
 	int rc;
-	char c;
-	size_t i;
+	size_t off = 0;
 
-#define ADDC(i,c) do {\
- if (i >= *maxlen) {\
-   *maxlen *= 2;\
-   *vptr = realloc(*vptr, *maxlen);\
-   if (!*vptr) \
-       anubis_error(HARD, _("Not enough memory"));\
- }\
- (*vptr)[i++] = c;\
-} while (0)
-		     
-	if (!*vptr || *maxlen == 0) {
-		*vptr = xmalloc(INIT_RECVLINE_SIZE);
-		*maxlen = INIT_RECVLINE_SIZE;
+	*vptr = NULL;
+	*maxlen = 0;
+	while (1) {
+		size_t nbytes;
+		
+		if (off == *maxlen) {
+			*maxlen += INIT_RECVLINE_SIZE;
+			*vptr = xrealloc(*vptr, *maxlen);
+		}
+		rc = stream_readline(sd, *vptr + off, *maxlen - off, &nbytes);
+		if (rc) {
+			socket_error(stream_strerror(sd, rc));
+			return 0; /* FIXME: ptr - buf ? */
+		}
+		if (nbytes == 0)
+			break;
+		off += nbytes;
+		if ((*vptr)[off - 1] == '\n')
+			break;
 	}
-	for (i = 0;;) {
-		if ((rc = mread(method, sd, &c)) == 1) {
-			if (c == '\n' && i > 1 && (*vptr)[i-1] != '\r') 
-				ADDC(i, '\r');
-			ADDC(i, c);
-			if (c == '\n') 
-				break;
-		} else if (rc == 0) {
-			if (i == 1)
-				return 0;
-			else
-				break;
-		} else
-			return -1;
-	}
-	(*vptr)[i] = 0;
-	DPRINTF(method, 0, i, *vptr);
-	return i;
+	(*vptr)[off] = 0;
+	DPRINTF(method, 0, off, *vptr);
+	return off;
 }
 
 /*****************
@@ -474,7 +300,7 @@ recvline_ptr(int method, void *sd, char **vptr, size_t *maxlen)
 ******************/
 
 void
-get_response_smtp(int method, void *sd, char *buf, int size)
+get_response_smtp(int method, NET_STREAM sd, char *buf, int size)
 {
 	int n;
 	char line[LINEBUFFER+1];
@@ -494,13 +320,30 @@ get_response_smtp(int method, void *sd, char *buf, int size)
 /**************************
  Close a socket descriptor
 ***************************/
-
 void
 close_socket(int sd)
 {
 	if (sd)
 		close(sd);
 	return;
+}
+
+void
+net_close_stream(NET_STREAM *sd)
+{
+	stream_close(*sd);
+	stream_destroy(sd);
+	return;
+}
+
+
+void
+net_create_stream(NET_STREAM *str, int fd)
+{
+	stream_create(str);
+	stream_set_io(*str,
+		      (void *)fd,
+		      NULL, NULL, NULL, NULL, NULL);
 }
 
 

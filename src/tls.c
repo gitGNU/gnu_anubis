@@ -2,7 +2,7 @@
    tls.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -39,12 +39,11 @@ static int cipher_info(gnutls_session);
 #define DH_BITS 768
 gnutls_dh_params dh_params;
 
-/* FIXME: should they belong to struct secure_struct? */
 static gnutls_certificate_client_credentials xcred;
 static gnutls_certificate_server_credentials x509_cred;
 
 static const char *
-_tls_strerror(int rc)
+_tls_strerror(void *unused_data, int rc)
 {
 	return gnutls_strerror(rc);
 }
@@ -110,21 +109,31 @@ _tls_cleanup_x509()
 static ssize_t
 _tls_fd_pull(gnutls_transport_ptr fd, void *buf, size_t size)
 {
+	NET_STREAM stream = fd;
 	int rc;
+	size_t rdbytes;
+	
 	do {
-		rc = read((int) fd, buf, size);
-	} while (rc == -1 && errno == EAGAIN);
-	return rc;
+		rc = stream_read(stream, buf, size, &rdbytes);
+	} while (rc != 0 && errno == EAGAIN);
+	if (rc)
+		return -1;
+	return rdbytes;
 }
 
 static ssize_t
 _tls_fd_push(gnutls_transport_ptr fd, const void *buf, size_t size)
 {
+	NET_STREAM stream = fd;
+
 	int rc;
+	size_t wrbytes;
 	do {
-		rc = write((int) fd, buf, size);
-	} while (rc == -1 && errno == EAGAIN);
-	return rc;
+		rc = stream_write(stream, buf, size, &wrbytes);
+	} while (rc != 0 && errno == EAGAIN);
+	if (rc)
+		return -1;
+	return wrbytes;
 }
 
 void
@@ -135,9 +144,10 @@ init_ssl_libs(void)
 	return;
 }
 
-void *
-start_ssl_client(int sd_server)
+NET_STREAM
+start_ssl_client(NET_STREAM sd_server, const char *cafile, int verbose)
 {
+	NET_STREAM stream;
 	int rs;
 	gnutls_session session = 0;
 	const int protocol_priority[] = {GNUTLS_TLS1, GNUTLS_SSL3, 0};
@@ -158,13 +168,13 @@ start_ssl_client(int sd_server)
 	gnutls_mac_set_priority(session, mac_priority);
 
 	gnutls_certificate_allocate_credentials(&xcred);
-	if (secure.cafile) {
+	if (cafile) {
 		rs = gnutls_certificate_set_x509_trust_file(xcred,
-							    secure.cafile,
+							    cafile,
 							    GNUTLS_X509_FMT_PEM);
 		if (rs < 0) {
 			anubis_error(HARD, _("TLS Error reading `%s': %s"),
-				     secure.cafile,
+				     cafile,
 				     gnutls_strerror(rs));
 			return 0;
 		}
@@ -173,27 +183,29 @@ start_ssl_client(int sd_server)
 	gnutls_credentials_set(session, GNUTLS_CRD_CERTIFICATE, xcred);
 	atexit(_tls_cleanup_xcred);
 
-	if (topt & T_LOCAL_MTA) {
-		gnutls_transport_set_pull_function(session, _tls_fd_pull);
-		gnutls_transport_set_push_function(session, _tls_fd_push);
-	}
-	gnutls_transport_set_ptr(session, (void*) sd_server);
+	gnutls_transport_set_pull_function(session, _tls_fd_pull);
+	gnutls_transport_set_push_function(session, _tls_fd_push);
+	gnutls_transport_set_ptr(session, (gnutls_transport_ptr) sd_server);
 
 	rs = gnutls_handshake(session);
 	if (rs < 0) {
 		gnutls_deinit(session);
 		anubis_error(HARD, _("TLS/SSL handshake failed: %s"),
 			     gnutls_strerror(rs));
-		return 0;
+		return NULL;
 	}
 
-	if (secure.cafile)
+	if (cafile)
 		verify_certificate(session);
-	if (options.termlevel > NORMAL)
+	if (verbose)
 		cipher_info(session);
 
-	net_set_io(CLIENT, _tls_read, _tls_write, _tls_close, _tls_strerror);
-	return session;
+	stream_create(&stream);
+	stream_set_io(stream,
+		      session,
+		      _tls_read, _tls_write,
+		      _tls_close, NULL, _tls_strerror);
+	return stream;
 }
 
 /***********************
@@ -221,9 +233,11 @@ initialize_tls_session(void)
 	return (gnutls_session)session;
 }
 
-void *
-start_ssl_server(int sd_client)
+NET_STREAM
+start_ssl_server(NET_STREAM sd_client, const char *cafile, const char *cert,
+		 const char *key, int verbose)
 {
+	NET_STREAM stream;
 	int rs;
 	gnutls_session session = 0;
 
@@ -231,19 +245,19 @@ start_ssl_server(int sd_client)
 
 	gnutls_certificate_allocate_credentials(&x509_cred);
 	atexit(_tls_cleanup_x509);
-	if (secure.cafile) {
+	if (cafile) {
 		rs = gnutls_certificate_set_x509_trust_file(x509_cred,
-							    secure.cafile,
+							    cafile,
 							    GNUTLS_X509_FMT_PEM);
 		if (rs < 0) {
 			anubis_error(HARD, _("TLS Error reading `%s': %s"),
-				     secure.cafile,
+				     cafile,
 				     gnutls_strerror(rs));
 			return 0;
 		}
 	}
 	gnutls_certificate_set_x509_key_file(x509_cred,
-					     secure.cert, secure.key,
+					     cert, key,
 					     GNUTLS_X509_FMT_PEM);
 
 	generate_dh_params();
@@ -251,10 +265,9 @@ start_ssl_server(int sd_client)
 
 	session = initialize_tls_session();
 
-	if (topt & T_STDINOUT) {
-		gnutls_transport_set_pull_function(session, _tls_fd_pull);
-		gnutls_transport_set_push_function(session, _tls_fd_push);
-	}
+	gnutls_transport_set_pull_function(session, _tls_fd_pull);
+	gnutls_transport_set_push_function(session, _tls_fd_push);
+
 	gnutls_transport_set_ptr(session, (gnutls_transport_ptr) sd_client);
 	rs = gnutls_handshake(session);
 	if (rs < 0) {
@@ -263,11 +276,15 @@ start_ssl_server(int sd_client)
 		gnutls_perror(rs);
 		return 0;
 	}
-	if (options.termlevel > NORMAL)
+	if (verbose)
 		cipher_info(session);
 
-	net_set_io(SERVER, _tls_read, _tls_write, _tls_close, _tls_strerror);
-	return session;
+        stream_create(&stream);
+	stream_set_io(stream,
+		      session,
+		      _tls_read, _tls_write,
+		      _tls_close, NULL, _tls_strerror);
+	return stream;
 }
 
 static void
