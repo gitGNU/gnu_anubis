@@ -28,14 +28,18 @@
 static int connect_directly_to(char *, unsigned int);
 static int mread(int, void *, char *);
 
+static struct _debug_cache {
+	int method;
+	int output;
+	int newline;
+	size_t count;
+} debug_cache = { -1, -1, 0, 0 };
+
 static void
 _debug_printer(int method, int output, unsigned long nleft, char *ptr)
 {
-	int len;
+	int i;
 	char *mode = "?";
-
-	if (strcmp(ptr, CRLF) == 0)
-		return;
 
 	switch (method) {
 	case CLIENT:
@@ -44,12 +48,37 @@ _debug_printer(int method, int output, unsigned long nleft, char *ptr)
 	case SERVER:
 		mode = _("CLIENT");
 	}
-		
-	fprintf(stderr, "(%ld)%s %s %s", nleft, mode,
-		output ? ">>>" : "<<<", ptr);
-	len = strlen (ptr);
-	if (len > 0 && ptr[len-1] != '\n')
-		fprintf(stderr, "\n");
+
+	if (debug_cache.newline
+	    || method != debug_cache.method || output != debug_cache.output) {
+		if (!debug_cache.newline && debug_cache.count)
+			fprintf(stderr, "(%lu)\n",
+				(unsigned long)debug_cache.count);
+		debug_cache.method = method;
+		debug_cache.output = output;
+		debug_cache.newline = 0;
+		debug_cache.count = 0;
+		fprintf(stderr, "%s %s", mode, output ? ">>>" : "<<<");
+	}
+
+	for (i = 0; i < nleft; i++, ptr++) {
+		debug_cache.count++;
+		debug_cache.newline = 0;
+		if (*ptr == '\r')
+			continue;
+		if (*ptr == '\n') {
+			fprintf(stderr, "(%ld)\n",
+				(unsigned long)debug_cache.count);
+			debug_cache.count = 0;
+			if (i != nleft-1) {
+				fprintf(stderr, "%s %s",
+					mode, output ? ">>>" : "<<<");
+				debug_cache.newline = 0;
+			} else
+				debug_cache.newline = 1;
+		} else 
+			fputc(*ptr, stderr);
+	}
 }
 
 #define DPRINTF(method, output, nleft, ptr) do {\
@@ -317,14 +346,16 @@ mread(int method, void *sd, char *ptr)
 int
 recvline(int method, void *sd, void *vptr, int maxlen)
 {
-	int n, rc;
+	int n, rc, addc = 0;
 	char c, *ptr;
 
 	ptr = vptr;
 	for (n = 1; n < maxlen; n++) {
 		if ((rc = mread(method, sd, &c)) == 1) {
-			if (c == '\n' && n > 1 && ptr[-1] != '\r') 
+			if (c == '\n' && n > 1 && ptr[-1] != '\r') {
+				addc++;
 				*ptr++ = '\r';
+			}
 			*ptr++ = c;
 			if (c == '\n') 
 				break;
@@ -337,7 +368,7 @@ recvline(int method, void *sd, void *vptr, int maxlen)
 			return -1;
 	}
 	*ptr = 0;
-	DPRINTF(method, 0, n, (char *)vptr);
+	DPRINTF(method, 0, n + addc, (char *)vptr);
 	return n;
 }
 
