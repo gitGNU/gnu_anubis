@@ -99,7 +99,6 @@ open_rcfile(int method)
 	switch (method) {
 	case CF_SUPERVISOR:
 	case CF_INIT:
-		rc_section_list_destroy(&parse_tree);
 		if (topt & T_ALTRC) {
 			rcfile = strdup(options.altrc);
 		} else if (check_superuser())
@@ -112,11 +111,12 @@ open_rcfile(int method)
 			sprintf(rcfile,	"%s/%s", homedir,
 				DEFAULT_LOCAL_RCFILE);
 		}
-		
+
 		if (check_filename(rcfile, &global_mtime) == 0) {
 			free(rcfile);
 			return;
 		}
+		rc_section_list_destroy(&parse_tree);
 		info(DEBUG,
 		     _("Reading system configuration file %s..."), rcfile);
 		break;
@@ -332,8 +332,6 @@ control_parser(int method, int key, LIST *arglist,
 
 static struct rc_kwdef init_kw[] = {
 	{ "bind", KW_BIND },
-	{ "rule-priority", KW_RULE_PRIORITY },
-	{ "control-priority", KW_CONTROL_PRIORITY },
 	{ NULL },
 };
 
@@ -350,6 +348,8 @@ static struct rc_kwdef init_supervisor_kw[] = {
 	{ "allow-local-mta", KW_ALLOW_LOCAL_MTA },
 	{ "user-notprivileged", KW_USER_NOTPRIVILEGED },
 	{ "drop-unknown-user", KW_DROP_UNKNOWN_USER },
+	{ "rule-priority", KW_RULE_PRIORITY },
+	{ "control-priority", KW_CONTROL_PRIORITY },
 	{ NULL }
 };
 
