@@ -34,6 +34,9 @@
 #include "extern.h"
 #include "rcfile.h"
 
+extern int yylex(void);
+int yyerror(char *s);
+
 static RC_SECTION *rc_section_create(char *, RC_STMT *);
 static void rc_section_destroy(RC_SECTION *);
 static void rc_section_print(RC_SECTION *);
@@ -74,7 +77,7 @@ static int debug_level;
 };
 
 %token EOL T_BEGIN T_END AND OR 
-%token T_HEADER T_COMMAND T_BODY IF FI ELSE RULE DONE
+%token T_HEADER T_COMMAND IF FI ELSE RULE DONE
 %token CALL STOP ADD REMOVE MODIFY
 %token <string> IDENT STRING REGEX D_BEGIN
 %token <num> T_MSGPART
@@ -95,6 +98,8 @@ static int debug_level;
 %%
 
 input    : seclist
+           {
+           }
          ;
 
 seclist  : section
@@ -867,7 +872,11 @@ inst_eval(struct eval_env *env, RC_INST *inst)
 		break;
 		
 	case inst_modify:
-		message_modify_headers(env->msg, inst->key, inst->key2, arg);
+		if (inst->part == BODY)
+			message_modify_body(env->msg, inst->key, arg);
+		else
+			message_modify_headers(env->msg, inst->key,
+					       inst->key2, arg);
 		break;
 		
 	case inst_remove:
