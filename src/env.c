@@ -23,6 +23,7 @@
 */
 
 #include "headers.h"
+#include <grp.h>
 #include <getopt.h>
 #include "extern.h"
 #include "rcfile.h"
@@ -246,6 +247,107 @@ check_superuser (void)
  Set USER's RGID, RUID, and home directory.
 ********************************************/
 
+/* Change to the given uid/gid. Clear the supplementary group list.
+   On success returns 0.
+   On failure returns 1 (or exits, depending on topt settings. See
+   anubis_error) */
+static int
+change_privs (uid_t uid, gid_t gid)
+{
+  int rc = 0;
+  gid_t emptygidset[1];
+
+  /* Reset group permissions */
+  emptygidset[0] = gid ? gid : getegid();
+  if (geteuid() == 0 && setgroups(1, emptygidset))
+    {
+      anubis_error (SOFT,
+		    _("setgroups(1, %lu) failed"),
+		    (u_long) emptygidset[0]);
+      rc = 1;
+    }
+
+  /* Switch to the user's gid. On some OSes the effective gid must
+     be reset first */
+
+#if defined(HAVE_SETEGID)
+  if ((rc = setegid(gid)) < 0)
+    anubis_error (SOFT, _("setegid(%lu) failed"), (u_long) gid);
+#elif defined(HAVE_SETREGID)
+  if ((rc = setregid(gid, gid)) < 0)
+    anubis_error (SOFT, _("setregid(%lu,%lu) failed"),
+		  (u_long) gid, (u_long) gid);
+#elif defined(HAVE_SETRESGID)
+  if ((rc = setresgid(gid, gid, gid)) < 0)
+    anubis_error (SOFT, _("setresgid(%lu,%lu,%lu) failed"),
+		  (u_long) gid,
+		  (u_long) gid,
+		  (u_long) gid);
+#endif
+
+  if (rc == 0 && gid != 0)
+    {
+      if ((rc = setgid(gid)) < 0 && getegid() != gid) 
+	anubis_error (SOFT, _("setgid(%lu) failed"), (u_long) gid);
+      if (rc == 0 && getegid() != gid)
+	{
+	  anubis_error (SOFT, _("cannot set effective gid to %lu"),
+			(u_long) gid);
+	  rc = 1;
+	}
+    }
+
+  /* Now reset uid */
+  if (rc == 0 && uid != 0)
+    {
+      uid_t euid;
+
+      if (setuid(uid)
+	  || geteuid() != uid
+	  || (getuid() != uid
+	      && (geteuid() == 0 || getuid() == 0)))
+	{
+			
+#if defined(HAVE_SETREUID)
+	  if (geteuid() != uid)
+	    {
+	      if (setreuid(uid, -1) < 0)
+		{
+		  anubis_error (SOFT, _("setreuid(%lu,-1) failed"),
+				(u_long) uid);
+		  rc = 1;
+		}
+	      if (setuid(uid) < 0)
+		{
+		  anubis_error (SOFT, _("second setuid(%lu) failed"),
+				(u_long) uid);
+		  rc = 1;
+		}
+	    }
+	  else
+#endif
+	    {
+	      anubis_error (SOFT, _("setuid(%lu) failed"), (u_long) uid);
+	      rc = 1;
+	    }
+	}
+	
+
+      euid = geteuid();
+      if (uid != 0 && setuid(0) == 0)
+	{
+	  anubis_error (HARD, _("seteuid(0) succeeded when it should not"));
+	  rc = 1;
+	}
+      else if (uid != euid && setuid(euid) == 0)
+	{
+	  anubis_error (HARD, _("cannot drop non-root setuid privileges"));
+	  rc = 1;
+	}
+    }
+  return rc;
+}
+
 void
 anubis_changeowner (char *user)
 {
@@ -277,8 +379,9 @@ anubis_changeowner (char *user)
   pwd = getpwnam (user);
   if (pwd)
     {
-      setgid (pwd->pw_gid);
-      setuid (pwd->pw_uid);
+      if (change_privs (pwd->pw_uid, pwd->pw_gid))
+	quit (EXIT_FAILURE);
+	
       chdir (pwd->pw_dir);
       info (VERBOSE, _("UID:%d (%s), GID:%d, EUID:%d, EGID:%d"),
 	    (int) getuid (), pwd->pw_name, (int) getgid (),
