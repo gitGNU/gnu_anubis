@@ -74,6 +74,7 @@ RDASHES [ \t]*---
          /* Keywords */
 [aA][nN][dD]   return AND;
 [oO][rR]       return OR;
+[nN][oO][tT]   return NOT;
 BEGIN          return T_BEGIN;
 {LDASHES}BEGIN{WS}{IDENT}{RDASHES} {
 	char *p = strstr(yytext, "BEGIN") + 5;
