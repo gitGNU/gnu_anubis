@@ -1,3 +1,68 @@
+2003-02-28  Sergey Poznyakoff 
+
+	User-visible changes:
+	  New syntactical entities:
+
+		add header[KEY] VALUE
+		add body VALUE
+		remove header[KEY]
+		modify header[KEY] [NEW-KEY] VALUE
+
+	("header" may be omitted). KEY is (currently) the header name. It
+	may be a regular expression matching a set of header names
+	for "remove". [NEW-KEY] in "modify" statement is optional.
+
+	  Added support for "here document" (see testsuite/etc/add.in
+	for a sample).
+
+	  Allow to select signer id with gpg-sign.
+	
+	* configure.ac: Use -ggdb instead of -g if gcc is being used.
+	* src/message.c: New file.
+	* src/Makefile.am: Added message.c
+	* src/extern.h (message): Removed.
+	* src/main.h: Likewise.
+	* src/headers.h (T_BOUNDARY): Removed macro.
+	  (message_modify_headers): Changed declaration
+	  (message_add_body,message_init,message_free): New functions.
+	* src/gpg.c (struct gpg_struct): New member "inited".
+	  (gpg_sign): Allow to select the signers IDs
+	  (gpg_parser): Call gpgme_init whenever necessary.
+	* src/misc.c: (header_assoc): Remove any leading whitespace from
+	  the header field value.
+	* src/quit.c (free_mem): Removed references to message.
+	* src/rc.c (rule_parser et al.): Removed "add", "remove" and
+	  "modify". These are reserved keywords and are handled by the
+	  main parser code.
+	* src/rcfile.h (RC_INST,enum rc_inst_opcode): New datatypes.
+	  (struct rc_stmt): New member v.inst.
+	* src/rcfile.l: Added new keywords: BODY, ADD, REMOVE, MODIFY,
+	  STOP, CALL. The latter two are reserved for future use.
+	  Removed support for unquoted regular expressions.
+	  Do not try to interpret backslashes in front of numbers
+	  (regexp backreferences).
+	  Added shell-like "here document" construction.
+	* src/rcfile.y: Support for ADD, REMOVE, and MODIFY instructions.
+	  Removed support for unquoted regular expressions.
+	* src/tunnel.c: Removed global variable "message".
+	  Moved all message-specific functions to message.c
+	* testsuite/anubis/base.exp: Added new test (append to the body).
+	* testsuite/anubis/gpg.exp: Added new test (GPG signing)
+	* testsuite/etc/add-body.pat: New file.
+	* testsuite/etc/gpgsign.pat: New file.
+ 	* testsuite/etc/add.in: New file.
+	* testsuite/etc/Makefile.am: Added add-body.pat, gpgsign.pat and
+	  add.in.
+	* testsuite/etc/del.in: Use the new syntax.
+	* testsuite/etc/simple.in: Likewise
+	* testsuite/etc/std.in: Likewise.
+	* testsuite/etc/std.pat: Likewise.
+	* testsuite/etc/gpg.in: Likewise. Added new rule
+	* testsuite/lib/anubis.exp (anubis_pat): Allow use of -re and
+	  -- prefixes within the :PATTERN block
+	  
+	* TODO: Updated
+	
 2003-02-26  Sergey Poznyakoff 
 
 	Changed the message processing algorithm to process a

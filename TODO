@@ -2,12 +2,42 @@
  TO DO
  =====
 
-* HTML processing
-* Rename guile-postprocess to guile-process. Introduce real postprocess
-  function.
-* Rewrite collect_body().
-* Add testsuite and more examples.
-* IPv6 support
+* Update documentation and examples to reflect the new syntax and
+semantics of the anubis language.
 
- EOF
+* Tunnel core
+** HTML processing
+** IPv6 support
+
+** Store the message body as a list of "line instructions" instead of one
+text blurb. A "line instruction" is one of the following:
+*** Simple text.
+Carries a single text line.
+*** File reference.
+Carries a name of the file that must be inserted in this point
+*** Maybe something else?
+
+** Rewrite transfer_body to make use of the above.
+
+** Add back the support for remailers.
+
+** Rewrite process_command and transfer_command to make them modular.
+
+* Parser and run-time evaluator:
+** Add support for `modify body ["pattern"] "replace"'
+** Add more verbose diagnostics to the parser. More specifically, emit
+a warning if gpg-crypt, rot-13 and the like may be used twice over the
+same block of text. (Basically this means adding a rudimentary flow
+control analyzer).
+** Add support for "stop" instruction -- immediately stop the processing
+of the section.
+** Add support for "call" instruction" -- call a named section (kind of
+a subroutine).
+
+
+Local variables:
+mode: outline
+paragraph-separate: "[	]*$"
+end:
+
 
