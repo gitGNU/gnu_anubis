@@ -44,8 +44,7 @@
 
  Optional:
 
- * PCRE -- Perl-Compatible Regular Expression Library
-   (ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/)
+ * PCRE -- Perl-Compatible Regular Expression Library (http://www.pcre.org/).
  * PAM -- Pluggable Authentication Modules.
  * libwrap (TCP wrappers) -- an access control library.
 
@@ -74,6 +73,8 @@
  `--without-gnutls'    to disable GnuTLS support.
  `--without-gpgme'     to disable GNU Privacy Guard (GPGME) support.
  `--without-guile'     to disable Guile support.
+ `--with-unprivileged-user=USER'
+                       to set an unprivileged user (default is "nobody").
 
  Next, write a proper init script for your system. See the examples
  in the `scripts' directory (part of the distribution).

@@ -1,5 +1,12 @@
 2003-06-07  Wojciech Polak
 
+	* examples/pam/anubis.allow: Added default unprivileged
+	  user `nobody'.
+	* po/POTFILES.in: Updated.
+	* README: Likewise.
+
+2003-06-07  Wojciech Polak
+
 	* src/Makefile.am: Bugfix. Added missing -I$(top_srcdir)/intl.
 
 2003-06-07  Wojciech Polak

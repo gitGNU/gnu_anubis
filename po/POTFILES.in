@@ -12,22 +12,23 @@ src/exec.c
 src/files.c
 src/getopt.c
 src/gpg.c
+src/guile.c
 src/help.c
 src/main.c
 src/map.c
 src/mem.c
 src/misc.c
 src/net.c
+src/obstack.c
 src/proxy.c
 src/quit.c
 src/rc.c
+src/rcfile.l
+src/rcfile.y
 src/regex.c
 src/ssl.c
 src/tls.c
 src/tunnel.c
-src/guile.c
-src/rcfile.y
-src/rcfile.l
 
 # EOF
 
