@@ -19,16 +19,15 @@
 ## compiling, linking, and/or using OpenSSL is allowed.
 ##
 
-GPGFILES = pubring.gpg
+GPGFILES = secring.gpg pubring.gpg
 noinst_DATA = @ANUBIS_GPGFILES@
 
-EXTRA_DIST = pubring.asc
-DISTCLEANFILES = pubring.gpg
+EXTRA_DIST = pubring.asc secring.asc
+CLEANFILES = *.gpg random_seed *~
 
-pubring.gpg: pubring.asc
+pubring.gpg secring.gpg: pubring.asc secring.asc
+	$(GPG) --homedir . --import < pubring.asc
+	$(GPG) --homedir . --allow-secret-key-import --import < secring.asc
 
-SUFFIXES = .asc .gpg
 
-.asc.gpg:
-	$(GPG) --homedir . --import $< 
 
