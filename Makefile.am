@@ -22,7 +22,7 @@
 ## compiling, linking, and/or using OpenSSL is allowed.
 ##
 
-AUTOMAKE_OPTIONS = 1.8 readme-alpha
+AUTOMAKE_OPTIONS = 1.8.3 readme-alpha
 ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = build lib intl po doc scripts examples guile contrib \
 	src elisp testsuite
