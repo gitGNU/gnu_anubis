@@ -1,3 +1,7 @@
+2003-11-22  Wojciech Polak
+
+	* src/help.c (config_opts): Added GSASL.
+
 2003-11-22  Sergey Poznyakoff  
 
 	* src/dbtext.c (dbtext_open): Minor fix.
