@@ -218,8 +218,8 @@
 #define T_DAEMON            0x00000040
 #define T_STDINOUT          0x00000080
 #define T_SSL               0x00000100
-#define T_SSL_CLIENT        0x00000200
-#define T_SSL_SERVER        0x00000400
+/* -- #define T_SSL_CLIENT        0x00000200 */
+/* -- #define T_SSL_SERVER        0x00000400 */
 #define T_SSL_FINISHED      0x00000800
 #define T_SSL_ONEWAY        0x00001000
 #define T_SSL_CKCLIENT      0x00002000
@@ -268,6 +268,10 @@ struct message_struct {
 	char *boundary;
 };
 
+typedef int (*net_io_t) (void *sd, char *data, size_t size, size_t *nbytes);
+typedef int (*net_close_t) (void *sd);
+typedef const char *(*strerror_t) (int e);
+
 /* main.c */
 void anubis(char *arg);
 
@@ -297,7 +301,7 @@ int  check_filename(char *, time_t *);
 
 /* errs.c */
 void anubis_error(int, char *, ...);
-void socket_error(void);
+void socket_error(const char *);
 void socks_error(char *);
 void hostname_error(char *);
 
@@ -307,6 +311,9 @@ void info(int, char *, ...);
 void filelog(char *, char *);
 
 /* net.c */
+void net_set_io(int method, net_io_t read, net_io_t write, net_close_t close,
+		strerror_t strerror);
+void net_close(int method, void *sd);
 int  make_remote_connection(char *, unsigned int);
 int  bind_and_listen(char *, unsigned int);
 void swrite(int, void *, char *);
@@ -394,23 +401,12 @@ void sig_timeout(int);
 void free_mem(void);
 void quit(int);
 
-/* tls.c */
-#ifdef HAVE_TLS
- void init_tls_libs(void);
- gnutls_session start_tls_client(int);
- gnutls_session start_tls_server(int);
- void end_tls(int, gnutls_session);
-#endif /* HAVE_TLS */
-
-/* ssl.c */
-#ifdef HAVE_SSL
- void init_ssl_libs(void);
- SSL_CTX *init_ssl_client(void);
- SSL_CTX *init_ssl_server(void);
- SSL *start_ssl_client(int, SSL_CTX *);
- SSL *start_ssl_server(int, SSL_CTX *);
- void end_ssl(int, SSL *, SSL_CTX *);
-#endif /* HAVE_SSL */
+/* tls.c or ssl.c */
+#ifdef USE_SSL
+void init_ssl_libs(void);
+void *start_ssl_client(int);
+void *start_ssl_server(int);
+#endif /* USE_SSL */
 
 /* gpg.c */
 #ifdef HAVE_GPG
