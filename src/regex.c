@@ -229,6 +229,8 @@ anubis_regex_free(RC_REGEX **pre)
 {
 	struct regex_vtab *vp;
 
+	if (!*pre)
+		return;
 	ASSERT_RE(*pre, vp);
 	free((*pre)->src);
 	vp->free(*pre);
