@@ -220,9 +220,12 @@ MU_CHECK_GSASL(0.0.2, [
 		       WITH_SQL=1
                        LIBS="$LIBS $anubis_cv_lib_mysqlclient"
                        AC_MSG_RESULT([Enabling MySQL support...])
+	        else
+		       AC_MSG_FAILURE([Required MySQL libraries not found])
 		fi
 		;;
 	 no)    ;;
+         *)     AC_MSG_FAILURE([Unexpected option argument $withval. Please use either --with-mysql or --without-mysql]);;
         esac])
 
     AC_ARG_WITH(postgres,
@@ -243,9 +246,12 @@ MU_CHECK_GSASL(0.0.2, [
 		       WITH_SQL=1
                        LIBS="$LIBS $anubis_cv_lib_pq"
                        AC_MSG_RESULT([Enabling PostgreSQL support...])
+	        else
+		       AC_MSG_FAILURE([Required PostgreSQL libraries not found])
 		fi
 		;;
 	 no)    ;;
+	 *)     AC_MSG_FAILURE([Unexpected option argument $withval. Please use either --with-postgres or --without-postgres]);;
         esac])
 
     if test "$WITH_SQL" = "1"; then
