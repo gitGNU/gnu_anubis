@@ -1,0 +1,41 @@
+#
+# A sample user configuration file for anubis with Guile support.
+# Copy this file to your HOME directory as `.anubisrc' file. To protect
+# your passwords in this configuration file, use the 0600 (u=rw,g=,o=)
+# permissions, otherwise GNU Anubis won't accept this file. Hash-marked
+# comments (#) and white lines are ignored.
+#
+
+#
+# The "CONTROL" section.
+# User configuration file.
+#
+
+---BEGIN CONTROL---
+logfile = /tmp/anubis.log
+loglevel = ALL
+remote-mta = localhost
+termlevel = debug
+---END---
+
+
+---BEGIN GUILE---
+guile-output = /tmp/anubis.out
+guile-debug = yes
+guile-load-path-append = <path-to-anubis-directory>/examples
+guile-load-program = rot-13.scm
+guile-load-program = anubis.scm
+guile-postprocess = postprocess
+---END---
+
+---BEGIN RULE---
+
+# Process the (E)SMTP commands.
+
+if header =^Subject:
+ guile-rewrite-line = rewrite-subject
+fi
+
+---END---
+
+
