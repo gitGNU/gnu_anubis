@@ -1,3 +1,27 @@
+2003-08-17  Sergey Poznyakoff
+
+	* doc/anubis.texi: Document the proper way of escaping
+	the & character in modify statements.
+	* src/headers.h (T_SMTP_ERROR_CODES): New define.
+	* src/daemon.c (stdinout): Set T_SMTP_ERROR_CODES bit.
+	* src/errs.c (anubis_error): Honor T_SMTP_ERROR_CODES bit.
+	* src/log.c (mprintf): Output to stderr.
+	* src/main.c (anubis): Removed resetting termlevel to SILENT
+	in --stdio mode.
+	* src/message.c (expand_ampersand): Bugfix.
+	* testsuite/etc/del.in: Fixed emacs mode indicator
+	* testsuite/etc/mod-header.in: Fixed escaping the & character.
+	* testsuite/etc/mult.pat: Minor change in wording.
+	* testsuite/etc/add.in: Use new syntax (avoid using =)
+	* testsuite/etc/empty.in: Likewise.
+	* testsuite/etc/entire.in: Likewise.
+	* testsuite/etc/gpg.in: Likewise.
+	* testsuite/etc/mod-body.in: Likewise.
+	* testsuite/etc/remail.in: Likewise.
+	* testsuite/etc/simple.in: Likewise.
+	* testsuite/etc/tlsoneway.in: Likewise.
+	* testsuite/etc/trigger.in: Likewise.
+
 2003-08-15  Wojciech Polak
 
 	* src/log.c: A few minor changes.
