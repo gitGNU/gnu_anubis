@@ -406,6 +406,7 @@ void open_rcfile(int);
 void process_rcfile(int);
 void rcfile_process_section(int, char *, void *, MESSAGE *);
 void rcfile_call_section(int, char *, void *, MESSAGE *);
+char *user_rcfile_name();
 
 /* help.c */
 void print_version(void);
@@ -526,6 +527,10 @@ int anubis_get_db_record(char *username, ANUBIS_USER *usr);
 void auth_gsasl_init();
 int anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER *usr);
 void anubis_set_mech_list(LIST *list);
+
+/* xdatabase.c */
+int xdatabase(char *command);
+void xdatabase_capability(char *reply, size_t reply_size);
 
 /* EOF */
 
