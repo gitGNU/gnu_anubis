@@ -22,7 +22,7 @@
 ## compiling, linking, and/or using OpenSSL is allowed.
 ##
 
-AUTOMAKE_OPTIONS = 1.7.2
+AUTOMAKE_OPTIONS = 1.7.5
 ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = build m4 intl po doc scripts examples guile contrib src testsuite
 
