@@ -56,7 +56,7 @@ static char *config_opts[] = {
 	NULL
 };
 
-void
+static void
 show_config_options(int delim)
 {
 	int i;
@@ -66,7 +66,7 @@ show_config_options(int delim)
 }
 
 void
-print_config_options()
+print_config_options(void)
 {
 	show_config_options('\n');
 	exit(0);
@@ -113,14 +113,18 @@ print_usage(void)
 	puts(_(" -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as described\n"
 	       "                              in RFC 821 on standard input and output."));
 	puts(_("Output options:\n"));
-	puts(_(" -s, --silent     Work silently."));
-	puts(_(" -v, --verbose    Work noisily."));
-	puts(_(" -D, --debug      Debug mode."));
+	puts(_(" -s, --silent                 Work silently."));
+	puts(_(" -v, --verbose                Work noisily."));
+	puts(_(" -D, --debug                  Debug mode."));
 	puts(_("\nMiscellaneous options:\n"));
-	puts(_(" --altrc FILE     Specify alternate system configuration file."));
-	puts(_(" --norc           Ignore system configuration file."));
-	puts(_(" --version        Print version number and copyright."));
-	puts(_(" --help           It's obvious..."));
+	puts(_(" -c, --check-config           Run the configuration file syntax checker."));
+	puts(_(" --show-config-options        Print a list of configuration options used\n"
+	       "                              to build GNU Anubis."));
+	puts(_(" --relax-perm-check           Do not check a user config file permissions."));
+	puts(_(" --altrc FILE                 Specify alternate system configuration file."));
+	puts(_(" --norc                       Ignore system configuration file."));
+	puts(_(" --version                    Print version number and copyright."));
+	puts(_(" --help                       It's obvious..."));
 	printf(_("\nReport bugs to <%s>.\n"), PACKAGE_BUGREPORT);
 	exit(0);
 }
