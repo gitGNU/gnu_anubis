@@ -367,8 +367,10 @@ AC_ARG_WITH(pcre,
 	[with_pcre=${withval}],
 	[with_pcre=no])
 if test "$with_pcre" = "yes"; then
- AC_CHECK_LIB(pcre, main)
+ AC_CHECK_LIB(pcre, main,, with_pcre=no)
  AC_CHECK_HEADERS(pcre.h pcre/pcre.h)
+fi
+if test "$with_pcre" = "yes"; then
  AC_MSG_RESULT([Enabling PCRE support...])
 fi
 
@@ -381,7 +383,9 @@ AC_ARG_WITH(pam,
 if test "$with_pam" = "yes"; then
  AC_CHECK_LIB(pam, main,, with_pam=no)
  AC_CHECK_LIB(pam_misc, main,, with_pam=no)
- AC_CHECK_HEADERS(security/pam_appl.h security/pam_misc.h)
+ AC_CHECK_HEADERS(security/pam_appl.h security/pam_misc.h,, with_pam=no)
+fi
+if test "$with_pam" = "yes"; then
  AC_MSG_RESULT([Enabling PAM support...])
 fi
 
@@ -392,9 +396,11 @@ AC_ARG_WITH(tcp-wrappers,
 	[with_tcp_wrappers=${withval}],
 	[with_tcp_wrappers=no])
 if test "$with_tcp_wrappers" = "yes"; then
- AC_CHECK_LIB(wrap, main)
- AC_CHECK_LIB(nsl, main)
- AC_CHECK_HEADERS(tcpd.h)
+ AC_CHECK_LIB(wrap, main,, with_tcp_wrappers=no)
+ AC_CHECK_LIB(nsl, main,, with_tcp_wrappers=no)
+ AC_CHECK_HEADERS(tcpd.h,, with_tcp_wrappers=no)
+fi
+if test "$with_tcp_wrappers" = "yes"; then
  AC_MSG_RESULT([Enabling libwrap (TCP wrappers) support...])
 fi
 
