@@ -36,7 +36,7 @@ fi
 
 dnl Internationalization macros.
 AM_GNU_GETTEXT
-AM_GNU_GETTEXT_VERSION(0.12.1)
+AM_GNU_GETTEXT_VERSION(0.13)
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -261,7 +261,7 @@ fi
 if test $with_gnutls = yes; then
   AC_CHECK_HEADERS(gnutls/gnutls.h)
   if test $ac_cv_header_gnutls_gnutls_h != no; then
-    AM_PATH_LIBGNUTLS("0.9.93",
+    AM_PATH_LIBGNUTLS("1.0.0",
                       [M4_DEFS="$M4_DEFS -DWITH_SSL"
                       AC_DEFINE(USE_GNUTLS, 1,
                                 [Define to 1 if USE_GNUTLS is requested.])],
