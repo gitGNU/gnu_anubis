@@ -1,4 +1,16 @@
-2003-03-07  Sergey Poznyakoff 
+2003-03-07  Wojciech Polak
+
+	* src/quit.c (free_mem): Removed unused variables.
+	* src/main.c (struct rm_struct): Removed.
+	* src/extern.h: Likewise.
+
+	* src/esmtp.c: Fixed preprocessor directives.
+	* src/proxy.c: Likewise.
+	* src/exec.c: Likewise.
+	* src/net.c: Likewise.
+	* src/ssl.c: Likewise.
+
+2003-03-07  Sergey Poznyakoff
 
 	* po/POTFILES.in: Added missing files.
 	* src/map.c (translate_parser): Synchronized with the
@@ -19,9 +31,9 @@
 	  well.
 	* testsuite/etc/remail.pat: Fixed remailer header.
 	
-2003-03-06  Sergey Poznyakoff 
+2003-03-06  Sergey Poznyakoff
 
-	* guile: New subdirecory
+	* guile: New subdirectory
 	* guile/Makefile.am: New file.
 	* guile/remailer.scm: New file.
 	* guile/rot-13.scm: Moved from ...
