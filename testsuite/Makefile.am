@@ -91,5 +91,3 @@ remote.exp:;
 
 DISTCLEANFILES=*.exp *.log *.sum 
 
-distclean-local:
-	-rm -rf	data
