@@ -1,3 +1,20 @@
+2003-05-27  Sergey Poznyakoff  
+
+	* TODO: Updated
+	* src/auth.c: Removed superfluous return
+	* src/log.c: Removed unneded HAVE_VSNPRINTF
+	* src/tls.c: Provide push/pull functions to work with local
+	mailers.
+	* src/tunnel.c (transfer_command): TLS can be used with
+	local mailers.
+	* testsuite/mta.c: Added TLS support (only with GnuTLS).
+
+	* testsuite/etc/tlsoneway.pat: New file.
+	* testsuite/etc/tlsoneway.in: New file.
+	* testsuite/etc/Makefile.am: Added new files.
+	* testsuite/anubis/tls.exp: New file.
+	* testsuite/anubis/DISTFILES: Added new files.
+
 2003-05-11  Wojciech Polak
 
 	* src/help.c (print_usage): Added missing command line options.

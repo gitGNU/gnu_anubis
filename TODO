@@ -9,16 +9,6 @@ semantics of the anubis language.
 ** HTML processing (also removing HTML part)
 ** IPv6 support
 
-** Store the message body as a list of "line instructions" instead of one
-text blurb. A "line instruction" is one of the following:
-*** Simple text.
-Carries a single text line.
-*** File reference.
-Carries a name of the file that must be inserted in this point
-*** Maybe something else?
-
-** Rewrite transfer_body to make use of the above.
-
 ** Rewrite process_command and transfer_command to make them modular.
 
 * Parser and run-time evaluator:
