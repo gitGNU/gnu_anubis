@@ -130,8 +130,13 @@ set_unprivileged_user(void)
 		if (check_username(session.notprivileged))
 			anubis_changeowner(session.notprivileged);
 	}
-	else
-		info(NORMAL, _("WARNING: An unprivileged user has not been specified!"));
+	else {
+		if (check_username(DEFAULT_UNPRIVILEGED_USER))
+			anubis_changeowner(DEFAULT_UNPRIVILEGED_USER);
+		else
+			info(NORMAL,
+			_("WARNING: An unprivileged user has not been specified!"));
+	}
 	return;
 }
 
