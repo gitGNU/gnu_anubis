@@ -531,24 +531,36 @@ err_line_num()
 	return yychar == EOL ? cfg_line_num - 1 : cfg_line_num;
 }
 
+static void
+default_error_printer (void *data, 
+		       const char *filename, int line,
+		       const char *fmt, va_list ap)
+{
+	char buf[LINEBUFFER];
+	vsnprintf(buf, sizeof buf, fmt, ap);
+	anubis_error(SYNTAX, "%s:%d: %s", filename, line, buf);
+}	
+
+static void *rc_error_printer_data;
+static RC_ERROR_PRINTER rc_error_printer = default_error_printer;
+
+
 void
 parse_error(const char *fmt, ...)
 {
-	char buf[LINEBUFFER];
 	va_list ap;
 
 	va_start(ap, fmt);
-	vsnprintf(buf, sizeof buf, fmt, ap);
+	rc_error_printer (rc_error_printer_data,
+			  cfg_file, err_line_num(), fmt, ap);
 	va_end(ap);
-	anubis_error(SYNTAX, "%s:%d: %s", cfg_file, err_line_num(), buf);
 	error_count++;
 }
 
 int
 yyerror(char *s)
 {
-	anubis_error(SYNTAX, "%s:%d: %s", cfg_file, err_line_num(), s);
-	error_count++;
+	parse_error("%s", s);
 	return 0;
 }
 
@@ -566,6 +578,22 @@ rc_parse(char *name)
 	if (debug_level)
 		rc_section_print(rc_section);
 	return rc_section;
+}
+
+/* Same as rc_parse() but also allows user to specify his own
+   error printer function */
+RC_SECTION *
+rc_parse_ep(char *name, RC_ERROR_PRINTER errprn, void *data)
+{
+	void *save_ep_data = rc_error_printer_data;
+	void *save_ep_handler = rc_error_printer;
+	RC_SECTION *sec;
+	rc_error_printer = errprn;
+	rc_error_printer_data = data;
+	sec = rc_parse(name);
+	rc_error_printer = save_ep_handler;
+	rc_error_printer_data = save_ep_data;
+	return sec;
 }
 
 void
