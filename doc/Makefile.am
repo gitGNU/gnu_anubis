@@ -167,7 +167,7 @@ webdocdir: $(WEB_HTML_STAMPS) $(WEB_BIN) index.html
 index.html: index.html.in $(WEBDOC)
 	@echo "s^%BASE_URL%^$(BASE_URL)^;" > .webdoc
 	@echo "s/%DATE%/`date`/;" >> .webdoc
-	@echo "s/%UPDATED%/`date +'%B, %d'`/;" >> .webdoc
+	@echo "s/%UPDATED%/`date +'%B %d, %Y'`/;" >> .webdoc
 	@echo "s/%PACKAGE_NAME%/$(PACKAGE_NAME)/" >> .webdoc
 	@echo "s/%PACKAGE%/$(PACKAGE)/" >> .webdoc
 	@echo "s/%VERSION%/$(VERSION)/" >> .webdoc
