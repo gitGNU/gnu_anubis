@@ -44,5 +44,8 @@ anubis_pat del3.pat
 # Delete all headers from a message
 anubis_pat del4.pat
 
+# Test the Trigger mechanism
+anubis_pat trigger.pat
+
 # End of parse.exp
 
