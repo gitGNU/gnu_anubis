@@ -5,10 +5,10 @@
  GNU Anubis is an SMTP message submission daemon. It represents an intermediate
  layer between mail user agent (MUA) and mail transport agent (MTA), receiving
  messages from MUA, applying to them a set of predefined changes and finally
- inserting modified messages into MTA routing network. The set of changes applied
- to a message is configurable on a system-wide and per-user basis. The built-in
- configuration language used for defining sets of changes allows for considerable
- flexibility and is easily extensible.
+ inserting modified messages into MTA routing network. The set of changes
+ applied to a message is configurable on a system-wide and per-user basis. The
+ built-in configuration language used for defining sets of changes allows for
+ considerable flexibility and is easily extensible.
 
  --------*      --------**      ------***
  |  MUA  | ---> | Anubis | ---> |  MTA  |
@@ -31,7 +31,8 @@
  Recommended:
 
  * GSASL -- an implementation of the SASL framework
-   (http://www.gnu.org/software/gsasl/).
+   (http://www.gnu.org/software/gsasl/). Anubis requires GSASL version 0.2.3
+   or newer.
 
  * A database, any from the following:
    - GDBM -- (http://www.gnu.org/software/gdbm/).

@@ -1,6 +1,32 @@
-2004-12-16  Sergey Poznyakoff  <gray@Mirddin.farlep.net>
+2004-12-17  Sergey Poznyakoff
 
-	* (TODO): updated
+	* README: Updated
+	* configure.ac: Use -Wno-deprecated gcc flag if GSASL support is
+	enabled.
+	* src/authmode.c (rc_parser): Use anubis_set_server_mech_list()
+	* src/esmtp.c (anubis_set_client_mech_list)
+	(anubis_set_encryption_mech_list): New function
+	(esmtp_auth): Support the list of mechanisms that can be used
+	only over an encrypted channel.
+	[!WITH_GSASL] (esmtp_auth): Provide function definition
+	* src/extern.h (struct session_struct): Removed mta_username,
+	mta_password
+	* src/gsasl_srv.c (anubis_set_mech_list): Changed declaration
+	(anubis_set_server_mech_list): New function
+	* src/headers.h: Provide new prototypes
+	* src/quit.c: Removed session_struct.mta_username, mta_password
+	* src/tunnel.c: Likewise
+	* src/rcfile.c (control_parser): Handle new statements
+	* testsuite/mta.c: Minor fix
+	* testsuite/etc/interface.in.in: Use WITH_GNUTLS instead of
+	WITH_SSL
+	* testsuite/etc/target.in.in: Likewise
+	* testsuite/lib/anubis.exp (run_in_authmode): Fix message text
+	* doc/anubis.texi: Documented new statements
+
+2004-12-16  Sergey Poznyakoff 
+
+	* TODO: updated
 	* configure.ac: set "M4_DEFS -DWITH_GSASL"
 	* src/esmtp.c: Completely rewritten using gsasl
 	* src/extern.h (anon_token,authorization_id,authentication_id)
