@@ -52,6 +52,11 @@ struct regex_vtab {
  _free_fp free;
 };
 
+static int exact_compile(RC_REGEX *, char *, int);
+static void exact_free(RC_REGEX *);
+static int exact_match(RC_REGEX *, char *, int *, char ***, int *, int *);
+static int exact_refcnt(RC_REGEX *);
+
 static int posix_compile(RC_REGEX *, char *, int);
 static void posix_free(RC_REGEX *);
 static int posix_match(RC_REGEX *, char *, int *, char ***, int *, int *);
@@ -64,10 +69,12 @@ static int perl_refcnt(RC_REGEX *);
 #endif /* HAVE_PCRE */
 
 static struct regex_vtab vtab[] = {
+	{ R_EXACT, exact_match, exact_refcnt, exact_compile, exact_free },
 #ifdef HAVE_PCRE
 	{ R_PERLRE, perl_match, perl_refcnt, perl_compile, perl_free },
 #endif
-	{ 0, posix_match, posix_refcnt, posix_compile, posix_free },
+	{ R_POSIX, posix_match, posix_refcnt, posix_compile, posix_free },
+	{ 0 }
 };
 		
 struct rc_regex {     /* Regular expression */
@@ -89,6 +96,8 @@ regex_vtab_lookup(int flags)
 	for (p = vtab; p->mask; p++)
 		if (p->mask & flags)
 			break;
+	if (p->mask == 0)
+		return NULL;
 	return p;
 }
 
@@ -98,7 +107,11 @@ int
 anubis_regex_match(RC_REGEX *re, char *line, int *refc, char ***refv)
 {
 	int so, eo;
-	struct regex_vtab *vp = regex_vtab_lookup(re->flags);
+	struct regex_vtab *vp;
+
+	if (!re)
+		return -1;
+	vp = regex_vtab_lookup(re->flags);
 	if (!vp)
 		return -1;
 	return vp->match(re, line, refc, refv, &so, &eo) == 0;
@@ -115,8 +128,11 @@ anubis_regex_replace(RC_REGEX *re, char *line, char *repl)
 	int newlen;
 	int off = 0;
 	int alloc = 0;
-	struct regex_vtab *vp = regex_vtab_lookup(re->flags);
-	
+	struct regex_vtab *vp;
+
+	if (!re)
+		return NULL;
+	vp = regex_vtab_lookup(re->flags);
 	if (!vp)
 		return NULL;
 	while (vp->match(re, line + off, &refc, &refv, &so, &eo) == 0) {
@@ -160,7 +176,11 @@ anubis_regex_replace(RC_REGEX *re, char *line, char *repl)
 int
 anubis_regex_refcnt(RC_REGEX *re)
 {
-	struct regex_vtab *vp = regex_vtab_lookup(re->flags);
+	struct regex_vtab *vp;
+
+	if (!re)
+		return 0;
+	vp = regex_vtab_lookup(re->flags);
 	if (!vp)
 		return 0;
 	return vp->refcnt(re);
@@ -186,7 +206,11 @@ anubis_regex_compile(char *line, int opt)
 void
 anubis_regex_free(RC_REGEX *re)
 {
-	struct regex_vtab *vp = regex_vtab_lookup(re->flags);
+	struct regex_vtab *vp;
+
+	if (!re)
+		return;
+	vp = regex_vtab_lookup(re->flags);
 	free(re->src);
 	if (vp)
 		vp->free(re);
@@ -196,8 +220,49 @@ anubis_regex_free(RC_REGEX *re)
 char *
 anubis_regex_source(RC_REGEX *re)
 {
+	if (!re)
+		return NULL;
 	return re->src;
 }
+
+
+/* **************************** Exact strings ***************************** */
+static int
+exact_compile(RC_REGEX *regex, char *line, int opt)
+{
+	return 0;
+}
+
+static void
+exact_free(RC_REGEX *regex)
+{
+	/* nothing */
+}
+
+
+static int
+exact_match(RC_REGEX *regex, char *line, int *refc, char ***refv,
+	    int *so, int *eo)
+{
+	int code;
+
+	*eo = *so = -1;
+	*refc = 0;
+	*refv = NULL;
+	
+	if (regex->flags & R_SCASE)
+		code = strcmp(line, regex->src);
+	else
+		code = strcasecmp(line, regex->src);
+	return code;
+}
+
+static int
+exact_refcnt(RC_REGEX *regex)
+{
+	return 0;
+}
+
 
 
 /* ********************* POSIX Regular Expressions ************************ */
@@ -208,7 +273,7 @@ posix_compile(RC_REGEX *regex, char *line, int opt)
 	int rc;
 	int cflags = 0;
 	
-	if (opt & R_SCASE)
+	if (!(opt & R_SCASE))
 		cflags |= REG_ICASE;
 	if (!(opt & R_BASIC))
 		cflags |= REG_EXTENDED;
