@@ -1,3 +1,15 @@
+2003-07-15  Sergey Poznyakoff
+
+	* src/rc.c (anubis_add_section): Initialize prio member.
+	(open_rcfile): For CF_INIT and CF_SUPERVISOR: initialize
+	parse_tree;
+	(control_parser): Implementes user-only and system-only keywords.
+	* src/rcfile.h (enum section_prio): New priorities.
+	(rc_section_list_destroy,rc_section_destroy): Changed proto.
+	* src/rcfile.y: Updated to new signatures of
+	rc_section_list_destroy,rc_section_destroy
+	(rc_section_link): Use new priorities.
+
 2003-07-15  Wojciech Polak
 
 	* src/main.c: Bump to 3.9.90.
