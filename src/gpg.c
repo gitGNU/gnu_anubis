@@ -456,7 +456,7 @@ gpg_parser(int method, int key, LIST *arglist,
 
 
 struct rc_kwdef gpg_kw[] = {
-	{ "gpg-passphrase",    KW_GPG_PASSPHRASE },
+	{ "gpg-passphrase",    KW_GPG_PASSPHRASE, KWF_HIDDEN },
 	{ "gpg-encrypt",       KW_GPG_ENCRYPT },
 	{ "gpg-sign",          KW_GPG_SIGN },
 	{ "gpg-sign-encrypt",  KW_GPG_SIGN_ENCRYPT },
