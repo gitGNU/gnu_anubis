@@ -321,7 +321,9 @@ get_response_smtp (int method, NET_STREAM sd, char *buf, int size)
 {
   int n;
   char line[LINEBUFFER + 1];
-
+  int overflow = 0; /* This will be removed when we finally get rid of
+		       static buffers */
+  
   if (buf != 0)
     memset (buf, 0, size);
   do
@@ -329,12 +331,23 @@ get_response_smtp (int method, NET_STREAM sd, char *buf, int size)
       n = recvline (method, sd, line, LINEBUFFER);
       if (buf != 0)
 	{
-	  strncat (buf, line, size);
-	  size -= n;
+	  if (size == 0)
+	    {
+	      if (!overflow)
+		{
+		  anubis_error (0, 0,
+			      _("INTERNAL ERROR (get_response_smtp): buffer exhausted. Please report."));
+		  overflow = 1;
+		}
+	    }
+	  else
+	    {
+	      strncat (buf, line, size);
+	      size -= n;
+	    }
 	}
     }
   while (line[3] == '-');
-  return;
 }
 
 /**************************
