@@ -1,3 +1,12 @@
+2003-11-22  Sergey Poznyakoff
+
+	* src/authmode.c (asmtp_ehlo,anubis_smtp,anubis_get_db_record)
+	(anubis_authenticate_mode): Pass ANUBIS_USER as application-
+	specific data.
+	* src/gsasl.c: Use new GSASL functions instead of obsolete
+	ones.
+	* src/headers.h (anubis_auth_gsasl): Changed prototype
+
 2003-11-22  Wojciech Polak
 
 	* src/authmode.c: Added preliminary RSET support.
