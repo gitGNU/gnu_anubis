@@ -1,3 +1,16 @@
+2003-03-03  Sergey Poznyakoff
+
+	* TODO: Updated
+	* src/headers.h (rcfile_call_section): New function
+	* src/rc.c: Likewise.
+	* src/rcfile.h (inst_stop, inst_call): New instruction types.
+	  (rc_call_section): New function.
+	* src/rcfile.y: Allow regexp options to appear on both sides of
+	  the equal sign.
+	  Implemented "call" and "stop" statements.
+	* testsuite/etc/std.in: Test for regexp option on the left from
+	  the '='.
+
 2003-03-03  Wojciech Polak
 
 	* src/gpg.c (gpg_free): New function. Free unused memory.

@@ -29,10 +29,6 @@ Carries a name of the file that must be inserted in this point
 a warning if gpg-crypt, rot-13 and the like may be used twice over the
 same block of text. (Basically this means adding a rudimentary flow
 control analyzer).
-** Add support for "stop" instruction -- immediately stop the processing
-of the section.
-** Add support for "call" instruction" -- call a named section (kind of
-a subroutine).
 
 
 Local variables:
