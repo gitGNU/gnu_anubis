@@ -1057,6 +1057,7 @@ for instance: @code{bind} or @code{BIND} or @code{BiNd}, and so on.
 * Basic Settings::
 * Output Settings::
 * Proxy Settings::
+* SMTP Authentication Settings::
 * Encryption Settings::
 * Security Settings::
 @end menu
@@ -1097,17 +1098,6 @@ Execute a local SMTP server, which works on standard input and output
 @smallexample
 local-mta /usr/sbin/sendmail -bs
 @end smallexample
-@end deffn
-
-@deffn Option esmtp-auth @var{username}:@var{password}
-@opindex esmtp-auth @var{username}:@var{password}
-This option allows you to specify a user name and a password for the
-ESMTP authentication. Use this option if your MTA requires such an
-authentication, but your MUA does not support it. A @var{username}
-and a @var{password} are separated with a colon (@samp{:}).
-Currently only @dfn{CRAM-MD5} and @dfn{LOGIN} authentication methods are
-supported (and @dfn{CRAM-MD5} has a priority). The @dfn{LOGIN} method,
-for security reasons, can only be used both with the TLS/SSL encryption.
 @end deffn
 
 @deffn Option mode @var{mode-name}
@@ -1198,8 +1188,7 @@ using @samp{tracefile yes} enables logging to the same file
 as @samp{logfile} (if possible).
 @end deffn
 
-
-@node Proxy Settings, Encryption Settings, Output Settings, CONTROL Section
+@node Proxy Settings, SMTP Authentication Settings, Output Settings, CONTROL Section
 @subsection Proxy Settings
 @cindex SOCKS proxy
 
@@ -1222,8 +1211,119 @@ Specify a user name and a password, if a SOCKS proxy server requires them.
 A @var{username} and a @var{password} are separated with a colon (@samp{:}).
 @end deffn
 
+@node SMTP Authentication Settings, Encryption Settings, Proxy Settings, CONTROL Section
 
-@node Encryption Settings, Security Settings, Proxy Settings, CONTROL Section
+The following options set authentication credentials for ESMTP
+authentication. You may use this option, for example, if your MTA
+requires such an authentication, but your MUA does not support it.
+
+@deffn Option esmtp-allowed-mech @var{mech-list}
+@opindex esmtp-allowed-mech @var{mech-list}
+Defines the list of allowed authentication mechanisms. @var{Mech-list}
+is a list of valid authentication mechanism names separated by
+whitespace.
+
+Anubis selects the authentication method using following algorithm:
+The MTA presents the list of authentication methods it supports.
+For each element in @var{mech-list}, Anubis tests whether it is
+available in the list presented by MTA. If found, this method is
+selected. For example, suppose that the MTA supports following
+mechanisms:
+
+@smallexample
+PLAIN LOGIN CRAM-MD5 ANONYMOUS
+@end smallexample
+
+@noindent
+and you have following statement in your configuration file
+
+@smallexample
+esmtp-allowed-mech DIGEST-MD5 CRAM-MD5 LOGIN
+@end smallexample
+
+@noindent
+In this case Anubis will select CRAM-MD5.
+
+@end deffn
+
+@deffn Option esmtp-require-encryption @var{mech-list}
+@opindex esmtp-require-encryption @var{mech-list}
+This statement declares the list of mechanisms that can be used only over
+a TLS encrypted channel. By default Anubis uses
+
+@smallexample
+esmtp-require-encryption LOGIN PLAIN
+@end smallexample
+
+@noindent
+This prevents sending user password over an unencrypted connection.
+
+@end deffn
+
+@deffn Option esmtp-auth-id @var{authentication-id}
+@opindex esmtp-auth-id @var{authentication-id}
+Sets authentication ID (user name).
+@end deffn
+
+@deffn Option esmtp-authz-id @var{authorization-id}
+@opindex esmtp-authz-id @var{authorization-id}
+Sets authorization ID (user name).
+@end deffn
+
+@deffn Option esmtp-password @var{password}
+@opindex esmtp-password @var{password}
+Sets password to be used in authentication.
+@end deffn
+
+@deffn Option esmtp-auth @var{username}:@var{password}
+@opindex esmtp-auth @var{username}:@var{password}
+This option sets both authentication and authorization IDs and the
+password. It is equivalent to
+
+@smallexample
+esmtp-auth-id @var{username}
+esmtp-authz-id @var{username}
+esmtp-password @var{password}
+@end smallexample
+
+@end deffn
+
+The following options specify authentication credentials for GSSAPI,
+DIGEST-MD5 and KERBEROS_V5 authentication mechanisms:
+
+@deffn Option esmtp-service @var{service-name}
+@opindex esmtp-service @var{service-name}
+Sets the name of GSSAPI service.
+@end deffn
+
+@deffn Option esmtp-hostname @var{hostname}
+@opindex esmtp-hostname @var{hostname}
+Sets hostname of the machine.
+@end deffn
+
+@deffn Option esmtp-generic-service @var{servise-name}
+@opindex esmtp-generic-service @var{servise-name}
+Sets generic service name.
+@end deffn
+
+@deffn Option esmtp-passcode @var{passcode}
+@opindex esmtp-passcode @var{passcode}
+Sets passcode.
+@end deffn
+
+@deffn Option esmtp-realm @var{realm-name}
+@opindex esmtp-realm @var{realm-name}
+Sets GSSAPI realm.
+@end deffn
+
+Following option is useful with ANONYMOUS authentication mechanism:
+
+@deffn Option esmtp-anonymous-token @var{token}
+@opindex esmtp-anonymous-token @var{token}
+Sets the token to be used with ANONYMOUS authentication mechanism
+@end deffn
+
+@node Encryption Settings, Security Settings, SMTP Authentication Settings, CONTROL Section
 @subsection Encryption Settings
 
 @deffn Option ssl @var{yes-or-no}
