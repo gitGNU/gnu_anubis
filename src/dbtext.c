@@ -1,5 +1,7 @@
 /*
-   GNU Anubis v3.9.94 -- an outgoing mail processor and the SMTP tunnel.
+   dbtext.c
+
+   This file is part of GNU Anubis.
    Copyright (C) 2003 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
