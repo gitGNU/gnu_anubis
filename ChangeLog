@@ -1,3 +1,11 @@
+2003-08-21  Sergey Poznyakoff 
+
+	* src/exec.c (exec_argv): Extra argument: full path
+	to the program to be executed.
+	* src/headers.h: Likewise.
+	* src/message.c: Updated calls to exec_argv
+	* THANKS: Added Dominique Bordereaux.
+	
 2003-08-21  Wojciech Polak
 
 	* src/gpg.c (gpg_sign_encrypt): New function.
