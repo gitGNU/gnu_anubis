@@ -25,14 +25,14 @@
 sbin_PROGRAMS = anubis
 anubis_LDADD = @LIBOBJS@ @LIBINTL@ $(GUILE_LIBS)
 anubis_SOURCES = main.c extern.h headers.h mem.c mem.h env.c errs.c \
-	log.c misc.c regex.c exec.c net.c proxy.c daemon.c auth.c map.c \
-	esmtp.c tunnel.c rc.c files.c help.c quit.c getopt.h guile.c \
-        rcfile-gram.c rcfile-lex.c rcfile-gram.h rcfile.h list.c list.h \
-        message.c
+	log.c list.c list.h misc.c regex.c exec.c net.c proxy.c daemon.c \
+	auth.c map.c message.c esmtp.c tunnel.c rc.c rcfile-gram.c \
+	rcfile-lex.c rcfile-gram.h rcfile.h guile.c files.c help.c quit.c
 
 YLWRAP = $(SHELL) $(top_srcdir)/build/ylwrap
 AM_YFLAGS = -dtv
-EXTRA_DIST = rcfile.y rcfile.l snprintf.c obstack.c obstack.h
+EXTRA_DIST = rcfile.y rcfile.l snprintf.c obstack.c obstack.h \
+	getopt.h gettext.h
 
 BUILT_SOURCES= \
   rcfile-gram.c rcfile-gram.h \
