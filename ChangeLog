@@ -1,3 +1,11 @@
+2004-06-10  Sergey Poznyakoff
+
+	* TODO: Updated
+	* src/authmode.c: Minor fixes to the diagnostic messages
+	* src/esmtp.c: Likewise.
+	* src/help.c: Likewise.
+	* src/tunnel.c: Likewise.
+
 2004-06-01  Wojciech Polak
 
 	Released version 3.9.94.

@@ -29,6 +29,10 @@ control analyzer).
 * Other stuff
 ** An external performance test.
 
+* Minor issues
+** Fix diagnostic messages to conform to standards texi: replace contracted
+verbal forms with full ones, check the proper use of 'illegal' and 'path'. 
+
 
 Local variables:
 mode: outline
