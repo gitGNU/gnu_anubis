@@ -241,7 +241,7 @@ do_gsasl_auth (NET_STREAM *pstr, Gsasl_ctx * ctx, char *mech)
       anubis_error (1, 0, _("Authentication failed: %d %s"), code, p);
     }
 
-  info (VERBOSE, _("Authentication successful\n"));
+  info (VERBOSE, _("Authentication successful."));
 
   if (sess_ctx)
     install_gsasl_stream (sess_ctx, pstr);
