@@ -1091,7 +1091,7 @@ The @samp{CONTROL} section specifies the basic GNU Anubis behavior.
 Specified in the system configuration file, it applies to all users on
 the machine, but each user can specify its own @samp{CONTROL} section,
 to customize own settings. Of course, not all options can be set
-or change by user. Some options can only be set in the system configuration
+or changed by user. Some options can only be set in the system configuration
 file, and some only in user configuration file. By default, options
 specified in user configuration file have a @strong{higher} priority
 that those specified in system configuration file.
@@ -1101,7 +1101,7 @@ for instance: @code{bind} or @code{BIND} or @code{BiNd}, and so on.
 
 @menu
 * Basic Settings::
-* Output Settings::
+* Output and Debugging Settings::
 * Proxy Settings::
 * ESMTP Authentication Settings::
 * Encryption Settings::
@@ -1109,7 +1109,7 @@ for instance: @code{bind} or @code{BIND} or @code{BiNd}, and so on.
 @end menu
 
 
-@node Basic Settings, Output Settings, CONTROL Section, CONTROL Section
+@node Basic Settings, Output and Debugging Settings, CONTROL Section, CONTROL Section
 @subsection Basic Settings
 @UNREVISED{}
 
@@ -1190,7 +1190,7 @@ Declares name of processing sections for outgoing mail. Default is
 configuration file.
 @end deffn
 
-@node Output Settings, Proxy Settings, Basic Settings, CONTROL Section
+@node Output and Debugging Settings, Proxy Settings, Basic Settings, CONTROL Section
 @subsection Output Settings
 
 @deffn Option termlevel @var{level}
@@ -1263,7 +1263,30 @@ using @samp{tracefile yes} enables logging to the same file
 as @samp{logfile} (if possible).
 @end deffn
 
-@node Proxy Settings, ESMTP Authentication Settings, Output Settings, CONTROL Section
+@deffn Option HANG @var{delay}
+@opindex HANG @var{delay}
+@emph{Do not use this option, unless you are developing or debugging Anubis!} 
+This option instructs a child process to hang for the given number
+of seconds. Before hanging, the process will issue the following
+diagnostic message, no matter what the settings of @code{termlevel}
+variable were:
+
+@smallexample
+Child process suspended for @var{delay} seconds
+@end smallexample
+
+This option is useful for Anubis developers who wish to
+attach to a child process with debugger. After attaching, set the
+variable @code{_anubis_hang} to zero to continue processing. It is
+useful to add the following statement to your @file{.gdbinit} file:
+
+@smallexample
+set variable _anubis_hang=0
+@end smallexample
+
+@end deffn
+
+@node Proxy Settings, ESMTP Authentication Settings, Output and Debugging Settings, CONTROL Section
 @subsection Proxy Settings
 @cindex SOCKS proxy
 
