@@ -1,3 +1,10 @@
+2004-08-12  Sergey Poznyakoff
+
+	* src/dbtext.c: Changed format. Fields are separated by
+	colons.
+	* src/anubisadm.c: Use NONE to represent empty fields.
+	* doc/anubis.texi: Updated.
+
 2004-08-09  Sergey Poznyakoff
 
 	* configure.ac: Updated
