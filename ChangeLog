@@ -1,5 +1,11 @@
 2003-05-10  Sergey Poznyakoff
 
+	* src/tls.c: More diagnostics.
+	* src/tunnel.c (process_command): Bugfix. Inform the client
+	that we are willing to handle TLS.
+
+2003-05-10  Sergey Poznyakoff
+
 	Implemented iterators instead of non-reentrant
 	list_first/list_next calls.
 	
