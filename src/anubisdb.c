@@ -60,7 +60,7 @@ anubis_db_locate(char *name)
 }
 
 int
-anubis_db_register(char *dbid,
+anubis_db_register(const char *dbid,
 		   anubis_db_open_t _db_open,
 		   anubis_db_close_t _db_close,
 		   anubis_db_io_t _db_get,
@@ -129,7 +129,7 @@ anubis_db_close(void **dptr)
 }
 
 int
-anubis_db_get_record(void *dptr, char *key, ANUBIS_USER *rec)
+anubis_db_get_record(void *dptr, const char *key, ANUBIS_USER *rec)
 {
 	struct anubis_db_instance *inst = dptr;
 	return inst->db_type->db_get_record(inst->db_handle, key, rec,
@@ -137,7 +137,7 @@ anubis_db_get_record(void *dptr, char *key, ANUBIS_USER *rec)
 }
 
 int
-anubis_db_put_record(void *dptr, char *key, ANUBIS_USER *rec)
+anubis_db_put_record(void *dptr, const char *key, ANUBIS_USER *rec)
 {
 	struct anubis_db_instance *inst = dptr;
 	if (inst->mode == anubis_db_rdonly) {
@@ -150,7 +150,7 @@ anubis_db_put_record(void *dptr, char *key, ANUBIS_USER *rec)
 }
 
 int
-anubis_db_delete_record(void *dptr, char *key)
+anubis_db_delete_record(void *dptr, const char *key)
 {
 	struct anubis_db_instance *inst = dptr;
 	if (inst->mode == anubis_db_rdonly) {

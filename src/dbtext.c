@@ -96,7 +96,7 @@ dbtext_to_record(char *p, ANUBIS_USER *rec)
 }
 
 static int
-dbtext_get (void *d, char *key, ANUBIS_USER *rec, int *errp)
+dbtext_get (void *d, const char *key, ANUBIS_USER *rec, int *errp)
 {
 	FILE *fp = d;
 	char buf[512], *p;
@@ -118,7 +118,7 @@ dbtext_get (void *d, char *key, ANUBIS_USER *rec, int *errp)
 }
 
 static int
-dbtext_put (void *d, char *key, ANUBIS_USER *rec, int *errp)
+dbtext_put (void *d, const char *key, ANUBIS_USER *rec, int *errp)
 {
 	FILE *fp = d;
 	fprintf(fp, "%s\t%s",
@@ -152,7 +152,7 @@ dbtext_list(void *d, LIST *list, int *ecode)
 }
 
 static int
-dbtext_delete(void *d, char *keystr, int *ecode)
+dbtext_delete(void *d, const char *keystr, int *ecode)
 {
 	FILE *fp = d;
 	char buf[512], *p;
