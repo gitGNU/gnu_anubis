@@ -21,7 +21,7 @@ anubis_init
 # Basic tests
 
 # Parse standard configuration file
-anubis_pat std.pat
+anubis_pat "${ANUBIS_RC_DIR}/std.pat"
 # Send a message without modifications
 anubis_pat empty.pat
 
