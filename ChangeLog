@@ -1,3 +1,13 @@
+2003-10-27  Wojciech Polak
+
+	* src/esmtp.c: Conform to libgcrypt >= 1.1.42 (a new API).
+	* src/help.c (show_config_options): Removed. Keep only
+	print_config_options().
+
+	* doc/anubis.1: Updated.
+	* configure.ac: Bump to 3.9.94. Requires now GnuTLS >= 0.9.93.
+	* src/main.c: Bump to 3.9.94.
+
 2003-09-16  Wojciech Polak
 
 	* src/rcfile.y (_print_stars): Print only three stars.
