@@ -33,6 +33,7 @@
 	* doc/index.html.in: Removed.
 	* doc/gendocs_template: New file.
 	* doc/fdl.texi: Fixed sectioning.
+	* doc/mime.texi: New file
 	
 2005-01-20  Sergey Poznyakoff
 

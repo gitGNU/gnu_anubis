@@ -74,11 +74,14 @@ Appendices
 
 * Pixie-Dixie::                     Original description of the new
                                     GNU Anubis operation mode.
+* Multi-Part Message Processing::   New Method of Processing
+                                    Multi-Part messages.
 * GNU Free Documentation License::  This manual is under the GNU Free
                                     Documentation License.
 Indices
 
 * Concept Index::                   Index of concepts.
+
 @end menu
 
 
@@ -3424,19 +3427,21 @@ really says you can do what you are trying to do. If it is
 not clear whether you should be able to do something or not,
 report that too; it's a bug in the documentation!
 
-@node Pixie-Dixie, GNU Free Documentation License, Problems, Top
-@chapter Pixie & Dixie
+@node Pixie-Dixie, Multi-Part Message Processing, Problems, Top
 @include pixie-dixie.texi
 
-@node GNU Free Documentation License, Concept Index, Pixie-Dixie, Top
-@include fdl.texi
+@node Multi-Part Message Processing, GNU Free Documentation License, Pixie-Dixie, Top
+@include mime.texi
 
+@node GNU Free Documentation License, Concept Index, Multi-Part Message Processing, Top
+@include fdl.texi
 
 @node Concept Index, , GNU Free Documentation License, Top
 @unnumbered Concept Index
 @printindex cp
 @shortcontents
 @contents
+
 @bye
 
 @c anubis.texi ends here

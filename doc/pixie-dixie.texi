@@ -1,3 +1,5 @@
+@appendix Pixie & Dixie
+
 @macro pixie
 @samp{Pixie}
 @end macro
