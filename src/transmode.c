@@ -46,23 +46,19 @@ anubis_transparent_mode (NET_STREAM * psd_client, struct sockaddr_in *addr)
 		  &session.clientname);
 
   if (cs == 1)
-    {
-      anubis_changeowner (session.clientname);
-      auth_tunnel ();
-    }
+    anubis_changeowner (session.clientname);
   else if (rs && cs == -1 && ntohl (addr->sin_addr.s_addr) == INADDR_LOOPBACK)
     {
       if (check_username (session.clientname))
-	{
-	  anubis_changeowner (session.clientname);
-	  auth_tunnel ();
-	}
+	anubis_changeowner (session.clientname);
       else
 	set_unprivileged_user ();
     }
   else
     set_unprivileged_user ();
 
+  auth_tunnel ();
+  
   if (!(topt & T_LOCAL_MTA) && !session.mta)
     {
       anubis_error (EXIT_FAILURE, 0, _("The MTA has not been specified. "

@@ -1,3 +1,24 @@
+2005-02-26  Sergey Poznyakoff
+
+	* src/ident.c (auth_ident): Bugfix
+	* src/rcfile.c: New CONTROL statement "HANG". Instructs
+	child process to hang for a given number of seconds
+	before processing.
+	* src/guile.c (guile_load_path_append,guile_load_program): Changed
+	prototype.
+	(inner_catch_body): New function
+	(eval_catch_body): Removed
+	(guile_parser): Largely rewritten. Wherever guile internal functions
+	are called, do so by wrapping them in a lazy catch to prevent
+	guile from aborting the child process on error.
+	* src/headers.h (guile_load_path_append,guile_load_program)
+	(guile_rewrite_line): Removed.
+	* src/transmode.c (anubis_transparent_mode): Call auth_tunnel no
+	matter was the client recognized or not. Thus, even if Anubis
+	has switched to the unprivileged level, it executest appropriate
+	parts from the main configuration file.
+	* doc/anubis.texi: Document HANG statement
+	
 2005-02-12  Sergey Poznyakoff
 
 	* TODO: Minor issue regarding session.execpath.
