@@ -1,3 +1,39 @@
+2003-11-30  Sergey Poznyakoff 
+
+	* TODO: Updated
+	* configure.ac: Removed useless AC_LIBOBJ. Added --with-mysql
+	option and code to detect presence of MySQL
+	* lib/Makefile.am: Added automake stuff
+	* m4/anubis.m4: New file
+	* m4/Makefile.am: Added anubis.m4
+	* src/Makefile.am: Modified to fit the new directory layout
+	* src/anubisdb.c: Protect the code by #ifdef
+	* src/authmode.c: Likewise
+	* src/dbtext.c: Likewise.
+	* src/gdbm.c: Likewise.
+	* src/gsasl.c: Likewise.
+
+	* src/url.c: New file.
+	* src/mysql.c: New file.
+	* src/headers.h (ANUBIS_URL): New data type.
+	(anubis_url_destroy,anubis_url_parse,anubis_url_full_path)
+	(anubis_url_get_arg): New functions.
+	* src/main.c (main): Call mysql_db_init
+	* src/rc.c (control_parser): sasl-password-db now takes
+	only one argument: the database URL.
+	
+2003-11-29  Wojciech Polak
+
+	* configure.ac: Added lib
+	* lib: added to the repository
+	* lib/.cvsignore: New file
+	* Makefile.am: Updated
+	* src/Makefile.am: Updated
+	* lib/Makefile.am: New file
+	* src/getopt1.c,getopt.c,getopt.h,gettext.h
+	  lbuf.c,lbuf.h,obstack.c,obstack.h,setenv.c,
+	  snprintf.c: moved to ../lib			 		 
+
 2003-11-26  Sergey Poznyakoff
 
 	* doc/anubis.texi: Fixed a couple of misspellings.
