@@ -1,3 +1,10 @@
+2003-02-07  Sergey Poznyakoff 
+
+	* src/map.c: Fixed section name.
+	* src/rcfile.y (rc_stmt_print): Display IFFALSE branch
+	  only if it is non-null.
+	  (rc_run_section): Check for sec==NULL.
+
 2003-02-07  Sergey Poznyakoff  
 
 	* src/guile.c (guile_parser): Removed kludge.
