@@ -151,6 +151,7 @@ process_rcfile(int method)
 #define KW_SOCKS_PROXY         9
 #define KW_SOCKS_V4           10
 #define KW_SOCKS_AUTH         11
+#define KW_READ_ENTIRE_BODY   12
 
 int
 control_parser(int method, int key, char *arg,
@@ -276,7 +277,11 @@ control_parser(int method, int key, char *arg,
 		}
 		break;
 	}
-	
+
+	case KW_READ_ENTIRE_BODY:
+		setbool(arg, topt, T_ENTIRE_BODY);
+		break;
+		
 	default:
 		return RC_KW_UNKNOWN;
 	}
@@ -332,6 +337,7 @@ struct rc_kwdef control_kw[] = {
 	{ "socks-proxy", KW_SOCKS_PROXY },
 	{ "socks-v4", KW_SOCKS_V4 },
 	{ "socks-auth", KW_SOCKS_AUTH },
+	{ "read-entire-body", KW_READ_ENTIRE_BODY },
 	{ NULL },
 };
 
@@ -459,7 +465,6 @@ all_parser(int method, int key, char *arg,
 		if (p) {
 			p += 4;
 			strncpy(modify, p, LINEBUFFER-2);
-			strcat(modify, CRLF);
 			p -= 4;
 			*p = '\0';
 			message.modlist_tail =
