@@ -226,7 +226,7 @@ mysql_db_put (void *d, char *key, ANUBIS_USER *rec, int *errp)
 	struct anubis_mysql_db *amp = d;
 
 	snprintf(amp->buf, amp->bufsize,
-		 "REPLACE INTO %s (%s,%s,%s,%s) VALUES (%s,%s,%s,%s)",
+		 "REPLACE INTO %s (%s,%s,%s,%s) VALUES ('%s','%s','%s','%s')",
 		 amp->table,
 		 amp->authid,
 		 amp->passwd,
