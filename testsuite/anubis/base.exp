@@ -24,6 +24,7 @@ anubis_init
 anubis_pat std.pat
 # Send a message without modifications
 anubis_pat empty.pat
+
 # Send multiple messages without modifications
 anubis_pat mult.pat
 # Add a header field to the message
@@ -34,6 +35,8 @@ anubis_pat add2.pat
 anubis_pat add3.pat
 # Append a text to the body
 anubis_pat add-body.pat
+# Modify the body
+anubis_pat mod-body.pat
 
 # Delete headers
 anubis_pat del1.pat
