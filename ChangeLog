@@ -1,3 +1,32 @@
+2003-05-10  Sergey Poznyakoff
+
+	Implemented iterators instead of non-reentrant
+	list_first/list_next calls.
+	
+	* src/list.h (list_first,list_next,list_remove_current)
+	  (list_append_list): Removed.
+	  (ITERATOR): New datatype.
+	  (iterator_create,iterator_destroy,iterator_current)
+	  (iterator_first,iterator_next): New functions.
+	* src/list.c: Likewise.
+	
+	* src/extern.h: Use iterator functions.
+	* src/headers.h: Likewise.
+	* src/daemon.c: Likewise.
+	* src/gpg.c: Likewise.
+	* src/guile.c: Likewise.
+
+	* src/map.c: Likewise.
+	* src/message.c: Likewise.
+	* src/misc.c: Likewise.
+	* src/quit.c: Likewise.
+	* src/rc.c: Likewise.
+	* src/rcfile.h: Likewise.
+	* src/rcfile.y: Likewise.
+	* src/tunnel.c: Likewise.
+
+	* src/tls.c: More diagnostics.
+	
 2003-05-08  Wojciech Polak
 
 	* configure.ac: Fixed OpenSSL compilation (broken with_gnutls=no).
