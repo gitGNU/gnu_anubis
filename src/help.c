@@ -38,6 +38,9 @@ static char *config_opts[] = {
 #ifdef WITH_MYSQL
   "MYSQL",
 #endif				/* WITH_MYSQL */
+#ifdef WITH_PGSQL
+  "POSTGRES",
+#endif			        /* WITH_PGSQL */
 #ifdef WITH_GUILE
   "GUILE",
 #endif				/* WITH_GUILE */
