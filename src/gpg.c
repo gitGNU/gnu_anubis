@@ -267,6 +267,16 @@ gpg_proc(MESSAGE *msg, char *(*proc)(char *input))
 	return;
 }
 
+void
+gpg_free(void)
+{
+	if (gpg.passphrase) {
+		memset(gpg.passphrase, 0, strlen(gpg.passphrase));
+		xfree(gpg.passphrase);
+	}
+	xfree(gpg.keys);
+}
+
 #define KW_GPG_PASSPHRASE         1
 #define KW_GPG_ENCRYPT            2
 #define KW_GPG_SIGN               3
@@ -279,7 +289,10 @@ gpg_parser(int method, int key, char *arg, void *inv_data, void *func_data,
 {
 	switch (key) {
 	case KW_GPG_PASSPHRASE:
-		free(gpg.passphrase);
+		if (gpg.passphrase) {
+			memset(gpg.passphrase, 0, strlen(gpg.passphrase));
+			xfree(gpg.passphrase);
+		}
 		gpg.passphrase = strdup(arg);
 		break;
 		
