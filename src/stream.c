@@ -228,7 +228,7 @@ stream_readline (struct net_stream *str, char *buf, size_t size,
 
       if (count == 1)
 	{
-	  if (c == '\n' && n > 1 && ptr[-1] != '\r')
+	  if (c == '\n' && (n == 1 || (n > 1 && ptr[-1] != '\r')))
 	    *ptr++ = '\r';
 	  *ptr++ = c;
 	  if (c == '\n')
