@@ -219,27 +219,6 @@ make_local_connection (char *exec_path, char **exec_args)
   net_create_stream (&str, fd);
   return str;
 }
-
-NET_STREAM
-make_local_connection_arg (char *exec_path, char **exec_args, char *arg)
-{
-  NET_STREAM s;
-  size_t argc, i;
-  char **argv;
-
-  for (argc = 0; exec_args[argc]; argc++)
-    ;
-  argc++;
-
-  argv = xmalloc ((argc+1) * sizeof *argv);
-  for (i = 0; exec_args[i]; i++)
-    argv[i] = exec_args[i];
-  argv[i++] = arg;
-  argv[i++] = NULL;
-  s = make_local_connection (exec_path, argv);
-  free (argv);
-  return s;
-}
   
 /*************************************
  Use an external program, which works
