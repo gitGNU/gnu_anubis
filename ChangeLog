@@ -1,3 +1,10 @@
+2004-06-19  Wojciech Polak
+
+	* src/anubisusr.c (cb_password): Use getpass().
+	(cb_passcode): Likewise.
+	(parse_netrc): Be silent if .netrc doesn't exist.
+	* configure.ac: Bump to 3.9.95.
+
 2004-06-10  Sergey Poznyakoff
 
 	* TODO: Updated
