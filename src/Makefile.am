@@ -25,7 +25,10 @@
 sbin_PROGRAMS = anubis @ANUBISADM@
 EXTRA_PROGRAMS = anubisadm
 noinst_LIBRARIES = libanubisdb.a
-anubis_LDADD = ./libanubisdb.a $(top_builddir)/lib/libanubis.a @LIBINTL@ $(GUILE_LIBS) @LIBGNUTLS_LIBS@ @GSASL_LIBS@ 
+
+anubis_LDADD = ./libanubisdb.a $(top_builddir)/lib/libanubis.a\
+ @LIBINTL@ $(GUILE_LIBS) @LIBGNUTLS_LIBS@ @GSASL_LIBS@ 
+
 anubis_SOURCES = \
  main.c \
  extern.h \
@@ -36,29 +39,29 @@ anubis_SOURCES = \
  misc.c \
  exec.c \
  net.c \
- proxy.c \
  daemon.c \
  auth.c \
  map.c \
  message.c \
+ mime.c \
  esmtp.c \
  tunnel.c \
+ regex.c \
  rc.c \
  rcfile-gram.c \
  rcfile-lex.c \
  rcfile-gram.h \
  rcfile.h \
  guile.c \
- files.c \
  help.c \
  quit.c \
  transmode.c \
- regex.c \
  authmode.c \
  gsasl.c \
  gpg.c \
  tls.c \
  ssl.c \
+ socks.c \
  xdatabase.c
 
 anubisadm_SOURCES = anubisadm.c

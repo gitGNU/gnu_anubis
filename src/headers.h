@@ -2,7 +2,7 @@
    headers.h
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -329,10 +329,6 @@ int net_io_read(void *iod, char *buf, size_t size, size_t *nbytes);
 int net_io_write(void *iod, char *buf, size_t size, size_t *nbytes);
 int net_io_close(void *iod);
 
-/* proxy.c */
-void check_all_proxies(char *, unsigned int *);
-int  check_socks_proxy(int, char *, unsigned int);
-
 /* daemon.c */
 void daemonize(void);
 void loop(int);
@@ -387,7 +383,7 @@ void make_lowercase(char *);
 char *get_localname(void);
 char *get_localdomain(void);
 
-/* files.c */
+/* mime.c */
 void message_append_text_file(MESSAGE *, char *);
 void message_append_signature_file(MESSAGE *);
 
@@ -418,6 +414,11 @@ RETSIGTYPE sig_exit(int);
 RETSIGTYPE sig_timeout(int);
 void free_mem(void);
 void quit(int);
+
+/* socks.c */
+#ifdef USE_SOCKS_PROXY
+int check_socks_proxy(int, char *, unsigned int);
+#endif /* USE_SOCKS_PROXY */
 
 /* tls.c or ssl.c */
 #ifdef USE_SSL
