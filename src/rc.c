@@ -76,6 +76,9 @@ open_rcfile(int method)
 	char *rcfile = 0;
 	RC_SECTION *sec;
 
+	rc_section_list_destroy(parse_tree);
+	parse_tree = NULL;
+	
 	switch (method) {
 	case CF_SUPERVISOR:
 	case CF_INIT:
@@ -98,8 +101,6 @@ open_rcfile(int method)
 		}
 		info(DEBUG,
 		     _("Reading system configuration file %s..."), rcfile);
-		rc_section_list_destroy(parse_tree);
-		parse_tree = NULL;
 		break;
 
 	case CF_CLIENT:
@@ -135,7 +136,10 @@ open_rcfile(int method)
 void
 process_rcfile(int method)
 {
-	rc_run_section_list(method, parse_tree, anubis_rc_sections);
+	rcfile_process_section(method, "CONTROL", NULL, NULL);
+#ifdef WITH_GUILE
+	rcfile_process_section(method, "GUILE", NULL, NULL);
+#endif
 }
 
 /* ************************** The CONTROL Section ************************* */ 
@@ -154,8 +158,8 @@ process_rcfile(int method)
 #define KW_READ_ENTIRE_BODY   12
 
 int
-control_parser(int method, int key, char *arg,
-	       void *inv_data, void *func_data, char *line)
+control_parser(int method, int key, char *arg, void *inv_data, void *func_data,
+	       MESSAGE *msg)
 {
 	switch (key) {
 	case KW_BIND:                
@@ -354,8 +358,8 @@ static struct rc_secdef_child control_sect_child = {
 #define KW_CAFILE              5
 
 int
-tls_parser(int method, int key, char *arg, 
-	   void *inv_data, void *func_data, char *line)
+tls_parser(int method, int key, char *arg, void *inv_data, void *func_data,
+	   MESSAGE *msg)
 {
 	switch (key) {
 	case KW_SSL:
@@ -422,7 +426,7 @@ control_section_init()
 #endif /* HAVE_TLS or HAVE_SSL */
 }
 
-/* ********************** The ALL and RULE Sections *********************** */ 
+/* ************************** The RULE Section *************************** */ 
 #define KW_ADD                      1
 #define KW_REMOVE                   2                
 #define KW_MODIFY                   3
@@ -439,18 +443,16 @@ control_section_init()
 #define KW_EXTERNAL_BODY_PROCESSOR 14 
 
 int
-all_parser(int method, int key, char *arg,
-	   void *inv_data, void *func_data, char *line)
+rule_parser(int method, int key, char *arg, void *inv_data, void *func_data,
+	    MESSAGE *msg)
 {
 	switch (key) {
 	case KW_ADD:
-		message.addlist_tail = new_element(message.addlist_tail,
-						   &message.addlist, arg);
+		message_add_header(msg, arg);
 		break;
 		
 	case KW_REMOVE:                                
-		message.remlist_tail = new_element(message.remlist_tail,
-						   &message.remlist, arg);
+		message_remove_headers(msg, arg);
 		break;
 		
 	case KW_MODIFY: {
@@ -463,76 +465,47 @@ all_parser(int method, int key, char *arg,
 			strncpy(modify, p, LINEBUFFER-2);
 			p -= 4;
 			*p = '\0';
-			message.modlist_tail =
-				new_element(message.modlist_tail,
-					    &message.modlist, arg);
-			message.modlist_tail->modify = strdup(modify);
+
+			message_modify_headers(msg, arg, modify);
 		}
 	}
 	break;
 		
 	case KW_SIGNATURE_FILE_APPEND:
-		setbool(arg, mopt, M_SIGNATURE);
+		message_append_signature_file(msg, arg);
 		break;
 		
 	case KW_BODY_APPEND:
-		xfree(message.body_append);
-		message.body_append = allocbuf(arg, MAXPATHLEN);
-		mopt |= M_BODYAPPEND;
-		mopt &= ~M_BODYCLEARAPPEND;
+		message_append_text_file(msg, arg);
 		break;
 		
-	case KW_BODY_CLEAR_APPEND:     
-		xfree(message.body_append);
-		message.body_append = allocbuf(arg, MAXPATHLEN);
-		mopt |= M_BODYAPPEND;
-		mopt |= M_BODYCLEARAPPEND;
+	case KW_BODY_CLEAR_APPEND:
+		/*FIXME: There should be a separate command body-clear
+		  instead!!!
+		*/
+		xfree(msg->body);
+		msg->body = strdup("");
+		message_append_text_file(msg, arg);
 		break;
 		
 	case KW_ROT13_SUBJECT:         
-		setbool(arg, mopt, M_ROT13S);
+		/*FIXME*/
 		break;
 		
 	case KW_ROT13_BODY:
-		setbool(arg, mopt, M_ROT13B);
+		/*FIXME*/
 		break;
 		
 	case KW_RM_RRT:                 
-		xfree(rm.rrt);
-		rm.rrt = allocbuf(arg, 0);
-		mopt |= M_RM;
-		mopt |= M_RMRRT;
-		break;
-		
 	case KW_RM_POST:                
-		xfree(rm.post);
-		rm.post = allocbuf(arg, 0);
-		mopt |= M_RM;
-		mopt |= M_RMPOST;
-		break;
-		
 	case KW_RM_HEADER:             
-		xfree(rm.header);
-		rm.header = allocbuf(arg, LINEBUFFER + 1);
-		mopt |= M_RMHEADER;
-		break;
-		
 	case KW_RM_LT:                  
-		xfree(rm.latent_time);
-		rm.latent_time = allocbuf(arg, 16);
-		mopt |= M_RMLT;
-		break;
-		
 	case KW_RM_RLT:                
-		xfree(rm.latent_time);
-		rm.latent_time = allocbuf(arg, 16);
-		mopt |= M_RMLT;
+		/* FIXME: Implement in Scheme */
 		break;
 		
 	case KW_EXTERNAL_BODY_PROCESSOR:
-		xfree(message.exteditor);
-		message.exteditor = allocbuf(arg, MAXPATHLEN);
-		mopt |= M_EXTBODYPROC;
+		message_external_proc(msg, arg);
 		break;
 		
 	default:
@@ -541,7 +514,7 @@ all_parser(int method, int key, char *arg,
 	return RC_KW_HANDLED;
 }
 
-struct rc_kwdef all_kw[] = {
+struct rc_kwdef rule_kw[] = {
 	{ "add",                     KW_ADD },                     
 	{ "remove", 		     KW_REMOVE },                  
 	{ "modify",		     KW_MODIFY },                  
@@ -559,34 +532,26 @@ struct rc_kwdef all_kw[] = {
         { NULL }
 };
 
-static struct rc_secdef_child all_sect_child = {
+static struct rc_secdef_child rule_sect_child = {
 	NULL,
 	CF_CLIENT,
-	all_kw,
-	all_parser,
+	rule_kw,
+	rule_parser,
 	NULL
 };
-
-void
-all_section_init()
-{
-	struct rc_secdef *sp = anubis_add_section("ALL");
-	rc_secdef_add_child(sp, &all_sect_child);
-}
 
 void
 rule_section_init()
 {
 	struct rc_secdef *sp = anubis_add_section("RULE");
 	
-	rc_secdef_add_child(sp, &all_sect_child);
+	rc_secdef_add_child(sp, &rule_sect_child);
 }
 
 void
 rc_system_init()
 {
 	control_section_init();
-	all_section_init();
 	translate_section_init();
 	rule_section_init();
 #ifdef WITH_GUILE
@@ -598,16 +563,11 @@ rc_system_init()
 }
 
 /* Placeholders */
-void
-rcfile_process_cond(char *name, int method, char *line)
-{
-	RC_SECTION *sec = rc_section_lookup(parse_tree, name);
-	rc_run_section(CF_CLIENT, sec, anubis_rc_sections, method, line, NULL);
-}
 
 void
-rcfile_process_section(int method, char *name, void *data)
+rcfile_process_section(int method, char *name, void *data, MESSAGE *msg)
 {
 	RC_SECTION *sec = rc_section_lookup(parse_tree, name);
-	rc_run_section(method, sec, anubis_rc_sections, 0, NULL, data);
+	rc_run_section(method, sec, anubis_rc_sections, data, msg);
 }
+
