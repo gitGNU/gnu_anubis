@@ -1,3 +1,21 @@
+2004-07-12  Sergey Poznyakoff 
+
+	* src/authmode.c (make_help_message): Fixed mess created
+	by the use of 'indent'.
+	(asmtp_ehlo): Bail out on receiving second STARTTLS. Remove
+	STARTTLS capability after successful initiation of TLS.
+	(anubis_smtp): Clear T_SSL_FINISHED flag after successful
+	authentication.
+	* src/net.c (swrite): Do not try to write out zero bytes. This
+	upsets gnutls.
+	* src/stream.c (struct net_stream.state): New member
+	(stream_set_io): Init ->state
+	(stream_close): Do nothing if state != state_open
+	* src/tunnel.c (get_ehlo_domain,save_ehlo_domain): New functions
+	(smtp_begin): Use get_ehlo_domain()
+	(handle_ehlo): Save user EHLO domain. Use get_ehlo_domain().
+	Removed FIXME indicator
+
 2004-07-11  Wojciech Polak
 
 	* src/authmode.c (anubis_authenticate_mode): Fixed the bug,
