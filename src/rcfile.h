@@ -96,7 +96,9 @@ struct rc_rule {             /* Rule definition */
 enum rc_inst_opcode {        /* Operation code */
 	inst_add,
 	inst_remove,
-	inst_modify
+	inst_modify,
+	inst_stop,
+	inst_call
 };
 
 struct rc_inst {             /* Instruction definition */
@@ -165,6 +167,8 @@ void rc_run_section_list(int method, RC_SECTION *sec,
 			 struct rc_secdef *secdef);
 void rc_run_section(int method, RC_SECTION *sec, struct rc_secdef *secdef,
 		    void *data, MESSAGE *msg);
+void rc_call_section(int method, RC_SECTION *sec, struct rc_secdef *secdef,
+		     void *data, MESSAGE *msg);
 void rc_set_debug_level(char *);
 
 int rc_open(char *name);
