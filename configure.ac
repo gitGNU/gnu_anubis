@@ -174,7 +174,6 @@ else
   AC_CHECK_HEADERS(gpgme.h)
  fi
  ANUBIS_GPGFILES='$(GPGFILES)'
- AC_LIBOBJ(gpg)
  M4_DEFS="$M4_DEFS -DWITH_GPG"
 fi
 
@@ -185,15 +184,33 @@ AC_SUBST(ANUBIS_DEFINES)
 
 MU_CHECK_GSASL(0.0.2, [
     AC_DEFINE(WITH_GSASL,1,[Define if Anubis is using GNU SASL])
-    AC_LIBOBJ(anubisdb)
-    AC_LIBOBJ(dbtext)
     AC_CHECK_LIB(gdbm, gdbm_open,
                  [LIBS="$LIBS -lgdbm"
-                  AC_LIBOBJ(gdbm)
                   AC_DEFINE(HAVE_LIBGDBM,1,[Define if you have libgdbm])])
-    AC_LIBOBJ(lbuf)
-    AC_LIBOBJ(gsasl)
-    AC_LIBOBJ(authmode)])
+
+    AC_ARG_WITH(mysql,
+	AC_HELP_STRING([--with-mysql],
+	[Configure to work with MySQL]),
+	[case $withval in
+	 yes)  ANUBIS_CHECK_LIB(mysqlclient, 
+	                        mysql_real_connect, 
+	                        [-lm],
+                                [ USE_SQL=1
+                                  AC_DEFINE(WITH_MYSQL,1,
+                                       [Define to 1 to enable MySQL interface])
+                                  AC_DEFINE(HAVE_LIBMYSQL,1,
+                                       [Define if you have libmysqlclient])
+                                ],
+			        [AC_MSG_FAILURE([The requested library libmysqlclient is not found or is unusable])],
+                                [/usr/local/lib/mysql /usr/lib/mysql])
+                if test "$USE_SQL" = "1" ;then
+                       LIBS="$LIBS $anubis_cv_lib_mysqlclient"
+		fi
+		;;
+	 no)    ;;
+        esac])
+
+    AC_LIBOBJ(lbuf)])
 
 dnl Use option --without-gnutls to NOT compile GnuTLS library support.
 AC_ARG_WITH(gnutls,
@@ -236,7 +253,6 @@ if test "$with_openssl" = "yes"; then
    AC_CHECK_HEADERS(openssl/ssl.h)
   fi
   M4_DEFS="$M4_DEFS -DWITH_SSL"
-  AC_LIBOBJ(ssl)
   AC_DEFINE(USE_OPENSSL, 1, [Define to 1 if USE_OPENSSL is requested.])
   AC_MSG_RESULT([Enabling OpenSSL support...])
  fi
@@ -247,7 +263,6 @@ if test $with_gnutls = yes; then
   if test $ac_cv_header_gnutls_gnutls_h != no; then
     AM_PATH_LIBGNUTLS("0.9.93",
                       [M4_DEFS="$M4_DEFS -DWITH_SSL"
-                      AC_LIBOBJ(tls)
                       AC_DEFINE(USE_GNUTLS, 1,
                                 [Define to 1 if USE_GNUTLS is requested.])],
                                 [AC_MSG_RESULT([Disabling GnuTLS support...])])
