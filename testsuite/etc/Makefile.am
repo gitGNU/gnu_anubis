@@ -38,7 +38,7 @@ EXTRA_DIST = \
  mult.pat\
  remail.pat\
  rot-13.pat\
- std.pat\
+ std.pin\
  tlsoneway.pat\
  trigger.pat\
  add.in\
@@ -68,8 +68,8 @@ RCFILES = \
  tlsoneway.rc\
  trigger.rc
 
-noinst_DATA = $(RCFILES) 
-CLEANFILES = $(RCFILES)
+noinst_DATA = $(RCFILES) std.pat
+CLEANFILES = $(RCFILES) std.pat
 DISTCLEANFILES = *.log
 
 del.rc: del.in
@@ -82,8 +82,15 @@ simple.rc: simple.in
 std.rc: std.in
 trigger.rc: trigger.in
 
-SUFFIXES=.in .rc
+std.pat: std.pin
+
+SUFFIXES=.in .rc .pin .pat
 
 .in.rc:
-	m4 -DTOP_SRCDIR=`cd $(top_srcdir); pwd` -DTESTDIR=`cd ..; pwd` $< > $@
+	m4 -DTOP_SRCDIR=`cd $(top_srcdir); pwd` \
+           -DTESTDIR=`cd ..; pwd` @M4_DEFS@ $< > $@
 
+.pin.pat:
+	m4 -DTOP_SRCDIR=`cd $(top_srcdir); pwd` \
+           -DTESTDIR=`cd ..; pwd` \
+           @M4_DEFS@ $< > $@

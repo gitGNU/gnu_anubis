@@ -24,10 +24,12 @@
 BEGIN SECTION CONTROL
   ASGN: logfile = anubis.log
   ASGN: remote-mta = localhost:25
-  ASGN: ssl = yes
+ifdef(`WITH_SSL',`  ASGN: ssl = yes
+')`'dnl
 END SECTION CONTROL
 BEGIN SECTION RULE
-  ASGN: gpg-passphrase = MYSECRETPASSPHRASE
+ifdef(`WITH_GPG',`  ASGN: gpg-passphrase = MYSECRETPASSPHRASE
+')`'dnl
   REMOVE HEADER :exact [Lines]
   COND: COMMAND[mail from] :posix [.*<?root@localhost>?]
   IFTRUE:
@@ -46,7 +48,8 @@ BEGIN SECTION RULE
   RULE: HEADER :posix [gpgd:(.*)]
   BODY
     ADD HEADER[X-GPG-Comment] "Encrypted for \1"
-    ASGN: gpg-encrypt = \1
+ifdef(`WITH_GPG',`    ASGN: gpg-encrypt = \1
+')`'dnl
   END RULE
   COND: HEADER[Subject] :posix [signature]
   IFTRUE:
@@ -56,7 +59,7 @@ BEGIN SECTION RULE
   IFTRUE:
     ASGN: external-body-processor = /usr/bin/formail
   END COND
-  COND: HEADER[Subject] :posix [gpg-all]
+ifdef(`WITH_GPG',`  COND: HEADER[Subject] :posix [gpg-all]
   IFTRUE:
     ASGN: gpg-encrypt = USERNAME
     ASGN: gpg-sign = yes
@@ -69,7 +72,8 @@ BEGIN SECTION RULE
   IFTRUE:
     ASGN: gpg-sign = yes
   END COND
-  COND: HEADER[Subject] :posix [rot13-all]
+')`'dnl
+ifdef(`WITH_GUILE',`  COND: HEADER[Subject] :posix [rot13-all]
   IFTRUE:
     ASGN: guile-process = rot-13 #:body
     ASGN: guile-process = rot-13 #:subject
@@ -82,6 +86,7 @@ BEGIN SECTION RULE
   IFTRUE:
     ASGN: guile-process = rot-13 #:subject
   END COND
+')`'dnl
   COND: HEADER[Subject] :posix [body-append]
   IFTRUE:
     ASGN: body-append = misc/notes.txt
@@ -89,9 +94,11 @@ BEGIN SECTION RULE
   COND: HEADER[Subject] :posix [ALL]
   IFTRUE:
     ASGN: body-append = misc/notes.txt
-    ASGN: gpg-encrypt = USERNAME
-    ASGN: guile-process = rot-13 #:body
+ifdef(`WITH_GPG',`    ASGN: gpg-encrypt = USERNAME
+')`'dnl
+ifdef(`WITH_GUILE',`    ASGN: guile-process = rot-13 #:body
     ASGN: guile-process = rot-13 #:subject
+')`'dnl
   END COND
 END SECTION RULE
 :END PATTERN
