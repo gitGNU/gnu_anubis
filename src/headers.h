@@ -133,8 +133,8 @@
 # include <security/pam_misc.h>
 #endif /* HAVE_PAM */
 
+#include "gettext.h"
 #ifdef ENABLE_NLS
-# include <libintl.h>
 # define _(String) gettext(String)
 # ifdef HAVE_LOCALE_H
 #  include <locale.h>
@@ -142,9 +142,6 @@
 #else
 # define _(String) (String)
 # define N_(String) String
-# define textdomain(Domain)
-# define bindtextdomain(Package, Directory)
-# define ngettext(s,p,n) s
 #endif /* ENABLE_NLS */
 
 #ifdef WITH_GUILE
