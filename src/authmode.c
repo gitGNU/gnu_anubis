@@ -386,7 +386,7 @@ anubis_set_password_db (char *arg)
 }
 
 int
-anubis_get_db_record(char *username, ANUBIS_USER *usr)
+anubis_get_db_record(const char *username, ANUBIS_USER *usr)
 {
 	void *db;
 	int rc;
@@ -449,16 +449,12 @@ anubis_authenticate_mode(NET_STREAM *psd_client, struct sockaddr_in *addr)
 		if (check_username(session.clientname)) {
 			anubis_changeowner(session.clientname);
 			auth_tunnel();
-		}
-		else
-		  set_unprivileged_user();
-
-	}
-	else {
+		} else
+			set_unprivileged_user();
+	} else {
 		strncpy(session.clientname, usr.smtp_authid,
 			sizeof(session.clientname));
 		set_unprivileged_user();
-		/* FIXME, get user's rcfile from a special path */
 	}
 
 	if (usr.rcfile_name)
