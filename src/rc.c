@@ -28,9 +28,9 @@
 
 #define setbool(a, b, c) \
    do {\
-        if (strcmp("yes", a) == 0) \
+        if (strcasecmp("yes", a) == 0) \
 		(b) |= (c); \
-	else if (strcmp("no", a) == 0) \
+	else if (strcasecmp("no", a) == 0) \
 		(b) &= ~(c); \
         else \
                 return RC_KW_ERROR; \
@@ -231,13 +231,13 @@ control_parser(int method, int key, LIST *arglist,
 		break;
 		
 	case KW_TERMLEVEL:           
-		if (strcmp("silent", arg) == 0)
+		if (strcasecmp("silent", arg) == 0)
 			options.termlevel = SILENT;
-		else if (strcmp("normal", arg) == 0)
+		else if (strcasecmp("normal", arg) == 0)
 			options.termlevel = NORMAL;
-		else if (strcmp("verbose", arg) == 0)
+		else if (strcasecmp("verbose", arg) == 0)
 			options.termlevel = VERBOSE;
-		else if (strcmp("debug", arg) == 0)
+		else if (strcasecmp("debug", arg) == 0)
 			options.termlevel = DEBUG;
 		else
 			return RC_KW_ERROR;
@@ -262,11 +262,11 @@ control_parser(int method, int key, LIST *arglist,
 		break;
 		
 	case KW_LOGLEVEL:
-		if (strcmp("none", arg) == 0)
+		if (strcasecmp("none", arg) == 0)
 			options.uloglevel = NONE;
-		else if (strcmp("all", arg) == 0)
+		else if (strcasecmp("all", arg) == 0)
 			options.uloglevel = ALL;
-		else if (strcmp("fails", arg) == 0)
+		else if (strcasecmp("fails", arg) == 0)
 			options.uloglevel = FAILS;
 		else
 			return RC_KW_ERROR;
@@ -489,7 +489,8 @@ rule_parser(int method, int key, LIST *arglist,
 	
 	switch (key) {
 	case KW_SIGNATURE_FILE_APPEND:
-		message_append_signature_file(msg, arg);
+		if (strcasecmp("no", arg))
+			message_append_signature_file(msg);
 		break;
 		
 	case KW_BODY_APPEND:

@@ -307,9 +307,9 @@ gpg_parser(int method, int key, LIST *arglist,
 		break;
 		
 	case KW_GPG_SIGN:
-		if (strcmp(arg, "no")) {
+		if (strcasecmp(arg, "no")) {
 			xfree(gpg.keys);
-			if (strcmp(arg, "yes")) 
+			if (strcasecmp(arg, "yes")) 
 				gpg.keys = strdup(arg);
 			if (gpg.inited == 0 && gpgme_init()) 
 				break;
