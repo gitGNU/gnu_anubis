@@ -4,6 +4,7 @@ config.guess
 config.rpath
 config.sub
 depcomp
+elisp-comp
 install-sh
 mdate-sh
 missing
