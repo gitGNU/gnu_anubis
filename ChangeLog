@@ -1,3 +1,15 @@
+2004-10-29  Sergey Poznyakoff
+
+	* src/regex.c (anubis_regex_replace): Fixed coredump
+	* testsuite/anubis/no-backref.exp: New regression test. Test for
+	'Paolo syndrome'.
+	* testsuite/anubis/DISTFILES: Add no-backref.exp
+	* testsuite/etc/no-backref.in: Data for testing 'Paolo syndrome'
+	* testsuite/etc/no-backref.pat: Likewise
+	* testsuite/etc/Makefile.am: Add no-backref.pat and no-backref.in
+
+	* THANKS: Updated
+	
 2004-10-16  Wojciech Polak
 
 	* configure.ac: Require GPGME 1.0.0.
