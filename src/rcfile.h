@@ -153,6 +153,10 @@ extern char *cfg_file;
 
 /* Function declarations */
 void verbatim(void);
+void lex_clear_state(void);
+
+void error_sync_begin();
+
 RC_SECTION *rc_section_lookup(RC_SECTION *, char *);
 void rc_section_link(RC_SECTION **, RC_SECTION *);
 void rc_secdef_add_child(struct rc_secdef *, struct rc_secdef_child *);
@@ -166,3 +170,5 @@ void rc_set_debug_level(char *);
 int rc_open(char *);
 struct rc_secdef *anubis_add_section(char *);
 struct rc_secdef *anubis_find_section(char *);
+
+void parse_error(const char *fmt, ...);
