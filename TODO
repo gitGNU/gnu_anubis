@@ -14,10 +14,13 @@ control analyzer).
 * New features
 ** OpenPGP/MIME support
 ** S/MIME support
+** MIME handling: adding, removing, etc.
+** RFC 2017 support (requires above)
 
 * Tunnel core
 ** HTML processing (also removing HTML part)
 ** IPv6 support
+** Error notification system (via email)
 
 * Other stuff
 ** An external performance test.

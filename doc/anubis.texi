@@ -470,6 +470,10 @@ This option specifies an output level for an additional file
 @end table
 @end deffn
 
+@deffn Option tracefile @var{file-name}
+@opindex tracefile @var{file-name}
+@end deffn
+
 
 @node Proxy Settings, Encryption Settings, Output Settings, CONTROL Section
 @subsection Proxy Settings
@@ -1346,34 +1350,59 @@ GNU Anubis supports the GNU Privacy Guard via the
 @cmindex gpg-encrypt @var{gpg-keys}
 This command enables encrypting your outgoing message with the
 GNU Privacy Guard (Pretty Good Privacy) public key(s).
-@var{gpg-keys} is a comma separated list of keys.
+@var{gpg-keys} is a comma separated list of keys (with no space
+between commas and keys).
 
 @smallexample
 gpg-encrypt "John's public key"
 @end smallexample
 @end deffn
 
-@deffn Command gpg-sign @var{passphrase}
-@deffnx Command gpg-sign @samp{yes} 
-@cmindex gpg-sign @var{passphrase}
+@deffn Command gpg-sign @var{gpg-signer-key}
+@deffnx Command gpg-sign @samp{yes-or-default}
+@cmindex gpg-sign @var{gpg-signer-key}
 This command signs the outgoing message with your
-GNU Privacy Guard private key. Specify the @var{passphrase} unless
-you have already set it using @code{gpg-passphrase}. In the latter
-case, use the second form of the command.
+GNU Privacy Guard private key. Specify a @var{passphrase} with
+@code{gpg-passphrase}. Value @samp{default} means your default
+private key, but you can change it if you have more than one
+private key.
 
 For example:
 
 @smallexample
-gpg-sign "my passphrase"
+gpg-sign default
 @end smallexample
 
 or
 
 @smallexample
 @group
-gpg-passphrase "my passphrase"
-gpg-sign yes
+gpg-passphrase "my office key passphrase"
+gpg-sign office@@example.key
 @end group
+@end smallexample
+@end deffn
+
+@deffn Command gpg-sign-encrypt @var{gpg-keys}[:@var{gpg-signer-key}]
+@deffnx Command gpg-se @var{gpg-keys}[:@var{gpg-signer-key}]
+@cmindex gpg-sign-encrypt @var{gpg-keys}[:@var{gpg-signer-key}]
+This command signs and encrypts (both at same time) your outgoing message.
+It has the same effect as @command{gpg -se}. The first argument is
+required and is exactly the same as for @samp{gpg-encrypt}. The second
+argument is optional and must be preceded with a colon (@samp{:}).
+It specifies an optional signer key, which by default is set to your
+default private key (exactly the same as for @samp{gpg-sign}).
+
+For example:
+
+@smallexample
+gpg-sign-encrypt John@@example.key
+@end smallexample
+
+or
+
+@smallexample
+gpg-se John@@example.key:office@@example.key
 @end smallexample
 @end deffn
 

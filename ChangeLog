@@ -1,3 +1,15 @@
+2003-08-24  Wojciech Polak
+
+	* testsuite/etc/gpgse.pat: Added new test
+	(GPG signing and encryption).
+	* testsuite/etc/gpg.in: Updated.
+	* testsuite/etc/gpgcrypt.pat: Likewise.
+	* testsuite/etc/gpgsign.pat: Likewise.
+	* testsuite/etc/Makefile.am: Added gpgse.pat.
+	* testsuite/anubis/gpg.exp: Likewise.
+
+	* doc/anubis.texi: Updated. Added gpg-sign-encrypt.
+
 2003-08-24  Sergey Poznyakoff  
 
 	* configure.ac: Determine signal handler return type.
