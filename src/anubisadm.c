@@ -151,10 +151,10 @@ op_create (int argc, char **argv)
       p = strtok (NULL, delim);
       if (p)
 	{
-	  rec.username = strdup (p);
+	  rec.username = strcmp(p, "NONE") ? strdup (p) : NULL;
 	  p = strtok (NULL, delim);
 	  if (p)
-	    rec.rcfile_name = strdup (p);
+	    rec.rcfile_name = strcmp(p, "NONE") ? strdup (p) : NULL;
 	}
 
       rc = anubis_db_put_record (db, rec.smtp_authid, &rec);
@@ -174,14 +174,9 @@ op_create (int argc, char **argv)
 void
 print_record (ANUBIS_USER * rec)
 {
-  printf ("%s\t%s", rec->smtp_authid, rec->smtp_passwd);
-  if (rec->username)
-    {
-      printf ("\t%s", rec->username);
-      if (rec->rcfile_name)
-	printf ("\t%s", rec->rcfile_name);
-    }
-  printf ("\n");
+  printf ("%s\t%s\t%s\t%s\n", rec->smtp_authid, rec->smtp_passwd,
+	  rec->username ? rec->username : "NONE",
+	  rec->rcfile_name ? rec->rcfile_name : "NONE");
 }
 
 void
