@@ -190,11 +190,8 @@ make_local_connection(char *exec_path, char **exec_args)
 char *
 external_program(int *rs, char *path, char *src, char *dst, int dstsize)
 {
-	int status;
-	int fd;
-	int n;
+	char *ret;
 	char tmp[LINEBUFFER+1];
-	char *buf = 0;
 	char **args = 0;
 	char *a = 0; /* args */
 	char *p = 0; /* path */
@@ -219,10 +216,22 @@ external_program(int *rs, char *path, char *src, char *dst, int dstsize)
 		else
 			a = path;
 	}
-
+	
 	args = gen_execargs(a);
-	fd = make_local_connection(p, args);
+	ret = exec_argv(rs, args, src, dst, dstsize);
 	xfree_pptr(args);
+	return ret;
+}
+
+char *
+exec_argv(int *rs, char **argv, char *src, char *dst, int dstsize)
+{
+	int status;
+	int fd;
+	int n;
+	char *buf;
+	
+	fd = make_local_connection(argv[0], argv);
 	if (fd == -1) {
 		*rs = -1;
 		return 0;
@@ -241,20 +250,17 @@ external_program(int *rs, char *path, char *src, char *dst, int dstsize)
 	memset(dst, 0, dstsize);
 
 	if (dst && dstsize) { /* static array */
-		while ((n = read(fd, buf, DATABUFFER)) > 0)
-		{
+		while ((n = read(fd, buf, DATABUFFER)) > 0) {
 			strncat(dst, buf, dstsize);
 			memset(buf, 0, DATABUFFER + 1);
 			dstsize -= n;
 			if (dstsize < 1)
 				break;
 		}
-	}
-	else { /* dynamic array */
+	} else { /* dynamic array */
 		dst = (char *)xmalloc(1);
-		while ((n = read(fd, buf, DATABUFFER)) > 0)
-		{
-			dst = (char *)xrealloc((char *)dst, strlen(dst) + n + 1);
+		while ((n = read(fd, buf, DATABUFFER)) > 0) {
+			dst = xrealloc(dst, strlen(dst) + n + 1);
 			strncat(dst, buf, n);
 			memset(buf, 0, DATABUFFER + 1);
 		}
