@@ -98,6 +98,8 @@ print_usage(void)
 	puts(_(" -l, --local-mta FILE         Execute a local SMTP server, which works on\n"
 	       "                              standard input and output (inetd-type program).\n"
 	       "                              This option excludes the '--remote-mta' option."));
+	puts(_(" -m, --mode=MODE              Select operation mode."));
+	puts(_("                              MODE is either \"transparent\" or \"auth\"")); 
 	puts(_(" -f, --foreground             Foreground mode."));
 	puts(_(" -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as described\n"
 	       "                              in RFC 821 on standard input and output."));
