@@ -2,11 +2,13 @@
  Introduction
  ============
 
- GNU Anubis is an outgoing mail processor. It goes between the MUA (Mail User
- Agent) and the MTA (Mail Transport Agent), and can perform on the fly various
- sorts of processing and conversion on the outgoing mail in accord with the
- sender's specified rules, based on a highly configurable regular expressions
- system. It operates as a proxy server, independently from mail user agents.
+ GNU Anubis is an SMTP message submission daemon. It represents an intermediate
+ layer between mail user agent (MUA) and mail transport agent (MTA), receiving
+ messages from MUA, applying to them a set of predefined changes and finally
+ inserting modified messages into MTA routing network. The set of changes applied
+ to a message is configurable on a system-wide and per-user basis. The built-in
+ configuration language used for defining sets of changes allows for considerable
+ flexibility and is easily extensible.
 
  --------*      --------**      ------***
  |  MUA  | ---> | Anubis | ---> |  MTA  |
@@ -28,17 +30,19 @@
 
  Recommended:
 
- * GnuTLS -- a Transport Layer Security Library (http://www.gnutls.org/)
-   or OpenSSL -- a cryptographic package (http://www.openssl.org/).
  * GSASL -- an implementation of the SASL framework
    (http://www.gnu.org/software/gsasl/).
- * GnuPG -- The GNU Privacy Guard (http://www.gnupg.org/)
-   with GPGME -- GnuPG Made Easy (http://www.gnupg.org/gpgme.html).
- * Guile -- The GNU extension language (http://www.gnu.org/software/guile/).
+
  * A database, any from the following:
    - GDBM -- (http://www.gnu.org/software/gdbm/).
    - MySQL -- (http://www.mysql.com/).
    - PostgreSQL -- (http://www.postgresql.com/)
+
+ * GnuTLS -- a Transport Layer Security Library (http://www.gnutls.org/)
+   or OpenSSL -- a cryptographic package (http://www.openssl.org/).
+ * Guile -- The GNU extension language (http://www.gnu.org/software/guile/).
+ * GnuPG -- The GNU Privacy Guard (http://www.gnupg.org/)
+   with GPGME -- GnuPG Made Easy (http://www.gnupg.org/gpgme.html).
 
  Optional:
 
