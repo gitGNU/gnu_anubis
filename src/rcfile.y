@@ -1013,10 +1013,7 @@ _print_str(void *item, void *data)
 static int
 _print_stars(void *item, void *data)
 {
-	int i, len = strlen ((char*)item);
-	putchar(' ');
-	for (i = 0; i < len; i++)
-		putchar('*');
+	printf(" ***");
 	return 0;
 }
 
