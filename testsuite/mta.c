@@ -152,6 +152,7 @@ main (int argc, char **argv)
 
 	if (diag)
 		fclose(diag);
+	smtp_reply (221, "Done");
 	return status;
 }
 
@@ -300,7 +301,6 @@ smtp()
 			continue;
 		kw = smtp_kw(argv[0]);
 		if (kw == KW_QUIT) {
-			smtp_reply (221, "Done");
 			state = STATE_QUIT;
 			argcv_free(argc, argv);
 			continue;
