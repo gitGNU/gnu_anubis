@@ -23,16 +23,38 @@
 ##
 
 man_MANS = anubis.1
-EXTRA_DIST = $(man_MANS)
+EXTRA_DIST = $(man_MANS) pixie-dixie.txt
 
+RENDITION=DISTRIB
+MAKEINFOFLAGS=-D$(RENDITION)
 info_TEXINFOS = anubis.texi
-anubis_TEXINFOS = fdl.texi
+anubis_TEXINFOS = fdl.texi pixie-dixie.texi rendition.texi
+CLEANFILES = tmp-*
 
-DISTCLEANFILES = \
- anubis.op\
- anubis.cm\
- anubis.cms\
- anubis.ops
+tmp-anubis.texi: $(info_TEXINFOS) $(anubis_TEXINFOS)
+	$(MAKEINFO) -D$(RENDITION) -Etmp-anubis.tmp -otmp-anubis.info \
+	 -I$(srcdir) anubis.texi
+	rm -f tmp-anubis.sed tmp-anubis.info*
+	test $(RENDITION) = DISTRIB \
+	  || echo >>tmp-anubis.sed 's/^@set DISTRIB/@set $(RENDITION)/'
+	test $(RENDITION) = PUBLISH \
+	  || echo >>tmp-anubis.sed '/^@smallbook/d'
+	sed -f tmp-anubis.sed tmp-anubis.tmp > tmp-anubis.texi
+	rm -f tmp-anubis.sed tmp-anubis.tmp
+
+anubis.dvi: tmp-anubis.texi
+	TEXINPUTS=$(top_srcdir)/build:$$TEXINPUTS \
+	 MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir)' \
+	 $(TEXI2DVI) tmp-anubis.texi
+	mv tmp-anubis.dvi $@
+
+DVIPDF=${SHELL} `cd $(top_srcdir); pwd`/build/missing --run dvipdf
+
+# Override the default rule. Texinfo is currently unable to cope with
+# our docs.
+anubis.pdf: anubis.dvi
+	$(DVIPDF) anubis.dvi
+
 
 ## EOF
 

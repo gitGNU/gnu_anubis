@@ -20,4 +20,8 @@ anubis.cps
 anubis.fns
 anubis.pgs
 anubis.pdf
+anubis.cms
+anubis.cm
+anubis.ops
 *.inc
+tmp-*

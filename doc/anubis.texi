@@ -6,6 +6,7 @@
 @finalout
 @c %**end of header
 @include version.texi
+@include rendition.texi
 @smallbook
 
 @defcodeindex op
@@ -56,15 +57,19 @@ documents GNU Anubis Version @value{VERSION}.
 @menu
 * Overview::                        Preliminary information.
 * Glossary::                        Frequently Used Terms Explained.
+* Authentication::                  How Incoming Connections Are Authenticated.
 * Configuration::                   Writing your own configuration files.
 * Rule System::                     How to use the Rule System.
 * Invoking Anubis::                 How to invoke the GNU @command{anubis}.
 * Sample Beginning::                Here is a sample beginning.
 * TLS/SSL::                         Using the TLS/SSL Encryption.
+* S/MIME::                          Using S/MIME signatures.
 * Problems::                        Reporting bugs.
 
 Appendices
 
+* Pixie-Dixie::                     Original description of the new
+                                    Anubis operation mode.
 * GNU Free Documentation License::  This manual is under the GNU Free
                                     Documentation License.
 Indices
@@ -158,10 +163,14 @@ command scripting language, specially desgined for this
 purpose.
 
 
-@node Glossary, Configuration, Overview, Top
+@node Glossary, Authentication, Overview, Top
 @chapter Glossary of Frequently Used Terms
 
 @table @dfn
+@item Authentication
+A process whereby Anubis determines the authenticity of the connecting
+party, its user name and configuration settings.
+
 @item Protocol
 Any standard for the exchange of information. A protocol
 defines the specific wording and control flow for communications between
@@ -201,8 +210,654 @@ For more information about Guile,
 GNU Privacy Guard, a tool compatible with the Pretty Good Privacy.
 @end table
 
+@node Authentication, User Database, Glossary, Top
+@chapter Authentication
+@cindex authentication
 
-@node Configuration, Rule System, Glossary, Top
+@UNREVISED{}
+
+When Anubis accepts an incoming connection, it first has to identify
+the remote party, i.e. determine whether it has the right to use
+Anubis resources and, if so, what configuration settings should be
+used during the session. We call this process @dfn{authentication}.
+The exact method of authentication depends on Anubis @dfn{operation
+mode}. Currently there are two modes:
+
+@table @asis
+@item transparent
+This is the default mode. It is compatible with versions of GNU Anubis
+up to 3.6.2. In this mode, Anubis relies on AUTH service (@command{identd}) to
+authenticate users.
+
+@item auth
+This mode uses SMTP AUTH mechanism to authenticate incoming
+connections. @xref{Pixie-Dixie}, this is the first draft
+description of this mode.
+@end table
+
+Both modes have their advantages and deficiences, which you
+have to weigh carefully before choosing which one to use. These
+are discussed below:
+
+@subheading Transparent (@samp{traditional}) mode.
+
+Deficiences:
+@enumerate
+@item The user must have @command{identd} installed on his machine
+@item Each user must have a system account on the
+machine where GNU Anubis runs (though the system administrator may relax
+this limitation using user name translation, @pxref{TRANSLATION
+Section}).
+@end enumerate
+
+@noindent
+Advantages:
+@enumerate
+@item Relative simplicity. You don't have to create your users database.
+@item Authentication is performed immediately after the connection.
+@end enumerate
+
+@subheading Auth mode.
+
+Deficiences:
+@enumerate
+@item You have to maintain your users database
+@item User's MUA must be able to perform ESMTP AUTH
+@FIXME{Not quite so. The user may install Anubis on his mashine
+for the sole purpose of SMTP authentication, as Pixie-Dixie suggests.}
+@end enumerate
+
+@noindent
+Advantages:
+@enumerate
+@item Better reliability
+@item Users do not have to run @command{identd} on their machines.
+@item Users are not required to have accounts on the machine where Anubis
+runs.
+@item Users can remotely modify their configuration files
+@end enumerate
+
+@menu
+* User Database::
+* Database URL::
+* Managing the Database::
+@end menu
+
+@node User Database, Database URL, Authentication, Authentication
+@section User Database
+@UNREVISED{}
+
+Anubis uses @dfn{User Database} for keeping @dfn{user credentials},
+i.e. data used to authenticate and autorize users. The exact way of
+storing these data does not matter here, it will be addressed further
+in this manual. In this section we treat user database as an
+abstraction layer.
+
+The user database consists of @dfn{records}. Each record keeps
+information about a particular @dfn{user}. A record consists
+of four @dfn{fields}. A field may contain some value, or be
+emtpy, in which case we say that the field has @dfn{null}
+value.
+
+The record fields are:
+
+@table @code
+@item SMTP AUTHID
+SMTP authentication ID of the user.
+
+@item AUTH PASSWORD
+SMTP password.
+
+@item ACCOUNT
+System user name to be used.
+
+@item CONFIG
+Path to the configuration file.
+@end table
+
+The first two fields are mandatory and must always have non-null values.
+No two records in the database may have the same value of
+@code{SMTP AUTHID} field. When @command{anubis} is trying to
+authenticate a user, it first looks up in the database a record
+with the value of @code{SMTP AUTHID} field matching AUTHID given
+by the user. If no such entry is found, authentication fails.
+Otherwise, @command{anubis} goes on and compares the password
+supplied by the user with that from @code{AUTH PASSWORD} column.
+If these match, authentication succeeds and @command{anubis}
+passes to authorization state.
+
+In this state, it first determines the user @acronym{ID}
+(@acronym{UID}) to switch to. If the @code{ACCOUNT} field
+is not null, its value is used as a login name of the system
+account to use. If it is null, @command{anubis} switches to
+the privilege level of a @dfn{default not privileged user},
+specified by @code{user-notprivileged} statement in the global
+configuration file (@pxref{Security Settings, user-notprivileged}).
+
+The final step is to parse @dfn{user configuration file}. If
+@code{CONFIG} field is not null, its value is used as absolute
+path to the configuration file. Otherwise, @command{anubis} searches
+for file @file{~/.anubisrc} (where @samp{~} denotes home directory
+for the system account obtained on the previous step) and if such
+a file exists, loads it.
+
+@node Database URL, text, User Database, Authentication
+@section Database URL
+@UNREVISED{}
+
+Anubis database is identified by its @dfn{URL}, or @dfn{Universal
+Resourse Locator}. A @code{URL} consists of following elements
+(square brackets enclose optional elements):
+
+@smallexample
+@var{proto}://[[@var{user}[:@var{password}]@@]@var{host}]/@var{path}[@var{params}]
+@end smallexample
+
+The detailed description of each @code{URL} part follows:
+
+@table @var
+@item proto
+Specifies a database @dfn{protocol}. The protocol describes how
+the database is to be accessed. In a way, it may be regarded as
+specifying the database @dfn{type}. Currently, GNU Anubis supports
+following database protocols:
+
+@multitable @columnfractions .20 .80
+@item @samp{text} @tab A plain text file, containing users' credentials.
+@item @samp{gdbm} @tab @acronym{GDBM} database
+@item @samp{mysql} @tab @acronym{MySQL} database
+@item @samp{pgsql} @tab @acronym{PostgreSQL} database
+@item @samp{postgres} @tab Alias for @samp{pgsql}.
+@end multitable
+
+These protocols are described in detail below.
+
+@item user
+User name necessary to access the database. 
+
+@item password
+User password necessary to access the database. 
+
+@item host
+Domain name or IP address of a machine running the database.
+
+@item path
+A @dfn{path} to the database. The exact meaning of this element
+depends on the database protocol. It is described in detail when
+discussing particular database protocols.
+
+@item params
+A list of protocol-dependent parameters. Each parameter is of the
+form @code{@var{keyword}=@var{name}}, parameters are separated
+by semicolons.
+@end table
+
+@menu
+* text::        Plain text databases
+* gdbm::        Databases in GDBM format
+* sql::         MySQL and PostgreSQL databases
+@end menu
+
+@node text, gdbm, Database URL, Database URL
+@subsection Plain text databases
+@UNREVISED{}
+
+This is the simplest database possible. It is kept in a plain text
+file. Each line in this file represents a single @dfn{record}, empty lines
+and lines beginning with @samp{#} (@dfn{comments}) sign are ignored.
+Records consist of @dfn{fields}, each field being a sequence of
+non-whitespace characters. Fields are separated by arbitrary amount
+of whitespace. A record may contain from two to four fields, whose
+meaning is as follows:
+
+@enumerate 1
+@item SMTP @samp{AUTHID}.
+@item SMTP password.
+@item Account name. 
+@item Path to user configuration file.
+@end enumerate 
+
+@subheading URL syntax
+
+The @acronym{URL} syntax for this type of databases is quite simple:
+
+@smallexample
+text:@var{path}
+@end smallexample
+
+@noindent
+where @var{path} specifies absolute file name of the database file.
+
+@node gdbm, sql, text, Database URL
+@subsection Databases in GDBM format
+@UNREVISED{}
+
+The protocol value @samp{gdbm} specifies a @dfn{GDBM database}. For
+the detailed description of @acronym{GDBM} system
+@ref{Top,,Introduction,gdbm,The GNU DBM Manual}.
+
+@FIXME{Technically speaking, each @acronym{GDBM} record consists of
+a @dfn{key} and @dfn{content}. Its @code{key} holds the value of
+SMTP @samp{AUTHID}, whereas its @code{content} holds SMTP password,
+system account name and path to user configuration file, separated by
+commas. As usual, the two last fields are optional.
+
+I doubt if this technical information would be of any use to the
+reader.}
+
+@acronym{URL} syntax for @acronym{GDBM} databases is: 
+
+@smallexample
+gdbm:@var{path}
+@end smallexample
+
+@noindent
+where @var{path} specifies absolute file name of the database file.
+
+@node sql, Managing the Database, gdbm, Database URL
+@subsection MySQL and PostgreSQL
+@UNREVISED{}
+
+This is the most flexible database format. GNU Anubis @value{VERSION}
+supports MySQL@footnote{See @url{http://www.mysql.com}.} and PostgreSQL
+@footnote{See @url{http://www.postgres.org}.} interfaces. No matter which
+of them you use, the implementation details are hidden behind
+a single consistent Anubis interface.
+
+GNU Anubis supposes that all user data are kept in a single database
+table. This table must have at least four columns for storing
+SMTP @samp{AUTHID}, SMTP password, system account name and path to
+user configuration file. Among those, only the last two may have
+NULL values. There is no restriction on the name of the database or
+the authentication table, nor on its column names. This information
+may be specified in @acronym{URL} as discussed below.
+
+@subheading URL syntax
+
+@smallexample
+@var{proto}://[[@var{user}[:@var{password}]@@@var{host}/@var{dbname}[@var{params}
+@end smallexample
+
+@var{Proto} describes the exact database type to use. Use @samp{mysql}
+for MySQL databases and @samp{pgsql} or @samp{postgres} for PostgreSQL
+databases.
+
+Optional @var{user} and @var{password} specify authentication
+credentials used to access the database. 
+
+@var{Host} sets domain name or IP address of the machine running
+the database. It may be omitted if the database resides on 
+@samp{localhost}.
+
+The database name is specified by @var{dbname} element.
+
+Finally, further details needed for connecting to the database may
+be given by @acronym{URL} parameters. All of them have reasonable
+default values, so you'll have to specify only those parameters that
+does not match the default values. Known parameters are:
+
+@table @var
+@item @var{port}=@var{number}
+Specifies the port number to be used when connecting to the database.
+If it is not specified, the behavior depends on the value of
+@var{socket} parameter: if @var{socket} is not present, the program
+will use the default port number for the given protocol (i.e. 3306
+for @samp{mysql} and 5432 for @samp{pgsql}.
+
+@item @var{socket}=@var{string}
+Specifies UNIX name of the socket to connect to. This parameter cannot be
+used together with @var{port} (see above).
+
+@item @var{bufsize}=@var{number}
+
+@item @var{table}=@var{string}
+Specifies the name of database table keeping where the authentication
+data are stored. Default is @samp{users}.
+
+@item @var{authid}=@var{string}
+Specifies the name of a column in @var{table} which holds 
+@samp{AUTHID} value. Default is @samp{authid}.
+
+@item @var{passwd}=@var{string}
+Specifies the name of a column in @var{table} which holds 
+user password. Default is @samp{passwd}.
+
+@item @var{account}=@var{string}
+Specifies the name of a column in @var{table} which holds
+the name of system account to be used for this @samp{AUTHID}. Default
+is @samp{account}.
+
+@item @var{rccol}=@var{string}
+Specifies the name of a column in @var{table} which holds
+path to the user's configuration file. Default is @samp{rccol}.
+
+@FIXME{An example, please.}
+
+@end table
+
+@node Managing the Database, Administrators, sql, Authentication
+@section Managing the Database
+@UNREVISED{}
+
+Managing the user database is a complex task, which looks differently
+from administrator's and user's point of view. The administrator have
+full rights on the database, it can add new records and delete or
+modify existing ones. A user, of course, does not have such ample
+rights. The only thing he is able to do is to maintain his own
+record in the database, provided that he already has one. If he
+does not, he should contact the system administrator and arrange
+for the creation of his record.
+
+@menu
+* Administrators::      The Administrator's View
+* Users::               The User's View
+@end menu
+
+@node Administrators, Create, Managing the Database, Managing the Database
+@subsection Administrators
+@UNREVISED{}
+
+All administrative tasks are done using @command{anubisadm} command ---
+a multipurpose tool for Anubis administrator.
+
+The command usage syntax is:
+
+@smallexample
+anubisadm @var{command} [@var{options}] @var{database-url}
+@end smallexample
+
+@noindent
+where @var{command} specifies the operation to be performed on the
+database, @var{options} give additional operation-specific parameters,
+and @var{database-url} specifies the database to operate upon.
+
+All administrative tasks can be subdivided into the following
+five categories:
+
+@itemize
+@item Creating the Database
+@item Listing Database Records
+@item Adding New Records
+@item Removing Existing Records       
+@item Modifying Existing Records
+@end itemize
+
+These operations are described in detail in the following
+subsections@FIXME{Err, actually ``subsubsections'', but I don't like
+the word}. 
+
+@menu
+* Create::              Creating the Database
+* List::                Listing Database Records
+* Add::                 Adding New Records
+* Remove::              Removing Existing Records       
+* Modify::              Modifying Existing Records
+* anubisadm summary::   Summary of All Administrative Commands
+@end menu
+
+@node Create, List, Administrators, Administrators
+@subsubsection Creating the Database
+
+To create the database use @kbd{anubisadm --create} (or
+@kbd{anubisadm -c}) command. @command{Anubisadm} will read database
+entries from the standard input and write them to the database.
+The standard input is supposed to be formatted as @code{text} database
+(@pxref{text}).
+
+Thus to create a @acronym{GDBM} database from plain text file
+@file{userlist}, use the following command
+
+@smallexample
+anubisadm --create gdbm:/etc/anubis.db < userlist
+@end smallexample
+
+@noindent
+Similarly, to create an initially empty database, type
+
+@smallexample
+anubisadm --create gdbm:/etc/anubis.db < /dev/null
+@end smallexample
+
+@emph{Notice}, that if you use @acronym{SQL} database format,
+@option{--create} command does not imply creating the database
+structure! So, before running
+
+@smallexample
+anubisadm --create mysql://localhost/dbname < userlist
+@end smallexample 
+
+@noindent
+make sure you create the underlying database structure (including
+granting privileges to the @command{anubis} user), via the
+usual procedure. Please refer to corresponding database manual
+for the detailed instructions on this.
+
+It is sometimes necessary to convert the existing user database
+from one format (protocol) to another. For example, suppose you
+have been running @acronym{GDBM} database (@code{text:/etc/anubis.db})
+for some time, but now it has grown considerably and you decided to
+switch to PostgreSQL database to improve performance. To do so,
+first create the database using postgres utilities. Then run
+
+@smallexample
+anubisadm --list text:/etc/anubis.db | \
+ anubisadm --create pgsql://localhost/dbname
+@end smallexample
+
+@noindent 
+That's all there is to it!
+
+@node List, Add, Create, Administrators
+@subsubsection Listing Database Records
+
+The command @option{--list} (or @option{-l}) lists the existing
+database. When run without additional options, it will display
+all records from the database, e.g.:
+
+@smallexample
+anubisadm --list gdbm:/etc/anubis.db
+@end smallexample
+
+Among its other uses, such invocation is handy for converting
+user database to another format (@pxref{Create}).
+
+If you wish to list only a particular record, specify the 
+@code{AUTHID} using @option{--authid} (@option{-i}) option. For example,
+to list record of the user with @code{AUTHID} @samp{test},
+type:
+
+@smallexample
+example$ anubisadm --list --authid test gdbm:/etc/anubis.db
+@end smallexample
+
+
+@node Add, Remove, List, Administrators
+@subsubsection Adding New Records
+
+To add a new record use command @option{--add} (@option{-a}).
+Additional data are specified via the following options:
+
+@table @option
+@item -i @var{string}
+@itemx --authid=@var{string}
+Specify the user @code{SMTP AUTHID}. 
+
+@item -p @var{string}
+@itemx --password=@var{string}
+Specify user password password. 
+
+@item -u @var{string}
+@itemx --user=@var{string}
+Specify system user name corresponding to the given @code{AUTHID}.
+
+@item -f @var{string}
+@itemx --rcfile=@var{string}
+Specify configuration file to be used for this user.
+@end table
+
+For example, the following command adds a record with @code{SMTP
+AUTHID} @samp{test}, password @samp{guessme} and maps it
+to the system account @samp{gray}:
+
+@smallexample
+anubisadm --add --authid test --password guessme \
+          --user gray gdbm:/etc/anubis.db
+@end smallexample
+
+@node Remove, Modify, Add, Administrators
+@subsubsection Removing Existing Records
+
+Removing a record is quite straightforward: use @option{--remove}
+(@option{-r}) command and specify @code{AUTHID} using
+@option{--authid} option. For example, to remove the record created
+in the previous subsection, run:
+
+@smallexample
+anubisadm --remove --authid test gdbm:/etc/anubis.db
+@end smallexample
+
+@node Modify, anubisadm summary, Remove, Administrators
+@subsubsection Modifying Existing Records
+
+To modify an existing record use command @option{--modify}
+(@option{-m}). The record is identified via @option{--authid} option.
+The fields to be changed are given with the following options:
+
+@table @option
+@item -p @var{string}
+@itemx --password=@var{string}
+Specify user password password. 
+
+@item -u @var{string}
+@itemx --user=@var{string}
+Specify system user name corresponding to the given @code{AUTHID}.
+
+@item -f @var{string}
+@itemx --rcfile=@var{string}
+Specify configuration file to be used for this user.
+@end table
+
+For example, the following command sets new configuration file name
+for the user @samp{smith}:
+
+@smallexample
+anubisadm --authid smith \
+          --rcfile=/var/spool/anubis/common gdbm:/etc/anubis.db
+@end smallexample
+
+@node anubisadm summary, Users, Modify, Administrators
+@subsubsection Summary of All Administrative Commands
+
+@subheading Usage
+@smallexample
+anubisadm @var{command} [@var{options}] @var{database-url}
+@end smallexample
+
+@noindent
+@subheading Commands:
+@table @option
+@item -c
+@itemx --create
+Create the database.
+
+@item -l
+@item --list
+List the contents of an existing database.
+
+@item -a
+@item --add
+Add a new record.
+
+@item -m
+@itemx --modify
+Modify an existing record.
+
+@item -r
+@item --remove
+Remove an existing record.
+
+@item --version
+Display program version number and exit.
+
+@item --help
+Display short usage summary and exit.
+@end table
+
+@noindent
+@subheading Options:
+@table @option
+@item -i @var{string}
+@itemx --authid=@var{string}
+Specify the authid to operate upon. This option is mandatory for
+@option{--add}, @option{--modify} and @option{--remove} commands.
+It may also be used with @option{--list} command.
+
+@item -p @var{string}
+@itemx --password=@var{string}
+Specify the password for the authid. This option is mandatory for
+@option{--add}, @option{--modify} and @option{--remove} commands.
+
+@item -u @var{string}
+@itemx --user=@var{string}
+Specify the system user name corresponding to the given authid. It may
+be used with @option{--add}, @option{--modify}, and @option{--remove}
+commands.
+
+@item -f @var{string}
+@itemx --rcfile=@var{string}
+Specify the rc file to be used for this authid. The option may
+be used with @option{--add}, @option{--modify}, and @option{--remove}
+commands.
+@end table
+
+@node Users, Configuration, anubisadm summary, Managing the Database
+@subsection Users
+@UNREVISED{}
+
+Users maintain their database records using @command{anubisusr}
+command. Main purpose of this command is to keep the copy of
+your configuration on Anubis server up to date.
+@FIXME{anubisusr should also allow to modify user
+password. This is the only database field, apart from @code{CONFIG}
+that the user may be allowed to change}. We recommend to invoke
+@command{anubisusr} from your @file{~/.profile}, which will make
+sure that your configuration file is up to date when you log in.
+@footnote{Make sure to run @command{anubisusr} in background, so
+it does not slow down your normal login sequence}.
+
+@subheading Usage
+@smallexample
+anubisusr [@var{options}] [@var{smtp-url}]
+@end smallexample
+
+@noindent
+where @var{smtp-url} is a @acronym{URL} of your Anubis server.
+Notice that if it lacks user name and password, then
+@command{anubisusr} will first try to retrieve them from your
+@file{~/.netrc} file (See @cite{netrc(5)} for more info), and if not
+found it will prompt you to supply them.
+
+@subheading Options
+
+@table @option
+@item -m @var{mech}
+@itemx --mechanism @var{mech}
+Only use SASL mechanism @var{mech}. Use this option several times
+to set a list of allowed mechanisms.
+
+@item -v
+@itemx --verbose
+Verbose output. Multiple options increase the verbosity. Maximum verbosity
+level is 3.
+
+@item --version
+Display program version number and exit.
+
+@item --help
+Display short usage summary and exit.
+@end table
+
+@node Configuration, Rule System, Users, Top
 @chapter Configuration
 @cindex configuration
 @cindex settings
@@ -212,8 +867,9 @@ GNU Privacy Guard, a tool compatible with the Pretty Good Privacy.
 The behavior of GNU Anubis is controlled by two configuration files.
 The @dfn{system configuration file}, @file{/etc/anubisrc},
 specifies system-wide options that affect all users. This file is usually
-owned by root. The @dfn{user configuration file}, @file{~/.anubisrc},
-specifies what GNU Anubis should do for a particular user.
+owned by root. The @dfn{user configuration file} specifies what GNU
+Anubis should do for a particular user. By default it is located
+in @file{~/.anubisrc}. This location can be changed in auth mode.
 To protect your passwords in the configuration files, use the 0600
 (u=rw,g=,o=) permissions, otherwise GNU Anubis won't accept them.
 
@@ -313,13 +969,15 @@ between the three dashes and the word.
 
 The sections cannot be nested.
 
-There are three predefined sections, whose names are uppercase.
+There are five predefined sections, whose names are uppercase.
 The user may define his own sections, which may then be referred
 to from the @code{RULE} section as subroutines (@pxref{Call Action}).
 
 The predefined section names are:
 
 @table @dfn
+@item AUTH
+Controls authentication mechanisms. FIXME
 @item CONTROL
 This section specifies the basic GNU Anubis behavior. Its presence
 is required in the system configuration file. It may be used in
@@ -337,13 +995,34 @@ messages (conditional and unconditional rules).
 @end table
 
 @menu
+* AUTH Section::
 * CONTROL Section::
 * TRANSLATION Section::
 * GUILE Section::
 @end menu
 
+@node AUTH Section, CONTROL Section, Configuration, Configuration
+@section AUTH Section
+@cindex AUTH section
+FIXME
 
-@node CONTROL Section, TRANSLATION Section, Configuration, Configuration
+@deffn Option smtp-greeting-message @var{text}
+@opindex smtp-greeting-message @var{text}
+@end deffn
+
+@deffn Option smtp-help-message @var{help-text}
+@opindex smtp-help-message @var{help-text}
+@end deffn
+
+@deffn Option sasl-password-db @var{url}
+@opindex sasl-password-db @var{url}
+@end deffn
+
+@deffn Option sasl-allowed-mech @var{mech-list}
+@opindex sasl-allowed-mech @var{mech-list}
+@end deffn
+
+@node CONTROL Section, TRANSLATION Section, AUTH Section, Configuration
 @section CONTROL Section
 @cindex CONTROL section
 
@@ -416,6 +1095,15 @@ supported (and @dfn{CRAM-MD5} has a priority). The @dfn{LOGIN} method,
 for security reasons, can only be used both with the TLS/SSL encryption.
 @end deffn
 
+@deffn Option mode @var{mode-name}
+FIXME
+@opindex mode @var{mode-name}
+@table @asis
+@item transparent
+@item auth
+@end table
+
+@end deffn
 
 @node Output Settings, Proxy Settings, Basic Settings, CONTROL Section
 @subsection Output Settings
@@ -1485,6 +2173,7 @@ For more information about Guile,
 Predefined Guile Actions
 * Rot-13::
 * Remailers::
+* Entire Message Filters::
 @end menu
 
 
@@ -1593,7 +2282,7 @@ If REST is not empty, append its car to BODY"
 The Guile actions are invoked from the @code{RULE} section using the
 @code{guile-process} command. Its syntax is:
 
-@deffn Command guile-process @var{function} @var{args}
+@deffn {Scheme Function} @var{function} @var{args}
 Arguments:
 
 @table @var
@@ -1644,8 +2333,8 @@ guile-load-program rot-13.scm
 
 Then, in your @code{RULE} section use:
 
-@deffn Command guile-process rot-13 @var{keyword-arguments}
-@fnindex rot-13, Guile function
+@deffn {Scheme Function} rot-13 @var{keyword-arguments}
+@fnindex rot-13, Scheme function
 The command accepts the following @var{keyword-arguments}:
 
 @table @code
@@ -1671,8 +2360,7 @@ done
 @end smallexample  
 @end deffn
 
-
-@node Remailers, , Rot-13, Using Guile Actions
+@node Remailers, Entire Message Filters, Rot-13, Using Guile Actions
 @subsection Remailers Type-I
 @cindex remailer
 
@@ -1689,8 +2377,8 @@ guile-load-program remailer.scm
 To send the message via a remailer, use the following command
 in the @code{RULE} section:
 
-@deffn Command guile-process remailer-I @var{keyword-arguments}
-@fnindex remailer-I, Guile function
+@deffn {Scheme Function} remailer-I @var{keyword-arguments}
+@fnindex remailer-I, Scheme function
 @cmindex guile-process remailer-I @var{keyword-arguments}
 The @var{keyword-arguments} specify the various parameters for
 the remailer. These are:
@@ -1754,6 +2442,71 @@ done
 @xref{Mail Encryption}, for more information on mail encryption in
 GNU Anubis.
 
+@node Entire Message Filters, , Remailers, Using Guile Actions
+@subsection Entire Message Filters
+@cindex entire-msg.scm
+@fnindex entire-msg-filter, Scheme function
+@fnindex openssl-filter, Scheme function
+@cindex entire message, filtering
+
+There may be some cases when you need to use an external filter that
+processes the entire message (including headers). You cannot use
+@code{external-body-processor}, since it feeds only the
+message body to the program. To overcome this difficulty, GNU Anubis
+is shipped with @file{entire-msg.scm} module. This module provides
+Scheme function @code{entire-msg-filter}, which is to be used in
+such cases.
+
+@deffn {Scheme Function} entire-msg-filter @var{program} [@var{args}]
+Feeds entire message to the given program. The output from the program
+replaces message headers and body.
+
+@table @var
+@item progname
+Full pathname of the program to be executed.
+
+@item args
+Any additional arguments it may require.
+@end table
+@end deffn
+
+Suppose you have a program @code{/usr/libexec/myfilter}, that accepts
+entire message as its output and produces on standard output a
+modified version of this message. The program takes as its argument
+he name of a directory for temporary files. The following example
+illustrates how to invoke this program:
+
+@smallexample
+BEGIN GUILE
+guile-load-program entire-msg.scm
+END
+
+SECTION RULE
+guile-process entire-msg-filter /usr/libexec/myfilter /tmp
+END
+@end smallexample
+
+Another function defined in this module is @code{openssl-filter}:
+
+@deffn {Scheme Function} openssl-filter @var{program} [@var{args}]
+
+This function is provided for use with @code{openssl}
+program. @code{Openssl} binary attempts to rewind its input and
+fails if the latter is a pipe, so @code{openssl} cannot be used
+with @code{entire-msg-filter}. Instead, you should use 
+@code{openssl-filter}. Its arguments are:
+
+@table @var
+@item program
+Path to @code{openssl} binary.
+
+@item args
+Its arguments
+@end table
+
+@xref{S/MIME}, for an example of use of this function.
+@end deffn
+
 @node Invoking Anubis, Sample Beginning, Rule System, Top
 @chapter Invoking GNU Anubis
 @cindex command line
@@ -1766,36 +2519,15 @@ which have a @strong{higher} priority than command line options.
 GNU @command{anubis} supports the following command line options:
 
 @table @samp
+@item --altrc @var{file}
+Specify alternate system configuration file.
+
 @item --bind [@var{host}:]@var{port}
 @itemx -b
 Specify the TCP port on which GNU Anubis listens for connections.
 The default @var{host} value is @w{@samp{INADDR_ANY}}, and default
 @var{port} number is 24 (private mail system).
-@item --remote-mta @var{host}[:@var{port}]
-@itemx -r
-Specify a remote SMTP host name or IP address, which GNU Anubis will
-connect and forward mail to (after a processing).
-The default @var{port} number is 25.
-@item --local-mta @var{file}
-@itemx -l
-Execute a local SMTP server, which works on standard input and output
-(inetd-type program). This option excludes the @samp{--remote-mta} option.
-@item --foreground
-@itemx -f
-Foreground mode.
-@item --stdio
-@itemx -i
-Use the SMTP protocol (OMP/Tunnel) as described in RFC 821 on standard
-input and output.
-@item --silent
-@itemx -s
-Work silently.
-@item --verbose
-@itemx -v
-Work noisily.
-@item --debug
-@itemx -D
-Debug mode.
+
 @item --check-config[=@var{level}]
 @itemx -c[@var{level}]
 Run the configuration file syntax checker. Optional @var{level}
@@ -1815,18 +2547,56 @@ As @samp{1}, but also prints the parser traces.
 As @samp{2}, but also prints the lexical analizer traces.
 @end table
 
-@item --show-config-options
-Print a list of configuration options used to build GNU Anubis.
-@item --relax-perm-check
-Do not check a user config file permissions.
-@item --altrc @var{file}
-Specify alternate system configuration file.
+@item --debug
+@itemx -D
+Debug mode.
+
+@item --foreground
+@itemx -f
+Foreground mode.
+
+@item --help
+Print short usage summary and exit.
+
+@item --local-mta @var{file}
+@itemx -l
+Execute a local SMTP server, which works on standard input and output
+(inetd-type program). This option excludes the @samp{--remote-mta} option.
+
+@item --mode @var{mode-name}
+@itemx -m @var{mode-name}
+FIXME
+
 @item --norc
 Ignore system configuration file.
+
+@item --relax-perm-check
+Do not check a user config file permissions.
+
+@item --remote-mta @var{host}[:@var{port}]
+@itemx -r
+Specify a remote SMTP host name or IP address, which GNU Anubis will
+connect and forward mail to (after a processing).
+The default @var{port} number is 25.
+
+@item --silent
+@itemx -s
+Work silently.
+
+@item --show-config-options
+Print a list of configuration options used to build GNU Anubis.
+
+@item --stdio
+@itemx -i
+Use the SMTP protocol (OMP/Tunnel) as described in RFC 821 on standard
+input and output.
+
+@item --verbose
+@itemx -v
+Work noisily.
+
 @item --version
 Print version number and copyright.
-@item --help
-Print a help message.
 @end table
 
 Examples:
@@ -1952,7 +2722,7 @@ and MTA, should consider using the @samp{msg2smtp.pl} Perl script
 from the @file{contrib} directory (part of the distribution).
 
 
-@node TLS/SSL, Problems, Sample Beginning, Top
+@node TLS/SSL, S/MIME, Sample Beginning, Top
 @chapter Using the TLS/SSL Encryption
 @cindex Transport Layer Security, TLS
 @cindex Secure Socket Layer, SSL
@@ -2025,8 +2795,41 @@ keywords in its own user configuration file.
 @noindent
 @xref{Encryption Settings}, for details.
 
+@node S/MIME, Problems, TLS/SSL, Top
+@chapter Using S/MIME Signatures
+@cindex smime
+@cindex openssl
 
-@node Problems, GNU Free Documentation License, TLS/SSL, Top
+Anubis version @value{VERSION} does not yet provide buil-in support
+for S/MIME encryption or signing. To encrypt or sign messages using
+S/MIME, you will have to use external programs. Usually such programs
+require the whole message as their input, so simply using
+@code{external-body-processor} will not work. Anubis distribution includes
+a special Guile program, @file{entire-msg.scm}, designed for use with
+such programs. For its detailed description, please refer to
+@ref{Entire Message Filters}. This chapter addresses a special case of
+using it with @code{openssl} to sign outgoing messages.
+
+To use @code{openssl} for S/MIME signing, invoke it using
+@code{openssl-filter} function defined in @file{entire-msg.scm}. You
+will have to supply at least @code{-sign} and @code{-signer} arguments
+to the program. Notice, that you should not specify any input or
+output files.
+
+The following example illustrates this approach:
+
+@smallexample
+BEGIN GUILE
+guile-load-program entire-msg.scm
+END
+
+BEGIN RULE
+guile-process openssl-filter /usr/local/ssl/bin/openssl \
+              smime -sign -signer FILE
+END
+@end smallexample
+
+@node Problems, Pixie-Dixie, S/MIME, Top
 @chapter Reporting Bugs
 @cindex bugs
 @cindex problems
@@ -2040,8 +2843,11 @@ really says you can do what you are trying to do. If it is
 not clear whether you should be able to do something or not,
 report that too; it's a bug in the documentation!
 
+@node Pixie-Dixie, GNU Free Documentation License, Problems, Top
+@chapter Pixie & Dixie
+@include pixie-dixie.texi
 
-@node GNU Free Documentation License, Concept Index, Problems, Top
+@node GNU Free Documentation License, Concept Index, Pixie-Dixie, Top
 @include fdl.texi
 
 
