@@ -39,7 +39,7 @@ struct options_struct {
 #ifdef WITH_GUILE
  char *guile_logfile;
  char *guile_postprocess;	
-#endif
+#endif /* WITH_GUILE */
  char *altrc;
 };
 
