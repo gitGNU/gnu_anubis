@@ -276,7 +276,7 @@ send_body(MESSAGE *msg, void *sd_server)
 *******************/
 
 void
-smtp_session()
+smtp_session_transparent()
 {
 	char command[LINEBUFFER+1];
 	MESSAGE msg;
@@ -315,6 +315,45 @@ smtp_session()
 	/*
 	   Then process the commands...
 	*/
+
+	message_init(&msg);
+	while (recvline(SERVER, remote_client, command, sizeof(command) - 1)) {
+		if (process_command(&msg, command))
+			continue;
+
+		if (topt & T_ERROR)
+			break;
+		
+		if (transfer_command(&msg, command) == 0)
+			break;
+	}
+
+	message_free(&msg);
+	return;
+}
+
+void
+smtp_begin ()
+{
+	char command[LINEBUFFER+1];
+
+	get_response_smtp(CLIENT, remote_server, command, sizeof(command) - 1);
+	snprintf(command, sizeof command, "EHLO %s" CRLF, get_localdomain());
+	swrite(CLIENT, remote_server, command);
+	/* FIXME: Eventually start TLS and/or authenticate to the
+	   remote */
+	get_response_smtp(CLIENT, remote_server, command, sizeof(command) - 1);
+}
+
+void
+smtp_session()
+{
+	char command[LINEBUFFER+1];
+	MESSAGE msg;
+
+	info(VERBOSE, _("Starting SMTP session..."));
+	smtp_begin ();
+	info(VERBOSE, _("Transferring message(s)..."));
 
 	message_init(&msg);
 	while (recvline(SERVER, remote_client, command, sizeof(command) - 1)) {
