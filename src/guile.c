@@ -261,7 +261,9 @@ guile_to_anubis(SCM cell)
 static SCM
 anubis_to_guile(struct list *p)
 {
-	SCM head = SCM_EOL, tail;
+	SCM head = SCM_EOL, 
+	    tail; /* Don't let gcc fool you: tail cannot be used 
+	             uninitialized */
 
 	for (; p; p = p->next) {
 		SCM cell, car, cdr;
@@ -439,11 +441,6 @@ guile_parser(int method, int key, char *arg,
 		break;
 
 	case KW_GUILE_PROCESS:
-		/* FIXME: Currently every chunk of the rc file may be
-		   processed several times. This kludge prevents
-		   the same function from being called several times. */
-		if (process_tail)
-			break;
 		process_tail = new_element(process_tail,
 					   &process_head, strdup(arg));
 		break;
@@ -466,7 +463,7 @@ guile_parser(int method, int key, char *arg,
 
 static struct rc_secdef_child guile_secdef_child = {
 	NULL,
-	CF_SUPERVISOR|CF_CLIENT,
+	CF_CLIENT,
 	guile_kw,
 	guile_parser,
 	NULL
@@ -474,7 +471,7 @@ static struct rc_secdef_child guile_secdef_child = {
 
 static struct rc_secdef_child guile_rule_secdef_child = {
 	NULL,
-	CF_SUPERVISOR|CF_CLIENT,
+	CF_CLIENT,
 	guile_rule_kw,
 	guile_parser,
 	NULL
