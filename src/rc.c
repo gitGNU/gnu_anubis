@@ -176,6 +176,7 @@ process_rcfile(int method)
 #define KW_READ_ENTIRE_BODY   12
 #define KW_DROP_UNKNOWN_USER  13
 #define KW_RULE_PRIORITY      14
+#define KW_CONTROL_PRIORITY   15
 
 char **
 list_to_argv(LIST *list)
@@ -216,6 +217,15 @@ control_parser(int method, int key, LIST *arglist,
 			anubis_section_set_prio("RULE", prio_system);
 		else if (strcasecmp(arg, "system-only") == 0)
 			anubis_section_set_prio("RULE", prio_system_only);
+		else
+			return RC_KW_ERROR;
+		break;
+
+	case KW_CONTROL_PRIORITY:
+		if (strcasecmp(arg, "user") == 0)
+			anubis_section_set_prio("CONTROL", prio_user);
+		else if (strcasecmp(arg, "system") == 0)
+			anubis_section_set_prio("CONTROL", prio_system);
 		else
 			return RC_KW_ERROR;
 		break;
@@ -323,6 +333,7 @@ control_parser(int method, int key, LIST *arglist,
 static struct rc_kwdef init_kw[] = {
 	{ "bind", KW_BIND },
 	{ "rule-priority", KW_RULE_PRIORITY },
+	{ "control-priority", KW_CONTROL_PRIORITY },
 	{ NULL },
 };
 
@@ -452,6 +463,7 @@ void
 control_section_init(void)
 {
 	struct rc_secdef *sp = anubis_add_section("CONTROL");
+	sp->prio = prio_system;
 	rc_secdef_add_child(sp, &init_sect_child);
 	rc_secdef_add_child(sp, &init_supervisor_sect_child);
 	rc_secdef_add_child(sp, &client_sect_child);
