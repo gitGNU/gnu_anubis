@@ -24,6 +24,7 @@
 
 #include "headers.h"
 #include "extern.h"
+#include "rcfile.h"
 
 void
 mprintf(char *format, ...)
@@ -96,6 +97,25 @@ filelog(char *logfile, char *txt)
 		fclose(fplog);
 	}
 	return;
+}
+
+void
+trace(RC_LOC *loc, const char *fmt, ...)
+{
+	va_list ap;
+	int n = 0;
+	char txt[LINEBUFFER];
+
+	if (VERBOSE > options.termlevel)
+		return;
+
+	if (loc)
+		n = snprintf(txt, sizeof(txt), "%s:%lu: ",
+			     loc->file, (unsigned long)loc->line);
+	va_start(ap, fmt);
+	vsnprintf(txt + n, sizeof(txt) - n, fmt, ap);
+	va_end(ap);
+	info(VERBOSE, "%s", txt);
 }
 
 /* EOF */
