@@ -30,8 +30,6 @@ anubis_SOURCES = \
  main.c \
  extern.h \
  headers.h \
- mem.c \
- mem.h \
  env.c \
  errs.c \
  log.c \
@@ -68,6 +66,8 @@ anubisadm_LDADD = ./libanubisdb.a $(top_builddir)/lib/libanubis.a @LIBINTL@
 libanubisdb_a_SOURCES = \
  list.h \
  list.c \
+ mem.c \
+ mem.h \
  url.c \
  anubisdb.c \
  dbtext.c \
