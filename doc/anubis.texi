@@ -66,6 +66,7 @@ documents GNU Anubis Version @value{VERSION}.
 * Sample Beginning::                Here is a sample beginning.
 * TLS/SSL::                         Using the TLS/SSL Encryption.
 * S/MIME::                          Using S/MIME signatures.
+* MDA Mode::                        Using Anubis to Process Incoming Mail
 * Mutt::                            Using Anubis with Mutt.
 * Problems::                        Reporting bugs.
 
@@ -1107,6 +1108,7 @@ for instance: @code{bind} or @code{BIND} or @code{BiNd}, and so on.
 
 @node Basic Settings, Output Settings, CONTROL Section, CONTROL Section
 @subsection Basic Settings
+@UNREVISED{}
 
 @deffn Option bind [@var{host}:]@var{port}
 @opindex bind [@var{host}:]@var{port}
@@ -1167,6 +1169,23 @@ sees the entire message body, set @code{read-entire-body yes}
 in your control  section.
 @end deffn
 
+@deffn Option incoming-mail-rule @var{string} 
+@opindex incoming-mail-rule @var{string} 
+
+Declares name of processing sections for incoming mail. Default is
+@samp{INCOMING}. This option is available only for system
+configuration file. @xref{MDA Mode}, for detailed description of
+incoming mail processing.
+@FIXME{More info?}
+@end deffn
+
+@deffn Option outgoing-mail-rule @var{string}
+@opindex outgoing-mail-rule @var{string}
+
+Declares name of processing sections for outgoing mail. Default is
+@samp{RULE}. This option is available only for system
+configuration file.
+@end deffn
 
 @node Output Settings, Proxy Settings, Basic Settings, CONTROL Section
 @subsection Output Settings
@@ -3007,7 +3026,7 @@ keywords in its own user configuration file.
 @noindent
 @xref{Encryption Settings}, for details.
 
-@node S/MIME, Mutt, TLS/SSL, Top
+@node S/MIME, MDA Mode, TLS/SSL, Top
 @chapter Using S/MIME Signatures
 @cindex smime
 @cindex openssl
@@ -3041,7 +3060,124 @@ guile-process openssl-filter /usr/local/ssl/bin/openssl \
 END
 @end smallexample
 
-@node Mutt, Problems, S/MIME, Top
+@node MDA Mode, Mutt, S/MIME, Top
+@chapter Using Anubis to Process Incoming Mail
+@cindex MDA mode
+@cindex incoming mail, processing
+
+Historically Anubis was designed to process outgoing mail. Support for
+processing incoming mail was added in version
+@value{VERSION}. @FIXME{Change this to the number of the next stable
+version when it is released.}
+
+To process incoming mail, Anubis must be started as @dfn{mail
+delivery agent} from your MTA configuration file. The invocation
+line must contain @option{--mode=mda} option, that tells Anubis
+to act in @dfn{mail delivery mode}. In this mode, Anubis receives
+the message from standard input, processes it using configuration
+file sections named @code{incoming-mail-rule} @FIXME-xref{} and
+finally calls local mailer to actually deliver the modified message.
+The local mailer must be given using @option{--local-mta} option.
+
+
+Let's summarize the special features of mail delivery mode
+@FIXME{This is basically a reminder for me to provide a detailed
+description of MDA mode}:
+
+@enumerate 1
+@item
+The mode is triggered by @option{--mode=mda} in the command line.
+It cannot be specified in configuration file.
+
+@item
+Anubis uses local mailer to actually deliver messages. The invocation
+line of the local mailer must be given via @option{--local-mta}
+command line option. The settings of @option{local-mta} (@pxref{Basic
+Settings} is ignored.
+
+The local mailer invocation line may contain meta-variables
+@code{%sender} and @code{%recipient}, which will be replaced by
+the actual sender and recipient email addresses before starting
+the mailer.
+
+@item
+Special option @option{--from} may be used in Anubis command line.
+This option sets sender email address (see @code{%sender} meta
+variable above). It implies @option{--mode=mda}. If the option is
+not given, GNU Anubis will deduce sender address from UNIX
+@samp{From } header or, if it is not present, from the value of
+@code{From} SMTP header.
+
+@item
+In MDA mode, Anubis takes names of the recipients from the command line.
+
+@item
+Anubis uses a separate rule section for processing incoming mails. The
+default section name is @samp{INCOMING}. It may be overridden in 
+system configuration file using @option{incoming-mail-rule}
+(@pxref{Basic Settings}).
+@end enumerate
+
+Following discussion explains how to configure Anubis in MDA mode with
+different mail transport agents.
+
+@itemize @bullet
+@item Sendmail
+
+If you use @code{mc} file to generate @file{sendmail.cf}, use
+@code{LOCAL_MAILER_PATH} and @code{LOCAL_MAILER_ARGS} as shown
+in the following example:
+
+@smallexample
+@group
+define(`LOCAL_MAILER_PATH', `/usr/local/sbin/anubis')
+define(`LOCAL_MAILER_ARGS',
+       `mail --mode=mda -l '/libexec/mail.local -f %sender %recipient')
+@end group
+@end smallexample
+
+@noindent
+If you prefer to directly edit @file{sendmail.cf}, use @code{M}
+macro to declare Anubis as a local mailer. Following example
+illustrates this:
+          
+@smallexample
+@group
+Mlocal, P=/usr/local/sbin/anubis,
+        F=lsDFMAw5:/|@@qSPfhn9,
+        S=EnvFromL/HdrFromL, R=EnvToL/HdrToL,
+        T=DNS/RFC822/X-Unix,
+        A=mail --mode=mda -l '/libexec/mail.local -f %sender %recipient' $u
+@end group        
+@end smallexample
+                                
+@item Exim
+
+With @command{exim}, you will need to declare appropriate transport
+and director in @file{exim.conf}:
+
+@smallexample
+@group
+# transport
+mail_local_pipe:
+  driver = pipe
+  command = /usr/local/sbin/anubis --mode=mda \
+             -l '/libexec/mail.local -f %sender %recipient' $local_part
+  return_path_add
+  delivery_date_add
+  envelope_to_add
+
+# director
+mail_local:
+  driver = localuser
+  transport = mail_local_pipe
+@end group   
+@end smallexample
+              
+@end itemize
+@FIXME{More mailers, anybody?}
+
+@node Mutt, Problems, MDA Mode, Top
 @chapter Using Mutt with Anubis
 @cindex mutt
 
