@@ -49,7 +49,6 @@ QUIT
 :MODE CAT
 :OPTIONS $gpg_prog --homedir $ANUBIS_DATA_DIR --decrypt 
 :PATTERN
-      "GNU Anubis Team (Anubis) <anubis-dev@gnu.org>"
-If you can read this, then it is working.
+-re .*encrypted with 1024-bit ELG-E key, ID E793A998, created 2003-02-20.*"GNU Anubis Team \(Anubis\) <anubis-dev@gnu.org>".*If you can read this, then it is working.
 :END PATTERN
 :END TEST

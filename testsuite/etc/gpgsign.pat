@@ -37,7 +37,7 @@ To: <polak@gnu.org>
 
 :ADD -----BEGIN PGP SIGNED MESSAGE-----
 :ADD Hash: SHA1
-:ADD
+:ADD 
 If you can read this, then it is working.
 :ADD -re -----BEGIN PGP SIGNATURE-----.*-----END PGP SIGNATURE-----
 .
@@ -51,8 +51,6 @@ QUIT
 :MODE CAT
 :OPTIONS $gpg_prog --homedir $ANUBIS_DATA_DIR --verify
 :PATTERN
--re Signature made .* using DSA key ID DCE73402
-gpg: Good signature from "GNU Anubis Team (Anubis) <anubis-dev@gnu.org>"
-Primary key fingerprint: 9D80 A493 F6C8 B63C FD84  E882 0DD5 03FB DCE7 3402
+-re .*Signature made .* using DSA key ID DCE73402.*gpg: Good signature from "GNU Anubis Team \(Anubis\) <anubis-dev@gnu.org>".*Primary key fingerprint: 9D80 A493 F6C8 B63C FD84  E882 0DD5 03FB DCE7 3402
 :END PATTERN
 :END TEST
