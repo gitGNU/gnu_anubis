@@ -1,3 +1,19 @@
+2004-08-14  Sergey Poznyakoff
+
+	* testsuite/anubis.authmode/abase.exp: New file
+	* testsuite/anubis.authmode/DISTFILES: Updated
+	* src/authmode.c (anubis_smtp,xdb_loop): Exit if T_ERROR
+	bit is set.
+	
+	* testsuite/lib/anubis.exp (update_config): Return -1 if
+	res is an empty list. Set anubisusr verbose mode only if
+	$verbose > 2
+	(run_in_authmode): Declare unsupported test if anubis is
+	configured without GSASL
+	(default_anubis_stop,anubis_exit): New procedures
+	(anubis_test_file): Call remote_close
+	(anubis_pat): Call default_anubis_stop
+
 2004-08-13  Sergey Poznyakoff
 
 	* src/anubisusr.c: New options --file and --netrc allow
