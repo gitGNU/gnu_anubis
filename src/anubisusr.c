@@ -1,7 +1,7 @@
 /*
    anubisusr.c
    
-   Copyright (C) 2004 The Anubis Team.
+   Copyright (C) 2004, 2005 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -639,7 +639,6 @@ parse_netrc (const char *filename)
       argcv_free (def_argc, def_argv);
     }
 }
-
 
 /* FIXME: Add UTF-8 conversion */
 static int

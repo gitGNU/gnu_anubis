@@ -2,7 +2,7 @@
    daemon.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -185,6 +185,9 @@ anubis_child_main (NET_STREAM *sd_client, struct sockaddr_in *addr)
 
     case anubis_authenticate:
       rc = anubis_authenticate_mode (sd_client, addr);
+
+    default:
+      abort();
     }
 #else
   rc = anubis_transparent_mode (sd_client, addr);
@@ -344,6 +347,15 @@ _stdio_strerror (void *ignored_data, int rc)
 }
 
 void
+create_stdio_stream (NET_STREAM *s)
+{
+  net_create_stream (s, 0);
+  stream_set_read (*s, _stdio_read);
+  stream_set_write (*s, _stdio_write);
+  stream_set_strerror (*s, _stdio_strerror);
+}
+
+void
 stdinout (void)
 {
   NET_STREAM sd_client = NULL;
@@ -353,20 +365,17 @@ stdinout (void)
   topt |= T_FOREGROUND;
   topt |= T_SMTP_ERROR_CODES;
 
-  anubis_getlogin (session.clientname, sizeof (session.clientname));
+  anubis_getlogin (&session.clientname);
   auth_tunnel ();		/* session.clientname = session.supervisor */
 
-  if (!(topt & T_LOCAL_MTA) && (strlen (session.mta) == 0))
+  if (!(topt & T_LOCAL_MTA) && !session.mta)
     {
       options.termlevel = NORMAL;
       anubis_error (EXIT_FAILURE, 0, _("The MTA has not been specified. "
 			               "Set the REMOTE-MTA or LOCAL-MTA."));
     }
 
-  net_create_stream (&sd_client, 0);
-  stream_set_read (sd_client, _stdio_read);
-  stream_set_write (sd_client, _stdio_write);
-  stream_set_strerror (sd_client, _stdio_strerror);
+  create_stdio_stream (&sd_client);
 
   alarm (300);
   if (topt & T_LOCAL_MTA)

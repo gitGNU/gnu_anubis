@@ -2,7 +2,7 @@
    authmode.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2004 The Anubis Team.
+   Copyright (C) 2003, 2004, 2005 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -572,8 +572,7 @@ anubis_authenticate_mode (NET_STREAM *psd_client,
 
   if (usr.username)
     {
-      strncpy (session.clientname, usr.username, sizeof (session.clientname));
-      session.clientname[sizeof (session.clientname) - 1] = '\0';
+      assign_string (&session.clientname, usr.username);
       if (check_username (session.clientname))
 	anubis_changeowner (session.clientname);
       else
@@ -581,9 +580,7 @@ anubis_authenticate_mode (NET_STREAM *psd_client,
     }
   else
     {
-      strncpy (session.clientname, usr.smtp_authid,
-	       sizeof (session.clientname));
-      session.clientname[sizeof (session.clientname) - 1] = '\0';
+      assign_string (&session.clientname, usr.smtp_authid);
       set_unprivileged_user ();
     }
 
@@ -600,7 +597,7 @@ anubis_authenticate_mode (NET_STREAM *psd_client,
     }
   else
     {
-      if (!(topt & T_LOCAL_MTA) && strlen (session.mta) == 0)
+      if (!(topt & T_LOCAL_MTA) && !session.mta)
 	{
 	  anubis_error (EXIT_FAILURE, 0,
                         _("MTA has not been specified. "

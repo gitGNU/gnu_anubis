@@ -2,7 +2,7 @@
    transmode.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2004 The Anubis Team.
+   Copyright (C) 2003, 2004, 2005 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ anubis_transparent_mode (NET_STREAM * psd_client, struct sockaddr_in *addr)
   int cs = 0;
   NET_STREAM sd_server = NULL;
 
-  rs = auth_ident (addr, session.clientname, sizeof (session.clientname));
+  rs = auth_ident (addr, &session.clientname);
 
   if ((topt & T_DROP_UNKNOWN_USER) && !rs)
     {
@@ -43,7 +43,7 @@ anubis_transparent_mode (NET_STREAM * psd_client, struct sockaddr_in *addr)
   parse_transmap (&cs,
 		  rs ? session.clientname : 0,
 		  inet_ntoa (addr->sin_addr),
-		  session.clientname, sizeof (session.clientname));
+		  &session.clientname);
 
   if (cs == 1)
     {
@@ -63,7 +63,7 @@ anubis_transparent_mode (NET_STREAM * psd_client, struct sockaddr_in *addr)
   else
     set_unprivileged_user ();
 
-  if (!(topt & T_LOCAL_MTA) && strlen (session.mta) == 0)
+  if (!(topt & T_LOCAL_MTA) && !session.mta)
     {
       anubis_error (EXIT_FAILURE, 0, _("The MTA has not been specified. "
 			               "Set the REMOTE-MTA or LOCAL-MTA."));

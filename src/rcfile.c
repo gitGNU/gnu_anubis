@@ -2,7 +2,7 @@
    rcfile.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -282,8 +282,8 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
 
   switch (key) {
   case KW_BIND:
-    parse_mtahost (arg, session.anubis, &session.anubis_port);
-    if (strlen (session.anubis) != 0)
+    parse_mtahost (arg, &session.anubis, &session.anubis_port);
+    if (session.anubis && strlen (session.anubis) != 0)
       topt |= T_NAMES;
     break;
 
@@ -327,7 +327,7 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
     break;
 
   case KW_USER_NOTPRIVILEGED:
-    safe_strcpy (session.notprivileged, arg);
+    assign_string (&session.notprivileged, arg);
     break;
 
   case KW_LOGFILE:
@@ -388,15 +388,20 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
     break;
 
   case KW_REMOTE_MTA:
-    parse_mtaport (arg, session.mta, &session.mta_port);
+    parse_mtaport (arg, &session.mta, &session.mta_port);
     break;
 
   case KW_LOCAL_MTA:
-    xfree (session.execpath);
-    xfree_pptr (session.execargs);
-    session.execpath = strdup (arg);
-    session.execargs = list_to_argv (arglist);
-    topt |= T_LOCAL_MTA;
+    if (!(topt & T_LOCAL_MTA)) /* Command line option overrides config */
+                               /* FIXME: generally speaking *all* command
+				  line options should */
+      { 
+	xfree (session.execpath);
+	xfree_pptr (session.execargs);
+	session.execpath = strdup (arg);
+	session.execargs = list_to_argv (arglist);
+	topt |= T_LOCAL_MTA;
+      }
     break;
 
 #if defined (WITH_GSASL)
@@ -476,7 +481,7 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
 
 #ifdef USE_SOCKS_PROXY
   case KW_SOCKS_PROXY:
-    parse_mtaport (arg, session.socks, &session.socks_port);
+    parse_mtaport (arg, &session.socks, &session.socks_port);
     if_empty_set (session.socks, topt, T_SOCKS);
     break;
 
@@ -490,9 +495,9 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
       p = strchr (arg, ':');
       if (p)
 	{
-	  safe_strcpy (session.socks_password, ++p);
+	  assign_string (&session.socks_password, ++p);
 	  *--p = '\0';
-	  safe_strcpy (session.socks_username, arg);
+	  assign_string (session.socks_username, arg);
 	  topt |= T_SOCKS_AUTH;
 	}
       break;
@@ -509,10 +514,14 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
 
 #ifdef WITH_GSASL
   case KW_MODE:
-    if (list_count (arglist) != 1)
-      return RC_KW_ERROR;
-    if (anubis_set_mode (arg))
-      return RC_KW_ERROR;
+    if (anubis_mode != anubis_mda) /* Special case. See comment to
+				      KW_LOCAL_MAILER directive, though */
+      {
+	if (list_count (arglist) != 1)
+	  return RC_KW_ERROR;
+	if (anubis_set_mode (arg))
+	  return RC_KW_ERROR;
+      }
     break;
 #endif /* WITH_GSASL */
 

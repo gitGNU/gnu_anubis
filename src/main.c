@@ -1,6 +1,6 @@
 /*
    GNU Anubis v4.0 -- an SMTP message submission daemon.
-   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ ANUBIS_MODE anubis_mode = anubis_transparent;
 
 const char version[] = "GNU Anubis v" VERSION;
 const char copyright[] =
-  "Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.";
+  "Copyright (C) 2001, 2002, 2003, 2004, 2005 The Anubis Team.";
 
 struct options_struct options;
 struct session_struct session;
@@ -63,7 +63,7 @@ main (int argc, char *argv[])
 {
   /* Register memory error printer */
   memory_error = anubis_memory_error;
-
+  
   /*
      Signal handling.
    */
@@ -102,7 +102,7 @@ main (int argc, char *argv[])
 
   SETVBUF (stderr, NULL, _IOLBF, 0);
   get_options (argc, argv);
-  anubis_getlogin (session.supervisor, sizeof (session.supervisor));
+  anubis_getlogin (&session.supervisor);
 
   /*
      Initialize various database formats
@@ -176,12 +176,12 @@ main (int argc, char *argv[])
 void
 anubis (char *arg)
 {
-  if (topt & T_STDINOUT)
-    {				/* stdin/stdout */
-      stdinout ();
-    }
+  if (anubis_mode == anubis_mda)  /* Mail Delivery Agent */
+    mda ();
+  else if (topt & T_STDINOUT)     /* stdin/stdout */
+    stdinout ();
   else
-    {				/* daemon */
+    {				  /* daemon */
       int sd_bind;
       sd_bind = bind_and_listen (session.anubis, session.anubis_port);
       if (topt & T_FOREGROUND_INIT)

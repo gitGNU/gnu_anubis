@@ -2,7 +2,7 @@
    map.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2005 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -48,11 +48,10 @@ struct translate_env
   char *extaddr;
   char translate[65];
   char into[65];
-  int size;
 };
 
 void
-parse_transmap (int *cs, char *extuser, char *extaddr, char *dst, int size)
+parse_transmap (int *cs, char *extuser, char *extaddr, char **dst)
 {
   struct translate_env env;
 
@@ -60,7 +59,6 @@ parse_transmap (int *cs, char *extuser, char *extaddr, char *dst, int size)
   env.cs = -1;			/* failed by default: unmatched */
   env.extuser = extuser;
   env.extaddr = extaddr;
-  env.size = size;
 
   rcfile_process_section (CF_SUPERVISOR, "TRANSLATION", &env, NULL);
   *cs = env.cs;
@@ -70,8 +68,7 @@ parse_transmap (int *cs, char *extuser, char *extaddr, char *dst, int size)
 	{
 	  info (NORMAL, _("%s remapped to %s@localhost."),
 		env.translate, env.into);
-	  memset (dst, 0, size);
-	  strncpy (dst, env.into, size - 1);
+	  assign_string (dst, env.into);
 	}
       else
 	*cs = 0;		/* failed: invalid user name */

@@ -2,7 +2,7 @@
    misc.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2005 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -102,27 +102,36 @@ assoc_to_header (ASSOC * asc)
   return buf;
 }
 
+static void
+get_port_number (int *port, char *str)
+{
+  char *p;
+  *port = strtoul (str, &p, 0);
+  if (*p)
+    anubis_error (1, 0, _("Invalid port number: %s"), str);
+}
+
 /****************************
  An extra port number parser
 *****************************/
 
 void
-parse_mtaport (char *opt, char *host, unsigned int *port)
+parse_mtaport (char *opt, char **host, unsigned int *port)
 {
   struct servent *p;
-  char opt_tmp[256];
   char *port_tmp = NULL;
-  safe_strcpy (opt_tmp, opt);
 
-  if ((port_tmp = strrchr (opt_tmp, ':')))
+  if ((port_tmp = strrchr (opt, ':')))
     {
-      *port_tmp++ = '\0';
+      port_tmp++;
       if ((p = getservbyname (port_tmp, "tcp")))
 	*port = ntohs (p->s_port);
       else
-	*port = (unsigned int) atoi (port_tmp);
+        get_port_number (port, port_tmp);
+      assign_string_n (host, opt, port_tmp - opt - 1); 
     }
-  strncpy (host, opt_tmp, sizeof (session.mta) - 1);
+  else
+    assign_string (host, opt); 
 }
 
 /**************************
@@ -130,28 +139,26 @@ parse_mtaport (char *opt, char *host, unsigned int *port)
 ***************************/
 
 void
-parse_mtahost (char *opt, char *host, unsigned int *port)
+parse_mtahost (char *opt, char **host, unsigned int *port)
 {
   struct servent *p;
-  char opt_tmp[256];
-  char *port_tmp = NULL;
-  safe_strcpy (opt_tmp, opt);
+  char *port_tmp;
 
-  if ((port_tmp = strrchr (opt_tmp, ':')))
+  if ((port_tmp = strrchr (opt, ':')))
     {
-      *port_tmp++ = '\0';
+      port_tmp++;
       if ((p = getservbyname (port_tmp, "tcp")))
 	*port = ntohs (p->s_port);
       else
-	*port = (unsigned int) atoi (port_tmp);
-      strncpy (host, opt_tmp, sizeof (session.anubis) - 1);
+        get_port_number (port, port_tmp);
+      assign_string_n (host, opt, port_tmp - opt - 1);
     }
   else
     {				/* only port number available */
       if ((p = getservbyname (opt, "tcp")))
 	*port = ntohs (p->s_port);
       else
-	*port = (unsigned int) atoi (opt);
+        get_port_number (port, opt);
     }
 }
 
@@ -363,6 +370,23 @@ get_localdomain (void)
 	anubis_domain = strdup (p + 1);
     }
   return anubis_domain;
+}
+
+void
+assign_string (char **pstr, const char *s)
+{
+  free (*pstr);
+  *pstr = xmalloc (strlen (s) + 1);
+  strcpy (*pstr, s);
+}
+
+void
+assign_string_n (char **pstr, const char *s, size_t length)
+{
+  free (*pstr);
+  *pstr = xmalloc (length + 1);
+  memcpy (*pstr, s, length);
+  (*pstr)[length] = 0;
 }
 
 /* EOF */

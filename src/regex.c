@@ -2,7 +2,7 @@
    regex.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2005 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -161,7 +161,6 @@ anubis_regex_replace (RC_REGEX * re, char *line, char *repl)
   int alloc = 0;
   struct regex_vtab *vp;
 
-  wd();
   ASSERT_RE (re, vp);
   while (vp->match (re, line + off, &refc, &refv, &so, &eo) == 0)
     {
@@ -485,9 +484,3 @@ perl_refcnt (RC_REGEX * regex)
 #endif /* HAVE_PCRE */
 
 /* EOF */
-wd()
-{
-  static int _st=1;
-  while (!_st)
-    _st=_st;
-}

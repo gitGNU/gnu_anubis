@@ -2,7 +2,7 @@
    ident.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@
    returns 1 */
 
 static int
-ident_extract_username (char *reply, char *username, size_t size)
+ident_extract_username (char *reply, char **pusername)
 {
   char *p;
 
@@ -54,9 +54,7 @@ ident_extract_username (char *reply, char *username, size_t size)
   if (!p)
     return 1;
   p++;
-  if (strlen (p) >= size)
-    return 1;
-  strcpy (username, p);
+  assign_string (pusername, p);
   return 0;
 }
 
@@ -69,7 +67,7 @@ ident_extract_username (char *reply, char *username, size_t size)
    returns 1 */
 
 static int
-crypt_extract_username (char *reply, char *username, size_t size)
+crypt_extract_username (char *reply, char **pusername)
 {
   int i;
   char *p = reply;
@@ -83,14 +81,12 @@ crypt_extract_username (char *reply, char *username, size_t size)
 	return 1;
     }
 
-  if (strlen (p) >= size)
-    return 1;
-  strcpy (username, p);
+  assign_string (pusername, p);
   return 0;
 }
 
 int
-auth_ident (struct sockaddr_in *addr, char *user, int size)
+auth_ident (struct sockaddr_in *addr, char **user)
 {
   struct servent *sp;
   struct sockaddr_in ident;
@@ -143,10 +139,9 @@ auth_ident (struct sockaddr_in *addr, char *user, int size)
       return 0;
     }
   net_close_stream (&str);
-  memset (user, 0, size);
 
   remcrlf (buf);
-  if (ident_extract_username (buf, user, size))
+  if (ident_extract_username (buf, user))
     {
       info (VERBOSE, _("IDENT: incorrect data."));
       return 0;
@@ -156,16 +151,16 @@ auth_ident (struct sockaddr_in *addr, char *user, int size)
    IDENTD DES decryption support
   *******************************/
 
-  if (strstr (user, "[") && strstr (user, "]"))
+  if (strstr (*user, "[") && strstr (*user, "]"))
     {
       int rs = 0;
       info (VERBOSE, _("IDENT: data probably encrypted with DES..."));
-      external_program (&rs, IDECRYPT_PATH, user, buf, LINEBUFFER);
+      external_program (&rs, IDECRYPT_PATH, *user, buf, LINEBUFFER);
       if (rs == -1)
 	return 0;
 
       remcrlf (buf);
-      if (crypt_extract_username (buf, user, size))
+      if (crypt_extract_username (buf, user))
 	{
 	  info (VERBOSE, _("IDENT: incorrect data (DES deciphered)."));
 	  return 0;
@@ -175,10 +170,10 @@ auth_ident (struct sockaddr_in *addr, char *user, int size)
 	  if (ntohl (ident.sin_addr.s_addr) == INADDR_LOOPBACK)
 	    {
 	      struct passwd *pwd;
-	      int uid = atoi (user);
+	      int uid = atoi (*user);
 	      pwd = getpwuid (uid);
 	      if (pwd != 0)
-		strncpy (user, (char *) pwd->pw_name, size - 1);
+		assign_string (user, pwd->pw_name);
 	      else
 		return 0;
 	    }

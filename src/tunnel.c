@@ -2,7 +2,7 @@
    tunnel.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -31,8 +31,6 @@
 
 static int transfer_command (MESSAGE *, char *);
 static int process_command (MESSAGE *, char *);
-static void transfer_header (ANUBIS_LIST *);
-static void transfer_body (MESSAGE *);
 static void process_data (MESSAGE *);
 static int handle_ehlo (char *, char *, size_t);
 
@@ -106,7 +104,7 @@ add_header (ANUBIS_LIST * list, char *line)
     }
 }
 
-static void
+void
 collect_headers (MESSAGE * msg)
 {
   char buf[LINEBUFFER + 1];
@@ -150,7 +148,7 @@ write_header_line (NET_STREAM sd_server, char *line)
   do
     {
       swrite (CLIENT, sd_server, p);
-      swrite (CLIENT, sd_server, CRLF);
+      send_eol (CLIENT, sd_server);
     }
   while ((p = strtok (NULL, "\n")));
 }
@@ -207,7 +205,7 @@ send_string_list (NET_STREAM sd_server, ANUBIS_LIST * list)
 #define ST_BODY  2
 #define ST_DONE  3
 
-static void
+void
 collect_body (MESSAGE * msg)
 {
   int nread;
@@ -275,9 +273,9 @@ send_body (MESSAGE * msg, NET_STREAM sd_server)
   if (msg->boundary)
     {
       swrite (CLIENT, sd_server, msg->boundary);
-      swrite (CLIENT, sd_server, CRLF);
+      send_eol (CLIENT, sd_server);
       send_string_list (sd_server, msg->mime_hdr);
-      swrite (CLIENT, sd_server, CRLF);
+      send_eol (CLIENT, sd_server);
     }
 
   for (p = msg->body; *p;)
@@ -289,14 +287,14 @@ send_body (MESSAGE * msg, NET_STREAM sd_server)
 	q = p + strlen (p);
 
       swrite (CLIENT, sd_server, p);
-      swrite (CLIENT, sd_server, CRLF);
+      send_eol (CLIENT, sd_server);
       p = q;
     }
 
   if (msg->boundary)
     {
       swrite (CLIENT, sd_server, msg->boundary);
-      swrite (CLIENT, sd_server, CRLF);
+      send_eol (CLIENT, sd_server);
     }
 }
 
@@ -371,8 +369,9 @@ smtp_begin (void)
   get_response_smtp (CLIENT, remote_server, command, sizeof (command) - 1);
 
   /* now send the ehlo command */
-  snprintf (command, sizeof (command), "EHLO %s" CRLF, get_ehlo_domain ());
+  snprintf (command, sizeof (command), "EHLO %s", get_ehlo_domain ());
   swrite (CLIENT, remote_server, command);
+  send_eol (CLIENT, remote_server);
   handle_ehlo (command, command, sizeof (command) - 1);
 }
 
@@ -750,11 +749,11 @@ process_data (MESSAGE * msg)
   alarm (0);
 }
 
-static void
+void
 transfer_header (ANUBIS_LIST * header_buf)
 {
   send_header (remote_server, header_buf);
-  swrite (CLIENT, remote_server, CRLF);
+  send_eol (CLIENT, remote_server);
 }
 
 /***************
@@ -787,7 +786,8 @@ transfer_body (MESSAGE * msg)
     }
   else
     send_body (msg, remote_server);
-  swrite (CLIENT, remote_server, "." CRLF);
+  if (anubis_mode != anubis_mda)
+    swrite (CLIENT, remote_server, "." CRLF);
 }
 
 /* EOF */

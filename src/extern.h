@@ -2,7 +2,7 @@
    extern.h
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -45,20 +45,20 @@ struct options_struct
 
 struct session_struct
 {
-  char anubis[65];
-  char mta[65];
-  char supervisor[65];
-  char clientname[65];
-  char notprivileged[65];
+  char *anubis;
+  char *mta;
+  char *supervisor;
+  char *clientname;
+  char *notprivileged;
   char *rcfile_name;
   char *execpath;
   char **execargs;
   unsigned int anubis_port;
   unsigned int mta_port;
 #ifdef USE_SOCKS_PROXY
-  char socks[65];
-  char socks_username[65];
-  char socks_password[65];
+  char *socks;
+  char *socks_username;
+  char *socks_password;
   unsigned int socks_port;
 #endif				/* USE_SOCKS_PROXY */
 };
@@ -107,5 +107,8 @@ extern char *auth_hostname;
 extern char *generic_service_name;
 extern char *auth_passcode;
 extern char *auth_realm;
+
+extern int x_argc;
+extern char **x_argv;
 
 /* EOF */
