@@ -235,6 +235,7 @@
 #define T_ALTRC             0x02000000
 #define T_CHECK_CONFIG      0x04000000
 #define T_RELAX_PERM_CHECK  0x08000000
+#define T_ENTIRE_BODY       0x10000000
 
 /* bit values for mopt */
 #define M_GPG_ENCRYPT       0x00000001
@@ -360,7 +361,6 @@ RC_REGEX *anubis_regex_compile(char *line, int opt);
 void anubis_regex_free(RC_REGEX *re);
 char *anubis_regex_source(RC_REGEX *re);
 int anubis_regex_refcnt(RC_REGEX *re);
-int regex_match(char *, char *);
 
 /* rc.c */
 void rc_system_init();
