@@ -314,6 +314,22 @@ asmtp_ehlo (enum asmtp_state state, ANUBIS_USER * usr)
       asmtp_reply(503, "TLS already started");
     else
       {
+	if (!secure.cert)
+	  secure.cert = allocbuf (DEFAULT_SSL_PEM, MAXPATHLEN);
+	if (!check_filename (secure.cert, NULL))
+	  {
+	    asmtp_reply (454, "TLS not available due to temporary reason");
+	    return 0;
+	  }
+
+	if (!secure.key)
+	  secure.key = allocbuf (secure.cert, MAXPATHLEN);
+	else if (!check_filename (secure.key, NULL))
+	  {
+	    asmtp_reply (454, "TLS not available due to temporary reason");
+	    return 0;
+	  }
+
 	asmtp_reply (220, "Ready to start TLS");
 	secure.server = start_ssl_server (remote_client,
 					  secure.cafile,

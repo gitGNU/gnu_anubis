@@ -501,14 +501,23 @@ handle_starttls (char *command)
      (client connected with the Tunnel).
    */
 
-  if (secure.cert == 0)
+  if (!secure.cert)
     secure.cert = allocbuf (DEFAULT_SSL_PEM, MAXPATHLEN);
-  if (check_filename (secure.cert, NULL) == 0)
-    return 0;
-  if (secure.key == 0)
+  if (!check_filename (secure.cert, NULL))
+    {
+      swrite (SERVER, remote_client,
+	      "454 TLS not available due to temporary reason" CRLF);
+      return 0;
+    }
+
+  if (!secure.key)
     secure.key = allocbuf (secure.cert, MAXPATHLEN);
-  else if (check_filename (secure.key, NULL) == 0)
-    return 0;
+  else if (!check_filename (secure.key, NULL))
+    {
+      swrite (SERVER, remote_client,
+	      "454 TLS not available due to temporary reason" CRLF);
+      return 0;
+    }
 
   /*
      Check file permissions. Ignore if a client hasn't
@@ -560,7 +569,7 @@ save_ehlo_domain(char *command)
 {
   char *p, *endp;
   
-  for (p = command + 5 /* legnth of EHLO + initial space */;
+  for (p = command + 5 /* length of EHLO + initial space */;
        *p && isspace (*p);
        p++)
     ;
