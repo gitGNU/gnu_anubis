@@ -89,13 +89,70 @@ anubis_section_set_prio(char *name, enum section_prio prio)
 		p->prio = prio;
 }
 
+/* A structure uniquely identifying a file */
+struct file_id {
+	dev_t dev;      /* Device number */
+	ino_t ino;      /* I-node number */
+};
+
+/* A list of struct file_id used to prevent duplicate parsing of the
+   same file */
+static LIST *file_id_list;
+
+/* Comparator for two struct file_id */
+static int
+cmp_fid(void *a, void *b)
+{
+	struct file_id *fid_a = a,
+	               *fid_b = b;
+	return !(fid_a->dev == fid_b->dev && fid_a->ino == fid_b->ino);
+}
+
+/* Adds the `filename' to file_id_list.
+   Returns 0 if the operation passed successfully, 1 -- if the file
+   is already present in the list, and -1 on error */
+static int
+file_id_add (char *filename)
+{
+	struct stat st;
+	struct file_id *fid;
+	if (stat(filename, &st)) {
+		anubis_error(SOFT,
+			     _("cannot stat file `%s': %s"), filename,
+			     strerror(errno));
+		return -1;
+	}
+	fid = xmalloc(sizeof(*fid));
+	fid->dev = st.st_dev;
+	fid->ino = st.st_ino;
+	if (list_locate(file_id_list, fid, cmp_fid)) {
+		free(fid);
+		info(DEBUG,
+		     _("File `%s' has already been read"),
+		     filename);
+		return 1;
+	}
+	if (!file_id_list)
+		file_id_list = list_create();
+	list_append(file_id_list, fid);
+	return 0;
+}
+
+static void
+file_id_destroy()
+{
+	list_destroy(&file_id_list, anubis_free_list_item, NULL);
+}
+
 void
 open_rcfile(int method)
 {
 	char homedir[MAXPATHLEN+1];
 	char *rcfile = 0;
 	RC_SECTION *sec;
-	
+	static int ctr = 0;
+	if (ctr++ > 0)
+		return;
 	switch (method) {
 	case CF_SUPERVISOR:
 	case CF_INIT:
@@ -117,6 +174,7 @@ open_rcfile(int method)
 			return;
 		}
 		rc_section_list_destroy(&parse_tree);
+		file_id_destroy();
 		info(DEBUG,
 		     _("Reading system configuration file %s..."), rcfile);
 		break;
@@ -142,13 +200,12 @@ open_rcfile(int method)
 		return;
 	}
 
-	sec = rc_parse(rcfile);
-	/* FIXME: check 'sec' against anubis_rc_sections and remove the
-	   erroneous statements  */
+	if (file_id_add(rcfile) == 0) {
+		sec = rc_parse(rcfile);
+		if (sec)
+			rc_section_link(&parse_tree, sec);
+	}
 	free(rcfile);
-
-	if (sec)
-		rc_section_link(&parse_tree, sec);
 }
 
 void
