@@ -2,7 +2,7 @@
 ## Makefile.am
 ##
 ## This file is part of GNU Anubis.
-## Copyright (C) 2001, 2002, 2003 The Anubis Team.
+## Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 ##
 ## GNU Anubis is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -22,9 +22,9 @@
 ## compiling, linking, and/or using OpenSSL is allowed.
 ##
 
-AUTOMAKE_OPTIONS = 1.7.9 readme-alpha
+AUTOMAKE_OPTIONS = 1.8 readme-alpha
 ACLOCAL_AMFLAGS = -I m4
-SUBDIRS = build m4 lib intl po doc scripts examples guile contrib \
+SUBDIRS = build lib intl po doc scripts examples guile contrib \
 	src elisp testsuite
 
 ## EOF
