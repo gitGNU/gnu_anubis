@@ -30,6 +30,8 @@
 #include "extern.h"
 
 #ifdef HAVE_SSL
+#include <openssl/bio.h>
+
 #define X509BUFSIZE 1024
 
 static void ssl_error(char *);
@@ -61,8 +63,135 @@ init_ssl_libs(void)
 	return;
 }
 
+
+/* SSL BIO Support */
+static int
+net_stream_write(BIO *bio, const char *buf, int size)
+{
+	if (bio->init && buf) {
+		size_t wrsize;
+		int rc = stream_write(bio->ptr, buf, size, &wrsize);
+		if (rc) {
+			anubis_error(HARD,
+				     _("Write error: %s"),
+				     stream_strerror(bio->ptr, rc));
+			return -1;
+		}
+		return wrsize;
+	}
+	return 0;
+}
+
+static int
+net_stream_read(BIO *bio, char *buf, int size)
+{
+	if (bio->init && buf) {
+		size_t rdsize;
+		int rc = stream_read(bio->ptr, buf, size, &rdsize);
+		if (rc) {
+			anubis_error(HARD,
+				     _("Read error: %s"),
+				     stream_strerror(bio->ptr, rc));
+			return -1;
+		}
+		return rdsize;
+	}
+	return 0;
+}
+
+static int
+net_stream_puts(BIO *bio, const char *str)
+{
+	return net_stream_write(bio, str, strlen(str));
+}
+
+static long
+net_stream_ctrl(BIO *bio, int cmd, long arg1, void *arg2)
+{
+	long rc = 1;
+	switch (cmd) {
+	case BIO_CTRL_PUSH:
+	case BIO_CTRL_FLUSH:
+		break;
+		
+	case BIO_C_SET_FILE_PTR:
+		bio->init = 1;
+		bio->ptr = arg2;
+		bio->shutdown = (int) arg1 & BIO_CLOSE;
+		return 1;
+		
+        case BIO_CTRL_GET_CLOSE:
+		rc = (long) bio->shutdown;
+		break;
+		
+	case BIO_CTRL_SET_CLOSE:
+		bio->shutdown = (int) arg1;
+		break;
+		
+	default:
+		/*info(VERBOSE, "net_stream_ctrl: cmd=%d, arg1=%d, arg2=%p",
+		       cmd, arg1, arg2);*/
+		rc = 0;
+		break;
+	}
+	return rc;
+}
+
+static int
+net_stream_new(BIO *bio)
+{
+        bio->init = 0;
+	bio->num = 0;
+	bio->ptr = NULL;
+	return(1);
+}
+
+static int
+net_stream_free(BIO *bio)
+{
+        if (!bio)
+		return 0;
+	if (bio->shutdown) {
+		if (bio->init && bio->ptr) {
+			stream_close((NET_STREAM) bio->ptr);
+			bio->ptr = NULL;
+		}
+		bio->init = 0;
+	}
+	return 1;
+}
+
+
+static BIO_METHOD method_net_stream =
+{
+	BIO_TYPE_SOURCE_SINK,      /* type */
+	"ANUBIS NET_STREAM",       /* name */
+	net_stream_write,          /* bwrite */
+	net_stream_read,           /* bread */
+	net_stream_puts,           /* bputs */
+	NULL,                      /* bgets */
+	net_stream_ctrl,           /* ctrl */
+	net_stream_new,            /* create */
+	net_stream_free,           /* destroy */
+	NULL,                      /* callback */
+};
+
+BIO *
+BIO_new_net_stream(NET_STREAM stream)
+{
+	BIO *bio;
+
+	if ((bio = BIO_new(&method_net_stream)) == NULL)
+		return NULL;
+	BIO_set_fp(bio, stream, BIO_CLOSE);
+	return bio;
+}	
+
+
+/* NET_STREAM I/O Support */
+
 static const char *
-_ssl_strerror(int rc)
+_ssl_strerror(void *unused_data, int rc)
 {
 	return ERR_error_string(rc, NULL);
 }
@@ -117,6 +246,8 @@ _ssl_close(void *sd)
 	return 0;
 }
 
+
+
 static void
 ssl_error(char *txt)
 {
@@ -130,7 +261,7 @@ ssl_error(char *txt)
 #endif /* HAVE_SYSLOG */
 			mprintf(">>%s", string_error);
 	}
-	anubis_error(HARD, txt);
+	anubis_error(HARD, "%s", txt);
 	return;
 }
 
@@ -158,37 +289,54 @@ init_ssl_client(void)
 	return (SSL_CTX *)ctx_local;
 }
 
-void *
-start_ssl_client(int sd_server)
+
+
+/* FIXME: cafile is not used */
+NET_STREAM
+start_ssl_client(NET_STREAM sd_server, const char *cafile, int verbose)
 {
+	NET_STREAM stream;
 	SESS *sd;
 	SSL *ssl = 0;
-	SSL_CTX *ctx = init_ssl_client();
-		
+	SSL_CTX *ctx = init_ssl_client(); 
+	BIO *rbio, *wbio;
+	int rc;
+	
 	info(VERBOSE, _("Initializing the TLS/SSL connection with MTA..."));
 
 	if (!(ssl = SSL_new(ctx))) {
 		ssl_error(_("Can't create a new SSL structure for a connection."));
 		return 0;
 	}
-	if (!(SSL_set_fd(ssl, sd_server))) {
-		ssl_error(_("SSL_set_fd() failed."));
-		return 0;
-	}
+
+	rbio = BIO_new_net_stream(sd_server);
+	wbio = BIO_new_net_stream(sd_server);
+	
+	/* Set up BIOs */
+	SSL_set_bio(ssl, rbio, wbio);
+
 	SSL_set_connect_state(ssl);
-	if (SSL_connect(ssl) <= 0) {
-		ssl_error(_("TLS/SSL handshake failed!"));
+	rc = SSL_connect(ssl);
+	
+	if (rc <= 0) {
+		anubis_error(HARD,
+			     _("TLS/SSL handshake failed: %s"),
+			     ERR_error_string(SSL_get_error(ssl, rc), NULL));
 		return 0;
 	}
 
-	if (options.termlevel > NORMAL)
+	if (verbose)
 		cipher_info(ssl);
 
 	sd = xmalloc(sizeof(*sd));
 	sd->ssl = ssl;
 	sd->ctx = ctx;
-	net_set_io(CLIENT, _ssl_read, _ssl_write, _ssl_close, _ssl_strerror);
-	return sd;
+	stream_create(&stream);
+	stream_set_io(stream,
+		      sd,
+		      _ssl_read, _ssl_write,
+		      _ssl_close, NULL, _ssl_strerror);
+	return stream;
 }
 
 /***********************
@@ -196,7 +344,7 @@ start_ssl_client(int sd_server)
 ************************/
 
 SSL_CTX *
-init_ssl_server(void)
+init_ssl_server(const char *cert, const char *key)
 {
 	SSL_CTX *ctx_local = 0;
 	SSL_METHOD *method = 0;
@@ -209,11 +357,11 @@ init_ssl_server(void)
 		ssl_error(_("Can't create SSL_CTX object."));
 		return 0;
 	}
-	if (SSL_CTX_use_certificate_file(ctx_local, secure.cert, SSL_FILETYPE_PEM) <= 0) {
+	if (SSL_CTX_use_certificate_file(ctx_local, cert, SSL_FILETYPE_PEM) <= 0) {
 		ssl_error(_("SSL_CTX_use_certificate_file() failed."));
 		return 0;
 	}
-	if (SSL_CTX_use_PrivateKey_file(ctx_local, secure.key, SSL_FILETYPE_PEM) <= 0) {
+	if (SSL_CTX_use_PrivateKey_file(ctx_local, key, SSL_FILETYPE_PEM) <= 0) {
 		ssl_error(_("SSL_CTX_use_PrivateKey_file() failed."));
 		return 0;
 	}
@@ -228,12 +376,16 @@ init_ssl_server(void)
 	return (SSL_CTX *)ctx_local;
 }
 
-void *
-start_ssl_server(int sd_client)
+/* FIXME: cafile is not used */
+NET_STREAM
+start_ssl_server(NET_STREAM sd_client, const char *cafile, const char *cert,
+		 const char *key, int verbose)
 {
+	NET_STREAM stream;
 	SESS *sd;
 	SSL *ssl = 0;
-	SSL_CTX *ctx = init_ssl_server();
+	SSL_CTX *ctx = init_ssl_server(cert, key);
+	BIO *rbio, *wbio;
 	
 	info(VERBOSE, _("Initializing the TLS/SSL connection with MUA..."));
 
@@ -241,24 +393,31 @@ start_ssl_server(int sd_client)
 		ssl_error(_("Can't create a new SSL structure for a connection."));
 		return 0;
 	}
-	if (!(SSL_set_fd(ssl, sd_client))) {
-		ssl_error(_("SSL_set_fd() failed."));
-		return 0;
-	}
+
+	rbio = BIO_new_net_stream(sd_client);
+	wbio = BIO_new_net_stream(sd_client);
+	
+	/* Set up BIOs */
+	SSL_set_bio(ssl, rbio, wbio);
+
 	SSL_set_accept_state(ssl);
 	if (SSL_accept(ssl) <= 0) {
 		ssl_error(_("TLS/SSL handshake failed!"));
 		return 0;
 	}
 
-	if (options.termlevel > NORMAL)
+	if (verbose)
 		cipher_info(ssl);
 
 	sd = xmalloc(sizeof(*sd));
 	sd->ssl = ssl;
 	sd->ctx = ctx;
-	net_set_io(SERVER, _ssl_read, _ssl_write, _ssl_close, _ssl_strerror);
-	return sd;
+	stream_create(&stream);
+	stream_set_io(stream,
+		      sd,
+		      _ssl_read, _ssl_write,
+		      _ssl_close, NULL, _ssl_strerror);
+	return stream;
 }
 
 /*****************
@@ -352,4 +511,3 @@ rand_md5(void)
 #endif /* HAVE_SSL */
 
 /* EOF */
-
