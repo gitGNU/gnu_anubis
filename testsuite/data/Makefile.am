@@ -22,7 +22,7 @@
 GPGFILES = secring.gpg pubring.gpg
 noinst_DATA = @ANUBIS_GPGFILES@
 
-EXTRA_DIST = pubring.asc secring.asc
+EXTRA_DIST = pubring.asc secring.asc anubis.pem
 CLEANFILES = *.gpg random_seed *~
 
 pubring.gpg secring.gpg: $(srcdir)/pubring.asc $(srcdir)/secring.asc

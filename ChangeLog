@@ -15,6 +15,9 @@
 	* testsuite/anubis/tls.exp: New file.
 	* testsuite/anubis/DISTFILES: Added new files.
 
+	* testsuite/data/anubis.pem: New file
+	* testsuite/data/Makefile.am: Added new file.
+	
 2003-05-11  Wojciech Polak
 
 	* src/help.c (print_usage): Added missing command line options.
