@@ -1,3 +1,27 @@
+2004-04-22  Sergey Poznyakoff
+
+	* configure.ac: Added check for Postgres libraries.
+	* guile/entire-msg.scm: New file.
+	* guile/Makefile.am: Added guile/entire-msg.scm
+	* src/sql.c: New file. General purpose interface to SQL databases.
+	* src/sql.h: New file.		
+	* src/pgsql.c: New file. Postgres DB interface.	
+	* src/mysql.c: Rewritten using new SQL interface.		
+	* src/Makefile.am: Added new files.
+	* src/anubisadm.c (op_list): Minor improvement.
+	(main): Init postgres db, if required.
+	* src/authmode.c: Minor stylistic fix. Removed misguiding comment.
+	* src/main.c (main): Init postgres db, if required.
+
+	* src/headers.h: Added missing prototypes.
+
+	* src/anubisdb.c: Use const consistently.
+	* src/dbtext.c: Likewise
+	* src/gdbm.c: Likewise
+	
+	* src/gsasl.c: Moved include <gsasl.h> to headers.h
+	* src/gsasl_srv.c: Likewise
+	
 2004-03-15  Wojciech Polak
 
 	* src/authmode.c: Removed RSET support (where was my mind
