@@ -28,43 +28,6 @@
 static int make_sockets (int fd[]);
 static void sig_local (int);
 
-/********************************
- execargs generator for execvp()
-*********************************/
-
-char **
-gen_execargs (const char *commandline)
-{
-  int argc;
-  char *dupstr;
-  char *str;
-  char **args;
-
-  /* strtok modifies the string. Prevent it by making a private copy. */
-  dupstr = strdup (commandline);
-
-  /* Count the arguments first. */
-  for (argc = 0, str = strtok (dupstr, " "); str; argc++)
-    str = strtok (0, " ");
-  free (dupstr);
-
-  args = xmalloc ((argc + 1) * sizeof (*args));
-
-  /* strtok above has modified the string, so we duplicate it again. */
-  dupstr = strdup (commandline);
-
-  /* Now copy the arguments. */
-  for (argc = 0, str = strtok (dupstr, " "); str; argc++)
-    {
-      args[argc] = strdup (str);
-      str = strtok (0, " ");
-    }
-  args[argc] = NULL;
-  free (dupstr);
-
-  return args;
-}
-
 /*************************
  Connect to stdin/stdout.
 **************************/
@@ -161,22 +124,19 @@ static int
 make_local_connection_fd (char *exec_path, char **exec_args)
 {
   int fd[2];
-  char **pargs;
-  char args[LINEBUFFER + 1];
 
   if (check_filename (exec_path, 0) == 0)
     return -1;
 
-  memset (args, 0, LINEBUFFER + 1);
-  pargs = exec_args;
-  pargs++;
-  while (*pargs)
+  if (VERBOSE > options.termlevel) /* Extra check to avoid unnecessary
+				      memory allocation */
     {
-      strncat (args, *pargs, LINEBUFFER - strlen (args));
-      strncat (args, " ", LINEBUFFER - strlen (args));
-      pargs++;
+        char *args;
+	argcv_string (-1, exec_args, &args);
+	info (VERBOSE, _("Executing %s..."), args);
+	free (args);
     }
-  info (VERBOSE, _("Executing %s %s..."), exec_path, args);
+  
   if (make_sockets (fd))
     return -1;
 
@@ -228,38 +188,16 @@ make_local_connection (char *exec_path, char **exec_args)
 char *
 external_program (int *rs, char *path, char *src, char *dst, int dstsize)
 {
+  int rc;
   char *ret;
-  char tmp[LINEBUFFER + 1];
-  char **args = 0;
-  char *a = 0;			/* args */
-  char *p = 0;			/* path */
+  int argc;
+  char **argv = 0;
 
-  a = strchr (path, ' ');	/* an extra arguments */
-  if (a)
-    {
-      *a++ = '\0';
-      p = strrchr (path, '/');
-      if (p)
-	p++;
-      else
-	p = path;
-      snprintf (tmp, LINEBUFFER, "%s %s", p, a);
-      p = path;
-      a = tmp;
-    }
-  else
-    {				/* no arguments */
-      p = path;
-      a = strrchr (path, '/');
-      if (a)
-	a++;
-      else
-	a = path;
-    }
-
-  args = gen_execargs (a);
-  ret = exec_argv (rs, p, args, src, dst, dstsize);
-  xfree_pptr (args);
+  if ((rc = argcv_get (path, "", "#", &argc, &argv)))
+    anubis_error (EX_SOFTWARE, rc, _("argcv_get failed"));
+  
+  ret = exec_argv (rs, argv[0], argv, src, dst, dstsize);
+  argcv_free (argc, argv);
   return ret;
 }
 
