@@ -1,3 +1,31 @@
+2003-02-20  Sergey Poznyakoff  <gray@Mirddin.farlep.net>
+
+	* configure.ac: Define ANUBIS_GPGFILES if GPG is enabled.
+	* contrib/Makefile.am: Added msg2smtp.pl to EXTRA_DIST.
+	* src/gpg.c: Moved configuration handler from rc.c. Added
+	  new configuration keyword gpg-home for setting the GPG
+	  home directory.
+	* src/headers.h (gpg_section_init): New function.
+	* src/rc.c: Moved gpg-specific functions to gpg.c
+	* testsuite/data: New directory.
+	* testsuite/data/Makefile.am:
+	* testsuite/data/.cvsignore:
+	* testsuite/data/pubring.asc:
+	* testsuite/anubis/gpg.exp: New file. Tests GPG encryption
+	* testsuite/anubis/DISTFILES: Added gpg.exp
+	* testsuite/Makefile.am: Added data to SUBDIRS
+	* testsuite/etc/gpgcrypt.pat: New file
+	* testsuite/etc/gpg.in: New file.
+	* testsuite/etc/Makefile.am: Added new files
+	* testsuite/lib/anubis.exp (anubis_version): Renamed to
+	  default_anubis_version to avoid name clashes.
+	  (anubis_exec,anubis_expect_list,anubis_test): Improved handling
+	  of pattern modifiers  (-re and --).
+	  (anubis_check_capability): New function.
+	  (anubis_test_file): New option -catprog.
+	  (anubis_pat): Improved handling of :OPTIONS keyword,
+	  Added new mode "CAT" for testing GPG encryption.
+	  
 2003-02-19  Wojciech Polak
 
 	* src/main.h: Removed no longer used variable `submatch'.
