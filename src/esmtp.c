@@ -2,7 +2,7 @@
    esmtp.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -25,358 +25,281 @@
 #include "headers.h"
 #include "extern.h"
 
-#ifdef HAVE_TLS
-# include <gcrypt.h>
-#endif /* HAVE_TLS */
-
-static char *b64encode (char *);
-static int b64decode (char *, char **);
-#if defined(HAVE_TLS) || defined(HAVE_SSL)
-static void cram_md5 (char *, char *, unsigned char *);
-#endif /* HAVE_TLS or HAVE_SSL */
-
-/*********************
- ESMTP Authentication
-**********************/
-
-void
-esmtp_auth (NET_STREAM sd_server, char *reply)
+#if defined(WITH_GSASL)
+/* FIXME: Duplicated in anubisusr.c */
+static int
+utf8cpy (char *dst, size_t * dstlen, char *src, size_t srclen)
 {
-  char *p = 0;
-  char *b64buf = 0;
-  char tmp[LINEBUFFER + 1];
-  memset (tmp, 0, LINEBUFFER + 1);
+  size_t len = strlen (src);
 
-#if defined(HAVE_TLS) || defined(HAVE_SSL)
-  if (strstr (reply, "CRAM-MD5"))
-    {
-      int i;
-      unsigned char digest[16];
-      static char ascii_digest[33];
-      memset (digest, 0, 16);
-
-      info (VERBOSE, _("Using ESMTP authentication mechanism CRAM-MD5..."));
-      swrite (CLIENT, sd_server, "AUTH CRAM-MD5" CRLF);
-      get_response_smtp (CLIENT, sd_server, tmp, LINEBUFFER);
-
-      if (strncmp (tmp, "334 ", 4))
-	{
-	  swrite (CLIENT, sd_server, "*" CRLF);
-	  anubis_error (0, 0, _("Server rejected the AUTH command."));
-	  get_response_smtp (CLIENT, sd_server, 0, 0);
-	  return;
-	}
-
-      p = strchr (tmp, ' ');
-      if (!p)
-	anubis_error (1, 0, _("ESMTP AUTH: %s."), _("Malformed response"));
-      
-      p++;
-      b64decode (p, &b64buf);
-      if (options.termlevel == DEBUG)
-	fprintf (stderr, _("Challenge decoded: %s\n"), b64buf);
-
-      cram_md5 (session.mta_password, b64buf, digest);
-      xfree (b64buf);
-
-      for (i = 0; i < 16; i++)
-	sprintf (ascii_digest + 2 * i, "%02x", digest[i]);
-
-      snprintf (tmp, LINEBUFFER, "%s %s", session.mta_username, ascii_digest);
-
-      p = b64encode (tmp);
-      snprintf (tmp, LINEBUFFER, "%s" CRLF, p);
-      xfree (p);
-
-      swrite (CLIENT, sd_server, tmp);
-      get_response_smtp (CLIENT, sd_server, tmp, LINEBUFFER);
-      if (!isdigit ((unsigned char) tmp[0]) || (unsigned char) tmp[0] > '3')
-	{
-	  remcrlf (tmp);
-	  anubis_error (0, 0, _("ESMTP AUTH: %s."), tmp);
-	}
-    }
-  else
-#endif /* HAVE_TLS or HAVE_SSL */
-  if (strstr (reply, "LOGIN") && (topt & T_SSL_FINISHED))
-    {
-      info (VERBOSE, _("Using ESMTP authentication mechanism LOGIN..."));
-      swrite (CLIENT, sd_server, "AUTH LOGIN" CRLF);
-      get_response_smtp (CLIENT, sd_server, tmp, LINEBUFFER);
-
-      if (strncmp (tmp, "334 ", 4))
-	{
-	  swrite (CLIENT, sd_server, "*" CRLF);
-	  info (VERBOSE, _("Server rejected the AUTH command."));
-	  get_response_smtp (CLIENT, sd_server, 0, 0);
-	  return;
-	}
-
-      p = strchr (tmp, ' ');
-      p++;
-      b64decode (p, &b64buf);
-      if (options.termlevel == DEBUG)
-	fprintf (stderr, _("Challenge decoded: %s\n"), b64buf);
-
-      p = b64encode (session.mta_username);
-      snprintf (tmp, LINEBUFFER, "%s" CRLF, p);
-      xfree (p);
-      swrite (CLIENT, sd_server, tmp);
-      get_response_smtp (CLIENT, sd_server, tmp, LINEBUFFER);
-
-      p = strchr (tmp, ' ');
-      if (!p)
-	anubis_error (1, 0, _("ESMTP AUTH: %s."), _("Malformed response"));
-      
-      p++;
-      b64decode (p, &b64buf);
-      if (options.termlevel == DEBUG)
-	fprintf (stderr, _("Challenge decoded: %s\n"), b64buf);
-
-      p = b64encode (session.mta_password);
-      snprintf (tmp, LINEBUFFER, "%s" CRLF, p);
-      xfree (p);
-      swrite (CLIENT, sd_server, tmp);
-
-      get_response_smtp (CLIENT, sd_server, tmp, LINEBUFFER);
-      if (!isdigit ((unsigned char) tmp[0]) || (unsigned char) tmp[0] > '3')
-	{
-	  remcrlf (tmp);
-	  anubis_error (0, 0, _("ESMTP AUTH: %s."), tmp);
-	}
-    }
+  if (dst && *dstlen < len)
+    return GSASL_TOO_SMALL_BUFFER;
+  *dstlen = len;
+  if (dst)
+    strcpy (dst, src);
+  return GSASL_OK;
 }
 
-/************************************
- Base64 encoding/decoding functions.
-*************************************/
+ANUBIS_LIST *anubis_client_mech_list;/* FIXME: init */
+char *anon_token;
+char *authorization_id;
+char *authentication_id;
+char *auth_password;
+char *auth_service;
+char *auth_hostname;
+char *generic_service_name;
+char *auth_passcode;
+char *auth_realm;
 
-static char *
-b64encode (char *in)
+static int
+cb_anonymous (Gsasl_session_ctx *ctx, char *out, size_t *outlen)
 {
-  int len;
-  char *out = 0;
-  char *p = 0;
+  if (anon_token == NULL)
+    return GSASL_AUTHENTICATION_ERROR;
 
-  const char uu_base64[64] = {
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-    'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-    'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-    'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
-    'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
-    'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-    'w', 'x', 'y', 'z', '0', '1', '2', '3',
-    '4', '5', '6', '7', '8', '9', '+', '/'
-  };
-
-  if (in == 0)
-    return 0;
-
-  len = strlen (in);
-  out = (char *) xmalloc (4 * ((len + 2) / 3) + 1);
-  p = out;
-
-  while (len-- > 0)
-    {
-      int x, y;
-      x = *in++;
-      *p++ = uu_base64[(x >> 2) & 63];
-
-      if (len-- <= 0)
-	{
-	  *p++ = uu_base64[(x << 4) & 63];
-	  *p++ = '=';
-	  *p++ = '=';
-	  break;
-	}
-      y = *in++;
-      *p++ = uu_base64[((x << 4) | ((y >> 4) & 15)) & 63];
-
-      if (len-- <= 0)
-	{
-	  *p++ = uu_base64[(y << 2) & 63];
-	  *p++ = '=';
-	  break;
-	}
-      x = *in++;
-      *p++ = uu_base64[((y << 2) | ((x >> 6) & 3)) & 63];
-      *p++ = uu_base64[x & 63];
-    }
-  *p = 0;
-  return out;
+  return utf8cpy (out, outlen, anon_token, strlen (anon_token));
 }
 
 static int
-b64decode (char *in, char **ptr)
+cb_authorization_id (Gsasl_session_ctx *ctx, char *out, size_t *outlen)
 {
-  int x, y;
-  char *result = 0;
+  if (authorization_id == NULL)
+    return GSASL_AUTHENTICATION_ERROR;
 
-  unsigned char uu_base64_decode[] = {
-    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-      255,
-    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-      255,
-    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 62, 255, 255, 255,
-      63,
-    52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 255, 255, 255, 255, 255, 255,
-    255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
-    15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 255, 255, 255, 255, 255,
-    255, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-    41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 255, 255, 255, 255, 255
-  };
+  return utf8cpy (out, outlen, authorization_id, strlen (authorization_id));
+}
 
-  result = (char *) xmalloc (3 * (strlen (in) / 4) + 1);
-  *ptr = result;
+static int
+cb_authentication_id (Gsasl_session_ctx *ctx, char *out, size_t *outlen)
+{
+  if (authentication_id == NULL)
+    return GSASL_AUTHENTICATION_ERROR;
 
-  while ((x = (unsigned char) (*in++)) != 0)
+  return utf8cpy (out, outlen, authentication_id, strlen (authentication_id));
+}
+
+static int
+cb_password (Gsasl_session_ctx * ctx, char *out, size_t * outlen)
+{
+  if (auth_password == NULL)
+    return GSASL_AUTHENTICATION_ERROR;
+
+  return utf8cpy (out, outlen, auth_password, strlen (auth_password));
+}
+
+static int
+cb_service (Gsasl_session_ctx * ctx, char *srv, size_t * srvlen,
+	    char *host, size_t * hostlen, char *srvname, size_t * srvnamelen)
+{
+  int rc;
+  
+  if (auth_service == NULL)
+    return GSASL_AUTHENTICATION_ERROR;
+
+  if (auth_hostname == NULL)
+    return GSASL_AUTHENTICATION_ERROR;
+
+  if (srvnamelen && generic_service_name == NULL)
+    return GSASL_AUTHENTICATION_ERROR;
+
+  rc = utf8cpy (srv, srvlen, auth_service, strlen (auth_service));
+  if (rc != GSASL_OK)
+    return rc;
+
+  rc = utf8cpy (host, hostlen, auth_hostname, strlen (auth_hostname));
+  if (rc != GSASL_OK)
+    return rc;
+
+  if (srvnamelen)
+    rc = utf8cpy (srvname, srvnamelen, generic_service_name,
+		  strlen (generic_service_name));
+
+  return rc;
+}
+
+static int
+cb_passcode (Gsasl_session_ctx * ctx, char *out, size_t * outlen)
+{
+  if (auth_passcode == NULL)
+    return GSASL_AUTHENTICATION_ERROR;
+
+  return utf8cpy (out, outlen, auth_passcode, strlen (auth_passcode));
+}
+
+static int
+cb_realm (Gsasl_session_ctx *ctx, char *out, size_t *outlen)
+{
+  if (auth_realm == NULL)
+    return GSASL_AUTHENTICATION_ERROR;
+
+  return utf8cpy (out, outlen, auth_realm, strlen (auth_realm));
+}
+
+static char *
+get_reply (NET_STREAM str, int *code, char *buf, size_t size)
+{
+  char *p;
+  get_response_smtp (CLIENT, str, buf, size);
+  remcrlf (buf);
+  *code = strtoul (buf, &p, 10);
+  if (*p == 0 || *p == '\r')
+    return p;
+
+  if (!isspace (*p))
     {
-      if (x > 127 || (x = uu_base64_decode[x]) == 255)
-	return -1;
-      if ((y = (unsigned char) (*in++)) == 0
-	  || (y = uu_base64_decode[y]) == 255)
-	return -1;
-      *result++ = (x << 2) | (y >> 4);
+      anubis_error (1, 0, _("Malformed or unexpected reply"));
+    }
 
-      if ((x = (unsigned char) (*in++)) == '=')
+  while (*p && isspace (*p))
+    p++;
+  return p;
+}
+
+int
+do_gsasl_auth (NET_STREAM *pstr, Gsasl_ctx * ctx, char *mech)
+{
+  char *output;
+  int rc;
+  Gsasl_session_ctx *sess_ctx = NULL;
+  char buf[LINEBUFFER + 1];
+  char *p;
+  int code;
+  
+  snprintf (buf, sizeof buf, "AUTH %s" CRLF, mech);
+  swrite (CLIENT, *pstr, buf);
+
+  rc = gsasl_client_start (ctx, mech, &sess_ctx);
+  if (rc != GSASL_OK)
+    {
+      anubis_error (1, 0, _("SASL gsasl_client_start: %s"),
+		    gsasl_strerror (rc));
+    }
+
+  output = NULL;
+
+  p = get_reply (*pstr, &code, buf, sizeof buf);
+  if (code != 334)
+    {
+      anubis_error (0, 0, _("GSASL handshake aborted: %d %s"), code, p);
+      return 1;
+    }
+
+  do
+    {
+      rc = gsasl_step64 (sess_ctx, p, &output);
+      if (rc != GSASL_NEEDS_MORE && rc != GSASL_OK)
+	break;
+
+      swrite (CLIENT, *pstr, output);
+      swrite (CLIENT, *pstr, CRLF);
+
+      if (rc == GSASL_OK)
+	break;
+      p = get_reply (*pstr, &code, buf, sizeof buf);
+      if (code != 334)
 	{
-	  if (*in++ != '=' || *in != 0)
-	    return -1;
-	}
-      else
-	{
-	  if (x > 127 || (x = uu_base64_decode[x]) == 255)
-	    return -1;
-	  *result++ = (y << 4) | (x >> 2);
-	  if ((y = (unsigned char) (*in++)) == '=')
-	    {
-	      if (*in != 0)
-		return -1;
-	    }
-	  else
-	    {
-	      if (y > 127 || (y = uu_base64_decode[y]) == 255)
-		return -1;
-	      *result++ = (x << 6) | y;
-	    }
+	  anubis_error (0, 0, _("GSASL handshake aborted: %d %s"), code, p);
+	  free (output);
+	  return 1;
 	}
     }
-  *result = 0;
-  return result - *ptr;
+  while (rc == GSASL_NEEDS_MORE);
+
+  free (output);
+
+  if (rc != GSASL_OK)
+    {
+      anubis_error (0, 0, _("GSASL error: %s"), gsasl_strerror (rc));
+      exit (1);
+    }
+
+  p = get_reply (*pstr, &code, buf, sizeof buf);
+  
+  if (code == 334)
+    {
+      /* Additional data. Do we need it? */
+      p = get_reply (*pstr, &code, buf, sizeof buf);
+    }
+
+  if (code != 235)
+    {
+      anubis_error (1, 0, _("Authentication failed: %d %s"), code, p);
+    }
+
+  info (VERBOSE, _("Authentication successful\n"));
+
+  if (sess_ctx)
+    install_gsasl_stream (sess_ctx, pstr);
+
+  return 0;
 }
 
-/***********
-  CRAM-MD5
-************/
-
-#ifdef HAVE_TLS
-
-static void
-cram_md5 (char *secret, char *challenge, unsigned char *digest)
+int
+esmtp_auth (NET_STREAM *pstr, char *input)
 {
-  gcry_md_hd_t context;
-  unsigned char ipad[64];
-  unsigned char opad[64];
-  int secret_len;
-  int challenge_len;
-  int i;
-
-  if (secret == 0 || challenge == 0)
-    return;
-
-  secret_len = strlen (secret);
-  challenge_len = strlen (challenge);
-  memset (ipad, 0, sizeof (ipad));
-  memset (opad, 0, sizeof (opad));
-
-  if (secret_len > 64)
+  Gsasl_ctx *ctx;
+  int rc;
+  ANUBIS_LIST *isect;
+  ANUBIS_LIST *mech_list = auth_method_list (input);
+  char *mech;
+  
+  if (list_count (mech_list) == 0)
     {
-      gcry_md_open (&context, GCRY_MD_MD5, 0);
-      gcry_md_write (context, (unsigned char *) secret, secret_len);
-      gcry_md_final (context);
-      memcpy (ipad, gcry_md_read (context, 0), 64);
-      memcpy (opad, gcry_md_read (context, 0), 64);
-      gcry_md_close (context);
-    }
-  else
-    {
-      memcpy (ipad, secret, secret_len);
-      memcpy (opad, secret, secret_len);
+      anubis_warning (0, _("Got empty list of authentication methods"));
+      list_destroy (&mech_list, anubis_free_list_item, NULL);
+      return 1;
     }
 
-  for (i = 0; i < 64; i++)
+  /* Backward compatibility hack */
+  authentication_id = authorization_id = session.mta_username;
+  auth_password = session.mta_password;
+  if (!anubis_client_mech_list)
     {
-      ipad[i] ^= 0x36;
-      opad[i] ^= 0x5c;
+      char *p = strdup ("CRAM-MD5 LOGIN PLAIN");
+      anubis_client_mech_list = auth_method_list (p);
+      free (p);
+    }
+  /* End of backward compatibility hack */
+  
+  isect = list_intersect (anubis_client_mech_list, mech_list, anubis_name_cmp);
+
+  if (list_count (isect) == 0)
+    {
+      anubis_warning (0,
+	      _("Server did not offer any feasible authentication mechanism"));
+      list_destroy (&isect, NULL, NULL);
+      list_destroy (&mech_list, anubis_free_list_item, NULL);
+      return 1;
+    }
+  
+  mech = list_item (isect, 0);
+  if (!mech) /* Just in case...*/
+    {
+      anubis_error(1, 0,
+		   "%s %s:%d", _("INTERNAL ERROR"), __FILE__, __LINE__);
     }
 
-  gcry_md_open (&context, GCRY_MD_MD5, 0);
-  gcry_md_write (context, ipad, 64);
-  gcry_md_write (context, (unsigned char *) challenge, challenge_len);
-  gcry_md_final (context);
-  memcpy (digest, gcry_md_read (context, 0), 16);
-  gcry_md_close (context);
+  info (VERBOSE, _("Selected authentication mechanism %s"), mech);
+  
+  rc = gsasl_init (&ctx);
+  
+  if (rc != GSASL_OK)
+    {
+      anubis_error (0, 0, _("cannot initialize libgsasl: %s"),
+		    gsasl_strerror (rc));
+      return 1;
+    }
 
-  gcry_md_open (&context, GCRY_MD_MD5, 0);
-  gcry_md_write (context, opad, 64);
-  gcry_md_write (context, digest, 16);
-  gcry_md_final (context);
-  memcpy (digest, gcry_md_read (context, 0), 16);
-  gcry_md_close (context);
+  gsasl_client_callback_anonymous_set (ctx, cb_anonymous);
+  gsasl_client_callback_authentication_id_set (ctx, cb_authentication_id);
+  gsasl_client_callback_authorization_id_set (ctx, cb_authorization_id);
+  gsasl_client_callback_password_set (ctx, cb_password);
+  gsasl_client_callback_passcode_set (ctx, cb_passcode);
+  gsasl_client_callback_service_set (ctx, cb_service);
+  gsasl_client_callback_realm_set (ctx, cb_realm);
+
+  rc = do_gsasl_auth (pstr, ctx, mech);
+  list_destroy (&mech_list, anubis_free_list_item, NULL);
+  return rc;
 }
-
-#else
-#ifdef HAVE_SSL
-
-static void
-cram_md5 (char *secret, char *challenge, unsigned char *digest)
-{
-  MD5_CTX context;
-  unsigned char ipad[64];
-  unsigned char opad[64];
-  int secret_len;
-  int challenge_len;
-  int i;
-
-  if (secret == 0 || challenge == 0)
-    return;
-
-  secret_len = strlen (secret);
-  challenge_len = strlen (challenge);
-  memset (ipad, 0, sizeof (ipad));
-  memset (opad, 0, sizeof (opad));
-
-  if (secret_len > 64)
-    {
-      MD5_Init (&context);
-      MD5_Update (&context, (unsigned char *) secret, secret_len);
-      MD5_Final (ipad, &context);
-      MD5_Final (opad, &context);
-    }
-  else
-    {
-      memcpy (ipad, secret, secret_len);
-      memcpy (opad, secret, secret_len);
-    }
-
-  for (i = 0; i < 64; i++)
-    {
-      ipad[i] ^= 0x36;
-      opad[i] ^= 0x5c;
-    }
-
-  MD5_Init (&context);
-  MD5_Update (&context, ipad, 64);
-  MD5_Update (&context, (unsigned char *) challenge, challenge_len);
-  MD5_Final (digest, &context);
-
-  MD5_Init (&context);
-  MD5_Update (&context, opad, 64);
-  MD5_Update (&context, digest, 16);
-  MD5_Final (digest, &context);
-}
-
-#endif /* HAVE_SSL */
-#endif /* HAVE_TLS */
-
-/* EOF */
+#endif
