@@ -1,3 +1,9 @@
+2004-03-13  Wojciech Polak
+
+	* src/*: Namespace cleanup.
+	* src/rc.c: Renamed to rcfile.c.
+	* src/daemon.c (anubis_child_main): Bugfix.
+
 2004-03-13  Sergey Poznyakoff 
 
 	* src/auth.c (auth_ident): Use streams appropriately
