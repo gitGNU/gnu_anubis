@@ -73,6 +73,9 @@ static struct option gopt[] =
 	{"check-config",optional_argument, 0, 'c'},
 	{"show-config-options", no_argument, 0, OPT_SHOW_CONFIG },
 	{"relax-perm-check", no_argument,  0, OPT_RELAX_PERM_CHECK },
+#if defined(WITH_GSASL)
+	{"mode",        required_argument, 0, 'm'},
+#endif
 	{0, 0, 0, 0}
 };
 
@@ -150,6 +153,18 @@ get_options(int argc, char *argv[])
 			options.termlevel = SILENT;
 			break;
 
+		case 'm':
+			if (strcmp (optarg, "transparent") == 0)
+				anubis_mode = anubis_transparent;
+			else if (strcmp (optarg, "auth") == 0)
+				anubis_mode = anubis_authenticate;
+			else {
+				mprintf(_("%s: Unknown mode: %s"),
+					argv[0], optarg);
+				exit (1);
+			}
+			break;
+			
 		case '?':
 		default:
 			mprintf(_("Try '%s --help' for more information."), argv[0]);
