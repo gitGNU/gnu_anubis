@@ -216,7 +216,7 @@ static void *in, *out;
 static const char *
 _def_strerror(int rc)
 {
-	return strerror(rc);
+	return rc == -1 ? "end of file reached" : strerror(rc);
 }
 
 static int
@@ -235,7 +235,7 @@ _def_read(void *sd, char *data, size_t size, size_t *nbytes)
 {
 	int n = read((int)sd, data, size);
 	if (n != size)
-		return errno;
+		return errno ? errno : -1;
 	if (nbytes)
 		*nbytes = n;
 	return 0;
