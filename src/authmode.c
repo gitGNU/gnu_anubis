@@ -666,7 +666,8 @@ anubis_authenticate_mode (NET_STREAM *psd_client,
   
   net_close_stream (&remote_client);
   net_close_stream (&remote_server);
-
+  *psd_client = NULL;
+  
   if (topt & T_ERROR)
     info (NORMAL, _("Connection terminated."));
   else
