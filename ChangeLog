@@ -1,3 +1,19 @@
+2003-07-18  Sergey Poznyakoff 
+
+	* src/message.c (message_modify_headers): Expand ampersands
+	to the old header value.
+	* src/rc.c: Added support for `control-priority' keyword.
+	* src/rcfile.l: Added `trigger' keyword.
+	
+	* TODO: Updated
+	* doc/anubis.texi: Updated
+	* examples/1anubisrc: Changed `rule' to `trigger'.
+	* examples/anubisrc.guile: Likewise.
+	* testsuite/etc/gpg.in: Likewise.
+	* testsuite/etc/remail.in: Likewise.
+	* testsuite/etc/std.in: Likewise.
+	* testsuite/etc/trigger.in: Likewise.
+
 2003-07-15  Sergey Poznyakoff
 
 	* src/rc.c (anubis_add_section): Initialize prio member.

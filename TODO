@@ -3,7 +3,6 @@
  =====
 
 * New settings (system configuration file)
-** `settings-priority = system | user'
 ** `forbid-user-settings = yes | no'
 
 * New action commands

@@ -539,13 +539,16 @@ Specify a CA certificate file (supported only by GnuTLS).
 @node Security Settings, , Encryption Settings, CONTROL Section
 @subsection Security Settings
 
+The following options control various security settings. 
+
 @deffn Option allow-local-mta @var{yes-or-no}
 @opindex allow-local-mta @var{yes-or-no}
 For security reasons, this option is set to @samp{no}, but the @samp{yes}
 value enables the @samp{local-mta} keyword (or @samp{--local-mta}
 command line option), so if you want to use a local mail server,
 which works on standard input and output, a supervisor must set
-this option to @samp{yes}. Only in system configuration file.
+this option to @samp{yes}. The option is available only in system
+configuration file.
 @end deffn
 
 @deffn Option drop-unknown-user @var{yes-or-no}
@@ -558,7 +561,8 @@ been verified by IDENT service. Value @samp{no} is the default.
 @opindex user-notprivileged @var{username}
 For security reasons, it is recommended to create an unprivileged user,
 which the server runs as most of the time, when doing unprivileged
-operations. Only in system configuration file. For example: 
+operations. The option is available only in system
+configuration file. For example: 
 
 @smallexample
 user-notprivileged "anubis.unprivileged"
@@ -569,6 +573,45 @@ in the @file{/etc/passwd}, if necessary. Add this user name also to the
 @w{@file{/etc/anubis.allow}}, if using GNU Anubis with PAM support.
 @end deffn
 
+@deffn Option rule-priority @var{value}
+@opindex rule-priority @var{value}
+
+This statement defines the order of execution of the system and user
+@code{RULE} sections (@xref{Rule System}, for detailed description).
+It is available only in system configuration file.
+
+@table @code
+@item system
+The system section is executed first, then the user section is executed.
+
+@item user
+The user section is executed first, next the system section is executed.
+
+@item system-only
+Only the system @code{RULE} section is executed.
+
+@item user-only
+Only the user @code{RULE} section is executed.
+@end table
+@end deffn
+
+@deffn Option control-priority @var{value}
+@opindex control-priority @var{value}
+
+Sets the order of processing the @code{CONTROL} sections. The option is
+available only in system configuration file. Its possible values are:
+
+@table @code
+@item system
+The system @code{CONTROL} section is processed first. Notice, that
+this means that the user may override the system settings in his
+configuration file. This is the default setting.
+
+@item user
+The user @code{CONTROL} section is processed first. Thus, the
+system-wide settings always override the user private settings.
+@end table
+@end deffn
 
 @node TRANSLATION Section, GUILE Section, CONTROL Section, Configuration
 @section TRANSLATION Section
@@ -791,10 +834,23 @@ fi
 Note also, that in the examples above any of the statements
 @var{action-list} may contain conditionals, so that the conditional
 statements may be nested. This allows to create very sophisticated
-rule sets. 
+rule sets. As an example, consider the following statement:
 
-[FIXME: elaborate on this. Provide an example]
+@smallexample
+if [List-Id] :re ".*<anubis-commit@@gnu.org>"
+  modify [Subject] "[Anubis Commit Notice] &"
+else
+  if [List-Id] :re ".*<bug-anubis@@gnu.org>"
+    modify [Subject] "[Anubis Bug Notice] &"
+  else
+    add [X-Passed] "Subject checking"
+  fi
+fi  
+@end smallexample
 
+This statement, depending on the value of @code{List-Id} header, will
+prepend the @code{Subject} header with an identification string, or add
+an @code{X-Passed} header if no known @code{List-Id} was found.
 
 @node Triggers, Boolean Operators, Conditional Statements, Rule System
 @section Triggers
@@ -806,7 +862,7 @@ trigger is:
 
 @smallexample
 @group
-rule [@var{flags}] @var{pattern}
+trigger [@var{flags}] @var{pattern}
   @var{action-list}
 done
 @end group
@@ -815,7 +871,9 @@ done
 @noindent
 Here, @var{pattern} is the pattern against which the @samp{Subject}
 header is checked, @var{flags} are optional flags controlling the
-type of regular expression used (@pxref{Regular Expressions}).
+type of regular expression used (@pxref{Regular Expressions}). For
+backward compatibility, the keyword @code{rule} may be used instead
+of @code{trigger}.
 
 The triggers act as follows: First, the value of the @samp{Subject} header is
 matched against the pattern @samp{@@@@}@var{pattern}. If it matches,
@@ -841,7 +899,7 @@ specified in a user configuration file. For example:
 @smallexample
 @group
 ---BEGIN RULE---
-rule :basic "^gpg-encrypt-john"
+trigger :basic "^gpg-encrypt-john"
    gpg-encrypt "john's_gpg_key"
 done
 ---END---
@@ -861,7 +919,7 @@ a substitution and back-references:
 @smallexample
 @group
 ---BEGIN RULE---
-rule :extended "^gpg-encrypt:(.*)"
+trigger :extended "^gpg-encrypt:(.*)"
    gpg-encrypt "\1"
    add [X-GPG-Comment] "Encrypted for \1"
 done
@@ -1072,7 +1130,7 @@ BEGIN myproc
 if header[Subject] "Re: .*"
   stop;
 fi
-rule "pgp"
+trigger "pgp"
   gpg-encrypt "my_gpg_key"
 done
 END
@@ -1177,6 +1235,30 @@ modify [Subject] "New subject"
 
 @noindent
 This statement sets the new value to the @code{Subject} header.
+
+Every occurrence of unescaped @samp{&} in the new value will be replaced
+by the old header value. For example, the following statement
+
+@smallexample
+modify [Subject] "[Anubis \& others] &"
+@end smallexample
+
+@noindent
+prepends the @code{Subject} header with the string @samp{[Anubis &
+others]}. Thus, the header line
+
+@smallexample
+Subject: Test subject
+@end smallexample
+
+@noindent
+
+after having been processed by Anubis, will contain:
+
+@smallexample
+Subject: [Anubis & others] Test subject
+@end smallexample
+
 @end deffn
 
 @deffn Command modify [@var{flags}] header @samp{[}@var{key}@samp{]} @samp{[}@var{new-key}@samp{]} @var{value}
@@ -1536,11 +1618,11 @@ For example:
 
 @smallexample
 @group
-rule "rot-13.*body"
+trigger "rot-13.*body"
  guile-process rot-13 #:body
 done
 
-rule "rot-13.*subj"
+trigger "rot-13.*subj"
  guile-process rot-13 #:subject
 done
 @end group
@@ -1598,7 +1680,7 @@ Example:
 
 @smallexample
 @group
-rule "remail:(.*)/(.*)"
+trigger "remail:(.*)/(.*)"
  guile-process remailer-I \
              #:rrt antonius_block@@helsingor.net \
              #:post \1 \
