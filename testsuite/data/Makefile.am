@@ -22,12 +22,10 @@
 GPGFILES = secring.gpg pubring.gpg
 noinst_DATA = @ANUBIS_GPGFILES@
 
-EXTRA_DIST = pubring.asc secring.asc anubis.pem
+EXTRA_DIST = pubring.asc secring.asc anubis.pem append.txt
 CLEANFILES = *.gpg random_seed *~
 
 pubring.gpg secring.gpg: $(srcdir)/pubring.asc $(srcdir)/secring.asc
 	$(GPG) --homedir . --import < $(srcdir)/pubring.asc
 	$(GPG) --homedir . --allow-secret-key-import --import < $(srcdir)/secring.asc
-
-
 

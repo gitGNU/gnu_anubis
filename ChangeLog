@@ -1,5 +1,14 @@
 2003-07-21  Wojciech Polak
 
+	* testsuite/etc/add-body-file.pat: New test.
+	* testsuite/etc/add.in: Added rule for add-body-file.pat.
+	* testsuite/etc/Makefile.am: Updated.
+	* testsuite/data/append.txt: New auxiliary file.
+	* testsuite/data/Makefile.am: Updated.
+	* testsuite/anubis/base.exp: Added add-body-file.pat.
+
+2003-07-21  Wojciech Polak
+
 	* src/files.c (message_append_signature_file): Bugfix.
 	* src/headers.h (message_append_signature_file): Changed prototype.
 	* src/rc.c: Test YES-OR-NO arguments with strcasecmp().

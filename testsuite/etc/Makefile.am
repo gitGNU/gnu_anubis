@@ -24,6 +24,7 @@ EXTRA_DIST = \
  add2.pat\
  add3.pat\
  add-body.pat\
+ add-body-file.pat\
  del1.pat\
  del2.pat\
  del3.pat\
