@@ -30,6 +30,7 @@
 
 static char *smtp_greeting_message;
 static ANUBIS_LIST *smtp_help_message;
+static int helo_count; /* report possible SMTP attack */
 
 
 
@@ -57,14 +58,15 @@ enum asmtp_state
   state_quit
 };
 
-#define KW_EHLO      0
-#define KW_HELO      1
-#define KW_AUTH      2
-#define KW_QUIT      3
-#define KW_HELP      4
-#define KW_STARTTLS  5
-#define KW_MAIL      6
-#define KW_RCPT      7
+#define KW_HELO      0
+#define KW_EHLO      1
+#define KW_XELO      2
+#define KW_AUTH      3
+#define KW_QUIT      4
+#define KW_HELP      5
+#define KW_STARTTLS  6
+#define KW_MAIL      7
+#define KW_RCPT      8
 
 static int
 asmtp_kw (const char *name)
@@ -76,15 +78,16 @@ asmtp_kw (const char *name)
   }
   kw[] =
   {
-    {"ehlo", KW_EHLO},
-    {"helo", KW_HELO},
-    {"auth", KW_AUTH},
-    {"help", KW_HELP},
-    {"quit", KW_QUIT},
-    {"starttls", KW_STARTTLS},
-    {"mail", KW_MAIL},
-    {"rcpt", KW_RCPT},
-    {NULL},
+    { "helo", KW_HELO },
+    { "ehlo", KW_EHLO },
+    { "xelo", KW_XELO },
+    { "auth", KW_AUTH },
+    { "help", KW_HELP },
+    { "quit", KW_QUIT },
+    { "starttls", KW_STARTTLS },
+    { "mail", KW_MAIL },
+    { "rcpt", KW_RCPT },
+    { NULL },
   };
   int i;
 
@@ -129,30 +132,10 @@ get_command_arg ()
 }
 
 static void
-asmtp_greet ()
+asmtp_greet (void)
 {
   char *name = get_localname ();
   asmtp_reply (220, "%s %s", name, smtp_greeting_message);
-}
-
-static enum asmtp_state
-asmtp_helo_reply (char *args)
-{
-  char *domain = get_command_arg ();
-
-  if (!domain)
-    {
-      asmtp_reply (501, "HELO requires domain address");
-      return state_init;
-    }
-  else if (get_command_arg ())
-    {
-      asmtp_reply (501, "Syntax error");
-      return state_init;
-    }
-
-  asmtp_reply (250, "Anubis is pleased to meet you.");
-  return state_ehlo;
 }
 
 static ANUBIS_LIST *asmtp_capa;
@@ -188,7 +171,7 @@ asmtp_capa_remove (char *name)
 }
 
 static void
-asmtp_capa_init ()
+asmtp_capa_init (void)
 {
   asmtp_capa = list_create ();
 #ifdef HAVE_TLS
@@ -201,7 +184,7 @@ asmtp_capa_init ()
 }
 
 static void
-asmtp_capa_report ()
+asmtp_capa_report (void)
 {
   ITERATOR *itr = iterator_create (asmtp_capa);
   char *p = iterator_first (itr);
@@ -213,6 +196,27 @@ asmtp_capa_report ()
       p = next;
     }
   iterator_destroy (&itr);
+}
+
+static enum asmtp_state
+asmtp_helo_reply (char *args)
+{
+  char *domain = get_command_arg ();
+
+  if (!domain)
+    {
+      asmtp_reply (501, "HELO requires domain address");
+      return state_init;
+    }
+  else if (get_command_arg ())
+    {
+      asmtp_reply (501, "Syntax error");
+      return state_init;
+    }
+
+  helo_count++;
+  asmtp_reply (250, "Anubis is pleased to meet you.");
+  return state_ehlo;
 }
 
 static enum asmtp_state
@@ -231,13 +235,38 @@ asmtp_ehlo_reply (char *args)
       return state_init;
     }
 
+  helo_count++;
+  asmtp_reply (R_CONT | 250, "Anubis is pleased to meet you.");
+  asmtp_capa_report ();
+  return state_ehlo;
+}
+
+static enum asmtp_state
+asmtp_xelo_reply (char *args)
+{
+  char *domain = get_command_arg (args);
+
+  if (!domain)
+    {
+      asmtp_reply (501, "XELO requires domain address");
+      return state_init;
+    }
+  else if (get_command_arg ())
+    {
+      asmtp_reply (501, "Syntax error");
+      return state_init;
+    }
+
+  helo_count++;
+  topt |= T_XELO;
+
   asmtp_reply (R_CONT | 250, "Anubis is pleased to meet you.");
   asmtp_capa_report ();
   return state_ehlo;
 }
 
 static void
-asmtp_help ()
+asmtp_help (void)
 {
   if (smtp_help_message)
     {
@@ -261,6 +290,10 @@ asmtp_init (enum asmtp_state state)
   switch (asmtp_kw (get_command_word (command))) {
   case KW_EHLO:
     state = asmtp_ehlo_reply (command);
+    break;
+    
+  case KW_XELO:
+    state = asmtp_xelo_reply (command);
     break;
     
   case KW_HELO:
@@ -641,11 +674,11 @@ rc_parser (int method, int key, ANUBIS_LIST * arglist,
 }
 
 static struct rc_kwdef init_authmode_kw[] = {
-  {"smtp-greeting-message", KW_SMTP_GREETING_MESSAGE},
-  {"smtp-help-message", KW_SMTP_HELP_MESSAGE},
-  {"sasl-password-db", KW_SASL_PASSWORD_DB},
-  {"sasl-allowed-mech", KW_SASL_ALLOWED_MECH},
-  {NULL}
+  { "smtp-greeting-message", KW_SMTP_GREETING_MESSAGE },
+  { "smtp-help-message",     KW_SMTP_HELP_MESSAGE },
+  { "sasl-password-db",      KW_SASL_PASSWORD_DB },
+  { "sasl-allowed-mech",     KW_SASL_ALLOWED_MECH },
+  { NULL }
 };
 
 static struct rc_secdef_child init_authmode_child = {
