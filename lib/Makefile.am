@@ -22,7 +22,23 @@
 ## compiling, linking, and/or using OpenSSL is allowed.
 ##
 
+noinst_LIBRARIES = libanubis.a
 
+libanubis_a_SOURCES = 
+
+EXTRA_DIST = \
+ getopt.h \
+ getopt.c \
+ getopt1.c \
+ gettext.h \
+ lbuf.h \
+ lbuf.c \
+ obstack.h \
+ obstack.c \
+ setenv.c \
+ snprintf.c
+
+libanubis_a_LIBADD = @LIBOBJS@
 
 ## EOF
 
