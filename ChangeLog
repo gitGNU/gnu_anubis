@@ -1,3 +1,7 @@
+2003-08-24  Wojciech Polak
+
+	* src/gpg.c: General fixes and improvements.
+
 2003-08-22  Wojciech Polak
 
 	New configuration file option `tracefile'.
