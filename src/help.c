@@ -2,7 +2,7 @@
    help.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -56,6 +56,9 @@ static char *config_opts[] = {
 #ifdef USE_LIBWRAP
 	"LIBWRAP",
 #endif /* USE_LIBWRAP */
+#ifdef USE_SOCKS_PROXY
+	"SOCKS",
+#endif /* USE_SOCKS_PROXY */
 #ifdef ENABLE_NLS
 	"NLS",
 #endif /* ENABLE_NLS */
