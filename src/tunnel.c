@@ -376,14 +376,28 @@ save_command (MESSAGE *msg, char *line)
 	int i;
 	ASSOC *asc = xmalloc(sizeof(*asc));
 
-	for (i = 0; line[i] && isspace((u_char)line[i]); i++)
+	for (i = 0; line[i] && !isspace((u_char)line[i]); i++)
 		;
 
+	if (i == 4) {
+		char *expect = NULL;
+		if (memcmp(line, "mail", 4) == 0)
+			expect = " from:";
+		else if (memcmp(line, "rcpt", 4) == 0)
+			expect = " to:";
+		if (expect) {
+			int n = strlen(expect);
+			if (strncmp(&line[i], expect, n) == 0)
+				i += n;
+		}
+	}
+			
 	asc->key = xmalloc(i + 1);
 	memcpy(asc->key, line, i);
 	asc->key[i] = 0;
 	for (; line[i] && isspace((u_char)line[i]); i++)
 		;
+
 	if (line[i])
 		asc->value = strdup(&line[i]);
 	else
@@ -485,9 +499,9 @@ process_command (MESSAGE *msg, char *command)
 	char buf[LINEBUFFER+1];
 	
 	safe_strcpy(buf, command); /* make a back-up */
-	save_command(msg, buf);
-
+	remcrlf(buf);
 	make_lowercase(buf);
+	save_command(msg, buf);
 	
 	if (strncmp(buf, "starttls", 8) == 0) 
 		return handle_starttls(command);
@@ -617,7 +631,7 @@ transfer_command (MESSAGE *msg, char *command)
 
 	if (strncmp(buf, "ehlo", 4) == 0) {
 		if (handle_ehlo(command, reply, sizeof reply))
-			return 1;
+			return 0;
 	} else
 		get_response_smtp(CLIENT, remote_server, reply, sizeof reply);
 
