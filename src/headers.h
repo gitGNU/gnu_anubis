@@ -359,6 +359,7 @@ int anubis_regex_match(RC_REGEX *re, char *line, int *refc, char ***refv);
 RC_REGEX *anubis_regex_compile(char *line, int opt);
 void anubis_regex_free(RC_REGEX *re);
 char *anubis_regex_source(RC_REGEX *re);
+int anubis_regex_refcnt(RC_REGEX *re);
 int regex_match(char *, char *);
 
 /* rc.c */

@@ -87,8 +87,14 @@ _posix_match(regex_t *re, char *line, int *refc, char ***refv)
 	return rc;
 }
 
+static int
+_posix_refcnt(regex_t *re)
+{
+	return re->re_nsub;
+}
+
 #ifdef HAVE_PCRE
-int
+static int
 _perl_match(pcre *re, char *line, int *refc, char ***refv)
 {
 	int rc;
@@ -137,6 +143,15 @@ _perl_match(pcre *re, char *line, int *refc, char ***refv)
 	xfree(ovector);
 	return rc;
 }
+
+static int
+_perl_refcnt(pcre *re)
+{
+	int count = 0;
+	
+	pcre_fullinfo(re, NULL, PCRE_INFO_CAPTURECOUNT, &count);
+	return count;
+}
 #endif
 
 int
@@ -147,6 +162,16 @@ anubis_regex_match(RC_REGEX *re, char *line, int *refc, char ***refv)
 		return !_perl_match(re->v.pre, line, refc, refv);
 #endif
 	return !_posix_match(&re->v.re, line, refc, refv);
+}
+
+int
+anubis_regex_refcnt(RC_REGEX *re)
+{
+#ifdef HAVE_PCRE
+	if (re->perlre)
+		return _perl_refcnt(re->v.pre);
+#endif
+	return _posix_refcnt(&re->v.re);
 }
 
 RC_REGEX *
