@@ -1,8 +1,15 @@
-2003-02-08  Sergey Poznyakoff 
+2003-02-08  Wojciech Polak
+
+	* src/rc.c (gpg_parser): Fixed KW_GPG_SIGN case.
+
+	* configure.ac: Clean up.
+	* README: Updated.
+
+2003-02-08  Sergey Poznyakoff
 
 	* src/regex.c (_perl_match): Fixed allocation of ovector.
 
-2003-02-07  Sergey Poznyakoff  
+2003-02-07  Sergey Poznyakoff
 
 	* src/env.c (check_filename): Take an additional
 	  argument: a pointer to the file modification time.

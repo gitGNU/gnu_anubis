@@ -40,6 +40,7 @@
    or OpenSSL -- a cryptographic package (http://www.openssl.org/).
  * GnuPG -- The GNU Privacy Guard (http://www.gnupg.org/)
    with GPGME -- GnuPG Made Easy (http://www.gnupg.org/gpgme.html).
+ * Guile -- The GNU extension language (http://www.gnu.org/software/guile/).
 
  Optional:
 
@@ -66,13 +67,13 @@
  For better control, use the options below.
  Set the `./configure' script with:
 
- `--with-guile'        to support Guile.
  `--with-pcre'         to support Perl-compatible regular expressions.
  `--with-pam'          to support Pluggable Authentication Modules.
  `--with-tcp-wrappers' to support libwrap (TCP wrappers).
  `--with-openssl'      to support OpenSSL (and disable GnuTLS).
  `--without-gnutls'    to disable GnuTLS support.
  `--without-gpgme'     to disable GNU Privacy Guard (GPGME) support.
+ `--without-guile'     to disable Guile support.
 
  Next, write a proper init script for your system. See the examples
  in the `scripts' directory (part of the distribution).
