@@ -64,20 +64,9 @@ quit(int code)
 	memset(session.mta_username, 0, sizeof(session.mta_username));
 	memset(session.mta_password, 0, sizeof(session.mta_password));
 
-#ifdef HAVE_TLS
-	end_tls(CLIENT, secure.client);
-	end_tls(SERVER, secure.server);
-	if (secure.xcred)
-		gnutls_certificate_free_credentials(secure.xcred);
-	if (secure.x509_cred)
-		gnutls_certificate_free_credentials(secure.x509_cred);
-	gnutls_global_deinit();
-#endif /* HAVE_TLS */
-
-#ifdef HAVE_SSL
-	end_ssl(CLIENT, secure.client, secure.ctx_client);
-	end_ssl(SERVER, secure.server, secure.ctx_server);
-#endif /* HAVE_SSL */
+	/* FIXME */
+	net_close(CLIENT, secure.client);
+	net_close(SERVER, secure.server);
 
 #ifdef HAVE_SYSLOG
 	if ((topt & T_DAEMON) && !(topt & T_FOREGROUND))
