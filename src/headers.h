@@ -411,7 +411,7 @@ void quit(int);
 
 /* gpg.c */
 #ifdef HAVE_GPG
- void check_gpg(void);
+ void gpg_free(void);
  void gpg_section_init(void);
 #endif /* HAVE_GPG */
 
