@@ -26,7 +26,27 @@ sbin_PROGRAMS = anubis
 anubis_LDADD = @LIBOBJS@ @LIBINTL@ $(GUILE_LIBS)
 anubis_SOURCES = main.c main.h extern.h headers.h mem.c mem.h env.c errs.c \
 	log.c misc.c regex.c exec.c net.c proxy.c daemon.c auth.c map.c \
-	esmtp.c tunnel.c rc.c files.c help.c quit.c getopt.h guile.c
+	esmtp.c tunnel.c rc.c files.c help.c quit.c getopt.h guile.c \
+        rcfile-gram.c rcfile-lex.c rcfile-gram.h rcfile.h
+
+YLWRAP = $(SHELL) $(top_srcdir)/build/ylwrap
+AM_YFLAGS = -dtv
+EXTRA_DIST = rcfile.y rcfile.l 
+
+BUILT_SOURCES= \
+  rcfile-gram.c rcfile-gram.h \
+  rcfile-lex.c
+
+rcfile-lex.c: $(srcdir)/rcfile.l rcfile-gram.h
+	$(YLWRAP) "$(LEX) $(AM_LEXFLAGS) $(LEXFLAGS)" \
+                  $(srcdir)/rcfile.l lex.yy.c rcfile-lex.c \
+                  -- -yy rc_yy
+
+rcfile-gram.c rcfile-gram.h: $(srcdir)/rcfile.y
+	$(YLWRAP) "$(YACC) $(AM_YFLAGS) $(YFLAGS)" $(srcdir)/rcfile.y \
+	          y.tab.c rcfile-gram.c y.tab.h rcfile-gram.h \
+                  y.output y.output \
+                  -- -yy rc_yy
 
 localedir = $(datadir)/locale
 
