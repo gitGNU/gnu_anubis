@@ -413,12 +413,14 @@ void quit(int);
 #endif /* HAVE_GPG */
 
 /* guile.c */
+#ifdef WITH_GUILE
 void anubis_boot(void *closure, int argc, char **argv);
 void guile_load_path_append(char *filename);
 void guile_debug(int enable);
 void guile_load_program(char *name);
 void guile_rewrite_line(char *procname, const char *source_line);
 void guile_postprocess_proc(char *procname, struct list **hdr, char **body);
+#endif /* WITH_GUILE */
 
 /* EOF */
 
