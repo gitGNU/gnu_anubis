@@ -50,9 +50,8 @@ rcfile-gram.c rcfile-gram.h: $(srcdir)/rcfile.y
                   -- -yy rc_yy
 
 localedir = $(datadir)/locale
-
 DEFS = @DEFS@ -DLOCALEDIR=\"$(localedir)\"
-INCLUDES = @INCLUDES@
+INCLUDES = @INCLUDES@ -I$(top_srcdir)/intl
 
 ## EOF
 
