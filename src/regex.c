@@ -24,6 +24,7 @@
 
 #include "headers.h"
 #include "extern.h"
+#include "rcfile.h"
 
 /****************************
  Regular Expressions support
@@ -33,6 +34,44 @@ static int posixre_match(char *, char *);
 #ifdef HAVE_PCRE
 static int perlre_match(char *, char *);
 #endif /* HAVE_PCRE */
+
+int
+anubis_regexp_match(RC_REGEX *re, char *line, int *refc, char ***refv)
+{
+#ifdef HAVE_PCRE
+	if (re->perlre)
+		return !_perl_match(re->v.pcre, line, refc, refv);
+#endif
+	return !_posix_match(&re->v.re, line, refc, refv);
+}
+
+int
+_posix_match(regex_t *re, char *line, int *refc, char ***refv)
+{
+	regmatch_t *rmp;
+	int rc;
+		
+	rmp = xmalloc((re->re_nsub + 1) * sizeof(*rmp));
+	rc = regexec(re, line, re->re_nsub + 1, rmp, 0);
+	if (rc == 0 && re->re_nsub) {
+		int i;
+		*refv = xmalloc((re->re_nsub + 2) * sizeof(**refv));
+		for (i = 0; i <= re->re_nsub; i++) {
+			if (rmp[i].rm_so != -1) {
+				size_t matchlen = rmp[i].rm_eo - rmp[i].rm_so;
+				(*refv)[i] = xmalloc(matchlen + 1);
+				memcpy((*refv)[i], line + rmp[i].rm_so,
+				       matchlen);
+				(*refv)[i][matchlen] = 0;
+				remcrlf((*refv)[i]);
+			} else
+				(*refv)[i] = strdup("");
+		}
+		*refc = re->re_nsub;
+	}
+	xfree(rmp);
+	return rc;
+}
 
 int
 regex_match(char *regex, char *line)
