@@ -86,7 +86,7 @@ static int debug_level;
 %left AND
 %left NOT
 
-%type <string> begin keyword string option opt_key arg
+%type <string> begin keyword string option key opt_key arg
 %type <section> section seclist
 %type <stmtlist> stmtlist
 %type <stmt> stmt asgn_stmt cond_stmt rule_stmt inst_stmt
@@ -244,15 +244,18 @@ meq      : /* empty */
          | '='
          ;
 
-opt_key  : /* empty */
-           {
-		   $$ = NULL;
-	   }
-         | '[' string ']'
+key      : '[' string ']'
            {
 		   $$ = $2;
 	   }
          ;
+
+opt_key  : /* empty */
+           {
+		   $$ = NULL;
+	   }
+         | key
+	 ;
 
 msgpart  : T_MSGPART opt_key
            {
@@ -378,6 +381,15 @@ inst_stmt: STOP
 		   $$->v.inst.key  = $2.key;
 		   $$->v.inst.key2 = $3;
 		   $$->v.inst.arg  = $4;
+	   }
+         | MODIFY msgpart key 
+           {
+		   $$ = rc_stmt_create(rc_stmt_inst);
+		   $$->v.inst.opcode = inst_modify;
+		   $$->v.inst.part = $2.part;
+		   $$->v.inst.key  = $2.key;
+		   $$->v.inst.key2 = $3;
+		   $$->v.inst.arg  = NULL;
 	   }
          ;
 
@@ -842,7 +854,7 @@ static void inst_eval(struct eval_env *env, RC_INST *inst);
 void
 inst_eval(struct eval_env *env, RC_INST *inst)
 {
-	char *arg, *argp = NULL;
+	char *arg = NULL, *argp = NULL;
 
 	if (!env->msg)
 		return; /* FIXME: bail out? */

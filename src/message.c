@@ -76,6 +76,8 @@ message_remove_headers(MESSAGE *msg, char *key)
 void
 message_modify_body(MESSAGE *msg, char *key, char *value)
 {
+	if (!value)
+		value = "";
 	if (!key) {
 		int len = strlen(value);
 		
@@ -146,19 +148,32 @@ message_modify_headers(MESSAGE *msg, char *key, char *key2, char *value)
 {
 	ASSOC *asc;
 	ITERATOR *itr;
+        RC_REGEX *regex = anubis_regex_compile(key, 0);
 
         itr = iterator_create(msg->header);
 	for (asc = iterator_first(itr); asc; asc = iterator_next(itr)) {
-		if (asc->key && strcasecmp(asc->key, key) == 0) {
+		char **rv;
+                int rc;
+
+		if (asc->key
+		    && anubis_regex_match(regex, asc->key, &rc, &rv)) {
 			if (key2) {
 				free(asc->key);
-				asc->key = strdup(key2);
+				if (rc) 
+					asc->key = substitute(key2, rv);
+				else
+					asc->key = strdup(key2);
 			}
-			free(asc->value);
-			asc->value = strdup(value);
+			if (value) {
+				free(asc->value);
+				asc->value = strdup(value);
+			}
 		}
+		if (rc)
+			free_pptr(rv);
 	}
 	iterator_destroy(&itr);
+	anubis_regex_free(regex);
 }
 
 void
