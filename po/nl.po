@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: anubis 3.6.2\n"
+"Project-Id-Version: anubis 3.9.94\n"
 "Report-Msgid-Bugs-To: bug-anubis@gnu.org\n"
-"POT-Creation-Date: 2004-05-21 19:59+0300\n"
-"PO-Revision-Date: 2003-08-16 17:25+0100\n"
+"POT-Creation-Date: 2004-05-27 22:30+0200\n"
+"PO-Revision-Date: 2004-06-06 12:17+0200\n"
 "Last-Translator: Elros Cyriatan <cyriatan@fastmail.fm>\n"
 "Language-Team: Dutch <vertaling@nl.linux.org>\n"
 "MIME-Version: 1.0\n"
@@ -36,9 +36,9 @@ msgid "IDENT: connected to %s:%u"
 msgstr "IDENT: verbonden met %s:%u"
 
 #: src/auth.c:138
-#, fuzzy, c-format
+#, c-format
 msgid "IDENT: stream_write() failed: %s."
-msgstr "IDENT: recvline() mislukt: %s."
+msgstr "IDENT: stream_write() mislukt: %s."
 
 #: src/auth.c:145
 #, c-format
@@ -64,27 +64,27 @@ msgstr "IDENT: gebruiker op afstand opgelost naar %s."
 
 #: src/authmode.c:396
 msgid "Database not specified"
-msgstr ""
+msgstr "Gegevensbank niet opgegeven"
 
 #: src/authmode.c:403
 #, c-format
 msgid "Cannot open database %s: %s"
-msgstr ""
+msgstr "Kan gegevensbank %s niet openen: %s"
 
 #: src/authmode.c:412
 #, c-format
 msgid "Found record for %s"
-msgstr ""
+msgstr "Record voor %s gevonden"
 
 #: src/authmode.c:417
 #, c-format
 msgid "Cannot retrieve data from the SASL database: %s"
-msgstr ""
+msgstr "Kan gegevens niet opvragen uit de SASL-gegevensbank: %s"
 
 #: src/authmode.c:422
 #, c-format
 msgid "Record for %s not found"
-msgstr ""
+msgstr "Record voor %s niet gevonden"
 
 #: src/authmode.c:465 src/daemon.c:323 src/transmode.c:66
 msgid "The MTA has not been specified. Set the REMOTE-MTA or LOCAL-MTA."
@@ -139,8 +139,8 @@ msgstr "%s daemon opstarten gelukt."
 #, fuzzy, c-format
 msgid "Child [%lu] finished. Exit status: %s. %d client left."
 msgid_plural "Child [%lu] finished. Exit status: %s. %d clients left."
-msgstr[0] "Kind [%d] voltooid. Afsluitstatus: %s. %d kind(eren) over."
-msgstr[1] "Kind [%d] voltooid. Afsluitstatus: %s. %d kind(eren) over."
+msgstr[0] "Kind [%lu] voltooid. Afsluitstatus: %s. %d client over."
+msgstr[1] "Kind [%lu] voltooid. Afsluitstatus: %s. %d client over."
 
 #: src/daemon.c:95
 msgid "OK"
@@ -152,7 +152,7 @@ msgstr "FOUT"
 
 #: src/daemon.c:137
 msgid "WARNING: An unprivileged user has not been specified!"
-msgstr ""
+msgstr "WAARSCHUWING: Er is geen gebruiker zonder privileges opgegeven!"
 
 #: src/daemon.c:186
 msgid "GNU Anubis is running..."
@@ -222,14 +222,14 @@ msgid "%s is not a regular file or a symbolic link."
 msgstr "%s is geen gewoon bestand of symbolische koppeling."
 
 #: src/env.c:380
-#, fuzzy, c-format
+#, c-format
 msgid "Unknown mode: %s"
-msgstr "Onbekende host %s."
+msgstr "Onbekende modus: %s"
 
 #: src/errs.c:82
-#, fuzzy, c-format
+#, c-format
 msgid "Couldn't write to socket: %s."
-msgstr "Kon niet schrijven naar socket! %s."
+msgstr "Kon niet schrijven naar socket: %s."
 
 #: src/errs.c:93
 #, c-format
@@ -249,9 +249,7 @@ msgstr "%s: er is een onoplosbare naamserver fout opgetreden."
 #: src/errs.c:102
 #, c-format
 msgid "%s: a temporary name server error occured. Try again later."
-msgstr ""
-"%s: er is een tijdelijke naamserver fout opgetreden. Probeer het later "
-"opnieuw."
+msgstr "%s: er is een tijdelijke naamserver fout opgetreden. Probeer het later opnieuw."
 
 #: src/errs.c:104
 #, c-format
@@ -319,9 +317,9 @@ msgid "socketpair() failed: %s."
 msgstr "socketpair() mislukt: %s."
 
 #: src/exec.c:134
-#, fuzzy, c-format
+#, c-format
 msgid "Local program [%lu] finished."
-msgstr "Lokaal programma [%d] voltooid."
+msgstr "Lokaal programma [%lu] voltooid."
 
 #: src/exec.c:170
 #, c-format
@@ -355,39 +353,38 @@ msgstr "GPGME: mislukt. %s."
 #: src/gpg.c:122 src/gpg.c:282
 #, c-format
 msgid "GPGME: Cannot list keys: %s"
-msgstr ""
+msgstr "GPGME: Kan sleutels niet opsommen: %s"
 
 #: src/guile.c:79
 #, c-format
 msgid "cannot open guile output file %s: %s"
-msgstr ""
+msgstr "kan guile-uitvoerbestand %s niet openen: %s"
 
 #: src/guile.c:258
 msgid "missing procedure name"
-msgstr ""
+msgstr "ontbrekende procedurenaam"
 
 #: src/guile.c:273
 #, c-format
 msgid "%s not a procedure object"
-msgstr ""
+msgstr "%s is niet een procedure objekt"
 
 #: src/guile.c:309
 #, c-format
 msgid "Bad car type in return from %s"
-msgstr ""
+msgstr "Slechte car-soort bij afsluiten van %s"
 
 #: src/guile.c:324
 #, c-format
 msgid "Bad cdr type in return from %s"
-msgstr ""
+msgstr "Slechte cdr-soort bij afsluiten van %s"
 
 #: src/guile.c:328
 #, c-format
 msgid "Bad return type from %s"
-msgstr ""
+msgstr "Slechte afsluitsoort van %s"
 
 #: src/help.c:82
-#, fuzzy
 msgid ""
 "\n"
 "GNU Anubis is free software; you can redistribute it and/or modify\n"
@@ -396,11 +393,10 @@ msgid ""
 "(at your option) any later version."
 msgstr ""
 "\n"
-"\n"
-"GNU Anubis is free software; you can redistribute it and/or modify\n"
-"it under the terms of the GNU General Public License as published by\n"
-"the Free Software Foundation; either version 2 of the License, or\n"
-"(at your option) any later version."
+"GNU Anubis is vrije software; u kunt het verspreiden en/of wijzigen onder\n"
+"de voorwaarden van de GNU General Public License zoals uitgegeven\n"
+"door de Free Software Foundation; ofwel versie 2 van de License, of een\n"
+"nieuwere versie (wat u wilt)."
 
 #: src/help.c:86
 msgid ""
@@ -444,50 +440,39 @@ msgstr "Gebruik: anubis [opties]\n"
 
 #: src/help.c:102
 msgid ""
-" -b, --bind [HOST:]PORT       Specify the TCP port on which GNU Anubis "
-"listens\n"
-"                              for connections. The default HOST is "
-"INADDR_ANY,\n"
+" -b, --bind [HOST:]PORT       Specify the TCP port on which GNU Anubis listens\n"
+"                              for connections. The default HOST is INADDR_ANY,\n"
 "                              and default PORT is 24 (private mail system)."
 msgstr ""
-" -b, --bind [HOST:]POORT      Geef de TCP poort op waarop GNU Anubis "
-"luistert\n"
-"                              voor verbindingen. De standaard HOST is "
-"INADDR_ANY,\n"
+" -b, --bind [HOST:]POORT      Geef de TCP poort op waarop GNU Anubis luistert\n"
+"                              voor verbindingen. De standaard HOST is INADDR_ANY,\n"
 "                              de standaard POORT is 24 (privé postsysteem)."
 
 #: src/help.c:105
 msgid ""
-" -r, --remote-mta HOST[:PORT] Specify a remote SMTP host name or IP "
-"address.\n"
+" -r, --remote-mta HOST[:PORT] Specify a remote SMTP host name or IP address.\n"
 "                              The default PORT number is 25."
 msgstr ""
-" -r, --remote-mta HOST[:POORT] Geef een SMTP hostnaam of IP-adres op afstand "
-"op.\n"
+" -r, --remote-mta HOST[:POORT] Geef een SMTP hostnaam of IP-adres op afstand op.\n"
 "                              Het standaard POORT nummer is 25."
 
 #: src/help.c:107
 msgid ""
 " -l, --local-mta FILE         Execute a local SMTP server, which works on\n"
-"                              standard input and output (inetd-type "
-"program).\n"
+"                              standard input and output (inetd-type program).\n"
 "                              This option excludes the '--remote-mta' option."
 msgstr ""
-" -l, --local-mta BESTAND      Een lokale SMTP server uitvoeren, die werkt "
-"op\n"
-"                              standaard in- en uitvoer (inetd-soort "
-"programma).\n"
+" -l, --local-mta BESTAND      Een lokale SMTP server uitvoeren, die werkt op\n"
+"                              standaard in- en uitvoer (inetd-soort programma).\n"
 "                              Deze optie sluit de '--remote-mta' optie uit."
 
 #: src/help.c:110
-#, fuzzy
 msgid " -m, --mode=MODE              Select operation mode."
-msgstr " -f, --foreground             Voorgrond modus."
+msgstr " -m, --mode=MODUS             Uitvoermodus kiezen."
 
 #: src/help.c:111
-msgid ""
-"                              MODE is either \"transparent\" or \"auth\""
-msgstr ""
+msgid "                              MODE is either \"transparent\" or \"auth\""
+msgstr "                              MODUS is \"transparent\" of \"auth\""
 
 #: src/help.c:112
 msgid " -f, --foreground             Foreground mode."
@@ -495,12 +480,10 @@ msgstr " -f, --foreground             Voorgrond modus."
 
 #: src/help.c:113
 msgid ""
-" -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as "
-"described\n"
+" -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as described\n"
 "                              in RFC 821 on standard input and output."
 msgstr ""
-" -i, --stdio                  Gebruik het SMTP protocol (OMP/Tunnel) zoals "
-"beschreven\n"
+" -i, --stdio                  Gebruik het SMTP protocol (OMP/Tunnel) zoals beschreven\n"
 "                              in RFC 821 voor standaard in- en uitvoer."
 
 #: src/help.c:115
@@ -508,19 +491,16 @@ msgid "Output options:\n"
 msgstr "Uitvoeropties:\n"
 
 #: src/help.c:116
-#, fuzzy
 msgid " -s, --silent                 Work silently."
-msgstr " -s, --silent     Werk stil."
+msgstr " -s, --silent                 Stil werken."
 
 #: src/help.c:117
-#, fuzzy
 msgid " -v, --verbose                Work noisily."
-msgstr " -v, --verbose    Werk luidruchtig."
+msgstr " -v, --verbose                Luidruchtig werken."
 
 #: src/help.c:118
-#, fuzzy
 msgid " -D, --debug                  Debug mode."
-msgstr " -D, --debug      Debug modus."
+msgstr " -D, --debug                  Debugmodus."
 
 #: src/help.c:119
 msgid ""
@@ -531,42 +511,38 @@ msgstr ""
 "Diverse opties:\n"
 
 #: src/help.c:120
-#, fuzzy
-msgid ""
-" -c, --check-config           Run the configuration file syntax checker."
-msgstr " --norc           Systeemconfiguratiebestand negeren."
+msgid " -c, --check-config           Run the configuration file syntax checker."
+msgstr " -c, --check-config           Configuratiebestand syntaxiscontrole uitvoeren."
 
 #: src/help.c:121
 msgid ""
 " --show-config-options        Print a list of configuration options used\n"
 "                              to build GNU Anubis."
 msgstr ""
+" --show-config-options        Een lijst geven van configuratie-opties gebruikt\n"
+"                              om GNU Anubis te bouwen."
 
 #: src/help.c:123
-msgid ""
-" --relax-perm-check           Do not check a user config file permissions."
+msgid " --relax-perm-check           Do not check a user config file permissions."
 msgstr ""
+" --relax-perm-check           Toegangsrechten van gebruikersconfiguratiebestand\n"
+"                                           niet controleren."
 
 #: src/help.c:124
-#, fuzzy
-msgid ""
-" --altrc FILE                 Specify alternate system configuration file."
-msgstr " --altrc BESTAND  Een alternatief systeemconfiguratiebestand opgeven."
+msgid " --altrc FILE                 Specify alternate system configuration file."
+msgstr " --altrc BESTAND              Alternatief systeemconfiguratiebestand opgeven."
 
 #: src/help.c:125
-#, fuzzy
 msgid " --norc                       Ignore system configuration file."
-msgstr " --norc           Systeemconfiguratiebestand negeren."
+msgstr " --norc                       Systeemconfiguratiebestand negeren."
 
 #: src/help.c:126
-#, fuzzy
 msgid " --version                    Print version number and copyright."
-msgstr " --version        Versienummer en auteursrecht weergeven."
+msgstr " --version                    Versienummer en auteursrecht weergeven."
 
 #: src/help.c:127
-#, fuzzy
 msgid " --help                       It's obvious..."
-msgstr " --help           Dit is duidelijk..."
+msgstr " --help                       Dit is duidelijk..."
 
 #: src/help.c:128
 #, c-format
@@ -596,15 +572,15 @@ msgstr "realloc() mislukt. Kan niet voldoende geheugen opnieuw toewijzen."
 
 #: src/misc.c:308
 msgid "Can't find out my own hostname"
-msgstr ""
+msgstr "Kan mijn eigen hostnaam niet uitvinden"
 
 #: src/net.c:45
 msgid "SERVER"
-msgstr ""
+msgstr "SERVER"
 
 #: src/net.c:48
 msgid "CLIENT"
-msgstr ""
+msgstr "CLIENT"
 
 #: src/net.c:122
 msgid "Getting remote host information..."
@@ -641,7 +617,7 @@ msgstr "GNU Anubis gebonden aan %s:%u"
 
 #: src/net.c:242
 msgid "Short write"
-msgstr ""
+msgstr "Te weinig geschreven"
 
 #: src/socks.c:53
 msgid "Using SOCKS Proxy..."
@@ -669,12 +645,8 @@ msgid "Request rejected."
 msgstr "Verzoek verworpen."
 
 #: src/socks.c:180
-msgid ""
-"Request rejected, because the client program and identd reported different "
-"User-IDs."
-msgstr ""
-"Verzoek verworpen, omdat het client programma en identd verschillende "
-"gebruikers IDs opgaven."
+msgid "Request rejected, because the client program and identd reported different User-IDs."
+msgstr "Verzoek verworpen, omdat het client programma en identd verschillende gebruikers IDs opgaven."
 
 #: src/socks.c:184 src/socks.c:406
 msgid "Server reply is not valid."
@@ -755,12 +727,12 @@ msgstr "Time-out! Bezig met afsluiten..."
 #: src/rcfile.c:121
 #, c-format
 msgid "cannot stat file `%s': %s"
-msgstr ""
+msgstr "kan bestand `%s' niet vinden: %s"
 
 #: src/rcfile.c:131
 #, c-format
 msgid "File `%s' has already been read"
-msgstr ""
+msgstr "Bestand `%s' is al gelezen"
 
 #: src/rcfile.c:177
 #, c-format
@@ -775,13 +747,12 @@ msgstr "Bezig met lezen gebruikersconfiguratiebestand %s..."
 #: src/rcfile.c:679
 #, c-format
 msgid "No such section: %s"
-msgstr ""
+msgstr "Sectie niet gevonden: %s"
 
 #: src/rcfile.l:180
 #, c-format
-msgid ""
-"Stray character in config: \\%03o. Possibly missing quotes around the string"
-msgstr ""
+msgid "Stray character in config: \\%03o. Possibly missing quotes around the string"
+msgstr "Overbodig teken in configuratie: \\%03o. Misschien ontbreken aanhalingstekens om de tekenreeks"
 
 #: src/rcfile.l:380
 #, c-format
@@ -791,78 +762,78 @@ msgstr "Anubis RC bestandsfout: %s."
 #: src/rcfile.y:162 src/rcfile.y:170
 #, c-format
 msgid "Section %s already defined"
-msgstr ""
+msgstr "Sectie %s is al gedefinieerd"
 
 #: src/rcfile.y:217
-#, fuzzy, c-format
+#, c-format
 msgid "unknown keyword: %s"
-msgstr "Onbekende host %s."
+msgstr "onbekend sleutelwoord: %s"
 
 #: src/rcfile.y:510
 msgid "missing replacement value"
-msgstr ""
+msgstr "ontbrekende vervangingswaarde"
 
 #: src/rcfile.y:1122
 msgid "Unknown regexp modifier"
-msgstr ""
+msgstr "Onbekende reguliere-uitdrukking-veranderaar"
 
 #: src/rcfile.y:1213
 msgid "STOP"
-msgstr ""
+msgstr "STOPPEN"
 
 #: src/rcfile.y:1218
 #, c-format
 msgid "Calling %s"
-msgstr ""
+msgstr "Bezig met oproepen %s"
 
 #: src/rcfile.y:1224
 #, c-format
 msgid "ADD %s [%s] %s"
-msgstr ""
+msgstr "TOEVOEGEN %s [%s] %s"
 
 #: src/rcfile.y:1234
 #, c-format
 msgid "MODIFY %s [%s] [%s] %s"
-msgstr ""
+msgstr "WIJZIGEN %s [%s] [%s] %s"
 
 #: src/rcfile.y:1247
 #, c-format
 msgid "REMOVE HEADER [%s]"
-msgstr ""
+msgstr "KOP VERWIJDEREN [%s]"
 
 #: src/rcfile.y:1270
-#, fuzzy, c-format
+#, c-format
 msgid "Executing %s"
-msgstr "Bezig met uitvoeren %s %s..."
+msgstr "Bezig met uitvoeren %s"
 
 #: src/rcfile.y:1341
 #, c-format
 msgid "Matched trigger \"%s\""
-msgstr ""
+msgstr "Overeengekomen trekker \"%s\""
 
 #: src/rcfile.y:1345
 #, c-format
 msgid "Matched condition %s[%s] \"%s\""
-msgstr ""
+msgstr "Overeengekomen voorwaarde %s[%s] \"%s\""
 
 #: src/rcfile.y:1475
-#, fuzzy, c-format
+#, c-format
 msgid "Unknown section: %s"
-msgstr "Onbekende host %s."
+msgstr "Onbekende sectie: %s"
 
 #: src/rcfile.y:1517
 msgid "program is not allowed in this section"
-msgstr ""
+msgstr "programma is niet toegelaten in deze sectie"
 
 #: src/regex.c:109
 #, c-format
 msgid "INTERNAL ERROR at %s:%d: missing or invalid regex"
-msgstr ""
+msgstr "INTERNE FOUT bij %s:%d: ontbrekende of ongeldige reguliere uitdrukking"
 
 #: src/regex.c:306
-#, fuzzy, c-format
+#, c-format
 msgid "regcomp() failed at %s: %s."
-msgstr "regcomp() mislukt. %s"
+msgstr "regcomp() mislukt bij %s: %s."
 
 #: src/regex.c:377
 #, c-format
@@ -870,9 +841,9 @@ msgid "pcre_compile() failed at offset %d: %s."
 msgstr "pcre_compile() mislukt op positie %d: %s."
 
 #: src/regex.c:402
-#, fuzzy, c-format
+#, c-format
 msgid "pcre_fullinfo() failed: %d."
-msgstr "listen() mislukt: %s."
+msgstr "pcre_fullinfo() mislukt: %d."
 
 #: src/regex.c:414
 msgid "Matched, but too many substrings."
@@ -892,14 +863,14 @@ msgid "Unable to seed random number generator."
 msgstr "Voeden van willekeurige getallen generator mislukt."
 
 #: src/ssl.c:76
-#, fuzzy, c-format
+#, c-format
 msgid "Write error: %s"
-msgstr "Anubis RC bestandsfout: %s."
+msgstr "Schrijffout: %s"
 
 #: src/ssl.c:93
-#, fuzzy, c-format
+#, c-format
 msgid "Read error: %s"
-msgstr "Anubis RC bestandsfout: %s."
+msgstr "Leesfout: %s"
 
 #: src/ssl.c:275
 msgid "SSLv23_client_method() failed."
@@ -922,9 +893,9 @@ msgid "Can't create a new SSL structure for a connection."
 msgstr "Kan geen nieuwe SSL structuur maken voor een verbinding."
 
 #: src/ssl.c:323 src/tls.c:193
-#, fuzzy, c-format
+#, c-format
 msgid "TLS/SSL handshake failed: %s"
-msgstr "TLS/SSL handdruk mislukt!"
+msgstr "TLS/SSL-handdruk mislukt: %s"
 
 #: src/ssl.c:353
 msgid "SSLv23_server_method() failed."
@@ -940,8 +911,7 @@ msgstr "SSL_CTX_use_PrivateKey_file() mislukt."
 
 #: src/ssl.c:369
 msgid "Private key does not match the certificate public key."
-msgstr ""
-"Privé sleutel komt niet overeen met de openbare sleutel van het certificaat."
+msgstr "Privé sleutel komt niet overeen met de openbare sleutel van het certificaat."
 
 #: src/ssl.c:390 src/tls.c:244
 msgid "Initializing the TLS/SSL connection with MUA..."
@@ -990,7 +960,7 @@ msgstr "Uitgever:  %s"
 #: src/tls.c:176 src/tls.c:253
 #, c-format
 msgid "TLS Error reading `%s': %s"
-msgstr ""
+msgstr "TLS-fout bij lezen `%s': %s"
 
 #: src/tls.c:296
 msgid "No certificate was sent."
@@ -1020,15 +990,15 @@ msgstr "Het certificaat wordt vertrouwd."
 #, fuzzy, c-format
 msgid "Anonymous DH using prime of %d bit."
 msgid_plural "Anonymous DH using prime of %d bits."
-msgstr[0] "Anonieme DH met een priemgetal van %d bits."
-msgstr[1] "Anonieme DH met een priemgetal van %d bits."
+msgstr[0] "Anonieme DH met priemgetal van %d bits."
+msgstr[1] "Anonieme DH met priemgetal van %d bits."
 
 #: src/tls.c:361
 #, fuzzy, c-format
 msgid "Ephemeral DH using prime of %d bit."
 msgid_plural "Ephemeral DH using prime of %d bits."
-msgstr[0] "Kortstondige DH met een priemgetal van %d bits."
-msgstr[1] "Kortstondige DH met een priemgetal van %d bits."
+msgstr[0] "Kortstondige DH met priemgetal van %d bits."
+msgstr[1] "Kortstondige DH met priemgetal van %d bits."
 
 #: src/tls.c:373
 #, c-format
@@ -1071,14 +1041,14 @@ msgid " - Certificate expires: %s"
 msgstr " - Certificaat verloopt: %s"
 
 #: src/tls.c:424
-#, fuzzy, c-format
+#, c-format
 msgid " - Certificate fingerprint: "
-msgstr " - Certificaat vingerafdruk: %s\n"
+msgstr " - Certificaat vingerafdruk: "
 
 #: src/tls.c:434
-#, fuzzy, c-format
+#, c-format
 msgid " - Certificate serial number: "
-msgstr " - Certificaat serienummer: %s\n"
+msgstr " - Certificaat serienummer: "
 
 #: src/tls.c:443
 #, c-format
@@ -1120,9 +1090,9 @@ msgid " - Certificate version: #%d\n"
 msgstr " - Certificaat versie: #%d\n"
 
 #: src/tls.c:466
-#, fuzzy, c-format
+#, c-format
 msgid " - Certificate Issuer's DN: %s\n"
-msgstr " - Certificaat uitgeversinfo:\n"
+msgstr " - Certificaat-uitgevers DN: %s\n"
 
 #: src/tunnel.c:288 src/tunnel.c:351
 msgid "Transferring message(s)..."
@@ -1130,7 +1100,7 @@ msgstr "Bezig met overbrengen bericht(en)..."
 
 #: src/tunnel.c:349
 msgid "Starting SMTP session..."
-msgstr ""
+msgstr "Bezig met starten SMTP-sessie..."
 
 #: src/tunnel.c:429
 msgid "Using the TLS/SSL encryption..."
@@ -1215,34 +1185,4 @@ msgstr "%s: optie `-W %s' staat geen argument toe\n"
 
 #: lib/obstack.c:403 lib/obstack.c:406
 msgid "memory exhausted"
-msgstr ""
-
-#~ msgid "The %s section has been found. Processing..."
-#~ msgstr "Het %s gedeelte is gevonden. Bezig met verwerken..."
-
-#~ msgid "IDENT: send() failed: %s."
-#~ msgstr "IDENT: send() mislukt: %s."
-
-#~ msgid "Built-in support for: "
-#~ msgstr "Ingebouwde ondersteuning voor:"
-
-#~ msgid "Initializing socket..."
-#~ msgstr "Bezig met initialiseren socket..."
-
-#~ msgid "(%ld)SERVER >>> %s"
-#~ msgstr "(%ld)SERVER >>> %s"
-
-#~ msgid "(%ld)CLIENT >>> %s"
-#~ msgstr "(%ld)CLIENT >>> %s"
-
-#~ msgid "(%d)SERVER <<< %s"
-#~ msgstr "(%d)SERVER <<< %s"
-
-#~ msgid "(%d)CLIENT <<< %s"
-#~ msgstr "(%d)CLIENT <<< %s"
-
-#~ msgid "Fatal fclose() error. %s."
-#~ msgstr "Fatale fclose() fout. %s."
-
-#~ msgid "SSL_set_fd() failed."
-#~ msgstr "SSL_set_fd() mislukt."
+msgstr "geheugen uitgeput"
