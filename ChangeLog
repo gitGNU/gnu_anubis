@@ -1,3 +1,23 @@
+2003-04-06  Sergey Poznyakoff 
+
+	* src/tunnel.c: Use new encryption wrappers.
+	* src/daemon.c: Likewise. 
+	* src/net.c: Likewise.
+	* src/errs.c (socket_error): Changed declaration.
+	* src/extern.h (secure_struct): Removed implementation-dependent
+	  members.
+	* src/headers.h (T_SSL_CLIENT,T_SSL_SERVER): Not needed anymore.
+	  (net_io_t,net_close_t,strerror_t): New data types.
+	  (socket_error): Changed proto.
+	  (net_set_io,net_close): New function.
+	* src/main.c (main): Call init_ssl_libs.
+	
+	* src/proxy.c: Reflect changes to the declaration of
+	socket_error().
+	* src/quit.c (quit): Removed implementation-dependent calls.
+	* src/ssl.c: Rewritten to make more modular.
+	* src/tls.c: Likewise.
+
 2003-03-10  Wojciech Polak
 
 	* testsuite/etc/trigger.pat: New file. Testing
