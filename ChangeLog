@@ -1,3 +1,14 @@
+2003-07-06  Sergey Poznyakoff 
+
+	* src/headers.h (SYNTAX): New error displaying method,
+	used for syntax errors.
+	* src/errs.c (anubis_error): Do not prefix the message
+	with '>>' for SYNTAX method.
+	* src/rc.c: Renamed ssl keywords.
+	New command "body-clear".
+	* src/rcfile.y: Use SYNTAX method for error messages.
+	* testsuite/etc/tlsoneway.in: Use new ssl keywords.
+
 2003-07-01  Sergey Poznyakoff
 
 	* configure.ac: Define M4_DEFS
