@@ -38,6 +38,7 @@ static int cipher_info(gnutls_session);
 
 #define DH_BITS 768
 gnutls_dh_params dh_params;
+
 /* FIXME: should they belong to struct secure_struct? */
 static gnutls_certificate_client_credentials xcred;
 static gnutls_certificate_server_credentials x509_cred;
@@ -78,7 +79,7 @@ _tls_read(void *sd, char *data, size_t size, size_t *nbytes)
 	if (rc >= 0) {
 		*nbytes = rc;
 		return 0;
-	} 
+ 	} 
 	return rc;
 }
 
@@ -106,6 +107,26 @@ _tls_cleanup_x509()
 		gnutls_certificate_free_credentials(x509_cred);
 }
 
+static ssize_t
+_tls_fd_pull(gnutls_transport_ptr fd, void *buf, size_t size)
+{
+	int rc;
+	do {
+		rc = read(fd, buf, size);
+	} while (rc == -1 && errno == EAGAIN);
+	return rc;
+}
+
+static ssize_t
+_tls_fd_push(gnutls_transport_ptr fd, const void *buf, size_t size)
+{
+	int rc;
+	do {
+		rc = write(fd, buf, size);
+	} while (rc == -1 && errno == EAGAIN);
+	return rc;
+}
+
 void
 init_ssl_libs(void)
 {
@@ -121,7 +142,9 @@ start_ssl_client(int sd_server)
 	gnutls_session session = 0;
 	const int protocol_priority[] = {GNUTLS_TLS1, GNUTLS_SSL3, 0};
 	const int kx_priority[] = {GNUTLS_KX_RSA, 0};
-	const int cipher_priority[] = {GNUTLS_CIPHER_3DES_CBC, GNUTLS_CIPHER_ARCFOUR_128, 0};
+	const int cipher_priority[] = {GNUTLS_CIPHER_3DES_CBC,
+				       GNUTLS_CIPHER_ARCFOUR_128,
+				       0};
 	const int comp_priority[] = {GNUTLS_COMP_NULL, 0};
 	const int mac_priority[] = {GNUTLS_MAC_SHA, GNUTLS_MAC_MD5, 0};
 
@@ -149,6 +172,11 @@ start_ssl_client(int sd_server)
 	
 	gnutls_credentials_set(session, GNUTLS_CRD_CERTIFICATE, xcred);
 	atexit(_tls_cleanup_xcred);
+
+	if (topt & T_LOCAL_MTA) {
+		gnutls_transport_set_pull_function(session, _tls_fd_pull);
+		gnutls_transport_set_push_function(session, _tls_fd_push);
+	}
 	gnutls_transport_set_ptr(session, sd_server);
 
 	rs = gnutls_handshake(session);
@@ -230,6 +258,10 @@ start_ssl_server(int sd_client)
 
 	session = initialize_tls_session();
 
+	if (topt & T_STDINOUT) {
+		gnutls_transport_set_pull_function(session, _tls_fd_pull);
+		gnutls_transport_set_push_function(session, _tls_fd_push);
+	}
 	gnutls_transport_set_ptr(session, sd_client);
 	rs = gnutls_handshake(session);
 	if (rs < 0) {
