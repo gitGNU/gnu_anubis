@@ -28,7 +28,6 @@ typedef struct rc_cond RC_COND;
 typedef struct rc_asgn RC_ASGN;
 typedef struct rc_node RC_NODE;
 typedef struct rc_bool RC_BOOL;
-typedef struct rc_regex RC_REGEX;
 
 struct rc_section {          /* RC Section */
 	RC_SECTION *next;    /* Link to the next section */
@@ -64,21 +63,10 @@ enum rc_node_type {          /* Executable node type */
 	rc_node_re           /* Regular expression */
 };
 
-struct rc_regex {            /* Regular expression */
-	char *src;           /* Raw-text representation */  
-	int perlre;          /* Is it Perl style? */
-	union {
-		regex_t re;  /* POSIX regex */
-#ifdef HAVE_PCRE
-		pcre pre;    /* Perl */
-#endif
-	} v;
-};
-
 struct rc_node {             /* Executable node */
 	enum rc_node_type type;  /* Node type */
 	union {
-		RC_REGEX re;      
+		RC_REGEX *re;      
 		RC_BOOL bool;
 	} v;
 };
@@ -157,4 +145,4 @@ void rc_set_debug_level(char *);
 int rc_open(char *name);
 
 struct rc_secdef *anubis_add_section(char *name);
-int anubis_regexp_match(RC_REGEX *re, char *line, int *refc, char ***refv);
+
