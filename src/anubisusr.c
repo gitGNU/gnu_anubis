@@ -95,6 +95,8 @@ info(int mode, const char *fmt, ...)
 {
 	va_list ap;
 
+	if (verbose == 0)
+		return;
 	va_start(ap, fmt);
 	vfprintf(stderr, fmt, ap);
 	va_end(ap);
@@ -458,24 +460,50 @@ assign_string(char **pstring, const char *value)
 int
 hostcmp(const char *a, const char *b)
 {
-	struct hostent *hpa = gethostbyname(a);
-	struct hostent *hpb = gethostbyname(b);
+	struct hostent *hp = gethostbyname(a);
+	char **addrlist;
+	char *dptr;
 	char **addr;
+	size_t i, count;
+	size_t entry_length;
+	int entry_type;
 	
-	if (!hpa || !hpb)
-		return 1;
-	if (hpa->h_length != hpb->h_length
-	    || hpa->h_addrtype != hpb->h_addrtype)
+	if (!hp)
 		return 1;
 
-	for (addr = hpa->h_addr_list; *addr; addr++) {
+	for (count = 1, addr = hp->h_addr_list; *addr; addr++)
+		count++;
+	addrlist = xmalloc(count * (sizeof *addrlist + hp->h_length)
+			   - hp->h_length);
+	dptr = (char*)(addrlist + count);
+	for (i = 0; i < count - 1; i++) {
+		memcpy(dptr, hp->h_addr_list[i], hp->h_length);
+		addrlist[i] = dptr;
+		dptr += hp->h_length;
+	}
+	addrlist[i] = NULL;
+	entry_length = hp->h_length;
+	entry_type = hp->h_addrtype;
+	
+	hp = gethostbyname(b);
+	if (!hp
+	    || entry_length != hp->h_length
+	    || entry_type != hp->h_addrtype) {
+		free(addrlist);
+		return 1;
+	}
+	
+	for (addr = addrlist; *addr; addr++) {
 		char **p;
 
-		for (p = hpb->h_addr_list; *p; p++) {
-			if (memcmp(*addr, *p, hpa->h_length) == 0)
+		for (p = hp->h_addr_list; *p; p++) {
+			if (memcmp(*addr, *p, entry_length) == 0) {
+				free(addrlist);
 				return 0;
+			}
 		}
 	}
+	free(addrlist);
 	return 1;
 }
 
@@ -538,8 +566,10 @@ parse_netrc(const char *filename)
 			def_argc = argc;
 			def_argv = argv;
 			p_argv = argv + 1;
-		} else
+		} else {
+			VDETAIL(1,(_("Ignoring unrecognized line %d"), line));
 			argcv_free(argc, argv);
+		}
 	}
 	fclose(fp);
 	free(buf);
@@ -611,7 +641,7 @@ cb_anonymous(Gsasl_session_ctx * ctx, char *out, size_t * outlen)
 	rc = utf8cpy(out, outlen, auth_args.anon_token,
 		     strlen(auth_args.anon_token));
 	if (rc != GSASL_OK)
-		     return rc;
+		return rc;
 
 	return GSASL_OK;
 }
@@ -699,18 +729,18 @@ cb_service(Gsasl_session_ctx *ctx, char *srv, size_t *srvlen,
 		return GSASL_AUTHENTICATION_ERROR;
 
 	rc = utf8cpy(srv, srvlen, auth_args.service,
-		      strlen(auth_args.service));
+		     strlen(auth_args.service));
 	if (rc != GSASL_OK)
 		return rc;
 
 	rc = utf8cpy(host, hostlen, auth_args.hostname,
-		      strlen(auth_args.hostname));
+		     strlen(auth_args.hostname));
 	if (rc != GSASL_OK)
 		return rc;
 
 	if (srvnamelen) {
 		rc = utf8cpy(srvname, srvnamelen, auth_args.service_name,
-			      strlen(auth_args.service_name));
+			     strlen(auth_args.service_name));
 		if (rc != GSASL_OK)
 			return rc;
 	}
@@ -730,7 +760,7 @@ cb_passcode(Gsasl_session_ctx * ctx, char *out, size_t * outlen)
 		return GSASL_AUTHENTICATION_ERROR;
 
 	rc = utf8cpy(out, outlen, auth_args.passcode,
-		      strlen(auth_args.passcode));
+		     strlen(auth_args.passcode));
 	if (rc != GSASL_OK)
 		return rc;
 
@@ -754,6 +784,15 @@ cb_realm(Gsasl_session_ctx * ctx, char *out, size_t * outlen)
 		return rc;
 	
 	return GSASL_OK;
+}
+
+void
+smtp_quit()
+{
+	struct smtp_reply repl;
+	send_line("QUIT");
+	smtp_get_reply(&repl);
+	smtp_free_reply(&repl); /* There's no use checking */
 }
 
 
@@ -845,14 +884,17 @@ smtp_auth()
 	mech = find_capa_v(&smtp_capa, "AUTH", auth_mech_list);
 	if (!mech) {
 		error(_("No suitable authentication mechanism found"));
+		smtp_quit();
 		exit(1);
 	}
 	VDETAIL(1,(_("Selected authentication mechanism: %s\n"), mech));
 
-	rc = gsasl_init (&ctx);
+	rc = gsasl_init(&ctx);
 	if (rc != GSASL_OK) {
 		info (NORMAL, _("cannot initialize libgsasl: %s"),
-		      gsasl_strerror (rc));
+		      gsasl_strerror(rc));
+		smtp_quit();
+		exit(1);
 	}
 
 	gsasl_client_callback_anonymous_set(ctx, cb_anonymous);
@@ -892,7 +934,7 @@ char *
 rc_name()
 {
 	char *rc;
-	char *home = get_home_dir();
+	const char *home = get_home_dir();
 	
 	rc = xmalloc(strlen(home) + 1 + sizeof DEFAULT_LOCAL_RCFILE);
 	strcpy(rc, home);
@@ -1104,7 +1146,8 @@ synch()
 
 	if (find_capa(&smtp_capa, "XDATABASE", NULL)) {
 		error(_("Remote party does not reveal XDATABASE capability"));
-		exit(1);
+		smtp_quit();
+		return 1;
 	}
 
 	send_line("XDATABASE EXAMINE");
@@ -1112,6 +1155,7 @@ synch()
 	if (repl.code != 250) {
 		error(_("EXAMINE failed"));
 		smtp_print_reply(stderr, &repl);
+		smtp_quit();
 		return 1;
 	}
 
@@ -1126,9 +1170,8 @@ synch()
 	if (rc == CMP_CHANGED)
 		smtp_upload(rcname);
 	free(rcname);
-	
-	send_line("QUIT");
-	smtp_get_reply(&repl);
+
+	smtp_quit();
 	return 0;
 }
 
@@ -1175,7 +1218,7 @@ help()
 void
 read_netrc()
 {
-	char *home = get_home_dir();
+	const char *home = get_home_dir();
 	char *netrc = xmalloc(strlen(home) + 1 + sizeof NETRC_NAME);
 	strcpy(netrc, home);
 	strcat(netrc, "/");
