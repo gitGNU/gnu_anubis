@@ -105,11 +105,7 @@ service_unavailable(int sd_client)
 {
 	char buf[LINEBUFFER+1];
 
-#ifdef HAVE_SNPRINTF
 	snprintf(buf, LINEBUFFER,
-#else
-	sprintf(buf,
-#endif /* HAVE_SNPRINTF */
 	"421 %s Service not available, closing transmission channel."CRLF,
 		(topt & T_LOCAL_MTA) ? "localhost" : session.mta);
 
@@ -369,15 +365,6 @@ stdinout(void)
 {
 	int sd_client = -1; /* stdin/stdout */
 	int sd_server = 0;
-
-	/*
-	   Read the system configuration file (SUPERVISOR).
-	*/
-
-	if (!(topt & T_NORC)) {
-		open_rcfile(CF_SUPERVISOR);
-		process_rcfile(CF_SUPERVISOR);
-	}
 
 	anubis_getlogin(session.client, sizeof(session.client));
 	auth_tunnel(); /* session.client = session.supervisor */
