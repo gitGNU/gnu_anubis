@@ -5,11 +5,16 @@
 * Update documentation and examples to reflect the new syntax and
 semantics of the anubis language.
 
-* Tunnel core
-** HTML processing (also removing HTML part)
-** IPv6 support
+* New settings (system configuration file)
+** `settings-priority = system | user'
+** `drop-unknown-client = yes | no'
+** `forbid-user-settings = yes | no'
+
+* New action commands
+** `reject' action command
 
 * Parser and run-time evaluator:
+** Allow RULE section in the system configuration file.
 ** Add more verbose diagnostics to the parser. More specifically, emit
 a warning if gpg-crypt, rot-13 and the like may be used twice over the
 same block of text. (Basically this means adding a rudimentary flow
@@ -18,7 +23,10 @@ control analyzer).
 * New features
 ** OpenPGP/MIME support
 ** S/MIME support
-** `reject' action command
+
+* Tunnel core
+** HTML processing (also removing HTML part)
+** IPv6 support
 
 * Other stuff
 ** An external performance test.
