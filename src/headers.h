@@ -122,17 +122,6 @@
  #define HAVE_SSL
 #endif /* USE_OPENSSL and HAVE_OPENSSL */
 
-#include <regex.h>
-#ifdef HAVE_PCRE
- #ifdef HAVE_PCRE_H
-  #include <pcre.h>
- #else
-  #ifdef HAVE_PCRE_PCRE_H
-   #include <pcre/pcre.h>
-  #endif /* HAVE_PCRE_PCRE_H */
- #endif /* HAVE_PCRE_H */
-#endif /* HAVE_PCRE */
-
 #ifdef HAVE_PAM
  #include <security/pam_appl.h>
  #include <security/pam_misc.h>
@@ -272,6 +261,9 @@
 #define safe_strcpy(s, ct) \
  (s[sizeof(s) - 1] = '\0', strncpy((char *)s, (char *)ct, sizeof(s) - 1))
 
+struct rc_regex; 
+typedef struct rc_regex RC_REGEX;
+
 /* main.c */
 
 void anubis(char *arg);
@@ -363,6 +355,10 @@ void check_rot13(void);
 void check_all_files(char *);
 
 /* regex.c */
+int anubis_regex_match(RC_REGEX *re, char *line, int *refc, char ***refv);
+RC_REGEX *anubis_regex_compile(char *line, int opt);
+void anubis_regex_free(RC_REGEX *re);
+char *anubis_regex_source(RC_REGEX *re);
 int regex_match(char *, char *);
 
 /* rc.c */
