@@ -559,7 +559,7 @@ process_command (MESSAGE * msg, char *command)
   if (!strncmp (buf, "starttls", 8))
     return handle_starttls (buf);
   else if (!strncmp (buf, "xdatabase", 9))
-    return xdatabase (buf);
+    return xdatabase (buf + 9);
 
   return 0;
 }
