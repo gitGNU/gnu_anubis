@@ -1,0 +1,979 @@
+# Mesajele în limba românã pentru anubis.
+# Copyright (C) 2003 Free Software Foundation, Inc.
+# Acest fiºier este distribuit sub aceeaºi licenþã ca ºi pachetul anubis.
+# Laurentiu Buzdugan <buzdugan@voyager.net>, 2003.
+#
+#
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: anubis 3.6.2\n"
+"POT-Creation-Date: 2002-12-15 13:16+0100\n"
+"PO-Revision-Date: 2003-03-17 03:22+0000\n"
+"Last-Translator: Laurentiu Buzdugan <buzdugan@voyager.net>\n"
+"Language-Team: Romanian <translation-team-ro@lists.sourceforge.net>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-2\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: src/auth.c:31
+#, c-format
+msgid "Welcome user %s !"
+msgstr "Bine aþi venit %s !"
+
+#: src/auth.c:37 src/rc.c:152 src/rc.c:174 src/rc.c:209
+#, c-format
+msgid "The %s section has been found. Processing..."
+msgstr "Am gãsit secþiunea %s. Procesãm..."
+
+#: src/auth.c:54
+#, c-format
+msgid "IDENT: socket() failed: %s."
+msgstr "IDENT: socket() a eºuat: %s."
+
+#: src/auth.c:65
+#, c-format
+msgid "IDENT: connect() failed: %s."
+msgstr "IDENT: connect() a eºuat: %s."
+
+#: src/auth.c:69
+#, c-format
+msgid "IDENT: connected to %s:%u"
+msgstr "IDENT: conectat la %s:%u"
+
+#: src/auth.c:80
+#, c-format
+msgid "IDENT: send() failed: %s."
+msgstr "IDENT: send() a eºuat: %s."
+
+#: src/auth.c:85
+#, c-format
+msgid "IDENT: recvline() failed: %s."
+msgstr "IDENT: recvline() a eºuat: %s."
+
+#: src/auth.c:93
+msgid "IDENT: incorrect data."
+msgstr "IDENT: date incorecte."
+
+#: src/auth.c:103
+msgid "IDENT: data probably encrypted with DES..."
+msgstr "IDENT: date probabil criptate cu DES..."
+
+#: src/auth.c:109
+msgid "IDENT: incorrect data (DES deciphered)."
+msgstr "IDENT: date incorecte (DES decriptat)."
+
+#: src/auth.c:125
+#, c-format
+msgid "IDENT: resolved remote user to %s."
+msgstr "IDENT: am rezolvat utilizator remote ca %s."
+
+#: src/daemon.c:50
+#, c-format
+msgid "daemon() failed. %s."
+msgstr "daemon() a eºuat. %s."
+
+#: src/daemon.c:57
+#, c-format
+msgid "Can't fork. %s."
+msgstr "Nu pot face fork. %s."
+
+#: src/daemon.c:65
+msgid "setsid() failed."
+msgstr "setsid() a eºuat."
+
+#: src/daemon.c:77
+#, c-format
+msgid "%s daemon startup succeeded."
+msgstr "demonul de pornire %s a reuºit."
+
+#: src/daemon.c:92
+#, c-format
+msgid "Child [%d] finished. Exit status: %s. %d client(s) left."
+msgstr "Copil [%d] a terminat. Stare de ieºire: %s. au mai rãmas %d client(i)."
+
+#: src/daemon.c:93
+msgid "OK"
+msgstr "OK"
+
+#: src/daemon.c:93
+msgid "ERROR"
+msgstr "EROARE"
+
+#: src/daemon.c:162
+msgid "GNU Anubis is running..."
+msgstr "GNU Anubis ruleazã..."
+
+#: src/daemon.c:171 src/exec.c:114
+#, c-format
+msgid "accept() failed: %s."
+msgstr "accept() a eºuat: %s."
+
+#: src/daemon.c:184
+#, c-format
+msgid "TCP wrappers: connection from %s:%u rejected."
+msgstr "TCP wrappers: conectarea de la %s:%u respinsã."
+
+#: src/daemon.c:203
+#, c-format
+msgid "Too many clients. Connection from %s:%u rejected."
+msgstr "Prea mulþi clienþi. Conectarea de la %s:%u respinsã."
+
+#: src/daemon.c:209
+#, c-format
+msgid "Connection from %s:%u"
+msgstr "Conectarea de la %s:%u"
+
+#: src/daemon.c:214
+#, c-format
+msgid "daemon: Can't fork. %s."
+msgstr "demon: Nu pot face fork. %s."
+
+#: src/daemon.c:263
+msgid "The MTA has not been specified. Set the REMOTE-MTA or LOCAL-MTA."
+msgstr "MTA-ul nu a fost specificat. Setaþi REMOTE-MTA sau LOCAL-MTA."
+
+#: src/daemon.c:292 src/map.c:105 src/net.c:84 src/net.c:145
+#, c-format
+msgid "Illegal address length received for host %s"
+msgstr "Am primit o lungime de adresã ilegalã de la host-ul %s"
+
+#: src/daemon.c:304
+msgid "Loop not allowed. Connection rejected."
+msgstr "Loop nu este permis. Conectarea respinsã."
+
+#: src/daemon.c:353
+msgid "Connection terminated."
+msgstr "Conectarea terminatã."
+
+#: src/daemon.c:355
+msgid "Connection closed successfully."
+msgstr "Conectarea închisã cu succes."
+
+#: src/daemon.c:360
+msgid "PAM: Session closed."
+msgstr "PAM: Sesiune terminatã."
+
+#: src/daemon.c:363
+msgid "PAM: failed to release authenticator."
+msgstr "PAM: am eºuat sã eliberez autentificatorului."
+
+#: src/env.c:107
+#, c-format
+msgid "Try '%s --help' for more information."
+msgstr "Încercaþi `%s --help' pentru informaþii suplimentare."
+
+#: src/env.c:209
+msgid "PAM: Session opened (restrictions applied)."
+msgstr "PAM: Sesiune deschisã (restricþii în vigoare)."
+
+#: src/env.c:211
+msgid "PAM: Not authenticated to use GNU Anubis."
+msgstr "PAM: Nu sunteþi autentificat sã folosiþi GNU Anubis."
+
+#: src/env.c:221 src/main.c:93
+#, c-format
+msgid "UID:%d, GID:%d, EUID:%d, EGID:%d"
+msgstr "UID:%d, GID:%d, EUID:%d, EGID:%d"
+
+#: src/env.c:252
+#, c-format
+msgid "Invalid user ID: %s"
+msgstr "Utilizator invalid: %s"
+
+#: src/env.c:257
+#, c-format
+msgid "Invalid user name: %s"
+msgstr "Nume utilizator invalid: %s"
+
+#: src/env.c:279
+#, c-format
+msgid "Wrong permissions on %s. Set 0600."
+msgstr "Permisiuni greºite pentru %s. Setaþi 0600."
+
+#: src/env.c:303
+#, c-format
+msgid "%s is not a regular file or a symbolic link."
+msgstr "%s nu este un fiºier normal sau o legãturã simbolicã."
+
+#: src/errs.c:75
+#, c-format
+msgid "Couldn't write on socket! %s."
+msgstr "Nu am putut scrie pe socket! %s."
+
+#: src/errs.c:82
+#, c-format
+msgid "SOCKS proxy: %s"
+msgstr "SOCKS proxy: %s"
+
+#: src/errs.c:93
+#, c-format
+msgid "Unknown host %s."
+msgstr "Host necunoscut %s."
+
+#: src/errs.c:96
+#, c-format
+msgid "%s: host name is valid but does not have an IP address."
+msgstr "%s: nume host este valid dar nu are o adresã IP."
+
+#: src/errs.c:99
+#, c-format
+msgid "%s: unrecoverable name server error occured."
+msgstr "%s: a avut loc o eroare de tip nume de server nedeterminat."
+
+#: src/errs.c:102
+#, c-format
+msgid "%s: a temporary name server error occured. Try again later."
+msgstr "%s: a avut loc o eroare de tip nume de server temporar. Încercaþi mai târziu."
+
+#: src/errs.c:104
+#, c-format
+msgid "%s: unknown DNS error %d."
+msgstr "%s: eroare DNS necunoscutã %d."
+
+#: src/esmtp.c:57
+msgid "Using the ESMTP CRAM-MD5 authentication..."
+msgstr "Folosim autentificarea ESMTP CRAM-MD5..."
+
+#: src/esmtp.c:63 src/esmtp.c:111
+msgid "Server rejected the AUTH command."
+msgstr "Serverul a respins comanda AUTH."
+
+#: src/esmtp.c:71 src/esmtp.c:119 src/esmtp.c:135
+#, c-format
+msgid "Challenge decoded: %s"
+msgstr "Încercare decodatã: %s"
+
+#: src/esmtp.c:99 src/esmtp.c:150
+#, c-format
+msgid "ESMTP AUTH: %s."
+msgstr "ESMTP AUTH: %s."
+
+#: src/esmtp.c:105
+msgid "Using the ESMTP LOGIN authentication..."
+msgstr "Folosim autentificarea ESMTP LOGIN..."
+
+#: src/exec.c:81
+msgid "#1 socket() failed."
+msgstr "socket() #1 a eºuat."
+
+#: src/exec.c:85
+msgid "#2 socket() failed."
+msgstr "socket() #2 a eºuat."
+
+#: src/exec.c:94
+#, c-format
+msgid "#1 bind() failed: %s."
+msgstr "bind() #1 a eºuat: %s."
+
+#: src/exec.c:98
+#, c-format
+msgid "#2 bind() failed: %s."
+msgstr "bind() #2 a eºuat: %s."
+
+#: src/exec.c:102 src/net.c:161
+#, c-format
+msgid "listen() failed: %s."
+msgstr "listen() a eºuat: %s."
+
+#: src/exec.c:106
+#, c-format
+msgid "getsockname() failed: %s."
+msgstr "getsockname() a eºuat: %s."
+
+#: src/exec.c:110
+#, c-format
+msgid "connect() failed: %s."
+msgstr "connect() a eºuat: %s."
+
+#: src/exec.c:120
+#, c-format
+msgid "socketpair() failed: %s."
+msgstr "socketpair() a eºuat: %s."
+
+#: src/exec.c:134
+#, c-format
+msgid "Local program [%d] finished."
+msgstr "Programul local [%d] a terminat."
+
+#: src/exec.c:157
+#, c-format
+msgid "Executing %s %s..."
+msgstr "Executãm %s %s..."
+
+#: src/exec.c:165
+msgid "fork() failed."
+msgstr "fork() a eºuat."
+
+#: src/exec.c:175
+#, c-format
+msgid "execvp() failed: %s"
+msgstr "execvp() a eºuat: %s."
+
+#: src/getopt.c:681
+#, c-format
+msgid "%s: option `%s' is ambiguous\n"
+msgstr "%s: opþiunea `%s' este ambiguã\n"
+
+#: src/getopt.c:706
+#, c-format
+msgid "%s: option `--%s' doesn't allow an argument\n"
+msgstr "%s: opþiunea `--%s' nu permite un argument\n"
+
+#: src/getopt.c:711
+#, c-format
+msgid "%s: option `%c%s' doesn't allow an argument\n"
+msgstr "%s: opþiunea `%c%s' nu permite un argument\n"
+
+#: src/getopt.c:729 src/getopt.c:902
+#, c-format
+msgid "%s: option `%s' requires an argument\n"
+msgstr "%s: opþiunea `%s' necesitã un argument\n"
+
+#: src/getopt.c:758
+#, c-format
+msgid "%s: unrecognized option `--%s'\n"
+msgstr "%s: opþiune nerecunoscutã `--%s'\n"
+
+#: src/getopt.c:762
+#, c-format
+msgid "%s: unrecognized option `%c%s'\n"
+msgstr "%s: opþiune nerecunoscutã `%c%s'\n"
+
+#: src/getopt.c:788
+#, c-format
+msgid "%s: illegal option -- %c\n"
+msgstr "%s: opþiune ilegalã -- %c\n"
+
+#: src/getopt.c:791
+#, c-format
+msgid "%s: invalid option -- %c\n"
+msgstr "%s: opþiune ilegalã -- %c\n"
+
+#: src/getopt.c:821 src/getopt.c:951
+#, c-format
+msgid "%s: option requires an argument -- %c\n"
+msgstr "%s: opþiunea necesitã un argument -- %c\n"
+
+#: src/getopt.c:868
+#, c-format
+msgid "%s: option `-W %s' is ambiguous\n"
+msgstr "%s: opþiunea `-W %s' este ambiguã\n"
+
+#: src/getopt.c:886
+#, c-format
+msgid "%s: option `-W %s' doesn't allow an argument\n"
+msgstr "%s: opþiunea `-W %s' nu permite un argument\n"
+
+#: src/gpg.c:40
+#, c-format
+msgid "GPGME: %s."
+msgstr "GPGME: %s."
+
+#: src/gpg.c:64
+#, c-format
+msgid "Install GPGME version %s or later."
+msgstr "Instalaþi GPGME versiunea %s sau o versiune ulterioarã."
+
+#: src/gpg.c:69
+#, c-format
+msgid "GPGME: failed. %s."
+msgstr "GPGME: a eºuat. %s."
+
+#: src/help.c:33
+msgid "Built-in support for: "
+msgstr "Suport intern pentru: "
+
+#: src/help.c:59
+msgid ""
+"\n"
+"\n"
+"GNU Anubis is free software; you can redistribute it and/or modify\n"
+"it under the terms of the GNU General Public License as published by\n"
+"the Free Software Foundation; either version 2 of the License, or\n"
+"(at your option) any later version."
+msgstr ""
+"\n"
+"\n"
+"GNU Anubis este software liber; îl puteþi redistribui ºi/sau modifica\n"
+"conform termenilor Licenþei Publice Generale GNU publicate de\n"
+"Fundaþia pentru Software Liber; fie versiunea 2 a Licenþei, sau\n"
+"(la alegerea d-voastrã) orice versiune ulterioarã."
+
+#: src/help.c:63
+msgid ""
+"\n"
+"GNU Anubis is distributed in the hope that it will be useful,\n"
+"but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
+"GNU General Public License for more details."
+msgstr ""
+"\n"
+"GNU Anubis este distribuit cu speranþa cã va fi folositor, dar\n"
+"FÃRÃ NICI O GARANÞIE; chiar ºi fãrã garanþia implicitã de\n"
+"COMERCIALITATE sau POTRIVIRE PENTU UN SCOP ANUME.  Vedeþi\n"
+"Licenþa Publicã Generalã GNU pentru detalii suplimentare."
+
+#: src/help.c:67
+msgid ""
+"\n"
+"You should have received a copy of the GNU General Public License\n"
+"along with GNU Anubis; if not, write to the Free Software\n"
+"Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA"
+msgstr ""
+"\n"
+"Ar fi trebuit sã fi primit o copie a Licenþei Publice Generale GNU\n"
+"împreunã cu GNU Anubis; dacã nu, scrieþi la adresa Free Software\n"
+"Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA"
+
+#: src/help.c:70
+msgid ""
+"\n"
+"GNU Anubis is released under the GPL with the additional exemption that\n"
+"compiling, linking, and/or using OpenSSL is allowed.\n"
+msgstr ""
+"\n"
+"GNU Anubis este distribuit sub GPL cu exceþia adiþionalã cã\n"
+"compilarea, link-editarea, ºi/sau folosirea OpenSSL este permisã.\n"
+
+#: src/help.c:78
+msgid "Usage: anubis [options]\n"
+msgstr "Folosire: anubis [opþiuni]\n"
+
+#: src/help.c:79
+msgid ""
+" -b, --bind [HOST:]PORT       Specify the TCP port on which GNU Anubis listens\n"
+"                              for connections. The default HOST is INADDR_ANY,\n"
+"                              and default PORT is 24 (private mail system)."
+msgstr ""
+" -b, --bind [HOST:]PORT       Specificã portul TCP pe care GNU Anubis ascultã\n"
+"                              pentru conectare. HOST-ul implicit este INADDR_ANY,\n"
+"                              iar PORT-ul implicit este 24 (sistemul de poºtã particularã)."
+
+#: src/help.c:82
+msgid ""
+" -r, --remote-mta HOST[:PORT] Specify a remote SMTP host name or IP address.\n"
+"                              The default PORT number is 25."
+msgstr ""
+" -r, --remote-mta HOST[:PORT] Specificã un nume de host SMTP remote sau adresã IP.\n"
+"                              Numãrul de PORT implicit este 25."
+
+#: src/help.c:84
+msgid ""
+" -l, --local-mta FILE         Execute a local SMTP server, which works on\n"
+"                              standard input and output (inetd-type program).\n"
+"                              This option excludes the '--remote-mta' option."
+msgstr ""
+" -l, --local-mta FILE         Executã u server SMTP, care lucreazã pe\n"
+"                              intrarea ºi ieºirea standard (în genul programului inetd).\n"
+"                              Aceastã opþiune exclude opþiunea '--remote-mta'"
+
+#: src/help.c:87
+msgid " -f, --foreground             Foreground mode."
+msgstr " -f, --foreground             Mod prim-plan."
+
+#: src/help.c:88
+msgid ""
+" -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as described\n"
+"                              in RFC 821 on standard input and output."
+msgstr ""
+
+#: src/help.c:90
+msgid "Output options:\n"
+msgstr "Opþiuni pentru ieºiri:\n"
+
+#: src/help.c:91
+msgid " -s, --silent     Work silently."
+msgstr " -s, --silent     Lucreazã silenþios"
+
+#: src/help.c:92
+msgid " -v, --verbose    Work noisily."
+msgstr " -v, --verbose    Lucreazã zgomotos"
+
+#: src/help.c:93
+msgid " -D, --debug      Debug mode."
+msgstr " -D, --debug      Mod depanare."
+
+#: src/help.c:94
+msgid ""
+"\n"
+"Miscellaneous options:\n"
+msgstr ""
+"\n"
+"Opþiuni diverse:\n"
+
+#: src/help.c:95
+msgid " --altrc FILE     Specify alternate system configuration file."
+msgstr " --altrc FIªIER   Specificã fiºier de configurare sistem alternativ"
+
+#: src/help.c:96
+msgid " --norc           Ignore system configuration file."
+msgstr " --norc           Ignorã fiºierul de configurare sistem"
+
+#: src/help.c:97
+msgid " --version        Print version number and copyright."
+msgstr " --version        Afiºeazã numãrul versiunii ºi copyright-ul."
+
+#: src/help.c:98
+msgid " --help           It's obvious..."
+msgstr " --help           Este evident..."
+
+#: src/help.c:99
+#, c-format
+msgid ""
+"\n"
+"Report bugs to <%s>.\n"
+msgstr ""
+"\n"
+"Raportaþi bug-uri la %s>.\n"
+
+#: src/map.c:69
+msgid "Translation map: incorrect syntax."
+msgstr "Hartã translaþii: sintaxã incorectã."
+
+#: src/map.c:150
+#, c-format
+msgid "%s remapped to %s@localhost."
+msgstr "%s remapat cãtre %s@localhost."
+
+#: src/mem.c:35
+msgid "malloc() failed. Cannot allocate enough memory."
+msgstr "malloc() a eºuat. Nu pot aloca destulã memorie."
+
+#: src/mem.c:52
+msgid "realloc() failed. Cannot reallocate enough memory."
+msgstr "realloc() a eºuat. Nu pot realoca destulã memorie."
+
+#: src/net.c:69
+msgid "Getting remote host information..."
+msgstr "Obþinem informaþii despre host-ul remote..."
+
+#: src/net.c:98
+msgid "Initializing socket..."
+msgstr "Iniþializare socket..."
+
+#: src/net.c:100 src/net.c:131
+msgid "Can't create stream socket."
+msgstr "Nu pot crea stream socket."
+
+#: src/net.c:103
+#, c-format
+msgid "Connecting to %s:%u..."
+msgstr "Mã conectez la %s:%u..."
+
+#: src/net.c:105
+#, c-format
+msgid "Couldn't connect to %s:%u. %s."
+msgstr "Nu mã pot conecta la to %s:%u. %s."
+
+#: src/net.c:110
+#, c-format
+msgid "Connected to %s:%u"
+msgstr "M-am conectat la %s:%u"
+
+#: src/net.c:157
+#, c-format
+msgid "bind() failed: %s."
+msgstr "bind() a eºuat: %s."
+
+#: src/net.c:158
+#, c-format
+msgid "GNU Anubis bound to %s:%u"
+msgstr "GNU Anubis legat la %s:%u"
+
+#: src/net.c:211
+#, c-format
+msgid "(%ld)SERVER >>> %s"
+msgstr "(%ld)SERVER >>> %s"
+
+#: src/net.c:246
+#, c-format
+msgid "(%ld)CLIENT >>> %s"
+msgstr "(%ld)CLIENT >>> %s"
+
+#: src/net.c:366
+#, c-format
+msgid "(%d)SERVER <<< %s"
+msgstr "(%d)SERVER <<< %s"
+
+#: src/net.c:368
+#, c-format
+msgid "(%d)CLIENT <<< %s"
+msgstr "(%d)CLIENT <<< %s"
+
+#: src/proxy.c:67
+msgid "Using SOCKS Proxy..."
+msgstr "Folosind SOCKS Proxy..."
+
+#: src/proxy.c:177
+msgid "Address must be an IP, not a domain name."
+msgstr "Adresa trebuie sã fie un IP, nu un nume de domeniu."
+
+#: src/proxy.c:212 src/proxy.c:452
+msgid "SOCKS Proxy Connection: succeeded."
+msgstr "Conectare Proxy SOCKS: reuºitã."
+
+#: src/proxy.c:215
+msgid "Request rejected or failed."
+msgstr "Cerere respinsã sau eºuatã."
+
+#: src/proxy.c:218
+msgid "Request rejected."
+msgstr "Cerere respinsã."
+
+#: src/proxy.c:221
+msgid "Request rejected, because the client program and identd reported different User-IDs."
+msgstr "Cerere respinsã, pentru cã programul client ºi identd au raportat ID-uri diferite pentru utilizator."
+
+#: src/proxy.c:225 src/proxy.c:479
+msgid "Server reply is not valid."
+msgstr "Rãspunsul serverului nu este valid."
+
+#: src/proxy.c:263
+msgid "Possibly not a SOCKS proxy service."
+msgstr "Probabil nu e un srviciu SOCKS proxy."
+
+#: src/proxy.c:275
+msgid "SOCKS Proxy AUTH method: NO AUTHENTICATION REQUIRED"
+msgstr "Metoda AUTH Proxy SOCKS: NICI O AUTENTIFICARE NECESARÃ"
+
+#: src/proxy.c:279
+msgid "SOCKS Proxy AUTH method: USER NAME/PASSWORD"
+msgstr "Metoda AUTH Proxy SOCKS: NUME UTILIZATOR/PAROLÃ"
+
+#: src/proxy.c:282
+msgid "Cannot send null user name or password."
+msgstr "Nu pot trimite nume utilizator sau parolã nulã."
+
+#: src/proxy.c:320
+msgid "Bad user name or password."
+msgstr "Nume utilizator sau parolã greºitã."
+
+#: src/proxy.c:324
+msgid "SOCKS Proxy AUTH: succeeded."
+msgstr "AUTH Proxy SOCKS: reuºitã."
+
+#: src/proxy.c:327
+msgid "Server does not accept any method."
+msgstr "Serverul nu acceptã orice metodã,"
+
+#: src/proxy.c:330
+msgid "Server does not accept an AUTH method."
+msgstr "Serverul nu acceptã o metodã AUTH."
+
+#: src/proxy.c:455
+msgid "General SOCKS server failure."
+msgstr "Eºuare generalã server SOCKS."
+
+#: src/proxy.c:458
+msgid "Connection not allowed by a ruleset."
+msgstr "Conectarea nu este permisã de un set de reguli."
+
+#: src/proxy.c:461
+msgid "Network unreachable."
+msgstr "Reþeaua nu poate fi atinsã."
+
+#: src/proxy.c:464
+msgid "Host unreachable."
+msgstr "Host-ul nu poate fi atins."
+
+#: src/proxy.c:467
+msgid "Connection refused."
+msgstr "Conectare refuzatã."
+
+#: src/proxy.c:470
+msgid "TTL expired."
+msgstr "TTL expirat."
+
+#: src/proxy.c:473
+msgid "Command not supported."
+msgstr "Comanda nu este suportatã."
+
+#: src/proxy.c:476
+msgid "Address type not supported."
+msgstr "Tipul de adresã nu este suportat."
+
+#: src/quit.c:31
+msgid "Signal Caught. Exiting Cleanly..."
+msgstr "Am prins un semnal. Ies curat..."
+
+#: src/quit.c:38
+msgid "Timeout! Exiting..."
+msgstr "Pauzã! Ies..."
+
+#: src/rc.c:127
+#, c-format
+msgid "Anubis RC file error: %s."
+msgstr "Eroare în fiºierul Anubis RC: %s."
+
+#: src/rc.c:131
+#, c-format
+msgid "Reading system configuration file %s..."
+msgstr "Citesc fiºierul de configurare sistem %s..."
+
+#: src/rc.c:133
+#, c-format
+msgid "Reading user configuration file %s..."
+msgstr "Citesc fiºierul de configurare utilizator %s..."
+
+#: src/rc.c:233
+#, c-format
+msgid "Fatal fclose() error. %s."
+msgstr "Eroare criticã fclose(). %s"
+
+#: src/regex.c:69
+#, c-format
+msgid "regcomp() failed. %s"
+msgstr "regcomp() a eºuat. %s"
+
+#: src/regex.c:115
+#, c-format
+msgid "pcre_compile() failed at offset %d: %s."
+msgstr "pcre_compile() a eºuat la offset %d: %s."
+
+#: src/regex.c:121
+msgid "Matched, but too many substrings."
+msgstr "Potrivire, dar prea multe subºiruri."
+
+#: src/regex.c:136
+#, c-format
+msgid "Get substring %d failed (%d)."
+msgstr "Obþinere subºir %d a eºuat (%d)."
+
+#: src/ssl.c:48
+msgid "Seeding random number generator..."
+msgstr "Iniþializez generatorul de numere aleatoare..."
+
+#: src/ssl.c:52
+msgid "Unable to seed random number generator."
+msgstr "Nu pot iniþializa generatorul de numere aleatoare."
+
+#: src/ssl.c:83
+msgid "SSLv23_client_method() failed."
+msgstr "SSLv23_client_method() a eºuat."
+
+#: src/ssl.c:87 src/ssl.c:142
+msgid "Can't create SSL_CTX object."
+msgstr "Nu pot crea obiect SSL_CTX."
+
+#: src/ssl.c:92 src/ssl.c:158
+msgid "SSL_CTX_set_cipher_list() failed."
+msgstr "SSL_CTX_set_cipher_list() a eºuat."
+
+#: src/ssl.c:104 src/tls.c:60
+msgid "Initializing the TLS/SSL connection with MTA..."
+msgstr "Iniþializez conectarea TLS/SSL cu MTA..."
+
+#: src/ssl.c:107 src/ssl.c:171
+msgid "Can't create a new SSL structure for a connection."
+msgstr "Nu pot crea o nouã structurã SSL pentry conectare."
+
+#: src/ssl.c:111 src/ssl.c:175
+msgid "SSL_set_fd() failed."
+msgstr "SSL_set_fd() a eºuat."
+
+#: src/ssl.c:116 src/ssl.c:180 src/tls.c:79 src/tls.c:149
+#, fuzzy
+msgid "TLS/SSL handshake failed!"
+msgstr "TLS/SSL a eºuat."
+
+#: src/ssl.c:138
+msgid "SSLv23_server_method() failed."
+msgstr "SSLv23_server_method() a eºuat."
+
+#: src/ssl.c:146
+msgid "SSL_CTX_use_certificate_file() failed."
+msgstr "SSL_CTX_use_certificate_file() a eºuat."
+
+#: src/ssl.c:150
+msgid "SSL_CTX_use_PrivateKey_file() failed."
+msgstr "SSL_CTX_use_PrivateKey_file() a eºuat."
+
+#: src/ssl.c:154
+msgid "Private key does not match the certificate public key."
+msgstr "Cheia privatã nu se potriveºte cu cheia publicã de certificare."
+
+#: src/ssl.c:168 src/tls.c:131
+msgid "Initializing the TLS/SSL connection with MUA..."
+msgstr "Iniþializez conectarea TLS/SSL cu MUA..."
+
+#: src/ssl.c:206
+#, c-format
+msgid "%s connection using %s (%u bits)"
+msgstr "conectare %s folosind %s (%u biþi)"
+
+#: src/ssl.c:213
+#, c-format
+msgid "Server public key is %d bits"
+msgstr "Cheia publicã a serverului are %d biþi"
+
+#: src/ssl.c:218
+msgid "Certificate:"
+msgstr "Certificat:"
+
+#: src/ssl.c:220
+msgid "X509_NAME_oneline [subject] failed!"
+msgstr "X509_NAME_oneline [subiect] e eºuat!"
+
+#: src/ssl.c:223
+#, c-format
+msgid "Subject: %s"
+msgstr "Subiect: %s"
+
+#: src/ssl.c:225
+msgid "X509_NAME_oneline [issuer] failed!"
+msgstr "X509_NAME_oneline [eliberator] a eºuat!"
+
+#: src/ssl.c:228
+#, c-format
+msgid "Issuer:  %s"
+msgstr "Eliberator:  %s"
+
+#: src/tls.c:166
+msgid "No certificate was sent."
+msgstr "Certificatul nu a fost trimis."
+
+#: src/tls.c:171
+msgid "The certificate is not trusted."
+msgstr "Certificatul nu este de considerat de încredere."
+
+#: src/tls.c:175
+msgid "The certificate has expired."
+msgstr "Certificatul a expirat."
+
+#: src/tls.c:179
+msgid "The certificate is not yet activated."
+msgstr "Certificatul nu este încã activat."
+
+#: src/tls.c:187
+msgid "No certificate was found!"
+msgstr "Nu a fost gãsit nici un certificat!"
+
+#: src/tls.c:191
+msgid "The certificate is trusted."
+msgstr "Certificatul este de încredere."
+
+#: src/tls.c:219
+#, c-format
+msgid "Anonymous DH using prime of %d bits."
+msgstr "DH anonim folosind numãr prim din %d biþi"
+
+#: src/tls.c:224
+#, c-format
+msgid "Ephemeral DH using prime of %d bits."
+msgstr "DH efemer folosind numãr prim din %d biþi"
+
+#: src/tls.c:234
+#, c-format
+msgid "- Protocol: %s\n"
+msgstr "- Protocol: %s\n"
+
+#: src/tls.c:237
+#, c-format
+msgid "- Certificate Type: %s\n"
+msgstr "- Tip de certificat: %s\n"
+
+#: src/tls.c:240
+#, c-format
+msgid "- Compression: %s\n"
+msgstr "- Compresie: %s\n"
+
+#: src/tls.c:243
+#, c-format
+msgid "- Cipher: %s\n"
+msgstr "- Cifru: %s\n"
+
+#: src/tls.c:246
+#, c-format
+msgid "- MAC: %s\n"
+msgstr "- MAC: %s\n"
+
+#: src/tls.c:269
+msgid " - Certificate info:\n"
+msgstr " - Info despre certificat:\n"
+
+#: src/tls.c:270
+#, c-format
+msgid " - Certificate is valid since: %s"
+msgstr " - Certificatul este valid din: %s"
+
+#: src/tls.c:271
+#, c-format
+msgid " - Certificate expires: %s"
+msgstr " - Certificatul expirã: %s"
+
+#: src/tls.c:280
+#, c-format
+msgid " - Certificate fingerprint: %s\n"
+msgstr " - Amprentã certificat: %s\n"
+
+#: src/tls.c:290
+#, c-format
+msgid " - Certificate serial number: %s\n"
+msgstr " - Numãr serial certificat: %s\n"
+
+#: src/tls.c:294
+msgid "Certificate public key: "
+msgstr "Cheie publicã certificat: "
+
+#: src/tls.c:296
+msgid "RSA\n"
+msgstr "RSA\n"
+
+#: src/tls.c:297
+#, c-format
+msgid " Modulus: %d bits\n"
+msgstr "Modul: %d biþi\n"
+
+#: src/tls.c:300
+msgid "DSA\n"
+msgstr "DSA\n"
+
+#: src/tls.c:301
+#, c-format
+msgid " Exponent: %d bits\n"
+msgstr " Exponent: %d biþi\n"
+
+#: src/tls.c:304
+msgid "UNKNOWN\n"
+msgstr "NECUNOSCUT\n"
+
+#: src/tls.c:306
+#, c-format
+msgid " - Certificate version: #%d\n"
+msgstr " - Versiune certificat: #%d\n"
+
+#: src/tls.c:313
+msgid " - Certificate Issuer's info:\n"
+msgstr " - Info despre eliberatorul certificatului:\n"
+
+#: src/tunnel.c:52
+msgid "Transferring message(s)..."
+msgstr "Transfer mesaj(e)..."
+
+#: src/tunnel.c:165
+msgid "Using the TLS/SSL encryption..."
+msgstr "Folosesc encripþie TLS/SSL..."
+
+#: src/tunnel.c:174 src/tunnel.c:296
+#, c-format
+msgid "WARNING: %s"
+msgstr "AVERTISMENT: %s"
+
+#: src/tunnel.c:175
+msgid "STARTTLS command failed."
+msgstr "Comanda STARTTLS a eºuat."
+
+#: src/tunnel.c:290
+msgid "Using the 'ONEWAY' TLS/SSL encryption..."
+msgstr "Folosesc encripþia TLS/SSL 'ONEWAY'..."
+
+#: src/tunnel.c:297
+msgid "STARTTLS (ONEWAY) command failed."
+msgstr "Comanda STARTTLS (ONEWAY) a eºuat."
+
+#: src/tunnel.c:336
+#, c-format
+msgid "getpeername() failed: %s."
+msgstr "getpeername() a eºuat: %s."
