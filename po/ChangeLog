@@ -1,3 +1,8 @@
+2003-09-06  Wojciech Polak
+
+	* nl.po: New file (Elros Cyriatan)
+	* LINGUAS: Added 'nl'.
+
 2003-07-09  Wojciech Polak
 
 	* nb.po: New file (Geir Helland)
