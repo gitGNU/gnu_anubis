@@ -10,12 +10,13 @@
 @item Introduction
 
 This document describes a new scheme for client authentication and
-authorization in GNU Anubis 4.
+authorization in GNU Anubis 4.x.
 
 @item Task Description
 
 So far the only authentication method used by Anubis was based on the
-@uref{ftp://ftp.rfc-editor.org@/in-notes@/rfc1413.txt,AUTH protocol (RFC 1413)}, and thus required client party to use a popular daemon
+@uref{ftp://ftp.rfc-editor.org/@/in-notes/@/rfc1413.txt,AUTH protocol (RFC 1413)},
+and thus required client party to use a popular daemon
 @command{identd}, which listens on TCP port 113 for authentication requests. As
 its primary advantage, this method allows to quickly identify whom the server
 had to deal with, i.e. to obtain user name or his UID. Actually, the
@@ -167,8 +168,6 @@ to the user's privileges, for security reasons, but this
 can be done using usual @code{user-notprivileged} configuration
 (@pxref{Security Settings, user-notprivileged}).
 
-@item Ufff...
-
 Surely you have noticed that in its response to EHLO command
 Dixie returned @code{250-XDATABASE} capability. Yes, this is exactly
 that command that I'd like to be used for remote management of
@@ -230,7 +229,7 @@ manage Anubis database. Notice however, that
 @uref{http://savannah.gnu.org/projects/hydrant,GNU Hydrant} will probably
 support @code{XDATABASE} in the future...
 
-@item The End!
+@item The End.
 
 Thus, the user will simply use his MUA, no identd, no hassle :)
 

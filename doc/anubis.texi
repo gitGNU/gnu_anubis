@@ -217,8 +217,6 @@ GNU Privacy Guard, a tool compatible with the Pretty Good Privacy.
 @chapter Authentication
 @cindex authentication
 
-@UNREVISED{}
-
 When GNU Anubis accepts an incoming connection, it first has to identify
 the remote party, i.e. determine whether it has the right to use
 Anubis resources and, if so, what configuration settings should be
@@ -288,7 +286,6 @@ Anubis runs.
 
 @node User Database, Database URL, Authentication, Authentication
 @section User Database
-@UNREVISED{}
 
 GNU Anubis uses @dfn{User Database} for keeping @dfn{user credentials},
 i.e. data used to authenticate and authorize users. The exact way of
@@ -346,7 +343,6 @@ a file exists, loads it.
 
 @node Database URL, text, User Database, Authentication
 @section Database URL
-@UNREVISED{}
 
 Anubis database is identified by its @dfn{URL}, or @dfn{Universal
 Resource Locator}. A @code{URL} consists of following elements
@@ -403,7 +399,6 @@ by semicolons.
 
 @node text, gdbm, Database URL, Database URL
 @subsection Plain text databases
-@UNREVISED{}
 
 This is the simplest database possible. It is kept in a plain text
 file. Each line in this file represents a single @dfn{record}, empty lines
@@ -434,7 +429,6 @@ where @var{path} specifies absolute file name of the database file.
 
 @node gdbm, sql, text, Database URL
 @subsection Databases in GDBM format
-@UNREVISED{}
 
 The protocol value @samp{gdbm} specifies a @dfn{GDBM database}. For
 the detailed description of @acronym{GDBM} system
@@ -460,7 +454,6 @@ where @var{path} specifies absolute file name of the database file.
 
 @node sql, Managing the Database, gdbm, Database URL
 @subsection MySQL and PostgreSQL
-@UNREVISED{}
 
 This is the most flexible database format. GNU Anubis @value{VERSION}
 supports MySQL@footnote{See @url{http://www.mysql.com}.} and
@@ -543,7 +536,6 @@ path to the user's configuration file. Default is @samp{rcfile}.
 
 @node Managing the Database, Administrators, sql, Authentication
 @section Managing the Database
-@UNREVISED{}
 
 Managing the user database is a complex task, which looks differently
 from administrator's and user's point of view. The administrator have
@@ -561,7 +553,6 @@ for the creation of his record.
 
 @node Administrators, Create, Managing the Database, Managing the Database
 @subsection Administrators
-@UNREVISED{}
 
 All administrative tasks are done using @command{anubisadm} command ---
 a multipurpose tool for Anubis administrator.
@@ -818,7 +809,6 @@ commands.
 
 @node Users, Configuration, anubisadm summary, Managing the Database
 @subsection Users
-@UNREVISED{}
 
 Users maintain their database records using @command{anubisusr}
 command. Main purpose of this command is to keep the copy of
@@ -1057,7 +1047,7 @@ for instance: @code{bind} or @code{BIND} or @code{BiNd}, and so on.
 * Basic Settings::
 * Output Settings::
 * Proxy Settings::
-* SMTP Authentication Settings::
+* ESMTP Authentication Settings::
 * Encryption Settings::
 * Security Settings::
 @end menu
@@ -1188,7 +1178,7 @@ using @samp{tracefile yes} enables logging to the same file
 as @samp{logfile} (if possible).
 @end deffn
 
-@node Proxy Settings, SMTP Authentication Settings, Output Settings, CONTROL Section
+@node Proxy Settings, ESMTP Authentication Settings, Output Settings, CONTROL Section
 @subsection Proxy Settings
 @cindex SOCKS proxy
 
@@ -1211,7 +1201,9 @@ Specify a user name and a password, if a SOCKS proxy server requires them.
 A @var{username} and a @var{password} are separated with a colon (@samp{:}).
 @end deffn
 
-@node SMTP Authentication Settings, Encryption Settings, Proxy Settings, CONTROL Section
+@node ESMTP Authentication Settings, Encryption Settings, Proxy Settings, CONTROL Section
+@subsection ESMTP Authentication Settings
+@cindex ESMTP authentication
 
 The following options set authentication credentials for ESMTP
 authentication. You may use this option, for example, if your MTA
@@ -1323,7 +1315,7 @@ Following option is useful with ANONYMOUS authentication mechanism:
 Sets the token to be used with ANONYMOUS authentication mechanism
 @end deffn
 
-@node Encryption Settings, Security Settings, SMTP Authentication Settings, CONTROL Section
+@node Encryption Settings, Security Settings, ESMTP Authentication Settings, CONTROL Section
 @subsection Encryption Settings
 
 @deffn Option ssl @var{yes-or-no}
