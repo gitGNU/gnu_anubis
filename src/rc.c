@@ -237,12 +237,8 @@ control_parser(int method, int key, char *arg,
 		xfree(session.execpath);
 		session.execpath = allocbuf(p, MAXPATHLEN);
 		topt |= T_LOCAL_MTA;
-		if (topt & T_RCEXECARGS) {
-			xfree_pptr(session.execargs);
-			topt &= ~T_RCEXECARGS;
-		}
+		xfree_pptr(session.execargs);
 		session.execargs = gen_execargs(a);
-		topt |= T_RCEXECARGS;
 	}
 	break;
 		

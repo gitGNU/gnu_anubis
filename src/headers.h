@@ -224,18 +224,17 @@
 #define T_NAMES             0x00004000
 #define T_LOCAL_MTA         0x00008000
 #define T_ALLOW_LOCAL_MTA   0x00010000
-#define T_RCEXECARGS        0x00020000
-#define T_TRANSLATION_MAP   0x00040000
-#define T_SUPERCLIENT       0x00080000
-#define T_USER_NOTPRIVIL    0x00100000
-#define T_STARTTLS          0x00200000
-#define T_ESMTP_AUTH        0x00400000
-#define T_BOUNDARY          0x00800000
-#define T_NORC              0x01000000
-#define T_ALTRC             0x02000000
-#define T_CHECK_CONFIG      0x04000000
-#define T_RELAX_PERM_CHECK  0x08000000
-#define T_ENTIRE_BODY       0x10000000
+#define T_TRANSLATION_MAP   0x00020000
+#define T_SUPERCLIENT       0x00040000
+#define T_USER_NOTPRIVIL    0x00080000
+#define T_STARTTLS          0x00100000
+#define T_ESMTP_AUTH        0x00200000
+#define T_BOUNDARY          0x00400000
+#define T_NORC              0x00800000
+#define T_ALTRC             0x01000000
+#define T_CHECK_CONFIG      0x02000000
+#define T_RELAX_PERM_CHECK  0x04000000
+#define T_ENTIRE_BODY       0x08000000
 
 /* bit values for mopt */
 #define M_GPG_ENCRYPT       0x00000001
