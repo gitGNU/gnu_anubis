@@ -2585,9 +2585,6 @@ Selects Anubis operation mode. Allowed values for @var{mode-name}
 are @samp{transparent} (default) and @samp{auth}. @xref{Authentication},
 for the detailed discussion of Anubis operation modes.
 
-@end table
-
-
 @item --norc
 Ignore system configuration file.
 
