@@ -278,6 +278,7 @@ typedef const char *(*strerror_t) (int);
 void anubis(char *);
 
 /* mem.c */
+extern void (*memory_error)(const char *message);
 void *xmalloc(int);
 void *xrealloc(void *, int);
 char *allocbuf(char *, int);
