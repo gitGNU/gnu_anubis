@@ -4,14 +4,15 @@
 #
 
 src/auth.c
+src/authmode.c
 src/daemon.c
 src/env.c
 src/errs.c
 src/esmtp.c
 src/exec.c
 src/files.c
-src/getopt.c
 src/gpg.c
+src/gsasl.c
 src/guile.c
 src/help.c
 src/main.c
@@ -19,7 +20,6 @@ src/map.c
 src/mem.c
 src/misc.c
 src/net.c
-src/obstack.c
 src/proxy.c
 src/quit.c
 src/rc.c
@@ -28,7 +28,11 @@ src/rcfile.y
 src/regex.c
 src/ssl.c
 src/tls.c
+src/transmode.c
 src/tunnel.c
+
+lib/getopt.c
+lib/obstack.c
 
 # EOF
 

@@ -4,6 +4,7 @@
 	* src/headers.h (change_to_lower): Changed prototype.
 	* src/tunnel.c: Use make_lowercase().
 	* src/help.c (config_opts): Added MYSQL.
+	* po/POTFILES.in: Updated.
 
 2003-11-30  Sergey Poznyakoff 
 
