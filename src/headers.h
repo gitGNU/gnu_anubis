@@ -373,7 +373,7 @@ void message_append_signature_file(MESSAGE *, char *);
 /* regex.c */
 int anubis_regex_match(RC_REGEX *, char *, int *, char ***);
 RC_REGEX *anubis_regex_compile(char *, int);
-void anubis_regex_free(RC_REGEX *);
+void anubis_regex_free(RC_REGEX **);
 char *anubis_regex_source(RC_REGEX *);
 int anubis_regex_refcnt(RC_REGEX *);
 char *anubis_regex_replace(RC_REGEX *, char *, char *);
