@@ -329,6 +329,7 @@ void message_add_body(MESSAGE *, char *, char *);
 void message_add_header(MESSAGE *, char *, char *);
 void message_remove_headers(MESSAGE *, char *);
 void message_modify_headers(MESSAGE *, char *, char *, char *);
+void message_modify_body(MESSAGE *msg, char *key, char *value);
 void message_external_proc(MESSAGE *, char **);
 void message_init(MESSAGE *);
 void message_free(MESSAGE *);
