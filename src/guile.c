@@ -28,8 +28,8 @@
 
 #ifdef WITH_GUILE
 
-static void guile_ports_open();
-static void guile_ports_close();
+static void guile_ports_open(void);
+static void guile_ports_close(void);
 
 static SCM
 catch_body (void *data)
@@ -63,7 +63,7 @@ guile_debug(int val)
 }
 
 void
-guile_ports_open()
+guile_ports_open(void)
 {
 	SCM port;
 	int fd = -1;
@@ -93,7 +93,7 @@ guile_ports_open()
 }
 
 void
-guile_ports_close()
+guile_ports_close(void)
 {
 	if (topt & (T_FOREGROUND_INIT|T_STDINOUT))
 		return;
@@ -202,7 +202,7 @@ list_to_args(struct list *arglist)
 	SCM val;
 		
 	list_first(arglist);
-	while (p = list_next(arglist)) {
+	while ((p = list_next(arglist))) {
 		SCM cell;
 		SCM_NEWCELL(cell);
 
@@ -235,7 +235,8 @@ list_to_args(struct list *arglist)
 	return head;
 }
 
-/* (define (postproc header-list body)*/
+/* (define (postproc header-list body) */
+
 void
 guile_process_proc(struct list *arglist, MESSAGE *msg)
 {
@@ -406,7 +407,7 @@ static struct rc_secdef_child guile_rule_secdef_child = {
 };
 
 void
-guile_section_init()
+guile_section_init(void)
 {
 	struct rc_secdef *sp = anubis_add_section("GUILE");
 	rc_secdef_add_child(sp, &guile_secdef_child);
@@ -414,6 +415,7 @@ guile_section_init()
 	rc_secdef_add_child(sp, &guile_rule_secdef_child);
 }
 	
-
 #endif /* WITH_GUILE */
+
+/* EOF */
 
