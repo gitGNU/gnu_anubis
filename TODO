@@ -13,6 +13,8 @@ duplicated as autos/arguments. These all should be automatic variables.
 the code (take anubisusr.c as an example)
 
 * Urgent: Remove duplicated functions: place them all into a library
+
+* Urgent: Do we need session.execpath at all? I guess we don't... 
  
 * anubisusr.c: Provide (configuration file||command line||envar) options
 to hold authentication credentials.
