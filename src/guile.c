@@ -192,19 +192,73 @@ anubis_to_guile(struct list *list)
 	return head;
 }
 
+static SCM
+list_to_args(struct list *arglist)
+{
+	char *p;
+	SCM head = SCM_EOL, 
+		tail; /* Don't let gcc fool you: tail cannot be used 
+			 uninitialized */
+	SCM val;
+		
+	list_first(arglist);
+	while (p = list_next(arglist)) {
+		SCM cell;
+		SCM_NEWCELL(cell);
+
+		if (p[0] == '#') {
+			switch (p[1]) {
+			case ':':
+				val = scm_c_make_keyword(p + 2);
+				break;
+
+			case 'f':
+				val = SCM_BOOL_F;
+				break;
+				
+			case 't':
+				val = SCM_BOOL_T;
+			}
+		} else
+			val = scm_makfrom0str(p);
+
+		SCM_SETCAR(cell, scm_list_2(scm_copy_tree(SCM_IM_QUOTE), val));
+			
+		if (head == SCM_EOL) 
+			head = cell;
+		else 
+			SCM_SETCDR(tail, cell);
+		tail = cell;
+	}
+	if (head != SCM_EOL)
+		SCM_SETCDR(tail, SCM_EOL);
+	return head;
+}
+
 /* (define (postproc header-list body)*/
 void
-guile_process_proc(char *procname, MESSAGE *msg)
+guile_process_proc(struct list *arglist, MESSAGE *msg)
 {
+	char *procname;
 	SCM arg_hdr, arg_body;
+	SCM invlist, rest_arg;
 	SCM procsym;
 	jmp_buf jmp_env;
 	SCM res;
 
-	/* Prepare the arguments */
+	procname = list_first(arglist);
+	if (!procname) {
+		anubis_error(SOFT, _("missing procedure name"));
+		return;
+	}
+	
+	/* Prepare the required arguments */
 	arg_hdr = anubis_to_guile(msg->header);
 	arg_body = scm_makfrom0str(msg->body);
 
+	/* Prepare the optional arguments */
+	rest_arg = list_to_args(arglist);
+	
 	/* Evaluate the procedure */
 	procsym = SCM_VARIABLE_REF(scm_c_lookup(procname));
 	if (scm_procedure_p(procsym) != SCM_BOOL_T) {
@@ -219,17 +273,17 @@ guile_process_proc(char *procname, MESSAGE *msg)
 		return;
 	}
 
-	res = scm_internal_lazy_catch(
-		SCM_BOOL_T,
-		eval_catch_body,
-		(void*) SCM_LIST3(procsym,
-				  scm_listify(scm_copy_tree(SCM_IM_QUOTE),
-					      arg_hdr,
-					      SCM_UNDEFINED),
-				  scm_listify(scm_copy_tree(SCM_IM_QUOTE),
-					      arg_body,
-					      SCM_UNDEFINED)),
-		eval_catch_handler, &jmp_env);
+	invlist = scm_append(
+		     SCM_LIST2(SCM_LIST3(procsym,
+					 SCM_LIST2(scm_copy_tree(SCM_IM_QUOTE),
+						   arg_hdr),
+					 SCM_LIST2(scm_copy_tree(SCM_IM_QUOTE),
+						   arg_body)),
+			       rest_arg));
+	res = scm_internal_lazy_catch(SCM_BOOL_T,
+				      eval_catch_body,
+				      (void*) invlist,
+				      eval_catch_handler, &jmp_env);
 	
 	if (SCM_IMP(res) && SCM_BOOLP(res)) {
 		/* FIXME 1*/;
@@ -241,7 +295,7 @@ guile_process_proc(char *procname, MESSAGE *msg)
 			/* Preserve the headers */;
 		} else if (SCM_NIMP(ret_hdr) && SCM_CONSP(ret_hdr)) {
 			/* Replace them */
-			destroy_assoc_list(msg->header);
+			destroy_assoc_list(&msg->header);
 			msg->header = guile_to_anubis(ret_hdr);
 		} else
 			anubis_error(SOFT,
@@ -298,9 +352,10 @@ static struct rc_kwdef guile_rule_kw[] = {
 };
 
 int
-guile_parser(int method, int key, char *arg, void *inv_data, void *func_data,
-	     MESSAGE *msg)
+guile_parser(int method, int key, struct list *arglist,
+	     void *inv_data, void *func_data, MESSAGE *msg)
 {
+	char *arg = list_item(arglist, 0);
 	switch (key) {
 	case KW_GUILE_OUTPUT:
 		xfree(options.guile_logfile);
@@ -320,7 +375,7 @@ guile_parser(int method, int key, char *arg, void *inv_data, void *func_data,
 		break;
 
 	case KW_GUILE_PROCESS:
-		guile_process_proc(arg, msg);
+		guile_process_proc(arglist, msg);
 		break;
 
 	case KW_GUILE_REWRITE_LINE:
