@@ -188,6 +188,25 @@ AC_SUBST(ANUBIS_DEFINES)
 AC_SUBST(ANUBIS_SBIN_ADM)
 AC_SUBST(ANUBIS_BIN_ADM)
 
+dnl Use option --enable-gcc-debug to enable GCC debug code.
+AC_ARG_ENABLE(gcc-debug,
+	AC_HELP_STRING([--enable-gcc-debug],
+	[enable GCC DEBUG code]),
+	[enable_gcc_debug=yes],
+	[enable_gcc_debug=no])
+if test "$enable_gcc_debug" = "yes" && (test "$GCC" = "yes"); then
+ if test -z "$CFLAGS_CUSTOM"; then
+  CFLAGS="-Wall -ggdb"
+ else
+  CFLAGS="$CFLAGS -ggdb"
+ fi
+ AC_MSG_RESULT([Enabling GCC DEBUG support...])
+else
+ if test -z "$CFLAGS_CUSTOM" && (test "$GCC" = "yes"); then
+  CFLAGS="-Wall -O2"
+ fi
+fi
+
 dnl Use option --with-gsasl to compile GSASL library support.
 MU_CHECK_GSASL(0.2.3, [
     AC_DEFINE(WITH_GSASL,1,[Define if Anubis is using GNU SASL])
@@ -195,6 +214,9 @@ MU_CHECK_GSASL(0.2.3, [
     ANUBIS_SBIN_ADM='$(adm_sbin_programs)'
     ANUBIS_BIN_ADM='$(adm_bin_programs)'
     M4_DEFS="$M4_DEFS -DWITH_GSASL"
+    if test "$GCC" = "yes"; then
+	CFLAGS="$CFLAGS -Wno-deprecated"
+    fi
 
     AC_CHECK_LIB(gdbm, gdbm_open,
                  [LIBS="$LIBS -lgdbm"
@@ -301,7 +323,7 @@ if test "$with_openssl" = "yes"; then
   else
    AC_CHECK_HEADERS(openssl/ssl.h)
   fi
-  M4_DEFS="$M4_DEFS -DWITH_SSL"
+  M4_DEFS="$M4_DEFS -DWITH_SSL -DWITH_OPENSSL"
   AC_DEFINE(USE_OPENSSL, 1, [Define to 1 if USE_OPENSSL is requested.])
   AC_MSG_RESULT([Enabling OpenSSL support...])
  fi
@@ -311,7 +333,7 @@ if test $with_gnutls = yes; then
   AC_CHECK_HEADERS(gnutls/gnutls.h)
   if test $ac_cv_header_gnutls_gnutls_h != no; then
     AM_PATH_LIBGNUTLS("1.0.0",
-                      [M4_DEFS="$M4_DEFS -DWITH_SSL"
+                      [M4_DEFS="$M4_DEFS -DWITH_SSL -DWITH_GNUTLS"
                       AC_DEFINE(USE_GNUTLS, 1,
                                 [Define to 1 if USE_GNUTLS is requested.])],
                                 [with_gnutls = no
@@ -385,25 +407,6 @@ if test -z "$with_unprivileged_user"; then
 fi
 AC_DEFINE_UNQUOTED(DEFAULT_UNPRIVILEGED_USER, "$with_unprivileged_user",
 [Define the default unprivileged user.])
-
-dnl Use option --enable-gcc-debug to enable GCC debug code.
-AC_ARG_ENABLE(gcc-debug,
-	AC_HELP_STRING([--enable-gcc-debug],
-	[enable GCC DEBUG code]),
-	[enable_gcc_debug=yes],
-	[enable_gcc_debug=no])
-if test "$enable_gcc_debug" = "yes" && (test "$GCC" = "yes"); then
- if test -z "$CFLAGS_CUSTOM"; then
-  CFLAGS="-Wall -ggdb"
- else
-  CFLAGS="$CFLAGS -ggdb"
- fi
- AC_MSG_RESULT([Enabling GCC DEBUG support...])
-else
- if test -z "$CFLAGS_CUSTOM" && (test "$GCC" = "yes"); then
-  CFLAGS="-Wall -O2"
- fi
-fi
 
 dnl Check for Emacs site-lisp directory
 AM_PATH_LISPDIR
