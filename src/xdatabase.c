@@ -225,15 +225,17 @@ xexamine()
 
 		swrite(SERVER, remote_client,
 		       "250-Configuration settings follow\r\n");
-		while (fgets(line, sizeof line, fp)) {
-			remcrlf(line);
-			swrite(SERVER, remote_client, "250-");
-			swrite(SERVER, remote_client, line);
-			swrite(SERVER, remote_client, CRLF);
+		if (fp) {
+			while (fgets(line, sizeof line, fp)) {
+				remcrlf(line);
+				swrite(SERVER, remote_client, "250-");
+				swrite(SERVER, remote_client, line);
+				swrite(SERVER, remote_client, CRLF);
+			}
+			fclose(fp);
 		}
 		swrite(SERVER, remote_client,
 		       "250 End of configuration listing\r\n");
-		fclose(fp);
 	}
 	free(rcname);
 }
@@ -253,7 +255,7 @@ int
 xdatabase(char *command)
 {
 	char *p;
-	
+
 	if (!xdatabase_active)
 		return 0;
 
