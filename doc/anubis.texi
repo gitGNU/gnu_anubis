@@ -7,6 +7,10 @@
 @c %**end of header
 @include version.texi
 
+@defcodeindex op
+@defcodeindex cm
+@syncodeindex fn cp
+
 @copying
 Copyright @copyright{} 2001, 2002, 2003 Wojciech Polak.
 
@@ -127,7 +131,7 @@ to the proxy server, which forwards it to the real server outside, collects
 the response, and passes it back to the internal host.
 
 
-@node Configuration, Rule System, Overview, Top
+@node Configuration, CONTROL Section, Overview, Top
 @chapter Configuration
 @cindex configuration
 @cindex settings
@@ -164,11 +168,11 @@ The user configuration file may contain the following sections:
 
 @enumerate
 @item
-@dfn{The CONTROL section}.
+@dfn{CONTROL section}.
 @*
 Optional. This specifies the basic GNU Anubis behavior.
 @item
-@dfn{The GUILE section}.
+@dfn{GUILE section}.
 @*
 Optional.
 @item
@@ -202,7 +206,7 @@ in system configuration file. The @samp{CONTROL} section starts with the
 ends it.
 
 All option names are case insensitive, so you can use
-for instance: @samp{bind} or @samp{BIND} or @samp{BiNd}, and so on.
+for instance: @code{bind} or @code{BIND} or @code{BiNd}, and so on.
 
 @menu
 * Basic Settings::
@@ -214,12 +218,11 @@ for instance: @samp{bind} or @samp{BIND} or @samp{BiNd}, and so on.
 * Option Summary::
 @end menu
 
-
 @node Basic Settings, Output Settings, CONTROL Section, CONTROL Section
 @subsection Basic Settings
 
-@table @samp
-@item bind = [@var{host}:]@var{port}
+@deffn Option bind [@var{host}:]@var{port}
+@opindex bind [@var{host}:]@var{port}
 Specify the TCP port on which GNU Anubis listens for connections.
 The default @var{host} value is @w{@samp{INADDR_ANY}}, which means
 that anyone can connect to GNU Anubis. The default @var{port} number
@@ -230,24 +233,30 @@ GNU Anubis to port 25 (SMTP) and limit its clients only to those from
 configuration file:
 
 @example
-bind = localhost:25
+bind localhost:25
 @end example
+@end deffn
 
-@item remote-mta = @var{host}[:@var{port}]
+@deffn Option remote-mta @var{host}[:@var{port}]
+@opindex remote-mta @var{host}[:@var{port}]
 Specify a remote SMTP host name or IP address, which GNU Anubis will
 connect and forward mail to (after a processing). The default @var{port}
 number is 25. This option is available in both configuration files.
+@end deffn
 
-@item local-mta = @var{file-name} [@var{args}]
+@deffn Option local-mta @var{file-name} [@var{args}]
+@opindex local-mta @var{file-name} [@var{args}]
 Execute a local SMTP server, which works on standard input and output
 (inetd-type program). This option excludes the @samp{remote-mta} keyword
 (or @samp{--remote-mta} command line option). For example:
 
 @example
-local-mta = /usr/sbin/sendmail -bs
+local-mta /usr/sbin/sendmail -bs
 @end example
+@end deffn
 
-@item esmtp-auth = @var{username}:@var{password}
+@deffn Option esmtp-auth @var{username}:@var{password}
+@opindex esmtp-auth @var{username}:@var{password}
 This option allows you to specify a user name and a password for the
 ESMTP authentication. Use this option if your MTA requires such an
 authentication, but your MUA does not support it. A user name (@var{username})
@@ -255,22 +264,38 @@ and a password (@var{password}) are separated with a colon (@samp{:}).
 Currently only @dfn{CRAM-MD5} and @dfn{LOGIN} authentication methods are
 supported (and @dfn{CRAM-MD5} has a priority). The @dfn{LOGIN} method,
 for security reasons, can only be used both with the TLS/SSL encryption.
-@end table
-
+@end deffn
 
 @node Output Settings, Proxy Settings, Basic Settings, CONTROL Section
 @subsection Output Settings
 
-@table @samp
-@item termlevel = @var{normal-verbose-debug-silent}
+@deffn Option termlevel @var{level}
+@opindex termlevel @var{level}
 This is a logging level for @code{syslogd} or a terminal (if using the
-@samp{--foreground} command line option). Value @samp{normal} is the default.
-Value @samp{verbose} makes a more diagnostic output, and @samp{debug}
-raises it even more. Value @samp{silent} disables an output,
-e.g. @samp{termlevel = silent}. Only in system configuration file.
+@samp{--foreground} command line option).  @var{level} can be one
+of the following:
 
-@item logfile = @var{file-name}
-This option specifies an additional file, where GNU Anubis can log its
+@table @asis
+@item normal
+Only errors are logged. This is the default level.
+
+@item verbose
+Produce more diagnostic output.
+
+@item debug
+Produce debugging output.
+
+@item silent
+Do not log anything.
+
+@end table
+
+This command may be used only in system configuration file.
+@end deffn
+
+@deffn Option logfile @var{file-name}
+@opindex logfile @var{file-name}
+This command specifies an additional file, where GNU Anubis can log its
 information, but only those information available for a client. Only in
 user configuration file. For example:
 
@@ -279,116 +304,112 @@ logfile = anubis.log
 @end example
 
 This will log to the @file{~/anubis.log} file in a client's home directory.
+@end deffn
 
-@item loglevel = @var{none-fails-all}
-This option specifies an output level for an additional file (@samp{logfile}).
-Value @samp{fails} is the default, and it logs only all fails.
-Only in user configuration file.
+@deffn Option loglevel @var{level}
+@opindex loglevel @var{level}
+This option specifies an output level for an additional file
+(@samp{logfile}). It can be used only in user configuration file.
+@var{level} is one of the following:
+
+@table @asis
+@item none
+@item fails
+@item all
 @end table
-
+@end deffn
 
 @node Proxy Settings, Encryption Settings, Output Settings, CONTROL Section
 @subsection Proxy Settings
 @cindex SOCKS proxy
 
-@table @samp
-@item socks-proxy = @var{host}[:@var{port}]
+@deffn Option socks-proxy @var{host}[:@var{port}]
+@opindex socks-proxy @var{host}[:@var{port}]
 This option enables tunneling the connections through a SOCKS proxy server,
 specified as an argument @var{host}. The @var{port} default value is
 1080, which is a common port number for SOCKS proxies.
+@end deffn
 
-@item socks-v4 = @var{yes-or-no}
+@deffn Option socks-v4 @var{yes-or-no}
+@opindex socks-v4 @var{yes-or-no}
 This specifies a SOCKS protocol version 4. By default it is turned off,
 and a default mode is SOCKS protocol version 5.
+@end deffn
 
-@item socks-auth = @var{username}:@var{password}
+@deffn Option socks-auth @var{username}:@var{password}
+@opindex socks-auth @var{username}:@var{password}
 Specify a user name and a password, if a SOCKS proxy server requires them.
 A user name (@var{username}) and a password (@var{password}) are separated
 with a colon (@samp{:}).
-@end table
-
+@end deffn
 
 @node Encryption Settings, Security Settings, Proxy Settings, CONTROL Section
 @subsection Encryption Settings
 
-@table @samp
-@item ssl = @var{yes-or-no}
+@deffn Option ssl @var{yes-or-no}
+@opindex ssl @var{yes-or-no}
 This option enables the TLS/SSL encryption between the MUA (Mail User Agent)
 and the MTA (Mail Transport Agent). Value @samp{no} is the default,
 but using the TLS/SSL encryption is recommended. You should also
 specify a private key and a certificate using the @samp{key}
 and @samp{cert} keywords (defined below). @xref{TLS/SSL}, for details.
+@end deffn
 
-@item oneway-ssl = @var{yes-or-no}
+@deffn Option ssl-oneway @var{yes-or-no}
+@opindex ssl-oneway @var{yes-or-no}
 This option enables the @dfn{ONEWAY} encryption. Use this mode,
 when you want to use the TLS/SSL, but your MUA (Mail User Agent)
 doesn't provide a support for ESMTP TLS/SSL. Using this option
 doesn't require using the @samp{key} and @samp{cert} keywords.
+@end deffn
 
-@item cert = @var{file-name}
+@deffn Option ssl-cert @var{file-name}
+@opindex ssl-cert @var{file-name}
 Specify a certificate for the TLS/SSL encryption.
 Value @file{anubis.pem} is the default.
+@end deffn
 
-@item key = @var{file-name}
+@deffn Option ssl-key @var{file-name}
+@opindex ssl-key @var{file-name}
 Specify a private key for the TLS/SSL encryption.
 Value @file{anubis.pem} is the default.
+@end deffn
 
-@item cafile = @var{file-name}
+@deffn Option ssl-cafile @var{file-name}
+@opindex ssl-cafile @var{file-name}
 Specify a CA certificate file (supported only by GnuTLS).
-@end table
+@end deffn
 
 @node Security Settings, Option Summary, Encryption Settings, CONTROL Section
 @subsection Security Settings
 
-@table @samp
-@item allow-local-mta = @var{yes-or-no}
+@deffn Option allow-local-mta @var{yes-or-no}
+@opindex allow-local-mta @var{yes-or-no}
 For security reasons, this option is set to @samp{no}, but the @samp{yes}
 value enables the @samp{local-mta} keyword (or @samp{--local-mta}
 command line option), so if you want to use a local mail server,
 which works on standard input and output, a supervisor must set
 this option to @samp{yes}. Only in system configuration file.
+@end deffn
 
-@item user-notprivileged = @var{username}
+@deffn Option user-notprivileged @var{username}
+@opindex user-notprivileged @var{username}
 For security reasons, it is recommended to create an unprivileged user,
 which the server runs as most of the time, when doing unprivileged
 operations. Only in system configuration file. For example: 
 
 @example
-user-notprivileged = anubis.unprivileged
+user-notprivileged "anubis.unprivileged"
 @end example
 
 @strong{Caution:} Create a user account named @w{@samp{anubis.unprivileged}}
 in the @file{/etc/passwd}, if necessary. Add this user name also to the
 @w{@file{/etc/anubis.allow}}, if using GNU Anubis with PAM support.
-@end table
+@end deffn
 
 @node Option Summary, , Security Settings, CONTROL Section
 @subsection Option Summary
-
-@example
-@group
----BEGIN CONTROL---
-bind = [@var{host}:]@var{port}  @r{(system config only)}
-remote-mta = @var{host}[:@var{port}]
-local-mta = @var{file-name} [@var{args}]
-esmtp-auth = @var{username}:@var{password}
-termlevel = @var{normal-verbose-debug-silent}  @r{(system config only)}
-logfile = @var{file-name}  @r{(user config only)}
-loglevel = @var{none-fails-all}  @r{(user config only)}
-socks-proxy = @var{host}[:@var{port}]
-socks-v4 = @var{yes-or-no}
-socks-auth = @var{username}:@var{password}
-ssl = @var{yes-or-no}
-oneway-ssl = @var{yes-or-no}
-cert = @var{file-name}
-key = @var{file-name}
-cafile = @var{file-name}
-allow-local-mta = @var{yes-or-no}  @r{(system config only)}
-user-notprivileged = @var{username}  @r{(system config only)}
----END---
-@end group
-@end example
-
+@printindex op
 
 @node TRANSLATION Section, GUILE Section, CONTROL Section, Configuration
 @section The TRANSLATION Section
@@ -403,7 +424,7 @@ line, and the @w{@code{---END---}} line ends it. Syntax:
 @example
 @group
 ---BEGIN TRANSLATION---
-translate = [@var{user}@@]@var{address} into = @var{username}
+translate  [@var{user}@@]@var{address} into  @var{username}
 ...
 ---END---
 @end group
@@ -417,7 +438,7 @@ An example:
 @example
 @group
 ---BEGIN TRANSLATION---
-translate = jack@@somewhere.net into = john
+translate jack@@somewhere.net into john
 ---END---
 @end group
 @end example
@@ -425,25 +446,68 @@ translate = jack@@somewhere.net into = john
 @noindent
 The rule above will allow a remote user @samp{jack} at @samp{somewhere.net}
 to use the configuration file of the local user @samp{john}. Or you can write:
-@w{@samp{translate = somewhere.net into = john}},
+@w{@samp{translate somewhere.net into john}},
 and this means that @emph{all} users at @samp{somewhere.net} are allowed to use
 the local john's configuration file.
 
 
-@node GUILE Section, , TRANSLATION Section, Configuration
-@section The GUILE Section
-@cindex GUILE section, The
+@node GUILE Section, Rule System, TRANSLATION Section, Configuration
+@section GUILE Section
+@cindex GUILE section
 @cindex Guile
 @cindex extension language
 @cindex Scheme
 
-[This section is missing :-P]
+The name Guile stands for @dfn{GNU's Ubiquitous Intelligent Language for
+Extensions}. It provides a Scheme interpreter conforming to the R4RS
+language specification. GNU Anubis uses Guile as its extension language.
 
-@node Rule System, Invoking Anubis, Configuration, Top
+This section assumes that the reader is sufficiently familiar with the
+Scheme language. For information about the language, refer to
+@ref{Top,,,r4rs,Revised(4) Report on the Algorithmic Language Scheme}.
+For more information about Guile,
+@xref{Top,,Overview,guile,The Guile Reference Manual}.
 
-The rule system is a core part of Anubis system. It can be regarded
-as a program that is executed for every outgoing message. It is
-defined in @dfn{RULE} section, which begins with a
+@deffn Command guile-output @var{file}
+Specifies the name of the file to bind to the Scheme standart error
+and output ports. This option has no effect if GNU Anubis is started
+with either of @option{--foreground} or @option{--stdio} command line
+options. 
+@end deffn
+
+@deffn Command guile-debug @var{yes-or-no}
+When set to @samp{yes} enables Guile stack traces and debugging output.
+@end deffn
+
+@deffn Command guile-load-path-append @var{path}
+Appends the given @var{path} to the list of Guile load paths
+(@pxref{Build Config, %load-path,,guile,The Guile Reference Manual}).
+@end deffn
+
+@deffn Command guile-load-program @var{file}
+Reads the given Scheme program.
+@end deffn
+
+@node Rule System, Invoking Anubis, GUILE Section, Top
+@section The Rule System
+The rule system is a core part of GNU Anubis. It can be regarded
+as a program that is executed for every outgoing message. 
+
+Throughout this section, when showing syntax definitions, the
+optional parts of these will be enclosed in a pair of square
+brackets, e.g.:
+
+@deffn Syntax keyword [@var{optional-part}] @var{mandatory-part} 
+@end deffn
+
+When the square braces are required symbols, they will be marked
+as such, e.g.:
+
+@deffn Syntax
+remove @samp{[}@var{key}@samp{]}
+@end deffn
+
+The rule system is defined in @dfn{RULE} section, which begins with a
 @w{@code{---BEGIN RULE---}} and ends with an @w{@code{---END---}}
 statements.
 
@@ -454,25 +518,19 @@ statement}.
 An @dfn{action} is a statement defining an operation to be performed
 over the message. Syntactically, each action is
 
-@example
-@var{command} [=] @var{right-hand-side}
-@end example
-@noindent
-
+@deffn Syntax @var{command} [=] @var{right-hand-side}
 Where @var{command} specifies a particular operation and
 @var{right-hand-side} specifies the arguments for it. The equal sign
 is optional.
+@end deffn
 
 A @dfn{conditional statement} defines the control flow in the section.
 It allows to execute arbitrary actions depending on whether a certain
 condition is met. A conditional statement in its simplest form is:
 
-@example
-if @var{part} [@var{flags}] @var{cond-expr}
-  @var{action-list-1}
-fi
-@end example
-@noindent
+@deffn Syntax if @var{part} [@var{pattern-match-flags}] @var{cond-expr}
+@deffnx Syntax  @var{action-list-1}
+@deffnx Syntax fi
     
 The @var{part} specifies which part of the input should be considered
 when evaluating the condition. It is either @samp{command}, meaning
@@ -482,8 +540,8 @@ two may be followed by the name of the corresponding command or
 header enclosed in square braquets. If this part is missing, all
 command or headers will be searched. 
 
-The optional @var{flags} determine which type of
-regular expressions is used in subsequent conditional expression. It
+The optional @var{pattern-match-flags} alter the pattern matching
+type used in subsequent conditional expression. It
 will be described in detail in the section @ref{Regular expressions}.
 The @var{cond-expr} is a @dfn{conditional expression}.
 It consists of a series of @dfn{conditions} joined together with
@@ -518,19 +576,17 @@ fi
 The actions represented by @dots{} will be executed only if the
 @samp{Subject:} header of the message starts with @samp{Re:} optionally
 preceeded by any amount of whitespace.
+@end deffn
 
 The more elaborate form of a conditional allows you to choose among
 the two different action sets depending on a given condition. The
 syntax is:
 
-@example
-if @var{part} [@var{flags}] @var{cond-expr}
-  @var{action-list-1}
-else
-  @var{action-list-2}  
-fi
-@end example
-@noindent
+@deffn Syntax if @var{part} [@var{flags}] @var{cond-expr}
+@deffnx Syntax  @var{action-list-1}
+@deffnx Syntax else
+@deffnx Syntax @var{action-list-2}  
+@deffnx Syntax fi
 
 Here, The @var{action-list-1} is executed if the condition
 @var{cond-expr} is met. Otherwise, @var{action-list-2} is
@@ -551,6 +607,7 @@ statements may be nested. This allows to create very sophisticated
 rule sets. 
 
 [FIXME: elaborate on this. Provide an example]
+@end deffn
 
 @menu
 * Boolean operators::
@@ -575,7 +632,7 @@ strength:
 As an example, let's consider the following statement:
 
 @example
-if header[X-Mailer] :scase "mutt" or header[X-Mailer] :scase "mail" \
+if header[X-Mailer] "mutt" or header[X-Mailer] "mail" \
    and not header[Content-Type] "^multipart/mixed;.*"
    @var{action}
 fi
@@ -594,7 +651,7 @@ header does not begin with the string @samp{multipart/mixed}, we would
 write the following:
 
 @example
-if (header[X-Mailer] :scase "mutt" or header[X-Mailer] :scase "mail") \
+if (header[X-Mailer] "mutt" or header[X-Mailer] "mail") \
    and not header[Content-Type] "^multipart/mixed;.*"
    @var{action}
 fi
@@ -606,17 +663,73 @@ boolean operators.
 
 @node Regular expressions
 @subsection Regular expressions
+@cindex regex, flag
+@cindex re, flag
+@cindex perl, flag
+@cindex perlre, flag
+@cindex exact, flag
+@cindex ex, flag
+@cindex scase, flag
+@cindex icase, flag
+@cindex basic, flag
+@cindex extended, flag
 
 GNU Anubis supports two types of regular expressions: POSIX (both
 basic and extended), and Perl-style regular expressions. Among this,
 the former are always supported, whereas the support for the latter
-depends on the configuration settings at compile time.
+depends on the configuration settings at compile time. The default
+type of regular expressions is POSIX Extended. 
 
-By default, the POSIX regular expressions are expected. To use
-Perl-style ones, use the @code{:perlre} flag. For example:
+A number of modifiers is provided to change the type of regular
+expressions. These are described in the following table.
+
+@table @code
+@item :regex
+@itemx :re
+Indicates that the following pattern should be considered a regular
+expression. The default type for this expression is assumed.
+
+@item :perl
+@itemx :perlre
+The regular expression is a Perl-style one.
+
+@item :exact
+@itemx :ex
+Disables regular expression matching, all patterns will be matched
+as exact strings.
+
+@item :scase
+Enables case-sensitive comparison.
+
+@item :icase
+Enables case-insensitive comparison.
+
+@item :basic
+Switches to the POSIX Basic regular expression matching.
+
+@item :extended
+Switches to the POSIX Extended regular expression matching.
+@end table
+
+The special statement @code{regex} allows you to alter the default
+regular expression type. For example, the following statement
+
+@example
+regex :perl :scase
+@end example
+
+sets the default regular expression types to Perl-style, case-sensitive.
+The settings of @code{regex} statement regard only those patterns that
+appear after it in the configuration file and have force until the
+next occurrence of the @code{regex} statement. 
+
+A couple of examples:
 
 @example
 if header[Subject] :perlre "(?<=(?<!foo)bar)baz"
+ ...
+fi
+
 @end example
 @noindent
 
@@ -624,17 +737,17 @@ This will match any @code{Subject} header whose value
 matches an occurrence of @samp{baz} that is preceded by @samp{bar}
 which in turn is not preceded by @samp{foo}.
               
-Usually the regular expression patterns are always case-sensitive.
-The special flag, @code{:scase}, is provided to change this default.
-For example:
-
 @example
-if header[Subject] :scase "^re"
+if header[Subject] :scase "^Re"
 @end example
 @noindent
 
-Will match a @code{Subject} header whose value starts with @samp{re},
-@samp{Re} or @samp{RE}.
+will match a @code{Subject} header whose value starts with @samp{Re},
+but will not match it if it starts with @samp{RE} or @samp{re}.
+
+When using POSIX regular expressions, the extended syntax is enabled
+by default. If you wish to use a basic regular expression, precede
+it with the @code{:basic} flag.
 
 For the detailed description of POSIX regular expressions,
 @xref{Top,,Regular Expression Library,regex,Regular Expression Library}.
@@ -649,106 +762,184 @@ An @dfn{action list} is a list of action commands, which control processing
 of an outgoing messages. All action command names are case insensitive, so you
 can use for instance: @samp{add} or @samp{ADD} or @samp{AdD}, and so on.
 
+@c [FIXME]
+@strong{Caution:} Some action commands below might not be compatible
+with GNU Anubis > 3.6.2, because this Manual has not been updated for
+a long time.
+
 @menu
-* Editing Headers::     How to edit a message header on-the-fly.
+* Adding Headers or Text::
+* Removing Headers::
+* Modifying Messages::  How to modify a message contents on-the-fly.
 * Inserting Files::     How to append text files to an outgoing message.
 * Mail Encryption::     How to encrypt a message on-the-fly.
 * Remailers::           How to enable the support for Remailers Type-I.
+* Rot-13::              How to use rot-13 transformation.
 * External Processor::  How to process a message body using an external tool.
 
-* Command Summary::     A short command summary.
+* Command Summary::     A short command summary
 * Quick Example::       A quick example of using an action list.
 @end menu
 
-[FIXME: The nodes below are not revised yet]
+@node Adding Headers or Text
+@subsubsection Adding Headers or Text
+@cindex @code{add}
 
-@node Editing Headers
-@subsubsection Editing Headers
-@cindex message header
+The @code{add} command allows you to add arbitrary headers or text
+to the message. To add a header, use the following syntax:
 
-@table @samp
-@item add header [@var{header-name}] @var{header-line}
-@itemx add [@var{header-name}] @var{header-line}
-This action command adds to the outgoing message the header
-@var{header-name} with the value @var{header-line}. Both forms of
-the command are equivalent. For example:
+@deffn Syntax add header @samp{[}@var{name}@samp{]} @var{string}
+@deffnx Syntax add @samp{[}@var{name}@samp{]} @var{string}
 
-@example
-add [X-Comment] "GNU's Not Unix!"
-@end example
-
-@item remove = @var{header-line} (a regular expression)
-This action command removes the header lines that match @var{header-line}
-from an outgoing message. This has to be a regular expression.
 For example:
 
 @example
-remove =^X-Mailer:
+add header[X-Comment-1] "GNU's Not Unix!"
+add [X-Comment-2] "Support FSF!"
 @end example
+@end deffn
 
-This will remove the @samp{X-Mailer:} line from an outgoing
-message.
+To add some text, use the following syntax:
 
-@item modify = @var{old-header-line} >> @var{new-header-line}
-This action command modifies a message header line (entirely or partly).
-An old header line (must be a regular expression) and a new header line
-are separated with @code{ >> }, i.e. @code{@key{SPC}>>@key{SPC}}.
+@deffn Syntax add body @var{text}
+@end deffn
 
-For example, the following code will change the @samp{Reply-To:}
-line only if you would send an email to @url{friend@@somewhere.net}.
+Use of this command with @samp{here document} syntax allows
+to append multiline text to the message, e.g.:
 
 @example
-@group
-if header =^To:.*<?friend@@somewhere.net>?
-   modify =^Reply-To: >> Reply-To: private@@somewhere.net
-fi
-@end group
+add body <<-EOT
+    Regards,
+    Hostmaster
+    EOT
 @end example
 
-Another example will change the @samp{X-Mailer: PINE}
-line to @samp{X-Mailer: The Big Boss} entirely.
+@node Removing Headers
+@subsubsection Removing Headers
+@cindex @code{remove}
+
+The command @code{remove} removes the specified header from the
+message. The syntax is:
+
+@deffn Syntax remove [@var{flags}] header @samp{[}@var{string}@samp{]}
+@deffnx Syntax remove [@var{flags}] @samp{[}@var{string}@samp{]}
+
+The name of the header to delete is given by @var{string} parameter.
+By default only those headers are removed whose names match it exactly.
+Optional @var{flags} allow to change this behavior. @xref{Regular
+expressions}, for the detailed description of these.
+@end deffn
+
+An example:
 
 @example
-@group
-if header =^X-Mailer: PINE
-   modify =^X-Mailer: >> X-Mailer: The Big Boss
-fi
-@end group
+remove ["X-Mailer"]
+remove :regex ["^X-.*"]
 @end example
 
-Using the @dfn{subexpressions} (or @dfn{substrings})
-and @dfn{back-references}, you can make a substitution, like this:
+The first example will remove the @samp{X-Mailer:} header from
+an outgoing message, and the second one will remove all "X-*"
+headers.
+
+@node Modifying Messages
+@subsubsection Modifying Messages
+@cindex @code{modify}
+
+The action command @code{modify} allows to alter the headers
+or the body of the message. 
+
+@deffn Syntax modify [@var{flags}] header @samp{[}@var{key}@samp{]} @samp{[}@var{new-key}@samp{]}
+@deffnx Syntax modify [@var{flags}] @samp{[}@var{key}@samp{]} @samp{[}@var{new-key}@samp{]}
+
+For each header whose name matches @var{key}, replaces its name
+with @var{new-key}. If @var{key} is a regular expressions, @var{new-key}
+may contain back references. For example, the following statement will
+select all headers whose names start with @samp{X-} and change their
+names to begin with @samp{X-Old-}:
 
 @example
-@group
-if header =^X-Mailer: (.*)
-   modify =^X-Mailer: >> X-Mailer: The lousy mailer \1
-fi
-@end group
+modify header :re ["X-\(.*\)"] ["X-Old-\1"]
+@end example
+@end deffn
+
+@deffn Syntax modify [@var{flags}] header @samp{[}@var{key}@samp{]} @var{value}
+@deffnx Syntax modify [@var{flags}] @samp{[}@var{key}@samp{]} @var{value}
+
+For each header whose name matches @var{key}, changes its value to
+@var{value}. For example:
+
+@example
+modify [Subject] "New subject"
 @end example
 
-It is allowed to make up to nine substitutions (range: \1---\9).
-@end table
+@noindent
+This statement sets the new value to the @code{Subject} header.
+@end deffn
+
+@deffn Syntax modify [@var{flags}] header @samp{[}@var{key}@samp{]} @samp{[}@var{new-key}@samp{]} @var{value}
+@deffnx Syntax modify [@var{flags}] @samp{[}@var{key}@samp{]} @samp{[}@var{new-key}@samp{]} @var{value}
+
+Combines the previous two cases, i.e. changes both the header
+name and its value, as shown in the following example:
+
+@example
+modify header [X-Mailer] [X-X-Mailer] "GNU Anubis"
+@end example
+@end deffn
+
+@deffn Syntax modify [@var{flags}] body @samp{[}@var{key}@samp{]}
+
+Removes all occurrences of @var{key} from the message body.
+For example, this statement will remove every occurrence of
+the word @samp{old}:
+
+@example
+modify body ["old"]
+@end example
+@end deffn
+
+@deffn Syntax modify [@var{flags}] body @samp{[}@var{key}@samp{]} @var{string}
+
+Replaces all occurences of @var{key} with @var{string}. For example:
+
+@example
+modify body :extended ["the old \([[:alnum:]]+\)"] "the new \1"
+@end example
+@end deffn
 
 @node Inserting Files
 @subsubsection Inserting Files
 
-@table @samp
-@item signature-file-append = @var{yes-or-no}
+@deffn Command signature-file-append @var{yes-or-no}
+@cmindex signature-file-append @var{yes-or-no}
 This action command adds at the end of a message body the
-@samp{--@key{SPC}} line, and includes a client's
+@samp{-- } line, and includes a client's
 @file{~/.signature} file. Value @samp{no} is the default.
+@end deffn
 
-@item body-append = @var{file-name}
+@deffn Command body-append @var{file-name}
+@cmindex body-append @var{file-name}
 This action command includes at the end of a message body
-a client's @file{@var{file-name}} file (a plain text).
+the contents of the given file. If @file{@var{file-name}} does
+not start with a @samp{/} character, it is taken relative to
+the current user home directory
+@end deffn
 
-@item body-clear-append = @var{file-name}
-Same as above, but wipes out a message (message body + any attachments)
-before including a message body from a @var{file-name} file.
-This action command is rarely useful.
-@end table
+@deffn Command body-clear
+@cmindex body-clear
+Removes the body of the message
+@end deffn
 
+@deffn Command body-clear-append @var{file-name}
+@cmindex body-clear-append @var{file-name}
+Replaces the message body with the contents of the specified
+file. The action is equivalent to the following command sequence:
+
+@example
+body-clear
+body-append @var{file-name}
+@end example
+@end deffn
 
 @node Mail Encryption
 @subsubsection Mail Encryption
@@ -756,141 +947,174 @@ This action command is rarely useful.
 @cindex Pretty Good Privacy, PGP
 @cindex GPG/PGP private key
 @cindex GPG/PGP public key
-@cindex ROT-13
 
-@table @samp
-@item gpg-passphrase = @var{passphrase}
-Specify your private key's pass phrase for signing an outgoing message
-using the GNU Privacy Guard (a tool compatible with the Pretty Good Privacy).
-Of course, to protect your passwords in the configuration file use the
+@deffn Command gpg-passphrase @var{passphrase}
+@cmindex gpg-passphrase @var{passphrase}
+Specifies your private key's pass phrase for signing an outgoing message
+using the GNU Privacy Guard (a tool compatible with the Pretty Good
+Privacy). Of course, to protect your passwords in the configuration file use the
 0600 (u=rw,g=,o=) permissions, otherwise GNU Anubis won't accept them.
-We recommend setting the @samp{gpg-passphrase} in a one place of your
-configuration file, e.g. put it in the @dfn{ALL} section.
+We recommend setting the @samp{gpg-passphrase} once in your
+configuration file, e.g. at the start of @code{RULE} section.
 
 GNU Anubis supports the GNU Privacy Guard via the
 @dfn{GnuPG Made Easy} library, available at
 @w{@uref{http://www.gnupg.org/gpgme.html}}.
+@end deffn
 
-@item gpg-encrypt = @var{gpg-keys}
+@deffn Command gpg-encrypt @var{gpg-keys}
+@cmindex gpg-encrypt @var{gpg-keys}
 This command enables encrypting your outgoing message with the
 GNU Privacy Guard (Pretty Good Privacy) public key(s).
-Comma separated list of keys.
+@var{gpg-keys} is a comma separated list of keys.
 
 @example
-gpg-encrypt = John's public key
+gpg-encrypt "John's public key"
 @end example
+@end deffn
 
-@item gpg-sign = @var{passphrase} or @samp{yes} if @samp{gpg-passphrase} is specified.
-This command enables signing your outgoing message with your
-GNU Privacy Guard private key. Specify the @var{passphrase}, or set it
-to @samp{yes} if you have already specified the @samp{gpg-passphrase}.
+@deffn Command gpg-sign @var{passphrase}
+@deffnx Command gpg-sign @samp{yes} 
+@cmindex gpg-sign @var{passphrase}
+This command signs the outgoing message with your
+GNU Privacy Guard private key. Specify the @var{passphrase} unless
+you have already set it using @code{gpg-passphrase}. In the latter
+case, use the second form of the command.
+
 For example:
 
 @example
-gpg-sign = @var{passphrase}
+gpg-sign "my passphrase"
 @end example
 
 or
 
 @example
 @group
-gpg-passphrase = @var{passphrase}
-gpg-sign = yes
+gpg-passphrase "my passphrase"
+gpg-sign yes
 @end group
 @end example
-
-@item rot13-subject = @var{yes-or-no}
-This command enables the simple ROT-13 message subject encoding.
-Value @samp{no} is the default. The ROT-13 encoding is a simple form
-of encryption in which the letters A-M are transposed with the letters L-Z.
-It is often used in Usenet postings/mailing lists to prevent people from
-accidentally reading a disturbing message.
-
-@item rot13-body = @var{yes-or-no}
-This command enables the simple ROT-13 message body encoding.
-Value @samp{no} is the default.
-@end table
-
+@end deffn
 
 @node Remailers
 @subsubsection Remailers Type-I
 @cindex remailer
 
-@table @samp
-@item rm-rrt = @var{email-address}
-This enables a support for the remailers (it allows sending mail in an
-anonymous way), by adding a special lines in a message body. This command
-specifies the @dfn{Request Remailing To} (@samp{Anon-To:} line). Set this
-to a recipient's email address. GNU Anubis supports only remailers Type-I
-(aka Cypherpunks).
-
-@item rm-post = @var{news-group}
-This command adds the @samp{Anon-Post-To: @var{news-group}} line,
-and transform an email to a news-mail for sending it to the Usenet
-via a remailer. This is only possible with a remailer, which supports
-the @samp{Anon-Post-To:}. For example:
+GNU Anubis supports remailers of type I. The support is written
+entirely in Scheme. To enable it you need to specify the following
+in the @code{GUILE} section of your configuration file:
 
 @example
-rm-post = alt.unix
+@group
+guile-load-program remailer.scm
+@end group
 @end example
 
-@item rm-gpg = @var{gpg-key}
-This makes an outgoing message encrypted with a remailer's PGP public
-key, and you must set this, if a remailer requires such an encryption.
+To send the message via a remailer, use the following command
+in the @code{RULE} section:
 
-@item rm-header = @var{header-line}
-This action command adds an extra header line to a remailed message.
+@deffn Command guile-process remailer-I @var{keyword-arguments}
+@fnindex remailer-I, Guile function
+@cmindex guile-process remailer-I @var{keyword-arguments}
+The @var{keyword-arguments} specify the various parameters for
+the remailer. These are:
 
-@item rm-lt = @var{time}
-The @samp{Latent-Time:} line causes a remailer to keep your message
-for some time before forwarding it. For example (2h):
+@table @asis
+@item #:rrt @var{string}
+This is the only required keyword argument. It sets the value for the
+@dfn{Request Remailing To} line. @var{string} should be your actual
+recipient's email address.
 
-@example
-rm-lt = 2:00
-@end example
+@item #:post @var{news-group}
+Adds the @samp{Anon-Post-To: @var{news-group}} line,
+and prepares the message for sending it to the Usenet
+via a remailer. Note, that this is only possible with remailers
+that support @samp{Anon-Post-To:} header.
 
-@item rm-rlt = @var{yes-or-no}
-This command forces the @dfn{random Latent-Time} over the @samp{Latent-Time:}
-and it is a random delay. Value @samp{no} is the default.
+@item #:latent @var{time}
+Adds the @samp{Latent-Time:} line, that causes a remailer to keep
+your message for specified @var{time} before forwarding it. 
+
+@item #:random
+Adds random suffix to the latent time.
+
+@item #:header @var{string}
+Adds an extra header line to the remailed message.
 @end table
 
+Example:
+
+@example
+rule "remail:(.*)/(.*)"
+ guile-process remailer-I #:rrt antonius_block@@helsingor.net \
+                          #:post \1 \
+                          #:latent \2 \
+			  #:header "X-Processed-By: GNU Anubis & Remailer-I"
+done
+@end example
+
+@end deffn
+
+@node Rot-13
+@subsubsection Support for ROT-13
+@cindex rot-13
+
+The ROT-13 transformation is a simple form of encryption where the
+letters A-M are transposed with the letters L-Z. It is often used in
+Usenet postings/mailing lists to prevent people from accidentally
+reading a disturbing message.
+
+GNU Anubis supports ROT-13 via a loadable Guile function. To enable
+this support, you will have to add the following to your @code{GUILE}
+section:
+
+@example
+guile-load-program rot-13.scm
+@end example
+
+Then, in your @code{RULE} section use:
+
+@deffn Command guile-process rot-13 @var{keyword-arguments}
+@fnindex rot-13, Guile function
+The command accepts the following @var{keyword-arguments}:
+
+@table @asis
+@item #:body
+Encrypt the entire body of the message
+
+@item #:subject
+Encrypt the @samp{Subject} header.
+@end table
+
+For example:
+
+@example
+rule "rot-13.*body"
+ guile-process rot-13 #:body
+done
+
+rule "rot-13.*subj"
+ guile-process rot-13 #:subject
+done
+@end example  
+@end deffn
 
 @node External Processor
 @subsubsection Using an External Processor
 
-@table @samp
-@item external-body-processor = @var{file-name} [@var{args}]
-This action command enables an external message body processor,
-which works on standard input and output. It could be an additional
-crypto engine, a spell checker, some text generator, whatever.
-@end table
+@deffn Command external-body-processor @var{program} [@var{args}]
+@cmindex external-body-processor @var{program} [@var{args}]
+Pipes the message body through @var{program}. @var{program} should
+be a filter program, that reads the text from the standard input
+and prints the transformed text on the standard output. The output
+from the @var{program} replaces the body of the message.
+@var{args} are any additional arguments the program may require.
+@end deffn
 
 @node Command Summary
 @subsubsection Command Summary
-
-@example
-@group
-add = @var{header-line}
-remove = @var{header-line} (a regular expression)
-modify = @var{old-header-line} >> @var{new-header-line}
-signature-file-append = @var{yes-or-no}
-body-append = @var{file-name}
-body-clear-append = @var{file-name}
-gpg-passphrase = @var{passphrase}
-gpg-encrypt = @var{gpg-keys}
-gpg-sign = @var{passphrase} or @samp{yes} if @samp{gpg-passphrase} is specified.
-rot13-subject = @var{yes-or-no}
-rot13-body = @var{yes-or-no}
-rm-rrt = @var{email-address}
-rm-post = @var{news-group}
-rm-gpg = @var{gpg-key}
-rm-header = @var{header-line}
-rm-lt = @var{time}
-rm-rlt = @var{yes-or-no}
-external-body-processor = @var{file-name} [@var{args}]
-@end group
-@end example
-
+@printindex cm
 
 @node Quick Example
 @subsubsection Quick Example
@@ -900,11 +1124,11 @@ Here is a quick example of using an action list:
 @example
 @group
 ---BEGIN RULE---
-if header =^X-Mailer:
-   remove =^X-Mailer:
-   add = X-Comment: GNU's Not Unix!
-   gpg-sign = @var{your passphrase}
-   signature-file-append = yes
+if header [X-Mailer] :re ".*"
+   remove [X-Mailer]
+   add [X-Comment] "GNU's Not Unix!"
+   gpg-sign "my password"
+   signature-file-append yes
 fi
 ---END---
 @end group
@@ -926,23 +1150,21 @@ specified in a user configuration file in the following way:
 
 @example
 @group
-rule [: @var{options}] =^@var{rule-name}
+rule [@var{flags}] @var{pattern}
    @var{action-list}
 done
 @end group
 @end example
 
 @noindent
-@strong{Caution:} Plase note that there is no space after the @samp{=}
-character.
 
 An example:
 
 @example
 @group
 ---BEGIN RULE---
-rule =^gpg-encrypt-john
-   gpg-encrypt = john's_gpg_key
+rule :basic "^gpg-encrypt-john"
+   gpg-encrypt "john's_gpg_key"
 done
 ---END---
 @end group
@@ -961,9 +1183,9 @@ while using a substitution and back-references:
 @example
 @group
 ---BEGIN RULE---
-rule =^gpg-encrypt:(.*)
-   gpg-encrypt = \1
-   add = X-GPG-Comment: Encrypted for \1
+rule :extended "^gpg-encrypt:(.*)"
+   gpg-encrypt "\1"
+   add [X-GPG-Comment] "Encrypted for \1"
 done
 ---END---
 @end group
@@ -1099,14 +1321,14 @@ or local SMTP host via TCP/IP or a local SMTP program, which works on
 standard input and output. In the first case, specify the following option:
 
 @example
-REMOTE-MTA = @var{smtp-host}:25
+REMOTE-MTA @var{smtp-host}:25
 @end example
 
 @noindent
 In the second case (local SMTP program), specify this:
 
 @example
-LOCAL-MTA = @var{/path/to/your/mta/mta-executable} -bs
+LOCAL-MTA @var{/path/to/your/mta/mta-executable} -bs
 @end example
 
 Please note that the @samp{-bs} command line option is a common way
@@ -1120,7 +1342,7 @@ value for the SMTP) or any other port number, then you must specify the
 to @samp{localhost:25}:
 
 @example
-BIND = localhost:25
+BIND localhost:25
 @end example
 
 This can make a conflict between GNU Anubis and your local MTA, which usually
@@ -1131,8 +1353,8 @@ local MTA's documentation about this topic. For example:
 
 @example
 @group
-BIND = localhost:25
-REMOTE-MTA = localhost:1111
+BIND localhost:25
+REMOTE-MTA localhost:1111
 @end group
 @end example
 
@@ -1149,7 +1371,6 @@ such a server. If not, try @samp{pidentd}, available at:
 All Mutt users, who would like to set up GNU Anubis between their MUA
 and MTA, should consider using the @samp{msg2smtp.pl} Perl script
 from the @file{contrib} directory (part of the distribution).
-
 
 @node TLS/SSL, Problems, Sample Beginning, Top
 @chapter Using the TLS/SSL Encryption
@@ -1202,9 +1423,9 @@ Next, edit your configuration file by adding:
 
 @example
 @group
-ssl = yes
-key = @var{path-to-the-private-key}
-cert = @var{path-to-the-certificate}
+ssl yes
+ssl-key @var{path-to-the-private-key}
+ssl-cert @var{path-to-the-certificate}
 @end group
 @end example
 
@@ -1212,8 +1433,8 @@ For example:
 
 @example
 @group
-key = /usr/share/ssl/certs/anubis.pem
-cert = /usr/share/ssl/certs/anubis.pem
+ssl-key /usr/share/ssl/certs/anubis.pem
+ssl-cert /usr/share/ssl/certs/anubis.pem
 @end group
 @end example
 
@@ -1251,4 +1472,5 @@ report that too; it's a bug in the documentation!
 @shortcontents
 @contents
 @bye
-@c anubis.texi ends here
+
+anubis.texi ends here
