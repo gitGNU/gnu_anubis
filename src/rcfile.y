@@ -264,7 +264,8 @@ key      : regex
 
 opt_key  : /* empty */
            {
-		   $$.string = $$.key = NULL;
+		   $$.string = NULL;
+		   $$.key = NULL;
            }
          | key
 	 ;
@@ -289,7 +290,7 @@ r_msgpart: msgpart
            {
 		   $$ = $1;
 		   if (!$$.key) {
-			   $$.key = anubis_regex_compile($$.string, 0);
+			   $$.key = anubis_regex_compile($$.string, R_EXACT);
 			   xfree($$.string);
 		   }
 	   }
