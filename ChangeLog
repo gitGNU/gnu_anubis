@@ -1,3 +1,8 @@
+2004-09-03  Sergey Poznyakoff  
+
+	* src/authmode.c: Added missing pam_retval declaration.
+	* src/transmode.c: Likewise
+
 2004-09-02  Sergey Poznyakoff 
 
 	* doc/anubis.texi (Mutt): New node documenting the existing
