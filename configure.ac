@@ -84,6 +84,40 @@ if test `uname` = "Darwin"; then
  INCLUDES="$INCLUDES -I/usr/include"
 fi
 
+dnl Use option --without-guile to NOT compile Guile support.
+AC_ARG_WITH([guile],
+            AC_HELP_STRING([--without-guile],
+                           [without Guile support]),
+            [
+case "${withval}" in
+  yes) useguile=yes ;;
+  no)  useguile=no ;;
+  *)   AC_MSG_ERROR(bad value ${withval} for --without-guile) ;;
+esac],[useguile=yes])
+
+AC_SUBST(GUILE_INCLUDES)
+AC_SUBST(GUILE_LIBS)
+AC_SUBST(GUILE_BINDIR)
+AC_SUBST(GUILE_SNARF_VERSION)
+AC_SUBST(GUIMB)
+AC_SUBST(MU_SCM)
+AC_SUBST(LIBMU_SCM)
+AC_SUBST(GUILE_PKGDATA)
+AC_SUBST(GUILE_BUILT_SOURCES)
+
+if test x"$useguile" = x"yes"; then
+  MU_CHECK_GUILE(,[
+    AC_DEFINE(WITH_GUILE,1,[Enable Guile support])
+    GUILE_INCLUDES=`guile-config compile`
+    GUILE_LIBS=`guile-config link`
+    GUILE_BINDIR=`guile-config info bindir`
+    case "$GUILE_VERSION" in
+    16|17) GUILE_SNARF_VERSION="1.6";;
+    *) GUILE_SNARF_VERSION="1.6";;
+    esac
+   ],[useguile=no])
+fi
+
 dnl Use option --without-gpgme to NOT compile GnuPG (GPGME library) support.
 AC_ARG_WITH(gpgme,
 	[  --without-gpgme         without GnuPG (GPGME library) support],
@@ -209,39 +243,6 @@ if test "$with_pam" = "yes"; then
  AC_CHECK_LIB(pam_misc, main,, with_pam=no)
  AC_CHECK_HEADERS(security/pam_appl.h security/pam_misc.h)
  AC_MSG_RESULT([Enabling PAM support...])
-fi
-
-AC_ARG_WITH([guile],
-            AC_HELP_STRING([--without-guile],
-                           [disable Guile support]),
-            [
-case "${withval}" in
-  yes) useguile=yes ;;
-  no)  useguile=no ;;
-  *)   AC_MSG_ERROR(bad value ${withval} for --without-guile) ;;
-esac],[useguile=yes])
-
-AC_SUBST(GUILE_INCLUDES)
-AC_SUBST(GUILE_LIBS)
-AC_SUBST(GUILE_BINDIR)
-AC_SUBST(GUILE_SNARF_VERSION)
-AC_SUBST(GUIMB)
-AC_SUBST(MU_SCM)
-AC_SUBST(LIBMU_SCM)
-AC_SUBST(GUILE_PKGDATA)
-AC_SUBST(GUILE_BUILT_SOURCES)
-
-if test x"$useguile" = x"yes"; then
-  MU_CHECK_GUILE(,[
-    AC_DEFINE(WITH_GUILE,1,[Enable Guile support])
-    GUILE_INCLUDES=`guile-config compile`
-    GUILE_LIBS=`guile-config link`
-    GUILE_BINDIR=`guile-config info bindir`
-    case "$GUILE_VERSION" in
-    16|17) GUILE_SNARF_VERSION="1.6";;
-    *) GUILE_SNARF_VERSION="1.6";;
-    esac
-   ],[useguile=no])
 fi
 
 dnl Use option --with-tcp-wrappers to compile libwrap library support.
