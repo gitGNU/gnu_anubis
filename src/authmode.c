@@ -467,7 +467,7 @@ xdb_loop (void)
 
       case KW_XDATABASE:
 	xdatabase (make_lowercase (get_command_arg ()));
-	return;
+	break;
 
       case KW_EHLO:
 	asmtp_ehlo_reply (command);
