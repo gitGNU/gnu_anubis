@@ -1,6 +1,6 @@
 #
 # List of source files containing translatable strings.
-# Copyright (C) 2001, 2002, 2003 The Anubis Team.
+# Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 #
 
 src/auth.c
@@ -23,7 +23,7 @@ src/mysql.c
 src/net.c
 src/socks.c
 src/quit.c
-src/rc.c
+src/rcfile.c
 src/rcfile.l
 src/rcfile.y
 src/regex.c
