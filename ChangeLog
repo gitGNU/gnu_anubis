@@ -1,11 +1,16 @@
-2003-02-07  Sergey Poznyakoff 
+2003-02-07  Wojciech Polak
+
+	* src/map.c (translate_parser): Fixed a bug in `user name after into'
+	  parser.
+
+2003-02-07  Sergey Poznyakoff
 
 	* src/map.c: Fixed section name.
 	* src/rcfile.y (rc_stmt_print): Display IFFALSE branch
 	  only if it is non-null.
 	  (rc_run_section): Check for sec==NULL.
 
-2003-02-07  Sergey Poznyakoff  
+2003-02-07  Sergey Poznyakoff
 
 	* src/guile.c (guile_parser): Removed kludge.
 	* src/headers.h (anubis_regex_refcnt): New function.
@@ -53,7 +58,7 @@
 	  dependent parts (regex,pcre) live in this file. The rest of
 	  sources uses anubis_regex_.* interface.
 
-2003-02-05  Sergey Poznyakoff 
+2003-02-05  Sergey Poznyakoff
 
 	Rewritten RC file support using yacc and lex.
 	
@@ -117,7 +122,7 @@
 	  check for SSL certificate.
 	* src/rc.c: Commented extra tokens at end of #endif directive.
 
-2003-02-01  Sergey Poznyakoff 
+2003-02-01  Sergey Poznyakoff
 
 	Added support for Guile
 	
