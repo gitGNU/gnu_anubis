@@ -119,6 +119,7 @@ op_create(int argc, char **argv)
 	if (opendb(&db, argc, argv, anubis_db_rdwr))
 		return 1;
 
+	memset(&rec, 0, sizeof(rec));
 	while (getline (&buf, &n, stdin) > 0 && n > 0) {
 		char *p;
 		int len = strlen (buf);
@@ -156,7 +157,7 @@ op_create(int argc, char **argv)
 		anubis_db_free_record(&rec);
 		if (rc) {
 			error(_("%lu: cannot write to the database: %s"),
-			      anubis_db_strerror(db));
+			      (unsigned long) line, anubis_db_strerror(db));
 			break;
 		}
 	}
