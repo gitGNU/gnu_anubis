@@ -25,30 +25,19 @@
 #include "headers.h"
 #include "extern.h"
 
-static void append_text_file(void);
-static void append_signature_file(char *);
-
-void
-check_all_files(char *user)
-{
-	if (mopt & M_BODYAPPEND)
-		append_text_file();
-	if (mopt & M_SIGNATURE)
-		append_signature_file(user);
-	return;
-}
-
 static void
-append_text_file(void)
+_append_text_file(MESSAGE *msg, char *filename, char *prefix)
 {
 	FILE *fptxt;
 	char buf[LINEBUFFER+1];
 	unsigned long nbytes;
 	unsigned long nlines = 0;
-
-	fptxt = fopen(message.body_append, "r");
+	char *p;
+	
+	fptxt = fopen(filename, "r");
 	if (fptxt == 0) {
-		anubis_error(HARD, "%s: %s.", message.body_append, strerror(errno));
+		anubis_error(HARD,
+			     "%s: %s.", filename, strerror(errno));
 		return;
 	}
 	while (fgets(buf, LINEBUFFER, fptxt) != 0)
@@ -58,68 +47,48 @@ append_text_file(void)
 	clearerr(fptxt);
 	nbytes = ftell(fptxt);
 	rewind(fptxt);
-	nbytes = strlen(message.body) + nbytes + nlines + 3;
-
-	message.body = (char *)xrealloc((char *)message.body, nbytes);
-	strcat(message.body, CRLF);
-	nbytes -= (strlen(message.body) + 1);
-	while (fgets(buf, LINEBUFFER - 2, fptxt) != 0)
-	{
-		remcrlf(buf);
-		strcat(buf, CRLF);
-		strncat(message.body, buf, nbytes);
-		nbytes -= strlen(buf);
+	nbytes = strlen(msg->body) 
+		+ (prefix ? strlen(prefix) : 0)
+		+ nbytes + nlines + 1;
+	
+	msg->body = (char *)xrealloc((char *)msg->body, nbytes);
+	p = msg->body + strlen(msg->body);
+	if (prefix) {
+		strcpy(p, prefix);
+		p += strlen(prefix);
 	}
+	while (fgets(buf, LINEBUFFER - 1, fptxt) != 0) {
+		strcpy(p, buf);
+		p += strlen(buf);
+	}
+	*p = 0;
 	fclose(fptxt);
 	return;
 }
 
-static void
-append_signature_file(char *user)
+void
+message_append_text_file(MESSAGE *msg, char *filename)
 {
-	int n;
-	FILE *fpsig;
-	unsigned long nbytes;
-	unsigned long nlines = 0;
+	_append_text_file(msg, filename, NULL);
+}
+
+
+void
+message_append_signature_file(MESSAGE *msg, char *user)
+{
 	char homedir[MAXPATHLEN+1];
-	char buf[LINEBUFFER+1];
 	char signature_file[] = DEFAULT_SIGFILE;
 	char *signature_path = 0;
-
+	size_t n;
+	
 	get_homedir(user, homedir, sizeof(homedir));
 
 	n = strlen(homedir) + strlen(signature_file) + 2;
-	n = n > MAXPATHLEN ? MAXPATHLEN + 1 : n + 1;
 	signature_path = (char *)xmalloc(n);
 	snprintf(signature_path, n - 1, "%s/%s", homedir, signature_file);
 
-	fpsig = fopen(signature_path, "r");
-	if (fpsig == 0) {
-		anubis_error(HARD, "%s: %s.", signature_path, strerror(errno));
-		return;
-	}
-	while (fgets(buf, LINEBUFFER, fpsig) != 0)
-		nlines++;
-
-	fseek(fpsig, 0L, SEEK_END);
-	clearerr(fpsig);
-	nbytes = ftell(fpsig);
-	rewind(fpsig);
-	nbytes = strlen(message.body) + nbytes + nlines + 10;
-
-	message.body = (char *)xrealloc((char *)message.body, nbytes);
-	strcat(message.body, CRLF"-- "CRLF);
-	nbytes -= (strlen(message.body) + 1);
-	while (fgets(buf, LINEBUFFER - 2, fpsig) != 0)
-	{
-		remcrlf(buf);
-		strcat(buf, CRLF);
-		strncat(message.body, buf, nbytes);
-		nbytes -= strlen(buf);
-	}
-	strncat(message.body, CRLF, nbytes);
+	_append_text_file(msg, signature_path, "\n--\n");
 	free(signature_path);
-	fclose(fpsig);
 	return;
 }
 
