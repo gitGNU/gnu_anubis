@@ -26,26 +26,38 @@
 #include "extern.h"
 #include "rcfile.h"
 
+#include <regex.h>
+#ifdef HAVE_PCRE
+# ifdef HAVE_PCRE_H
+#  include <pcre.h>
+# elif defined (HAVE_PCRE_PCRE_H)
+#  include <pcre/pcre.h>
+# endif
+#endif
+
 /****************************
  Regular Expressions support
 *****************************/
+
+struct rc_regex {            /* Regular expression */
+	char *src;           /* Raw-text representation */  
+#ifdef HAVE_PCRE
+	int perlre;          /* Is it Perl style? */
+#endif
+	union {
+		regex_t re;  /* POSIX regex */
+#ifdef HAVE_PCRE
+		pcre *pre;   /* Perl */
+#endif
+	} v;
+};
 
 static int posixre_match(char *, char *);
 #ifdef HAVE_PCRE
 static int perlre_match(char *, char *);
 #endif /* HAVE_PCRE */
 
-int
-anubis_regexp_match(RC_REGEX *re, char *line, int *refc, char ***refv)
-{
-#ifdef HAVE_PCRE
-	if (re->perlre)
-		return !_perl_match(re->v.pcre, line, refc, refv);
-#endif
-	return !_posix_match(&re->v.re, line, refc, refv);
-}
-
-int
+static int
 _posix_match(regex_t *re, char *line, int *refc, char ***refv)
 {
 	regmatch_t *rmp;
@@ -67,10 +79,144 @@ _posix_match(regex_t *re, char *line, int *refc, char ***refv)
 			} else
 				(*refv)[i] = strdup("");
 		}
+		(*refv)[i] = NULL;
 		*refc = re->re_nsub;
-	}
+	} else
+		*refc = 0;
 	xfree(rmp);
 	return rc;
+}
+
+#ifdef HAVE_PCRE
+int
+_perl_match(pcre *re, char *line, int *refc, char ***refv)
+{
+	int rc;
+	int ovsize, count;
+	int *ovector;
+	
+	rc = pcre_fullinfo(re, NULL, PCRE_INFO_CAPTURECOUNT, &count);
+	if (rc) {
+		anubis_error(SOFT,
+			     _("pcre_fullinfo() failed: %d."), rc);
+		return rc;
+	}
+
+	/* According to pcre docs: */
+	ovsize = (count + 1) * 3;
+	ovector = xmalloc(count * sizeof(*ovector));
+	
+	rc = pcre_exec(re, 0, line, strlen(line), 0, 0,
+		       ovector, ovsize);
+	if (rc == 0) {
+		/* shouldn't happen, but still ... */
+		anubis_error(SOFT, _("Matched, but too many substrings."));
+		count /= 3;
+	} else if (rc < 0)
+		count = 0;
+	else
+		rc = 0; /* indiocate the string is matched */
+	
+	if (count) {
+		/* Collect captured substrings */
+		int i;
+		
+		*refv = xmalloc((count + 1) * sizeof(**refv));
+		for (i = 0; i < count; i++) {
+			rc = pcre_get_substring(line, ovector, count, i,
+						(const char **)&(*refv)[i]);
+			if (rc < 0)
+				anubis_error(SOFT,
+				     _("Get substring %d failed (%d)."),
+					     i, rc);
+		}
+		(*refv)[i] = NULL;
+		*refc = count;
+	} else		
+		*refc = 0;
+	xfree(ovector);
+	return rc;
+}
+#endif
+
+int
+anubis_regex_match(RC_REGEX *re, char *line, int *refc, char ***refv)
+{
+#ifdef HAVE_PCRE
+	if (re->perlre)
+		return !_perl_match(re->v.pre, line, refc, refv);
+#endif
+	return !_posix_match(&re->v.re, line, refc, refv);
+}
+
+RC_REGEX *
+anubis_regex_compile(char *line, int opt)
+{
+	RC_REGEX *re;
+	int cflags = 0;
+	
+	re = xmalloc(sizeof(*re));
+#ifdef HAVE_PCRE
+	if (opt & R_PERLRE) {
+		const char *error;
+		int error_offset;
+
+		re->perlre = 1;
+		
+                if (!(opt & R_SCASE))
+			cflags |= PCRE_CASELESS;
+		re->v.pre = pcre_compile(line, cflags,
+					 &error, &error_offset, 0);
+		if (re->v.pre == 0) {
+			anubis_error(SOFT,
+				     _("pcre_compile() failed at offset %d: %s."),
+				     error_offset, error);
+			xfree(re);
+			return NULL;
+		}
+	} else
+#endif
+	{
+		int rc;
+		
+		if (opt & R_SCASE)
+			cflags |= REG_ICASE;
+		if (!(opt & R_BASIC))
+			cflags |= REG_EXTENDED;
+		
+		rc = regcomp(&re->v.re, line, cflags);
+		if (rc) {
+			char errbuf[512];
+			regerror(rc, &re->v.re, errbuf, sizeof(errbuf));
+			anubis_error(SOFT,
+				     _("regcomp() failed at %s: %s."),
+				     line, errbuf);
+			xfree(re);
+			return NULL;
+		}
+	}
+
+	re->src = strdup(line);
+	return re;
+}
+
+void
+anubis_regex_free(RC_REGEX *re)
+{
+	free(re->src);
+#ifdef HAVE_PCRE
+	if (re->perlre)
+		pcre_free(re->v.pre);
+	else
+#endif
+		regfree(&re->v.re);
+	xfree(re);
+}
+
+char *
+anubis_regex_source(RC_REGEX *re)
+{
+	return re->src;
 }
 
 int
