@@ -1,3 +1,8 @@
+2004-03-15  Wojciech Polak
+
+	* src/authmode.c: Removed RSET support (where was my mind
+	when I added it, dammit?).
+
 2004-03-13  Wojciech Polak
 
 	* src/authmode.c (anubis_authenticate_mode): Don't read the
