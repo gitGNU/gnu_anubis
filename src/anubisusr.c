@@ -988,103 +988,31 @@ rc_name (void)
 #define CMP_ERROR     2
 
 int
-diff (char *file1, char *file2)
+diff (char *file, struct smtp_reply *repl)
 {
-  pid_t pid;
-  int i, status;
-  char *args[4];
-
-  VDETAIL (1, (_("Comparing %s and %s\n"), file1, file2));
-
-  args[0] = "cmp";
-  args[1] = file1;
-  args[2] = file2;
-  args[3] = NULL;
-
-  switch (pid = fork ())
-    {
-    case -1:			/* an error */
-      error (_("fork() failed: %s"), strerror (errno));
-      return -1;
-
-    case 0:			/* a child process */
-      for (i = 0; i < 64; i++)	/* FIXME */
-	close (i);
-      open ("/dev/null", O_RDONLY);
-      open ("/dev/null", O_WRONLY);
-      execvp (args[0], args);
-      error (_("execvp() failed: %s"), strerror (errno));
-      exit (77);
-    }
-
-  /* Master */
-  waitpid (pid, &status, 0);
-  if (WIFEXITED (status))
-    {
-      switch (WEXITSTATUS (status)) {
-      case 0:
-	VDETAIL (0, (_("Result: UNCHANGED\n")));
-	return CMP_UNCHANGED;
-      case 1:
-	VDETAIL (0, (_("Result: CHANGED\n")));
-	return CMP_CHANGED;
-      default:
-	VDETAIL (0, (_("Result: ERROR\n")));
-	return CMP_ERROR;
-      }
-    }
-  VDETAIL (1, (_("Result: Abnormal termination\n")));
-
-  return CMP_ERROR;
-}
-
-#ifndef P_tmpdir
-# define P_tmpdir "/tmp"
-#endif
-#define TEMPLATE "anXXXXXX"
-
-char *
-save_reply (struct smtp_reply *reply)
-{
-  char *filename;
-  int fd;
-  int i;
-  char *tmpdir = getenv ("TMPDIR");
-
-  if (!tmpdir)
-    tmpdir = P_tmpdir;
-
-  filename = xmalloc (strlen (tmpdir) + 1 + sizeof TEMPLATE);
-  sprintf (filename, "%s/%s", tmpdir, TEMPLATE);
-
-#ifdef HAVE_MKSTEMP
-  {
-    int save_mask = umask (077);
-    fd = mkstemp (filename);
-    umask (save_mask);
-  }
-#else
-  if (mktemp (filename))
-    fd = open (filename, O_CREAT | O_EXCL | O_RDWR, 0600);
-  else
-    fd = -1;
-#endif
-
+  unsigned char sample[MD5_DIGEST_BYTES];
+  unsigned char digest[MD5_DIGEST_BYTES];
+  int len;
+  int fd = open (file, O_RDONLY);
   if (fd == -1)
     {
-      error (_("Can not open temporary file: %s"), strerror (errno));
-      free (filename);
-      exit (1);
+      error (_("Cannot open file %s: %s"), file, strerror (errno));
+      return CMP_ERROR;
     }
 
-  VDETAIL (1, (_("Saving to %s\n"), filename));
-  for (i = 1; i < reply->argc - 1; i++)
-    {
-      write (fd, reply->argv[i], strlen (reply->argv[i]));
-      write (fd, "\n", 1);
-    }
+  anubis_md5_file (digest, fd);
   close (fd);
-  return filename;
+
+  len = strlen (repl->argv[0]);
+  if (len != sizeof digest * 2)
+    {
+      error (_("Invalid MD5 digest: %s"), repl->argv[0]);
+      return CMP_ERROR;
+    }
+  string_hex_to_bin (sample, repl->argv[0], len);
+
+  return memcmp (digest, sample, sizeof digest) == 0 ?
+                 CMP_UNCHANGED : CMP_CHANGED;
 }
 
 void
@@ -1144,7 +1072,6 @@ synch (void)
   int rc;
   struct sockaddr_in addr;
   struct smtp_reply repl;
-  char *filename;
   char *rcname;
 
   obstack_init (&input_stk);
@@ -1203,6 +1130,7 @@ synch (void)
       return 1;
     }
 
+  
   send_line ("XDATABASE EXAMINE");
   smtp_get_reply (&repl);
   if (repl.code != 250)
@@ -1213,16 +1141,17 @@ synch (void)
       return 1;
     }
 
-  filename = save_reply (&repl);
   rcname = rc_name ();
 
-  rc = diff (filename, rcname);
-
-  unlink (filename);
-  free (filename);
+  rc = diff (rcname, &repl);
 
   if (rc == CMP_CHANGED)
-    smtp_upload (rcname);
+    {
+      VDETAIL (1, (_("File changend\n")));
+      smtp_upload (rcname);
+    }
+  else
+    VDETAIL (1, (_("File NOT changend\n")));
   free (rcname);
 
   smtp_quit ();

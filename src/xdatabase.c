@@ -213,31 +213,25 @@ static void
 xexamine ()
 {
   char *rcname = user_rcfile_name ();
-  FILE *fp;
-
-  fp = fopen (rcname, "r");
-  if (!fp && errno != ENOENT)
+  int fd = open (rcname, O_RDONLY);
+  if (fd == -1)
     {
       anubis_error (SOFT, _("Cannot open %s: %s"), rcname, strerror (errno));
       swrite (SERVER, remote_client, "450 Cannot open file" CRLF);
     }
   else
     {
-      char line[LINEBUFFER + 1];
+      unsigned char digest[MD5_DIGEST_BYTES];
+      unsigned char hex[2*MD5_DIGEST_BYTES+1];
+      
+      anubis_md5_file (digest, fd);
+      close (fd);
 
-      swrite (SERVER, remote_client, "250-Configuration settings follow\r\n");
-      if (fp)
-	{
-	  while (fgets (line, sizeof line, fp))
-	    {
-	      remcrlf (line);
-	      swrite (SERVER, remote_client, "250-");
-	      swrite (SERVER, remote_client, line);
-	      swrite (SERVER, remote_client, CRLF);
-	    }
-	  fclose (fp);
-	}
-      swrite (SERVER, remote_client, "250 End of configuration listing\r\n");
+      memset (hex, 0, sizeof hex); 
+      string_bin_to_hex (hex, digest, sizeof digest);
+      swrite (SERVER, remote_client, "250 ");
+      swrite (SERVER, remote_client, hex);
+      swrite (SERVER, remote_client, CRLF);
     }
   free (rcname);
 }
