@@ -412,6 +412,10 @@ stdinout(void)
 	int sd_client = 0; 
 	int sd_server = 0;
 
+	topt &= ~T_SSL;
+	topt |= T_FOREGROUND;
+	topt |= T_SMTP_ERROR_CODES;
+	
 	anubis_getlogin(session.client, sizeof(session.client));
 	auth_tunnel(); /* session.client = session.supervisor */
 
