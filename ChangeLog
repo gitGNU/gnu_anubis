@@ -1,3 +1,9 @@
+2003-12-09  Wojciech Polak
+
+	* configure.ac: Set AM_GNU_GETTEXT_VERSION(0.13).
+	Force to use GnuTLS >= 1.0.0.
+	* m4/Makefile.am: Updated (gettext 0.13).
+
 2003-11-30  Sergey Poznyakoff 
 
 	* src/headers.h (N_): Define uncoditionally.
