@@ -411,9 +411,9 @@ control_parser(int method, int key, LIST *arglist,
 
 #if defined(WITH_GSASL)
 	case KW_SASL_PASSWORD_DB:
-		if (list_count(arglist) != 2) 
+		if (list_count(arglist) != 1) 
 			return RC_KW_ERROR;
-		anubis_set_password_db (arg, list_item(arglist, 1));
+		anubis_set_password_db (arg);
 		break;
 
 	case KW_SASL_ALLOWED_MECH:
