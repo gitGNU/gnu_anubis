@@ -24,6 +24,8 @@
 
 #include "headers.h"
 
+void (*memory_error)(const char *message);
+
 void *
 xmalloc(int n)
 {
@@ -31,9 +33,8 @@ xmalloc(int n)
 
 	p = malloc(n);
 	if (p == NULL) {
-		anubis_error(HARD,
+		memory_error(
 			_("malloc() failed. Cannot allocate enough memory."));
-		quit(EXIT_FAILURE); /* force exit */
 	}
 	memset(p, 0, n);
 	return p;
@@ -47,9 +48,8 @@ xrealloc(void *p, int n)
 
 	p = realloc(p, n);
 	if (p == NULL) {
-		anubis_error(HARD,
-			_("realloc() failed. Cannot reallocate enough memory."));
-		quit(EXIT_FAILURE); /* force exit */
+		memory_error(
+		      _("realloc() failed. Cannot reallocate enough memory."));
 	}
 	return p;
 }
