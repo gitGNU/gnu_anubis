@@ -38,6 +38,7 @@
  * A database, any from the following:
    - GDBM -- (http://www.gnu.org/software/gdbm/).
    - MySQL -- (http://www.mysql.com/).
+   - PostgreSQL -- (http://www.postgresql.com/)
 
  Optional:
 
@@ -53,6 +54,7 @@
 
  $ ./configure
  $ make
+ $ make check (optional)
  $ make install
 
  By default, GNU Anubis will be installed in `/usr/local/sbin/anubis',
@@ -60,6 +62,7 @@
 
  $ ./configure --prefix=/usr
  $ make
+ $ make check (optional)
  $ make install
 
  For better control, use the options below.
@@ -67,6 +70,7 @@
 
  `--with-gsasl'        to support SASL authentication.
  `--with-mysql'        to support MySQL database.
+ `--with-postgres'     to support PostgreSQL database.
  `--with-pcre'         to support Perl-compatible regular expressions.
  `--with-pam'          to support Pluggable Authentication Modules.
  `--with-socks-proxy'  to support SOCKS v4/5 proxy support.
@@ -92,6 +96,7 @@
  Most modern GNU/Linux (or *BSD) distributions have already
  installed an IDENT server. If not, try `pidentd', available at:
  ftp://ftp.lysator.liu.se/pub/ident/servers/
+
 
  Editing Configuration Files with GNU Emacs
  ==========================================

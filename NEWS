@@ -6,12 +6,32 @@
  4.0 (unreleased)
  ****************
 
-* GNU Anubis 4.0 has been rewritten from scratch.
-  Changed the message processing algorithm to process
-  a message as a whole. Many changes, bugfixes,
-  and improvements have been made.
-* Rewritten configuration files support using yacc and lex.
-* Grammar rewritten and improved. The new syntax is:
+ Current v3.9.94 (?? ??? 2004):
+
+ GNU Anubis 4.0 has been rewritten from scratch. Changed the message
+ processing algorithm to process a message as a whole. Many changes,
+ bugfixes, and improvements have been made.
+
+** New features:
+
+* The new authentication and authorization mode has been introduced.
+  It drops the IDENT protocol server authentication requirement...
+  [FIXME: elaborate on this]
+
+* [FIXME: Due to above] ...support for the following databases
+  has been added:
+
+  - GDBM
+  - MySQL
+  - PostgreSQL
+
+* Support for the GNU extension language has been added
+  via Guile 1.6 or newer.
+
+* Added testsuite (make check).
+
+** Grammar rewritten and improved (configuration files support
+   has been rewritten using Yacc and Lex). The new syntax is:
 
    if header[Subject] "regexp"
 
@@ -20,7 +40,6 @@
    if header[Subject] "Re: .*" and body ".*found.*"
 
   Conditional statements may be nested to any depth.
-
   New syntactical entities:
 
    add header[KEY] VALUE
@@ -28,6 +47,17 @@
    remove header[KEY]
    modify header[KEY] [NEW-KEY] VALUE
 
+  [FIXME: Add more news about the grammar]
+
+  The new statement `stop' allows to abort execution of a RULE section.
+  The new statement `regex' sets the default preferences for the
+  style of the regular expressions.
+
+** Run Control File News:
+
+* Added new security option `drop-unknown-user'.
+* New option 'gpg-sign-encrypt' allows to encrypt and sign messages
+  simultaneously.
 * The RULE section is allowed both in system-wide and in user
   configuration files. The statement `rule-priority' in the
   system CONTROL section defines the order of execution of
@@ -35,25 +65,19 @@
 * User-defined sections are allowed in either configuration file.
   Such sections may be invoked from RULE section or from another
   user-defined section using `call' statement.
-* The new statement `stop' allows to abort execution of a RULE section.
-* The new statement `regex' sets the default preferences for the
-  style of the regular expressions.
 * The order of processing user CONTROL sections may be altered by
   setting `control-priority' in the system-wide CONTROL section.
 * Execution of the configuration files can be traced by setting
   new CONTROL variable `tracefile'.
-* Support for the GNU extension language has been added
-  (via Guile 1.6 or newer).
-* Remailers and ROT-13 support has been removed from
-  the main engine (moved to Guile layer).
-* Added testsuite (make check).
-* Added new security option `drop-unknown-user'.
-* New option 'gpg-sign-encrypt' allows to encrypt and sign messages
-  simultaneously.
-* New file anubis-mode.el provides an Emacs major mode for editing
+
+** Other changes:
+
+* Remailers and Rot-13 support has been removed from the main engine
+  and rewritten as the loadable extension modules.
+* New file `anubis-mode.el' provides an Emacs major mode for editing
   Anubis configuration files.
-* New Ukrainian, Malay, and Romanian message translations.
-* Added Dutch, Polish, and Russian message translations.
+* New Dutch, Malay, Polish, Romanian, Russian, and Ukrainian message
+  translations.
 
  *******************
  3.6.2 (15 Dec 2002)
