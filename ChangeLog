@@ -1,3 +1,10 @@
+2004-05-19  Sergey Poznyakoff
+
+	* src/tunnel.c (save_command): Fixed parsing of commands
+	(process_command): remove CRLF from the command and flip
+	it to lower case before parsing.
+	(transfer_command): Reversed return code if handle_ehlo failed.
+
 2004-05-14  Sergey Poznyakoff
 
 	* src/ssl.c: Rewritten to match new API.
