@@ -564,8 +564,15 @@ process_command (MESSAGE * msg, char *command)
   return 0;
 }
 
+void
+set_ehlo_domain (char *domain)
+{
+  xfree (smtp_ehlo_domain_name);
+  smtp_ehlo_domain_name = strdup (domain);
+}
+
 static void
-save_ehlo_domain(char *command)
+save_ehlo_domain (char *command)
 {
   char *p, *endp;
   
@@ -577,8 +584,7 @@ save_ehlo_domain(char *command)
   for (endp = p + strlen (p) - 1; endp >= p && isspace(*endp); endp--)
     ;
   endp[1] = 0;
-  xfree(smtp_ehlo_domain_name);
-  smtp_ehlo_domain_name = strdup(p);
+  set_ehlo_domain (p);
 }
 
 static int
