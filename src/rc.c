@@ -156,6 +156,7 @@ process_rcfile(int method)
 #define KW_SOCKS_V4           10
 #define KW_SOCKS_AUTH         11
 #define KW_READ_ENTIRE_BODY   12
+#define KW_DROP_UNKNOWN_USER  13
 
 char **
 list_to_argv(LIST *list)
@@ -276,7 +277,11 @@ control_parser(int method, int key, LIST *arglist,
 	case KW_READ_ENTIRE_BODY:
 		setbool(arg, topt, T_ENTIRE_BODY);
 		break;
-		
+
+	case KW_DROP_UNKNOWN_USER:
+		setbool(arg, topt, T_DROP_UNKNOWN_USER);
+		break;
+
 	default:
 		return RC_KW_UNKNOWN;
 	}
@@ -333,6 +338,7 @@ struct rc_kwdef control_kw[] = {
 	{ "socks-v4", KW_SOCKS_V4 },
 	{ "socks-auth", KW_SOCKS_AUTH },
 	{ "read-entire-body", KW_READ_ENTIRE_BODY },
+	{ "drop-unknown-user", KW_DROP_UNKNOWN_USER },
 	{ NULL },
 };
 
