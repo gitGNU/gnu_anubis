@@ -1,3 +1,34 @@
+2003-02-17  Sergey Poznyakoff 
+
+	* src/extern.h (struct message_struct): New member mime_hdr.
+	* src/headers.h (T_ENTIRE_BODY): New flag.
+	  (regex_match): Removed.
+	* src/mem.c (free_pptr): Correctly handle null pointer.
+	* src/rc.c (control_parser): New boolean flag `read-entire-body'.
+	  When set to true causes the entire mime-encoded body to
+	  be read in core. Otherwise, only the first mime part is
+	  read, all the rest is passed to the server verbatim (default).
+	* src/regex.c (regex_match,posixre_match): Removed
+	* src/tunnel.c: Implemented new scheme of message processing.
+
+	Added new tests:
+	* testsuite/lib/anubis.exp (anubis_pat): Handle :DEL keyword.
+	* testsuite/anubis/base.exp: Test removal of headers.
+	* testsuite/anubis/mime.exp: New file.
+	* testsuite/anubis/DISTFILES: Added mime.exp
+	* testsuite/etc/del1.pat: New file.
+	* testsuite/etc/del2.pat: New file.
+	* testsuite/etc/del3.pat: New file.
+	* testsuite/etc/del4.pat: New file.
+	* testsuite/etc/del.in: New file.
+	* testsuite/etc/entire.in: New file.
+	* testsuite/etc/mime1.pat: New file.
+	* testsuite/etc/mime2.pat: New file.
+	* testsuite/etc/Makefile.am: Added new files.
+	* testsuite/etc/add1.pat: Minor change.
+	* testsuite/etc/add2.pat: Likewise.
+	* testsuite/etc/add3.pat: Likewise.
+	
 2003-02-15  Wojciech Polak
 
 	* configure.ac: Check apple-darwin by config.guess, not uname.
