@@ -523,17 +523,15 @@ parse_netrc(const char *filename)
 	char **p_argv = NULL;
 	int line = 0;
 	
-	VDETAIL(1,(_("Opening configuration file %s: "), filename));
 	fp = fopen(filename, "r");
 	if (!fp) {
-		VDETAIL(1,("%s\n", strerror(errno)));
 		if (errno != ENOENT) {
 			error(_("Cannot open configuration file %s: %s"),
 			      filename, strerror(errno));
 		}
 		return;
 	} else
-		VDETAIL(1,(_("OK\n")));
+	  VDETAIL(1, (_("Opening configuration file %s...\n"), filename));
 
 	while (getline(&buf, &n, fp) > 0 && n > 0) {
 		char *p;
@@ -696,7 +694,7 @@ cb_password(Gsasl_session_ctx *ctx, char *out, size_t *outlen)
 	int rc;
 
 	if (auth_args.password == NULL)
-		auth_args.password = get_input(_("Password: "));
+		auth_args.password = getpass (_("Password: "));
 	
 	if (auth_args.password == NULL)
 		return GSASL_AUTHENTICATION_ERROR;
@@ -759,7 +757,7 @@ cb_passcode(Gsasl_session_ctx * ctx, char *out, size_t * outlen)
 	int rc;
 	
 	if (auth_args.passcode == NULL)
-		auth_args.passcode = get_input(_("Passcode: "));
+		auth_args.passcode = getpass (_("Passcode: "));
 
 	if (auth_args.passcode == NULL)
 		return GSASL_AUTHENTICATION_ERROR;
