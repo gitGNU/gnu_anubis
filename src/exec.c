@@ -172,7 +172,7 @@ make_local_connection_fd(char *exec_path, char **exec_args)
 		return -1;
 
 	signal(SIGCHLD, sig_local);
-	switch(fork()) {
+	switch (fork()) {
 	case -1: /* an error */
 		anubis_error(HARD, _("fork() failed."));
 		close(fd[0]);
@@ -181,9 +181,12 @@ make_local_connection_fd(char *exec_path, char **exec_args)
 		
 	case 0: /* a child process */
 		close(fd[0]);
-		dup2(fd[1], 0);
-		dup2(fd[1], 1);
-		close(fd[1]);
+		if (fd[1] != 0)
+			dup2(fd[1], 0);
+		if (fd[1] != 1)
+			dup2(fd[1], 1);
+		if (fd[1] > 1)
+			close(fd[1]);
 		execvp(exec_path, exec_args);
 		anubis_error(HARD, _("execvp() failed: %s"), strerror(errno));
 		return -1;
