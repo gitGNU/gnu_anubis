@@ -57,7 +57,7 @@ gpgme_debug_info(GpgmeCtx ctx)
 {
 	char *s = gpgme_get_op_info(ctx, 0);
 	if (s) {
-		puts(s);
+		fputs(s, stderr);
 		free(s);
 	}
 }
@@ -80,7 +80,7 @@ gpgme_init(void)
 	}
 	gpg.inited = 1;
 	if (options.termlevel == DEBUG)
-		puts(gpgme_get_engine_info());
+		fputs(gpgme_get_engine_info(), stderr);
 	return 0;
 }
 
