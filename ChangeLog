@@ -1,3 +1,21 @@
+2003-08-09  Sergey Poznyakoff 
+
+	* elisp/anubis-mode.el: Compatibility fix.
+	* README: Updated
+
+	* etc/add.in: Reformatted using anubis-mode.
+	* etc/del.in: Likewise.
+	* etc/empty.in: Likewise.
+	* etc/entire.in: Likewise.
+	* etc/gpg.in: Likewise.
+	* etc/mod-body.in: Likewise.
+	* etc/mod-header.in: Likewise.
+	* etc/remail.in: Likewise.
+	* etc/simple.in: Likewise.
+	* etc/std.in: Likewise.
+	* etc/tlsoneway.in: Likewise.
+	* etc/trigger.in: Likewise.
+
 2003-08-08  Sergey Poznyakoff 
 
 	* elisp/anubis-mode.el (anubis-keyword-dict): Added font-lock
