@@ -15,6 +15,7 @@
 # remote-mta HOST[:PORT]
 # local-mta FILE-NAME [ARGS]
 # termlevel NORMAL-VERBOSE-DEBUG-SILENT
+# tracefile YES-OR-NO
 # esmtp-auth USERNAME:PASSWORD
 # socks-proxy HOST[:PORT]
 # socks-v4 YES-OR-NO

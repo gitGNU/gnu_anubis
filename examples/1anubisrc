@@ -11,10 +11,11 @@
 #
 
 ---BEGIN CONTROL---
-# logfile FILE-NAME
-# loglevel NONE-FAILS-ALL
 # remote-mta HOST[:PORT]
 # local-mta FILE-NAME [ARGS]
+# logfile FILE-NAME
+# loglevel NONE-FAILS-ALL
+# tracefile YES-NO-FILE-NAME
 # esmtp-auth USERNAME:PASSWORD
 # socks-proxy HOST[:PORT]
 # socks-v4 YES-OR-NO
@@ -27,13 +28,13 @@
 ---END---
 
 #
-# The Rule System (The "RULE" section)
+# The Rule System (The RULE section)
 # User configuration file only. Examples:
 #
 
 ---BEGIN RULE---
 
-gpg-passphrase MYSECRETPASSPHRASE
+gpg-passphrase "MYSECRETPASSPHRASE"
 
 # Process the (E)SMTP commands.
 
@@ -44,17 +45,17 @@ fi
 # Process a message header lines.
 # The Triggers:
 
-trigger "^gpg-encrypt"
- gpg-encrypt GPG-KEY(S)
+trigger "gpg-sign"
+ gpg-sign default
 done
 
-trigger "^gpg-sign"
- gpg-sign yes
-done
-
-trigger "^gpg-dynamic:(.*)"
- add header[X-GPG-Comment] "Encrypted for \1"
+trigger "gpg-encrypt:(.*)"
+ add header[X-GPG] "Encrypted for \1"
  gpg-encrypt \1
+done
+
+trigger "gpg-se:(.*)"
+ gpg-se \1:default
 done
 
 #
@@ -62,29 +63,25 @@ done
 #
 
 if header[To] ".*<?friend1@somewhere.net>?"
- modify header[Reply-To] "mybox@myisp.net"
- add header[X-Comment] "GNU's Not Unix!"
+  modify header[Reply-To] "mybox@myisp.net"
+  add header[X-Comment] "GNU's Not Unix!"
 fi
 
 if header[X-Mailer] :perlre "(.*)"
- add header[X-Comment] "\1 rocks!"
- modify header[X-Mailer] "The lousy mailer \1"
+  add header[X-Comment] "\1 rocks!"
+  modify header[X-Mailer] "The lousy mailer \1"
 fi
 
 if header[Subject] "(.*)" and not header[Subject] :scase "URGENT"
- add header[X-Comment] "This message is not URGENT (\1)."
+  add header[X-Comment] "This message is not URGENT (\1)."
 fi
 
 if header[Subject] "gpg-encrypt"
- gpg-encrypt GPG-KEY(S)
-fi
-
-if header[Subject] "gpg-sign"
- gpg-sign PASSPHRASE
+  gpg-encrypt GPG-KEY(S)
 fi
 
 if header[Subject] "signature-file"
- signature-file-append yes
+  signature-file-append yes
 fi
 
 ---END---

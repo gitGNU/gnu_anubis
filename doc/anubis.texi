@@ -451,7 +451,7 @@ information, but only those information available for a client. Only in
 user configuration file. For example:
 
 @smallexample
-logfile = anubis.log
+logfile "anubis.log"
 @end smallexample
 
 This will log to the @file{~/anubis.log} file in a client's home directory.
@@ -485,10 +485,10 @@ Using @samp{tracefile no} disables it.
 
 When used in the user configuration file, a filename is allowed
 as an argument to this option. This allows you to explicitly
-specify to which file the tracing output should go.
-
+specify to which file the tracing output should go. Otherwise,
+using @samp{tracefile yes} enables logging to the same file
+as @samp{logfile} (if possible).
 @end deffn
-
 
 
 @node Proxy Settings, Encryption Settings, Output Settings, CONTROL Section
