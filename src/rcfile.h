@@ -56,6 +56,8 @@ enum rc_stmt_type {          /* Statement type: */
 struct rc_asgn {             /* Assignment */
 	char *lhs;           /* Left-hand side: A keyword */
 	LIST *rhs;    /* Right-hand side: A list of character strings */
+	int flags;           /* Flags control various aspects of assignment
+				functionality */
 };
 
 enum bool_op {               /* Boolean operator */
@@ -137,9 +139,13 @@ struct rc_stmt {             /* General statement representation */
 typedef int (*rc_kw_parser_t)(int method, int key, LIST *arg,
 			      void *inv_data, void *func_data, MESSAGE *msg);
 
+/* Keyword flags */
+#define KWF_HIDDEN 0x0001   /* Replace RHS with stars in debugging output */
+
 struct rc_kwdef {
-	char *name;
-	int tok;
+	char *name;         /* Keyword name */
+	int tok;            /* Assigned token number */
+	int flags;          /* Flags controlling debugging output, etc. */
 };
 
 struct rc_secdef_child {
