@@ -1,4 +1,8 @@
-2003-04-06  Sergey Poznyakoff 
+2003-04-08  Wojciech Polak
+
+	* doc/anubis.texi: Clean up. Removed some old stuff.
+
+2003-04-06  Sergey Poznyakoff
 
 	* src/tunnel.c: Use new encryption wrappers.
 	* src/daemon.c: Likewise. 
@@ -13,7 +17,7 @@
 	* src/main.c (main): Call init_ssl_libs.
 	
 	* src/proxy.c: Reflect changes to the declaration of
-	socket_error().
+	  socket_error().
 	* src/quit.c (quit): Removed implementation-dependent calls.
 	* src/ssl.c: Rewritten to make more modular.
 	* src/tls.c: Likewise.
