@@ -91,9 +91,9 @@ main(int argc, char *argv[])
 	options.termlevel = NORMAL;
 	options.uloglevel = FAILS;
 	session.tunnel_port = 24; /* private mail system */
+	session.mta_port = 25;
 
 #ifdef USE_SOCKS_PROXY
-	session.mta_port = 25;
 	session.socks_port = 1080;
 #endif
 	/*
