@@ -119,7 +119,7 @@ hostname_error (char *host)
 		  _("%s: a temporary name server error occured. Try again later."),
 		  host);
   else
-    anubis_error (EXIT_FAILURE, _("%s: unknown DNS error %d."), host, h_errno);
+    anubis_error (EXIT_FAILURE, 0, _("%s: unknown DNS error %d."), host, h_errno);
 }
 
 /* EOF */

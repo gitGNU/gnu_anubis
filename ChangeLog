@@ -1,3 +1,45 @@
+2004-09-17  Sergey Poznyakoff
+
+	* testsuite/lib/anubis.exp (anubis_pat): Updated to
+	support the recent changes (2004-09-13)
+	
+	* src/errs.c (anubis_error): Rewritten
+	(anubis_warning): New function (for future use).
+	
+	* src/headers.h (T_ERROR): Removed.
+	(SOFT,HARD,SYNTAX): Removed
+	(anubis_error,anubis_warning): New declaration
+	
+	* src/anubisusr.c (anubis_error): Updated definition
+	Issue QUIT command before normal exiting.
+	
+	* src/authmode.c: Do not use T_ERROR. Updated calls to
+	anubis_error
+	Issue 221 response on QUIT command
+	
+	* src/daemon.c: Do not use T_ERROR. Updated calls to anubis_error
+	* src/env.c: Likewise
+	* src/esmtp.c: Likewise
+	* src/exec.c: Likewise
+	* src/gpg.c: Likewise
+	* src/gsasl_srv.c: Likewise
+	* src/guile.c: Likewise
+	* src/ident.c: Likewise
+	* src/main.c: Likewise
+	* src/map.c: Likewise
+	* src/mime.c: Likewise
+	* src/net.c: Likewise
+	* src/rcfile.c: Likewise
+	* src/rcfile.l: Likewise
+	* src/rcfile.y: Likewise
+	* src/regex.c: Likewise
+	* src/socks.c: Likewise
+	* src/ssl.c: Likewise
+	* src/tls.c: Likewise
+	* src/transmode.c: Likewise
+	* src/tunnel.c: Likewise
+	* src/xdatabase.c: Likewise
+	
 2004-09-13  Sergey Poznyakoff
 
 	* src/authmode.c (anubis_smtp): Force T_SSL_ONEWAY if `ssl yes'
