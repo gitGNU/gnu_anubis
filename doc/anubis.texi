@@ -31,13 +31,13 @@ Software Foundation raise funds for GNU development.''
 @ifinfo
 @dircategory Email
 @direntry
-* Anubis: (anubis).             The GNU outgoing mail processor.
+* Anubis: (anubis).             The GNU SMTP message submission daemon.
 @end direntry
 @end ifinfo
 
 @titlepage
 @title GNU Anubis
-@subtitle An outgoing mail processor and the SMTP tunnel
+@subtitle An SMTP message submission daemon.
 @subtitle GNU Anubis Version @value{VERSION}
 @subtitle @value{UPDATED}
 @author Wojciech Polak and Sergey Poznyakoff
@@ -90,12 +90,12 @@ Indices
 @cindex tunnel
 @cindex proxy
 @cindex server
+@cindex message submission daemon
 @cindex outgoing mail processor
-@cindex on-the-fly
 @cindex MUA, Mail User Agent
 @cindex MTA, Mail Transport Agent
 
-GNU Anubis is an outgoing mail processor. Its purpose is to receive
+GNU Anubis is an SMTP message submission daemon. Its purpose is to receive
 the outgoing message, perform some manipulations over its contents,
 and to forward the altered message to the mail transport agent.
 

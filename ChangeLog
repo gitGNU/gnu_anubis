@@ -1,8 +1,16 @@
+2004-12-17  Wojciech Polak
+
+	* doc/anubis.texi: Updated.
+	* doc/anubis.1: Likewise.
+	* elisp/anubis-mode.el: Added new keywords.
+	* src/esmtp.c (do_gsasl_auth): Removed trailing \n in a verbose
+	message.
+
 2004-12-17  Sergey Poznyakoff
 
 	* README: Updated
-	* configure.ac: Use -Wno-deprecated gcc flag if GSASL support is
-	enabled.
+	* configure.ac: Use -Wno-deprecated-declarations gcc flag
+	if GSASL support is enabled.
 	* src/authmode.c (rc_parser): Use anubis_set_server_mech_list()
 	* src/esmtp.c (anubis_set_client_mech_list)
 	(anubis_set_encryption_mech_list): New function
@@ -52,7 +60,7 @@
 	* src/gsasl.c (write_chunk,_gsasl_read): Removed old usage of
 	gsasl_decode/gsasl_encode.
 	* src/help.c (config_opts): Reflect WITH_PGSQL
-	* src/net.c (recvline_ptr): Fixeb buffer reallocation condition
+	* src/net.c (recvline_ptr): Fixed buffer reallocation condition
 	(it didn't take null terminator into account).
 	* src/sql.c (sql_db_get,sql_db_delete,sql_db_put): Fixed eventual
 	sql injection.

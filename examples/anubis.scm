@@ -1,4 +1,7 @@
-;;;; GNU Anubis -- an SMTP message submission daemon.
+;;;;
+;;;; anubis.scm
+;;;;
+;;;; This file is part of GNU Anubis.
 ;;;; Copyright (C) 2003 The Anubis Team.
 ;;;;
 ;;;; GNU Anubis is free software; you can redistribute it and/or modify
