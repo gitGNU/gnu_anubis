@@ -29,6 +29,7 @@ EXTRA_DIST = \
  del3.pat\
  del4.pat\
  empty.pat\
+ gpgcrypt.pat\
  mime1.pat\
  mime2.pat\
  mult.pat\
@@ -36,16 +37,26 @@ EXTRA_DIST = \
  del.in\
  empty.in\
  entire.in\
+ gpg.in\
  std.in\
  simple.in
 
-noinst_DATA = empty.rc entire.rc del.rc std.rc simple.rc
-CLEANFILES = empty.rc entire.rc del.rc std.rc simple.rc
+RCFILES = \
+ del.rc\
+ empty.rc\
+ entire.rc\
+ gpg.rc\
+ simple.rc\
+ std.rc
+
+noinst_DATA = $(RCFILES) 
+CLEANFILES = $(RCFILES)
 DISTCLEANFILES = *.log
 
 del.rc: del.in
 empty.rc: empty.in
 entire.rc: entire.in
+gpg.rc: gpg.in
 simple.rc: simple.in
 std.rc: std.in
 
