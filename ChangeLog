@@ -28,7 +28,11 @@
 	rules.
 	
 	* doc/anubis.texi: Initial documentation for MDA mode
-
+	* doc/Makefile.am: Rewritten to use gendocs.sh. Needs CVS
+	version of the script.
+	* doc/index.html.in: Removed.
+	* doc/gendocs_template: New file.
+	
 2005-01-20  Sergey Poznyakoff
 
 	Initial implementation of MDA mode, allowing Anubis to
