@@ -43,6 +43,7 @@ unsigned long mopt;
 unsigned long ropt;
 unsigned long rule_position;
 unsigned long all_position;
+unsigned long guile_position;
 
 FILE *fp_rcfile;
 void *remote_client;
