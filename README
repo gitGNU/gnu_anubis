@@ -15,7 +15,7 @@
  ---------      ----------      ---------
 
  *   Mail User Agent (client)
- **  An outgoing mail processor and the SMTP tunnel.
+ **  An SMTP message submission daemon.
  *** Mail Transport Agent (server)
 
  GNU Anubis is GNU software. See the home page at:
