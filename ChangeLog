@@ -1,3 +1,7 @@
+2004-12-09  Wojciech Polak
+
+	* src/socks.c: Fixed possible buffer overflow.
+
 2004-12-03  Sergey Poznyakoff 
 
 	* contrib/Makefile.am: Use AM_INSTALLCHECK_STD_OPTIONS_EXEMPT
