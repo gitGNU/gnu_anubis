@@ -119,7 +119,7 @@ anubis_error (int ignored_method, const char *fmt, ...)
 }
 
 void
-starttls ()
+starttls (void)
 {
   struct smtp_reply reply;
 
@@ -204,20 +204,11 @@ h_error_string (int ec)
   }
    *ep, h_err_tab[] =
   {
-    {
-    HOST_NOT_FOUND, N_("No such host is known in the database.")}
-    ,
-    {
-    TRY_AGAIN, N_("Temporary error. Try again later.")}
-    ,
-    {
-    NO_RECOVERY, N_("Non-recoverable error")}
-    ,
-    {
-    NO_ADDRESS, N_("No Internet address is associated with the name")}
-    ,
-    {
-    0, 0}
+    { HOST_NOT_FOUND, N_("No such host is known in the database.") },
+    { TRY_AGAIN, N_("Temporary error. Try again later.") },
+    { NO_RECOVERY, N_("Non-recoverable error") },
+    { NO_ADDRESS, N_("No Internet address is associated with the name") },
+    { 0, 0 }
   };
 
   for (ep = h_err_tab; ep->descr; ep++)
@@ -443,7 +434,7 @@ smtp_print_reply (FILE * fp, struct smtp_reply *repl)
 
 
 void
-smtp_ehlo ()
+smtp_ehlo (void)
 {
   struct smtp_reply repl;
 
@@ -826,7 +817,7 @@ cb_realm (Gsasl_session_ctx * ctx, char *out, size_t * outlen)
 }
 
 void
-smtp_quit ()
+smtp_quit (void)
 {
   struct smtp_reply repl;
   send_line ("QUIT");
@@ -912,7 +903,7 @@ do_gsasl_auth (Gsasl_ctx * ctx, char *mech)
       exit (1);
     }
 
-  VDETAIL (1, (_("GSASL authentication successful\n")));
+  VDETAIL (1, (_("Authentication successful\n")));
 
   if (sess_ctx)
     install_gsasl_stream (sess_ctx, &iostream);
@@ -921,7 +912,7 @@ do_gsasl_auth (Gsasl_ctx * ctx, char *mech)
 }
 
 void
-smtp_auth ()
+smtp_auth (void)
 {
   Gsasl_ctx *ctx;
   char *mech;
@@ -957,7 +948,7 @@ smtp_auth ()
 
 
 const char *
-get_home_dir ()
+get_home_dir (void)
 {
   static char *home;
 
@@ -980,7 +971,7 @@ get_home_dir ()
 
 /* Auxiliary functions */
 char *
-rc_name ()
+rc_name (void)
 {
   char *rc;
   const char *home = get_home_dir ();
@@ -1030,16 +1021,17 @@ diff (char *file1, char *file2)
   waitpid (pid, &status, 0);
   if (WIFEXITED (status))
     {
-      VDETAIL (1, (_("Result %d\n"), WEXITSTATUS (status)));
-      switch (WEXITSTATUS (status))
-	{
-	case 0:
-	  return CMP_UNCHANGED;
-	case 1:
-	  return CMP_CHANGED;
-	default:
-	  return CMP_ERROR;
-	}
+      switch (WEXITSTATUS (status)) {
+      case 0:
+	VDETAIL (0, (_("Result: UNCHANGED\n")));
+	return CMP_UNCHANGED;
+      case 1:
+	VDETAIL (0, (_("Result: CHANGED\n")));
+	return CMP_CHANGED;
+      default:
+	VDETAIL (0, (_("Result: ERROR\n")));
+	return CMP_ERROR;
+      }
     }
   VDETAIL (1, (_("Result: Abnormal termination\n")));
 
@@ -1146,7 +1138,7 @@ smtp_upload (char *rcname)
 
 /* Main entry points */
 int
-synch ()
+synch (void)
 {
   int fd;
   int rc;
@@ -1255,10 +1247,9 @@ static struct option gnu_options[] = {
 };
 
 void
-help ()
+help (void)
 {
-  puts (_
-	("anubisusr -- Synchronize local and remote copies of the user's RC file"));
+  puts (_("anubisusr -- Synchronize local and remote copies of the user's RC file"));
   puts (_("Usage: anubisusr [OPTIONS] [URL]"));
   puts (_("OPTIONS are:"));
 #ifdef HAVE_TLS
@@ -1278,7 +1269,7 @@ help ()
 
 #define NETRC_NAME ".netrc"
 void
-read_netrc ()
+read_netrc (void)
 {
   const char *home = get_home_dir ();
   char *netrc = xmalloc (strlen (home) + 1 + sizeof NETRC_NAME);
