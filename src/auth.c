@@ -2,7 +2,7 @@
    auth.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -36,6 +36,66 @@ auth_tunnel(void)
 /***********************
  IDENT protocol support
 ************************/
+
+#define USERNAME_C "USERID :"
+
+/* If the reply matches sscanf expression
+   
+      "%*[^:]: USERID :%*[^:]:%s"
+
+   and the length of "%s" part does not exceed size-1 bytes,
+   copies this part to USERNAME and returns 0. Otherwise,
+   returns 1 */
+
+static int
+ident_extract_username(char *reply, char *username, size_t size)
+{
+	char *p;
+
+	p = strchr (reply, ':');
+	if (!p)
+		return 1;
+	if (p[1] != ' '
+	    || strncmp (p + 2, USERNAME_C, sizeof (USERNAME_C) - 1))
+		return 1;
+	p += 2 + sizeof (USERNAME_C) - 1;
+	p = strchr (p, ':');
+	if (!p)
+		return 1;
+	p++;
+	if (strlen (p) >= size)
+		return 1;
+	strcpy(username, p);
+	return 0;
+}
+
+/* If the reply matches sscanf expression
+
+      "%*[^ ] %*[^ ] %*[^ ] %*[^ ] %*[^ ] %s"
+
+   and the length of "%s" part does not exceed size-1 bytes,
+   copies this part to USERNAME and returns 0. Otherwise,
+   returns 1 */
+
+static int
+crypt_extract_username(char *reply, char *username, size_t size)
+{
+	int i;
+	char *p = reply;
+#define skip_word(c) while (*c && (*c) != ' ') c++
+
+	/* Skip five words */
+	for (i = 0; i < 5; i++) {
+		skip_word(p);
+		if (!*p++)
+			return 1;
+	}
+	
+	if (strlen (p) >= size)
+		return 1;
+	strcpy(username, p);
+	return 0;
+}
 
 int
 auth_ident(struct sockaddr_in *addr, char *user, int size)
@@ -81,7 +141,8 @@ auth_ident(struct sockaddr_in *addr, char *user, int size)
 	close_socket(sd);
 	memset(user, 0, size);
 
-	if (sscanf(buf, "%*[^:]: USERID :%*[^:]:%s", user) != 1) {
+	remcrlf (buf);
+	if (ident_extract_username(buf, user, size)) {
 		info(VERBOSE, _("IDENT: incorrect data."));
 		return 0;
 	}
@@ -97,7 +158,8 @@ auth_ident(struct sockaddr_in *addr, char *user, int size)
 		if (rs == -1)
 			return 0;
 
-		if (sscanf(buf, "%*[^ ] %*[^ ] %*[^ ] %*[^ ] %*[^ ] %s", user) != 1) {
+		remcrlf (buf);
+		if (crypt_extract_username(buf, user, size)) {
 			info(VERBOSE, _("IDENT: incorrect data (DES deciphered)."));
 			return 0;
 		}
@@ -119,4 +181,3 @@ auth_ident(struct sockaddr_in *addr, char *user, int size)
 }
 
 /* EOF */
-
