@@ -72,7 +72,6 @@ message_append_text_file(MESSAGE *msg, char *filename)
 	_append_text_file(msg, filename, NULL);
 }
 
-
 void
 message_append_signature_file(MESSAGE *msg, char *user)
 {
@@ -87,7 +86,7 @@ message_append_signature_file(MESSAGE *msg, char *user)
 	signature_path = (char *)xmalloc(n);
 	snprintf(signature_path, n - 1, "%s/%s", homedir, signature_file);
 
-	_append_text_file(msg, signature_path, "\n--\n");
+	_append_text_file(msg, signature_path, "\n-- \n");
 	free(signature_path);
 	return;
 }
