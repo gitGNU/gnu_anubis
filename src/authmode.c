@@ -385,6 +385,7 @@ anubis_smtp (ANUBIS_USER * usr)
 
   asmtp_capa_init ();
   asmtp_greet ();
+
   for (state = state_init; state != state_auth;)
     {
       switch (state) {
@@ -400,11 +401,11 @@ anubis_smtp (ANUBIS_USER * usr)
 	return EXIT_FAILURE;
 	
       case state_auth:
-	topt &= ~T_SSL_FINISHED;
 	break;
       }
     }
 
+  topt &= ~T_SSL_FINISHED;
   xdatabase_enable ();
   return 0;
 }
