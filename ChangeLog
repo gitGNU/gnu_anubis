@@ -1,3 +1,14 @@
+2003-02-07  Sergey Poznyakoff  
+
+	* src/guile.c (guile_parser): Removed kludge.
+	* src/headers.h (anubis_regex_refcnt): New function.
+	* src/regex.c: Likewise.
+	* src/rcfile.l: A couple of bugfixes/improvements in
+	  RX/RXM states.
+	* src/rcfile.y (rc_parse): Fixed return value.
+	  (node_eval): Check the number of backreferences in
+	  regexp.
+	  
 2003-02-06  Sergey Poznyakoff
 
 	* configure.ac: Provide a replacement for snprintf
