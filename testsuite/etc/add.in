@@ -33,7 +33,7 @@ if header[X-Command] = "Complete"
 fi
 
 if header[X-Order] = "Append file"
-  body-append "TESTDIR/data/append.txt"
+  body-append "TOP_SRCDIR/testsuite/data/append.txt"
 fi
 
 remove [X-Command]
