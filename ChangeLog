@@ -1,3 +1,8 @@
+2004-07-18  Wojciech Polak
+
+	* src/anubisusr.c: Be more user friendly.
+	(diff): As the result print text, not numbers.
+
 2004-07-17  Wojciech Polak
 
 	* src/env.c (anubis_changeowner): Print also a user name.
