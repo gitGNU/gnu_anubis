@@ -1,11 +1,60 @@
+2003-02-01  Sergey Poznyakoff 
+
+	Added support for Guile
+	
+	* configure.ac: Added --with-guile switch.
+	  Determine if socklen_t is defined, define it if it is not.
+	* m4/guile.m4: New file	
+	* m4/Makefile.am: Added guile.m4
+	* build/guile-1.6: New directory.
+	* build/guile-1.6/guile-doc-snarf: New file
+	* build/guile-1.6/guile-doc-snarf.awk: New file
+	* build/guile-1.6/Makefile.am: New file.
+	* build/Makefile.am: Added subdirs.
+	* src/daemon.c (loop): Removed `#ifdef __socklen_t_defined'
+	  conditional'.
+	
+	* src/guile.c: New file
+	* src/Makefile.am: Added guile.c
+	* src/auth.c [WITH_GUILE](auth_tunnel): Call read_rcfile_guile().
+	* src/extern.h [WITH_GUILE](struct options_struct): New members
+	  guile_logfile, guile_postprocess.
+	  (guile_position): New global.
+	* src/headers.h [WITH_GUILE]: Include libguile.h
+	  [WITH_GUILE] (read_rcfile_guile): New function.
+	  (read_action_block): Take an argument.
+	  (BEGIN_GUILE): New define
+	  (anubis,anubis_boot,guile_load_path,guile_load_program)
+	  (guile_rewrite_line): New functions.
+	* src/main.c [WITH_GUILE] (anubis_core): New
+	  function. Bootstrapper for guile support.
+	  (anubis_core): New define
+	  (anubis): New function. Runs main anubis loop.
+	  (main): Call anubis_core()
+	* src/main.h (guile_position): New global
+	* src/rc.c (read_action_block,match_action): Take additional
+	  argument: the source line (command or header) that triggered
+	  its invocation.
+	  [WITH_GUILE] (match_action): Handle guile-rewrite-line keyword
+	  [WITH_GUILE] (match_action_guile,read_rcfile_guile): New functions
+	* src/tunnel.c: Updated invocations of read_action_block()
+
+	* examples/anubisrc.guile: New file
+	* examples/anubis.scm: New file
+	* examples/rot-13.scm: 
+	* examples/Makefile.am: Added new files.
+	
 2003-01-30  Wojciech Polak
-
-	* m4/Makefile.am: Added gettext m4 macros to EXTRA_DIST.
-	* src/Makefile.am: Removed DEFAULT_INCLUDES.
-
-2003-01-30  Wojciech Polak
-
+ 
 	* Initial CVS import, starting GNU Anubis 3.6.3.
+ 
 
- EOF
+
+Local Variables:
+mode: change-log
+version-control: never
+End:
+
+EOF
+	  
 
