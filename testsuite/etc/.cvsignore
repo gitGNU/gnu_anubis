@@ -1,5 +1,12 @@
 Makefile
 Makefile.in
 *.rc
+*.rc.tmp
 *.log
 std.pat
+anubis.out
+anubis.pid
+anubis.trace
+anubis.log
+user.rc
+net.rc

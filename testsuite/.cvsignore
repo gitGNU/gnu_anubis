@@ -6,3 +6,4 @@ Makefile.in
 site.exp
 remote.exp
 mta
+findport

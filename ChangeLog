@@ -1,3 +1,54 @@
+2004-08-13  Sergey Poznyakoff
+
+	* src/anubisusr.c: New options --file and --netrc allow
+	to override default file names for users' .anubisrc and
+	.netrc files
+	(diff): Proceed with the update if the remote rcfile does
+	not exist.
+	(main): Bail out on unknown options
+	* src/authmode.c (asmtp_ehlo_reply): Save ehlo domain for
+	further use in tunnel.c
+	(anubis_authenticate_mode): Process rc file whenever it
+	is present in ANUBIS_USER.
+	* src/daemon.c (daemonize): Ignore SIGHUP before call to
+	daemon(). Write pid file.
+	* src/dbtext.c (dbtext_open): Minor fix
+	* src/env.c: New option --pid-file
+	(write_pid_file): New function
+	* src/headers.h: New declarations.
+	* src/tunnel.c (set_ehlo_domain): New function
+	* src/xdatabase.c (xexamine): Issue reply 300 if rc file
+	does not exist.
+
+	* testsuite/findport.c: New file
+	* testsuite/anubis.authmode: New directory
+	* testsuite/anubis.authmode/DISTFILE: New file
+	* testsuite/anubis.authmode/base.exp: New file
+	* testsuite/anubis.authmode/gpg.exp: New file
+	* testsuite/anubis.authmode/guile.exp: New file
+	* testsuite/anubis.authmode/mime.exp: New file
+	
+	* testsuite/Makefile.am: Added new files
+
+	* testsuite/anubis/abase.exp: New file. It should be
+	called before base.exp, hence its name.
+	* testsuite/anubis/base.exp: Moved std.pat to abase.exp
+	* testsuite/anubis/DISTFILES: Added new files
+
+	* testsuite/data/users: New file
+	* testsuite/data/Makefile.am: Added new files
+
+	* testsuite/etc/interface.in.in: New file
+	* testsuite/etc/target.in.in: New file
+	* testsuite/etc/net.rc: New file
+	* testsuite/etc/Makefile.am: Added new files
+
+	* testsuite/lib/anubis.exp: Added support for authmode testing.
+
+	* testsuite/.cvsignore: Updated
+	* testsuite/data/.cvsignore: Updated
+	* testsuite/etc/.cvsignore: Updated
+	
 2004-08-12  Sergey Poznyakoff
 
 	* src/dbtext.c: Changed format. Fields are separated by

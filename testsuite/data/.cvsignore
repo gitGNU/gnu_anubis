@@ -2,3 +2,4 @@ Makefile
 Makefile.in
 random_seed
 *.gpg
+text.db
