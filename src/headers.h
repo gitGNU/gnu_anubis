@@ -228,7 +228,7 @@
 #define T_LOCAL_MTA         0x00002000
 #define T_ALLOW_LOCAL_MTA   0x00004000
 #define T_TRANSLATION_MAP   0x00008000
-#define T_SUPERCLIENT       0x00010000
+#define T_DROP_UNKNOWN_USER 0x00010000
 #define T_USER_NOTPRIVIL    0x00020000
 #define T_STARTTLS          0x00040000
 #define T_ESMTP_AUTH        0x00080000
@@ -340,7 +340,7 @@ void message_add_body(MESSAGE *, char *, char *);
 void message_add_header(MESSAGE *, char *, char *);
 void message_remove_headers(MESSAGE *, RC_REGEX *);
 void message_modify_headers(MESSAGE *, RC_REGEX *, char *, char *);
-void message_modify_body(MESSAGE *msg, RC_REGEX *key, char *value);
+void message_modify_body(MESSAGE *, RC_REGEX *, char *);
 void message_external_proc(MESSAGE *, char **);
 void message_init(MESSAGE *);
 void message_free(MESSAGE *);
@@ -376,8 +376,8 @@ RC_REGEX *anubis_regex_compile(char *, int);
 void anubis_regex_free(RC_REGEX *);
 char *anubis_regex_source(RC_REGEX *);
 int anubis_regex_refcnt(RC_REGEX *);
-char *anubis_regex_replace(RC_REGEX *re, char *line, char *repl);
-void anubis_regex_print(RC_REGEX *re);
+char *anubis_regex_replace(RC_REGEX *, char *, char *);
+void anubis_regex_print(RC_REGEX *);
 
 /* rc.c */
 void rc_system_init(void);
