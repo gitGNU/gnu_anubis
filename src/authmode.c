@@ -349,6 +349,8 @@ asmtp_ehlo (enum asmtp_state state, ANUBIS_USER * usr)
       asmtp_reply(503, "TLS already started");
     else
       {
+	NET_STREAM stream;
+	
 	if (!secure.cert)
 	  secure.cert = allocbuf (DEFAULT_SSL_PEM, MAXPATHLEN);
 	if (!check_filename (secure.cert, NULL))
@@ -366,17 +368,17 @@ asmtp_ehlo (enum asmtp_state state, ANUBIS_USER * usr)
 	  }
 
 	asmtp_reply (220, "Ready to start TLS");
-	secure.server = start_ssl_server (remote_client,
-					  secure.cafile,
-					  secure.cert,
-					  secure.key,
-					  options.termlevel > NORMAL);
-	if (!secure.server)
+	stream = start_ssl_server (remote_client,
+				   secure.cafile,
+				   secure.cert,
+				   secure.key,
+				   options.termlevel > NORMAL);
+	if (!stream)
 	  {
 	    asmtp_reply (454, "TLS not available" CRLF);
 	    break;
 	  }
-	remote_client = secure.server;
+	remote_client = stream;
 	asmtp_capa_remove ("STARTTLS");
 	topt |= T_SSL_FINISHED;
     
@@ -679,17 +681,18 @@ anubis_authenticate_mode (NET_STREAM *psd_client,
   info (NORMAL, _("Connection closed successfully."));
 
 #ifdef HAVE_PAM
- {
-   int pam_retval = pam_close_session (pamh, 0);
-   if (pam_retval == PAM_SUCCESS)
-     info (VERBOSE, _("PAM: Session closed."));
-   if (pam_end (pamh, pam_retval) != PAM_SUCCESS)
-     {
-       pamh = NULL;
-       info (NORMAL, _("PAM: failed to release authenticator."));
-       return EXIT_FAILURE;
-     }
- }
+  if (pamh)
+    {
+      int pam_retval = pam_close_session (pamh, 0);
+      if (pam_retval == PAM_SUCCESS)
+	info (VERBOSE, _("PAM: Session closed."));
+      if (pam_end (pamh, pam_retval) != PAM_SUCCESS)
+	{
+	  pamh = NULL;
+	  info (NORMAL, _("PAM: failed to release authenticator."));
+	  return EXIT_FAILURE;
+	}
+    }
 #endif /* HAVE_PAM */
   return 0;
 }
