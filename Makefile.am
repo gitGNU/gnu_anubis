@@ -24,7 +24,7 @@
 
 AUTOMAKE_OPTIONS = 1.7.5 readme-alpha
 ACLOCAL_AMFLAGS = -I m4
-SUBDIRS = build m4 intl po doc scripts examples guile contrib src testsuite
+SUBDIRS = build m4 intl po doc scripts examples guile contrib src elisp testsuite
 
 ## EOF
 
