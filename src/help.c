@@ -32,6 +32,9 @@ static char *config_opts[] = {
 #ifdef HAVE_PCRE
 	"PCRE",
 #endif /* HAVE_PCRE */
+#ifdef WITH_GSASL
+	"GSASL",
+#endif /* WITH_GSASL */
 #ifdef WITH_GUILE
 	"GUILE",
 #endif /* WITH_GUILE */
