@@ -85,6 +85,7 @@ noinst_DATA = $(RCFILES) std.pat
 CLEANFILES = $(RCFILES) std.pat
 DISTCLEANFILES = *.log target.rc interface.rc anubis.pid anubis.trace *.tmp anubis.out user.rc
 
+$(RCFILES) std.pat: Makefile.am
 cond.rc: cond.in
 del.rc: del.in
 empty.rc: empty.in
