@@ -32,40 +32,8 @@
 static int  transfer_command(void *, void *, char *);
 static void process_command(void *, void *, char *, int);
 static void transfer_header(void *, void *, struct list *list);
-static void process_header_line(char *);
 static void transfer_body(void *, void *);
-static void add_remailer_commands(void *);
-static void transform_body(void *sd_server);
 static void process_data(void *sd_client, void *sd_server);
-
-
-/* Auxiliary list handling functions */ 
-/* These belong to the future list.c */
-typedef int (*list_iterator_t)(struct list *list, void *data);
-
-void
-list_iterate(struct list *p, list_iterator_t itr, void *data)
-{
-	while (p) {
-		struct list *q = p->next;
-		itr(p, data);
-		p = q;
-	};
-}
-
-void
-list_append(struct list **a, struct list *b)
-{
-	if (!*a)
-		*a = b;
-	else {
-		struct list *p;
-		
-		for (p = *a; p->next; p = p->next)
-			;
-		p->next = b;
-	}
-}
 
 
 /* Collect and send headers */
@@ -99,35 +67,59 @@ get_boundary(char *line)
 }
 
 static void
-collect_headers(void *sd_client, struct list **listp)
+add_header(struct list *list, char *line)
 {
-	struct list *tail;
-	char buf[LINEBUFFER+1];
+	ASSOC *asc = header_assoc(line);
+	list_append(list, asc);
+	if (asc->key && strcasecmp(asc->key, "subject") == 0) {
+		char *p = strstr(asc->value, BEGIN_TRIGGER);
 
-	*listp = tail = NULL;
-	while (recvline(SERVER, sd_client, buf, LINEBUFFER)) {
-		if (strncmp(buf, CRLF, 2) == 0)
-			break;
-		remcrlf(buf);
-		if (isspace(buf[0])) {
-			if (!tail) 
-				/* Something wrong, assume we've got no
-				   headers */
-				break;
-			tail->line = xrealloc(tail->line,
-					      strlen(tail->line) +
-					      strlen(buf) + 2);
-			strcat(tail->line, "\n");
-			strcat(tail->line, buf);
-		} else {
-			if (!(topt & (T_BOUNDARY|T_ENTIRE_BODY)) && tail)
-			    get_boundary(tail->line);
-			tail = new_element(tail, listp, buf);
+		if (p) {
+			asc = xmalloc(sizeof(*asc));
+			
+			*p = 0;
+			p += sizeof(BEGIN_TRIGGER) - 1;
+			asc->key = strdup(X_ANUBIS_RULE_HEADER);
+			asc->value = strdup(p);
+			list_append(list, asc);
 		}
 	}
 }
+
 static void
-write_header_line (void *sd_server, char *line)
+collect_headers(void *sd_client, struct list **listp)
+{
+	char buf[LINEBUFFER+1];
+	char *line = NULL;
+
+	*listp = list_create();
+	while (recvline(SERVER, sd_client, buf, LINEBUFFER)) {
+		remcrlf(buf);
+		if (isspace(buf[0])) {
+			if (!line) 
+				/* Something wrong, assume we've got no
+				   headers */
+				break;
+			line = xrealloc(line,
+					strlen(line) + strlen(buf) + 2);
+			strcat(line, "\n");
+			strcat(line, buf);
+		} else {
+			if (line) {
+				if (!(topt & (T_BOUNDARY|T_ENTIRE_BODY)))
+					get_boundary(line);
+				add_header(*listp, line);
+				line = NULL;
+			} 
+			if (buf[0] == 0)
+				break;
+			line = strdup(buf);
+		}
+	}
+}
+
+static void
+write_header_line(void *sd_server, char *line)
 {
 	char *p;
 
@@ -138,19 +130,34 @@ write_header_line (void *sd_server, char *line)
 	} while (p = strtok(NULL, "\n"));
 }
 			
-void
-send_header (void *sd_server, struct list **plist)
+static void
+write_assoc(void *sd_server, ASSOC *entry)
 {
-	struct list *p;
-	p = *plist;
-	while (p) {
-		struct list *q = p->next;
-		write_header_line(sd_server, p->line);
-		free(p->line);
-		free(p);
-		p = q;
+	if (entry->key) {
+		if (strcmp(entry->key, X_ANUBIS_RULE_HEADER) == 0)
+			return;
+		swrite(CLIENT, sd_server, entry->key);
+		swrite(CLIENT, sd_server, ":");
 	}
-	*plist = NULL;
+	write_header_line(sd_server, entry->value);
+}
+			
+void
+send_header(void *sd_server, struct list *list)
+{
+	ASSOC *p;
+
+	for (p = list_first(list); p; p = list_next(list)) 
+		write_assoc(sd_server, p);
+}
+
+void
+send_string_list(void *sd_server, struct list *list)
+{
+	char *p;
+
+	for (p = list_first(list); p; p = list_next(list)) 
+		write_header_line(sd_server, p);
 }
 
 
@@ -177,12 +184,13 @@ collect_body(void *sd_client, char **retptr)
 	char buf[LINEBUFFER+1];
 	struct obstack stk;
 	int state = 0;
-	struct list *tail = NULL;
 	int len;
 
-	if (topt & T_BOUNDARY) 
+	if (topt & T_BOUNDARY) {
 		len = strlen(message.boundary);
-	
+		message.mime_hdr = list_create();
+	}
+			
 	obstack_init (&stk);
 	while (state != ST_DONE
 	       && (nread = recvline(SERVER, sd_client, buf, LINEBUFFER))) {
@@ -202,9 +210,8 @@ collect_body(void *sd_client, char **retptr)
 				if (buf[0] == 0) 
 					state = ST_BODY;
 				else
-					tail = new_element(tail,
-							   &message.mime_hdr,
-							   buf);
+					list_append(message.mime_hdr,
+						    strdup(buf));
 				break;
 
 			case ST_BODY:
@@ -233,7 +240,7 @@ send_body(void *sd_server)
 	if (topt & T_BOUNDARY) {
 		swrite(CLIENT, sd_server, message.boundary);
 		swrite(CLIENT, sd_server, CRLF);
-		send_header(sd_server, &message.mime_hdr);
+		send_string_list(sd_server, message.mime_hdr);
 		swrite(CLIENT, sd_server, CRLF);
 	}
 
@@ -321,13 +328,34 @@ smtp_session(void *sd_client, void *sd_server)
 *********************/
 
 static void
+save_command(char *line)
+{
+	int i;
+	ASSOC *asc = xmalloc(sizeof(*asc));
+
+	for (i = 0; line[i] && isspace(line[i]); i++)
+		;
+
+	asc->key = xmalloc(i + 1);
+	memcpy(asc->key, line, i);
+	asc->key[i] = 0;
+	for (; line[i] && isspace(line[i]); i++)
+		;
+	if (line[i])
+		asc->value = strdup(&line[i]);
+	else
+		asc->value = NULL;
+	list_append(message.commands, asc);
+}
+
+static void
 process_command(void *sd_client, void *sd_server, char *command, int size)
 {
 	char buf[LINEBUFFER+1];
 	safe_strcpy(buf, command); /* make a back-up */
-	change_to_lower(buf);
+	save_command(buf);
 
-	rcfile_process_cond("RULE", COMMAND, command);
+	change_to_lower(buf);
 	
 	if (strncmp(buf, "starttls", 8) == 0) {
 
@@ -566,26 +594,20 @@ transfer_command(void *sd_client, void *sd_server, char *command)
 		if (strncmp(buf, "quit", 4) == 0)
 			return 0; /* The QUIT command */
 		else if (strncmp(buf, "rset", 4) == 0) {
+			destroy_assoc_list(&message.commands);
+			destroy_assoc_list(&message.header);
+			destroy_string_list(&message.mime_hdr);
 			xfree(message.body);
 			xfree(message.boundary);
-			destroy_list(&message.addlist);
-			destroy_list(&message.remlist);
-			destroy_list(&message.modlist);
-			mopt = 0;
 			topt &= ~T_BOUNDARY;
 			topt &= ~T_ERROR;
-			if (topt & T_SUPERCLIENT)
-				rcfile_process_section(CF_CLIENT, "ALL", NULL);
 		}
 		else if (strncmp(buf, "data", 4) == 0) {
 			process_data(sd_client, sd_server);
 			xfree(message.body);
 			xfree(message.boundary);
-			mopt = 0;
 			topt &= ~T_BOUNDARY;
 			topt &= ~T_ERROR;
-			if (topt & T_SUPERCLIENT)
-				rcfile_process_section(CF_CLIENT, "ALL", NULL);
 		}
 	}
 	return 1; /* OK */
@@ -594,16 +616,16 @@ transfer_command(void *sd_client, void *sd_server, char *command)
 void
 process_data(void *sd_client, void *sd_server)
 {
-	struct list *message_hdr;
 	char buf[LINEBUFFER+1];
 
 	alarm(1800);
 
-	collect_headers(sd_client, &message_hdr);
+	collect_headers(sd_client, &message.header);
 	collect_body(sd_client, &message.body);
 
-	transfer_header(sd_client, sd_server, message_hdr);
-	transform_body(sd_server);
+	rcfile_process_section(CF_CLIENT, "RULE", NULL, &message);
+	
+	transfer_header(sd_client, sd_server, message.header);
 	transfer_body(sd_client, sd_server);
 
 	recvline(CLIENT, sd_server, buf, LINEBUFFER);
@@ -614,167 +636,17 @@ process_data(void *sd_client, void *sd_server)
 	alarm(0);
 }
 	
-/*****************
-  MESSAGE HEADER
-******************/
-
-struct header_data {
-	void *sd_client;
-	void *sd_server;
-	struct list *header;
-};
-
-struct closure {
-	RC_REGEX *regex;
-	char *modify;
-	struct list *head, *tail;
-};
-
-int
-action_remove2(struct list *p, void *data)
-{
-	struct closure *clos = data;
-	int rc, stat;
-	char **rv = NULL;
-	
-	stat = anubis_regex_match(clos->regex, p->line, &rc, &rv);
-	free_pptr(rv);
-	if (stat) {
-		free(p->line);
-		free(p);
-	} else {
-		p->next = NULL;
-		if (clos->head == NULL)
-			clos->head = p;
-		if (clos->tail)
-			clos->tail->next = p;
-		clos->tail = p;
-	}
-	return 0;
-}
-
-int
-action_remove(struct list *p, void *data)
-{
-	struct header_data *hp = data;
-	struct closure clos;
-
-	clos.regex = anubis_regex_compile(p->line, 0);
-	clos.head = clos.tail = NULL;
-	list_iterate(hp->header, action_remove2, &clos);
-	hp->header = clos.head;
-	anubis_regex_free(clos.regex);
-	free(p->line);
-	free(p);
-	return 0;
-}
-
-int
-action_mod2(struct list *p, void *data)
-{
-	struct closure *clos = data;
-	int rc, stat;
-	char **rv = NULL;
-	
-	stat = anubis_regex_match(clos->regex, p->line, &rc, &rv);
-	if (stat) {
-		free(p->line);
-		p->line = substitute(clos->modify, rv);
-		if (!p->line)
-			p->line = strdup(clos->modify);
-		free_pptr(rv);
-	}
-	return 0;
-}
-
-int
-action_mod(struct list *p, void *data)
-{
-	struct header_data *hp = data;
-	struct closure clos;
-
-	clos.regex = anubis_regex_compile(p->line, 0);
-	clos.head = clos.tail = NULL;
-	clos.modify = p->modify;
-	list_iterate(hp->header, action_mod2, &clos);
-	anubis_regex_free(clos.regex);
-	free(p->line);
-	free(p);
-	return 0;
-}
-
-int
-action_free(struct list *p, void *data)
-{
-	free(p->line);
-	free(p);
-	return 0;
-}
-
 static void
 transfer_header(void *sd_client, void *sd_server, struct list *header_buf)
 {
-	struct list *p;
-	struct header_data hd;
-	
-	hd.sd_server = sd_server;
-	hd.sd_client = sd_client;
-	hd.header = header_buf;
-
-	for (p = hd.header; p; p = p->next) 
-		process_header_line(p->line);
-	
-#ifdef WITH_GUILE
-	guile_process_list(&header_buf, &message.body);
-#endif /* WITH_GUILE */
-	
-	list_iterate(message.remlist, action_remove, &hd);
-	message.remlist = NULL;
-
-	list_append(&hd.header, message.addlist);
-	message.addlist = NULL;
-	
-	list_iterate(message.modlist, action_mod, &hd);
-	message.modlist = NULL;
-	
-#ifdef WITH_GUILE
-	guile_postprocess_list(&hd.header, &message.body);
-#endif /* WITH_GUILE */
-
-	send_header(sd_server, &hd.header);
+	send_header(sd_server, header_buf);
 	swrite(CLIENT, sd_server, CRLF);
-	
-	list_iterate(hd.header, action_free, NULL);
 }
 
-static void
-process_header_line(char *header_line)
-{
-	char *p = 0;
-	char backup[LINEBUFFER+1];
-
-	/*
-	   The Trigger.
-	*/
-
-	p = strstr(header_line, BEGIN_TRIGGER);
-	if (p) {
-		safe_strcpy(backup, p);
-		*p = '\0';
-		p = backup;
-		p += sizeof(BEGIN_TRIGGER) - 1;
-	} else
-		p = header_line;
-
-	rcfile_process_cond("RULE", HEADER, p); 
-	return;
-}
 
 /***************
   MESSAGE BODY
 ****************/
-
-
 
 static void
 raw_transfer(void *sd_client, void *sd_server)
@@ -794,10 +666,6 @@ transfer_body(void *sd_client, void *sd_server)
 {
 	if (topt & T_BOUNDARY) {
 		send_body(sd_server);
-#ifdef HAVE_GPG
-		if ((mopt & M_GPG_ENCRYPT) || (mopt & M_GPG_SIGN))
-			swrite(CLIENT, sd_server, CRLF);
-#endif /* HAVE_GPG */
 		
 		/* Transfer everything else */
 		raw_transfer(sd_client, sd_server);
@@ -806,68 +674,69 @@ transfer_body(void *sd_client, void *sd_server)
 	swrite(CLIENT, sd_server, "."CRLF);
 }
 
-
-static void
-add_remailer_commands(void *sd_server)
+void
+message_add_header(MESSAGE *msg, char *hdr)
 {
-	char buf[1024];
-
-	if (!(mopt & M_RMGPG)) {
-		if (mopt & M_RMRRT) {
-			sprintf(buf, "::"CRLF"Anon-To: %s"CRLF, rm.rrt);
-			swrite(CLIENT, sd_server, buf);
-		}
-		else if (mopt & M_RMPOST) {
-			sprintf(buf, "::"CRLF"Anon-Post-To: %s"CRLF, rm.post);
-			swrite(CLIENT, sd_server, buf);
-		}
-		if ((mopt & M_RMLT) || (mopt & M_RMRLT)) {
-			sprintf(buf, "Latent-Time: +%s%s"CRLF,
-			rm.latent_time, (mopt & M_RMRLT) ? "r" : "");
-			swrite(CLIENT, sd_server, buf);
-		}
-		swrite(CLIENT, sd_server, CRLF);
-		if (mopt & M_RMHEADER) {
-			remcrlf(rm.header);
-			swrite(CLIENT, sd_server, "##"CRLF);
-			swrite(CLIENT, sd_server, rm.header);
-			swrite(CLIENT, sd_server, CRLF);
-		}
-	}
-#ifdef HAVE_GPG
-	else
-		swrite(CLIENT, sd_server, "::"CRLF"Encrypted: PGP"CRLF CRLF);
-#endif /* HAVE_GPG */
-
-	return;
+	list_append(msg->header, header_assoc(hdr));
 }
 
-static void
-transform_body(void *sd_server)
+void
+message_remove_headers(MESSAGE *msg, char *arg)
 {
-	check_all_files(session.client);
-	if (!(topt & T_ERROR) && (mopt & M_EXTBODYPROC)) {
-		int rs = 0;
-		char *extbuf = 0;
-		extbuf = external_program(&rs, message.exteditor, message.body, 0, 0);
-		if (rs != -1 && extbuf) {
-			xfree(message.body);
-			message.body = extbuf;
+	ASSOC *asc;
+	RC_REGEX *regex = anubis_regex_compile(arg, 0);
+	
+	for (asc = list_first(msg->header); asc;
+	     asc = list_next(msg->header)) {
+		char **rv;
+		int rc;
+		char *h = assoc_to_header(asc);
+		
+		if (anubis_regex_match(regex, h, &rc, &rv)) {
+			list_remove_current(msg->header);
+			assoc_free(asc);
 		}
+		free(h);
+		if (rc)
+			free_pptr(rv);
 	}
+	anubis_regex_free(regex);
+}
 
-#ifdef HAVE_GPG
-	if (!(topt & T_ERROR) && ((mopt & M_GPG_ENCRYPT)
-				  || (mopt & M_GPG_SIGN) || (mopt & M_RMGPG)))
-		check_gpg();
-#endif /* HAVE_GPG */
-
-	if (!(topt & T_ERROR)) {
-		if (mopt & M_RM)
-			add_remailer_commands(sd_server);
+void
+message_modify_headers(MESSAGE *msg, char *arg, char *modify)
+{
+	ASSOC *asc;
+	RC_REGEX *regex = anubis_regex_compile(arg, 0);
+	
+	for (asc = list_first(msg->header); asc;
+	     asc = list_next(msg->header)) {
+		char **rv;
+		int rc;
+		char *h = assoc_to_header(asc);
+		
+		if (anubis_regex_match(regex, h, &rc, &rv)) {
+			free(asc->value);
+			asc->value = substitute(modify, rv);
+			if (!asc->value)
+				asc->value = strdup(modify);
+		}
+		free(h);
+		free_pptr(rv);
 	}
-	topt &= ~T_ERROR;
-	return;
+	anubis_regex_free(regex);
+}
+
+void
+message_external_proc(MESSAGE *msg, char *name)
+{
+	int rc = 0;
+	char *extbuf = 0;
+	extbuf = external_program(&rc, name, message.body, 0, 0);
+	if (rc != -1 && extbuf) {
+		xfree(message.body);
+		message.body = extbuf;
+	}
 }
 
 /* EOF */
