@@ -35,6 +35,9 @@ static char *config_opts[] = {
 #ifdef WITH_GSASL
 	"GSASL",
 #endif /* WITH_GSASL */
+#ifdef WITH_MYSQL
+	"MYSQL",
+#endif /* WITH_MYSQL */
 #ifdef WITH_GUILE
 	"GUILE",
 #endif /* WITH_GUILE */
