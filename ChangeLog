@@ -1,5 +1,11 @@
 2003-08-21  Wojciech Polak
 
+	* src/log.c (info): Removed `slogfile'.
+	* src/errs.c (anubis_error): Likewise.
+	* src/quit.c (free_mem): Likewise.
+	* src/rc.c: Moved `logfile' to client_kw.
+	* src/extern.h (options_struct): Removed `slogfile'.
+
 	* src/errs.c (anubis_error, socks_error): Changed prototype.
 	* src/headers.h: Likewise.
 
