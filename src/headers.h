@@ -236,6 +236,7 @@
 #define T_CHECK_CONFIG      0x00400000
 #define T_RELAX_PERM_CHECK  0x00800000
 #define T_ENTIRE_BODY       0x01000000
+#define T_SMTP_ERROR_CODES  0x02000000
 
 /* Regexp modifiers */
 /* Basic types */
