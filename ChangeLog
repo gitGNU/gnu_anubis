@@ -1,3 +1,35 @@
+2004-03-06  Sergey Poznyakoff
+
+	* configure.ac (ANUBISADM): Use Makefile variable dereference
+	* src/Makefile.am: Added anubisusr.c Moved some tls.c and
+	gsasl.c to libanubisdb.a (the name seems to be a misnomer
+	now). Split gsasl.c to gsasl.c (library part) and gsasl_srv.c
+	(server part)
+	* src/.cvsignore: Updated
+	
+	* src/anubisusr.c: New file. Synchronize local and remote copies
+	of the user's RC file, using XDATABASE protocol.
+	* src/authmode.c: Implemented TLS
+
+	* src/stream.c: New file. General-purpose streams
+	* src/net.c: Rewritten using streams.
+	* src/daemon.c: Likewise
+	* src/esmtp.c: Likewise
+	* src/exec.c: Likewise
+	* src/extern.h: Likewise
+	* src/headers.h: Likewise
+	* src/main.c: Likewise
+	* src/quit.c: Likewise
+	* src/tls.c: Likewise
+	* src/transmode.c: Likewise
+	* src/tunnel.c: Likewise
+	
+	* src/gsasl.c: Split off server-specific functions to a separate
+	module
+	* src/gsasl_srv.c: New file
+	
+	* TODO: Updated
+
 2004-02-22  Sergey Poznyakoff
 
 	* src/log.c: Bugfixes

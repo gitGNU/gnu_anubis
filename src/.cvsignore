@@ -4,6 +4,7 @@ Makefile
 .libs
 anubis
 anubisadm
+anubisusr
 libanubisdb.a
 y.output
 rcfile-lex.c
