@@ -40,6 +40,8 @@ static void rc_section_print(RC_SECTION *sect);
 static void rc_asgn_destroy(RC_ASGN *asgn);
  
 static void rc_bool_destroy(RC_BOOL *bool);
+
+static void rc_level_print(int level, char *str);
  
 static RC_NODE *rc_node_create(enum rc_node_type t);
 static void rc_node_destroy(RC_NODE *node);
@@ -71,22 +73,29 @@ static int debug_level;
 	RC_NODE *node;
 	RC_REGEX *regex;
 	int num;
+	struct {
+		int part;
+		char *key;
+	} msgpart;
 };
 
-%token EOL T_BEGIN T_END AND OR EQ NE
+%token EOL T_BEGIN T_END AND OR 
 %token T_HEADER T_COMMAND T_BODY IF FI ELSE RULE DONE
+%token CALL STOP ADD REMOVE MODIFY
 %token <string> IDENT STRING REGEX D_BEGIN
+%token <num> T_MSGPART
 
 %left OR
 %left AND
 %left NOT
 
-%type <string> begin keyword string option
+%type <string> begin keyword string option opt_key
 %type <section> section seclist
 %type <stmtlist> stmtlist
-%type <stmt> stmt asgn_stmt cond_stmt rule_stmt 
-%type <num> part optlist
+%type <stmt> stmt asgn_stmt cond_stmt rule_stmt inst_stmt
+%type <num> optlist
 %type <node> rule_start cond expr
+%type <msgpart> msgpart 
 
 %%
 
@@ -158,21 +167,16 @@ stmt     : /* empty */ EOL
          | asgn_stmt EOL
          | cond_stmt EOL
          | rule_stmt EOL
+	 | inst_stmt EOL
          ;
 
-asgn_stmt: keyword EQ { verbatim(); } STRING
+asgn_stmt: keyword '=' { verbatim(); } STRING
            {
 		   $$ = rc_stmt_create(rc_stmt_asgn);
 		   $$->v.asgn.lhs = $1;
 		   $$->v.asgn.rhs = $4;
 	   }
-         | keyword REGEX /* Compatibility syntax */
-           {
-		   $$ = rc_stmt_create(rc_stmt_asgn);
-		   $$->v.asgn.lhs = $1;
-		   $$->v.asgn.rhs = $2;
-	   }
-          ;
+         ;
 
 keyword  : IDENT
          ;
@@ -221,36 +225,38 @@ cond     : expr
 	   }
          ;
 
-expr     : part '[' string ']' optlist string
+meq      : /* empty */
+         | '='
+         ;
+
+opt_key  : /* empty */
            {
-		   $$ = rc_node_create(rc_node_expr);
-		   $$->v.expr.part = $1;
-		   $$->v.expr.key = $3;
-		   $$->v.expr.re = anubis_regex_compile($6, $5);
+		   $$ = NULL;
 	   }
-         | part optlist string
+         | '[' string ']'
            {
-		   $$ = rc_node_create(rc_node_expr);
-		   $$->v.expr.part = $1;
-		   $$->v.expr.key = NULL;
-		   $$->v.expr.re = anubis_regex_compile($3, $2);
-	   }
-         | T_BODY optlist string
-           {
-		   $$ = rc_node_create(rc_node_expr);
-		   $$->v.expr.part = BODY;
-		   $$->v.expr.key = NULL;
-		   $$->v.expr.re = anubis_regex_compile($3, $2);
+		   $$ = $2;
 	   }
          ;
 
-part     : T_HEADER
+msgpart  : T_MSGPART opt_key
            {
-		   $$ = HEADER;
+		   $$.part = $1;
+		   $$.key = $2;
 	   }
-         | T_COMMAND
+         | '[' string ']'
            {
-		   $$ = COMMAND;
+		   $$.part = HEADER;
+		   $$.key = $2;
+	   }
+         ;
+
+expr     : msgpart meq optlist string
+           {
+		   $$ = rc_node_create(rc_node_expr);
+		   $$->v.expr.part = $1.part;
+		   $$->v.expr.key = $1.key;
+		   $$->v.expr.re = anubis_regex_compile($4, $3);
 	   }
          ;
 
@@ -311,6 +317,35 @@ rule_start: RULE optlist string
 
 string   : STRING
          | IDENT
+         ;
+
+inst_stmt: ADD msgpart string
+           {
+		   $$ = rc_stmt_create(rc_stmt_inst);
+		   $$->v.inst.opcode = inst_add;
+		   $$->v.inst.part = $2.part;
+		   $$->v.inst.key  = $2.key;
+		   $$->v.inst.key2 = NULL;
+		   $$->v.inst.arg  = $3;
+	   }
+         | REMOVE msgpart
+           {
+		   $$ = rc_stmt_create(rc_stmt_inst);
+		   $$->v.inst.opcode = inst_remove;
+		   $$->v.inst.part = $2.part;
+		   $$->v.inst.key  = $2.key;
+		   $$->v.inst.key2 = NULL;
+		   $$->v.inst.arg  = NULL;
+	   }
+         | MODIFY msgpart opt_key string
+           {
+		   $$ = rc_stmt_create(rc_stmt_inst);
+		   $$->v.inst.opcode = inst_modify;
+		   $$->v.inst.part = $2.part;
+		   $$->v.inst.key  = $2.key;
+		   $$->v.inst.key2 = $3;
+		   $$->v.inst.arg  = $4;
+	   }
          ;
 
 %%
@@ -531,6 +566,42 @@ rc_cond_destroy(RC_COND *cond)
 	rc_stmt_list_destroy(cond->iffalse);
 }
 
+/* Instructions */
+
+void
+rc_inst_destroy(RC_INST *inst)
+{
+	free(inst->key);
+	free(inst->key2);
+	free(inst->arg);
+}
+
+static char *
+inst_name(enum rc_inst_opcode opcode)
+{
+	switch (opcode) {
+	case inst_add:
+		return "ADD";
+	case inst_remove:
+		return "REMOVE";
+	case inst_modify:
+		return "MODIFY";
+	}
+	return "UNKNOWN";
+}
+
+void
+rc_inst_print(RC_INST *inst, int level)
+{
+	rc_level_print(level, inst_name(inst->opcode));
+	printf(" %s[%s]", part_string(inst->part),
+	       inst->key ? inst->key : "");
+	if (inst->key2)
+		printf(" [%s]", inst->key2);
+	if (inst->arg)
+		printf(" \"%s\"", inst->arg);
+}
+
 /* Statements */
 RC_STMT *
 rc_stmt_create(enum rc_stmt_type type)
@@ -555,6 +626,10 @@ rc_stmt_destroy(RC_STMT *stmt)
 		
 	case rc_stmt_cond:
 		rc_cond_destroy(&stmt->v.cond);
+		break;
+
+	case rc_stmt_inst:
+		rc_inst_destroy(&stmt->v.inst);
 	}
 	xfree(stmt);
 }
@@ -610,6 +685,10 @@ rc_stmt_print(RC_STMT *stmt, int level)
 			rc_level_print(level, "BODY\n");
 			rc_stmt_print(stmt->v.rule.stmt, level+1);
 			rc_level_print(level, "END RULE");
+			break;
+
+		case rc_stmt_inst:
+			rc_inst_print(&stmt->v.inst, level);
 			break;
 			
 		default:
@@ -694,7 +773,47 @@ static int bool_eval(struct eval_env *env, RC_BOOL *bool);
 static void cond_eval(struct eval_env *env, RC_COND *cond);
 static void rule_eval(struct eval_env *env, RC_RULE *rule);
 static void stmt_list_eval(struct eval_env *env, RC_STMT *stmt);
+static void inst_eval(struct eval_env *env, RC_INST *inst);
 
+void
+inst_eval(struct eval_env *env, RC_INST *inst)
+{
+	char *arg, *argp = NULL;
+
+	if (!env->msg)
+		return; /* FIXME: bail out? */
+	
+	if (inst->arg) {
+		if (env->refstr)
+			arg = argp = substitute(inst->arg, env->refstr);
+		else
+			arg = inst->arg;
+	}
+	
+	switch (inst->opcode) {
+	case inst_add:
+		if (inst->part == BODY)
+			message_add_body(env->msg, inst->key, arg);
+		else
+			message_add_header(env->msg, inst->key, arg);
+		break;
+		
+	case inst_modify:
+		message_modify_headers(env->msg, inst->key, inst->key2, arg);
+		break;
+		
+	case inst_remove:
+		message_remove_headers(env->msg, inst->key);
+		break;
+		
+	default:
+		abort();
+	}
+
+	if (argp)
+		free(argp);
+}
+	
 void
 asgn_eval(struct eval_env *env, RC_ASGN *asgn)
 {
@@ -837,6 +956,10 @@ stmt_list_eval(struct eval_env *env, RC_STMT *stmt)
 
 		case rc_stmt_rule:
 			rule_eval(env, &stmt->v.rule);
+			break;
+
+		case rc_stmt_inst:
+			inst_eval(env, &stmt->v.inst);
 		}
 }
 
