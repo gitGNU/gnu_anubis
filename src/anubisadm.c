@@ -42,7 +42,7 @@ static struct option option[] =
 	{"authid",      required_argument, 0, 'i'},
 	{"user",        required_argument, 0, 'u'},
 	{"rcfile",      required_argument, 0, 'f'},
-	{"password",    required_argument, 0, 'p'},
+	{"password",    optional_argument, 0, 'p'},
 
 	{"version",     no_argument,       0, OPT_VERSION},
 	{"help",        no_argument,       0, OPT_HELP},
@@ -89,11 +89,11 @@ opendb (void **dptr, int argc, char **argv, enum anubis_db_mode mode)
 	char *err;
 
 	if (argc == 0) {
-		error(_("Database URL is not specified"));
+		error(_("database URL is not specified"));
 		return 1;
 	}
 	if (argc > 1) {
-		error(_("Too many arguments"));
+		error(_("too many arguments"));
 		return 1;
 	}
 
@@ -139,7 +139,7 @@ op_create (int argc, char **argv)
 
 		p = strtok(NULL, delim);
 		if (!p) {
-			error("%lu: incomplete line", (unsigned long) line);
+			error(_("%lu: incomplete line"), (unsigned long) line);
 			free(rec.smtp_authid);
 			continue;
 		}
@@ -258,8 +258,9 @@ op_add_or_modify (char *database, int code, char *errmsg)
 		error(_("authid not specified"));
 		return 1;
 	}
+	if (!password)
+		password = getpass (_("Password:"));
 	if (!password) {
-/* fixme: call getpass() like function */
 		error(_("password not specified"));
 		return 1;
 	}
@@ -323,7 +324,7 @@ op_remove (int argc, char **argv)
 
 	switch (anubis_db_delete_record(db, authid)) {
 	case ANUBIS_DB_NOT_FOUND:
-		error(_("Record not found."));
+		error(_("record not found"));
 		rc = 1;
 		break;
 
