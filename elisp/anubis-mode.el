@@ -130,6 +130,7 @@
               "drop-unknown-user"
               "loglevel"
               "logfile"
+	      "tracefile"
               "remote-mta"
               "local-mta"
               "esmtp-auth"
@@ -150,6 +151,8 @@
               "gpg-passphrase"
               "gpg-encrypt"
               "gpg-sign"
+	      "gpg-sign-encrypt"
+	      "gpg-se"
               "gpg-home"
               "guile-output"
               "guile-debug"
@@ -199,7 +202,8 @@
                  (loglevel       none
 				 fails
 				 all)
-                 logfile             
+                 logfile
+		 tracefile
                  remote-mta           
                  local-mta           
                  esmtp-auth          
@@ -246,6 +250,9 @@
 		 body-clear-append
 		 gpg-passphrase
 		 gpg-encrypt
+		 gpg-sign
+		 gpg-sign-encrypt
+		 gpg-se
 		 external-body-processor
 		 guile-process)))
 
@@ -265,6 +272,7 @@
     ("termlevel"                "Output Settings")
     ("logfile"                  "Output Settings")
     ("loglevel"                 "Output Settings")
+    ("tracefile"                "Output Settings")
 			        
     ("socks-proxy"              "Proxy Settings")
     ("socks-v4"                 "Proxy Settings")
@@ -294,6 +302,8 @@
     ("gpg-passphrase"           "Mail Encryption")
     ("gpg-encrypt"              "Mail Encryption")
     ("gpg-sign"                 "Mail Encryption")
+    ("gpg-sign-encrypt"         "Mail Encryption")
+    ("gpg-se"                   "Mail Encryption")
     ("external-body-processor"  "External Processor")
     ("guile-process"            "Invoking Guile Actions")
     ("guile-output"             "GUILE Section") 
