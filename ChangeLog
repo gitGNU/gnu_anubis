@@ -32,6 +32,7 @@
 	version of the script.
 	* doc/index.html.in: Removed.
 	* doc/gendocs_template: New file.
+	* doc/fdl.texi: Fixed sectioning.
 	
 2005-01-20  Sergey Poznyakoff
 
