@@ -141,9 +141,18 @@ struct rc_secdef_child {
 	void *data;
 };
 
+/* Section priorities affect linking the user-defined sections to
+   the parse tree left from parsing the system configuration file. */
+enum section_prio {
+	prio_override,  /* Only user-defined section is taken into account */
+	prio_system,    /* System-defined section first, user-defined next */
+	prio_user       /* User-defined section first, system-defined next */
+};
+
 struct rc_secdef {
-	char *name;
-	int allow_prog;
+	char *name;                   /* Section name */
+	enum section_prio prio;       /* Execution priority */ 
+	int allow_prog;               /* Are rules allowed in this section? */
 	struct rc_secdef_child *child;
 };
 	
