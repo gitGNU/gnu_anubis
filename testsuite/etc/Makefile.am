@@ -35,12 +35,14 @@ EXTRA_DIST = \
  mime1.pat\
  mime2.pat\
  mult.pat\
+ remail.pat\
  std.pat\
  add.in\
  del.in\
  empty.in\
  entire.in\
  gpg.in\
+ remail.in\
  std.in\
  simple.in
 
@@ -50,6 +52,7 @@ RCFILES = \
  empty.rc\
  entire.rc\
  gpg.rc\
+ remail.rc\
  simple.rc\
  std.rc
 
