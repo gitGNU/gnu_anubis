@@ -290,7 +290,7 @@ make_lowercase (char *s)
 {
   unsigned char *p;
   if (!s)
-    return;
+    return NULL;
   for (p = (unsigned char*) s; *p; p++)
     *p = tolower (*p);
   return s;
@@ -301,7 +301,7 @@ make_uppercase (char *s)
 {
   unsigned char *p;
   if (!s)
-    return;
+    return NULL;
   for (p = (unsigned char*) s; *p; p++)
     *p = toupper (*p);
   return s;
