@@ -31,6 +31,7 @@ typedef struct rc_asgn RC_ASGN;
 typedef struct rc_node RC_NODE;
 typedef struct rc_bool RC_BOOL;
 typedef struct rc_expr RC_EXPR;
+typedef struct rc_inst RC_INST;
 
 struct rc_section {          /* RC Section */
 	RC_SECTION *next;    /* Link to the next section */
@@ -41,7 +42,8 @@ struct rc_section {          /* RC Section */
 enum rc_stmt_type {          /* Statement type: */
 	rc_stmt_asgn,        /* Assignment */
 	rc_stmt_rule,        /* Rule definition */
-	rc_stmt_cond         /* Conditional expression */
+	rc_stmt_cond,        /* Conditional expression */
+	rc_stmt_inst         /* Instruction */
 };
 
 struct rc_asgn {             /* Assignment */
@@ -91,6 +93,20 @@ struct rc_rule {             /* Rule definition */
 	RC_STMT *stmt;       /* Body of the rule */
 };
 
+enum rc_inst_opcode {        /* Operation code */
+	inst_add,
+	inst_remove,
+	inst_modify
+};
+
+struct rc_inst {             /* Instruction definition */
+	enum rc_inst_opcode opcode;
+	int part;            /* Message part to operate upon */ 
+	char *key;           /* Key */
+	char *key2;          /* New key value (for modify) */
+	char *arg;           /* Argument */
+};
+
 struct rc_stmt {             /* General statement representation */
 	RC_STMT *next;       /* Link to the next statement */
 	enum rc_stmt_type type;   /* Statement type */
@@ -98,6 +114,7 @@ struct rc_stmt {             /* General statement representation */
 		RC_ASGN asgn;     /* type == rc_stmt_asgn */
 		RC_RULE rule;     /* type == rc_stmt_rule */
 		RC_COND cond;     /* type == rc_stmt_cond */
+		RC_INST inst;     /* type == rc_stmt_inst */
 	} v;
 };
 
