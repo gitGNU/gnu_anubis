@@ -1,3 +1,22 @@
+2003-06-29  Sergey Poznyakoff 
+
+	* src/headers.h: Altered regexp modifiers.
+	(re_set_type,re_typeof,re_set_flag,re_clear_flag): New macros
+	(message_remove_headers,message_modify_headers): Changed
+	declarations.
+	* src/message.c (message_remove_headers)
+	(message_modify_headers): Changed declarations.
+	* src/rcfile.h (struct rc_inst.type): Changed type
+	* src/rcfile.l: New keyword "regex"
+	* src/rcfile.y: Lots of changes to allow for more
+	flexible handling of regular expressions. Improved
+	diagnostics.
+	* src/regex.c: New pattern matching type R_EXACT.
+
+	* testsuite/etc/del.in: Use new syntax.
+	* testsuite/etc/mod-body.in: Likewise.
+	* testsuite/etc/mod-header.in: Likewise.
+
 2003-06-27  Sergey Poznyakoff
 
 	* src/headers.h (message_modify_body): Added prototype.
