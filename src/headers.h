@@ -273,13 +273,13 @@ void *xmalloc(int);
 void *xrealloc(void *, int);
 char *allocbuf(char *, int);
 #ifndef HAVE_STRDUP
- char *strdup(const char *);
+char *strdup(const char *);
 #endif /* not HAVE_STRDUP */
 void free_pptr(char **);
 
 /* setenv.c */
 #if !defined(HAVE_SETENV) && defined(HAVE_PUTENV)
- int setenv(const char *, const char *, int);
+int setenv(const char *, const char *, int);
 #endif
 
 /* env.c */
@@ -299,8 +299,8 @@ void socks_error(char *);
 void hostname_error(char *);
 
 /* log.c */
-void mprintf(char *, ...);
-void info(int, char *, ...);
+void mprintf(const char *, ...);
+void info(int, const char *, ...);
 void filelog(char *, char *);
 
 /* net.c */
@@ -404,8 +404,8 @@ void *start_ssl_server(int);
 
 /* gpg.c */
 #ifdef HAVE_GPG
- void gpg_free(void);
- void gpg_section_init(void);
+void gpg_free(void);
+void gpg_section_init(void);
 #endif /* HAVE_GPG */
 
 /* guile.c */
