@@ -311,6 +311,7 @@ asmtp_init (enum asmtp_state state)
     break;
     
   case KW_QUIT:
+    asmtp_reply (221, "Closing connection");
     state = state_quit;
     break;
     
@@ -370,7 +371,7 @@ asmtp_ehlo (enum asmtp_state state, ANUBIS_USER * usr)
 					  secure.cert,
 					  secure.key,
 					  options.termlevel > NORMAL);
-	if (!secure.server || (topt & T_ERROR))
+	if (!secure.server)
 	  {
 	    asmtp_reply (454, "TLS not available" CRLF);
 	    break;
@@ -392,6 +393,7 @@ asmtp_ehlo (enum asmtp_state state, ANUBIS_USER * usr)
     break;
     
   case KW_QUIT:
+    asmtp_reply (221, "Closing connection");
     state = state_quit;
     break;
     
@@ -422,9 +424,6 @@ anubis_smtp (ANUBIS_USER * usr)
 
   for (state = state_init; state != state_auth;)
     {
-      if (topt & T_ERROR)
-	return EXIT_FAILURE;
-      
       switch (state) {
       case state_init:
 	state = asmtp_init (state);
@@ -470,15 +469,13 @@ xdb_loop (void)
   asmtp_capa_add ("XDATABASE");
   while (recvline_ptr (SERVER, remote_client, &command, &s) > 0)
     {
-      if (topt & T_ERROR)
-	break;
-
       switch (asmtp_kw (get_command_word (command))) {
       case KW_HELP:
 	asmtp_help ();
 	break;
     
       case KW_QUIT:
+	asmtp_reply (221, "Closing connection");
 	info (VERBOSE, _("Exiting XDB loop..."));
 	return;
 
@@ -524,14 +521,14 @@ anubis_get_db_record (const char *username, ANUBIS_USER * usr)
 
   if (!anubis_dbarg)
     {
-      anubis_error (HARD, _("Database not specified"));
+      anubis_error (0, 0, _("Database not specified"));
       return ANUBIS_DB_FAIL;
     }
 
   if (anubis_db_open (anubis_dbarg, anubis_db_rdonly,
 		      &db, &errtext) != ANUBIS_DB_SUCCESS)
     {
-      anubis_error (HARD,
+      anubis_error (0, 0,
 		    _("Cannot open database %s: %s"), anubis_dbarg, errtext);
       return ANUBIS_DB_FAIL;
     }
@@ -543,7 +540,7 @@ anubis_get_db_record (const char *username, ANUBIS_USER * usr)
     break;
     
   case ANUBIS_DB_FAIL:
-    anubis_error (SOFT,
+    anubis_error (0, 0,
 		  _("Cannot retrieve data from the SASL database: %s"),
 		  anubis_db_strerror (db));
     break;
@@ -601,9 +598,9 @@ anubis_authenticate_mode (NET_STREAM *psd_client,
     {
       if (!(topt & T_LOCAL_MTA) && strlen (session.mta) == 0)
 	{
-	  anubis_error (HARD, _("MTA has not been specified. "
-				"Set either REMOTE-MTA or LOCAL-MTA."));
-	  return EXIT_FAILURE;
+	  anubis_error (EXIT_FAILURE, 0,
+                        _("MTA has not been specified. "
+		  	  "Set either REMOTE-MTA or LOCAL-MTA."));
 	}
 
       /*
@@ -632,11 +629,9 @@ anubis_authenticate_mode (NET_STREAM *psd_client,
 		{
 		  if (hp->h_length != 4 && hp->h_length != 8)
 		    {
-		      anubis_error (HARD,
-				    _
-				    ("Illegal address length received for host %s"),
+		      anubis_error (EXIT_FAILURE, 0,
+			 _("Illegal address length received for host %s"),
 				    session.mta);
-		      return EXIT_FAILURE;
 		    }
 		  else
 		    {
@@ -648,8 +643,8 @@ anubis_authenticate_mode (NET_STREAM *psd_client,
 	  if (ntohl (ad.sin_addr.s_addr) == INADDR_LOOPBACK
 	      && session.anubis_port == session.mta_port)
 	    {
-	      anubis_error (SOFT, _("Loop not allowed. Connection rejected."));
-	      return EXIT_FAILURE;
+	      anubis_error (EXIT_FAILURE, 0, 
+                             _("Loop not allowed. Connection rejected."));
 	    }
 	}
       
@@ -671,24 +666,17 @@ anubis_authenticate_mode (NET_STREAM *psd_client,
 	  if (!remote_server)
 	    service_unavailable (&remote_client);
 	}
-      alarm (0);
 
-      if (!(topt & T_ERROR))
-	{
-	  alarm (900);
-	  smtp_session ();
-	  alarm (0);
-	}
+      alarm (900);
+      smtp_session ();
+      alarm (0);
     }
   
   net_close_stream (&remote_client);
   net_close_stream (&remote_server);
   *psd_client = NULL;
   
-  if (topt & T_ERROR)
-    info (NORMAL, _("Connection terminated."));
-  else
-    info (NORMAL, _("Connection closed successfully."));
+  info (NORMAL, _("Connection closed successfully."));
 
 #ifdef HAVE_PAM
  {
