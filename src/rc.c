@@ -81,14 +81,19 @@ anubis_find_section(char *name)
 }
 
 void
+anubis_section_set_prio(char *name, enum section_prio prio)
+{
+	struct rc_secdef *p = anubis_find_section(name);
+	if (p)
+		p->prio = prio;
+}
+
+void
 open_rcfile(int method)
 {
 	char homedir[MAXPATHLEN+1];
 	char *rcfile = 0;
 	RC_SECTION *sec;
-
-	rc_section_list_destroy(parse_tree);
-	parse_tree = NULL;
 	
 	switch (method) {
 	case CF_SUPERVISOR:
@@ -168,6 +173,7 @@ process_rcfile(int method)
 #define KW_SOCKS_AUTH         11
 #define KW_READ_ENTIRE_BODY   12
 #define KW_DROP_UNKNOWN_USER  13
+#define KW_RULE_PRIORITY      14
 
 char **
 list_to_argv(LIST *list)
@@ -197,6 +203,17 @@ control_parser(int method, int key, LIST *arglist,
 		parse_mtahost(arg, session.tunnel, &session.tunnel_port);
 		if (strlen(session.tunnel) != 0)
 			topt |= T_NAMES;
+		break;
+
+	case KW_RULE_PRIORITY:
+		if (strcasecmp(arg, "user") == 0)
+			anubis_section_set_prio("RULE", prio_user);
+		else if (strcasecmp(arg, "system") == 0)
+			anubis_section_set_prio("RULE", prio_system);
+		else if (strcasecmp(arg, "override") == 0)
+			anubis_section_set_prio("RULE", prio_override);
+		else
+			return RC_KW_ERROR;
 		break;
 		
 	case KW_TERMLEVEL:           
@@ -301,6 +318,7 @@ control_parser(int method, int key, LIST *arglist,
 
 static struct rc_kwdef init_kw[] = {
 	{ "bind", KW_BIND },
+	{ "rule-priority", KW_RULE_PRIORITY },
 	{ NULL },
 };
 
@@ -507,6 +525,7 @@ rule_section_init(void)
 {
 	struct rc_secdef *sp = anubis_add_section("RULE");
 	sp->allow_prog = 1;
+	sp->prio = prio_system;
 	rc_secdef_add_child(sp, &rule_sect_child);
 }
 
@@ -524,13 +543,15 @@ rc_system_init(void)
 #endif /* HAVE_GPG */
 }
 
-/* Placeholders */
-
 void
 rcfile_process_section(int method, char *name, void *data, MESSAGE *msg)
 {
-	RC_SECTION *sec = rc_section_lookup(parse_tree, name);
-	rc_run_section(method, sec, anubis_rc_sections, data, msg);
+	RC_SECTION *sec;
+
+	for (sec = rc_section_lookup(parse_tree, name);
+	     sec;
+	     sec = rc_section_lookup(sec->next, name))
+		rc_run_section(method, sec, anubis_rc_sections, data, msg);
 }
 
 void
@@ -538,8 +559,7 @@ rcfile_call_section(int method, char *name, void *data, MESSAGE *msg)
 {
 	RC_SECTION *sec = rc_section_lookup(parse_tree, name);
 	if (!sec)
-		anubis_error(SOFT,
-			     _("No such section: %s"), name);
+		anubis_error(SOFT, _("No such section: %s"), name);
 	rc_call_section(method, sec, anubis_rc_sections, data, msg);
 }
 
