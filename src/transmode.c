@@ -160,15 +160,17 @@ anubis_transparent_mode (NET_STREAM * psd_client, struct sockaddr_in *addr)
     info (NORMAL, _("Connection closed successfully."));
 
 #ifdef HAVE_PAM
-  pam_retval = pam_close_session (pamh, 0);
-  if (pam_retval == PAM_SUCCESS)
-    info (VERBOSE, _("PAM: Session closed."));
-  if (pam_end (pamh, pam_retval) != PAM_SUCCESS)
-    {
-      pamh = NULL;
-      info (NORMAL, _("PAM: failed to release authenticator."));
-      return EXIT_FAILURE;
-    }
+ {
+   int pam_retval = pam_close_session (pamh, 0);
+   if (pam_retval == PAM_SUCCESS)
+     info (VERBOSE, _("PAM: Session closed."));
+   if (pam_end (pamh, pam_retval) != PAM_SUCCESS)
+     {
+       pamh = NULL;
+       info (NORMAL, _("PAM: failed to release authenticator."));
+       return EXIT_FAILURE;
+     }
+ }
 #endif /* HAVE_PAM */
   return 0;
 }
