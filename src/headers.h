@@ -150,8 +150,12 @@
  #define _(String) (String)
  #define N_(String) String
  #define textdomain(Domain)
- #define bindtextdomain(Package, Directory)
+ #define bindtextdomain(Package, Directory);
 #endif /* ENABLE_NLS */
+
+#ifdef WITH_GUILE
+# include <libguile.h>
+#endif
 
 #ifndef INADDR_NONE
  #define INADDR_NONE (unsigned long)0xffffffff
@@ -183,6 +187,7 @@
 #define BEGIN_TRANSLATION "---BEGIN TRANSLATION---"
 #define BEGIN_ALL "---BEGIN ALL---"
 #define BEGIN_RULE "---BEGIN RULE---"
+#define BEGIN_GUILE "---BEGIN GUILE---"
 #define END_SECTION "---END---"
 #define LF "\n"
 #define CRLF "\r\n"
@@ -268,6 +273,10 @@
 
 #define safe_strcpy(s, ct) \
  (s[sizeof(s) - 1] = '\0', strncpy((char *)s, (char *)ct, sizeof(s) - 1))
+
+/* main.c */
+
+void anubis(char *arg);
 
 /* mem.c */
 void *xmalloc(int);
@@ -361,10 +370,13 @@ int regex_match(char *, char *);
 void open_rcfile(int);
 void read_rcfile(int);
 void read_rcfile_allsection(void);
+#ifdef WITH_GUILE
+void read_rcfile_guile(void);
+#endif
 void close_rcfile(void);
 char *parse_line_option(char *);
 int  read_regex_block(int, char *, int);
-int  read_action_block(void);
+int  read_action_block(const char *source_line);
 unsigned long get_position(char *);
 
 /* help.c */
@@ -399,6 +411,14 @@ void quit(int);
 #ifdef HAVE_GPG
  void check_gpg(void);
 #endif /* HAVE_GPG */
+
+/* guile.c */
+void anubis_boot(void *closure, int argc, char **argv);
+void guile_load_path(char *filename);
+void guile_debug(int enable);
+void guile_load_program(char *name);
+void guile_rewrite_line(char *procname, const char *source_line);
+void guile_postprocess_proc(char *procname, struct list **hdr, char **body);
 
 /* EOF */
 
