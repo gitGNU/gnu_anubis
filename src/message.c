@@ -51,11 +51,10 @@ message_add_body(MESSAGE *msg, char *key, char *value)
 }
 
 void
-message_remove_headers(MESSAGE *msg, char *key)
+message_remove_headers(MESSAGE *msg, RC_REGEX *regex)
 {
         ASSOC *asc;
         ITERATOR *itr;
-        RC_REGEX *regex = anubis_regex_compile(key, 0);
 	
         itr = iterator_create(msg->header);
         for (asc = iterator_first(itr); asc; asc = iterator_next(itr)) {
@@ -70,15 +69,14 @@ message_remove_headers(MESSAGE *msg, char *key)
 			free_pptr(rv);
 	}
 	iterator_destroy(&itr);
-	anubis_regex_free(regex);
 }
 
 void
-message_modify_body(MESSAGE *msg, char *key, char *value)
+message_modify_body(MESSAGE *msg, RC_REGEX *regex, char *value)
 {
 	if (!value)
 		value = "";
-	if (!key) {
+	if (!regex) {
 		int len = strlen(value);
 		
 		xfree(msg->body);
@@ -90,7 +88,6 @@ message_modify_body(MESSAGE *msg, char *key, char *value)
 		} else			
 			msg->body = strdup(value);
 	} else {
-		RC_REGEX *regex = anubis_regex_compile(key, 0);
 		char *start, *end;
 		int stack_level = 0;
 		struct obstack stack;
@@ -131,7 +128,6 @@ message_modify_body(MESSAGE *msg, char *key, char *value)
 				*end++ = '\n';
 			start = end;
 		}
-		anubis_regex_free(regex);
 
 		if (stack_level) {
 			char *p = obstack_finish(&stack);
@@ -144,11 +140,10 @@ message_modify_body(MESSAGE *msg, char *key, char *value)
 }
 
 void
-message_modify_headers(MESSAGE *msg, char *key, char *key2, char *value)
+message_modify_headers(MESSAGE *msg, RC_REGEX *regex, char *key2, char *value)
 {
 	ASSOC *asc;
 	ITERATOR *itr;
-        RC_REGEX *regex = anubis_regex_compile(key, 0);
 
         itr = iterator_create(msg->header);
 	for (asc = iterator_first(itr); asc; asc = iterator_next(itr)) {
@@ -173,7 +168,6 @@ message_modify_headers(MESSAGE *msg, char *key, char *key2, char *value)
 			free_pptr(rv);
 	}
 	iterator_destroy(&itr);
-	anubis_regex_free(regex);
 }
 
 void
