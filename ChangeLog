@@ -1,3 +1,7 @@
+2003-02-18  Sergey Poznyakoff
+
+	* src/net.c: Fixed debugging diagnostics.
+
 2003-02-17  Sergey Poznyakoff 
 
 	* src/extern.h (struct message_struct): New member mime_hdr.
