@@ -1,3 +1,15 @@
+2003-02-01  Wojciech Polak
+
+	* AUTHORS: Added Sergey Poznyakoff.
+	* configure.ac: Don't use `uname' for SunOS.
+	  Check -lsocket and -lnsl directly with AC_CHECK_LIB.
+
+	* src/headers.h: Fixed `guile_load_path_append' prototype.
+	* src/help.c (print_version): Added info about GUILE.
+	* src/tunnel.c (process_command): Removed file permissions
+	  check for SSL certificate.
+	* src/rc.c: Commented extra tokens at end of #endif directive.
+
 2003-02-01  Sergey Poznyakoff 
 
 	Added support for Guile
@@ -43,11 +55,15 @@
 	* examples/anubis.scm: New file
 	* examples/rot-13.scm: 
 	* examples/Makefile.am: Added new files.
-	
+
 2003-01-30  Wojciech Polak
- 
+
+	* m4/Makefile.am: Added gettext m4 macros to EXTRA_DIST.
+	* src/Makefile.am: Removed DEFAULT_INCLUDES.
+
+2003-01-30  Wojciech Polak
+
 	* Initial CVS import, starting GNU Anubis 3.6.3.
- 
 
 
 Local Variables:
@@ -56,5 +72,4 @@ version-control: never
 End:
 
 EOF
-	  
 
