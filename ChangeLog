@@ -1,3 +1,26 @@
+2003-07-01  Sergey Poznyakoff
+
+	* configure.ac: Define M4_DEFS
+	(--with-gpgme,--with-pcre,--with-pam,--with-tcp-wrappers): Bugfix:
+	correctly handle both forms (with -- without).
+	* src/Makefile.am: Add @LIBGNUTLS_LIBS@ and @LIBGNUTLS_CFLAGS@
+	* testsuite/Makefile.am: Likewise.
+	* src/headers.h: Fixed heuristics of defining HAVE_GNUTLS.
+	* src/rcfile.y (parse_error): New function. Used instead of
+	yyerror() wherever appropriate.
+	* src/tls.c: Provide typecasts for gnutls_transport_ptr data.
+	* testsuite/mta.c: Likewise.
+	* testsuite/anubis/base.exp (std.pat): Provide full path.
+	* testsuite/etc/std.pat: Removed.
+	* testsuite/etc/std.pin: New file.
+	* testsuite/etc/Makefile.am: Remove std.pat. Add std.pin
+	* testsuite/etc/.cvsignore: Add std.pat.
+	* testsuite/etc/std.in: Conditionally include parts of the
+	file depending on the compilation settings.
+	* testsuite/lib/anubis.exp (anubis_pat): Allow for full pathname
+	of the pat-file.
+	* doc/anubis.texi: Minor change
+
 2003-07-01  Sergey Poznyakoff 
 
 	* src/rc.c: Forgotten to commit
