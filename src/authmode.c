@@ -611,7 +611,7 @@ authmode_section_init(void)
 	smtp_greeting_message = strdup("GNU Anubis ESMTP; Identify yourself");
 	smtp_help_message = list_create();
 	list_append(smtp_help_message,
-		    strdup("Run 'info anubis' or visit http://www.gnu.org/software/anubis/doc/anubis.html"));
+		    strdup("Run 'info anubis' or visit http://www.gnu.org/software/anubis/manual/"));
 }
 
 #endif /* WITH_GSASL */
