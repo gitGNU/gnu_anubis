@@ -1,3 +1,10 @@
+2004-02-18  Sergey Poznyakoff
+
+	* src/auth.c (auth_ident): Do not use sscanf.
+	* src/errs.c: Fix improper format specs in syslog
+	invocations.
+	* src/ssl.c: Likewise.
+
 2004-02-14  Wojciech Polak
 
 	* src/url.c (url_get_mech): Bugfix.
