@@ -233,6 +233,8 @@ process_rcfile(int method)
 #define KW_SOCKS_V4            14
 #define KW_SOCKS_AUTH          15
 #define KW_READ_ENTIRE_BODY    16
+#define KW_LOCAL_DOMAIN        17
+#define KW_SASL_PASSWORD_DB    18
 
 char **
 list_to_argv(LIST *list)
@@ -361,7 +363,8 @@ control_parser(int method, int key, LIST *arglist,
 		topt |= T_LOCAL_MTA;
 		break;
 		
-	case KW_ESMTP_AUTH: {
+	case KW_ESMTP_AUTH:
+	{
 		char *p = strchr(arg, ':');
 		if (p) {
 			safe_strcpy(session.mta_password, ++p);
@@ -371,6 +374,10 @@ control_parser(int method, int key, LIST *arglist,
 		}
 	}		
 	break;
+
+	case KW_LOCAL_DOMAIN:
+		anubis_domain = strdup(arg);
+		break;
 		
 	case KW_SOCKS_PROXY:
 		parse_mtaport(arg, session.socks, &session.socks_port);
@@ -401,6 +408,13 @@ control_parser(int method, int key, LIST *arglist,
 		setbool(arg, topt, T_DROP_UNKNOWN_USER);
 		break;
 
+#if defined(WITH_GSASL)
+	case KW_SASL_PASSWORD_DB:
+		if (list_count(arglist) != 2) 
+			return RC_KW_ERROR;
+		anubis_set_password_db (arg, list_item(arglist, 1));
+		break;
+#endif
 	default:
 		return RC_KW_UNKNOWN;
 	}
@@ -409,6 +423,7 @@ control_parser(int method, int key, LIST *arglist,
 
 static struct rc_kwdef init_kw[] = {
 	{ "bind", KW_BIND },
+	{ "local-domain", KW_LOCAL_DOMAIN },
 	{ NULL },
 };
 
@@ -427,6 +442,7 @@ static struct rc_kwdef init_supervisor_kw[] = {
 	{ "drop-unknown-user", KW_DROP_UNKNOWN_USER },
 	{ "rule-priority", KW_RULE_PRIORITY },
 	{ "control-priority", KW_CONTROL_PRIORITY },
+	{ "sasl-password-db", KW_SASL_PASSWORD_DB },
 	{ NULL }
 };
 
