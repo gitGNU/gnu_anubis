@@ -34,12 +34,7 @@ struct rm_struct rm;
  struct secure_struct secure;
 #endif /* HAVE_TLS or HAVE_SSL */
 
-#ifdef HAVE_GPG
- struct gpg_struct gpg;
-#endif /* HAVE_GPG */
-
 unsigned long topt;
-unsigned long mopt;
 unsigned long ropt;
 
 void *remote_client;
