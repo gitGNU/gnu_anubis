@@ -3,6 +3,8 @@
 	* doc/anubis.texi: Updated.
 	* doc/anubis.1: Likewise.
 	* elisp/anubis-mode.el: Added new keywords.
+	* lib/obstack.c: Provide newer version.
+	* lib/obstack.h: Likewise.
 	* src/esmtp.c (do_gsasl_auth): Removed trailing \n in a verbose
 	message.
 
