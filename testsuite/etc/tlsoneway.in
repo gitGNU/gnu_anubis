@@ -17,7 +17,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 ---BEGIN CONTROL---
-logfile = TESTDIR/etc/anubis.log
-local-mta = TESTDIR/mta -bs -d TESTDIR/etc/mta.log -c TOP_SRCDIR/testsuite/data/anubis.pem -k TOP_SRCDIR/testsuite/data/anubis.pem
-ssl-oneway = yes
+logfile TESTDIR/etc/anubis.log
+local-mta TESTDIR/mta -bs -d TESTDIR/etc/mta.log -c TOP_SRCDIR/testsuite/data/anubis.pem -k TOP_SRCDIR/testsuite/data/anubis.pem
+ssl-oneway yes
 ---END---
