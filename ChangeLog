@@ -1,3 +1,9 @@
+2003-03-03  Wojciech Polak
+
+	* src/gpg.c (gpg_free): New function. Free unused memory.
+	* src/headers.h (gpg_free): Added prototype.
+	* src/quit.c (free_mem): Call gpg_free().
+
 2003-02-28  Wojciech Polak
 
 	* configure.ac: Bumped to 3.9.0 (unreleased, internal version).
