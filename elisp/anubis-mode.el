@@ -36,7 +36,7 @@
 
 ;; Customization:
 ;;  To your .emacs or site-start add:
-;;  (autoload 'anubis-mode "Anubis-Config")
+;;  (autoload 'anubis-mode "anubis-mode")
 ;;  (setq auto-mode-alist (append auto-mode-alist
 ;;                                '(("/.anubisrc$" . anubis-mode)
 ;;                                  ("/anubisrc$" . anubis-mode))))
@@ -470,13 +470,12 @@
   "Checks the syntax of the current Anubis RC buffer. Optional argument
 specifies the detail level (from 0 to 3)."
   (interactive "p")
-  (let ((compile-command compile-command))
-    (compile (concat
-	      (if anubis-path anubis-path "anubis")
-	      " --check="
-	      (number-to-string (or current-prefix-arg 0))
-	      " --norc --relax --altrc "
-		   (buffer-file-name)))))
+  (compile (concat
+	    (if anubis-path anubis-path "anubis")
+	    " --check="
+	    (number-to-string (or current-prefix-arg 0))
+	    " --norc --relax --altrc "
+	    (buffer-file-name))))
 
 
 
@@ -491,6 +490,7 @@ Key bindings:
   (kill-all-local-variables)
   (set-syntax-table anubis-mode-syntax-table)
   (make-local-variable 'indent-line-function)
+  (set (make-local-variable 'compile-command) "")
   (setq major-mode 'anubis-mode
         mode-name "Anubis-Config"
         local-abbrev-table anubis-mode-abbrev-table
@@ -503,8 +503,7 @@ Key bindings:
   (setq font-lock-defaults
         '((anubis-font-lock-keywords)
           nil t (("+-*/.<>=!?$%_&~^:" . "w")) beginning-of-defun
-          (font-lock-mark-block-function . mark-defun)))
-  )
+          (font-lock-mark-block-function . mark-defun))) )
 
 (require 'info) 
 (provide 'anubis-mode)
