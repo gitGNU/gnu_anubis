@@ -86,18 +86,14 @@ struct secure_struct {
 };
 #endif /* HAVE_SSL */
 
-
 extern struct options_struct options;
 extern struct session_struct session;
 extern struct rm_struct rm;
-
 #if defined(HAVE_TLS) || defined(HAVE_SSL)
 extern struct secure_struct secure;
 #endif /* HAVE_TLS or HAVE_SSL */
 
 extern unsigned long topt;
-extern unsigned long ropt;
-
 extern void *remote_client;
 extern void *remote_server;
 
