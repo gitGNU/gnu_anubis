@@ -1,3 +1,8 @@
+2003-11-22  Wojciech Polak
+
+	* src/authmode.c: Added preliminary RSET support.
+	(asmtp_kw): Check the `name' before strcasecmp().
+
 2003-11-22  Sergey Poznyakoff 
 
 	* src/gsasl.c (auth_gsasl_capa_init): Removed calls to obsolete
