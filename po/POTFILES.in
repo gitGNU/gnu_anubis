@@ -10,7 +10,6 @@ src/env.c
 src/errs.c
 src/esmtp.c
 src/exec.c
-src/files.c
 src/gpg.c
 src/gsasl.c
 src/guile.c
@@ -18,10 +17,11 @@ src/help.c
 src/main.c
 src/map.c
 src/mem.c
+src/mime.c
 src/misc.c
 src/mysql.c
 src/net.c
-src/proxy.c
+src/socks.c
 src/quit.c
 src/rc.c
 src/rcfile.l
