@@ -1,7 +1,13 @@
+2003-06-06  Wojciech Polak
+
+	* src/errs.c (anubis_error): Removed unneeded HAVE_VSNPRINTF.
+	* src/log.c (mprintf): Likewise.
+	* testsuite/mta.c: Clean up with prototypes.
+
 2003-06-02  Sergey Poznyakoff
 
 	* src/net.c (_debug_printer): Avoid splitting debug transcript
-	lines.
+	  lines.
 
 2003-05-30  Wojciech Polak
 
@@ -27,7 +33,7 @@
 
 	* TODO: Updated
 	* src/auth.c: Removed superfluous return
-	* src/log.c: Removed unneded HAVE_VSNPRINTF
+	* src/log.c: Removed unneeded HAVE_VSNPRINTF
 	* src/tls.c: Provide push/pull functions to work with local
 	  mailers.
 	* src/tunnel.c (transfer_command): TLS can be used with
