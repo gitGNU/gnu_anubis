@@ -1230,10 +1230,12 @@ modify [Subject] "New subject"
 This statement sets the new value to the @code{Subject} header.
 
 Every occurrence of unescaped @samp{&} in the new value will be replaced
-by the old header value. For example, the following statement
+by the old header value. To enter the @samp{&} character itself,
+escape it with two backslash characters (@samp{\\}). For example, the
+following statement
 
 @smallexample
-modify [Subject] "[Anubis \& others] &"
+modify [Subject] "[Anubis \\& others] &"
 @end smallexample
 
 @noindent
