@@ -20,7 +20,6 @@
 ##
 
 EXTRA_DIST = \
- std.pat\
  add1.pat\
  add2.pat\
  add3.pat\
@@ -38,6 +37,7 @@ EXTRA_DIST = \
  remail.pat\
  rot-13.pat\
  std.pat\
+ trigger.pat\
  add.in\
  del.in\
  empty.in\
@@ -45,7 +45,8 @@ EXTRA_DIST = \
  gpg.in\
  remail.in\
  std.in\
- simple.in
+ simple.in\
+ trigger.in
 
 RCFILES = \
  add.rc\
@@ -55,7 +56,8 @@ RCFILES = \
  gpg.rc\
  remail.rc\
  simple.rc\
- std.rc
+ std.rc\
+ trigger.rc
 
 noinst_DATA = $(RCFILES) 
 CLEANFILES = $(RCFILES)
@@ -67,8 +69,10 @@ entire.rc: entire.in
 gpg.rc: gpg.in
 simple.rc: simple.in
 std.rc: std.in
+trigger.rc: trigger.in
 
 SUFFIXES=.in .rc
 
 .in.rc:
 	m4 -DTOP_SRCDIR=`cd $(top_srcdir); pwd` -DTESTDIR=`cd ..; pwd` $< > $@
+

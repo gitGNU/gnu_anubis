@@ -1,3 +1,12 @@
+2003-03-10  Wojciech Polak
+
+	* testsuite/etc/trigger.pat: New file. Testing
+	  the Trigger mechanism.
+	* testsuite/etc/trigger.in: New file.
+	* testsuite/etc/Makefile.am: Updated.
+	* testsuite/anubis/base.exp: Added trigger.pat.
+	* TODO: Updated.
+
 2003-03-07  Wojciech Polak
 
 	* src/quit.c (free_mem): Removed unused variables.
@@ -41,7 +50,7 @@
 	* examples/Makefile.am: Updated.
 	* Makefile.am: Added new subdir (guile)
 	* configure.ac: Likewise.
-	  Minor fix for handling --with-tls and --with-openssl options.
+	  Minor fix for handling --with-gnutls and --with-openssl options.
 	* examples/anubis.scm: Added extra arguments to interface
 	  functions.
 	* src/daemon.c: Use ngettext wherever appropriate.
