@@ -71,16 +71,16 @@ BEGIN SECTION RULE
   END COND
   COND: HEADER[Subject] :posix [rot13-all]
   IFTRUE:
-    ASGN: rot13-subject = yes
-    ASGN: rot13-body = yes
+    ASGN: guile-process = rot-13 #:body
+    ASGN: guile-process = rot-13 #:subject
   END COND
   COND: HEADER[Subject] :posix [rot13-body]
   IFTRUE:
-    ASGN: rot13-body = yes
+    ASGN: guile-process = rot-13 #:body
   END COND
   COND: HEADER[Subject] :posix [rot13-subject]
   IFTRUE:
-    ASGN: rot13-subject = yes
+    ASGN: guile-process = rot-13 #:subject
   END COND
   COND: HEADER[Subject] :posix [body-append]
   IFTRUE:
@@ -90,8 +90,8 @@ BEGIN SECTION RULE
   IFTRUE:
     ASGN: body-append = misc/notes.txt
     ASGN: gpg-encrypt = USERNAME
-    ASGN: rot13-subject = yes
-    ASGN: rot13-body = yes
+    ASGN: guile-process = rot-13 #:body
+    ASGN: guile-process = rot-13 #:subject
   END COND
 END SECTION RULE
 :END PATTERN

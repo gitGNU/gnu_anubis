@@ -67,16 +67,16 @@ if header[Subject] = gpg-sign
 fi
 
 if header[Subject] = "rot13-all"
- rot13-subject = yes
- rot13-body = yes
+ guile-process rot-13 #:body
+ guile-process rot-13 #:subject
 fi
 
 if header[Subject] = "rot13-body"
- rot13-body = yes
+ guile-process rot-13 #:body 
 fi
 
 if header[Subject] = "rot13-subject"
- rot13-subject = yes
+ guile-process rot-13 #:subject
 fi
 
 if header[Subject] = "body-append"
@@ -86,8 +86,8 @@ fi
 if header[Subject] = "ALL"
  body-append = misc/notes.txt
  gpg-encrypt = USERNAME
- rot13-subject = yes
- rot13-body = yes
+ guile-process rot-13 #:body
+ guile-process rot-13 #:subject
 fi
 
 ---END---

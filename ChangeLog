@@ -1,3 +1,21 @@
+2003-06-30  Sergey Poznyakoff 
+
+	* configure.ac: Use AM_PATH_LIBGNUTLS
+	* m4/libgnutls.m4: New file.
+	* m4/Makefile.am: Added libgnutls.m4
+	* src/headers.h (anubis_regex_free): Changed prototype.
+	* src/map.c (translate_section): Removed.
+	* src/rc.c (anubis_add_section): Initialize allow_prog member
+	* src/rcfile.h (struct rc_secdef.allow_prog): New
+	member. 
+	* src/rcfile.y: Improved diagnostics.
+	* src/regex.c (ASSERT_RE): New macro
+	(anubis_regex_match,anubis_regex_replace)
+	(anubis_regex_refcnt,anubis_regex_compile): Use ASSERT_RE
+	(anubis_regex_free): Changed proto
+	* testsuite/etc/std.in: Updated
+	* testsuite/etc/std.pat: Updated
+
 2003-06-29  Wojciech Polak
 
 	* src/daemon.c (loop): Added support for DROP-UNKNOWN-USER.
@@ -45,7 +63,7 @@
 
 2003-06-27  Sergey Poznyakoff
 
-	* src/daemon.c: Get rid of the unneded locals
+	* src/daemon.c: Get rid of the unneeded locals
 	* src/headers.h (smtp_session): Changed proto.
 	* src/rcfile.l: Allow the use of '\' to escape newlines
 	* src/tunnel.c (process_command,transfer_command): Rewritten
