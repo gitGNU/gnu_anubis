@@ -22,7 +22,7 @@
 ## compiling, linking, and/or using OpenSSL is allowed.
 ##
 
-EXTRA_DIST = 1anubisrc 2anubisrc anubisrc.guile anubis.scm rot-13.scm
+EXTRA_DIST = 1anubisrc 2anubisrc anubisrc.guile anubis.scm 
 SUBDIRS = pam
 
 ## EOF
