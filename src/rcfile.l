@@ -49,6 +49,15 @@ static int escape(int c);
 char * trimws(char *s);
 char * trimcpy();
 
+static void multiline_begin(void);
+static void multiline_add(char *);
+static void multiline_finish(void);
+static char *multiline_strip_tabs(char *text);
+static int isemptystr(char *text);
+ 
+static char *multiline_delimiter;
+static int strip_tabs; 
+ 
 static struct string_list *str_head, *str_tail;
 int cfg_line_num;
 char *cfg_file;
@@ -61,7 +70,7 @@ extern int yydebug;
  
 %}
 
-%x STR LIT RX RXM
+%x STR LIT ML
 
 WS [ \t][ \t]*
 IDENT [a-zA-Z_][a-zA-Z_0-9-]+
@@ -72,9 +81,6 @@ RDASHES [ \t]*---
 #.*\n          { cfg_line_num++; }
 #.*            /* end-of-file comment */;
          /* Keywords */
-[aA][nN][dD]   return AND;
-[oO][rR]       return OR;
-[nN][oO][tT]   return NOT;
 BEGIN          return T_BEGIN;
 {LDASHES}BEGIN{WS}{IDENT}{RDASHES} {
 	char *p = strstr(yytext, "BEGIN") + 5;
@@ -93,53 +99,23 @@ BEGIN          return T_BEGIN;
 	return D_BEGIN; }
 END |
 {LDASHES}END{RDASHES}        return T_END;
-[hH][eE][aA][dD][eE][rR]     return T_HEADER;
-[cC][oO][mM][mM][aA][nN][dD] return T_COMMAND;
-         /* Backward compatible (unquoted) regular expressions */
-=[^ \t][^!\n]*/\n  { yylval.string = trimws(strdup(yytext + 1));
-		     DBG("RX0", yylval.string);
-		     return REGEX; }
-=[^ \t][^!\n]*!=   { BEGIN(RXM);
-		     yylval.string = malloc(yyleng-2);
-		     memcpy(yylval.string, yytext + 1, yyleng-3);
-		     yylval.string[yyleng-3] = 0;
-		     trimws(yylval.string);
-		     DBG("RX1", yylval.string);
-		     return REGEX; }
-=[^ \t][^!\n]*!    { BEGIN(RX);
-                     string_begin();
-	             string_add(yytext+1, yyleng-1); }
-<RX>[^!\n]*!=      { BEGIN(RXM);
-		     string_add(yytext, yyleng - 2);
-		     string_finish();
-		     trimws(yylval.string);
-                     DBG("RX2", yylval.string);
-		     return REGEX; }
-<RX>[^!\n]*/\n     { BEGIN(INITIAL);
-		     string_add(yytext, yyleng);
-		     string_finish();
-		     trimws(yylval.string);
-                     DBG("RX2", yylval.string);
-		     return REGEX; }
-<RX>[^!\n]*!       { string_add(yytext, yyleng); }
-<RXM>[^!\n]*/\n    { BEGIN(INITIAL); 
-		     yylval.string = trimcpy();
-		     DBG("RX3", yylval.string);
-		     return REGEX; }
-<RXM>[^!\n]*!      { int i;
- 
-	             BEGIN(RX);
-                     string_begin();
-		     for (i = 0; i < yyleng && isspace(yytext[i]); i++)
-			     ;
-	             string_add(yytext + i, yyleng - i); }
-=                 return EQ;
-!=                return NE;
-[iI][fF]          return IF;
-[fF][iI]          return FI;
-[eE][lL][sS][eE]  return ELSE;
-[rR][uU][lL][eE]  return RULE;
-[dD][oO][nN][eE]  return DONE;
+[aA][nN][dD]                 return AND;
+[oO][rR]                     return OR;
+[nN][oO][tT]                 return NOT;
+[hH][eE][aA][dD][eE][rR]     { yylval.num = HEADER; return T_MSGPART; }
+[cC][oO][mM][mM][aA][nN][dD] { yylval.num = COMMAND; return T_MSGPART; }
+[bB][oO][dD][yY]             { yylval.num = BODY; return T_MSGPART; }
+[sS][tT][oO][pP]             return STOP;
+[cC][aA][lL][lL]             return CALL;
+[iI][fF]                     return IF;
+[fF][iI]                     return FI;
+[eE][lL][sS][eE]             return ELSE;
+[rR][uU][lL][eE]             return RULE;
+[dD][oO][nN][eE]             return DONE;
+[aA][dD][dD]                 return ADD;
+[rR][eE][mM][oO][vV][eE]     return REMOVE;
+[mM][oO][dD][iI][fF][yY]     return MODIFY;
+
          /* Literal */
 <LIT>[^\n]*/\n   { BEGIN(INITIAL);
 	           yylval.string = trimcpy();
@@ -151,16 +127,39 @@ END |
 		   return IDENT; }
          /* Quoted strings */
 \"[^\\"\n]*\"     { return simple_string(); }
+\"[^\\"\n]*\\[0-9] {BEGIN(STR);
+                   string_begin();
+		   string_add(yytext+1, yyleng-1);
+                  }
 \"[^\\"\n]*\\.    { BEGIN(STR);
                    string_begin();
 		   string_add(yytext+1, yyleng-3);
 		   string_add_char(escape(yytext[yyleng-1])); }
+<STR>[^\\"\n]*\\[0-9] { string_add(yytext, yyleng); }
 <STR>[^\\"\n]*\\. { string_add(yytext, yyleng-2);
                     string_add_char(escape(yytext[yyleng-1])); }
 <STR>[^\\"\n]*\" { BEGIN(INITIAL);
                    string_add(yytext, yyleng-1); 
                    string_finish();
 		   return STRING; }
+         /* "Here document" (multiline strings) */
+"<<"-?{IDENT}[ \t]*\n |
+"<<"-?{IDENT}[ \t]*#.*\n { BEGIN(ML);
+                         multiline_begin();
+	             	 cfg_line_num++; }
+<ML>.*\n { char *p = multiline_strip_tabs(yytext);
+           cfg_line_num++;
+	   
+           if (strncmp(p, multiline_delimiter, strlen(multiline_delimiter))
+	        == 0
+	       && isemptystr(p + strlen(multiline_delimiter))) {
+		   BEGIN(INITIAL);
+		   multiline_finish();
+		   unput('\n');
+		   return STRING;
+	     }
+	    multiline_add(p);
+         } 
          /* Other tokens */
 {WS}           ;
 \n             { cfg_line_num++; return EOL; }
@@ -239,6 +238,62 @@ string_finish()
 		s = next;
 	}
 	*p = 0;
+}
+
+void
+multiline_begin()
+{
+	char *endp;
+	int len;
+	char *p = yytext + 2; /* past the << marker */
+
+	if (*p == '-') {
+		strip_tabs = 1;
+		p++;
+	} else
+		strip_tabs = 0;
+
+	/* Find the delimiter */
+	for (endp = p; *endp; endp++)
+		if (isspace(*endp))
+			break;
+
+	len = endp - p;
+	multiline_delimiter = xmalloc(len + 1);
+	memcpy(multiline_delimiter, p, len);
+	multiline_delimiter[len] = 0;
+	string_begin();
+}
+
+void
+multiline_finish()
+{
+	free (multiline_delimiter);
+	multiline_delimiter = NULL;
+	string_finish();
+}
+
+int
+isemptystr(char *text)
+{
+	for (; *text && isspace(*text); text++)
+		;
+	return *text == 0;
+}
+
+char *
+multiline_strip_tabs(char *text)
+{
+	if (strip_tabs)
+		for (; *text == '\t'; text++)
+			;
+	return text;
+}
+
+void
+multiline_add(char *p)
+{
+	string_add(p, strlen(p));
 }
 
 int
