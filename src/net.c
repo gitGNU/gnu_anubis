@@ -249,10 +249,9 @@ swrite (int method, NET_STREAM sd, char *ptr)
   int rc;
   size_t nleft, nwritten = 0;
 
-  if (ptr == 0)
+  if (ptr == NULL || (nleft = strlen (ptr)) == 0)
     return;
-
-  nleft = strlen (ptr);
+  
   rc = stream_write (sd, ptr, nleft, &nwritten);
   if (rc)
     {
