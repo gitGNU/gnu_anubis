@@ -33,6 +33,7 @@ EXTRA_DIST = \
  gpgsign.pat\
  mime1.pat\
  mime2.pat\
+ mod-body.pat\
  mult.pat\
  remail.pat\
  rot-13.pat\
@@ -44,6 +45,7 @@ EXTRA_DIST = \
  empty.in\
  entire.in\
  gpg.in\
+ mod-body.in\
  remail.in\
  std.in\
  simple.in\
@@ -56,6 +58,7 @@ RCFILES = \
  empty.rc\
  entire.rc\
  gpg.rc\
+ mod-body.rc\
  remail.rc\
  simple.rc\
  std.rc\
@@ -70,6 +73,7 @@ del.rc: del.in
 empty.rc: empty.in
 entire.rc: entire.in
 gpg.rc: gpg.in
+mod-body.rc: mod-body.in
 simple.rc: simple.in
 std.rc: std.in
 trigger.rc: trigger.in
