@@ -76,20 +76,11 @@ esmtp_auth(void *sd_server, char *reply)
 		for (i = 0; i < 16; i++)
 			sprintf(ascii_digest + 2 * i, "%02x", digest[i]);
 
-		#ifdef HAVE_SNPRINTF
 		snprintf(tmp, LINEBUFFER,
-		#else
-		sprintf(tmp,
-		#endif /* HAVE_SNPRINTF */
 			"%s %s", session.mta_username, ascii_digest);
 
 		p = b64encode(tmp);
-		#ifdef HAVE_SNPRINTF
-		snprintf(tmp, LINEBUFFER,
-		#else
-		sprintf(tmp,
-		#endif /* HAVE_SNPRINTF */
-			"%s"CRLF, p);
+		snprintf(tmp, LINEBUFFER, "%s"CRLF, p);
 		xfree(p);
 
 		swrite(CLIENT, sd_server, tmp);
@@ -119,12 +110,7 @@ esmtp_auth(void *sd_server, char *reply)
 		info(DEBUG, _("Challenge decoded: %s"), b64buf);
 
 		p = b64encode(session.mta_username);
-		#ifdef HAVE_SNPRINTF
-		snprintf(tmp, LINEBUFFER,
-		#else
-		sprintf(tmp,
-		#endif /* HAVE_SNPRINTF */
-			"%s"CRLF, p);
+		snprintf(tmp, LINEBUFFER, "%s"CRLF, p);
 		xfree(p);
 		swrite(CLIENT, sd_server, tmp);
 		get_response_smtp(CLIENT, sd_server, tmp, LINEBUFFER);
@@ -135,12 +121,7 @@ esmtp_auth(void *sd_server, char *reply)
 		info(DEBUG, _("Challenge decoded: %s"), b64buf);
 
 		p = b64encode(session.mta_password);
-		#ifdef HAVE_SNPRINTF
-		snprintf(tmp, LINEBUFFER,
-		#else
-		sprintf(tmp,
-		#endif /* HAVE_SNPRINTF */
-			"%s"CRLF, p);
+		snprintf(tmp, LINEBUFFER, "%s"CRLF, p);
 		xfree(p);
 		swrite(CLIENT, sd_server, tmp);
 

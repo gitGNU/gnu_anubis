@@ -276,11 +276,7 @@ rand_md5(void)
 	static char ascii_digest[33];
 	MD5_CTX context;
 
-	#ifdef HAVE_SNPRINTF
 	snprintf(buf, LINEBUFFER,
-	#else
-	sprintf(buf,
-	#endif /* HAVE_SNPRINTF */
 		"%d%d%s", rand_int(32768), (int)getpid(), (char *)getlogin());
 
 	MD5_Init(&context);

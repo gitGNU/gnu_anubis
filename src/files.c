@@ -91,12 +91,7 @@ append_signature_file(char *user)
 	n = strlen(homedir) + strlen(signature_file) + 2;
 	n = n > MAXPATHLEN ? MAXPATHLEN + 1 : n + 1;
 	signature_path = (char *)xmalloc(n);
-	#ifdef HAVE_SNPRINTF
-	snprintf(signature_path, n - 1,
-	#else
-	sprintf(signature_path,
-	#endif /* HAVE_SNPRINTF */
-		"%s/%s", homedir, signature_file);
+	snprintf(signature_path, n - 1, "%s/%s", homedir, signature_file);
 
 	fpsig = fopen(signature_path, "r");
 	if (fpsig == 0) {

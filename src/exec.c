@@ -207,12 +207,7 @@ external_program(int *rs, char *path, char *src, char *dst, int dstsize)
 			p++;
 		else
 			p = path;
-		#ifdef HAVE_SNPRINTF
-		snprintf(tmp, LINEBUFFER,
-		#else
-		sprintf(tmp,
-		#endif /* HAVE_SNPRINTF */
-			"%s %s", p, a);
+		snprintf(tmp, LINEBUFFER, "%s %s", p, a);
 		p = path;
 		a = tmp;
 	}

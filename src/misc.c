@@ -194,12 +194,7 @@ substitute(char *inbuf, char **subbuf)
 	tmp++;
 	while (*tmp)
 	{
-		#ifdef HAVE_SNPRINTF
-		snprintf(sign, 4,
-		#else
-		sprintf(sign,
-		#endif /* HAVE_SNPRINTF */
-			"\\%d", i + 1);
+		snprintf(sign, 4, "\\%d", i + 1);
 		tmpout = insert(tmpbuf, sign, *tmp);
 		if (tmpout) {
 			tmpbuf = (char *)xrealloc((char *)tmpbuf, strlen(tmpout) + 1);

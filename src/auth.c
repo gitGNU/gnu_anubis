@@ -66,11 +66,7 @@ auth_ident(struct sockaddr_in *addr, char *user, int size)
 	info(VERBOSE, _("IDENT: connected to %s:%u"),
 	inet_ntoa(ident.sin_addr), ntohs(ident.sin_port));
 
-	#ifdef HAVE_SNPRINTF
 	snprintf(buf, LINEBUFFER,
-	#else
-	sprintf(buf,
-	#endif /* HAVE_SNPRINTF */
 		"%u , %u"CRLF, ntohs(addr->sin_port), session.tunnel_port);
 
 	if (send(sd, buf, strlen(buf), 0) == -1) {

@@ -183,11 +183,7 @@ smtp_session(void *sd_client, void *sd_server)
 				banner_ptr++;
 			} while (*banner_ptr != ' ');
 			banner_ptr++;
-#ifdef HAVE_SNPRINTF
 			snprintf(command, LINEBUFFER,
-#else
-			sprintf(command,
-#endif /* HAVE_SNPRINTF */
 				"220 %s (%s) %s", host, version, banner_ptr);
 		}
 	}
@@ -416,11 +412,7 @@ transfer_command(void *sd_client, void *sd_server, char *command)
 			if (getpeername((int)sd_client, (struct sockaddr *)&rclient, &addrlen) == -1)
 				anubis_error(HARD, _("getpeername() failed: %s."), strerror(errno));
 
-#ifdef HAVE_SNPRINTF
 			snprintf(ehlo, LINEBUFFER,
-#else
-			sprintf(ehlo,
-#endif /* HAVE_SNPRINTF */
 				"EHLO %s"CRLF,
 				(topt & T_ERROR) ? "localhost" : inet_ntoa(rclient.sin_addr));
 
@@ -537,7 +529,7 @@ postprocess(void *sd_client, void *sd_server)
 {
 	alarm(1800);
 #ifdef WITH_GUILE	
-	if (options.guile_postprocess) {
+	if (!guile_proclist_empty()) {
 		struct mem_buf mb;
 		struct list_buf lb;
 		struct list *hdr_list;
@@ -546,9 +538,7 @@ postprocess(void *sd_client, void *sd_server)
 		collect_headers(sd_client, &hdr_list);
 		collect_body(sd_client, &body);
 
-		guile_postprocess_proc(options.guile_postprocess,
-				       &hdr_list,
-				       &body);
+		guile_process_list(&hdr_list, &body);
 		init_mem_buf(&mb, body);
 		init_list_buf(&lb, hdr_list);
 		transfer_header(sd_client, sd_server, list_reader, &lb);
@@ -720,7 +710,11 @@ transfer_header(void *sd_client, void *sd_server,
 					topt |= T_BOUNDARY;
 					safe_strcpy(boundary_buf, plist->line);
 
-					ptr2 = parse_line_option(boundary_buf);
+					ptr2 = strchr(boundary_buf, '=');
+					if (!ptr2)
+						ptr2 = boundary_buf;
+					else
+						ptr2 = parse_line_option(ptr2);
 					message.boundary = (char *)xmalloc(strlen(ptr2) + 3);
 					if (*ptr2 == '"') {
 						ptr2++;
