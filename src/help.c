@@ -111,8 +111,9 @@ print_usage (void)
 	  "                              standard input and output (inetd-type program).\n"
 	  "                              This option excludes the '--remote-mta' option."));
   puts (_(" -m, --mode=MODE              Select operation mode."));
-  puts (_("                              MODE is either \"transparent\" or \"auth\""));
+  puts (_("                              MODE is one of \"transparent\", \"auth\" or \"mda\"."));
   puts (_(" -f, --foreground             Foreground mode."));
+  puts (_(" --from=EMAIL                 Specify sender address (implies MDA mode)"));
   puts (_(" -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as described\n"
 	  "                              in RFC 821 on standard input and output."));
   puts (_("Output options:\n"));
