@@ -25,7 +25,10 @@
 # ssl-key FILE-NAME
 # ssl-cafile FILE-NAME
 # allow-local-mta YES-OR-NO
+# drop-unknown-user YES-OR-NO
 # user-notprivileged USERNAME
+# control-priority VALUE
+# rule-priority VALUE
 ---END---
 
 #

@@ -12,34 +12,34 @@
 #
 
 ---BEGIN CONTROL---
-logfile = /tmp/anubis.log
-loglevel = ALL
-remote-mta = localhost
-termlevel = debug
+logfile "/tmp/anubis.log"
+loglevel ALL
+remote-mta localhost
+termlevel debug
 ---END---
 
 ---BEGIN GUILE---
-guile-output = /tmp/anubis.out
-guile-debug = yes
-guile-load-path-append = <path-to-anubis-directory>/examples
-guile-load-program = rot-13.scm
-guile-load-program = anubis.scm
+guile-output "/tmp/anubis.out"
+guile-debug yes
+guile-load-path-append <path-to-anubis-directory>/examples
+guile-load-program rot-13.scm
+guile-load-program anubis.scm
 ---END---
 
 ---BEGIN RULE---
 
-if header =^Subject:
- guile-rewrite-line = rewrite-subject
+if header [Subject] = "Odp:.*"
+ guile-rewrite-line rewrite-subject
 fi
 
-trigger :basic =^rot13.*subj
- guile-process = anubis-rot-13-header
- add = X-Comment: Subject encoded with ROT-13
+trigger :basic "^rot13.*subj"
+ guile-process anubis-rot-13-header
+ add [X-Comment] "Subject encoded with ROT-13"
 done
 
-trigger :basic =^rot13.*body
- guile-process = anubis-rot-13-body
- add = X-Comment: Body encoded with ROT-13
+trigger :basic "^rot13.*body"
+ guile-process anubis-rot-13-body
+ add [X-Comment] "Body encoded with ROT-13"
 done
 
 ---END---

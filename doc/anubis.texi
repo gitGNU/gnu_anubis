@@ -333,8 +333,7 @@ Contains the settings of the Guile interpreter. The section is
 allowed in both configuration files.
 @item RULE
 Defines the rules that are used to alter the contents of the
-messages. This is the core part of the user configuration file.
-It is not allowed in the system configuration file.
+messages (conditional and unconditional rules).
 @end table
 
 @menu
@@ -353,11 +352,9 @@ Specified in the system configuration file, it applies to all users on
 the machine, but each user can specify its own @samp{CONTROL} section,
 to customize own settings. Of course, not all options can be set
 or change by user. Some options can only be set in the system configuration
-file, and some only in user configuration file. Options specified in user
-configuration file have a @strong{higher} priority that those specified
-in system configuration file. The @samp{CONTROL} section starts with the
-@w{@code{---BEGIN CONTROL---}} line, and the @w{@code{---END---}} line
-ends it.
+file, and some only in user configuration file. By default, options
+specified in user configuration file have a @strong{higher} priority
+that those specified in system configuration file.
 
 All option names are case insensitive, so you can use
 for instance: @code{bind} or @code{BIND} or @code{BiNd}, and so on.
@@ -503,19 +500,19 @@ A @var{username} and a @var{password} are separated with a colon (@samp{:}).
 
 @deffn Option ssl @var{yes-or-no}
 @opindex ssl @var{yes-or-no}
-This option enables the TLS/SSL encryption between the MUA (Mail User Agent)
-and the MTA (Mail Transport Agent). Value @samp{no} is the default,
-but using the TLS/SSL encryption is recommended. You should also
-specify a private key and a certificate using the @samp{key}
-and @samp{cert} keywords (defined below). @xref{TLS/SSL}, for details.
+This option enables the TLS/SSL encryption between the MUA and the MTA.
+Value @samp{no} is the default, but using the TLS/SSL encryption
+is recommended. You should also specify a private key and a certificate
+using the @samp{ssl-key} and @samp{ssl-cert} keywords (defined below).
+@xref{TLS/SSL}, for details.
 @end deffn
 
 @deffn Option ssl-oneway @var{yes-or-no}
 @opindex ssl-oneway @var{yes-or-no}
 This option enables the @dfn{ONEWAY} encryption. Use this mode,
-when you want to use the TLS/SSL, but your MUA (Mail User Agent)
-doesn't provide a support for ESMTP TLS/SSL. Using this option
-doesn't require using the @samp{key} and @samp{cert} keywords.
+when you want to use the TLS/SSL, but your MUA doesn't provide
+a support for ESMTP TLS/SSL. Using this option doesn't require
+using the @samp{ssl-key} and @samp{ssl-cert} keywords.
 @end deffn
 
 @deffn Option ssl-cert @var{file-name}
@@ -620,8 +617,7 @@ system-wide settings always override the user private settings.
 The @samp{TRANSLATION} section specifies how to translate remote or local
 user names, or host names or addresses, to local user names.
 The @samp{TRANSLATION} section is available @emph{only} in the system
-configuration file. It starts with the @w{@code{---BEGIN TRANSLATION---}}
-line, and the @w{@code{---END---}} line ends it. Syntax:
+configuration file. Syntax:
 
 @smallexample
 @group
@@ -704,10 +700,7 @@ as such, e.g.:
 remove @samp{[}@var{key}@samp{]}
 @end smallexample
 
-The rule system is defined in @dfn{RULE} section, which begins with a
-@w{@code{---BEGIN RULE---}} and ends with an @w{@code{---END---}}
-statements.
-
+The rule system is defined in @dfn{RULE} section.
 The statements within this section are executed sequentially.
 Each statement is either an @dfn{action} or a @dfn{conditional
 statement}.
@@ -1893,8 +1886,7 @@ communicating applications. The TLS protocol itself is based on the SSL 3.0
 GNU Anubis supports the TLS/SSL (via the GnuTLS, a Transport Layer Security
 Library available at @w{@uref{http://www.gnutls.org/}}, or OpenSSL,
 a cryptographic package available at @w{@uref{http://www.openssl.org/}}),
-but your MTA (Mail Transport Agent) must provide the STARTTLS command first.
-This can be checked by:
+but your MTA must provide the STARTTLS command first. This can be checked by:
 
 @smallexample
 @group
@@ -1906,10 +1898,10 @@ $ telnet @var{your-smtp-host} 25
 @noindent
 The server will response with all its available commands.
 If you see the STARTTLS, then you can use the TLS/SSL encryption.
-If your MUA (Mail User Agent) doesn't support the TLS/SSL encryption,
-but your MTA does, then you should use the @samp{oneway-ssl} keyword in your
-configuration file. Before using the TLS/SSL encryption, you must generate
-a proper private key and a certificate. You can do it simply with:
+If your MUA doesn't support the TLS/SSL encryption, but your MTA does,
+then you should use the @samp{oneway-ssl} keyword in your configuration
+file. Before using the TLS/SSL encryption, you must generate a proper
+private key and a certificate. You can do it simply with:
 
 @smallexample
 @group
@@ -1942,8 +1934,8 @@ ssl-cert /usr/share/ssl/certs/anubis.pem
 
 @noindent
 @strong{Caution:} Each client can specify its own private key
-and a certificate by adding the @samp{key} and @samp{cert} keywords
-in its own user configuration file.
+and a certificate by adding the @samp{ssl-key} and @samp{ssl-cert}
+keywords in its own user configuration file.
 
 @noindent
 @xref{Encryption Settings}, for details.

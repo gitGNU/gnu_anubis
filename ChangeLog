@@ -1,3 +1,9 @@
+2003-07-18  Wojciech Polak
+
+	* doc/anubis.texi: Updated.
+	* examples/2anubisrc: Likewise.
+	* examples/anubisrc.guile: Likewise.
+
 2003-07-18  Sergey Poznyakoff 
 
 	* src/message.c (message_modify_headers): Expand ampersands
