@@ -256,6 +256,8 @@ process_rcfile (int method)
 #define KW_ESMTP_REALM              27
 #define KW_ESMTP_ALLOWED_MECH       28
 #define KW_ESMTP_REQUIRE_ENCRYPTION 29
+#define KW_INCOMING_MAIL_RULE       30
+#define KW_OUTGOING_MAIL_RULE       31
 
 char **
 list_to_argv (ANUBIS_LIST * list)
@@ -525,6 +527,14 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
     break;
 #endif /* WITH_GSASL */
 
+  case KW_INCOMING_MAIL_RULE:
+    incoming_mail_rule = strdup (arg);
+    break;
+    
+  case KW_OUTGOING_MAIL_RULE:
+    outgoing_mail_rule = strdup (arg);
+    break;
+    
   default:
     return RC_KW_UNKNOWN;
   }
@@ -535,6 +545,8 @@ static struct rc_kwdef init_kw[] = {
   { "bind",         KW_BIND },
   { "local-domain", KW_LOCAL_DOMAIN },
   { "mode",         KW_MODE },
+  { "incoming-mail-rule", KW_INCOMING_MAIL_RULE },
+  { "outgoing-mail-rule", KW_OUTGOING_MAIL_RULE },
   { NULL },
 };
 
