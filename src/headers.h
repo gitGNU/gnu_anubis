@@ -351,11 +351,13 @@ char **gen_execargs(const char *);
 int  make_local_connection(char *, char **);
 char *external_program(int *, char *, char *, char *, int);
 char *exec_argv(int *, char *, char **, char *, char *, int);
+void cleanup_children();
 
 /* esmtp.c */
 void esmtp_auth(void *, char *);
 
 /* misc.c */
+int anubis_free_list_item(void *item, void *data);
 void assoc_free(ASSOC *);
 ASSOC *header_assoc(char *);
 void destroy_assoc_list(LIST **);
@@ -393,8 +395,8 @@ void print_usage(void);
 void print_config_options(void);
 
 /* quit.c */
-void sig_exit(int);
-void sig_timeout(int);
+RETSIGTYPE sig_exit(int);
+RETSIGTYPE sig_timeout(int);
 void free_mem(void);
 void quit(int);
 
