@@ -24,7 +24,85 @@
 
 #include "headers.h"
 #include "extern.h"
+#define obstack_chunk_alloc malloc
+#define obstack_chunk_free free
+#include <obstack.h>
 
+char *from_address; /* Sender address */
+
+/* Expand a meta-variable. Available meta-variables are:
+   
+   %sender          Replace with the sender name
+   %recipient       Replace with the recipient name */
+
+static void
+expand_meta_variable (char *start, size_t size,
+		      char **expansion, size_t *expansion_size)
+{
+  size--;
+  start++;
+      
+  if (strncmp ("sender", start, size) == 0)
+    {
+      *expansion = from_address;
+      *expansion_size = strlen (*expansion);
+    }
+  else if (strncmp ("recipient", start, size) == 0)
+    {
+      *expansion = session.clientname;
+      *expansion_size = strlen (*expansion);
+    }
+  else
+    {
+      *expansion = start;
+      *expansion_size = size;
+    }	  
+}
+
+
+/* Expand meta-notations in arguments. */
+   
+static void
+expand_arg (struct obstack *stk, char *arg)
+{
+  char *meta = 0;
+  for (; *arg; arg++)
+    {
+      if (!meta)
+	{
+	  if (*arg != '%')
+	    obstack_1grow (stk, *arg);
+	  else
+	    meta = arg;
+	}
+      else /* In metacharacter */
+	{
+	  if (!(isalnum (*arg) || *arg == '_'))
+	    {
+	      char *repl;
+	      size_t size;
+	      
+	      expand_meta_variable (meta, arg - meta, &repl, &size);
+	      obstack_grow (stk, repl, size);
+	      obstack_1grow (stk, *arg);
+	      meta = NULL;
+	    }
+	}
+    }
+
+  if (meta)
+    {
+      char *repl;
+      size_t size;
+	      
+      expand_meta_variable (meta, arg - meta, &repl, &size);
+      obstack_grow (stk, repl, size);
+    }
+  
+  obstack_1grow (stk, 0);
+}
+
+/* Deliver message to the recipient */
 static void
 deliver (const char *recipient, MESSAGE *msg)
 {
@@ -41,26 +119,39 @@ deliver (const char *recipient, MESSAGE *msg)
   if (pid == 0)
     {
       /* Child */
+      int i;
+      char **argv;
+      char *p;
+      struct obstack stk;
 
-      /* FIXME: Need a way to specify sender and recipient user names in
-	 execargs, like in mailutils' mail.local */
-      remote_server = make_local_connection_arg (session.execpath,
-						 session.execargs,
-						 recipient);
+      assign_string (&session.clientname, recipient);
+
+      /* Create argv vector.
+	 Argv will not be freed. It is no use, since we're going to
+	 exit anyway. */
+      obstack_init (&stk);
+      for (i = 0; session.execargs[i]; i++)
+	expand_arg (&stk, session.execargs[i]);
+      obstack_1grow (&stk, 0);
+      
+      argv = xmalloc (sizeof *argv * (i + 1));
+      for (i = 0, p = obstack_finish (&stk); *p; p += strlen (p) + 1, i++)
+	argv[i] = p;
+      argv[i] = NULL;
+	
+      remote_server = make_local_connection (session.execpath, argv);
       if (!remote_server)
 	{
 	  service_unavailable (&remote_client);
 	  exit (EXIT_FAILURE);
 	}
 
-      assign_string (&session.clientname, recipient);
       anubis_changeowner (recipient); /* FIXME: Contains PAM auth. Is it OK? */
 
       open_rcfile (CF_CLIENT);
       process_rcfile (CF_CLIENT);
 
-      /* FIXME: Other sections? */ 
-      rcfile_process_section (CF_CLIENT, "RULE", NULL, msg);
+      rcfile_call_section (CF_CLIENT, incoming_mail_rule, NULL, msg);
       
       transfer_header (msg->header);
       transfer_body (msg);
@@ -122,18 +213,94 @@ deliver (const char *recipient, MESSAGE *msg)
     }
 }
 
+/* Extract sender e-mail from the UNIX 'From ' line and save it in
+   from_address */
+static void
+save_sender_address (char *from_line)
+{
+  char *p;
+
+  from_line += 5;
+  p = strchr (from_line, ' ');
+  if (p)
+    assign_string_n (&from_address, from_line, p - from_line);
+  else
+    /* Should not happen, but anyway ... */
+    assign_string (&from_address, from_line); 
+}
+
+#define DEFAULT_FROM_ADDRESS "" /* FIXME: a better value?
+				   postmaster@localhost? */
+
+/* Ensure from_address is set. */
+static void
+ensure_sender_address (MESSAGE *msg)
+{
+  if (!from_address)
+    {
+      ASSOC *p = list_locate (msg->header, "From", anubis_assoc_cmp);
+      if (p)
+	{
+	  /* Find the email address itself. It is a rather simplified
+	     logic, but it seems to be sufficient for the purpose */
+	  char *q = strchr (p->value, '@');
+	  if (!q)
+	    assign_string (&from_address, p->value);
+	  else
+	    {
+	      char *start, *end;
+	      
+	      for (start = q; start > p->value; start--)
+		{
+		  if (*start == '<' || isspace (*start))
+		    {
+		      start++;
+		      break;
+		    }
+		}
+
+	      for (end = q; *end; end++)
+		{
+		  if (*end == '>' || isspace (*end))
+		    {
+		      end--;
+		      break;
+		    }
+		}
+	      assign_string_n (&from_address, start, end - start + 1);
+	    }
+	}
+      else
+	assign_string (&from_address, DEFAULT_FROM_ADDRESS);
+    }
+  remcrlf (from_address);
+}
+
+
+/* Run in MDA mode */
 void
 mda ()
 {
   char **p;
   MESSAGE msg;
-
+  char buf[128];
+  char *line = NULL;
+  
   create_stdio_stream (&remote_client);
 
   message_init (&msg);
-  collect_headers (&msg);
-  collect_body (&msg);
+
+  /* Read eventual From line */
+  recvline (SERVER, remote_client, buf, sizeof (buf) - 1);
+  if (memcmp (buf, "From ", 5) == 0)
+    save_sender_address (buf);
+  else
+    assign_string (&line, buf);
   
+  collect_headers (&msg, line);
+  ensure_sender_address (&msg);
+  collect_body (&msg);
+
   signal (SIGCHLD, SIG_DFL);
   for (p = x_argv; *p; p++)
     deliver (*p, &msg);
