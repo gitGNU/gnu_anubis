@@ -35,6 +35,18 @@ static void transfer_header (ANUBIS_LIST *);
 static void transfer_body (MESSAGE *);
 static void process_data (MESSAGE *);
 static int handle_ehlo (char *, char *, size_t);
+
+
+
+static char *smtp_ehlo_domain_name = NULL;
+
+static char *
+get_ehlo_domain (void)
+{
+  return smtp_ehlo_domain_name ? smtp_ehlo_domain_name : get_localname ();
+}
+
+
 
 
 /* Collect and send headers */
@@ -363,7 +375,7 @@ smtp_begin (void)
   get_response_smtp (CLIENT, remote_server, command, sizeof (command) - 1);
 
   /* now send the ehlo command */
-  snprintf (command, sizeof (command), "EHLO %s" CRLF, get_localname ());
+  snprintf (command, sizeof (command), "EHLO %s" CRLF, get_ehlo_domain ());
   swrite (CLIENT, remote_server, command);
   handle_ehlo (command, command, sizeof (command) - 1);
 }
@@ -543,9 +555,29 @@ process_command (MESSAGE * msg, char *command)
   return 0;
 }
 
+static void
+save_ehlo_domain(char *command)
+{
+  char *p, *endp;
+  
+  for (p = command + 5 /* legnth of EHLO + initial space */;
+       *p && isspace (*p);
+       p++)
+    ;
+
+  for (endp = p + strlen (p) - 1; endp >= p && isspace(*endp); endp--)
+    ;
+  endp[1] = 0;
+  xfree(smtp_ehlo_domain_name);
+  smtp_ehlo_domain_name = strdup(p);
+}
+
 static int
 handle_ehlo (char *command, char *reply, size_t reply_size)
 {
+  if (!smtp_ehlo_domain_name)
+    save_ehlo_domain (command);
+    
   get_response_smtp (CLIENT, remote_server, reply, reply_size - 1);
 
   if (strstr (reply, "STARTTLS"))
@@ -553,9 +585,6 @@ handle_ehlo (char *command, char *reply, size_t reply_size)
 				   encryption. */
 
   xdatabase_capability (reply, reply_size);
-
-  if (topt & T_SSL_FINISHED)
-    fprintf (stderr, " + FIXME +\n"); /* FIXME!!! */
 
 #ifdef USE_SSL
   if ((topt & T_SSL_ONEWAY)
@@ -605,7 +634,7 @@ handle_ehlo (char *command, char *reply, size_t reply_size)
          Send the EHLO command (after the TLS/SSL negotiation).
        */
 
-      snprintf (ehlo, sizeof (ehlo), "EHLO %s" CRLF, get_localname ());
+      snprintf (ehlo, sizeof (ehlo), "EHLO %s" CRLF, get_ehlo_domain ());
       swrite (CLIENT, remote_server, ehlo);
       get_response_smtp (CLIENT, remote_server, reply, reply_size);
     }
