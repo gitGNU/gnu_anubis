@@ -1,4 +1,12 @@
-2003-02-20  Sergey Poznyakoff  <gray@Mirddin.farlep.net>
+2003-02-20  Sergey Poznyakoff  
+
+	* testsuite/Makefile.am: Removed erroneous distclean-local
+	* testsuite/data/Makefile.am: Fixeed rules for generating
+	  *.gpg files.
+	* testsuite/data/pubring.asc: Updated
+	* testsuite/data/secring.asc: New file
+
+2003-02-20  Sergey Poznyakoff  
 
 	* configure.ac: Define ANUBIS_GPGFILES if GPG is enabled.
 	* contrib/Makefile.am: Added msg2smtp.pl to EXTRA_DIST.
