@@ -1,18 +1,25 @@
-2003-05-28  Sergey Poznyakoff 
+2003-05-29  Wojciech Polak
+
+	* configure.ac: Set AM_GNU_GETTEXT_VERSION(0.12.1).
+	* m4/Makefile.am: Added nls.m4 and po.m4.
+	* po/Makevars: Added MSGID_BUGS_ADDRESS.
+	* Makefile.am: Bumped to GNU Automake 1.7.5.
+
+2003-05-28  Sergey Poznyakoff
 
 	* src/tls.c (start_ssl_server): Bugfix
 	* testsuite/etc/tlsoneway.in: Use TOP_SRCDIR to access
-	PEM file.
+	  PEM file.
 
-2003-05-27  Sergey Poznyakoff  
+2003-05-27  Sergey Poznyakoff
 
 	* TODO: Updated
 	* src/auth.c: Removed superfluous return
 	* src/log.c: Removed unneded HAVE_VSNPRINTF
 	* src/tls.c: Provide push/pull functions to work with local
-	mailers.
+	  mailers.
 	* src/tunnel.c (transfer_command): TLS can be used with
-	local mailers.
+	  local mailers.
 	* testsuite/mta.c: Added TLS support (only with GnuTLS).
 
 	* testsuite/etc/tlsoneway.pat: New file.
@@ -23,7 +30,7 @@
 
 	* testsuite/data/anubis.pem: New file
 	* testsuite/data/Makefile.am: Added new file.
-	
+
 2003-05-11  Wojciech Polak
 
 	* src/help.c (print_usage): Added missing command line options.
