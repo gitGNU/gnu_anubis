@@ -71,7 +71,9 @@ header_assoc(char *line)
 		entry->key = xmalloc(len + 1);
 		memcpy(entry->key, line, len);
 		entry->key[len] = 0;
-		entry->value = strdup(p + 1);
+		for (p++; *p && isspace(*p); p++)
+			;
+		entry->value = strdup(p);
 	} else {
 		/* Malformed header. Save everything as rhs */
 		entry->key = NULL;
