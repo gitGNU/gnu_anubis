@@ -61,7 +61,7 @@ init_ssl_libs(void)
 	return;
 }
 
-static char *
+static const char *
 _ssl_strerror(int rc)
 {
 	return ERR_error_string(rc, NULL);
@@ -231,6 +231,7 @@ init_ssl_server(void)
 void *
 start_ssl_server(int sd_client)
 {
+	SESS *sd;
 	SSL *ssl = 0;
 	SSL_CTX *ctx = init_ssl_server();
 	
@@ -277,7 +278,7 @@ cipher_info(SSL *ssl_local)
 		SSL_CIPHER_get_bits(cipher, &bits);
 		info(VERBOSE,
 		     ngettext("%s connection using %s (%u bit)",
-			      "%s connection using %s (%u bits)"
+			      "%s connection using %s (%u bits)",
 			      bits),
 		     SSL_CIPHER_get_version(cipher),
 		     SSL_CIPHER_get_name(cipher), bits);
