@@ -437,7 +437,7 @@ anubis_get_db_record (const char *username, ANUBIS_USER * usr)
   rc = anubis_db_get_record (db, username, usr);
   switch (rc) {
   case ANUBIS_DB_SUCCESS:
-    info (VERBOSE, _("Found record for `%s'"), username);
+    info (VERBOSE, _("Found record for `%s'."), username);
     break;
     
   case ANUBIS_DB_FAIL:
@@ -447,7 +447,7 @@ anubis_get_db_record (const char *username, ANUBIS_USER * usr)
     break;
     
   case ANUBIS_DB_NOT_FOUND:
-    info (VERBOSE, _("Record for `%s' not found"), username);
+    info (VERBOSE, _("Record for `%s' not found."), username);
     break;
   }
 
