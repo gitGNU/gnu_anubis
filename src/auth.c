@@ -31,7 +31,6 @@ auth_tunnel(void)
 	info(NORMAL, _("Welcome user %s !"), session.client);
 	open_rcfile(CF_CLIENT);
 	process_rcfile(CF_CLIENT);
-	return;
 }
 
 /***********************
