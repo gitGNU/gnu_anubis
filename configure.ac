@@ -185,7 +185,7 @@ AC_SUBST(ANUBISADM)
 
 MU_CHECK_GSASL(0.0.2, [
     AC_DEFINE(WITH_GSASL,1,[Define if Anubis is using GNU SASL])
-    ANUBISADM=anubisadm
+    ANUBISADM='$(adm_programs)'
 
     AC_CHECK_LIB(gdbm, gdbm_open,
                  [LIBS="$LIBS -lgdbm"
