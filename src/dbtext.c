@@ -44,6 +44,7 @@ dbtext_open (void **dp, ANUBIS_URL * url, enum anubis_db_mode mode,
 
     case anubis_db_rdwr:
       tmode = "a+";
+      break;
     }
 
   path = anubis_url_full_path (url);
@@ -66,37 +67,80 @@ dbtext_close (void *d)
   return ANUBIS_DB_SUCCESS;
 }
 
-static const char delim[] = " \t\r\n";
+static char *
+next_field (const char *text, const char **endp)
+{
+  const char *p;
+  char *field;
+  int length;
+  int nescapes = 0;
+
+  if (!text)
+    return NULL;
+  for (p = text; *p && *p != ':' && *p != '\n'; p++)
+    if (*p == '\\' && p[1] == ':')
+      {
+	nescapes++;
+	p++;
+      }
+
+  if (endp)
+    *endp = p + 1;
+  length = p - text - nescapes;
+  if (length == 0)
+    return NULL;
+  field = xmalloc (length + 1);
+  if (nescapes)
+    {
+      char *q;
+      for (q = field, p = text; *p != ':'; )
+	{
+	  if (*p == '\\' && p[1] == ':')
+	    p++;
+	  *q++ = *p++;
+	}
+      *q = 0;
+    }
+  else
+    {
+      memcpy (field, text, length);
+      field[length] = 0;
+    }
+  return field;
+}
+
+static void
+put_field (FILE *fp, const char *text)  
+{
+  if (!text)
+    return;
+  for (; *text; text++)
+    {
+      if (*text == ':')
+	fputc ('\\', fp);
+      fputc (*text, fp);
+    }
+}
 
 int
-dbtext_to_record (char *p, ANUBIS_USER * rec)
+dbtext_to_record (const char *p, ANUBIS_USER *rec)
 {
   memset (rec, 0, sizeof *rec);
   while (*p && isspace (*p))
     p++;
   if (*p == '#')
     return ANUBIS_DB_NOT_FOUND;
-  p = strtok (p, delim);
-  if (!p)
+  rec->smtp_authid = next_field (p, &p); 
+  if (!rec->smtp_authid)
     return ANUBIS_DB_NOT_FOUND;
-  rec->smtp_authid = strdup (p);
-
-  p = strtok (NULL, delim);
-  if (!p)
+  rec->smtp_passwd = next_field (p, &p); 
+  if (!rec->smtp_passwd)
     {
       free (rec->smtp_authid);
       return ANUBIS_DB_FAIL;
     }
-  rec->smtp_passwd = strdup (p);
-
-  p = strtok (NULL, delim);
-  if (p)
-    {
-      rec->username = strdup (p);
-      p = strtok (NULL, delim);
-      if (p)
-	rec->rcfile_name = strdup (p);
-    }
+  rec->username = next_field (p, &p);
+  rec->rcfile_name = next_field (p, &p); 
   return ANUBIS_DB_SUCCESS;
 }
 
@@ -110,31 +154,36 @@ dbtext_get (void *d, const char *key, ANUBIS_USER * rec, int *errp)
   fseek (fp, 0, SEEK_SET);
   while ((p = fgets (buf, sizeof buf, fp)) != NULL)
     {
+      char *kp;
+      
       while (*p && isspace (*p))
 	p++;
-      if (*p == '#')
+      if (*p == '#' || *p == 0)
 	continue;
-      for (p = buf; *p && !strchr (delim, *p); p++)
-	;
-      if (!*p || memcmp (buf, key, p - buf))
-	continue;
+      kp = next_field (p, NULL);
+      if (!kp || strcmp (kp, key))
+	{
+	  free (kp);
+	  continue;
+	}
+      free (kp);
       return dbtext_to_record (buf, rec);
     }
   return ferror (fp) ? ANUBIS_DB_FAIL : ANUBIS_DB_NOT_FOUND;
 }
 
 static int
-dbtext_put (void *d, const char *key, ANUBIS_USER * rec, int *errp)
+dbtext_put (void *d, const char *key, ANUBIS_USER *rec, int *errp)
 {
   FILE *fp = d;
-  fprintf (fp, "%s\t%s", rec->smtp_authid, rec->smtp_passwd);
-  if (rec->username)
-    {
-      fprintf (fp, "\t%s", rec->username);
-      if (rec->rcfile_name)
-	fprintf (fp, "\t%s", rec->rcfile_name);
-    }
-  fprintf (fp, "\n");
+  put_field (fp, rec->smtp_authid);
+  fputc (':', fp); 
+  put_field (fp, rec->smtp_passwd);
+  fputc (':', fp);
+  put_field (fp, rec->username);
+  fputc (':', fp);
+  put_field (fp, rec->rcfile_name);
+  fputc ('\n', fp);
   return ferror (fp) ? ANUBIS_DB_FAIL : ANUBIS_DB_SUCCESS;
 }
 
@@ -169,14 +218,20 @@ dbtext_delete (void *d, const char *keystr, int *ecode)
   while ((p = fgets (buf, sizeof buf, fp)) != NULL)
     {
       size_t len;
-
+      char *kp;
+      
       while (*p && isspace (*p))
 	p++;
-      if (*p == '#')
+      if (*p == '#' || *p == 0)
 	continue;
-      p = strtok (p, delim);
-      if (!p || strcmp (p, keystr))
-	continue;
+
+      kp = next_field (p, NULL);
+      if (!kp || strcmp (kp, keystr))
+	{
+	  free (kp);
+	  continue;
+	}
+      free (kp);
       len = strlen (buf);
       memset (buf, '#', len - 1);
       buf[len - 1] = 0;
