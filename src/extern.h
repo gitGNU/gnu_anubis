@@ -25,12 +25,6 @@
 extern const char version[];
 extern const char copyright[];
 
-struct list {
- char *line;
- char *modify;
- struct list *next;
-};
-
 struct options_struct {
  int termlevel;
  int uloglevel;
@@ -58,22 +52,6 @@ struct session_struct {
  unsigned int tunnel_port;
  unsigned int mta_port;
  unsigned int socks_port;
- struct list *transmap;
- struct list *transmap_tail;
-};
-
-struct message_struct {
- char *body;
- char *body_append;
- struct list *mime_hdr;
- char *boundary;
- char *exteditor;
- struct list *addlist;
- struct list *remlist;
- struct list *modlist;
- struct list *addlist_tail;
- struct list *remlist_tail;
- struct list *modlist_tail;
 };
 
 struct rm_struct {
@@ -108,13 +86,6 @@ struct secure_struct {
 };
 #endif /* HAVE_SSL */
 
-#ifdef HAVE_GPG
-struct gpg_struct {
- char *keys;
- char *rm_key;
- char *passphrase;
-};
-#endif /* HAVE_GPG */
 
 extern struct options_struct options;
 extern struct session_struct session;
@@ -125,12 +96,7 @@ extern struct rm_struct rm;
 extern struct secure_struct secure;
 #endif /* HAVE_TLS or HAVE_SSL */
 
-#ifdef HAVE_GPG
-extern struct gpg_struct gpg;
-#endif /* HAVE_GPG */
-
 extern unsigned long topt;
-extern unsigned long mopt;
 extern unsigned long ropt;
 
 extern void *remote_client;
