@@ -165,6 +165,7 @@ expand_ampersand(char *value, char *old_value)
 		}
 		if (value && value[0])
 			obstack_grow(&stk, value, strlen(value));
+		obstack_1grow(&stk, 0);
 		p = strdup(obstack_finish(&stk));
 		obstack_free(&stk, NULL);
 	}
