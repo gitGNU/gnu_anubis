@@ -1,3 +1,13 @@
+2004-06-01  Sergey Poznyakoff
+
+	* configure.ac: Install anubisusr into bindir.
+	* src/Makefile.am: Likewise.
+	
+	* m4/anubis.m4: Quote the defun name
+	* m4/gpgme.m4: Likewise.
+	* m4/gsasl.m4: Likewise.
+	* m4/guile.m4: Likewise.
+
 2004-05-31  Sergey Poznyakoff  
 
 	* NEWS: Updated
