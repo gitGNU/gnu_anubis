@@ -27,66 +27,127 @@
 
 #ifdef WITH_MYSQL
 
+#include "sql.h"
 #include <mysql/mysql.h>
 
 /* MySQL URL:
 
    mysql://user:password@host/dbname;
-          table=STRING;authid=STRING;passwd=STRING[;user=STRING][;rccol=STRING]
-          [;port=NUMBER][;socket=STRING][;bufsize=NUMBER]
+          table=STRING;authid=STRING;passwd=STRING[;account=STRING]
+	  [;rccol=STRING][;port=NUMBER][;socket=STRING][;bufsize=NUMBER]
 */
 
-struct anubis_mysql_db {
+struct mysql_db_data {
 	MYSQL mysql;
-	char *table;
-	char *authid;
-	char *passwd;
-	char *user;
-	char *rccol;
-	char *buf;
-	size_t bufsize;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 };
 
-#define ERR_MISS         0
-#define ERR_BADBUFSIZE   1
-#define ERR_BADPORT      2 
-#define ERR_CANTCONNECT  3 
+static int
+my_sql_release_result(struct anubis_sql_db *amp)
+{
+	struct mysql_db_data *mdata = amp->data;
 
-static char *open_err_tab[] = {
-	N_("Required parameters are missing"), /* ERR_MISS */
-	N_("Invalid buffer size"),             /* ERR_BADBUFSIZE */
-	N_("Invalid port number"),             /* ERR_BADPORT */
-	N_("Cannot connect to the database"),  /* ERR_CANTCONNECT */
-};
+	if (mdata->result) {
+		mysql_free_result(mdata->result);
+		mdata->result = NULL;
+		mdata->row = NULL;
+	}
+	return 0;
+}
 
-#define open_error_text(s) gettext(open_err_tab[s])
+static int
+my_sql_query(struct anubis_sql_db *amp)
+{
+	struct mysql_db_data *mdata = amp->data;
+	int rc;
+	
+	my_sql_release_result(amp);
+	
+	rc = mysql_query(&mdata->mysql, amp->buf);
+	if (rc)
+		return rc;
+	mdata->result = mysql_store_result(&mdata->mysql);
+	return 0;
+}
+
+static size_t
+my_sql_num_tuples(struct anubis_sql_db *amp)
+{
+	struct mysql_db_data *mdata = amp->data;
+
+	if (!mdata->result)
+		return 0;
+	return mysql_num_rows(mdata->result);
+}
+
+static size_t
+my_sql_num_columns(struct anubis_sql_db *amp)
+{
+	struct mysql_db_data *mdata = amp->data;
+
+	if (!mdata->result)
+		return 0;
+	return mysql_num_fields(mdata->result);
+}
+
+static int
+my_sql_get_tuple(struct anubis_sql_db *amp, size_t i)
+{
+	struct mysql_db_data *mdata = amp->data;
+
+	if (!mdata->result)
+		return 1;
+	mdata->row = mysql_fetch_row(mdata->result);
+	if (!mdata->row)
+		return 1;
+	return 0;
+}
+
+static const char *
+my_sql_get_column(struct anubis_sql_db *amp, size_t i)
+{
+	struct mysql_db_data *mdata = amp->data;
+
+	if (!mdata->row)
+		return NULL;
+	return mdata->row[i];
+}
 
 /* Open the plaintext database. ARG is the full pathname to the file */
 static int
 mysql_db_open (void **dp, ANUBIS_URL *url, enum anubis_db_mode mode,
 	       char **errp)
 {
-	struct anubis_mysql_db *amp = NULL;
+	struct anubis_sql_db *amp = NULL;
 	const char *table = anubis_url_get_arg(url, "table");
 	const char *authid = anubis_url_get_arg(url, "authid");
 	const char *passwd = anubis_url_get_arg(url, "passwd");
-	const char *user = anubis_url_get_arg(url, "user");
+	const char *user = anubis_url_get_arg(url, "account");
 	const char *rccol = anubis_url_get_arg(url, "rccol");
 	const char *portstr = anubis_url_get_arg(url, "port");
 	const char *s = anubis_url_get_arg(url, "bufsize");
 	int port = 0;
 	size_t bufsize = 1024;
+	struct mysql_db_data *mdata;
+	
+	/* Provide reasonable defaults */
+	if (!table)
+		table = "users";
+	if (!authid)
+		authid = "authid";
+	if (!passwd)
+		passwd = "passwd";
+	if (!user)
+		user = "account";
+	if (!rccol)
+		rccol = "rcfile";
 
-	if (!table || !authid || !passwd || !user || !rccol) {
-		*errp = open_error_text(ERR_MISS);
-		return ANUBIS_DB_FAIL;
-	}
-	 
 	if (s) {
 		char *p;
 		bufsize = strtoul(s, &p, 10);
 		if (*p) {
-			*errp = open_error_text(ERR_BADBUFSIZE);
+			*errp = sql_open_error_text(ERR_BADBUFSIZE);
 			return ANUBIS_DB_FAIL;
 		}
 	}
@@ -95,7 +156,7 @@ mysql_db_open (void **dp, ANUBIS_URL *url, enum anubis_db_mode mode,
 		char *p;
 		port = strtoul(portstr, &p, 10);
 		if (*p) {
-			*errp = open_error_text(ERR_BADPORT);
+			*errp = sql_open_error_text(ERR_BADPORT);
 			return ANUBIS_DB_FAIL;
 		}
 	}
@@ -103,16 +164,27 @@ mysql_db_open (void **dp, ANUBIS_URL *url, enum anubis_db_mode mode,
 	amp = xmalloc(sizeof(*amp));
 	amp->buf = xmalloc(bufsize);
 	amp->bufsize = bufsize;
-        mysql_init(&amp->mysql);
-	if (!mysql_real_connect(&amp->mysql, 
+	mdata = xmalloc(sizeof(*mdata));
+	amp->data = mdata;
+        mysql_init(&mdata->mysql);
+	if (!mysql_real_connect(&mdata->mysql, 
 				url->host, url->user, url->passwd,
 				url->path, port,
 				anubis_url_get_arg(url, "socket"),
 				0)) {
+		free(amp->data);
 		free(amp);
-		*errp = open_error_text(ERR_CANTCONNECT);
+		*errp = sql_open_error_text(ERR_CANTCONNECT);
 		return ANUBIS_DB_FAIL;
 	}
+
+	amp->query = my_sql_query;         
+	amp->num_tuples	= my_sql_num_tuples;     
+	amp->num_columns = my_sql_num_columns;    
+	amp->release_result = my_sql_release_result; 
+	amp->get_tuple = my_sql_get_tuple;      
+	amp->get_column	= my_sql_get_column;     
+	
 	amp->table = strdup(table);
 	amp->authid = strdup(authid);
 	amp->passwd = strdup(passwd);
@@ -126,8 +198,13 @@ mysql_db_open (void **dp, ANUBIS_URL *url, enum anubis_db_mode mode,
 static int
 mysql_db_close (void *d)
 {
-	struct anubis_mysql_db *amp = d;
-	mysql_close(&amp->mysql);
+	struct anubis_sql_db *amp = d;
+	struct mysql_db_data *mdata = amp->data;
+
+	my_sql_release_result(amp);
+	mysql_close(&mdata->mysql);
+	
+	free(amp->data);
 	free(amp->table);
 	free(amp->authid);
 	free(amp->passwd);
@@ -137,146 +214,20 @@ mysql_db_close (void *d)
 	return ANUBIS_DB_SUCCESS;
 }
 
-static int
-mysql_db_get (void *d, char *key, ANUBIS_USER *rec, int *errp)
-{
-        MYSQL_RES *result;
-        MYSQL_ROW row;
-	struct anubis_mysql_db *amp = d;
-
-	snprintf(amp->buf, amp->bufsize,
-		 "SELECT %s,%s,%s,%s FROM %s WHERE %s='%s'",
-		 amp->authid,
-		 amp->passwd,
-		 amp->user,
-		 amp->rccol,
-		 amp->table,
-		 amp->authid,
-		 key);
-
-	*errp = mysql_query(&amp->mysql, amp->buf);
-	if (*errp)
-		return ANUBIS_DB_FAIL;
-        if (!(result = mysql_store_result(&amp->mysql)))
-		return ANUBIS_DB_FAIL;
-        if (mysql_num_rows(result) == 0) {
-		mysql_free_result(result);
-		return ANUBIS_DB_NOT_FOUND;
-	}
-
-	row = mysql_fetch_row(result);
-	
-	rec->smtp_authid = strdup(row[0]);
-	rec->smtp_passwd = strdup(row[1]);
-	if (row[2])
-		rec->username = strdup(row[2]);
-	if (row[3])
-		rec->rcfile_name = strdup(row[3]);
-	mysql_free_result(result);
-	return ANUBIS_DB_SUCCESS;
-}
-
-static int
-mysql_db_list(void *d, LIST *list, int *ecode)
-{
-	struct anubis_mysql_db *amp = d;
-        MYSQL_RES *result;
-	size_t nrows, i;
-	
-	snprintf(amp->buf, amp->bufsize,
-		 "SELECT %s,%s,%s,%s FROM %s",
-		 amp->authid,
-		 amp->passwd,
-		 amp->user,
-		 amp->rccol,
-		 amp->table);
-	
-	*ecode = mysql_query(&amp->mysql, amp->buf);
-	if (*ecode)
-		return ANUBIS_DB_FAIL;
-        if (!(result = mysql_store_result(&amp->mysql)))
-		return ANUBIS_DB_FAIL;
-        if ((nrows = mysql_num_rows(result)) == 0) {
-		mysql_free_result(result);
-		return ANUBIS_DB_NOT_FOUND;
-	}
-
-	for (i = 0; i < nrows; i++) {
-		ANUBIS_USER *rec;
-		MYSQL_ROW row = mysql_fetch_row(result);
-		if (!row)
-			break;
-		rec = xmalloc(sizeof(*rec));
-		rec->smtp_authid = strdup(row[0]);
-		rec->smtp_passwd = strdup(row[1]);
-		if (row[2])
-			rec->username = strdup(row[2]);
-		if (row[3])
-			rec->rcfile_name = strdup(row[3]);
-		list_append(list, rec);
-	}
-	
-	return ANUBIS_DB_SUCCESS;
-}
-
-#define MSTR(s) ((s) ? (s) : "NULL")
-
-static int
-mysql_db_put (void *d, char *key, ANUBIS_USER *rec, int *errp)
-{
-	struct anubis_mysql_db *amp = d;
-
-	snprintf(amp->buf, amp->bufsize,
-		 "REPLACE INTO %s (%s,%s,%s,%s) VALUES ('%s','%s','%s','%s')",
-		 amp->table,
-		 amp->authid,
-		 amp->passwd,
-		 amp->user,
-		 amp->rccol,
-		 rec->smtp_authid,
-		 rec->smtp_passwd,
-		 MSTR(rec->username),
-		 MSTR(rec->rcfile_name));
-	*errp = mysql_query(&amp->mysql, amp->buf);
-	if (*errp)
-		return ANUBIS_DB_FAIL;
-	return ANUBIS_DB_SUCCESS;
-}
-
-static int
-mysql_db_delete(void *d, char *keystr, int *ecode)
-{
-	struct anubis_mysql_db *amp = d;
-
-	snprintf(amp->buf, amp->bufsize,
-		 "DELETE FROM %s WHERE %s='%s'",
-		 amp->table,
-		 amp->authid,
-		 keystr);
-	*ecode = mysql_query(&amp->mysql, amp->buf);
-	if (*ecode)
-		return ANUBIS_DB_FAIL;
-	return ANUBIS_DB_SUCCESS;
-}
-
 const char *
 mysql_db_strerror(void *d, int rc)
 {
-	struct anubis_mysql_db *amp = d;
-	return mysql_error(&amp->mysql);
+	struct anubis_sql_db *amp = d;
+	return mysql_error(amp->data);
 }
 
 void
 mysql_db_init (void)
 {
-	anubis_db_register("mysql",
-			   mysql_db_open,
-			   mysql_db_close,
-			   mysql_db_get,
-			   mysql_db_put,
-			   mysql_db_delete,
-			   mysql_db_list,
-			   mysql_db_strerror);
+	sql_db_init ("mysql",
+		     mysql_db_open,
+		     mysql_db_close,
+		     mysql_db_strerror);
 }
 
 #endif /* WITH_MYSQL */
