@@ -23,10 +23,11 @@
 ##
 
 EXTRA_DIST = \
- guile.m4\
  codeset.m4\
  gettext.m4\
  glibc21.m4\
+ gpgme.m4\
+ guile.m4\
  iconv.m4\
  intdiv0.m4\
  inttypes.m4\
