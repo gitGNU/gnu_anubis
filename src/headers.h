@@ -364,6 +364,7 @@ RC_REGEX *anubis_regex_compile(char *, int);
 void anubis_regex_free(RC_REGEX *);
 char *anubis_regex_source(RC_REGEX *);
 int anubis_regex_refcnt(RC_REGEX *);
+char *anubis_regex_replace(RC_REGEX *re, char *line, char *repl);
 
 /* rc.c */
 void rc_system_init(void);

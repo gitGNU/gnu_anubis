@@ -39,7 +39,7 @@
  Regular Expressions support
 *****************************/
 
-typedef int (*_match_fp) (RC_REGEX *, char *, int *, char ***);
+typedef int (*_match_fp) (RC_REGEX *, char *, int *, char ***, int *, int *);
 typedef int (*_refcnt_fp) (RC_REGEX *);
 typedef int (*_compile_fp) (RC_REGEX *, char *, int);
 typedef void (*_free_fp) (RC_REGEX *);
@@ -54,12 +54,12 @@ struct regex_vtab {
 
 static int posix_compile(RC_REGEX *, char *, int);
 static void posix_free(RC_REGEX *);
-static int posix_match(RC_REGEX *, char *, int *, char ***);
+static int posix_match(RC_REGEX *, char *, int *, char ***, int *, int *);
 static int posix_refcnt(RC_REGEX *);
 #ifdef HAVE_PCRE
 static int perl_compile(RC_REGEX *, char *, int);
 static void perl_free(RC_REGEX *);
-static int perl_match(RC_REGEX *, char *, int *, char ***);
+static int perl_match(RC_REGEX *, char *, int *, char ***, int *, int *);
 static int perl_refcnt(RC_REGEX *);
 #endif /* HAVE_PCRE */
 
@@ -97,10 +97,37 @@ regex_vtab_lookup(int flags)
 int
 anubis_regex_match(RC_REGEX *re, char *line, int *refc, char ***refv)
 {
+	int so, eo;
 	struct regex_vtab *vp = regex_vtab_lookup(re->flags);
 	if (!vp)
 		return -1;
-	return vp->match(re, line, refc, refv) == 0;
+	return vp->match(re, line, refc, refv, &so, &eo) == 0;
+}
+
+char *
+anubis_regex_replace(RC_REGEX *re, char *line, char *repl)
+{
+	int so, eo;
+	int refc;
+	char **refv;
+	struct regex_vtab *vp = regex_vtab_lookup(re->flags);
+	
+	if (!vp)
+		return NULL;
+	if (vp->match(re, line, &refc, &refv, &so, &eo) == 0) {
+		char *p = substitute(repl, refv);
+		int plen = strlen(p);
+		int newlen = strlen(line) - (eo - so) + plen + 1;
+		char *newstr = xmalloc(newlen);
+
+		memcpy(newstr, line, so);
+		memcpy(newstr + so, p, strlen(p));
+		strcpy(newstr + so + plen, line + eo);
+
+		xfree_pptr(refv);
+		return newstr;
+	}
+	return NULL;
 }
 
 int
@@ -178,7 +205,8 @@ posix_free(RC_REGEX *regex)
 }
 
 static int
-posix_match(RC_REGEX *regex, char *line, int *refc, char ***refv)
+posix_match(RC_REGEX *regex, char *line, int *refc, char ***refv,
+	    int *so, int *eo)
 {
 	regmatch_t *rmp;
 	int rc;
@@ -189,6 +217,8 @@ posix_match(RC_REGEX *regex, char *line, int *refc, char ***refv)
 	if (rc == 0 && re->re_nsub) {
 		int i;
 		*refv = xmalloc((re->re_nsub + 2) * sizeof(**refv));
+		*eo = rmp[0].rm_eo;
+		*so = rmp[0].rm_so;
 		for (i = 0; i <= re->re_nsub; i++) {
 			if (rmp[i].rm_so != -1) {
 				size_t matchlen = rmp[i].rm_eo - rmp[i].rm_so;
@@ -245,7 +275,8 @@ perl_free(RC_REGEX *regex)
 }
 
 static int
-perl_match(RC_REGEX *regex, char *line, int *refc, char ***refv)
+perl_match(RC_REGEX *regex, char *line, int *refc, char ***refv,
+	   int *so, int *eo)
 {
 	int rc;
 	int ovsize, count;
@@ -283,6 +314,8 @@ perl_match(RC_REGEX *regex, char *line, int *refc, char ***refv)
 		}
 		(*refv)[i] = NULL;
 		*refc = count;
+		*so = ovector[0];
+		*eo = ovector[1];
 	} else		
 		*refc = 0;
 	xfree(ovector);
