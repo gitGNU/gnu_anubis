@@ -176,7 +176,6 @@ anubis_regex_compile(char *line, int opt)
 	p = xmalloc(sizeof(*p));
 	if (vp->compile(p, line, opt)) {
 		xfree(p);
-		p = NULL;
 	} else {
 		p->src = strdup(line);
 		p->flags = opt;

@@ -960,7 +960,6 @@ expr_eval(struct eval_env *env, RC_EXPR *expr)
 	
 	if (env->refstr && anubis_regex_refcnt(expr->re)) {
 		xfree_pptr(env->refstr);
-		env->refstr = NULL;
 		env->refcnt = 0;
 	}
 

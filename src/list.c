@@ -67,8 +67,7 @@ list_destroy(struct list **plist, list_iterator_t user_free, void *data)
 		xfree(p);
 		p = next;
 	}
-	xfree(*plist);
-	*plist = NULL;
+	xfree(*plist); /* zeroes *plist as well */
 }
 
 void *

@@ -109,7 +109,6 @@ collect_headers(MESSAGE *msg)
 					get_boundary(msg, line);
 				add_header(msg->header, line);
 				xfree(line);
-				line = NULL;
 			} 
 			if (buf[0] == 0)
 				break;

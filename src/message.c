@@ -204,9 +204,7 @@ message_free(MESSAGE *msg)
 	destroy_string_list(&msg->mime_hdr);
 	
 	xfree(msg->body);
-	msg->body = NULL;
 	xfree(msg->boundary);
-	msg->boundary = NULL;
 }
 
 /* EOF */
