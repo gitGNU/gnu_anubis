@@ -24,21 +24,30 @@ EXTRA_DIST = \
  add1.pat\
  add2.pat\
  add3.pat\
+ del1.pat\
+ del2.pat\
+ del3.pat\
+ del4.pat\
  empty.pat\
- modify.pat\
+ mime1.pat\
+ mime2.pat\
  mult.pat\
  std.pat\
+ del.in\
  empty.in\
+ entire.in\
  std.in\
  simple.in
 
-noinst_DATA = empty.rc std.rc simple.rc
-CLEANFILES = empty.rc std.rc simple.rc
+noinst_DATA = empty.rc entire.rc del.rc std.rc simple.rc
+CLEANFILES = empty.rc entire.rc del.rc std.rc simple.rc
 DISTCLEANFILES = *.log
 
+del.rc: del.in
 empty.rc: empty.in
-std.rc: std.in
+entire.rc: entire.in
 simple.rc: simple.in
+std.rc: std.in
 
 SUFFIXES=.in .rc
 
