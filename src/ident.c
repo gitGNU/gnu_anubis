@@ -91,6 +91,7 @@ auth_ident (struct sockaddr_in *addr, char **user)
   struct servent *sp;
   struct sockaddr_in ident;
   char *buf = NULL;
+  char inetd_buf[LINEBUFFER];
   size_t size = 0;
   int sd = 0;
   int rc;
@@ -120,10 +121,10 @@ auth_ident (struct sockaddr_in *addr, char **user)
   info (VERBOSE, _("IDENT: connected to %s:%u"),
 	inet_ntoa (ident.sin_addr), ntohs (ident.sin_port));
 
-  snprintf (buf, LINEBUFFER,
+  snprintf (inetd_buf, sizeof inetd_buf,
 	    "%u , %u" CRLF, ntohs (addr->sin_port), session.anubis_port);
 
-  if ((rc = stream_write (str, buf, strlen (buf), &nbytes)))
+  if ((rc = stream_write (str, inetd_buf, strlen (inetd_buf), &nbytes)))
     {
       anubis_error (0, 0,
 		    _("IDENT: stream_write() failed: %s."),
@@ -183,7 +184,7 @@ auth_ident (struct sockaddr_in *addr, char **user)
 	}
     }
 
-  info (VERBOSE, _("IDENT: resolved remote user to %s."), user);
+  info (VERBOSE, _("IDENT: resolved remote user to %s."), *user);
   return 1;			/* success */
 }
 
