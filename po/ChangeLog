@@ -1,3 +1,9 @@
+2003-06-25  Wojciech Polak
+
+	* pl.po: New file (Sergey Poznyakoff).
+	* ru.po: Likewise.
+	* LINGUAS: Added 'pl' and 'ru'.
+
 2003-03-17  Wojciech Polak
 
 	* ro.po: New file (Laurentiu Buzdugan).
@@ -44,5 +50,8 @@
 	* fr.po: New file (Michel Robitaille).
 	* LINGUAS: Added 'fr'.
 
- EOF
-
+
+Local Variables:
+mode: change-log
+version-control: never
+End:
