@@ -50,20 +50,22 @@ void
 message_remove_headers(MESSAGE *msg, char *key)
 {
         ASSOC *asc;
+        ITERATOR *itr;
         RC_REGEX *regex = anubis_regex_compile(key, 0);
 	
-        for (asc = list_first(msg->header); asc;
-	     asc = list_next(msg->header)) {
+        itr = iterator_create(msg->header);
+        for (asc = iterator_first(itr); asc; asc = iterator_next(itr)) {
 		char **rv;
 		int rc;
 
 		if (anubis_regex_match(regex, asc->key, &rc, &rv)) {
-			list_remove_current(msg->header);
+			list_remove(msg->header, asc, NULL);
 			assoc_free(asc);
 		}
 		if (rc)
 			free_pptr(rv);
 	}
+	iterator_destroy(&itr);
 	anubis_regex_free(regex);
 }
 
@@ -72,9 +74,10 @@ void
 message_modify_headers(MESSAGE *msg, char *key, char *key2, char *value)
 {
 	ASSOC *asc;
-	
-	for (asc = list_first(msg->header); asc;
-	     asc = list_next(msg->header)) {
+	ITERATOR *itr;
+
+        itr = iterator_create(msg->header);
+	for (asc = iterator_first(itr); asc; asc = iterator_next(itr)) {
 		if (asc->key && strcasecmp(asc->key, key) == 0) {
 			if (key2) {
 				free(asc->key);
@@ -84,6 +87,7 @@ message_modify_headers(MESSAGE *msg, char *key, char *key2, char *value)
 			asc->value = strdup(value);
 		}
 	}
+	iterator_destroy(&itr);
 }
 
 void

@@ -31,7 +31,7 @@
 
 static int  transfer_command(void *, void *, MESSAGE *, char *);
 static void process_command(void *, void *, MESSAGE *, char *, int);
-static void transfer_header(void *, void *, struct list *);
+static void transfer_header(void *, void *, LIST *);
 static void transfer_body(void *, void *, MESSAGE *);
 static void process_data(void *, void *, MESSAGE *);
 
@@ -66,7 +66,7 @@ get_boundary(MESSAGE *msg, char *line)
 }
 
 static void
-add_header(struct list *list, char *line)
+add_header(LIST *list, char *line)
 {
 	ASSOC *asc = header_assoc(line);
 	list_append(list, asc);
@@ -143,21 +143,25 @@ write_assoc(void *sd_server, ASSOC *entry)
 }
 			
 void
-send_header(void *sd_server, struct list *list)
+send_header(void *sd_server, LIST *list)
 {
 	ASSOC *p;
+	ITERATOR *itr = iterator_create(list);
 
-	for (p = list_first(list); p; p = list_next(list)) 
+	for (p = iterator_first(itr); p; p = iterator_next(itr)) 
 		write_assoc(sd_server, p);
+	iterator_destroy(&itr);
 }
 
 void
-send_string_list(void *sd_server, struct list *list)
+send_string_list(void *sd_server, LIST *list)
 {
 	char *p;
+	ITERATOR *itr = iterator_create(list);
 
-	for (p = list_first(list); p; p = list_next(list)) 
+	for (p = iterator_first(itr); p; p = iterator_next(itr)) 
 		write_header_line(sd_server, p);
+	iterator_destroy(&itr);
 }
 
 
@@ -594,7 +598,7 @@ process_data(void *sd_client, void *sd_server, MESSAGE *msg)
 }
 	
 static void
-transfer_header(void *sd_client, void *sd_server, struct list *header_buf)
+transfer_header(void *sd_client, void *sd_server, LIST *header_buf)
 {
 	send_header(sd_server, header_buf);
 	swrite(CLIENT, sd_server, CRLF);

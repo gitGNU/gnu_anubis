@@ -60,9 +60,9 @@ struct assoc {
 };
 
 struct message_struct {
- struct list *commands; /* Associative list of SMTP commands */
- struct list *header;   /* Associative list of RFC822 headers */
- struct list *mime_hdr; /* List of lines before the first boundary marker */
+ LIST *commands; /* Associative list of SMTP commands */
+ LIST *header;   /* Associative list of RFC822 headers */
+ LIST *mime_hdr; /* List of lines before the first boundary marker */
  char *body;            /* Message body */
  char *boundary;        /* Additional data */
 };

@@ -48,7 +48,7 @@ enum rc_stmt_type {          /* Statement type: */
 
 struct rc_asgn {             /* Assignment */
 	char *lhs;           /* Left-hand side: A keyword */
-	struct list *rhs;    /* Right-hand side: A list of character strings */
+	LIST *rhs;    /* Right-hand side: A list of character strings */
 };
 
 enum bool_op {               /* Boolean operator */
@@ -125,7 +125,7 @@ struct rc_stmt {             /* General statement representation */
 #define RC_KW_UNKNOWN 1
 #define RC_KW_ERROR   2
 
-typedef int (*rc_kw_parser_t)(int method, int key, struct list *arg,
+typedef int (*rc_kw_parser_t)(int method, int key, LIST *arg,
 			      void *inv_data, void *func_data, MESSAGE *msg);
 
 struct rc_kwdef {

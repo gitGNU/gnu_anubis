@@ -42,7 +42,7 @@ sig_timeout(int code)
 void
 free_mem(void)
 {
-#if defined(HAVE_TLS) || defined(HAVE_SSL)
+#ifdef USE_SSL
 	xfree(secure.cafile);
 	xfree(secure.cert);
 	xfree(secure.key);
@@ -64,10 +64,10 @@ quit(int code)
 	memset(session.mta_username, 0, sizeof(session.mta_username));
 	memset(session.mta_password, 0, sizeof(session.mta_password));
 
-	/* FIXME */
+#ifdef USE_SSL
 	net_close(CLIENT, secure.client);
 	net_close(SERVER, secure.server);
-
+#endif
 #ifdef HAVE_SYSLOG
 	if ((topt & T_DAEMON) && !(topt & T_FOREGROUND))
 		closelog();

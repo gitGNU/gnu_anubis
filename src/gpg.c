@@ -283,7 +283,7 @@ gpg_free(void)
 #define KW_GPG_HOME               4
 
 int
-gpg_parser(int method, int key, struct list *arglist,
+gpg_parser(int method, int key, LIST *arglist,
 	   void *inv_data, void *func_data, MESSAGE *msg)
 {
 	char *arg = list_item(arglist, 0);

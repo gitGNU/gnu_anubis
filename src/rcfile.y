@@ -70,7 +70,7 @@ static int debug_level;
 		int part;
 		char *key;
 	} msgpart;
-	struct list *list;
+	LIST *list;
 };
 
 %token EOL T_BEGIN T_END AND OR 
@@ -893,11 +893,13 @@ asgn_eval(struct eval_env *env, RC_ASGN *asgn)
 
 	if (env->refstr) {
 		char *s;
-		struct list *arg = list_create();
-		for (s = list_first(asgn->rhs); s; s = list_next(asgn->rhs)) {
+		LIST *arg = list_create();
+		ITERATOR *itr = iterator_create(asgn->rhs);
+		for (s = iterator_first(itr); s; s = iterator_next(itr)) {
 			char *str = substitute(s, env->refstr);
 			list_append(arg, str);
 		}
+		iterator_destroy(&itr);
 		p->parser(env->method, key, arg, p->data, env->data, env->msg);
 		list_destroy(&arg, _free_mem, NULL);
 	} else
@@ -907,16 +909,19 @@ asgn_eval(struct eval_env *env, RC_ASGN *asgn)
 
 
 int
-re_eval_list(struct eval_env *env, char *key, RC_REGEX *re, struct list *list)
+re_eval_list(struct eval_env *env, char *key, RC_REGEX *re, LIST *list)
 {
 	ASSOC *p;
+	ITERATOR *itr;
 	int rc = 0;
-	
-	for (p = list_first(list); rc == 0 && p; p = list_next(list)) {
+
+	itr = iterator_create(list);
+	for (p = iterator_first(itr); rc == 0 && p; p = iterator_next(itr)) {
 		if (!p->key || strcasecmp(p->key, key) == 0) 
 			rc = anubis_regex_match(re, p->value,
 						&env->refcnt, &env->refstr);
 	}
+	iterator_destroy(&itr);
 	return rc;
 }
 

@@ -158,21 +158,24 @@ process_rcfile(int method)
 #define KW_READ_ENTIRE_BODY   12
 
 char **
-list_to_argv(struct list *list)
+list_to_argv(LIST *list)
 {
 	int i, argc;
 	char **argv, *p;
+	ITERATOR *itr;
 
 	argc = list_count(list);
 	argv = xmalloc((argc + 1) * sizeof(argv[0]));
-	for (i = 0, p = list_first(list); p; i++, p = list_next(list))
+	itr = iterator_create(list);
+	for (i = 0, p = iterator_first(itr); p; i++, p = iterator_next(itr))
 		argv[i] = strdup(p);
+	iterator_destroy(&itr);
 	argv[i] = NULL;
 	return argv;
 }
 
 int
-control_parser(int method, int key, struct list *arglist,
+control_parser(int method, int key, LIST *arglist,
 	       void *inv_data, void *func_data, MESSAGE *msg)
 {
 	char *arg = list_item(arglist, 0);
@@ -350,7 +353,7 @@ static struct rc_secdef_child control_sect_child = {
 #define KW_CAFILE              5
 
 int
-tls_parser(int method, int key, struct list *arglist,
+tls_parser(int method, int key, LIST *arglist,
 	   void *inv_data, void *func_data, MESSAGE *msg)
 {
 	char *arg = list_item(arglist, 0);
@@ -426,7 +429,7 @@ control_section_init(void)
 #define KW_EXTERNAL_BODY_PROCESSOR  4 
 
 int
-rule_parser(int method, int key, struct list *arglist,
+rule_parser(int method, int key, LIST *arglist,
 	    void *inv_data, void *func_data, MESSAGE *msg)
 {
 	char *arg = list_item(arglist, 0);

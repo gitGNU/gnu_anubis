@@ -35,7 +35,7 @@ _mem_free(void *item, void *data)
 }
 
 void
-destroy_string_list(struct list **plist)
+destroy_string_list(LIST **plist)
 {
 	list_destroy(plist, _mem_free, NULL);
 }
@@ -48,7 +48,7 @@ _assoc_free(void *item, void *data)
 }
 
 void
-destroy_assoc_list(struct list **plist)
+destroy_assoc_list(LIST **plist)
 {
 	list_destroy(plist, _assoc_free, NULL);
 }

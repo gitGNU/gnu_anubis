@@ -88,7 +88,7 @@ struct rc_kwdef translate_kw[] = {
 
 
 int
-translate_parser(int method, int key, struct list *arglist, void *inv_data,
+translate_parser(int method, int key, LIST *arglist, void *inv_data,
 		 void *func_data, MESSAGE *msg)
 {
 	struct translate_env *env = func_data;

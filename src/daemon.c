@@ -315,10 +315,12 @@ loop(int sd_bind)
 					smtp_session((void *)sd_client, (void *)sd_server);
 					alarm(0);
 
+#ifdef USE_SSL
 					net_close(CLIENT, secure.client);
 					net_close(SERVER, secure.server);
 					secure.server = 0;
 					secure.client = 0;
+#endif
 				}
 				close_socket(sd_server);
 				close_socket(sd_client);

@@ -348,8 +348,8 @@ void esmtp_auth(void *, char *);
 /* misc.c */
 void assoc_free(ASSOC *);
 ASSOC *header_assoc(char *);
-void destroy_assoc_list(struct list **);
-void destroy_string_list(struct list **);
+void destroy_assoc_list(LIST **);
+void destroy_string_list(LIST **);
 void parse_mtaport(char *, char *, unsigned int *);
 void parse_mtahost(char *, char *, unsigned int *);
 void remline(char *, char *);
@@ -406,7 +406,7 @@ void guile_load_path_append(char *);
 void guile_debug(int);
 void guile_load_program(char *);
 void guile_rewrite_line(char *, const char *);
-void guile_postprocess_proc(char *, struct list **, char **);
+void guile_postprocess_proc(char *, LIST **, char **);
 void guile_section_init(void);
 #endif /* WITH_GUILE */
 

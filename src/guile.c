@@ -141,10 +141,10 @@ eval_catch_handler(void *data, SCM tag, SCM throw_args)
 }
 
 
-static struct list *
+static LIST *
 guile_to_anubis(SCM cell)
 {
-	static struct list *list;
+	static LIST *list;
 
 	list = list_create();
 	for (; cell != SCM_EOL; cell = SCM_CDR(cell)) {
@@ -161,14 +161,16 @@ guile_to_anubis(SCM cell)
 }
 
 static SCM
-anubis_to_guile(struct list *list)
+anubis_to_guile(LIST *list)
 {
 	ASSOC *asc;
+	ITERATOR *itr;
 	SCM head = SCM_EOL, 
 		tail; /* Don't let gcc fool you: tail cannot be used 
 			 uninitialized */
 
-	for (asc = list_first(list); asc; asc = list_next(list)) {
+	itr = iterator_create(list);
+	for (asc = iterator_first(itr); asc; asc = iterator_next(itr)) {
 		SCM cell, car, cdr;
 
 		if (asc->key)
@@ -187,22 +189,25 @@ anubis_to_guile(struct list *list)
 			SCM_SETCDR(tail, cell);
 		tail = cell;
 	}
+	iterator_destroy(&itr);
 	if (head != SCM_EOL)
 		SCM_SETCDR(tail, SCM_EOL);
 	return head;
 }
 
 static SCM
-list_to_args(struct list *arglist)
+list_to_args(LIST *arglist)
 {
 	char *p;
+	ITERATOR *itr;
 	SCM head = SCM_EOL, 
 		tail; /* Don't let gcc fool you: tail cannot be used 
 			 uninitialized */
 	SCM val;
 		
-	list_first(arglist);
-	while ((p = list_next(arglist))) {
+	itr = iterator_create(arglist);
+	iterator_first(itr);
+	while ((p = iterator_next(itr))) {
 		SCM cell;
 		SCM_NEWCELL(cell);
 
@@ -230,6 +235,7 @@ list_to_args(struct list *arglist)
 			SCM_SETCDR(tail, cell);
 		tail = cell;
 	}
+	iterator_destroy(&itr);
 	if (head != SCM_EOL)
 		SCM_SETCDR(tail, SCM_EOL);
 	return head;
@@ -238,7 +244,7 @@ list_to_args(struct list *arglist)
 /* (define (postproc header-list body) */
 
 void
-guile_process_proc(struct list *arglist, MESSAGE *msg)
+guile_process_proc(LIST *arglist, MESSAGE *msg)
 {
 	char *procname;
 	SCM arg_hdr, arg_body;
@@ -247,7 +253,7 @@ guile_process_proc(struct list *arglist, MESSAGE *msg)
 	jmp_buf jmp_env;
 	SCM res;
 
-	procname = list_first(arglist);
+	procname = list_item(arglist, 0);
 	if (!procname) {
 		anubis_error(SOFT, _("missing procedure name"));
 		return;
@@ -353,7 +359,7 @@ static struct rc_kwdef guile_rule_kw[] = {
 };
 
 int
-guile_parser(int method, int key, struct list *arglist,
+guile_parser(int method, int key, LIST *arglist,
 	     void *inv_data, void *func_data, MESSAGE *msg)
 {
 	char *arg = list_item(arglist, 0);
