@@ -215,8 +215,6 @@ for instance: @code{bind} or @code{BIND} or @code{BiNd}, and so on.
 * Proxy Settings::
 * Encryption Settings::
 * Security Settings::
-
-* Option Summary::
 @end menu
 
 
@@ -261,8 +259,8 @@ local-mta /usr/sbin/sendmail -bs
 @opindex esmtp-auth @var{username}:@var{password}
 This option allows you to specify a user name and a password for the
 ESMTP authentication. Use this option if your MTA requires such an
-authentication, but your MUA does not support it. A user name (@var{username})
-and a password (@var{password}) are separated with a colon (@samp{:}).
+authentication, but your MUA does not support it. A @var{username}
+and a @var{password} are separated with a colon (@samp{:}).
 Currently only @dfn{CRAM-MD5} and @dfn{LOGIN} authentication methods are
 supported (and @dfn{CRAM-MD5} has a priority). The @dfn{LOGIN} method,
 for security reasons, can only be used both with the TLS/SSL encryption.
@@ -343,8 +341,7 @@ and a default mode is SOCKS protocol version 5.
 @deffn Option socks-auth @var{username}:@var{password}
 @opindex socks-auth @var{username}:@var{password}
 Specify a user name and a password, if a SOCKS proxy server requires them.
-A user name (@var{username}) and a password (@var{password}) are separated
-with a colon (@samp{:}).
+A @var{username} and a @var{password} are separated with a colon (@samp{:}).
 @end deffn
 
 
@@ -386,7 +383,7 @@ Specify a CA certificate file (supported only by GnuTLS).
 @end deffn
 
 
-@node Security Settings, Option Summary, Encryption Settings, CONTROL Section
+@node Security Settings, , Encryption Settings, CONTROL Section
 @subsection Security Settings
 
 @deffn Option allow-local-mta @var{yes-or-no}
@@ -412,11 +409,6 @@ user-notprivileged "anubis.unprivileged"
 in the @file{/etc/passwd}, if necessary. Add this user name also to the
 @w{@file{/etc/anubis.allow}}, if using GNU Anubis with PAM support.
 @end deffn
-
-
-@node Option Summary, , Security Settings, CONTROL Section
-@subsection Option Summary
-@printindex op
 
 
 @node TRANSLATION Section, GUILE Section, CONTROL Section, Configuration
@@ -461,7 +453,7 @@ the local john's configuration file.
 
 @node GUILE Section, , TRANSLATION Section, Configuration
 @section The GUILE Section
-@cindex GUILE section
+@cindex GUILE section, The
 @cindex Guile
 @cindex extension language
 @cindex Scheme
@@ -499,6 +491,7 @@ Reads the given Scheme program.
 
 @node Rule System, Invoking Anubis, Configuration, Top
 @chapter The Rule System
+@cindex rule system
 
 The rule system is a core part of GNU Anubis. It can be regarded
 as a program that is executed for every outgoing message. 
@@ -539,7 +532,7 @@ It allows to execute arbitrary actions depending on whether a certain
 condition is met. A conditional statement in its simplest form is:
 
 @deffn Syntax if @var{part} [@var{pattern-match-flags}] @var{cond-expr}
-@deffnx Syntax  @var{action-list-1}
+@deffnx Syntax @var{action-list-1}
 @deffnx Syntax fi
     
 The @var{part} specifies which part of the input should be considered
@@ -552,10 +545,10 @@ command or headers will be searched.
 
 The optional @var{pattern-match-flags} alter the pattern matching
 type used in subsequent conditional expression. It
-will be described in detail in the section @ref{Regular expressions}.
+will be described in detail in the section @ref{Regular Expressions}.
 The @var{cond-expr} is a @dfn{conditional expression}.
 It consists of a series of @dfn{conditions} joined together with
-boolean operators @samp{and} or @samp{or} (@pxref{Boolean operators}).
+boolean operators @samp{and} or @samp{or} (@pxref{Boolean Operators}).
 Each condition is:
 
 @table @asis
@@ -578,9 +571,11 @@ is useful for changing operator precedence.
 The simplest example:
 
 @smallexample
+@group
 if header [Subject] "^ *Re:"
   ...
 fi
+@end group
 @end smallexample
 
 The actions represented by @dots{} will be executed only if the
@@ -593,7 +588,7 @@ the two different action sets depending on a given condition. The
 syntax is:
 
 @deffn Syntax if @var{part} [@var{flags}] @var{cond-expr}
-@deffnx Syntax  @var{action-list-1}
+@deffnx Syntax @var{action-list-1}
 @deffnx Syntax else
 @deffnx Syntax @var{action-list-2}  
 @deffnx Syntax fi
@@ -603,11 +598,13 @@ Here, The @var{action-list-1} is executed if the condition
 executed.
 
 @smallexample
+@group
 if @var{part} [@var{flags}] @var{cond-expr}
   @var{action-list-1}
 else
   @var{action-list-2}  
 fi
+@end group
 @end smallexample
 @noindent
 
@@ -620,15 +617,15 @@ rule sets.
 @end deffn
 
 @menu
-* Boolean operators::
-* Regular expressions::
+* Boolean Operators::
+* Regular Expressions::
 * Action List::
 * Triggers::
 @end menu
 
 
-@node Boolean operators, Regular expressions, Rule System, Rule System
-@section Boolean operators
+@node Boolean Operators, Regular Expressions, Rule System, Rule System
+@section Boolean Operators
 
 The following table lists the three boolean operators that can be used
 in Anubis conditional expressions in the order of increasing binding
@@ -643,10 +640,12 @@ strength:
 As an example, let's consider the following statement:
 
 @smallexample
+@group
 if header[X-Mailer] "mutt" or header[X-Mailer] "mail" \
    and not header[Content-Type] "^multipart/mixed;.*"
    @var{action}
 fi
+@end group
 @end smallexample
 @noindent
 
@@ -673,8 +672,8 @@ Notice the use of parentheses to change the binding strength of the
 boolean operators.
 
 
-@node Regular expressions, Action List, Boolean operators, Rule System
-@section Regular expressions
+@node Regular Expressions, Action List, Boolean Operators, Rule System
+@section Regular Expressions
 @cindex regex, flag
 @cindex re, flag
 @cindex perl, flag
@@ -738,13 +737,14 @@ next occurrence of the @code{regex} statement.
 A couple of examples:
 
 @smallexample
+@group
 if header[Subject] :perlre "(?<=(?<!foo)bar)baz"
  ...
 fi
-
+@end group
 @end smallexample
-@noindent
 
+@noindent
 This will match any @code{Subject} header whose value
 matches an occurrence of @samp{baz} that is preceded by @samp{bar}
 which in turn is not preceded by @samp{foo}.
@@ -752,8 +752,8 @@ which in turn is not preceded by @samp{foo}.
 @smallexample
 if header[Subject] :scase "^Re"
 @end smallexample
-@noindent
 
+@noindent
 will match a @code{Subject} header whose value starts with @samp{Re},
 but will not match it if it starts with @samp{RE} or @samp{re}.
 
@@ -767,7 +767,7 @@ For information about Perl-style regular expressions, refer to the
 Perl documentation.
 
 
-@node Action List, Triggers, Regular expressions, Rule System
+@node Action List, Triggers, Regular Expressions, Rule System
 @section Action List
 @cindex Action List
 
@@ -781,17 +781,15 @@ with GNU Anubis > 3.6.2, because this Manual has not been updated for
 a long time.
 
 @menu
-* Adding Headers or Text::
-* Removing Headers::
-* Modifying Messages::  How to modify a message contents on-the-fly.
-* Inserting Files::     How to append text files to an outgoing message.
-* Mail Encryption::     How to encrypt a message on-the-fly.
-* Remailers::           How to enable the support for Remailers Type-I.
-* Rot-13::              How to use rot-13 transformation.
-* External Processor::  How to process a message body using an external tool.
-
-* Command Summary::     A short command summary
-* Quick Example::       A quick example of using an action list.
+* Adding Headers or Text:: How to add a new header or body line(s).
+* Removing Headers::       How to remove a message header line(s).
+* Modifying Messages::     How to modify a message contents on-the-fly.
+* Inserting Files::        How to append text files to an outgoing message.
+* Mail Encryption::        How to encrypt a message on-the-fly.
+* Remailers::              How to enable the support for Remailers Type-I.
+* Rot-13::                 How to use rot-13 transformation.
+* External Processor::     How to process a message body using an external tool.
+* Quick Example::          A quick example of using an action list.
 @end menu
 
 
@@ -822,10 +820,12 @@ Use of this command with @samp{here document} syntax allows
 to append multiline text to the message, e.g.:
 
 @smallexample
+@group
 add body <<-EOT
     Regards,
     Hostmaster
     EOT
+@end group
 @end smallexample
 
 
@@ -841,8 +841,8 @@ message. The syntax is:
 
 The name of the header to delete is given by @var{string} parameter.
 By default only those headers are removed whose names match it exactly.
-Optional @var{flags} allow to change this behavior. @xref{Regular
-expressions}, for the detailed description of these.
+Optional @var{flags} allow to change this behavior. @xref{Regular Expressions},
+for the detailed description of these.
 @end deffn
 
 An example:
@@ -1065,12 +1065,14 @@ Adds an extra header line to the remailed message.
 Example:
 
 @smallexample
+@group
 rule "remail:(.*)/(.*)"
  guile-process remailer-I #:rrt antonius_block@@helsingor.net \
                           #:post \1 \
                           #:latent \2 \
-			  #:header "X-Processed-By: GNU Anubis & Remailer-I"
+                          #:header "X-Processed-By: GNU Anubis & Remailer-I"
 done
+@end group
 @end smallexample
 
 @end deffn
@@ -1110,6 +1112,7 @@ Encrypt the @samp{Subject} header.
 For example:
 
 @smallexample
+@group
 rule "rot-13.*body"
  guile-process rot-13 #:body
 done
@@ -1117,11 +1120,12 @@ done
 rule "rot-13.*subj"
  guile-process rot-13 #:subject
 done
+@end group
 @end smallexample  
 @end deffn
 
 
-@node External Processor, Command Summary, Rot-13, Action List
+@node External Processor, Quick Example, Rot-13, Action List
 @subsection Using an External Processor
 
 @deffn Command external-body-processor @var{program} [@var{args}]
@@ -1134,12 +1138,7 @@ from the @var{program} replaces the body of the message.
 @end deffn
 
 
-@node Command Summary, Quick Example, External Processor, Action List
-@subsection Command Summary
-@printindex cm
-
-
-@node Quick Example, , Command Summary, Action List
+@node Quick Example, , External Processor, Action List
 @subsection Quick Example
 
 Here is a quick example of using an action list:
