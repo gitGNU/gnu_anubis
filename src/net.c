@@ -2,7 +2,7 @@
    net.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -260,6 +260,12 @@ swrite (int method, NET_STREAM sd, char *ptr)
       /* Should not happen */
       anubis_error (EXIT_FAILURE, 0, _("Short write"));
     }
+}
+
+void
+send_eol (int method, NET_STREAM sd)
+{
+  swrite (method, sd, (anubis_mode == anubis_mda) ? "\n" : CRLF);
 }
 
 /**************
