@@ -637,7 +637,10 @@ proc anubis_pat {patname} {
     global gpg_prog
     
     verbose "ANUBIS_PAT $patname" 1
-    set chan [open $ANUBIS_ETC_DIR/$patname r]
+    if ![regexp "^/.*" $patname x y] {
+	set patname "$ANUBIS_ETC_DIR/$patname"
+    }
+    set chan [open $patname r]
     set state 0
     set options ""
     set testname ""
