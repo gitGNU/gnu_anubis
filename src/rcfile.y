@@ -29,6 +29,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <setjmp.h>	
 #include "headers.h"
 #include "extern.h"
 #include "rcfile.h"
@@ -251,12 +252,12 @@ msgpart  : T_MSGPART opt_key
 	   }
          ;
 
-expr     : msgpart meq optlist string
+expr     : msgpart optlist meq optlist string
            {
 		   $$ = rc_node_create(rc_node_expr);
 		   $$->v.expr.part = $1.part;
 		   $$->v.expr.key = $1.key;
-		   $$->v.expr.re = anubis_regex_compile($4, $3);
+		   $$->v.expr.re = anubis_regex_compile($5, $4|$2);
 	   }
          ;
 
@@ -319,7 +320,25 @@ string   : STRING
          | IDENT
          ;
 
-inst_stmt: ADD msgpart string
+inst_stmt: STOP
+           {
+		   $$ = rc_stmt_create(rc_stmt_inst);
+		   $$->v.inst.opcode = inst_stop;
+		   $$->v.inst.part = NIL;
+		   $$->v.inst.key  = NULL;
+		   $$->v.inst.key2 = NULL;
+		   $$->v.inst.arg  = NULL;
+	   }
+         | CALL string
+           {
+		   $$ = rc_stmt_create(rc_stmt_inst);
+		   $$->v.inst.opcode = inst_call;
+		   $$->v.inst.key = $2;
+		   $$->v.inst.part = NIL;
+		   $$->v.inst.key2 = NULL;
+		   $$->v.inst.arg  = NULL;
+	   }
+         | ADD msgpart string
            {
 		   $$ = rc_stmt_create(rc_stmt_inst);
 		   $$->v.inst.opcode = inst_add;
@@ -580,6 +599,10 @@ static char *
 inst_name(enum rc_inst_opcode opcode)
 {
 	switch (opcode) {
+	case inst_stop:
+		return "STOP";
+	case inst_call:
+		return "CALL";
 	case inst_add:
 		return "ADD";
 	case inst_remove:
@@ -594,12 +617,22 @@ void
 rc_inst_print(RC_INST *inst, int level)
 {
 	rc_level_print(level, inst_name(inst->opcode));
-	printf(" %s[%s]", part_string(inst->part),
-	       inst->key ? inst->key : "");
-	if (inst->key2)
-		printf(" [%s]", inst->key2);
-	if (inst->arg)
-		printf(" \"%s\"", inst->arg);
+	switch (inst->opcode) {
+	case inst_stop:
+		break;
+		
+	case inst_call:
+		printf(" %s", inst->key);
+		break;
+
+	default:
+		printf(" %s[%s]", part_string(inst->part),
+		       inst->key ? inst->key : "");
+		if (inst->key2)
+			printf(" [%s]", inst->key2);
+		if (inst->arg)
+			printf(" \"%s\"", inst->arg);
+	}
 }
 
 /* Statements */
@@ -765,6 +798,7 @@ struct eval_env {
 	void *data;
 	int refcnt;
 	char **refstr;
+	jmp_buf jmp;
 };
 
 static void asgn_eval(struct eval_env *env, RC_ASGN *asgn);
@@ -791,6 +825,15 @@ inst_eval(struct eval_env *env, RC_INST *inst)
 	}
 	
 	switch (inst->opcode) {
+	case inst_stop:
+		longjmp(env->jmp, 1);
+		break;
+
+	case inst_call:
+		rcfile_call_section(env->method, inst->key,
+				    env->data, env->msg);
+		break;
+		
 	case inst_add:
 		if (inst->part == BODY)
 			message_add_body(env->msg, inst->key, arg);
@@ -964,6 +1007,25 @@ stmt_list_eval(struct eval_env *env, RC_STMT *stmt)
 }
 
 void
+eval_section(int method, RC_SECTION *sec, struct rc_secdef *secdef,
+	     void *data, MESSAGE *msg)
+{
+	struct eval_env env;
+	env.method = method;
+	env.child = secdef->child;
+	env.refcnt = 0;
+	env.refstr = NULL;
+	env.msg = msg;
+	env.data = data;
+	
+	if (setjmp(env.jmp) == 0)
+		stmt_list_eval(&env, sec->stmt);
+			
+	if (env.refstr)
+		xfree_pptr(env.refstr);
+}	
+
+void
 rc_run_section(int method, RC_SECTION *sec, struct rc_secdef *secdef,
 	       void *data, MESSAGE *msg)
 {
@@ -971,22 +1033,24 @@ rc_run_section(int method, RC_SECTION *sec, struct rc_secdef *secdef,
 		return;
 	for (; secdef->name; secdef++)
 		if (strcmp(sec->name, secdef->name) == 0) {
-			struct eval_env env;
-			env.method = method;
-			env.child = secdef->child;
-			env.refcnt = 0;
-			env.refstr = NULL;
-			env.msg = msg;
-			env.data = data;
-			
-			stmt_list_eval(&env, sec->stmt);
-			if (env.refstr)
-				xfree_pptr(env.refstr);
-
+			eval_section(method, sec, secdef, data, msg);
 			return;
 		}
 	anubis_error(SOFT,
 		     _("Unknown section: %s"), sec->name);
+}
+
+void
+rc_call_section(int method, RC_SECTION *sec, struct rc_secdef *secdef,
+		void *data, MESSAGE *msg)
+{
+	if (!sec)
+		return;
+	for (; secdef->name; secdef++)
+		if (strcmp(secdef->name, "RULE") == 0) {
+			eval_section(method, sec, secdef, data, msg);
+			return;
+		}
 }
 
 void
