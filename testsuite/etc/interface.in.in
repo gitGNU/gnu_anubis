@@ -19,7 +19,7 @@
 BEGIN CONTROL
 termlevel debug
 remote-mta localhost:@ANUBIS_PORT@
-ifdef(`WITH_SSL',`ssl-oneway yes')
+ifdef(`WITH_GNUTLS',`ssl-oneway yes')
 esmtp-auth anubis:guessme
 END
 
