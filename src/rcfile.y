@@ -584,8 +584,10 @@ rc_stmt_print(RC_STMT *stmt)
 			rc_node_print(stmt->v.cond.node);
 			printf("\nIFTRUE:\n");
 			rc_stmt_print(stmt->v.cond.iftrue);
-			printf("IFFALSE:\n");
-			rc_stmt_print(stmt->v.cond.iffalse);
+			if (stmt->v.cond.iffalse) {
+				printf("IFFALSE:\n");
+				rc_stmt_print(stmt->v.cond.iffalse);
+			}
 			printf("END COND");
 			break;
 			
@@ -791,6 +793,8 @@ void
 rc_run_section(int method, RC_SECTION *sec, struct rc_secdef *secdef,
 	       int cmp_method, char *line, void *data)
 {
+	if (!sec)
+		return;
 	for (; secdef->name; secdef++)
 		if (strcmp(sec->name, secdef->name) == 0) {
 			struct eval_env env;
