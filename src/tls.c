@@ -286,8 +286,7 @@ verify_certificate(gnutls_session session)
 		info(VERBOSE, _("No certificate was sent."));
 		return;
 	}
-	if (status & GNUTLS_CERT_INVALID || status & GNUTLS_CERT_NOT_TRUSTED
-	|| status & GNUTLS_CERT_CORRUPTED || status & GNUTLS_CERT_REVOKED) {
+	if (status & GNUTLS_CERT_INVALID || status & GNUTLS_CERT_REVOKED) {
 		info(VERBOSE, _("The certificate is not trusted."));
 		return;
 	}
