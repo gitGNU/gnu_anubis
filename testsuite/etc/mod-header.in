@@ -22,6 +22,6 @@ local-mta = TESTDIR/mta -bs -d TESTDIR/etc/mta.log
 
 ---BEGIN RULE---
 modify [Subject] "Meteora"
-modify header ["X-\(.*\)"] ["X-Old-\1"]
+modify header :re ["X-\(.*\)"] ["X-Old-\1"]
 modify header [X-Old-LP-InTheEnd] [X-LP-Faint] "rules!"
 ---END---

@@ -21,9 +21,9 @@ local-mta = TESTDIR/mta -bs -d TESTDIR/etc/mta.log
 ---END---
 
 ---BEGIN RULE---
-modify body ["a very \(old\)"] "the new"
-modify body ["Xanadu"] "/users3"
-modify body ["\(Alph\)"] "/bin"
-modify body ["caverns"] "Test Suites"
-modify body ["\(sea\)"] "C"
+modify body :re ["a very \(old\)"] "the new"
+modify body :re ["Xanadu"] "/users3"
+modify body :re ["\(Alph\)"] "/bin"
+modify body :re ["caverns"] "Test Suites"
+modify body :re ["\(sea\)"] "C"
 ---END---
