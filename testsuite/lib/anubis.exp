@@ -940,15 +940,15 @@ proc anubis_pat {patname} {
 	} else {
 	    switch -regexp -- "$line" {
 		"^HELO" {
-		    if [anubis_authmode] {
+		    if {[anubis_authmode]} {
 			regexp "^HELO *(\[^ \t\]*)" $line dummy rest
-			if [anubis_authmode] {
-			    verbose "REST $rest"
-			    lappend pattern "EHLO $rest"
+		        verbose "REST $rest"
+			lappend pattern "EHLO $rest"
+			if [anubis_check_capability "GNUTLS"] {
 			    lappend pattern ":ADD STARTTLS"
 			    lappend pattern ":ADD EHLO $rest"
-			    verbose "PATTERN $pattern"
 			}
+			verbose "PATTERN $pattern"
 		    } else {
 			lappend pattern $line
 		    }
