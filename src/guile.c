@@ -1,6 +1,8 @@
 /*
-   GNU Anubis v3.6.2 -- an outgoing mail processor and the SMTP tunnel.
-   Copyright (C) 2001, 2002 The Anubis Team.
+   guile.c
+
+   This file is part of GNU Anubis.
+   Copyright (C) 2003 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -368,3 +370,4 @@ guile_postprocess_proc(char *procname, struct list **hdr, char **body)
 }
 
 #endif /* WITH_GUILE */
+
