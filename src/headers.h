@@ -390,6 +390,7 @@ void cleanup_children (void);
 
 /* esmtp.c */
 int esmtp_auth (NET_STREAM *, char *);
+void anubis_set_client_mech_list (ANUBIS_LIST *list);
 
 /* misc.c */
 int anubis_free_list_item (void *item, void *data);
@@ -569,7 +570,6 @@ void authmode_section_init (void);
 void auth_gsasl_init (void);
 int anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER * usr,
 		       NET_STREAM * stream);
-void anubis_set_mech_list (ANUBIS_LIST * list);
 #ifdef WITH_GSASL
 void install_gsasl_stream (Gsasl_session_ctx * sess_ctx, NET_STREAM * stream);
 #endif
@@ -577,6 +577,8 @@ void install_gsasl_stream (Gsasl_session_ctx * sess_ctx, NET_STREAM * stream);
 /* gsasl_srv.c */
 int anubis_name_cmp (void *item, void *data);
 ANUBIS_LIST *auth_method_list (char *input);
+void anubis_set_mech_list (ANUBIS_LIST **out, ANUBIS_LIST *list);
+void anubis_set_server_mech_list (ANUBIS_LIST *list);
 
 /* xdatabase.c */
 int xdatabase (char *command);
