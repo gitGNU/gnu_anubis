@@ -1,5 +1,14 @@
 2004-03-13  Wojciech Polak
 
+	* src/authmode.c (anubis_authenticate_mode): Don't read the
+	"translation" section in the "authentication" mode.
+	Call the set_unprivileged_user() when `usr.username' is null.
+	TO DO: search a special rc-file directory and retrieve
+	an appropriate client's run control file when `usr.username'
+	is null.
+
+2004-03-13  Wojciech Polak
+
 	* src/*: Namespace cleanup.
 	* src/rc.c: Renamed to rcfile.c.
 	* src/daemon.c (anubis_child_main): Bugfix.
