@@ -183,13 +183,16 @@ AC_CHECK_LIB(resolv, res_query)
 AC_SUBST(ANUBIS_DEFINES)
 AC_SUBST(ANUBISADM)
 
+dnl Use option --with-gsasl to compile GSASL library support.
 MU_CHECK_GSASL(0.0.2, [
     AC_DEFINE(WITH_GSASL,1,[Define if Anubis is using GNU SASL])
+    AC_MSG_RESULT([Enabling GSASL support...])
     ANUBISADM='$(adm_programs)'
 
     AC_CHECK_LIB(gdbm, gdbm_open,
                  [LIBS="$LIBS -lgdbm"
-                  AC_DEFINE(HAVE_LIBGDBM,1,[Define if you have libgdbm])])
+                  AC_DEFINE(HAVE_LIBGDBM,1,[Define if you have libgdbm])],
+                 [AC_MSG_RESULT([Disabling GDBM support...])])
 
     AC_ARG_WITH(mysql,
 	AC_HELP_STRING([--with-mysql],
@@ -210,6 +213,7 @@ MU_CHECK_GSASL(0.0.2, [
                 if test "$USE_SQL" = "1" ;then
 		       WITH_SQL=1
                        LIBS="$LIBS $anubis_cv_lib_mysqlclient"
+                       AC_MSG_RESULT([Enabling MySQL support...])
 		fi
 		;;
 	 no)    ;;
@@ -232,6 +236,7 @@ MU_CHECK_GSASL(0.0.2, [
                 if test "$USE_SQL" = "1" ;then
 		       WITH_SQL=1
                        LIBS="$LIBS $anubis_cv_lib_pq"
+                       AC_MSG_RESULT([Enabling PostgreSQL support...])
 		fi
 		;;
 	 no)    ;;
