@@ -567,88 +567,11 @@ static struct rc_secdef_child all_sect_child = {
 	NULL
 };
 
-
-
-#ifdef HAVE_GPG
-#define KW_GPG_PASSPHRASE         1
-#define KW_GPG_ENCRYPT            2
-#define KW_GPG_SIGN               3
-#define KW_RM_GPG                 4
-
-int
-gpg_parser(int method, int key, char *arg,
-	   void *inv_data, void *func_data, char *line)
-{
-	switch (key) {
-	case KW_GPG_PASSPHRASE:
-		if (gpg.passphrase) {
-			memset(gpg.passphrase, 0, strlen(gpg.passphrase));
-			xfree(gpg.passphrase);
-		}
-		gpg.passphrase = allocbuf(arg, 0);
-		mopt |= M_GPG_PASSPHRASE;
-		break;
-		
-	case KW_GPG_ENCRYPT:
-		xfree(gpg.keys);
-		gpg.keys = allocbuf(arg, 0);
-		gpg.keys = xrealloc(gpg.keys, strlen(gpg.keys) + 2);
-		strcat(gpg.keys, ",");
-		mopt |= M_GPG_ENCRYPT;
-		break;
-		
-	case KW_GPG_SIGN:              
-		if (strcmp(arg, "yes")
-		    || !(mopt & M_GPG_PASSPHRASE)) {
-			if (gpg.passphrase) {
-				memset(gpg.passphrase, 0,
-				       strlen(gpg.passphrase));
-				xfree(gpg.passphrase);
-			}
-			gpg.passphrase = allocbuf(arg, 0);
-		}
-		mopt |= M_GPG_SIGN;
-		break;
-		
-	case KW_RM_GPG:
-		xfree(gpg.rm_key);
-		gpg.rm_key = allocbuf(arg, 0);
-		mopt |= M_RMGPG;
-		break;
-		
-	default:
-		return RC_KW_UNKNOWN;
-	}
-	return RC_KW_HANDLED;
-}
-
-
-struct rc_kwdef gpg_kw[] = {
-	{ "gpg-passphrase", 	     KW_GPG_PASSPHRASE },          
-	{ "gpg-encrypt", 	     KW_GPG_ENCRYPT },             
-	{ "gpg-sign", 		     KW_GPG_SIGN },                
-	{ "rm-gpg", 		     KW_RM_GPG },                  
-	{ NULL },
-};
-
-static struct rc_secdef_child gpg_sect_child = {
-	NULL,
-	CF_CLIENT,
-	gpg_kw,
-	gpg_parser,
-	NULL
-};
-
-#endif /* HAVE_GPG */
-
 void
 all_section_init()
 {
 	struct rc_secdef *sp = anubis_add_section("ALL");
 	rc_secdef_add_child(sp, &all_sect_child);
-#ifdef HAVE_GPG
-	rc_secdef_add_child(sp, &gpg_sect_child);
-#endif /* HAVE_GPG */
 }
 
 void
@@ -657,9 +580,6 @@ rule_section_init()
 	struct rc_secdef *sp = anubis_add_section("RULE");
 	
 	rc_secdef_add_child(sp, &all_sect_child);
-#ifdef HAVE_GPG
-	rc_secdef_add_child(sp, &gpg_sect_child);
-#endif /* HAVE_GPG */
 }
 
 void
@@ -672,6 +592,9 @@ rc_system_init()
 #ifdef WITH_GUILE
 	guile_section_init();
 #endif /* WITH_GUILE */
+#ifdef HAVE_GPG
+	gpg_section_init();
+#endif /* HAVE_GPG */
 }
 
 /* Placeholders */
