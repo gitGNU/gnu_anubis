@@ -120,7 +120,6 @@ translate_parser(int method, int key, char *arg,
 		
 		for (ptr2 = ptr1; *ptr2 && !isspace(*ptr2); ptr2++)
 			;
-
 		if (!*ptr2) {
 			info(VERBOSE, _("Translation map: incorrect syntax."));
 			break;
@@ -129,13 +128,19 @@ translate_parser(int method, int key, char *arg,
 		*ptr2++ = 0;
 		for (; *ptr2 && isspace(*ptr2); ptr2++)
 			;
-		
 		if (!*ptr2 || strncmp(ptr2, "into", 4)) {
 			info(VERBOSE, _("Translation map: incorrect syntax."));
 			break;
 		}
 
 		for (ptr2 += 4; *ptr2 && isspace(*ptr2); ptr2++)
+			;
+		if (!*ptr2 || strncmp(ptr2, "=", 1)) {
+			info(VERBOSE, _("Translation map: incorrect syntax."));
+			break;
+		}
+
+		for (ptr2 += 1; *ptr2 && isspace(*ptr2); ptr2++)
 			;
 
 		safe_strcpy(env->translate, ptr1);
