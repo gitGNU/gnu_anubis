@@ -1,3 +1,17 @@
+2003-11-22  Sergey Poznyakoff  
+
+	* src/dbtext.c (dbtext_open): Minor fix.
+	* src/gsasl.c (anubis_set_mech_list): New function.
+	(auth_gsasl_capa_init): Allow for terminating nul in
+	gsasl_server_listmech output.
+	Build the resulting capability list as an intersection
+	between the one reported by GSASL and the list of
+	allowed mechanisms.
+	* src/headers.h (anubis_set_mech_list): New function.
+	* src/list.c (list_intersect): New function
+	* src/list.h: Likewise.
+	* src/rc.c (control_parser): Handle sasl-allowed-mech keyword.
+
 2003-11-21  Wojciech Polak
 
 	* src/env.c (get_options): Added missing "m:" to getopt_long().
