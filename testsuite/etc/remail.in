@@ -1,3 +1,4 @@
+# -*- anubis -*-
 # This file is part of GNU Anubis testsuite.
 # Copyright (C) 2003 The Anubis Team.
 #
@@ -32,14 +33,14 @@ END
 ---BEGIN RULE---
 
 trigger "remail:(.*)/(.*)"
- guile-process remailer-I #:rrt gray@localhost \
-                          #:post \1 \
-                          #:latent \2 \
-			  #:header "X-Processed-By: GNU Anubis & Remailer-I"
+  guile-process remailer-I #:rrt gray@localhost \
+                           #:post \1 \
+                           #:latent \2 \
+	 		   #:header "X-Processed-By: GNU Anubis & Remailer-I"
 done
 
 trigger "rot-13.*body"
- guile-process rot-13 #:body
+  guile-process rot-13 #:body
 done
 
 trigger "rot-13.*subj"

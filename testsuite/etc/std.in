@@ -1,3 +1,4 @@
+# -*- anubis -*-
 # This file is part of GNU Anubis testsuite.
 # Copyright (C) 2003 The Anubis Team.
 #
@@ -27,69 +28,69 @@ ifdef(`WITH_GPG',`gpg-passphrase = MYSECRETPASSPHRASE')
 remove [Lines]
 
 if command["mail from"] = ".*<?root@localhost>?"
- STOP
+  STOP
 fi
 
 if header[Subject] = "(.*)" and not header[Subject] :scase = "URGENT"
- add [X-Comment] "This message is not URGENT (\1)."
- add [X-Comment] "GNU's Not Unix! (\1)"
+  add [X-Comment] "This message is not URGENT (\1)."
+  add [X-Comment] "GNU's Not Unix! (\1)"
 fi
 
 if header[X-Mailer] = "(.*)"
- add [X-Comment] "My love \1"
- modify [X-Mailer]  "The lousy mailer \1"
+  add [X-Comment] "My love \1"
+  modify [X-Mailer]  "The lousy mailer \1"
 fi
 
 trigger "gpgd:(.*)"
- add [X-GPG-Comment] "Encrypted for \1"
- ifdef(`WITH_GPG', `gpg-encrypt = \1')
+  add [X-GPG-Comment] "Encrypted for \1"
+  ifdef(`WITH_GPG', `gpg-encrypt = \1')
 done
 
 if header[Subject] = "signature"
- signature-file-append = yes
+  signature-file-append = yes
 fi
 
 if header[Subject] = :scase "external"
- external-body-processor = /usr/bin/formail
+  external-body-processor = /usr/bin/formail
 fi
 
 ifdef(`WITH_GPG',`
 if header[Subject] = "gpg-all"
- gpg-encrypt = USERNAME
- gpg-sign = yes
+  gpg-encrypt = USERNAME
+  gpg-sign = yes
 fi
 
 if header[Subject] = gpg-encrypt
- gpg-encrypt = USERNAME-1,USERNAME-2,USERNAME-3
+  gpg-encrypt = USERNAME-1,USERNAME-2,USERNAME-3
 fi
 
 if header[Subject] = gpg-sign
- gpg-sign = yes
+  gpg-sign = yes
 fi')
 
 ifdef(`WITH_GUILE',`
 if header[Subject] = "rot13-all"
- guile-process rot-13 #:body
- guile-process rot-13 #:subject
+  guile-process rot-13 #:body
+  guile-process rot-13 #:subject
 fi
 
 if header[Subject] = "rot13-body"
- guile-process rot-13 #:body 
+  guile-process rot-13 #:body 
 fi
 
 if header[Subject] = "rot13-subject"
- guile-process rot-13 #:subject
+  guile-process rot-13 #:subject
 fi')
 
 if header[Subject] = "body-append"
- body-append = misc/notes.txt
+  body-append = misc/notes.txt
 fi
 
 if header[Subject] = "ALL"
- body-append = misc/notes.txt
- ifdef(`WITH_GPG', `gpg-encrypt = USERNAME')
- ifdef(`WITH_GUILE', `guile-process rot-13 #:body
- guile-process rot-13 #:subject')
+  body-append = misc/notes.txt
+  ifdef(`WITH_GPG', `gpg-encrypt = USERNAME')
+  ifdef(`WITH_GUILE', `guile-process rot-13 #:body
+  guile-process rot-13 #:subject')
 fi
 
 ---END---

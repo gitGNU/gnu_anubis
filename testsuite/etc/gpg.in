@@ -1,3 +1,4 @@
+# -*- anubis -*-
 # This file is part of GNU Anubis testsuite.
 # Copyright (C) 2003 The Anubis Team.
 #
@@ -24,11 +25,11 @@ local-mta = TESTDIR/mta -bs -d TESTDIR/etc/mta.log
 gpg-home = TESTDIR/data
 
 trigger "^gpgd:(.*)"
- gpg-encrypt = \1
- add [X-GPG-Comment] "Encrypted for \1"
+  gpg-encrypt = \1
+  add [X-GPG-Comment] "Encrypted for \1"
 done
 
 trigger "^sign:(.*)"
- gpg-sign = yes
+  gpg-sign = yes
 done
 ---END---
