@@ -62,7 +62,7 @@ esmtp_auth (NET_STREAM sd_server, char *reply)
       if (strncmp (tmp, "334 ", 4))
 	{
 	  swrite (CLIENT, sd_server, "*" CRLF);
-	  anubis_error (SOFT, _("Server rejected the AUTH command."));
+	  anubis_error (0, 0, _("Server rejected the AUTH command."));
 	  get_response_smtp (CLIENT, sd_server, 0, 0);
 	  return;
 	}
@@ -90,7 +90,7 @@ esmtp_auth (NET_STREAM sd_server, char *reply)
       if (!isdigit ((unsigned char) tmp[0]) || (unsigned char) tmp[0] > '3')
 	{
 	  remcrlf (tmp);
-	  anubis_error (SOFT, _("ESMTP AUTH: %s."), tmp);
+	  anubis_error (0, 0, _("ESMTP AUTH: %s."), tmp);
 	}
     }
   else
@@ -136,7 +136,7 @@ esmtp_auth (NET_STREAM sd_server, char *reply)
       if (!isdigit ((unsigned char) tmp[0]) || (unsigned char) tmp[0] > '3')
 	{
 	  remcrlf (tmp);
-	  anubis_error (SOFT, _("ESMTP AUTH: %s."), tmp);
+	  anubis_error (0, 0, _("ESMTP AUTH: %s."), tmp);
 	}
     }
 }

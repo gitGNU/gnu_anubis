@@ -41,7 +41,7 @@ _append_text_file (MESSAGE * msg, char *filename, char *prefix)
   fptxt = fopen (filename, "r");
   if (fptxt == 0)
     {
-      anubis_error (HARD, "%s: %s.", filename, strerror (errno));
+      anubis_error (0, errno, "%s", filename);
       return;
     }
   while (fgets (buf, LINEBUFFER, fptxt) != 0)

@@ -146,7 +146,7 @@ connect_directly_to (char *host, unsigned int port)
 	{
 	  if (hp->h_length != 4 && hp->h_length != 8)
 	    {
-	      anubis_error (HARD,
+	      anubis_error (EXIT_FAILURE, 0,
 			    _("Illegal address length received for host %s"),
 			    host);
 	      return -1;
@@ -165,13 +165,13 @@ connect_directly_to (char *host, unsigned int port)
 
   if ((sd = socket (AF_INET, SOCK_STREAM, 0)) == -1)
     {
-      anubis_error (HARD, _("Can't create stream socket."));
+      anubis_error (EXIT_FAILURE, errno, _("Cannot create stream socket."));
       return -1;
     }
   if (connect (sd, (struct sockaddr *) &addr, sizeof (addr)) == -1)
     {
-      anubis_error (HARD, _("Couldn't connect to %s:%u. %s."),
-		    host, port, strerror (errno));
+      anubis_error (EXIT_FAILURE, errno, _("Couldn't connect to %s:%u. %s."),
+		    host, port);
       return -1;
     }
   else
@@ -197,7 +197,7 @@ bind_and_listen (char *host, unsigned int port)
   addr.sin_port = htons (port);
 
   if ((sd = socket (AF_INET, SOCK_STREAM, 0)) == -1)
-    anubis_error (HARD, _("Can't create stream socket."));
+    anubis_error (EXIT_FAILURE, errno, _("Cannot create stream socket"));
 
   if (topt & T_NAMES)
     {
@@ -213,9 +213,8 @@ bind_and_listen (char *host, unsigned int port)
 	  else
 	    {
 	      if (hp->h_length != 4 && hp->h_length != 8)
-		anubis_error (HARD,
-			      _
-			      ("Illegal address length received for host %s"),
+		anubis_error (EXIT_FAILURE, 0,
+			      _("Illegal address length received for host %s"),
 			      host);
 	      else
 		{
@@ -231,11 +230,11 @@ bind_and_listen (char *host, unsigned int port)
   setsockopt (sd, SOL_SOCKET, SO_REUSEADDR, &true, sizeof (true));
 
   if (bind (sd, (struct sockaddr *) &addr, sizeof (addr)))
-    anubis_error (HARD, _("bind() failed: %s."), strerror (errno));
+    anubis_error (EXIT_FAILURE, errno, _("bind() failed"));
   info (VERBOSE, _("GNU Anubis bound to %s:%u"), inet_ntoa (addr.sin_addr),
 	ntohs (addr.sin_port));
   if (listen (sd, 5))
-    anubis_error (HARD, _("listen() failed: %s."), strerror (errno));
+    anubis_error (EXIT_FAILURE, errno, _("listen() failed"));
   return sd;
 }
 
@@ -254,15 +253,12 @@ swrite (int method, NET_STREAM sd, char *ptr)
   
   rc = stream_write (sd, ptr, nleft, &nwritten);
   if (rc)
-    {
-      socket_error (stream_strerror (sd, rc));
-      return;
-    }
+    socket_error (stream_strerror (sd, rc));
   DPRINTF (method, 1, nwritten, ptr);
   if (nwritten != nleft)
     {
       /* Should not happen */
-      anubis_error (HARD, _("Short write"));
+      anubis_error (EXIT_FAILURE, 0, _("Short write"));
     }
 }
 
@@ -278,10 +274,7 @@ recvline (int method, NET_STREAM sd, void *vptr, size_t maxlen)
 
   rc = stream_readline (sd, vptr, maxlen, &nbytes);
   if (rc)
-    {
-      socket_error (stream_strerror (sd, rc));
-      return 0;			/* FIXME: nbytes? */
-    }
+    socket_error (stream_strerror (sd, rc));
   DPRINTF (method, 0, nbytes, (char *) vptr);
   return nbytes;
 }
@@ -307,10 +300,7 @@ recvline_ptr (int method, NET_STREAM sd, char **vptr, size_t * maxlen)
 	}
       rc = stream_readline (sd, *vptr + off, *maxlen - off, &nbytes);
       if (rc)
-	{
-	  socket_error (stream_strerror (sd, rc));
-	  return 0;		/* FIXME: ptr - buf ? */
-	}
+        socket_error (stream_strerror (sd, rc));
       if (nbytes == 0)
 	break;
       off += nbytes;
@@ -359,7 +349,7 @@ close_socket (int sd)
 }
 
 void
-net_close_stream (NET_STREAM * sd)
+net_close_stream (NET_STREAM *sd)
 {
   stream_close (*sd);
   stream_destroy (sd);

@@ -68,7 +68,7 @@ memcopy_offset (char *dst, char *what, int offset)
 static void
 socks_error (const char *msg)
 {
-  anubis_error (HARD, _("SOCKS proxy: %s"), msg);
+  anubis_error (EXIT_FAILURE, 0, _("SOCKS proxy: %s"), msg);
 }
 
 static int

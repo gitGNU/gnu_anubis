@@ -99,7 +99,7 @@ auth_gsasl_capa_init ()
   rc = gsasl_server_mechlist (ctx, &listmech);
   if (rc != GSASL_OK)
     {
-      anubis_error (HARD, "%s", gsasl_strerror (rc));
+      anubis_error (0, 0, "%s", gsasl_strerror (rc));
       return;
     }
 
@@ -291,7 +291,7 @@ cb_retrieve (Gsasl_session_ctx * ctx,
 	     const char *realm, char *key, size_t * keylen)
 {
   ANUBIS_USER *usr = gsasl_server_application_data_get (ctx);
-
+  
   if (usr->smtp_authid == NULL
       && anubis_get_db_record (authentication_id, usr) != ANUBIS_DB_SUCCESS)
     return GSASL_AUTHENTICATION_ERROR;

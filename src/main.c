@@ -55,8 +55,7 @@ anubis_core (void)
 static void
 anubis_memory_error (const char *msg)
 {
-  anubis_error (HARD, msg);
-  quit (EXIT_FAILURE);		/* force exit */
+  anubis_error (EXIT_FAILURE, 0, msg);
 }
 
 int

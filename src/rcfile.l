@@ -382,9 +382,7 @@ rc_open (char *name)
   if (!yyin)
     {
       if (options.termlevel == DEBUG)
-	anubis_error (SOFT,
-		      _("Anubis RC file error: %s."),
-		      strerror (errno));
+	anubis_error (0, errno, _("Anubis RC file error"));
       return -1;
     }
   

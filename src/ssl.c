@@ -76,7 +76,7 @@ net_stream_write (BIO * bio, const char *buf, int size)
       int rc = stream_write (bio->ptr, buf, size, &wrsize);
       if (rc)
 	{
-	  anubis_error (HARD,
+	  anubis_error (EXIT_FAILURE, 0,
 			_("Write error: %s"), stream_strerror (bio->ptr, rc));
 	  return -1;
 	}
@@ -94,7 +94,7 @@ net_stream_read (BIO * bio, char *buf, int size)
       int rc = stream_read (bio->ptr, buf, size, &rdsize);
       if (rc)
 	{
-	  anubis_error (HARD,
+	  anubis_error (EXIT_FAILURE, 0,
 			_("Read error: %s"), stream_strerror (bio->ptr, rc));
 	  return -1;
 	}
@@ -263,18 +263,7 @@ static void
 ssl_error (char *txt)
 {
   char *string_error = ERR_error_string (ERR_get_error (), NULL);
-
-  if (options.termlevel != SILENT)
-    {
-#ifdef HAVE_SYSLOG
-      if ((topt & T_DAEMON) && !(topt & T_FOREGROUND))
-	syslog (LOG_ERR | LOG_MAIL, "%s", string_error);
-      else
-#endif /* HAVE_SYSLOG */
-	mprintf (">>%s", string_error);
-    }
-  anubis_error (HARD, "%s", txt);
-  return;
+  anubis_error (EXIT_FAILURE, 0, "%s: %s", txt, string_error);
 }
 
 SSL_CTX *
@@ -336,7 +325,7 @@ start_ssl_client (NET_STREAM sd_server, const char *cafile, int verbose)
 
   if (rc <= 0)
     {
-      anubis_error (HARD,
+      anubis_error (0, 0,
 		    _("TLS/SSL handshake failed: %s"),
 		    ERR_error_string (SSL_get_error (ssl, rc), NULL));
       return 0;

@@ -102,7 +102,7 @@ auth_ident (struct sockaddr_in *addr, char *user, int size)
 
   if ((sd = socket (AF_INET, SOCK_STREAM, 0)) < 0)
     {
-      anubis_error (SOFT, _("IDENT: socket() failed: %s."), strerror (errno));
+      anubis_error (0, errno, _("IDENT: socket() failed"));
       return 0;
     }
   memcpy (&ident, addr, sizeof (ident));
@@ -114,8 +114,7 @@ auth_ident (struct sockaddr_in *addr, char *user, int size)
 
   if (connect (sd, (struct sockaddr *) &ident, sizeof (ident)) < 0)
     {
-      anubis_error (SOFT, _("IDENT: connect() failed: %s."),
-		    strerror (errno));
+      anubis_error (0, errno, _("IDENT: connect() failed"));
       close_socket (sd);
       return 0;
     }
@@ -129,7 +128,7 @@ auth_ident (struct sockaddr_in *addr, char *user, int size)
 
   if ((rc = stream_write (str, buf, strlen (buf), &nbytes)))
     {
-      anubis_error (SOFT,
+      anubis_error (0, 0,
 		    _("IDENT: stream_write() failed: %s."),
 		    stream_strerror (str, rc));
       net_close_stream (&str);
@@ -137,7 +136,7 @@ auth_ident (struct sockaddr_in *addr, char *user, int size)
     }
   if (recvline (CLIENT, str, buf, LINEBUFFER) == 0)
     {
-      anubis_error (SOFT,
+      anubis_error (0, 0,
 		    _("IDENT: recvline() failed: %s."),
 		    stream_strerror (str, rc));
       net_close_stream (&str);

@@ -356,9 +356,6 @@ smtp_session_transparent (void)
       if (process_command (&msg, command))
 	continue;
 
-      if (topt & T_ERROR)
-	break;
-
       if (transfer_command (&msg, command) == 0)
 	break;
     }
@@ -395,9 +392,6 @@ smtp_session (void)
     {
       if (process_command (&msg, command))
 	continue;
-
-      if (topt & T_ERROR)
-	break;
 
       if (transfer_command (&msg, command) == 0)
 	break;
@@ -484,14 +478,14 @@ handle_starttls (char *command)
 	{
 	  remcrlf (reply);
 	  info (VERBOSE, _("WARNING: %s"), reply);
-	  anubis_error (HARD, _("STARTTLS command failed."));
+	  anubis_error (0, 0, _("STARTTLS command failed."));
 	  return 0;
 	}
 
       secure.client = start_ssl_client (remote_server,
 					secure.cafile,
 					options.termlevel > NORMAL);
-      if (!secure.client || (topt & T_ERROR))
+      if (!secure.client)
 	return 0;
       remote_server = (void *) secure.client;
     }
@@ -532,7 +526,7 @@ handle_starttls (char *command)
 				    secure.cafile,
 				    secure.cert,
 				    secure.key, options.termlevel > NORMAL);
-  if (!secure.server || (topt & T_ERROR))
+  if (!secure.server)
     {
       swrite (SERVER, remote_client, "454 4.3.3 TLS not available" CRLF);
       return 0;
@@ -627,7 +621,7 @@ handle_ehlo (char *command, char *reply, size_t reply_size)
 	{
 	  remcrlf (newreply);
 	  info (VERBOSE, _("WARNING: %s"), newreply);
-	  anubis_error (SOFT, _("STARTTLS (ONEWAY) command failed."));
+	  anubis_error (0, 0, _("STARTTLS (ONEWAY) command failed."));
 	  topt &= ~T_SSL_ONEWAY;
 	  swrite (SERVER, remote_client, reply);
 	  return 1;
@@ -636,9 +630,8 @@ handle_ehlo (char *command, char *reply, size_t reply_size)
       secure.client = start_ssl_client (remote_server,
 					secure.cafile,
 					options.termlevel > NORMAL);
-      if (!secure.client || (topt & T_ERROR))
+      if (!secure.client)
 	{
-	  topt &= ~T_ERROR;
 	  topt &= ~T_SSL_ONEWAY;
 	  swrite (SERVER, remote_client, reply);
 	  return 1;
@@ -696,8 +689,6 @@ transfer_command (MESSAGE * msg, char *command)
   safe_strcpy (buf, command);
   make_lowercase (buf);
   swrite (CLIENT, remote_server, command);
-  if (topt & T_ERROR)
-    return 0;
 
   if (!strncmp (buf, "ehlo", 4))
     {
@@ -708,8 +699,6 @@ transfer_command (MESSAGE * msg, char *command)
     get_response_smtp (CLIENT, remote_server, reply, sizeof (reply));
 
   swrite (SERVER, remote_client, reply);
-  if (topt & T_ERROR)
-    return 0;
 
   if (isdigit ((unsigned char) reply[0]) && (unsigned char) reply[0] < '4')
     {
@@ -719,12 +708,10 @@ transfer_command (MESSAGE * msg, char *command)
 	{
 	  message_free (msg);
 	  message_init (msg);
-	  topt &= ~T_ERROR;
 	}
       else if (strncmp (buf, "data", 4) == 0)
 	{
 	  process_data (msg);
-	  topt &= ~T_ERROR;
 	}
     }
   return 1;			/* OK */

@@ -51,8 +51,8 @@ static void gpgme_debug_info (gpgme_ctx_t);
 #define EXTRA_GPG_BUF 4096
 #define fail_if_err(a) do { \
 		if (a) { \
-			anubis_error(HARD, _("GPGME: %s."), \
-			gpgme_strerror(a)); \
+			anubis_error(EXIT_FAILURE, 0, _("GPGME: %s."), \
+			             gpgme_strerror(a)); \
 		} \
 	} while(0)
 
@@ -97,14 +97,14 @@ gpgme_init (void)
   
   if ((gpgme_check_version (GPGME_REQ_VERSION)) == 0)
     {
-      anubis_error (HARD, _("Install GPGME version %s or later."),
+      anubis_error (0, 0, _("Install GPGME version %s or later."),
 		    GPGME_REQ_VERSION);
       return -1;
     }
 
   if ((err = gpgme_engine_check_version (GPGME_PROTOCOL_OpenPGP)))
     {
-      anubis_error (HARD, _("GPGME: failed. %s."), gpgme_strerror (err));
+      anubis_error (0, 0, _("GPGME: failed. %s."), gpgme_strerror (err));
       return -1;
     }
 
@@ -156,9 +156,11 @@ gpg_sign (char *gpg_data)
 	}
       if (err && gpg_err_code (err) != GPG_ERR_EOF)
 	{
-	  anubis_error (HARD, _("GPGME: Cannot list keys: %s"),
+	  anubis_error (0, 0, _("GPGME: Cannot list keys: %s"),
 			gpgme_strerror (err));
-	  topt |= T_ERROR;
+          xfree (signed_data);
+          gpgme_release (ctx);
+          return NULL;
 	}
     }
 
@@ -175,13 +177,6 @@ gpg_sign (char *gpg_data)
 
   if (options.termlevel == DEBUG)
     gpgme_debug_info (ctx);
-
-  if (topt & T_ERROR)
-    {
-      gpgme_release (ctx);
-      free (signed_data);
-      return 0;
-    }
 
   while ((nread = gpgme_data_read (out, buf, sizeof (buf))) > 0)
     {
@@ -290,23 +285,13 @@ gpg_encrypt (char *gpg_data)
 				 in, out));
   result = gpgme_op_encrypt_result (ctx);
   if (result->invalid_recipients)
-    anubis_error(HARD, _("GPGME: Invalid recipient encountered: %s"),
+    anubis_error(0, 0, _("GPGME: Invalid recipient encountered: %s"),
 		 result->invalid_recipients->fpr);
 
   fail_if_err (rewind_gpgme_data (out));
 
   if (options.termlevel == DEBUG)
     gpgme_debug_info (ctx);
-
-  if (topt & T_ERROR)
-    {
-      for (; *keyptr; keyptr++)
-	gpgme_key_unref (*keyptr);
-      obstack_free (&stk, NULL);
-      gpgme_release (ctx);
-      free (encrypted_data);
-      return 0;
-    }
 
   while ((nread = gpgme_data_read (out, buf, sizeof (buf))) > 0)
     {
@@ -338,32 +323,52 @@ gpg_encrypt (char *gpg_data)
   return encrypted_data;
 }
 
-static void
+static int
 check_result (gpgme_sign_result_t result, gpgme_sig_mode_t type)
 {
+  int errcnt = 0;
+
   if (result->invalid_signers)
-    anubis_error (HARD, _("GPGME: Invalid signer found: %s"),
-		  result->invalid_signers->fpr);
+    {
+      anubis_error (0, 0, _("GPGME: Invalid signer found: %s"),
+  		    result->invalid_signers->fpr);
+      errcnt++;
+    } 
 
   if (!result->signatures || result->signatures->next)
-    anubis_error (HARD, _("GPGME: Unexpected number of signatures created"));
+    {
+      anubis_error (0, 0, _("GPGME: Unexpected number of signatures created"));
+      errcnt++;
+    }
 
   if (result->signatures->type != type)
-    anubis_error (HARD, _("GPGME: Wrong type of signature created"));
+    {
+      errcnt++;
+      anubis_error (0, 0, _("GPGME: Wrong type of signature created"));
+    }
 
   if (result->signatures->pubkey_algo != GPGME_PK_DSA)
-    anubis_error (HARD, _("GPGME: Wrong pubkey algorithm reported: %i"),
-		  result->signatures->pubkey_algo);
+    {
+      anubis_error (0, 0, _("GPGME: Wrong pubkey algorithm reported: %i"),
+		    result->signatures->pubkey_algo);
+      errcnt++;
+    }
 
   if (result->signatures->hash_algo != GPGME_MD_SHA1)
-    anubis_error (HARD, _("GPGME: Wrong hash algorithm reported: %i"),
-		  result->signatures->hash_algo);
+    {
+      anubis_error (0, 0, _("GPGME: Wrong hash algorithm reported: %i"),
+		    result->signatures->hash_algo);
+      errcnt++;
+    }
 
   if (result->signatures->sig_class != 0)
-    anubis_error (HARD, _("GPGME: Wrong signature class reported: %u"),
-		  result->signatures->sig_class);
-
+    {
+      anubis_error (0, 0, _("GPGME: Wrong signature class reported: %u"),
+ 		    result->signatures->sig_class);
+      errcnt++;
+    }
   /* FIXME: fingerprint? */
+  return 0;
 }
 
 static char *
@@ -376,7 +381,6 @@ gpg_sign_encrypt (char *gpg_data)
   char buf[256];
   char *p, *se_data;		/* Signed-Encrypted Data */
   int size;
-  size_t nread;
   gpgme_encrypt_result_t result;
   gpgme_sign_result_t sign_result;
   struct obstack stk;
@@ -400,9 +404,12 @@ gpg_sign_encrypt (char *gpg_data)
 	}
       if (err && gpg_err_code (err) != GPG_ERR_EOF)
 	{
-	  anubis_error (HARD, _("GPGME: Cannot list keys: %s"),
+	  anubis_error (0, 0, _("GPGME: Cannot list keys: %s"),
 			gpgme_strerror (err));
-	  topt |= T_ERROR;
+          
+          gpgme_release (ctx);
+          xfree (se_data); 
+          return NULL;
 	}
     }
 
@@ -420,45 +427,39 @@ gpg_sign_encrypt (char *gpg_data)
 				      in, out));
   result = gpgme_op_encrypt_result (ctx);
   if (result->invalid_recipients)
-    anubis_error(HARD, _("GPGME: Invalid recipient encountered: %s"),
+    anubis_error(0, 0, _("GPGME: Invalid recipient encountered: %s"),
 		 result->invalid_recipients->fpr);
   sign_result = gpgme_op_sign_result (ctx);
-  check_result (sign_result, GPGME_SIG_MODE_NORMAL);
-
-  fail_if_err (rewind_gpgme_data (out));
-
-  if (options.termlevel == DEBUG)
-    gpgme_debug_info (ctx);
-
-  if (topt & T_ERROR)
+  if (check_result (sign_result, GPGME_SIG_MODE_NORMAL) == 0)
     {
-      for (; *keyptr; keyptr++)
-	gpgme_key_unref (*keyptr);
-      obstack_free (&stk, NULL);
-      gpgme_release (ctx);
-      free (se_data);
-      return 0;
-    }
+      size_t nread;
+      fail_if_err (rewind_gpgme_data (out));
 
-  while ((nread = gpgme_data_read (out, buf, sizeof (buf))) > 0)
-    {
-      if (size > nread)
-	{
-	  strncat (se_data, buf, nread);
-	  size -= nread;
-	}
-      else
-	{
-	  size = EXTRA_GPG_BUF;
-	  se_data = (char *) xrealloc ((char *) se_data,
-				       strlen (se_data) + size);
-	  strncat (se_data, buf, nread);
-	  size -= nread;
-	}
-      memset (buf, 0, sizeof (buf));
+      if (options.termlevel == DEBUG)
+        gpgme_debug_info (ctx);
+
+      while ((nread = gpgme_data_read (out, buf, sizeof (buf))) > 0)
+        {
+          if (size > nread)
+	    {
+	      strncat (se_data, buf, nread);
+	      size -= nread;
+ 	    }
+          else
+	    {
+	      size = EXTRA_GPG_BUF;
+	      se_data = (char *) xrealloc ((char *) se_data,
+				           strlen (se_data) + size);
+	      strncat (se_data, buf, nread);
+	      size -= nread;
+	    }
+          memset (buf, 0, sizeof (buf));
+        }
+     if (nread == -1)
+       fail_if_err (errno);
     }
-  if (nread == -1)
-    fail_if_err (errno);
+  else 
+    xfree (se_data);
 
   for (; *keyptr; keyptr++)
     gpgme_key_unref (*keyptr);
@@ -483,10 +484,6 @@ gpg_proc (MESSAGE * msg, char *(*proc) (char *input))
 #endif /* HAVE_SETENV or HAVE_PUTENV */
 
   buf = proc (msg->body);
-
-  if (topt & T_ERROR)
-    return;
-
   xfree (msg->body);
   msg->body = buf;
 

@@ -75,9 +75,9 @@ guile_ports_open (void)
       fd = open (options.glogfile, O_CREAT | O_WRONLY | O_APPEND, 0644);
       if (fd == -1)
 	{
-	  anubis_error (SOFT,
-			_("cannot open guile output file %s: %s"),
-			options.glogfile, strerror (errno));
+	  anubis_error (0, errno,
+			_("cannot open guile output file %s"),
+			options.glogfile);
 	}
     }
   else
@@ -263,7 +263,7 @@ guile_process_proc (ANUBIS_LIST * arglist, MESSAGE * msg)
   procname = list_item (arglist, 0);
   if (!procname)
     {
-      anubis_error (SOFT, _("missing procedure name"));
+      anubis_error (0, 0, _("missing procedure name"));
       return;
     }
 
@@ -278,7 +278,7 @@ guile_process_proc (ANUBIS_LIST * arglist, MESSAGE * msg)
   procsym = SCM_VARIABLE_REF (scm_c_lookup (procname));
   if (scm_procedure_p (procsym) != SCM_BOOL_T)
     {
-      anubis_error (SOFT, _("%s not a procedure object"), procname);
+      anubis_error (0, 0, _("%s not a procedure object"), procname);
       return;
     }
 
@@ -320,7 +320,7 @@ guile_process_proc (ANUBIS_LIST * arglist, MESSAGE * msg)
 	  msg->header = guile_to_anubis (ret_hdr);
 	}
       else
-	anubis_error (SOFT, _("Bad car type in return from %s"), procname);
+	anubis_error (0, 0, _("Bad car type in return from %s"), procname);
 
       if (ret_body == SCM_BOOL_T)
 	{
@@ -339,10 +339,10 @@ guile_process_proc (ANUBIS_LIST * arglist, MESSAGE * msg)
 	  msg->body = strdup (SCM_STRING_CHARS (ret_body));
 	}
       else
-	anubis_error (SOFT, _("Bad cdr type in return from %s"), procname);
+	anubis_error (0, 0, _("Bad cdr type in return from %s"), procname);
     }
   else
-    anubis_error (SOFT, _("Bad return type from %s"), procname);
+    anubis_error (0, 0, _("Bad return type from %s"), procname);
   guile_ports_close ();
 }
 

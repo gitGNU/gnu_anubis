@@ -46,14 +46,14 @@ daemonize (void)
   signal (SIGHUP, SIG_IGN);
 #ifdef HAVE_DAEMON
   if (daemon (0, 0) == -1)
-    anubis_error (HARD, _("daemon() failed. %s."), strerror (errno));
+    anubis_error (EXIT_FAILURE, errno, _("daemon() failed"));
 #else
   chdir ("/");
   umask (0);
   switch (fork ())
     {
     case -1:			/* fork() failed */
-      anubis_error (HARD, _("Can't fork. %s."), strerror (errno));
+      anubis_error (EXIT_FAILURE, errno, _("Cannot fork."));
       break;
     case 0:			/* child process */
       break;
@@ -61,7 +61,7 @@ daemonize (void)
       quit (0);
     }
   if (setsid () == -1)
-    anubis_error (HARD, _("setsid() failed."));
+    anubis_error (EXIT_FAILURE, errno, _("setsid() failed"));
 
   close (0);
   close (1);
@@ -144,7 +144,7 @@ set_unprivileged_user (void)
 }
 
 int
-anubis_child_main (NET_STREAM * sd_client, struct sockaddr_in *addr)
+anubis_child_main (NET_STREAM *sd_client, struct sockaddr_in *addr)
 {
   int rc;
 
@@ -161,7 +161,6 @@ anubis_child_main (NET_STREAM * sd_client, struct sockaddr_in *addr)
 #else
   rc = anubis_transparent_mode (sd_client, addr);
 #endif /* WITH_GSASL */
-
   net_close_stream (sd_client);
   return rc;
 }
@@ -179,9 +178,6 @@ loop (int sd_bind)
 #ifdef USE_LIBWRAP
   struct request_info req;
 #endif /* USE_LIBWRAP */
-#ifdef HAVE_PAM
-  int pam_retval;
-#endif /* HAVE_PAM */
 
   addrlen = sizeof (addr);
   signal (SIGCHLD, sig_cld);
@@ -198,8 +194,7 @@ loop (int sd_bind)
 	    continue;
 	  else
 	    {
-	      anubis_error (SOFT,
-			    _("accept() failed: %s."), strerror (errno));
+	      anubis_error (0, errno, _("accept() failed"));
 	      continue;
 	    }
 	}
@@ -250,8 +245,7 @@ loop (int sd_bind)
 
 	  childpid = fork ();
 	  if (childpid == -1)
-	    anubis_error (HARD,
-			  _("daemon: Can't fork. %s."), strerror (errno));
+	    anubis_error (0, errno, _("daemon: cannot fork"));
 	  else if (childpid == 0)
 	    {			/* a child process */
 	      /* FIXME */
@@ -261,7 +255,6 @@ loop (int sd_bind)
 
 	  net_close_stream (&sd_client);
 	}
-      topt &= ~T_ERROR;
       cleanup_children ();
     }
   return;
@@ -333,10 +326,8 @@ stdinout (void)
   if (!(topt & T_LOCAL_MTA) && (strlen (session.mta) == 0))
     {
       options.termlevel = NORMAL;
-      anubis_error (HARD, _("The MTA has not been specified. "
-			    "Set the REMOTE-MTA or LOCAL-MTA."));
-      free_mem ();
-      return;
+      anubis_error (EXIT_FAILURE, 0, _("The MTA has not been specified. "
+			               "Set the REMOTE-MTA or LOCAL-MTA."));
     }
 
   net_create_stream (&sd_client, 0);

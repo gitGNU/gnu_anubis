@@ -50,7 +50,7 @@ xdatabase_capability (char *reply, size_t reply_size)
 
   if (strlen (reply) + capa_len >= reply_size)
     {
-      anubis_error (SOFT,
+      anubis_error (0, 0,
 		    _("Cannot add capability: not enough buffer space."));
       return;
     }
@@ -58,9 +58,8 @@ xdatabase_capability (char *reply, size_t reply_size)
   p = strstr (reply, "250 ");
   if (!p)
     {
-      anubis_error (SOFT,
-		    _
-		    ("Cannot add capability: input string missing end marker"));
+      anubis_error (0, 0,
+		    _("Cannot add capability: input string missing end marker"));
       return;
     }
   len = strlen (p);
@@ -96,9 +95,7 @@ make_temp_file (struct obstack *stk, char *rcname, char **name)
   umask (save_umask);
   if (!fp)
     {
-      anubis_error (SOFT,
-		    _("Cannot open temporary file %s: %s"),
-		    p, strerror (errno));
+      anubis_error (0, errno, _("Cannot open temporary file %s: %s"), p);
     }
   return fp;
 }
@@ -177,9 +174,8 @@ xupload ()
       rc_section_list_destroy (&sec);
       if (rename (tempname, rcname))
 	{
-	  anubis_error (SOFT,
-			_("Cannot rename %s to %s: %s"),
-			tempname, rcname, strerror (errno));
+	  anubis_error (0, errno, _("Cannot rename %s to %s"),
+			tempname, rcname);
 	  swrite (SERVER, remote_client, "450 Cannot rename file" CRLF);
 	}
       else
@@ -201,8 +197,7 @@ xremove ()
   char *rcname = user_rcfile_name ();
   if (unlink (rcname) && errno != ENOENT)
     {
-      anubis_error (SOFT,
-		    _("Cannot unlink %s: %s"), rcname, strerror (errno));
+      anubis_error (0, errno, _("Cannot unlink %s"), rcname);
       swrite (SERVER, remote_client, "450 Cannot unlink file" CRLF);
     }
   swrite (SERVER, remote_client, "250 Configuration settings dropped" CRLF);
@@ -221,8 +216,7 @@ xexamine ()
 		"300 Configuration file does not exist" CRLF);
       else
 	{
-	  anubis_error (SOFT,
-			_("Cannot open %s: %s"), rcname, strerror (errno));
+	  anubis_error (0, errno, _("Cannot open %s"), rcname);
 	  swrite (SERVER, remote_client, "450 Cannot open file" CRLF);
 	}
     }

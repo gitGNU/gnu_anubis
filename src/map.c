@@ -76,8 +76,6 @@ parse_transmap (int *cs, char *extuser, char *extaddr, char *dst, int size)
       else
 	*cs = 0;		/* failed: invalid user name */
     }
-  topt &= ~T_ERROR;
-  return;
 }
 
 
@@ -162,9 +160,8 @@ translate_parser (int method, int key, ANUBIS_LIST * arglist, void *inv_data,
 	    {
 	      if (hp->h_length != 4 && hp->h_length != 8)
 		{
-		  anubis_error (HARD,
-				_
-				("Illegal address length received for host %s"),
+		  anubis_error (0, 0,
+			_("Illegal address length received for host %s"),
 				address);
 		  cu = 0;
 		  break;	/* failed */
@@ -177,7 +174,7 @@ translate_parser (int method, int key, ANUBIS_LIST * arglist, void *inv_data,
 	}
 
       safe_strcpy (a2, inet_ntoa (addr.sin_addr));
-      if (cu && !(topt & T_ERROR))
+      if (cu)
 	{
 	  if (strcmp (env->extuser, user) == 0)
 	    {
@@ -196,7 +193,7 @@ translate_parser (int method, int key, ANUBIS_LIST * arglist, void *inv_data,
 		}
 	    }
 	}
-      else if (cu == 0 && !(topt & T_ERROR))
+      else if (cu == 0)
 	{
 	  /* a temporary solution */
 	  if (strcmp (a2, "0.0.0.0") == 0)
@@ -212,7 +209,6 @@ translate_parser (int method, int key, ANUBIS_LIST * arglist, void *inv_data,
 	      break;
 	    }
 	}
-      topt &= ~T_ERROR;
       break;
 
     default:

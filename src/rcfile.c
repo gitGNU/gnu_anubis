@@ -118,9 +118,7 @@ file_id_add (char *filename)
   struct file_id *fid;
   if (stat (filename, &st))
     {
-      anubis_error (SOFT,
-		    _("cannot stat file `%s': %s"), filename,
-		    strerror (errno));
+      anubis_error (0, errno, _("cannot stat file `%s'"), filename);
       return -1;
     }
   fid = xmalloc (sizeof (*fid));
@@ -697,7 +695,7 @@ rcfile_call_section (int method, char *name, void *data, MESSAGE * msg)
 {
   RC_SECTION *sec = rc_section_lookup (parse_tree, name);
   if (!sec)
-    anubis_error (SOFT, _("No such section: %s"), name);
+    anubis_error (0, 0, _("No such section: %s"), name);
   rc_call_section (method, sec, anubis_rc_sections, data, msg);
 }
 

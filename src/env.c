@@ -269,7 +269,7 @@ change_privs (uid_t uid, gid_t gid)
   emptygidset[0] = gid ? gid : getegid();
   if (geteuid() == 0 && setgroups(1, emptygidset))
     {
-      anubis_error (SOFT,
+      anubis_error (0, errno,
 		    _("setgroups(1, %lu) failed"),
 		    (u_long) emptygidset[0]);
       rc = 1;
@@ -280,14 +280,14 @@ change_privs (uid_t uid, gid_t gid)
 
 #if defined(HAVE_SETEGID)
   if ((rc = setegid(gid)) < 0)
-    anubis_error (SOFT, _("setegid(%lu) failed"), (u_long) gid);
+    anubis_error (0, errno, _("setegid(%lu) failed"), (u_long) gid);
 #elif defined(HAVE_SETREGID)
   if ((rc = setregid(gid, gid)) < 0)
-    anubis_error (SOFT, _("setregid(%lu,%lu) failed"),
+    anubis_error (0, errno, _("setregid(%lu,%lu) failed"),
 		  (u_long) gid, (u_long) gid);
 #elif defined(HAVE_SETRESGID)
   if ((rc = setresgid(gid, gid, gid)) < 0)
-    anubis_error (SOFT, _("setresgid(%lu,%lu,%lu) failed"),
+    anubis_error (0, errno, _("setresgid(%lu,%lu,%lu) failed"),
 		  (u_long) gid,
 		  (u_long) gid,
 		  (u_long) gid);
@@ -296,10 +296,10 @@ change_privs (uid_t uid, gid_t gid)
   if (rc == 0 && gid != 0)
     {
       if ((rc = setgid(gid)) < 0 && getegid() != gid) 
-	anubis_error (SOFT, _("setgid(%lu) failed"), (u_long) gid);
+	anubis_error (0, errno, _("setgid(%lu) failed"), (u_long) gid);
       if (rc == 0 && getegid() != gid)
 	{
-	  anubis_error (SOFT, _("cannot set effective gid to %lu"),
+	  anubis_error (0, errno, _("cannot set effective gid to %lu"),
 			(u_long) gid);
 	  rc = 1;
 	}
@@ -321,13 +321,13 @@ change_privs (uid_t uid, gid_t gid)
 	    {
 	      if (setreuid(uid, -1) < 0)
 		{
-		  anubis_error (SOFT, _("setreuid(%lu,-1) failed"),
+		  anubis_error (0, errno, _("setreuid(%lu,-1) failed"),
 				(u_long) uid);
 		  rc = 1;
 		}
 	      if (setuid(uid) < 0)
 		{
-		  anubis_error (SOFT, _("second setuid(%lu) failed"),
+		  anubis_error (0, errno, _("second setuid(%lu) failed"),
 				(u_long) uid);
 		  rc = 1;
 		}
@@ -335,7 +335,7 @@ change_privs (uid_t uid, gid_t gid)
 	  else
 #endif
 	    {
-	      anubis_error (SOFT, _("setuid(%lu) failed"), (u_long) uid);
+	      anubis_error (0, errno, _("setuid(%lu) failed"), (u_long) uid);
 	      rc = 1;
 	    }
 	}
@@ -344,12 +344,12 @@ change_privs (uid_t uid, gid_t gid)
       euid = geteuid();
       if (uid != 0 && setuid(0) == 0)
 	{
-	  anubis_error (HARD, _("seteuid(0) succeeded when it should not"));
+	  anubis_error (0, 0, _("seteuid(0) succeeded when it should not"));
 	  rc = 1;
 	}
       else if (uid != euid && setuid(euid) == 0)
 	{
-	  anubis_error (HARD, _("cannot drop non-root setuid privileges"));
+	  anubis_error (0, 0, _("cannot drop non-root setuid privileges"));
 	  rc = 1;
 	}
     }
@@ -455,7 +455,7 @@ check_filemode (char *path)
     return 0;
   if ((st.st_mode & S_IRWXG) || (st.st_mode & S_IRWXO))
     {
-      anubis_error (SOFT, _("Wrong permissions on %s. Set 0600."), path);
+      anubis_error (0, 0, _("Wrong permissions on %s. Set 0600."), path);
       return 0;			/* FALSE */
     }
   return 1;			/* TRUE */
@@ -475,12 +475,12 @@ check_filename (char *path, time_t *timep)
 
   if (stat (path, &st) == -1)
     {
-      anubis_error (HARD, "%s: %s.", path, strerror (errno));
+      anubis_error (0, errno, "%s", path);
       return 0;			/* FALSE */
     }
   if (!(st.st_mode & S_IFREG) || !(st.st_mode & S_IFLNK))
     {
-      anubis_error (HARD,
+      anubis_error (0, 0,
 		    _("%s is not a regular file or a symbolic link."), path);
       return 0;			/* FALSE */
     }
@@ -519,9 +519,11 @@ write_pid_file (void)
     pidfile = "/var/run/" DEFAULT_PIDFILE;
   fp = fopen (pidfile, "w");
   if (!fp)
-    anubis_error (SOFT, _("Cannot open pid file '%s': %s"),
-		  pidfile, strerror (errno));
-  fprintf (fp, "%ld\n", (unsigned long) getpid ());
-  fclose (fp);
+    anubis_error (0, errno, _("Cannot open pid file '%s'"), pidfile);
+  else 
+    {
+      fprintf (fp, "%ld\n", (unsigned long) getpid ());
+      fclose (fp);
+    }
 }
 /* EOF */

@@ -79,12 +79,12 @@ make_sockets (int fd[2])
 
   if ((sd = socket (AF_INET, SOCK_STREAM, 0)) < 0)
     {
-      anubis_error (HARD, _("#1 socket() failed."));
+      anubis_error (0, errno, _("#1 socket() failed."));
       return -1;
     }
   if ((fd[1] = socket (AF_INET, SOCK_STREAM, 0)) < 0)
     {
-      anubis_error (HARD, _("#2 socket() failed."));
+      anubis_error (0, errno, _("#2 socket() failed."));
       return -1;
     }
   addrlen = sizeof (addr);
@@ -94,39 +94,39 @@ make_sockets (int fd[2])
   addr.sin_port = 0;
   if (bind (sd, (struct sockaddr *) &addr, addrlen))
     {
-      anubis_error (HARD, _("#1 bind() failed: %s."), strerror (errno));
+      anubis_error (0, errno, _("#1 bind() failed"));
       return -1;
     }
   if (bind (fd[1], (struct sockaddr *) &addr, addrlen))
     {
-      anubis_error (HARD, _("#2 bind() failed: %s."), strerror (errno));
+      anubis_error (0, errno, _("#2 bind() failed"));
       return -1;
     }
   if (listen (sd, 5))
     {
-      anubis_error (HARD, _("listen() failed: %s."), strerror (errno));
+      anubis_error (0, errno, _("listen() failed"));
       return -1;
     }
   if (getsockname (sd, (struct sockaddr *) &addr, &addrlen))
     {
-      anubis_error (HARD, _("getsockname() failed: %s."), strerror (errno));
+      anubis_error (0, errno, _("getsockname() failed: %s."));
       return -1;
     }
   if (connect (fd[1], (struct sockaddr *) &addr, addrlen))
     {
-      anubis_error (HARD, _("connect() failed: %s."), strerror (errno));
+      anubis_error (0, errno, _("connect() failed"));
       return -1;
     }
   if ((fd[0] = accept (sd, (struct sockaddr *) &addr, &addrlen)) < 0)
     {
-      anubis_error (HARD, _("accept() failed: %s."), strerror (errno));
+      anubis_error (0, errno, _("accept() failed"));
       return -1;
     }
   close_socket (sd);
 #else
   if (socketpair (AF_UNIX, SOCK_STREAM, 0, fd))
     {
-      anubis_error (HARD, _("socketpair() failed: %s."), strerror (errno));
+      anubis_error (0, errno, _("socketpair() failed"));
       return -1;
     }
 #endif /* not HAVE_SOCKETPAIR */
@@ -184,7 +184,7 @@ make_local_connection_fd (char *exec_path, char **exec_args)
   switch (fork ())
     {
     case -1:			/* an error */
-      anubis_error (HARD, _("fork() failed."));
+      anubis_error (0, errno, _("fork() failed"));
       close (fd[0]);
       close (fd[1]);
       return -1;
@@ -198,8 +198,7 @@ make_local_connection_fd (char *exec_path, char **exec_args)
       if (fd[1] > 1)
 	close (fd[1]);
       execvp (exec_path, exec_args);
-      anubis_error (HARD, _("execvp() failed: %s"), strerror (errno));
-      return -1;
+      anubis_error (EXIT_FAILURE, errno, _("execvp() failed"));
     }
   close (fd[1]);
 #ifdef FD_CLOEXEC

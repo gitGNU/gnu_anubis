@@ -65,9 +65,8 @@ anubis_transparent_mode (NET_STREAM * psd_client, struct sockaddr_in *addr)
 
   if (!(topt & T_LOCAL_MTA) && strlen (session.mta) == 0)
     {
-      anubis_error (HARD, _("The MTA has not been specified. "
-			    "Set the REMOTE-MTA or LOCAL-MTA."));
-      return EXIT_FAILURE;
+      anubis_error (EXIT_FAILURE, 0, _("The MTA has not been specified. "
+			               "Set the REMOTE-MTA or LOCAL-MTA."));
     }
 
   /*
@@ -90,17 +89,14 @@ anubis_transparent_mode (NET_STREAM * psd_client, struct sockaddr_in *addr)
 	  if (hp == 0)
 	    {
 	      hostname_error (session.mta);
-	      return EXIT_FAILURE;
 	    }
 	  else
 	    {
 	      if (hp->h_length != 4 && hp->h_length != 8)
 		{
-		  anubis_error (HARD,
-				_
-				("Illegal address length received for host %s"),
+		  anubis_error (EXIT_FAILURE, 0,
+				_("Illegal address length received for host %s"),
 				session.mta);
-		  return EXIT_FAILURE;
 		}
 	      else
 		{
@@ -112,8 +108,8 @@ anubis_transparent_mode (NET_STREAM * psd_client, struct sockaddr_in *addr)
       if (ntohl (ad.sin_addr.s_addr) == INADDR_LOOPBACK
 	  && session.anubis_port == session.mta_port)
 	{
-	  anubis_error (SOFT, _("Loop not allowed. Connection rejected."));
-	  return EXIT_FAILURE;
+	  anubis_error (EXIT_FAILURE, 0,
+                        _("Loop not allowed. Connection rejected."));
 	}
     }
 
@@ -133,31 +129,25 @@ anubis_transparent_mode (NET_STREAM * psd_client, struct sockaddr_in *addr)
       if (!sd_server)
 	service_unavailable (psd_client);
     }
+
+  remote_client = *psd_client;
+  remote_server = sd_server;
+  alarm (900);
+  smtp_session_transparent ();
   alarm (0);
 
-  if (!(topt & T_ERROR))
-    {
-      remote_client = *psd_client;
-      remote_server = sd_server;
-      alarm (900);
-      smtp_session_transparent ();
-      alarm (0);
-
 #ifdef USE_SSL
-      net_close_stream (&secure.client);
-      net_close_stream (&secure.server);
-      secure.server = 0;
-      secure.client = 0;
+  net_close_stream (&secure.client);
+  net_close_stream (&secure.server);
+  secure.server = 0;
+  secure.client = 0;
 #endif
-    }
+
   net_close_stream (&sd_server);
   net_close_stream (psd_client);
   *psd_client = NULL;
 
-  if (topt & T_ERROR)
-    info (NORMAL, _("Connection terminated."));
-  else
-    info (NORMAL, _("Connection closed successfully."));
+  info (NORMAL, _("Connection closed successfully."));
 
 #ifdef HAVE_PAM
  {

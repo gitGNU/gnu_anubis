@@ -109,10 +109,9 @@ regex_vtab_lookup (int flags)
 /* ************************** Interface Functions ************************** */
 #define ASSERT_RE(re,vp) \
  if (!(re) || (vp = regex_vtab_lookup((re)->flags)) == NULL) {\
-	anubis_error(HARD,\
+	anubis_error(EXIT_ABORT, 0,\
 		    _("INTERNAL ERROR at %s:%d: missing or invalid regex"),\
                     __FILE__, __LINE__);\
-		abort();\
  }
 
 void
@@ -314,7 +313,7 @@ posix_compile (RC_REGEX * regex, char *line, int opt)
     {
       char errbuf[512];
       regerror (rc, &regex->v.re, errbuf, sizeof (errbuf));
-      anubis_error (SOFT, _("regcomp() failed at %s: %s."), line, errbuf);
+      anubis_error (0, 0, _("regcomp() failed at %s: %s."), line, errbuf);
     }
   return rc;
 }
@@ -389,7 +388,7 @@ perl_compile (RC_REGEX * regex, char *line, int opt)
   regex->v.pre = pcre_compile (line, cflags, &error, &error_offset, 0);
   if (regex->v.pre == 0)
     {
-      anubis_error (SOFT,
+      anubis_error (0, 0,
 		    _("pcre_compile() failed at offset %d: %s."),
 		    error_offset, error);
       return 1;
@@ -415,7 +414,7 @@ perl_match (RC_REGEX * regex, char *line, int *refc, char ***refv,
   rc = pcre_fullinfo (re, NULL, PCRE_INFO_CAPTURECOUNT, &count);
   if (rc)
     {
-      anubis_error (SOFT, _("pcre_fullinfo() failed: %d."), rc);
+      anubis_error (0, 0, _("pcre_fullinfo() failed: %d."), rc);
       return rc;
     }
 
@@ -427,7 +426,7 @@ perl_match (RC_REGEX * regex, char *line, int *refc, char ***refv,
   if (rc == 0)
     {
       /* shouldn't happen, but still ... */
-      anubis_error (SOFT, _("Matched, but too many substrings."));
+      anubis_error (0, 0, _("Matched, but too many substrings."));
     }
   else if (rc > 0)
     {
@@ -440,7 +439,7 @@ perl_match (RC_REGEX * regex, char *line, int *refc, char ***refv,
 	  int c = pcre_get_substring (line, ovector, ovsize, i,
 				      (const char **) &(*refv)[i]);
 	  if (c < 0)
-	    anubis_error (SOFT, _("Get substring %d failed (%d)."), i, c);
+	    anubis_error (0, 0, _("Get substring %d failed (%d)."), i, c);
 	}
       (*refv)[i] = NULL;
       *refc = count;

@@ -182,7 +182,7 @@ start_ssl_client (NET_STREAM sd_server, const char *cafile, int verbose)
 						   GNUTLS_X509_FMT_PEM);
       if (rs < 0)
 	{
-	  anubis_error (HARD, _("TLS error reading `%s': %s"),
+	  anubis_error (0, 0, _("TLS error reading `%s': %s"),
 			cafile, gnutls_strerror (rs));
 	  return 0;
 	}
@@ -199,7 +199,7 @@ start_ssl_client (NET_STREAM sd_server, const char *cafile, int verbose)
   if (rs < 0)
     {
       gnutls_deinit (session);
-      anubis_error (HARD, _("TLS/SSL handshake failed: %s"),
+      anubis_error (0, 0, _("TLS/SSL handshake failed: %s"),
 		    gnutls_strerror (rs));
       return NULL;
     }
@@ -260,7 +260,7 @@ start_ssl_server (NET_STREAM sd_client, const char *cafile, const char *cert,
 						   GNUTLS_X509_FMT_PEM);
       if (rs < 0)
 	{
-	  anubis_error (HARD, _("TLS error reading `%s': %s"),
+	  anubis_error (0, 0, _("TLS error reading `%s': %s"),
 			cafile, gnutls_strerror (rs));
 	  return 0;
 	}
@@ -281,7 +281,7 @@ start_ssl_server (NET_STREAM sd_client, const char *cafile, const char *cert,
   if (rs < 0)
     {
       gnutls_deinit (session);
-      anubis_error (HARD, _("TLS/SSL handshake failed!"));
+      anubis_error (0, 0, _("TLS/SSL handshake failed!"));
       gnutls_perror (rs);
       return 0;
     }

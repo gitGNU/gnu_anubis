@@ -561,7 +561,7 @@ default_error_printer (void *data,
 {
   char buf[LINEBUFFER];
   vsnprintf (buf, sizeof buf, fmt, ap);
-  anubis_error (SYNTAX, "%s:%d: %s", filename, line, buf);
+  anubis_error (0, 0, "%s:%d: %s", filename, line, buf);
 }	
 
 static void *rc_error_printer_data;
@@ -1383,7 +1383,7 @@ int
 expr_eval (struct eval_env *env, RC_EXPR *expr)
 {
   int rc;
-  
+
   if (env->refstr && anubis_regex_refcnt (expr->re))
     {
       xfree_pptr (env->refstr);
@@ -1549,7 +1549,7 @@ rc_run_section (int method, RC_SECTION *sec, struct rc_secdef *secdef,
 	  return;
 	}
     }
-  anubis_error (SOFT, _("Unknown section: %s"), sec->name);
+  anubis_error (0, 0, _("Unknown section: %s"), sec->name);
 }
 
 void
@@ -1599,4 +1599,3 @@ is_prog_allowed (void)
     parse_error (_("program is not allowed in this section"));
   return p->allow_prog;
 }
-
