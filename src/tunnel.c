@@ -578,7 +578,7 @@ transfer_header(void *sd_client, void *sd_server,
 	for (header_tail = header_buf; header_tail && header_tail->next;
 	     header_tail = header_tail->next)
 		;
-#endif
+#endif /* WITH_GUILE */
 		
 	if (message.remlist) {
 		struct list *h1;
@@ -675,7 +675,7 @@ transfer_header(void *sd_client, void *sd_server,
 
 #ifdef WITH_GUILE
 	guile_postprocess_list(&header_buf, &message.body);
-#endif
+#endif /* WITH_GUILE */
 
 	p1 = header_buf;
 	do {
@@ -731,19 +731,6 @@ transfer_header(void *sd_client, void *sd_server,
 			}
 		}
 
-		if (mopt & M_ROT13S) {
-			if (strncmp(p1->line, "Subject:", 8) == 0) {
-				char *p = strchr(p1->line, ':');
-				p++;
-				do {
-					*p = (islower((unsigned char)*p)
-					? 'a'+ (*p - 'a' + 13)%26 : isupper((unsigned char)*p)
-					? 'A' + (*p - 'A' + 13)%26 : *p);
-					p++;
-				} while (*p != '\n');
-			}
-		}
-
 		swrite(CLIENT, sd_server, p1->line);
 		free(p1->line);
 		free(p1);
@@ -786,7 +773,7 @@ process_header_line(char *header_line)
   MESSAGE BODY
 ****************/
 
-#define M_OPT_STATIC (M_GPG_ENCRYPT | M_GPG_SIGN | M_ROT13B | M_RM \
+#define M_OPT_STATIC (M_GPG_ENCRYPT | M_GPG_SIGN | M_RM \
  | M_SIGNATURE | M_BODYAPPEND | M_EXTBODYPROC)
 
 static void
@@ -988,8 +975,6 @@ transform_body(void *sd_server)
 			message.body = extbuf;
 		}
 	}
-	if (!(topt & T_ERROR))
-		check_rot13();
 
 #ifdef HAVE_GPG
 	if (!(topt & T_ERROR) && ((mopt & M_GPG_ENCRYPT)
