@@ -52,11 +52,12 @@ static RC_STMT *rc_stmt_create(enum rc_stmt_type);
 static void rc_stmt_destroy(RC_STMT *);
 static void rc_stmt_list_destroy(RC_STMT *);
 static void rc_stmt_print(RC_STMT *, int);
-static int reg_option_add(int *, char *);
+static int reg_modifier_add(int *, char *);
 
 static RC_SECTION *rc_section;
 static int debug_level;
- 
+static int error_count;
+static int def_regex_modifier = R_POSIX; 
 %}
 
 %union {
@@ -71,13 +72,14 @@ static int debug_level;
 	int num;
 	struct {
 		int part;
-		char *key;
+		RC_REGEX *key;
+		char *string;
 	} msgpart;
 	LIST *list;
 };
 
 %token EOL T_BEGIN T_END AND OR 
-%token T_HEADER T_COMMAND IF FI ELSE RULE DONE
+%token IF FI ELSE RULE DONE
 %token CALL STOP ADD REMOVE MODIFY
 %token <string> IDENT STRING REGEX D_BEGIN
 %token <num> T_MSGPART
@@ -86,14 +88,15 @@ static int debug_level;
 %left AND
 %left NOT
 
-%type <string> begin keyword string option key opt_key arg
+%type <string> begin keyword string modifier arg string_key
 %type <section> section seclist
 %type <stmtlist> stmtlist
-%type <stmt> stmt asgn_stmt cond_stmt rule_stmt inst_stmt
-%type <num> optlist
+%type <stmt> stmt asgn_stmt cond_stmt rule_stmt inst_stmt modf_stmt
+%type <num> modlist opt_modlist
 %type <node> rule_start cond expr
-%type <msgpart> msgpart 
+%type <msgpart> msgpart s_msgpart r_msgpart key opt_key
 %type <list> arglist
+%type <regex> regex 
 
 %%
 
@@ -168,6 +171,7 @@ stmt     : /* empty */ EOL
          | cond_stmt EOL
          | rule_stmt EOL
 	 | inst_stmt EOL
+	 | modf_stmt EOL
          ;
 
 asgn_stmt: keyword meq { verbatim(); } arglist
@@ -244,64 +248,102 @@ meq      : /* empty */
          | '='
          ;
 
-key      : '[' string ']'
+key      : regex
            {
-		   $$ = $2;
+		   $$.part = HEADER;
+		   $$.key = $1;
+		   $$.string = NULL;
 	   }
+         | '[' string ']'
+           {
+		   $$.part = HEADER;
+		   $$.key = NULL;
+		   $$.string = $2;
+	   }		   
          ;
 
 opt_key  : /* empty */
            {
-		   $$ = NULL;
-	   }
+		   $$.string = $$.key = NULL;
+           }
          | key
 	 ;
 
 msgpart  : T_MSGPART opt_key
            {
+		   $$ = $2;
 		   $$.part = $1;
-		   $$.key = $2;
+	   }
+         | key
+         ;
+
+s_msgpart: msgpart
+           {
+		   $$ = $1;
+		   if ($$.key)
+			   yyerror("regexp is not allowed in this context");
+	   }
+         ;
+
+r_msgpart: msgpart
+           {
+		   $$ = $1;
+		   if (!$$.key) {
+			   $$.key = anubis_regex_compile($$.string, 0);
+			   xfree($$.string);
+		   }
+	   }
+         ;
+
+regex    : modlist '[' string ']'
+           {
+		   $$ = anubis_regex_compile($3, $1);
+		   free($3);
+	   }
+         ;
+
+string_key: /* empty */
+           {
+		   $$ = NULL;
 	   }
          | '[' string ']'
            {
-		   $$.part = HEADER;
-		   $$.key = $2;
+		   $$ = $2;
 	   }
-         ;
+	 ;
 
-expr     : msgpart optlist meq optlist string
+expr     : s_msgpart opt_modlist meq opt_modlist string
            {
 		   $$ = rc_node_create(rc_node_expr);
 		   $$->v.expr.part = $1.part;
-		   $$->v.expr.key = $1.key;
+		   $$->v.expr.key = $1.string;
 		   $$->v.expr.re = anubis_regex_compile($5, $4|$2);
+		   free($5);
 	   }
          ;
 
-optlist  : /* empty */
+modlist  : modifier
            {
-		   $$ = 0;
-	   }
-         | option
-           {
-		   int rc;
-		   $$ = 0;
-		   rc = reg_option_add(&$$, $1);
+		   $$ = def_regex_modifier;
+		   reg_modifier_add(&$$, $1);
 		   xfree($1);
-		   if (rc)
-			   YYERROR;
 	   }
-         | optlist option
+         | modlist modifier
            {
-		   int rc = reg_option_add(&$1, $2);
+		   reg_modifier_add(&$1, $2);
 		   xfree($2);
-		   if (rc)
-			   YYERROR;
 		   $$ = $1;
 	   }
          ;
 
-option   : ':' IDENT
+opt_modlist: /* empty */
+           {
+		   $$ = def_regex_modifier;
+	   }
+         | modlist
+	 ;
+
+modifier   : ':' IDENT
            {
 		   $$ = $2;
 	   }
@@ -324,12 +366,13 @@ rule_stmt: rule_start EOL stmtlist DONE
 	   }
          ;
 
-rule_start: RULE optlist string
+rule_start: RULE opt_modlist string
            {
 		   $$ = rc_node_create(rc_node_expr);
 		   $$->v.expr.part = HEADER;
 		   $$->v.expr.key = strdup(X_ANUBIS_RULE_HEADER);
 		   $$->v.expr.re = anubis_regex_compile($3, $2);
+		   free($3);
 	   }
          ;
 
@@ -350,30 +393,30 @@ inst_stmt: STOP
            {
 		   $$ = rc_stmt_create(rc_stmt_inst);
 		   $$->v.inst.opcode = inst_call;
-		   $$->v.inst.key = $2;
+		   $$->v.inst.key = NULL;
 		   $$->v.inst.part = NIL;
 		   $$->v.inst.key2 = NULL;
-		   $$->v.inst.arg  = NULL;
+		   $$->v.inst.arg  = $2;
 	   }
-         | ADD msgpart string
+         | ADD s_msgpart string
            {
 		   $$ = rc_stmt_create(rc_stmt_inst);
 		   $$->v.inst.opcode = inst_add;
 		   $$->v.inst.part = $2.part;
-		   $$->v.inst.key  = $2.key;
-		   $$->v.inst.key2 = NULL;
+		   $$->v.inst.key  = NULL;
+		   $$->v.inst.key2 = $2.string;
 		   $$->v.inst.arg  = $3;
 	   }
-         | REMOVE msgpart
+         | REMOVE r_msgpart
            {
 		   $$ = rc_stmt_create(rc_stmt_inst);
 		   $$->v.inst.opcode = inst_remove;
 		   $$->v.inst.part = $2.part;
-		   $$->v.inst.key  = $2.key;
+		   $$->v.inst.key = $2.key;
 		   $$->v.inst.key2 = NULL;
 		   $$->v.inst.arg  = NULL;
 	   }
-         | MODIFY msgpart opt_key string
+         | MODIFY r_msgpart string_key string
            {
 		   $$ = rc_stmt_create(rc_stmt_inst);
 		   $$->v.inst.opcode = inst_modify;
@@ -382,14 +425,24 @@ inst_stmt: STOP
 		   $$->v.inst.key2 = $3;
 		   $$->v.inst.arg  = $4;
 	   }
-         | MODIFY msgpart key 
+         | MODIFY r_msgpart string_key 
            {
 		   $$ = rc_stmt_create(rc_stmt_inst);
 		   $$->v.inst.opcode = inst_modify;
 		   $$->v.inst.part = $2.part;
 		   $$->v.inst.key  = $2.key;
+		   if ($3 == NULL) {
+			   yyerror(_("missing replacement value"));
+		   }
 		   $$->v.inst.key2 = $3;
 		   $$->v.inst.arg  = NULL;
+	   }
+         ;
+
+modf_stmt: REGEX modlist
+           {
+		   def_regex_modifier = $2;
+		   $$ = NULL;
 	   }
          ;
 
@@ -400,6 +453,7 @@ yyerror(char *s)
 {
 	anubis_error(SOFT, "%s:%d: %s",
 		     cfg_file, cfg_line_num, s);
+	error_count++;
 	return 0;
 }
 
@@ -410,8 +464,9 @@ rc_parse(char *name)
 	if (rc_open(name))
 		return NULL;
 	rc_section = NULL;
+	error_count = 0;
 	status = yyparse();
-	if (status) {
+	if (status || error_count) {
 		rc_section_list_destroy(rc_section);
 		rc_section = NULL;
 	}
@@ -625,7 +680,7 @@ rc_cond_destroy(RC_COND *cond)
 void
 rc_inst_destroy(RC_INST *inst)
 {
-	free(inst->key);
+	anubis_regex_free(inst->key);
 	free(inst->key2);
 	free(inst->arg);
 }
@@ -657,12 +712,18 @@ rc_inst_print(RC_INST *inst, int level)
 		break;
 		
 	case inst_call:
-		printf(" %s", inst->key);
+		printf(" %s", inst->arg);
 		break;
 
+	case inst_add:
+		printf(" %s[%s]", part_string(inst->part), inst->key2);
+		if (inst->arg)
+			printf(" \"%s\"", inst->arg);
+		break;
+		
 	default:
 		printf(" %s[%s]", part_string(inst->part),
-		       inst->key ? inst->key : "");
+		       inst->key ? anubis_regex_source(inst->key) : "");
 		if (inst->key2)
 			printf(" [%s]", inst->key2);
 		if (inst->arg)
@@ -774,23 +835,40 @@ rc_stmt_print(RC_STMT *stmt, int level)
 }
 
 int
-reg_option_add(int *flag, char *opt)
+reg_modifier_add(int *flag, char *opt)
 {
-	if (strcasecmp(opt, "basic") == 0) 
-		*flag |= R_BASIC;
-	else if (strcasecmp(opt, "scase") == 0)
-		*flag |= R_SCASE;
+	/* Regex types */
+	if (strcasecmp(opt, "re") == 0 || strcasecmp(opt, "regex") == 0)
+		re_set_type(*flag, re_typeof(def_regex_modifier));
+	else if (strcasecmp(opt, "posix") == 0)
+		re_set_type(*flag, R_POSIX);
 #ifdef HAVE_PCRE
-	else if (strcasecmp(opt, "perlre") == 0) 
-		*flag |= R_PERLRE;
+	else if (strcasecmp(opt, "perlre") == 0
+		 || strcasecmp(opt, "perl") == 0)
+		re_set_type(*flag, R_PERLRE);
 #endif
+	else if (strcasecmp(opt, "ex") == 0 || strcasecmp(opt, "exact") == 0)
+		re_set_type(*flag, R_EXACT);
+
+	/* Modifiers: */
+	else if (strcasecmp(opt, "basic") == 0) {
+		re_set_type(*flag, R_POSIX);
+		re_set_flag(*flag, R_BASIC);
+	} else if (strcasecmp(opt, "extended") == 0) {
+		re_set_type(*flag, R_POSIX);
+		re_clear_flag(*flag, R_BASIC);
+	} else if (strcasecmp(opt, "scase") == 0)
+		re_set_flag(*flag, R_SCASE);
+	else if (strcasecmp(opt, "icase") == 0)
+		re_clear_flag(*flag, R_SCASE);
 	else {
-		yyerror(_("Unknown regexp option"));
+		yyerror(_("Unknown regexp modifier"));
 		return 1;
 	}
 	return 0;
 }
-	
+
+
 /* ******************************* Runtime ********************************* */
 static struct rc_secdef_child *
 child_copy(struct rc_secdef_child *p)
@@ -872,15 +950,15 @@ inst_eval(struct eval_env *env, RC_INST *inst)
 		break;
 
 	case inst_call:
-		rcfile_call_section(env->method, inst->key,
+		rcfile_call_section(env->method, inst->arg,
 				    env->data, env->msg);
 		break;
 		
 	case inst_add:
 		if (inst->part == BODY)
-			message_add_body(env->msg, inst->key, arg);
+			message_add_body(env->msg, inst->key2, arg);
 		else
-			message_add_header(env->msg, inst->key, arg);
+			message_add_header(env->msg, inst->key2, arg);
 		break;
 		
 	case inst_modify:
