@@ -253,7 +253,7 @@ xdatabase (char *command)
 {
   char *p;
 
-  if (!xdatabase_active)
+  if (!command || !xdatabase_active)
     return 0;
 
   remcrlf (command);
