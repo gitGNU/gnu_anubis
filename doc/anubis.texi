@@ -23,9 +23,9 @@ Software Foundation raise funds for GNU development.''
 @end copying
 
 @ifinfo
-@dircategory GNU Packages
+@dircategory Email
 @direntry
-* Anubis: (anubis).        The GNU outgoing mail processor.
+* Anubis: (anubis).             The GNU outgoing mail processor.
 @end direntry
 @end ifinfo
 
@@ -140,7 +140,7 @@ owned by root. The @dfn{user configuration file}, @file{~/.anubisrc},
 specifies what GNU Anubis should do for a particular user.
 To protect your passwords in the configuration files, use the 0600
 (u=rw,g=,o=) permissions, otherwise GNU Anubis won't accept them.
-Hash-marked comments (@code{#}) and white lines in the configuration
+Hash-marked comments (@samp{#}) and white lines in the configuration
 files are ignored.
 
 @noindent
@@ -1065,7 +1065,6 @@ report that too; it's a bug in the documentation!
 
 @node Concept Index, , GNU Free Documentation License, Top
 @unnumbered Concept Index
-
 @printindex cp
 @shortcontents
 @contents
