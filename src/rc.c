@@ -423,14 +423,7 @@ control_section_init()
 #define KW_SIGNATURE_FILE_APPEND    1
 #define KW_BODY_APPEND              2 
 #define KW_BODY_CLEAR_APPEND        3
-#define KW_ROT13_SUBJECT            4
-#define KW_ROT13_BODY               5 
-#define KW_RM_RRT                   6 
-#define KW_RM_POST                  7  
-#define KW_RM_HEADER                8
-#define KW_RM_LT                    9
-#define KW_RM_RLT                  10
-#define KW_EXTERNAL_BODY_PROCESSOR 11 
+#define KW_EXTERNAL_BODY_PROCESSOR  4 
 
 int
 rule_parser(int method, int key, struct list *arglist,
@@ -457,22 +450,6 @@ rule_parser(int method, int key, struct list *arglist,
 		message_append_text_file(msg, arg);
 		break;
 		
-	case KW_ROT13_SUBJECT:         
-		/*FIXME*/
-		break;
-		
-	case KW_ROT13_BODY:
-		/*FIXME*/
-		break;
-		
-	case KW_RM_RRT:                 
-	case KW_RM_POST:                
-	case KW_RM_HEADER:             
-	case KW_RM_LT:                  
-	case KW_RM_RLT:                
-		/* FIXME: Implement in Scheme */
-		break;
-		
 	case KW_EXTERNAL_BODY_PROCESSOR:
 		session.execargs = list_to_argv(arglist);
 		message_external_proc(msg, argv);
@@ -489,13 +466,6 @@ struct rc_kwdef rule_kw[] = {
 	{ "signature-file-append",   KW_SIGNATURE_FILE_APPEND },   
 	{ "body-append",	     KW_BODY_APPEND },             
 	{ "body-clear-append",	     KW_BODY_CLEAR_APPEND },       
-	{ "rot13-subject", 	     KW_ROT13_SUBJECT },           
-	{ "rot13-body", 	     KW_ROT13_BODY },              
-	{ "rm-rrt", 		     KW_RM_RRT },                  
-	{ "rm-post", 		     KW_RM_POST },                 
-	{ "rm-header", 		     KW_RM_HEADER },               
-	{ "rm-lt", 		     KW_RM_LT },                   
-	{ "rm-rlt", 		     KW_RM_RLT },                  
 	{ "external-body-processor", KW_EXTERNAL_BODY_PROCESSOR },
         { NULL }
 };

@@ -280,8 +280,7 @@ gpg_free(void)
 #define KW_GPG_PASSPHRASE         1
 #define KW_GPG_ENCRYPT            2
 #define KW_GPG_SIGN               3
-#define KW_RM_GPG                 4
-#define KW_GPG_HOME               5
+#define KW_GPG_HOME               4
 
 int
 gpg_parser(int method, int key, struct list *arglist,
@@ -333,7 +332,6 @@ struct rc_kwdef gpg_kw[] = {
 	{ "gpg-passphrase", 	     KW_GPG_PASSPHRASE },          
 	{ "gpg-encrypt", 	     KW_GPG_ENCRYPT },             
 	{ "gpg-sign", 		     KW_GPG_SIGN },                
-	{ "rm-gpg", 		     KW_RM_GPG },
 	{ "gpg-home",                KW_GPG_HOME },
 	{ NULL },
 };
