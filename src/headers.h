@@ -151,6 +151,7 @@
 # include <libguile.h>
 #endif /* WITH_GUILE */
 
+#include <argcv.h>
 #include "mem.h"		/* xfree(), xfree_pptr() */
 #include "list.h"
 
