@@ -15,7 +15,7 @@
 # along with GNU Anubis; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-:TEST Sending several messages in one connection
+:TEST Sending several messages in a single connection
 :MODE SPAWN
 :OPTIONS --stdio
 :RCFILE empty.rc
