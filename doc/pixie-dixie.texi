@@ -227,7 +227,8 @@ database using ESMTP (TLS/AUTH) and @code{XDATABASE}.
 Such a program will be an additional advantage, since
 no existing MUA is, of course, able to use @code{XDATABASE} command to
 manage Anubis database. Notice however, that
-@uref{http://savannah.gnu.org@/projects/hydrant,GNU Hydrant} will probably support @code{XDATABASE} in the future...
+@uref{http://savannah.gnu.org/projects/hydrant,GNU Hydrant} will probably
+support @code{XDATABASE} in the future...
 
 @item The End!
 
