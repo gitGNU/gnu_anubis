@@ -4,11 +4,15 @@
 	  argument: a pointer to the file modification time.
 	* src/headers.h: Likewise.
 	* src/exec.c: Updated calls to check_filename().
+	* src/tunnel.c: Likewise.
 	* src/net.c: Restored checking the modification time
 	  of the global rcfile.
+	* src/rc.c: Likewise.
 	* src/rcfile.y: Improved readability of the diagnostic
 	  output.
 
+	* src/map.c: Minor changes.
+	  
 2003-02-07  Wojciech Polak
 
 	* src/map.c (translate_parser): Fixed a bug in `user name after into'
