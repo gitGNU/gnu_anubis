@@ -64,6 +64,7 @@ tmp2-$(PROJECT).texi: Makefile tmp-$(PROJECT).texi
 	echo '/@insertcopying/{x;h;}' >> tmp2.sed
 	echo 's/\(.\)@ifset/\1\' >> tmp2.sed
 	echo '@ifset/' >> tmp2.sed
+	echo 's,/@/,/,g' >> tmp2.sed
 	sed -f tmp2.sed tmp-$(PROJECT).texi > tmp2-$(PROJECT).texi
 	rm -f tmp2.sed
 
@@ -104,7 +105,7 @@ $(PROJECT).pdf: $(PROJECT).dvi
 text: $(PROJECT).text
 
 $(PROJECT).text: Makefile $(PROJECT).info
-	$(INFO) --node=Top --subnodes --out $(PROJECT).text -f $(PROJECT).info
+	$(INFO) --node=Top --subnodes --out $(PROJECT).text -f ./$(PROJECT).info
 
 $(PROJECT).info.tar.gz: Makefile
 	rm -f $(PROJECT).info.tar.gz
