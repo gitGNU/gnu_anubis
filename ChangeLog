@@ -1,3 +1,40 @@
+2005-01-20  Sergey Poznyakoff
+
+	Initial implementation of MDA mode, allowing Anubis to
+	process incoming mail.
+	Some cleanup according to TODO:5
+	
+	* configure.ac: Check for sysexits.h
+	* src/mda.c: New file. Mail Delivery Agent mode support
+	* src/Makefile.am: Add mda.c
+
+	* src/env.c (x_argc,x_argv): New globals
+	--mode option does not depend on WITH_GSASL anymore.
+	(get_options): Changed handling of non-optional arguments.
+	Argument to -l option must be properly quoted.
+	* src/exec.c (make_local_connection_arg): New function
+
+	* src/headers.h: Provide EX_ macros or include sysexits.h
+	when available
+	(enum anubis_mode.anubis_mda): New mode
+	* src/extern.h (session_struct): Removed fixed-size strings.
+	All referers updated.
+	* src/anubisusr.c: Likewise
+	* src/authmode.c: Likewise
+	* src/daemon.c: Likewise
+	* src/ident.c: Likewise
+	* src/main.c: Likewise
+	* src/map.c: Likewise
+	* src/misc.c: Likewise
+	* src/rcfile.c: Likewise
+	* src/regex.c: Likewise
+	* src/transmode.c: Likewise
+
+	* src/net.c (send_eol): New function.
+	* src/tunnel.c: Use send_eol() when needed.
+	(transfer_header,collect_header)
+	(transfer_body, collect_body): Changed to extern
+
 2005-01-02  Sergey Poznyakoff
 
 	* doc/anubis.texi: Documented read-entire-body and escape
