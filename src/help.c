@@ -77,9 +77,9 @@ print_version(void)
 {
 	printf("\n%s\n", version);
 	printf("%s\n\n", copyright);
+
 	printf(_("Built-in support for: "));
 	show_config_options(' ');
-	printf("\n");
 		
 	puts(_("\n\nGNU Anubis is free software; you can redistribute it and/or modify\n"
 	       "it under the terms of the GNU General Public License as published by\n"
