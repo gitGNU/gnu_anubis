@@ -92,9 +92,10 @@ AC_CHECK_LIB(socket, socket)
 AC_CHECK_LIB(nsl, gethostbyaddr)
 
 AC_SUBST(INCLUDES)
-if test `uname` = "Darwin"; then
- INCLUDES="$INCLUDES -I/usr/include"
-fi
+case $build in
+  *-apple-darwin*)
+    INCLUDES="$INCLUDES -I/usr/include" ;;
+esac
 
 dnl Use option --without-guile to NOT compile Guile support.
 AC_ARG_WITH([guile],
@@ -128,6 +129,9 @@ if test x"$useguile" = x"yes"; then
     *) GUILE_SNARF_VERSION="1.6";;
     esac
    ],[useguile=no])
+fi
+if test x"$useguile" = x"no"; then
+ AC_MSG_RESULT([Disabling GUILE support...])
 fi
 
 dnl Use option --without-gpgme to NOT compile GnuPG (GPGME library) support.
