@@ -1,0 +1,9 @@
+# -*- tcl -*-
+# This file is part of GNU Anubis testsuite.
+# Copyright (C) 2004 The Anubis Team.
+#
+# This program is free software; as a special exception the author gives
+# unlimited permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+
+run_in_authmode $ANUBIS_SRCDIR/anubis/mime.exp
