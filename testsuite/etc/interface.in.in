@@ -17,7 +17,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 BEGIN CONTROL
-logfile TESTDIR/etc/anubis.log
+termlevel debug
 remote-mta localhost:@ANUBIS_PORT@
 ifdef(`WITH_SSL',`ssl-oneway yes')
 esmtp-auth anubis:guessme
