@@ -267,25 +267,5 @@ change_to_lower(char *s)
 	return;
 }
 
-/****************
- ROT-13 encoding
-*****************/
-
-void
-check_rot13(void)
-{
-	if (message.body && (mopt & M_ROT13B)) {
-		int c;
-		char *txt = message.body;
-		for (c = strlen(txt) - 1; c >= 0; c--)
-		{
-			txt[c] = (islower((unsigned char)txt[c])
-			? 'a'+ (txt[c] - 'a' + 13)%26 : isupper((unsigned char)txt[c])
-			? 'A' + (txt[c] - 'A' + 13)%26 : txt[c]);
-		}
-	}
-	return;
-}
-
 /* EOF */
 
