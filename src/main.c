@@ -123,13 +123,9 @@ main(int argc, char *argv[])
 	   Initialize GnuTLS or OpenSSL library and the PRNG.
 	*/
 
-#ifdef HAVE_TLS
-	init_tls_libs();
-#endif /* HAVE_TLS */
-
-#ifdef HAVE_SSL
+#ifdef USE_SSL
 	init_ssl_libs();
-#endif /* HAVE_SSL */
+#endif /* USE_SSL */
 
 	/*
 	   Enter the main core...
