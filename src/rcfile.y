@@ -37,10 +37,6 @@ static void rc_section_print(RC_SECTION *sect);
  
 static void rc_asgn_destroy(RC_ASGN *asgn);
  
-static void rc_regex_destroy(RC_REGEX *re);
-static int compile_regex(char *string, RC_REGEX *rp);
-static int compile_unquoted_regex(char *string, RC_REGEX *rp, int *revp);
- 
 static void rc_bool_destroy(RC_BOOL *bool);
  
 static RC_NODE *rc_node_create(enum rc_node_type t);
@@ -74,6 +70,7 @@ static int debug_level;
 	RC_COND cond;
 	RC_RULE rule;
 	RC_NODE *node;
+	RC_REGEX *regex;
 	int num;
 };
 
@@ -90,7 +87,8 @@ static int debug_level;
 %type <stmt> stmt asgn_stmt cond_stmt rule_stmt 
 %type <cond> cond
 %type <num> cond_lhs
-%type <node> cond_rhs compat_rx compat_rx_list rx_list regex rule_start
+%type <node> cond_rhs compat_rx_list rx_list regex rule_start
+%type <regex> compat_rx
 
 %%
 
@@ -122,11 +120,15 @@ section  : /* empty */ EOL
            {
 		   $$ = rc_section_create($1, $2.head);
 	   }
+         | begin end
+           {
+		   $$ = NULL;
+	   }
          ;
 
-begin    : T_BEGIN IDENT EOL
+begin    : T_BEGIN { verbatim(); } STRING EOL
            {
-		   $$ = $2;
+		   $$ = $3;
 	   }
          | D_BEGIN EOL
          ;
@@ -166,7 +168,13 @@ asgn_stmt: keyword EQ { verbatim(); } STRING
 		   $$->v.asgn.lhs = $1;
 		   $$->v.asgn.rhs = $4;
 	   }
-         ;
+         | keyword REGEX /* Compatibility syntax */
+           {
+		   $$ = rc_stmt_create(rc_stmt_asgn);
+		   $$->v.asgn.lhs = $1;
+		   $$->v.asgn.rhs = $2;
+	   }
+          ;
 
 keyword  : IDENT
          ;
@@ -223,35 +231,31 @@ cond_rhs : compat_rx_list
          ;
 
 compat_rx_list: compat_rx
+           {
+		   $$ = rc_node_create(rc_node_re);
+		   $$->v.re = $1;
+	   }
          | compat_rx_list compat_rx
            {
+		   RC_NODE *node;
+
+		   node = rc_node_create(rc_node_bool);
+		   node->v.bool.op = bool_not;
+		   node->v.bool.left = rc_node_create(rc_node_re);
+		   node->v.bool.left->v.re = $2;
+			   
 		   $$ = rc_node_create(rc_node_bool);
 		   $$->v.bool.op = bool_and;
 		   $$->v.bool.left = $1;
-		   $$->v.bool.right = $2;
+		   $$->v.bool.right = node;
 	   }
          ;
 
 compat_rx: REGEX
            {
-		   RC_REGEX re;
-		   RC_NODE *node;
-		   int not;
-		   
-		   if (compile_unquoted_regex($1, &re, &not))
+		   $$ = anubis_regex_compile($1, reg_opt);
+		   if (!$$)
 			   YYERROR;
-
-		   node = rc_node_create(rc_node_re);
-		   node->v.re = re;
-
-		   if (not) {
-			   RC_NODE *p = rc_node_create(rc_node_bool);
-			   p->v.bool.op = bool_not;
-			   p->v.bool.left = node;
-			   p->v.bool.right = NULL;
-			   node = p;
-		   }
-		   $$ = node;
 	   }
          ;
 
@@ -278,18 +282,18 @@ regex    : '(' rx_list ')'
 	   }
          | EQ STRING
            {
-		   RC_REGEX re;
+		   RC_REGEX *re = anubis_regex_compile($2, reg_opt);
 		   
-		   if (compile_regex($2, &re))
+		   if (!re)
 			   YYERROR;
 		   $$ = rc_node_create(rc_node_re);
 		   $$->v.re = re;
 	   }
          | NE STRING
            {
-		   RC_REGEX re;
+		   RC_REGEX *re = anubis_regex_compile($2, reg_opt);
 		   
-		   if (compile_regex($2, &re))
+		   if (!re)
 			   YYERROR;
 
 		   $$ = rc_node_create(rc_node_bool);
@@ -437,67 +441,6 @@ rc_asgn_destroy(RC_ASGN *asgn)
 	xfree(asgn->rhs);
 }
 
-/* Regex manipulations */
-
-void
-rc_regex_destroy(RC_REGEX *re)
-{
-#ifdef HAVE_PCRE
-	if (re->perlre)
-		/*FIXME*/;
-	else
-#endif
-		regfree(&re->v.re);
-}
-
-int
-compile_regex(char *string, RC_REGEX *rp)
-{
-	int rc;
-
-	rp->src = string;
-#ifdef HAVE_PCRE
-	if (perlre) {
-		const char *error;
-		int error_offset;
-		int cflags = 0;
-
-		if (!(reg_opt & R_SCASE))
-			cflags |= PCRE_CASELESS;
-		
-		rp->re.pre = pcre_compile(string, cflags,
-					  &error, &error_offset, 0);
-		if (rp->re.pre == 0) {
-			anubis_error(SOFT,
-				     _("pcre_compile() failed at offset %d: %s."),
-				     error_offset, error);
-			yyerror(_("Regexp error"));
-			return 1;
-		}
-		return 0;
-	}
-#endif
-	rc = regcomp(&rp->v.re, string, reg_opt);
-	if (rc) {
-		char errbuf[512];
-		regerror(rc, &rp->v.re, errbuf, sizeof(errbuf));
-		yyerror(errbuf);
-		return 1;
-	}
-	return 0;
-}
-
-int
-compile_unquoted_regex(char *string, RC_REGEX *rp, int *revp)
-{
-	if (string[0] == '!') {
-		*revp = 1;
-		string++;
-	} else
-		*revp = 0;
-	return compile_regex(string + 1, rp);
-}
-
 /* Bools */
 
 void
@@ -529,7 +472,7 @@ rc_node_destroy(RC_NODE *node)
 		break;
 		
 	case rc_node_re:
-		rc_regex_destroy(&node->v.re);
+		anubis_regex_free(node->v.re);
 	}
 	xfree(node);
 }
@@ -539,7 +482,7 @@ rc_node_print(RC_NODE *node)
 {
 	switch (node->type) {
 	case rc_node_re:
-		printf("%s", node->v.re.src);
+		printf("%s", anubis_regex_source(node->v.re));
 		break;
 		
 	case rc_node_bool:
@@ -665,20 +608,19 @@ rc_stmt_print(RC_STMT *stmt)
 void
 reg_option_init()
 {
-	perlre = 0;
-	reg_opt = REG_EXTENDED;
+	reg_opt = 0;
 }
 
 int
 reg_option_add(char *opt)
 {
 	if (strcasecmp(opt, "basic") == 0) 
-		reg_opt &= ~REG_EXTENDED;
+		reg_opt |= R_BASIC;
 	else if (strcasecmp(opt, "scase") == 0)
-		reg_opt |= REG_ICASE;
+		reg_opt |= R_SCASE;
 #ifdef HAVE_PCRE
 	else if (strcasecmp(opt, "perlre") == 0) 
-		perlre = 1;
+		reg_opt |= R_PERLRE;
 #endif
 	else {
 		yyerror(_("Unknown regexp option"));
@@ -764,7 +706,8 @@ asgn_eval(struct eval_env *env, RC_ASGN *asgn)
 int
 node_eval(struct eval_env *env, RC_NODE *node)
 {
-	int rc;
+	int rc; /* It won't be used uninitialized despite what cc says.
+		   Note default: branch below */
 	
 	switch (node->type) {
 	case rc_node_bool:
@@ -776,8 +719,12 @@ node_eval(struct eval_env *env, RC_NODE *node)
 			env->refstr = NULL;
 			env->refcnt = 0;
 		}
-		rc = anubis_regexp_match(&node->v.re, env->line,
-					 &env->refcnt, &env->refstr);
+		rc = anubis_regex_match(node->v.re, env->line,
+					&env->refcnt, &env->refstr);
+		break;
+		
+	default:
+		abort();
 	}
 	return rc;
 }
@@ -858,6 +805,7 @@ rc_run_section(int method, RC_SECTION *sec, struct rc_secdef *secdef,
 			stmt_list_eval(&env, sec->stmt);
 			if (env.refstr)
 				xfree_pptr(env.refstr);
+
 			return;
 		}
 	anubis_error(SOFT,
