@@ -110,24 +110,51 @@ anubis_regex_replace(RC_REGEX *re, char *line, char *repl)
 	int so, eo;
 	int refc;
 	char **refv;
+	char *newstr = NULL;
+	char *savep = NULL;
+	int newlen;
+	int off = 0;
+	int alloc = 0;
 	struct regex_vtab *vp = regex_vtab_lookup(re->flags);
 	
 	if (!vp)
 		return NULL;
-	if (vp->match(re, line, &refc, &refv, &so, &eo) == 0) {
-		char *p = substitute(repl, refv);
-		int plen = strlen(p);
-		int newlen = strlen(line) - (eo - so) + plen + 1;
-		char *newstr = xmalloc(newlen);
+	while (vp->match(re, line + off, &refc, &refv, &so, &eo) == 0) {
+		char *p;
+		int plen;
+		
+		if (so == -1) {
+			char *q;
+			
+			alloc = 0;
+			p = repl;
+			plen = strlen(p);
+			q = strstr(line + off, anubis_regex_source(re));
+			
+			so = (q - (line + off));
+			eo = so + strlen(anubis_regex_source(re));
+		} else {
+			alloc = 1;
+			p = substitute(repl, refv);
+			plen = strlen(p);
+			xfree_pptr(refv);
+		}
 
-		memcpy(newstr, line, so);
-		memcpy(newstr + so, p, strlen(p));
-		strcpy(newstr + so + plen, line + eo);
+		savep = newstr;
+		newlen = strlen(line) - (eo - so) + plen + 1;
+		newstr = xmalloc(newlen);
+		memcpy(newstr, line, off + so);
+		memcpy(newstr + off + so, p, plen);
+		strcpy(newstr + off + so + plen, line + off + eo);
 
-		xfree_pptr(refv);
-		return newstr;
+		if (alloc)
+			xfree(p);
+		if (savep)
+			xfree(savep);
+		line = newstr;
+		off += eo;
 	}
-	return NULL;
+	return newstr;
 }
 
 int
@@ -232,8 +259,10 @@ posix_match(RC_REGEX *regex, char *line, int *refc, char ***refv,
 		}
 		(*refv)[i] = NULL;
 		*refc = re->re_nsub;
-	} else
+	} else {
+		*eo = *so = -1;
 		*refc = 0;
+	}
 	xfree(rmp);
 	return rc;
 }
@@ -316,8 +345,10 @@ perl_match(RC_REGEX *regex, char *line, int *refc, char ***refv,
 		*refc = count;
 		*so = ovector[0];
 		*eo = ovector[1];
-	} else		
+	} else {
+		*so = *eo = -1;
 		*refc = 0;
+	}
 	xfree(ovector);
 	return rc < 0;
 }
