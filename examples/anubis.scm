@@ -75,8 +75,8 @@ is preserved in X-Anubis-Preserved-Header header"
 	 (else #t))))
      (else #t))))
 
-;;; This function illustrates the concept of Anubis message processing
-;;; functions.
+;;; The three functions below illustrate the concept of Anubis message
+;;; processing functions.
 ;;; A processing function takes two arguments:
 ;;;
 ;;;   HDR   -- A list of message headers. Each list element is a cons
@@ -96,10 +96,10 @@ is preserved in X-Anubis-Preserved-Header header"
 ;;;     #f  --  delete entire body.
 ;;;     #t  --  preserve the body as is. 
 
-(define (msg-process hdr body)
+(define (anubis-rot-13-all hdr body)
   "Encode the \"Subject\" header and the body using ROT-13. Add
 X-Processed-By header."
-  (DEBUG 1 "postprocess called with hdr=" hdr " and body=\"" body "\"")
+  (DEBUG 1 "anubis-rot-13-all called with hdr=" hdr " and body=\"" body "\"")
   (cons (append
 	 (map (lambda (x)
 		(if (string-ci=? (car x) "subject")
@@ -107,6 +107,23 @@ X-Processed-By header."
 		    x))
 	      hdr)
 	 (list (cons "X-Processed-By" "GNU Anubis")))
+	(rot-13 body)))
+
+(define (anubis-rot-13-header hdr body)
+  "Encode the \"Subject\" header using ROT-13."
+  (DEBUG 1 "anubis-rot-13-header called with hdr=" hdr
+	 " and body=\"" body "\"")
+  (cons (map (lambda (x)
+	       (if (string-ci=? (car x) "subject")
+		   (cons (car x) (rot-13 (cdr x)))
+		   x))
+	     hdr)
+	 #t))
+
+(define (anubis-rot-13-body hdr body)
+  "Encode the message body using ROT-13."
+  (DEBUG 1 "anubis-rot-13-body called with hdr=" hdr " and body=\"" body "\"")
+  (cons #t
 	(rot-13 body)))
 
 ;; To test your output redirection:
