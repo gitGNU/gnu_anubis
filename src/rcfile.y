@@ -55,7 +55,6 @@ static void rc_stmt_print(RC_STMT *, int);
 static int reg_modifier_add(int *, char *);
 static int check_kw(char *ident);
 static int is_prog_allowed();
-static void parse_error(const char *fmt, ...);
  
 static RC_SECTION *rc_section;
 static int debug_level;
@@ -82,7 +81,7 @@ static struct rc_secdef *rc_secdef;
 	LIST *list;
 };
 
-%token EOL T_BEGIN T_END AND OR 
+%token EOL T_BEGIN T_END AND OR
 %token IF FI ELSE RULE DONE
 %token CALL STOP ADD REMOVE MODIFY
 %token <string> IDENT STRING REGEX D_BEGIN
@@ -123,6 +122,13 @@ seclist  : section
 				   $$ = $2;
 			   } 
 		   }
+	   }
+         | seclist error
+           {
+		   lex_clear_state();
+		   error_sync_begin();
+		   yyerrok;
+		   yyclearin;
 	   }
          ;
 
@@ -180,9 +186,16 @@ stmt     : /* empty */ EOL
          | rule_stmt EOL
 	 | inst_stmt EOL
 	 | modf_stmt EOL
+	 | error EOL
+           {
+		   lex_clear_state();
+		   yyerrok;
+		   yyclearin;
+		   $$ = NULL;
+	   }
          ;
 
-asgn_stmt: keyword meq { verbatim(); } arglist
+asgn_stmt: keyword arglist
            {
 		   if (!check_kw($1)) {
 			   parse_error(_("unknown keyword: %s"), $1);
@@ -191,11 +204,19 @@ asgn_stmt: keyword meq { verbatim(); } arglist
 
 		   $$ = rc_stmt_create(rc_stmt_asgn);
 		   $$->v.asgn.lhs = $1;
-		   $$->v.asgn.rhs = $4;
+		   if (list_count($2)) {
+			   char *s = list_item($2, 0);
+			   if (s && strcmp(s, "=") == 0)
+				   list_remove($2, s, NULL);
+		   }
+		   $$->v.asgn.rhs = $2;
 	   }
          ;
 
 keyword  : IDENT
+           {
+		   verbatim();
+	   }
          ;
 
 arglist  : arg
@@ -503,12 +524,13 @@ parse_error(const char *fmt, ...)
 	vsnprintf(buf, sizeof buf, fmt, ap);
 	va_end(ap);
 	anubis_error(SYNTAX, "%s:%d: %s", cfg_file, err_line_num(), buf);
+	error_count++;
 }
 
 int
 yyerror(char *s)
 {
-	anubis_error(SYNTAX, "%s:%d: %s", cfg_file, cfg_line_num, s);
+	anubis_error(SYNTAX, "%s:%d: %s", cfg_file, err_line_num(), s);
 	error_count++;
 	return 0;
 }
