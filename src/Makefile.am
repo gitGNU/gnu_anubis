@@ -2,7 +2,7 @@
 ## src/Makefile.am
 ##
 ## This file is part of GNU Anubis.
-## Copyright (C) 2001, 2002, 2003 The Anubis Team.
+## Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 ##
 ## GNU Anubis is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -58,7 +58,8 @@ anubis_SOURCES = \
  gsasl.c \
  gpg.c \
  tls.c \
- ssl.c
+ ssl.c \
+ xdatabase.c
 
 anubisadm_SOURCES = anubisadm.c
 anubisadm_LDADD = ./libanubisdb.a $(top_builddir)/lib/libanubis.a @LIBINTL@
