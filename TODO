@@ -9,8 +9,6 @@ semantics of the anubis language.
 ** HTML processing (also removing HTML part)
 ** IPv6 support
 
-** Rewrite process_command and transfer_command to make them modular.
-
 * Parser and run-time evaluator:
 ** Add more verbose diagnostics to the parser. More specifically, emit
 a warning if gpg-crypt, rot-13 and the like may be used twice over the

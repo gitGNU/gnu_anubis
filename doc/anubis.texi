@@ -439,114 +439,268 @@ the local john's configuration file.
 
 [This section is missing :-P]
 
-
 @node Rule System, Invoking Anubis, Configuration, Top
-@chapter The Rule System
-@cindex Basic regular expressions
-@cindex Extended regular expressions
-@cindex Perl regular expressions
-@cindex rules
-@cindex rule system
-@cindex regex
-@cindex regular expressions
 
-GNU Anubis' rule system is based on @dfn{regular expressions} (@dfn{POSIX Basic},
-@dfn{POSIX Extended}, or @dfn{Perl regular expressions}). All of them can be
-used in a run time.
+The rule system is a core part of Anubis system. It can be regarded
+as a program that is executed for every outgoing message. It is
+defined in @dfn{RULE} section, which begins with a
+@w{@code{---BEGIN RULE---}} and ends with an @w{@code{---END---}}
+statements.
 
-According to the GNU's documentation, a @dfn{regular expression}
-(or @dfn{regexp}, or @dfn{pattern}) is a text string that describes some
-(mathematical) set of strings. A regexp @var{r} @dfn{matches} a string @var{s}
-if @var{s} is in the set of strings described by @var{r}. For more information
-about @dfn{regular expressions}, read the GNU regular expression library manual
-and the regex manual. In addition, you can also read the Perl regular expressions
-manual.
+The statements within this section are executed sequentially.
+Each statement is either an @dfn{action} or a @dfn{conditional
+statement}.
 
-The rule system is available only for GNU Anubis clients,
-so it can only be used in the user configuration file.
-The whole rule system starts with the @w{@code{---BEGIN RULE---}} line,
-and the @w{@code{---END---}} line ends it.
+An @dfn{action} is a statement defining an operation to be performed
+over the message. Syntactically, each action is
+
+@example
+@var{command} [=] @var{right-hand-side}
+@end example
+@noindent
+
+Where @var{command} specifies a particular operation and
+@var{right-hand-side} specifies the arguments for it. The equal sign
+is optional.
+
+A @dfn{conditional statement} defines the control flow in the section.
+It allows to execute arbitrary actions depending on whether a certain
+condition is met. A conditional statement in its simplest form is:
+
+@example
+if @var{part} [@var{flags}] @var{cond-expr}
+  @var{action-list-1}
+fi
+@end example
+@noindent
+    
+The @var{part} specifies which part of the input should be considered
+when evaluating the condition. It is either @samp{command}, meaning
+the text of an smtp command issued while sending the message, or
+@samp{header}, meaning the value of an RFC822 header. Either of the
+two may be followed by the name of the corresponding command or
+header enclosed in square braquets. If this part is missing, all
+command or headers will be searched. 
+
+The optional @var{flags} determine which type of
+regular expressions is used in subsequent conditional expression. It
+will be described in detail in the section @ref{Regular expressions}.
+The @var{cond-expr} is a @dfn{conditional expression}.
+It consists of a series of @dfn{conditions} joined together with
+boolean operators @samp{and} or @samp{or} (@pxref{Boolean operators}).
+Each condition is:
+
+@table @asis
+@item = @var{regexp}
+Returns true if the requested part of the input matches the given regular
+expression (@var{regexp}).
+
+@item != @var{regexp}
+Returns true if the requested part of the input does not match the given
+regular expression.
+
+@item not @var{condition}
+Reverses the sense of @var{condition}
+
+@item ( @var{cond-expr} )
+Returns the result of the conditional expression in parentheses. This
+is useful for changing operator precedence. 
+@end table
+
+The simplest example:
+
+@example
+if header [Subject] "^ *Re:"
+  ...
+fi
+@end example
+
+The actions represented by @dots{} will be executed only if the
+@samp{Subject:} header of the message starts with @samp{Re:} optionally
+preceeded by any amount of whitespace.
+
+The more elaborate form of a conditional allows you to choose among
+the two different action sets depending on a given condition. The
+syntax is:
+
+@example
+if @var{part} [@var{flags}] @var{cond-expr}
+  @var{action-list-1}
+else
+  @var{action-list-2}  
+fi
+@end example
+@noindent
+
+Here, The @var{action-list-1} is executed if the condition
+@var{cond-expr} is met. Otherwise, @var{action-list-2} is
+executed.
+
+@example
+if @var{part} [@var{flags}] @var{cond-expr}
+  @var{action-list-1}
+else
+  @var{action-list-2}  
+fi
+@end example
+@noindent
+
+Note also, that in the examples above any of the statements
+@var{action-list} may contain conditionals, so that conditinal
+statements may be nested. This allows to create very sophisticated
+rule sets. 
+
+[FIXME: elaborate on this. Provide an example]
 
 @menu
-* Grammar::
-* Action List::
-* Trigger::
+* Boolean operators::
+* Regular expressions::
+* Action Lists::
+* Triggers::
 @end menu
 
+@node Boolean operators
+@subsection Boolean operators
 
-@node Grammar, Action List, Rule System, Rule System
-@section Grammar
-@cindex grammar
+The following table lists the three boolean operators that can be used
+in Anubis conditional expressions in the order of increasing binding
+strength:
 
-[This section is missing :-P]
+@itemize @samp
+@item OR
+@item AND
+@item NOT
+@end itemize
 
+As an example, let's consider the following statement:
 
-@node Action List, Trigger, Grammar, Rule System
-@section The Action List
+@example
+if header[X-Mailer] :scase "mutt" or header[X-Mailer] :scase "mail" \
+   and not header[Content-Type] "^multipart/mixed;.*"
+   @var{action}
+fi
+@end example
+@noindent
+
+In this case the @var{action} will be executed if the @code{X-Mailer}
+header contains the word @samp{mutt}. The same @var{action} will also
+be executed if the @code{X-Mailer} header contains the word @samp{mail}
+@emph{and} the value of the @code{Content-Type} header does not begin
+with the string @samp{multipart/mixed}.
+
+Now, if we wished to execute the @var{action} for any message sent
+using @command{mail} or @command{mutt} whose @code{Content-Type}
+header does not begin with the string @samp{multipart/mixed}, we would
+write the following:
+
+@example
+if (header[X-Mailer] :scase "mutt" or header[X-Mailer] :scase "mail") \
+   and not header[Content-Type] "^multipart/mixed;.*"
+   @var{action}
+fi
+@end example
+@noindent
+
+Notice the use of parentheses to change the binding strength of the
+boolean operators.
+
+@node Regular expressions
+@subsection Regular expressions
+
+GNU Anubis supports two types of regular expressions: POSIX (both
+basic and extended), and Perl-style regular expressions. Among this,
+the former are always supported, whereas the support for the latter
+depends on the configuration settings at compile time.
+
+By default, the POSIX regular expressions are expected. To use
+Perl-style ones, use the @code{:perlre} flag. For example:
+
+@example
+if header[Subject] :perlre "(?<=(?<!foo)bar)baz"
+@end example
+@noindent
+
+This will match any @code{Subject} header whose value
+matches an occurrence of @samp{baz} that is preceded by @samp{bar}
+which in turn is not preceded by @samp{foo}.
+              
+Usually the regular expression patterns are always case-sensitive.
+The special flag, @code{:scase}, is provided to change this default.
+For example:
+
+@example
+if header[Subject] :scase "^re"
+@end example
+@noindent
+
+Will match a @code{Subject} header whose value starts with @samp{re},
+@samp{Re} or @samp{RE}.
+
+For the detailed description of POSIX regular expressions,
+@xref{Top,,Regular Expression Library,regex,Regular Expression Library}.
+For information about Perl-style regular expressions, refer to the
+Perl documentation.
+
+@node Action Lists
+@subsection Action Lists
 @cindex Action List
 
 An @dfn{action list} is a list of action commands, which control processing
 of an outgoing messages. All action command names are case insensitive, so you
 can use for instance: @samp{add} or @samp{ADD} or @samp{AdD}, and so on.
 
-@strong{Caution:} Some action commands below might not be compatible
-with GNU Anubis > 3.6.2, because this Manual has not been updated for
-a long time.
-
 @menu
 * Editing Headers::     How to edit a message header on-the-fly.
 * Inserting Files::     How to append text files to an outgoing message.
 * Mail Encryption::     How to encrypt a message on-the-fly.
-* Scheme Programs::     How to execute an external Scheme programs.
+* Remailers::           How to enable the support for Remailers Type-I.
 * External Processor::  How to process a message body using an external tool.
 
 * Command Summary::     A short command summary.
 * Quick Example::       A quick example of using an action list.
 @end menu
 
-@node Editing Headers, Inserting Files, Action List, Action List
-@subsection Editing Headers
+[FIXME: The nodes below are not revised yet]
+
+@node Editing Headers
+@subsubsection Editing Headers
 @cindex message header
 
 @table @samp
-@item add header[@var{key}] @var{value}
-This action command adds a header line to an outgoing message.
-The "header" keyword may be omitted. A @var{key} is the header
-name. For example:
+@item add header [@var{header-name}] @var{header-line}
+@itemx add [@var{header-name}] @var{header-line}
+This action command adds to the outgoing message the header
+@var{header-name} with the value @var{header-line}. Both forms of
+the command are equivalent. For example:
 
 @example
-add header[X-Comment1] "GNU's Not Unix!"
-add [X-Comment2] "Support FSF!"
+add [X-Comment] "GNU's Not Unix!"
 @end example
 
-@item remove header[@var{key}]
-This action command removes the header lines that match a pattern
-from an outgoing message. The "header" keyword may be omitted.
-A @var{key} is the header name and it can be a regular expression
-matching a set of header names for "remove". For example:
+@item remove = @var{header-line} (a regular expression)
+This action command removes the header lines that match @var{header-line}
+from an outgoing message. This has to be a regular expression.
+For example:
 
 @example
-remove header["^X-Mailer"]
-remove ["^X-.*"]
+remove =^X-Mailer:
 @end example
 
-The first example will remove the @samp{X-Mailer:} line from
-an outgoing message, and the second one will remove all "X-*"
-header lines.
+This will remove the @samp{X-Mailer:} line from an outgoing
+message.
 
-@item modify header[@var{key}] [@var{new-key}] @var{value}
+@item modify = @var{old-header-line} >> @var{new-header-line}
 This action command modifies a message header line (entirely or partly).
-The "header" keyword may be omitted. A @var{key} is the header name.
-It may be a regular expression matching a set of header names.
-A @var{new-key} is optional.
+An old header line (must be a regular expression) and a new header line
+are separated with @code{ >> }, i.e. @code{@key{SPC}>>@key{SPC}}.
 
 For example, the following code will change the @samp{Reply-To:}
 line only if you would send an email to @url{friend@@somewhere.net}.
 
 @example
 @group
-if header[To] = ".*<?friend@@somewhere.net>?"
-   modify header[Reply-To] "private@@somewhere.net"
+if header =^To:.*<?friend@@somewhere.net>?
+   modify =^Reply-To: >> Reply-To: private@@somewhere.net
 fi
 @end group
 @end example
@@ -556,8 +710,8 @@ line to @samp{X-Mailer: The Big Boss} entirely.
 
 @example
 @group
-if header[X-Mailer] = PINE
-   modify header[X-Mailer] "The Big Boss"
+if header =^X-Mailer: PINE
+   modify =^X-Mailer: >> X-Mailer: The Big Boss
 fi
 @end group
 @end example
@@ -567,8 +721,8 @@ and @dfn{back-references}, you can make a substitution, like this:
 
 @example
 @group
-if header[X-Mailer] = "(.*)"
-   modify [X-Mailer] "The lousy mailer \1"
+if header =^X-Mailer: (.*)
+   modify =^X-Mailer: >> X-Mailer: The lousy mailer \1
 fi
 @end group
 @end example
@@ -576,9 +730,8 @@ fi
 It is allowed to make up to nine substitutions (range: \1---\9).
 @end table
 
-
-@node Inserting Files, Mail Encryption, Editing Headers, Action List
-@subsection Inserting Files
+@node Inserting Files
+@subsubsection Inserting Files
 
 @table @samp
 @item signature-file-append = @var{yes-or-no}
@@ -597,8 +750,8 @@ This action command is rarely useful.
 @end table
 
 
-@node Mail Encryption, Scheme Programs, Inserting Files, Action List
-@subsection Mail Encryption
+@node Mail Encryption
+@subsubsection Mail Encryption
 @cindex GNU Privacy Guard, GnuPG
 @cindex Pretty Good Privacy, PGP
 @cindex GPG/PGP private key
@@ -645,25 +798,7 @@ gpg-passphrase = @var{passphrase}
 gpg-sign = yes
 @end group
 @end example
-@end table
 
-
-@node Scheme Programs, External Processor, Mail Encryption, Action List
-@subsection Executing Scheme Programs
-@cindex Scheme
-@cindex Guile
-
-@menu
-* ROT-13::          ROT-13 support.
-* Remailers::       How to enable the support for Remailers Type-I.
-@end menu
-
-
-@node ROT-13, Remailers, Scheme Programs, Scheme Programs
-@subsubsection ROT-13
-@cindex ROT-13
-
-@table @samp
 @item rot13-subject = @var{yes-or-no}
 This command enables the simple ROT-13 message subject encoding.
 Value @samp{no} is the default. The ROT-13 encoding is a simple form
@@ -677,7 +812,7 @@ Value @samp{no} is the default.
 @end table
 
 
-@node Remailers, , ROT-13, Scheme Programs
+@node Remailers
 @subsubsection Remailers Type-I
 @cindex remailer
 
@@ -720,8 +855,8 @@ and it is a random delay. Value @samp{no} is the default.
 @end table
 
 
-@node External Processor, Command Summary, Scheme Programs, Action List
-@subsection Using an External Processor
+@node External Processor
+@subsubsection Using an External Processor
 
 @table @samp
 @item external-body-processor = @var{file-name} [@var{args}]
@@ -730,54 +865,83 @@ which works on standard input and output. It could be an additional
 crypto engine, a spell checker, some text generator, whatever.
 @end table
 
-
-@node Command Summary, Quick Example, External Processor, Action List
-@subsection Command Summary
+@node Command Summary
+@subsubsection Command Summary
 
 @example
 @group
-add header[@var{key}] @var{value}
-remove header[@var{key}] @var{value}
-modify header[@var{key}] [@var{new-key}] @var{value}
+add = @var{header-line}
+remove = @var{header-line} (a regular expression)
+modify = @var{old-header-line} >> @var{new-header-line}
 signature-file-append = @var{yes-or-no}
 body-append = @var{file-name}
 body-clear-append = @var{file-name}
 gpg-passphrase = @var{passphrase}
 gpg-encrypt = @var{gpg-keys}
 gpg-sign = @var{passphrase} or @samp{yes} if @samp{gpg-passphrase} is specified.
+rot13-subject = @var{yes-or-no}
+rot13-body = @var{yes-or-no}
+rm-rrt = @var{email-address}
+rm-post = @var{news-group}
+rm-gpg = @var{gpg-key}
+rm-header = @var{header-line}
+rm-lt = @var{time}
+rm-rlt = @var{yes-or-no}
 external-body-processor = @var{file-name} [@var{args}]
 @end group
 @end example
 
 
-@node Quick Example, , Command Summary, Action List
-@subsection Quick Example
+@node Quick Example
+@subsubsection Quick Example
 
-[This section is missing :-P]
+Here is a quick example of using an action list:
+
+@example
+@group
+---BEGIN RULE---
+if header =^X-Mailer:
+   remove =^X-Mailer:
+   add = X-Comment: GNU's Not Unix!
+   gpg-sign = @var{your passphrase}
+   signature-file-append = yes
+fi
+---END---
+@end group
+@end example
+
+@noindent
+The example above will remove (on-the-fly) the @samp{X-Mailer:} line from
+an outgoing message, add an extra header line (@samp{X-Comment:}), sign your
+message with your private key, and add a simple signature file from your
+home directory.
 
 
-@node Trigger, , Action List, Rule System
-@section The Trigger
-@cindex Trigger, The
-
+@node Triggers
+@subsection Triggers
+@cindex Triggers
 Adding the @samp{@@@@@var{rule-name}} code to your message header line,
 e.g. to a @samp{Subject} header line, triggers a rule named @var{rule-name},
 specified in a user configuration file in the following way:
 
 @example
 @group
-rule [:@var{tags}] "@var{rule-name}"
+rule [: @var{options}] =^@var{rule-name}
    @var{action-list}
 done
 @end group
 @end example
+
+@noindent
+@strong{Caution:} Plase note that there is no space after the @samp{=}
+character.
 
 An example:
 
 @example
 @group
 ---BEGIN RULE---
-rule "gpg-encrypt-john"
+rule =^gpg-encrypt-john
    gpg-encrypt = john's_gpg_key
 done
 ---END---
@@ -797,9 +961,9 @@ while using a substitution and back-references:
 @example
 @group
 ---BEGIN RULE---
-rule "gpg-encrypt:(.*)"
+rule =^gpg-encrypt:(.*)
    gpg-encrypt = \1
-   add header[X-GPG-Comment] "Encrypted for \1"
+   add = X-GPG-Comment: Encrypted for \1
 done
 ---END---
 @end group
@@ -811,7 +975,6 @@ a subject @w{@samp{hello John!@@@@gpg-encrypt:john's_gpg_key}}.
 In this case, you decide in a run time which public key should be used,
 without creating a separate rules for each user; thanks to back-references,
 those 3---4 lines are enough.
-
 
 @node Invoking Anubis, Sample Beginning, Rule System, Top
 @chapter Invoking GNU Anubis
