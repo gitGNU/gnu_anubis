@@ -23,10 +23,9 @@ local-mta = TESTDIR/mta -bs -d TESTDIR/etc/mta.log
 BEGIN GUILE
 guile-output = TESTDIR/etc/anubis.out
 guile-debug = yes
-guile-load-path-append = TESTDIR/../examples
-guile-load-path-append = TESTDIR/../guile
+guile-load-path-append = TOP_SRCDIR/examples
+guile-load-path-append = TOP_SRCDIR/guile
 guile-load-program = rot-13.scm
-guile-load-program = anubis.scm
 guile-load-program = remailer.scm
 END
 
@@ -36,13 +35,15 @@ rule "remail:(.*)/(.*)"
  guile-process remailer-I #:rrt gray@localhost \
                           #:post \1 \
                           #:latent \2 \
-	#:header <<-EOT
-		In /users3 did Kubla Kahn
-		A stately pleasure dome decree,
-		Where /bin, the sacred river ran
-		Through Test Suites measureless to Man
-		Down to a sunless C.
-	EOT
+			  #:header "X-Processed-By: GNU Anubis & Remailer-I"
+done
+
+rule "rot-13.*body"
+ guile-process rot-13 #:body
+done
+
+rule "rot-13.*subj"
+ guile-process rot-13 #:subject
 done
 
 ---END---
