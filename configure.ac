@@ -135,6 +135,7 @@ if test x"$useguile" = x"no"; then
 fi
 
 dnl Use option --without-gpgme to NOT compile GnuPG (GPGME library) support.
+AC_SUBST(ANUBIS_GPGFILES)
 AC_ARG_WITH(gpgme,
 	[  --without-gpgme         without GnuPG (GPGME library) support],
 	[with_gpgme=no],
@@ -147,6 +148,7 @@ fi
 if test "$with_gpgme" = "no"; then
  AC_MSG_RESULT([Disabling GPGME support...])
 else
+ AC_PATH_PROG(GPG, gpg)
  findgpgmedir() { :
   if test -f "$1/include/gpgme.h"; then
    gpgmedir=1
@@ -165,6 +167,7 @@ else
  else
   AC_CHECK_HEADERS(gpgme.h)
  fi
+ ANUBIS_GPGFILES='$(GPGFILES)'
  AC_LIBOBJ(gpg)
 fi
 
@@ -303,6 +306,7 @@ AC_CONFIG_FILES([Makefile
  examples/Makefile
  examples/pam/Makefile
  testsuite/Makefile
+ testsuite/data/Makefile
  testsuite/etc/Makefile
  contrib/Makefile
  ])
