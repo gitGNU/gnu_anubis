@@ -1,3 +1,13 @@
+2004-07-13  Sergey Poznyakoff
+
+	* src/gsasl_srv.c (anubis_set_mech_list): Convert mechanism
+	names to uppercase
+	* src/headers.h (make_uppercase): New function
+	(make_lowercase): Return char* for symmetry with make_uppercase().
+	* src/misc.c (make_lowercase): Rewritten in a more effective way.
+	(make_uppercase): New function
+	* src/rcfile.y (rc_set_debug_level): Check for valid input.
+
 2004-07-12  Sergey Poznyakoff 
 
 	* src/authmode.c (make_help_message): Fixed mess created
