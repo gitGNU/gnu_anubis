@@ -32,7 +32,7 @@
  int allow_severity = LOG_INFO;
 #endif /* USE_LIBWRAP */
 
-static void sig_cld(int);
+static RETSIGTYPE sig_cld(int);
 static void service_unavailable(int);
 static void set_unprivileged_user(void);
 
@@ -80,7 +80,7 @@ daemonize(void)
 	return;
 }
 
-static void
+static RETSIGTYPE
 sig_cld(int code)
 {
 	pid_t pid;
@@ -354,6 +354,7 @@ loop(int sd_bind)
 			close_socket(sd_client);
 		}
 		topt &= ~T_ERROR;
+		cleanup_children();
 	}
 	return;
 }
@@ -444,7 +445,8 @@ stdinout(void)
 	net_set_io(CLIENT, _stdio_read, _stdio_write, NULL, _stdio_strerror);
 	net_set_io(SERVER, _stdio_read, _stdio_write, NULL, _stdio_strerror);
 	smtp_session();
-
+	cleanup_children();
+	
 	close_socket(sd_server);
 	free_mem();
 	return;
