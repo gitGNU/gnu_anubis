@@ -115,6 +115,7 @@ END |
 [aA][dD][dD]                 return ADD;
 [rR][eE][mM][oO][vV][eE]     return REMOVE;
 [mM][oO][dD][iI][fF][yY]     return MODIFY;
+[rR][eE][gG][eE][xX]         return REGEX;
 
          /* Identifiers */
 {IDENT}          { yylval.string = strdup(yytext);
