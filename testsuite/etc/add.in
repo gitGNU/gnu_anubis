@@ -32,5 +32,10 @@ if header[X-Command] = "Complete"
 	EOT
 fi
 
+if header[X-Order] = "Append file"
+  body-append "TESTDIR/data/append.txt"
+fi
+
 remove [X-Command]
+
 ---END---
