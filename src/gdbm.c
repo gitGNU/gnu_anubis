@@ -95,18 +95,18 @@ gdbm_content_to_record(char *keystr, datum content, ANUBIS_USER *rec)
 }
 
 static int
-gdbm_db_get (void *d, char *keystr, ANUBIS_USER *rec, int *errp)
+gdbm_db_get (void *d, const char *keystr, ANUBIS_USER *rec, int *errp)
 {
 	datum key, content;
 	
-	key.dptr = keystr;
+	key.dptr = (char*) keystr;
 	key.dsize = strlen(keystr);
 	content = gdbm_fetch((GDBM_FILE)d, key);
 	if (content.dptr == NULL) 
 		return ANUBIS_DB_NOT_FOUND;
 
 	memset(rec, 0, sizeof *rec);
-	gdbm_content_to_record(keystr, content, rec);
+	gdbm_content_to_record((char*) keystr, content, rec);
 	free(content.dptr);
 	return ANUBIS_DB_SUCCESS;
 }
@@ -139,7 +139,7 @@ gdbm_db_list(void *d, LIST *list, int *ecode)
 }
 
 static int
-gdbm_db_put (void *d, char *keystr, ANUBIS_USER *rec, int *errp)
+gdbm_db_put (void *d, const char *keystr, ANUBIS_USER *rec, int *errp)
 {
 	size_t size, n;
 	char *text;
@@ -164,7 +164,7 @@ gdbm_db_put (void *d, char *keystr, ANUBIS_USER *rec, int *errp)
 		n += sprintf(text + n, ",%s", rec->rcfile_name);
 	}
 
-	key.dptr = keystr;
+	key.dptr = (char*) keystr;
 	key.dsize = strlen(keystr);
 	content.dptr = text;
 	content.dsize = size;
@@ -179,12 +179,12 @@ gdbm_db_put (void *d, char *keystr, ANUBIS_USER *rec, int *errp)
 }
 
 static int
-gdbm_db_delete(void *d, char *keystr, int *ecode)
+gdbm_db_delete(void *d, const char *keystr, int *ecode)
 {
 	int rc;
 	datum key;
 
-	key.dptr = keystr;
+	key.dptr = (char*) keystr;
 	key.dsize = strlen(keystr);
 	if (gdbm_delete((GDBM_FILE)d, key)) {
 		*ecode = gdbm_errno;
@@ -197,7 +197,6 @@ gdbm_db_delete(void *d, char *keystr, int *ecode)
 const char *
 gdbm_db_strerror(void *d, int rc)
 {
-	struct anubis_mysql_db *amp = d;
 	return gdbm_strerror(rc);
 }
 
