@@ -192,6 +192,8 @@ void
 message_init(MESSAGE *msg)
 {
 	memset(msg, 0, sizeof(*msg));
+	msg->header = list_create();
+	msg->commands = list_create();
 }
 
 void
