@@ -1,23 +1,22 @@
 # Polish messages for GNU Anubis -*- mode: po; buffer-file-coding-system: iso-8859-2; default-input-method: latin-2-prefix -*-
-# Copyright (C) 2003 Free Software Foundation, Inc.
-# Sergey Poznyakoff <gray@gnu.org>, 2003.
+# Copyright (C) 2003, 2004 Free Software Foundation, Inc.
+# Sergey Poznyakoff <gray@gnu.org>, 2003, 2004.
 #
 # Local Variables:
 # Local IspellDict: polish
 # End:
 msgid ""
 msgstr ""
-"Project-Id-Version: anubis 3.6.2\n"
+"Project-Id-Version: anubis 3.9.94\n"
 "Report-Msgid-Bugs-To: bug-anubis@gnu.org\n"
-"POT-Creation-Date: 2004-05-21 19:59+0300\n"
-"PO-Revision-Date: 2003-06-25 13:39+0300\n"
+"POT-Creation-Date: 2004-05-27 22:30+0200\n"
+"PO-Revision-Date: 2004-06-05 12:04+0300\n"
 "Last-Translator: Sergey Poznyakoff <gray@gnu.org>\n"
 "Language-Team: Polish <translation-team-pl@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-2\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
-"|| n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 
 #: src/auth.c:31
 #, c-format
@@ -27,12 +26,12 @@ msgstr "Witaj, u¿ytkowniku %s !"
 #: src/auth.c:112
 #, c-format
 msgid "IDENT: socket() failed: %s."
-msgstr "IDENT: socket() nie powiód³ siê: %s"
+msgstr "IDENT: socket() nie powiod³a siê: %s"
 
 #: src/auth.c:124
 #, c-format
 msgid "IDENT: connect() failed: %s."
-msgstr "IDENT: connect() nie powiód³ siê: %s."
+msgstr "IDENT: connect() nie powiod³a siê: %s."
 
 #: src/auth.c:130
 #, c-format
@@ -40,14 +39,14 @@ msgid "IDENT: connected to %s:%u"
 msgstr "IDENT: po³±czono siê z %s:%u"
 
 #: src/auth.c:138
-#, fuzzy, c-format
+#, c-format
 msgid "IDENT: stream_write() failed: %s."
-msgstr "IDENT: recvline() nie powiód³ siê: %s"
+msgstr "IDENT: stream_write() nie powiod³a siê: %s"
 
 #: src/auth.c:145
 #, c-format
 msgid "IDENT: recvline() failed: %s."
-msgstr "IDENT: recvline() nie powiód³ siê: %s"
+msgstr "IDENT: recvline() nie powiod³a siê: %s"
 
 #: src/auth.c:155
 msgid "IDENT: incorrect data."
@@ -68,32 +67,31 @@ msgstr "IDENT: u¿ytkownika okre¶lono jako %s."
 
 #: src/authmode.c:396
 msgid "Database not specified"
-msgstr ""
+msgstr "Nie podano bazy danych"
 
 #: src/authmode.c:403
 #, c-format
 msgid "Cannot open database %s: %s"
-msgstr ""
+msgstr "Nie mo¿na otworzyæ bazy danych %s: %s"
 
 #: src/authmode.c:412
 #, c-format
 msgid "Found record for %s"
-msgstr ""
+msgstr "Znaleziono wpis dla %s"
 
 #: src/authmode.c:417
 #, c-format
 msgid "Cannot retrieve data from the SASL database: %s"
-msgstr ""
+msgstr "Nie mo¿na pobraæ dane z bazy SASL: %s"
 
 #: src/authmode.c:422
 #, c-format
 msgid "Record for %s not found"
-msgstr ""
+msgstr "Brak wpisu dla %s"
 
 #: src/authmode.c:465 src/daemon.c:323 src/transmode.c:66
 msgid "The MTA has not been specified. Set the REMOTE-MTA or LOCAL-MTA."
-msgstr ""
-"Nie podano MTA. Ustaw w pliku konfiguracyjnym REMOTE-MTA lub LOCAL-MTA."
+msgstr "Nie podano MTA. Ustaw w pliku konfiguracyjnym REMOTE-MTA lub LOCAL-MTA."
 
 #: src/authmode.c:491 src/map.c:155 src/net.c:137 src/net.c:198
 #: src/transmode.c:92
@@ -124,16 +122,16 @@ msgstr "PAM: zwolnienie warto¶ci uwierzytelniaj±cej nie powiod³o siê."
 #: src/daemon.c:48
 #, c-format
 msgid "daemon() failed. %s."
-msgstr "daemon() nie powiód³ siê. %s"
+msgstr "daemon() nie powiod³a siê. %s"
 
 #: src/daemon.c:55
 #, c-format
 msgid "Can't fork. %s."
-msgstr "fork() nie powiód³ siê. %s"
+msgstr "fork() nie powiod³a siê. %s"
 
 #: src/daemon.c:63
 msgid "setsid() failed."
-msgstr "setsid() nie powiód³ siê."
+msgstr "setsid() nie powiod³a siê."
 
 #: src/daemon.c:75
 #, c-format
@@ -141,18 +139,12 @@ msgid "%s daemon startup succeeded."
 msgstr "Program %s pomy¶lnie rozpocz±³ pracê w trybie demona."
 
 #: src/daemon.c:91
-#, fuzzy, c-format
+#, c-format
 msgid "Child [%lu] finished. Exit status: %s. %d client left."
 msgid_plural "Child [%lu] finished. Exit status: %s. %d clients left."
-msgstr[0] ""
-"Proces potomny [%d] zakoñczy³ siê. Kod zakoñczenia: %s. Pozosta³y %d procesy "
-"potomne."
-msgstr[1] ""
-"Proces potomny [%d] zakoñczy³ siê. Kod zakoñczenia: %s. Pozosta³y %d procesy "
-"potomne."
-msgstr[2] ""
-"Proces potomny [%d] zakoñczy³ siê. Kod zakoñczenia: %s. Pozosta³y %d procesy "
-"potomne."
+msgstr[0] "Proces potomny [%lu] zakoñczy³ pracê. Kod zakoñczenia: %s. Pozosta³ %d proces potomny."
+msgstr[1] "Proces potomny [%lu] zakoñczy³ pracê. Kod zakoñczenia: %s. Pozosta³y %d procesy potomne."
+msgstr[2] "Proces potomny [%lu] zakoñczy³ pracê. Kod zakoñczenia: %s. Pozosta³o %d procesów potomnych."
 
 #: src/daemon.c:95
 msgid "OK"
@@ -164,7 +156,7 @@ msgstr "B£¡D"
 
 #: src/daemon.c:137
 msgid "WARNING: An unprivileged user has not been specified!"
-msgstr ""
+msgstr "OSTRZE¯ENIE: Brak nazwy u¿ytkownika nieuprzywilejowanego!"
 
 #: src/daemon.c:186
 msgid "GNU Anubis is running..."
@@ -173,7 +165,7 @@ msgstr "GNU Anubis zosta³ uruchomiony..."
 #: src/daemon.c:196 src/exec.c:114
 #, c-format
 msgid "accept() failed: %s."
-msgstr "accept() nie powiód³ siê: %s"
+msgstr "accept() nie powiod³a siê: %s"
 
 #: src/daemon.c:214
 #, c-format
@@ -234,14 +226,14 @@ msgid "%s is not a regular file or a symbolic link."
 msgstr "%s nie jest zwyk³ym plikiem ani dowi±zaniem symbolicznym."
 
 #: src/env.c:380
-#, fuzzy, c-format
+#, c-format
 msgid "Unknown mode: %s"
-msgstr "Nieznany host %s."
+msgstr "Nieznany tryb %s."
 
 #: src/errs.c:82
-#, fuzzy, c-format
+#, c-format
 msgid "Couldn't write to socket: %s."
-msgstr "Nie mo¿na zapisaæ do gniazda! %s."
+msgstr "Nie mo¿na zapisaæ do gniazda: %s."
 
 #: src/errs.c:93
 #, c-format
@@ -301,37 +293,37 @@ msgstr "Utworzenie gniazda #2 nie powiod³o siê."
 #: src/exec.c:94
 #, c-format
 msgid "#1 bind() failed: %s."
-msgstr "bind() nad gniazdem #1 nie powiód³ siê: %s."
+msgstr "bind() nad gniazdem #1 nie powiod³a siê: %s."
 
 #: src/exec.c:98
 #, c-format
 msgid "#2 bind() failed: %s."
-msgstr "bind() nad gniazdem #2 nie powiód³ siê: %s."
+msgstr "bind() nad gniazdem #2 nie powiod³a siê: %s."
 
 #: src/exec.c:102 src/net.c:216
 #, c-format
 msgid "listen() failed: %s."
-msgstr "listen() nie powiód³ siê: %s."
+msgstr "listen() nie powiod³a siê: %s."
 
 #: src/exec.c:106
 #, c-format
 msgid "getsockname() failed: %s."
-msgstr "getsockname() nie powiód³ siê: %s."
+msgstr "getsockname() nie powiod³a siê: %s."
 
 #: src/exec.c:110
 #, c-format
 msgid "connect() failed: %s."
-msgstr "connect() nie powiód³ siê: %s."
+msgstr "connect() nie powiod³a siê: %s."
 
 #: src/exec.c:120
 #, c-format
 msgid "socketpair() failed: %s."
-msgstr "socketpair() nie powiód³ siê: %s."
+msgstr "socketpair() nie powiod³a siê: %s."
 
 #: src/exec.c:134
-#, fuzzy, c-format
+#, c-format
 msgid "Local program [%lu] finished."
-msgstr "Program lokalny [%d] zakoñczy³ siê."
+msgstr "Program lokalny [%lu] zakoñczy³ siê."
 
 #: src/exec.c:170
 #, c-format
@@ -340,12 +332,12 @@ msgstr "Uruchomienie %s %s..."
 
 #: src/exec.c:177
 msgid "fork() failed."
-msgstr "fork() nie powiód³ siê."
+msgstr "fork() nie powiod³a siê."
 
 #: src/exec.c:191
 #, c-format
 msgid "execvp() failed: %s"
-msgstr "execvp() nie powiód³ siê: %s"
+msgstr "execvp() nie powiod³a siê: %s"
 
 #: src/gpg.c:50
 #, c-format
@@ -360,44 +352,43 @@ msgstr "Zainstaluj GPGME w wersji %s lub nowszej."
 #: src/gpg.c:78
 #, c-format
 msgid "GPGME: failed. %s."
-msgstr "GPGME nie powiód³ siê. %s."
+msgstr "GPGME nie powiod³a siê. %s."
 
 #: src/gpg.c:122 src/gpg.c:282
 #, c-format
 msgid "GPGME: Cannot list keys: %s"
-msgstr ""
+msgstr "GPGME: Nie mo¿na wydrukowaæ kluczy: %s"
 
 #: src/guile.c:79
 #, c-format
 msgid "cannot open guile output file %s: %s"
-msgstr ""
+msgstr "nie mo¿na otworzyæ pliku wyj¶ciowego `%s' dla Guile: %s\""
 
 #: src/guile.c:258
 msgid "missing procedure name"
-msgstr ""
+msgstr "brak nazwy procedury"
 
 #: src/guile.c:273
 #, c-format
 msgid "%s not a procedure object"
-msgstr ""
+msgstr "%s nie jest obiektem-procedur±"
 
 #: src/guile.c:309
 #, c-format
 msgid "Bad car type in return from %s"
-msgstr ""
+msgstr "B³êdny typ komórki car w powrocie z %s"
 
 #: src/guile.c:324
 #, c-format
 msgid "Bad cdr type in return from %s"
-msgstr ""
+msgstr "B³êdny typ komórki cdr w powrocie z %s"
 
 #: src/guile.c:328
 #, c-format
 msgid "Bad return type from %s"
-msgstr ""
+msgstr "B³êdny typ danych w powrocie z %s"
 
 #: src/help.c:82
-#, fuzzy
 msgid ""
 "\n"
 "GNU Anubis is free software; you can redistribute it and/or modify\n"
@@ -405,7 +396,6 @@ msgid ""
 "the Free Software Foundation; either version 2 of the License, or\n"
 "(at your option) any later version."
 msgstr ""
-"\n"
 "\n"
 "GNU Anubis jest wolnym oprogramowaniem; mo¿esz go\n"
 "rozprowadzaæ dalej i/lub modyfikowaæ na warunkach Powszechnej\n"
@@ -457,22 +447,17 @@ msgstr "Sk³adnia: anubis [opcje]\n"
 
 #: src/help.c:102
 msgid ""
-" -b, --bind [HOST:]PORT       Specify the TCP port on which GNU Anubis "
-"listens\n"
-"                              for connections. The default HOST is "
-"INADDR_ANY,\n"
+" -b, --bind [HOST:]PORT       Specify the TCP port on which GNU Anubis listens\n"
+"                              for connections. The default HOST is INADDR_ANY,\n"
 "                              and default PORT is 24 (private mail system)."
 msgstr ""
-" -b, --bind [HOST:]PORT       Ustala port TCP na którym GNU Anubis "
-"nas³uchuje.\n"
-"                              Domniemany HOST INADDR_ANY, port -- 24 "
-"(prywatny\n"
+" -b, --bind [HOST:]PORT       Ustala port TCP na którym GNU Anubis nas³uchuje.\n"
+"                              Domniemany HOST INADDR_ANY, port -- 24 (prywatny\n"
 "                              system pocztowy)."
 
 #: src/help.c:105
 msgid ""
-" -r, --remote-mta HOST[:PORT] Specify a remote SMTP host name or IP "
-"address.\n"
+" -r, --remote-mta HOST[:PORT] Specify a remote SMTP host name or IP address.\n"
 "                              The default PORT number is 25."
 msgstr ""
 " -r, --remote-mta HOST[:PORT] Podaje nazwê lub IP zdalnego hostu SMTP.\n"
@@ -481,8 +466,7 @@ msgstr ""
 #: src/help.c:107
 msgid ""
 " -l, --local-mta FILE         Execute a local SMTP server, which works on\n"
-"                              standard input and output (inetd-type "
-"program).\n"
+"                              standard input and output (inetd-type program).\n"
 "                              This option excludes the '--remote-mta' option."
 msgstr ""
 " -l, --local-mta FILE         W³±cza u¿ycie lokalnego serweru SMTP który\n"
@@ -492,14 +476,12 @@ msgstr ""
 "                              --remote-mta"
 
 #: src/help.c:110
-#, fuzzy
 msgid " -m, --mode=MODE              Select operation mode."
-msgstr " -f, --foreground             Tryb pierwszoplanowy."
+msgstr " -m, --mode=TRYB              Ustawia tryb dzia³ania."
 
 #: src/help.c:111
-msgid ""
-"                              MODE is either \"transparent\" or \"auth\""
-msgstr ""
+msgid "                              MODE is either \"transparent\" or \"auth\""
+msgstr "                              Warto¶ci± TRYB jest \"transparent\" b±d¼ \"auth\""
 
 #: src/help.c:112
 msgid " -f, --foreground             Foreground mode."
@@ -507,8 +489,7 @@ msgstr " -f, --foreground             Tryb pierwszoplanowy."
 
 #: src/help.c:113
 msgid ""
-" -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as "
-"described\n"
+" -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as described\n"
 "                              in RFC 821 on standard input and output."
 msgstr ""
 " -i, --stdio                  U¿yj protoko³u SMTP (OMP/Tunnel, RFC 821) na\n"
@@ -519,19 +500,16 @@ msgid "Output options:\n"
 msgstr "Opcje kontroluj±ce wyj¶cie:\n"
 
 #: src/help.c:116
-#, fuzzy
 msgid " -s, --silent                 Work silently."
-msgstr " -s, --silent     Wy³±czenie komunikatów o b³êdach."
+msgstr " -s, --silent                 Wy³±czenie komunikatów o b³êdach."
 
 #: src/help.c:117
-#, fuzzy
 msgid " -v, --verbose                Work noisily."
-msgstr " -v, --verbose    Wy¶wietla du¿o informacji diagnostycznej."
+msgstr " -v, --verbose                Wy¶wietla du¿o informacji diagnostycznej."
 
 #: src/help.c:118
-#, fuzzy
 msgid " -D, --debug                  Debug mode."
-msgstr " -D, --debug      Tryb odpluskwiania."
+msgstr " -D, --debug                  Tryb odpluskwiania."
 
 #: src/help.c:119
 msgid ""
@@ -542,42 +520,40 @@ msgstr ""
 "Ró¿ne opcje:\n"
 
 #: src/help.c:120
-#, fuzzy
-msgid ""
-" -c, --check-config           Run the configuration file syntax checker."
-msgstr " --norc           Ignorowanie systemowego pliku konfiguracyjnego."
+msgid " -c, --check-config           Run the configuration file syntax checker."
+msgstr ""
+" -c, --check-config           Uruchomienie kontroli sk³adni pliku\n"
+"                              konfiguracyjnego."
 
 #: src/help.c:121
 msgid ""
 " --show-config-options        Print a list of configuration options used\n"
 "                              to build GNU Anubis."
 msgstr ""
+" --show-config-options        Wypisanie warto¶ci domy¶lnych, u¿ytych podczas\n"
+"                              budowy GNU Anubisa."
 
 #: src/help.c:123
-msgid ""
-" --relax-perm-check           Do not check a user config file permissions."
+msgid " --relax-perm-check           Do not check a user config file permissions."
 msgstr ""
+" --relax-perm-check           Wy³±cza sprawdzanie uprawnieñ do pliku\n"
+"                              konfiguracyjnego u¿ytkownika."
 
 #: src/help.c:124
-#, fuzzy
-msgid ""
-" --altrc FILE                 Specify alternate system configuration file."
-msgstr " --altrc PLIK     Podaje nazwê alternatywnego pliku konfiguracyjnego."
+msgid " --altrc FILE                 Specify alternate system configuration file."
+msgstr " --altrc PLIK                 Podaje nazwê alternatywnego pliku konfiguracyjnego."
 
 #: src/help.c:125
-#, fuzzy
 msgid " --norc                       Ignore system configuration file."
-msgstr " --norc           Ignorowanie systemowego pliku konfiguracyjnego."
+msgstr " --norc                       Ignorowanie systemowego pliku konfiguracyjnego."
 
 #: src/help.c:126
-#, fuzzy
 msgid " --version                    Print version number and copyright."
-msgstr " --version        Wy¶wietla numer wersji i copyright."
+msgstr " --version                    Wy¶wietla numer wersji i copyright."
 
 #: src/help.c:127
-#, fuzzy
 msgid " --help                       It's obvious..."
-msgstr " --help           Samo przez siê rozumie..."
+msgstr " --help                       Samo przez siê rozumie..."
 
 #: src/help.c:128
 #, c-format
@@ -599,23 +575,23 @@ msgstr "Mapa translacji: niepoprawna sk³adnia."
 
 #: src/mem.c:37
 msgid "malloc() failed. Cannot allocate enough memory."
-msgstr "malloc() nie powiód³ siê. Brak pamiêci."
+msgstr "malloc() nie powiod³a siê. Brak pamiêci."
 
 #: src/mem.c:52
 msgid "realloc() failed. Cannot reallocate enough memory."
-msgstr "ralloc() nie powiód³ siê. Brak pamiêci dla powtórnego przydzielenia."
+msgstr "ralloc() nie powiod³a siê. Brak pamiêci dla powtórnego przydzielenia."
 
 #: src/misc.c:308
 msgid "Can't find out my own hostname"
-msgstr ""
+msgstr "Nie mo¿na rozpoznaæ w³asnej nazwy hosta"
 
 #: src/net.c:45
 msgid "SERVER"
-msgstr ""
+msgstr "SERWER"
 
 #: src/net.c:48
 msgid "CLIENT"
-msgstr ""
+msgstr "KLIENT"
 
 #: src/net.c:122
 msgid "Getting remote host information..."
@@ -643,7 +619,7 @@ msgstr "Ustalono po³±czenie z %s:%u "
 #: src/net.c:212
 #, c-format
 msgid "bind() failed: %s."
-msgstr "bind() nie powiód³ siê: %s."
+msgstr "bind() nie powiod³a siê: %s."
 
 #: src/net.c:213
 #, c-format
@@ -652,7 +628,7 @@ msgstr "GNU Anubis zosta³ przywi±zany do %s:%u"
 
 #: src/net.c:242
 msgid "Short write"
-msgstr ""
+msgstr "B³±d zapisu"
 
 #: src/socks.c:53
 msgid "Using SOCKS Proxy..."
@@ -680,12 +656,8 @@ msgid "Request rejected."
 msgstr "¯±danie odrzucono."
 
 #: src/socks.c:180
-msgid ""
-"Request rejected, because the client program and identd reported different "
-"User-IDs."
-msgstr ""
-"¯±danie odrzucono, poniewa¿ program klienta a identd poda³y ró¿ne "
-"identyfikatory u¿ytkownika."
+msgid "Request rejected, because the client program and identd reported different User-IDs."
+msgstr "¯±danie odrzucono, poniewa¿ program klienta a identd poda³y ró¿ne identyfikatory u¿ytkownika."
 
 #: src/socks.c:184 src/socks.c:406
 msgid "Server reply is not valid."
@@ -697,8 +669,7 @@ msgstr "Nie wygl±da to na us³ugê serwera SOCKS."
 
 #: src/socks.c:234
 msgid "SOCKS Proxy AUTH method: NO AUTHENTICATION REQUIRED"
-msgstr ""
-"Metoda uwierzytelnienia serwera SOCKS: UWIERZYTELNIENIE NIE JEST WYMAGANE"
+msgstr "Metoda uwierzytelnienia serwera SOCKS: UWIERZYTELNIENIE NIE JEST WYMAGANE"
 
 #: src/socks.c:238
 msgid "SOCKS Proxy AUTH method: USER NAME/PASSWORD"
@@ -767,12 +738,12 @@ msgstr "Czas wyczerpany! Zakoñczenie..."
 #: src/rcfile.c:121
 #, c-format
 msgid "cannot stat file `%s': %s"
-msgstr ""
+msgstr "stat(%s) nie powiod³a siê: %s"
 
 #: src/rcfile.c:131
 #, c-format
 msgid "File `%s' has already been read"
-msgstr ""
+msgstr "Plik `%s' ju¿ zosta³ odczytany"
 
 #: src/rcfile.c:177
 #, c-format
@@ -787,13 +758,12 @@ msgstr "Odczytanie pliku konfiguracyjnego u¿ytkownika %s..."
 #: src/rcfile.c:679
 #, c-format
 msgid "No such section: %s"
-msgstr ""
+msgstr "Brak takiej sekcji: %s"
 
 #: src/rcfile.l:180
 #, c-format
-msgid ""
-"Stray character in config: \\%03o. Possibly missing quotes around the string"
-msgstr ""
+msgid "Stray character in config: \\%03o. Possibly missing quotes around the string"
+msgstr "Zab³±kany znak w pliku konfiguracyjnym: \\%03o. Mo¿liwie brakuje cudzys³owów woko³o ³añcucha."
 
 #: src/rcfile.l:380
 #, c-format
@@ -803,88 +773,88 @@ msgstr "B³±d pliku RC: %s."
 #: src/rcfile.y:162 src/rcfile.y:170
 #, c-format
 msgid "Section %s already defined"
-msgstr ""
+msgstr "Sekcja %s ju¿ jest zdefiniowana"
 
 #: src/rcfile.y:217
-#, fuzzy, c-format
+#, c-format
 msgid "unknown keyword: %s"
-msgstr "Nieznany host %s."
+msgstr "nieznane s³owo kluczowe: %s"
 
 #: src/rcfile.y:510
 msgid "missing replacement value"
-msgstr ""
+msgstr "brak warto¶ci zast±pienia"
 
 #: src/rcfile.y:1122
 msgid "Unknown regexp modifier"
-msgstr ""
+msgstr "Nieznany modyfikator wyra¿enia regularnego"
 
 #: src/rcfile.y:1213
 msgid "STOP"
-msgstr ""
+msgstr "ZATRZYMANIE"
 
 #: src/rcfile.y:1218
 #, c-format
 msgid "Calling %s"
-msgstr ""
+msgstr "Wywo³anie %s"
 
 #: src/rcfile.y:1224
 #, c-format
 msgid "ADD %s [%s] %s"
-msgstr ""
+msgstr "ADD %s [%s] %s"
 
 #: src/rcfile.y:1234
 #, c-format
 msgid "MODIFY %s [%s] [%s] %s"
-msgstr ""
+msgstr "MODIFY %s [%s] [%s] %s"
 
 #: src/rcfile.y:1247
 #, c-format
 msgid "REMOVE HEADER [%s]"
-msgstr ""
+msgstr "REMOVE HEADER [%s]"
 
 #: src/rcfile.y:1270
-#, fuzzy, c-format
+#, c-format
 msgid "Executing %s"
-msgstr "Uruchomienie %s %s..."
+msgstr "Uruchomienie %s"
 
 #: src/rcfile.y:1341
 #, c-format
 msgid "Matched trigger \"%s\""
-msgstr ""
+msgstr "Regu³a wyzwalania \"%s\" dopasowa³a"
 
 #: src/rcfile.y:1345
 #, c-format
 msgid "Matched condition %s[%s] \"%s\""
-msgstr ""
+msgstr "Warunek %s[%s] \"%s\" dopasowa³"
 
 #: src/rcfile.y:1475
-#, fuzzy, c-format
+#, c-format
 msgid "Unknown section: %s"
-msgstr "Nieznany host %s."
+msgstr "Nieznana sekcja: %s"
 
 #: src/rcfile.y:1517
 msgid "program is not allowed in this section"
-msgstr ""
+msgstr "u¿ycie programu w tej sekcji nie jest dozwolone"
 
 #: src/regex.c:109
 #, c-format
 msgid "INTERNAL ERROR at %s:%d: missing or invalid regex"
-msgstr ""
+msgstr "B£¡D WEWNÊTRZNY w %s:%d: brakuj±ce b±d¼ niepoprawne wyra¿enie regularne"
 
 #: src/regex.c:306
-#, fuzzy, c-format
+#, c-format
 msgid "regcomp() failed at %s: %s."
-msgstr "regcomp() nie powiód³ siê. %s"
+msgstr "regcomp() nie powiod³a siê przy '%s': %s"
 
 #: src/regex.c:377
 #, c-format
 msgid "pcre_compile() failed at offset %d: %s."
-msgstr "pcre_compile() nie powiód³ siê przy pozycji %d: %s."
+msgstr "pcre_compile() nie powiod³a siê przy pozycji %d: %s."
 
 #: src/regex.c:402
-#, fuzzy, c-format
+#, c-format
 msgid "pcre_fullinfo() failed: %d."
-msgstr "listen() nie powiód³ siê: %s."
+msgstr "pcre_fullinfo() nie powiod³a siê: %d."
 
 #: src/regex.c:414
 msgid "Matched, but too many substrings."
@@ -904,18 +874,18 @@ msgid "Unable to seed random number generator."
 msgstr "Nie mo¿na zainicjowaæ generatora liczb losowych..."
 
 #: src/ssl.c:76
-#, fuzzy, c-format
+#, c-format
 msgid "Write error: %s"
-msgstr "B³±d pliku RC: %s."
+msgstr "B³±d zapisu: %s"
 
 #: src/ssl.c:93
-#, fuzzy, c-format
+#, c-format
 msgid "Read error: %s"
-msgstr "B³±d pliku RC: %s."
+msgstr "B³±d odczytu: %s"
 
 #: src/ssl.c:275
 msgid "SSLv23_client_method() failed."
-msgstr "SSLv23_client_method() nie powiód³ siê."
+msgstr "SSLv23_client_method() nie powiod³a siê."
 
 #: src/ssl.c:279 src/ssl.c:357
 msgid "Can't create SSL_CTX object."
@@ -923,7 +893,7 @@ msgstr "Nie mo¿na utworzyæ obiektu SSL_CTX."
 
 #: src/ssl.c:284 src/ssl.c:373
 msgid "SSL_CTX_set_cipher_list() failed."
-msgstr "SSL_CTX_set_cipher_list() nie powiód³ siê."
+msgstr "SSL_CTX_set_cipher_list() nie powiod³a siê."
 
 #: src/ssl.c:305 src/tls.c:161
 msgid "Initializing the TLS/SSL connection with MTA..."
@@ -934,25 +904,25 @@ msgid "Can't create a new SSL structure for a connection."
 msgstr "Nie mogê utworzyæ nowej struktury SSL dla pod³±czenia."
 
 #: src/ssl.c:323 src/tls.c:193
-#, fuzzy, c-format
+#, c-format
 msgid "TLS/SSL handshake failed: %s"
-msgstr "Proces negocjacji TLS/SSL nie powiód³ siê!"
+msgstr "Proces negocjacji TLS/SSL nie powiód³ siê: %s"
 
 #: src/ssl.c:353
 msgid "SSLv23_server_method() failed."
-msgstr "SSLv23_server_method() nie powiód³ siê."
+msgstr "SSLv23_server_method() nie powiod³a siê."
 
 #: src/ssl.c:361
 msgid "SSL_CTX_use_certificate_file() failed."
-msgstr "SSL_CTX_use_certificate_file() nie powiód³ siê."
+msgstr "SSL_CTX_use_certificate_file() nie powiod³a siê."
 
 #: src/ssl.c:365
 msgid "SSL_CTX_use_PrivateKey_file() failed."
-msgstr "SSL_CTX_use_PrivateKey_file() nie powiód³ siê."
+msgstr "SSL_CTX_use_PrivateKey_file() nie powiod³a siê."
 
 #: src/ssl.c:369
 msgid "Private key does not match the certificate public key."
-msgstr "Klucz prywatny nie pasuje do klucz publicznego."
+msgstr "Klucz prywatny nie pasuje do klucza publicznego."
 
 #: src/ssl.c:390 src/tls.c:244
 msgid "Initializing the TLS/SSL connection with MUA..."
@@ -963,19 +933,19 @@ msgid "TLS/SSL handshake failed!"
 msgstr "Proces negocjacji TLS/SSL nie powiód³ siê!"
 
 #: src/ssl.c:439
-#, fuzzy, c-format
+#, c-format
 msgid "%s connection using %s (%u bit)"
 msgid_plural "%s connection using %s (%u bits)"
-msgstr[0] "Pod³±czenie %s z u¿yciem %s (%u bitów)"
-msgstr[1] "Pod³±czenie %s z u¿yciem %s (%u bitów)"
+msgstr[0] "Pod³±czenie %s z u¿yciem %s (%u bit)"
+msgstr[1] "Pod³±czenie %s z u¿yciem %s (%u bity)"
 msgstr[2] "Pod³±czenie %s z u¿yciem %s (%u bitów)"
 
 #: src/ssl.c:451
-#, fuzzy, c-format
+#, c-format
 msgid "Server public key is %d bit"
 msgid_plural "Server public key is %d bits"
-msgstr[0] "Publiczny klucz serwera ma rozmiar %d bitów"
-msgstr[1] "Publiczny klucz serwera ma rozmiar %d bitów"
+msgstr[0] "Publiczny klucz serwera ma rozmiar %d bit"
+msgstr[1] "Publiczny klucz serwera ma rozmiar %d bity"
 msgstr[2] "Publiczny klucz serwera ma rozmiar %d bitów"
 
 #: src/ssl.c:457
@@ -984,7 +954,7 @@ msgstr "Certyfikat:"
 
 #: src/ssl.c:459
 msgid "X509_NAME_oneline [subject] failed!"
-msgstr "X509_NAME_oneline [temat] nie powiód³ siê!"
+msgstr "X509_NAME_oneline [temat] nie powiod³a siê!"
 
 #: src/ssl.c:462
 #, c-format
@@ -993,7 +963,7 @@ msgstr "Temat: %s"
 
 #: src/ssl.c:464
 msgid "X509_NAME_oneline [issuer] failed!"
-msgstr "X509_NAME_oneline [wydawca] nie powiód³ siê!"
+msgstr "X509_NAME_oneline [wydawca] nie powiod³a siê!"
 
 #: src/ssl.c:467
 #, c-format
@@ -1003,7 +973,7 @@ msgstr "Wydawca: %s"
 #: src/tls.c:176 src/tls.c:253
 #, c-format
 msgid "TLS Error reading `%s': %s"
-msgstr ""
+msgstr "B³±d TLS przy odczycie `%s': %s"
 
 #: src/tls.c:296
 msgid "No certificate was sent."
@@ -1030,18 +1000,18 @@ msgid "The certificate is trusted."
 msgstr "Certyfikat jest zaufany."
 
 #: src/tls.c:351
-#, fuzzy, c-format
+#, c-format
 msgid "Anonymous DH using prime of %d bit."
 msgid_plural "Anonymous DH using prime of %d bits."
-msgstr[0] "DH anonimowy u¿ywa liczby pierwszej z %d bitów."
+msgstr[0] "DH anonimowy u¿ywa liczby pierwszej z %d bita."
 msgstr[1] "DH anonimowy u¿ywa liczby pierwszej z %d bitów."
 msgstr[2] "DH anonimowy u¿ywa liczby pierwszej z %d bitów."
 
 #: src/tls.c:361
-#, fuzzy, c-format
+#, c-format
 msgid "Ephemeral DH using prime of %d bit."
 msgid_plural "Ephemeral DH using prime of %d bits."
-msgstr[0] "DH efemeralny u¿ywa liczby pierwszej z %d bitów."
+msgstr[0] "DH efemeralny u¿ywa liczby pierwszej z %d bita."
 msgstr[1] "DH efemeralny u¿ywa liczby pierwszej z %d bitów."
 msgstr[2] "DH efemeralny u¿ywa liczby pierwszej z %d bitów."
 
@@ -1086,14 +1056,14 @@ msgid " - Certificate expires: %s"
 msgstr " - Certyfikat wyga¶nie %s"
 
 #: src/tls.c:424
-#, fuzzy, c-format
+#, c-format
 msgid " - Certificate fingerprint: "
-msgstr " - Odcisk certyfikatu: %s\n"
+msgstr " - Odcisk certyfikatu: "
 
 #: src/tls.c:434
-#, fuzzy, c-format
+#, c-format
 msgid " - Certificate serial number: "
-msgstr " - Numer seryjny certyfikatu: %s\n"
+msgstr " - Numer seryjny certyfikatu: "
 
 #: src/tls.c:443
 #, c-format
@@ -1106,11 +1076,11 @@ msgid "RSA\n"
 msgstr "RSA\n"
 
 #: src/tls.c:446
-#, fuzzy, c-format
+#, c-format
 msgid " Modulus: %d bit\n"
 msgid_plural " Modulus: %d bits\n"
-msgstr[0] " Wspó³czynnik: %d bitów\n"
-msgstr[1] " Wspó³czynnik: %d bitów\n"
+msgstr[0] " Wspó³czynnik: %d bit\n"
+msgstr[1] " Wspó³czynnik: %d bity\n"
 msgstr[2] " Wspó³czynnik: %d bitów\n"
 
 #: src/tls.c:451
@@ -1119,11 +1089,11 @@ msgid "DSA\n"
 msgstr "DSA\n"
 
 #: src/tls.c:452
-#, fuzzy, c-format
+#, c-format
 msgid " Exponent: %d bit\n"
 msgid_plural " Exponent: %d bits\n"
-msgstr[0] " Wyk³adnik: %d bitów\n"
-msgstr[1] " Wyk³adnik: %d bitów\n"
+msgstr[0] " Wyk³adnik: %d bit\n"
+msgstr[1] " Wyk³adnik: %d bity\n"
 msgstr[2] " Wyk³adnik: %d bitów\n"
 
 #: src/tls.c:457
@@ -1137,9 +1107,9 @@ msgid " - Certificate version: #%d\n"
 msgstr " - Wersja certyfikatu: #%d\n"
 
 #: src/tls.c:466
-#, fuzzy, c-format
+#, c-format
 msgid " - Certificate Issuer's DN: %s\n"
-msgstr " - Informacje o wydawcy certyfikatu:\n"
+msgstr " - Informacje o wydawcy certyfikatu: %s\n"
 
 #: src/tunnel.c:288 src/tunnel.c:351
 msgid "Transferring message(s)..."
@@ -1147,7 +1117,7 @@ msgstr "Przekazywanie wiadomo¶ci..."
 
 #: src/tunnel.c:349
 msgid "Starting SMTP session..."
-msgstr ""
+msgstr "Uruchamianie sesji SMTP..."
 
 #: src/tunnel.c:429
 msgid "Using the TLS/SSL encryption..."
@@ -1173,7 +1143,7 @@ msgstr "Polecenie STARTTLS (jednokierunkowe) nie powiod³o siê."
 #: src/tunnel.c:577
 #, c-format
 msgid "getpeername() failed: %s."
-msgstr "getpeername() nie powiód³ siê: %s"
+msgstr "getpeername() nie powiod³a siê: %s"
 
 #: lib/getopt.c:629 lib/getopt.c:641
 #, c-format
@@ -1232,7 +1202,7 @@ msgstr "%s: opcja `-W %s' nie mo¿e mieæ argumentów\n"
 
 #: lib/obstack.c:403 lib/obstack.c:406
 msgid "memory exhausted"
-msgstr ""
+msgstr "pamiêæ wyczerpana"
 
 #~ msgid "The %s section has been found. Processing..."
 #~ msgstr "Odnaleziono sekcjê %s. Przetwarzanie..."

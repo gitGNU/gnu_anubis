@@ -1,19 +1,18 @@
 # Russian messages for GNU Anubis -*- mode: po; buffer-file-coding-system: koi8-r; default-input-method: cyrillic-jcuken -*-
-# Copyright (C) 2003 Free Software Foundation, Inc.
-# Sergey Poznyakoff <gray@gnu.org>, 2003.
+# Copyright (C) 2003, 2004 Free Software Foundation, Inc.
+# Sergey Poznyakoff <gray@gnu.org>, 2003, 2004
 msgid ""
 msgstr ""
-"Project-Id-Version: anubis 3.6.2\n"
+"Project-Id-Version: anubis 3.9.94\n"
 "Report-Msgid-Bugs-To: bug-anubis@gnu.org\n"
-"POT-Creation-Date: 2004-05-21 19:59+0300\n"
-"PO-Revision-Date: 2003-06-25 17:54+0300\n"
+"POT-Creation-Date: 2004-05-27 22:30+0200\n"
+"PO-Revision-Date: 2004-06-06 14:14+0300\n"
 "Last-Translator: Sergey Poznyakoff <gray@gnu.org>\n"
 "Language-Team: Russian <ru@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=koi8-r\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%"
-"10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 
 #: src/auth.c:31
 #, c-format
@@ -36,9 +35,9 @@ msgid "IDENT: connected to %s:%u"
 msgstr "IDENT: установлено соединение с %s:%u"
 
 #: src/auth.c:138
-#, fuzzy, c-format
+#, c-format
 msgid "IDENT: stream_write() failed: %s."
-msgstr "IDENT: recvline() не удался: %s."
+msgstr "IDENT: stream_write() не удался: %s."
 
 #: src/auth.c:145
 #, c-format
@@ -64,27 +63,27 @@ msgstr "IDENT: удаленный пользователь определен как %s."
 
 #: src/authmode.c:396
 msgid "Database not specified"
-msgstr ""
+msgstr "Не указана база данных"
 
 #: src/authmode.c:403
 #, c-format
 msgid "Cannot open database %s: %s"
-msgstr ""
+msgstr "Невозможно открыть базу данных %s: %s"
 
 #: src/authmode.c:412
 #, c-format
 msgid "Found record for %s"
-msgstr ""
+msgstr "Найдена запись для %s"
 
 #: src/authmode.c:417
 #, c-format
 msgid "Cannot retrieve data from the SASL database: %s"
-msgstr ""
+msgstr "Невозможно получить данные из базы данных SASL: %s"
 
 #: src/authmode.c:422
 #, c-format
 msgid "Record for %s not found"
-msgstr ""
+msgstr "Запись для %s не найдена"
 
 #: src/authmode.c:465 src/daemon.c:323 src/transmode.c:66
 msgid "The MTA has not been specified. Set the REMOTE-MTA or LOCAL-MTA."
@@ -136,19 +135,16 @@ msgid "%s daemon startup succeeded."
 msgstr "Запуск демона %s прошел успешно."
 
 #: src/daemon.c:91
-#, fuzzy, c-format
+#, c-format
 msgid "Child [%lu] finished. Exit status: %s. %d client left."
 msgid_plural "Child [%lu] finished. Exit status: %s. %d clients left."
-msgstr[0] ""
-"Дочерний процесс [%d] завершился. Код возврата: %s. Осталось %d клиента(ов)."
-msgstr[1] ""
-"Дочерний процесс [%d] завершился. Код возврата: %s. Осталось %d клиента(ов)."
-msgstr[2] ""
-"Дочерний процесс [%d] завершился. Код возврата: %s. Осталось %d клиента(ов)."
+msgstr[0] "Дочерний процесс [%lu] завершился. Код возврата: %s. Остался %d клиент."
+msgstr[1] "Дочерний процесс [%lu] завершился. Код возврата: %s. Осталось %d клиента."
+msgstr[2] "Дочерний процесс [%lu] завершился. Код возврата: %s. Осталось %d клиентов."
 
 #: src/daemon.c:95
 msgid "OK"
-msgstr "OK"
+msgstr "ПОРЯДОК"
 
 #: src/daemon.c:95
 msgid "ERROR"
@@ -156,7 +152,7 @@ msgstr "ОШИБКА"
 
 #: src/daemon.c:137
 msgid "WARNING: An unprivileged user has not been specified!"
-msgstr ""
+msgstr "ПРЕДУПРЕЖДЕНИЕ: Не указан непривилегированный пользователь!"
 
 #: src/daemon.c:186
 msgid "GNU Anubis is running..."
@@ -226,14 +222,14 @@ msgid "%s is not a regular file or a symbolic link."
 msgstr "%s не является ни обычным файлом, ни символической ссылкой."
 
 #: src/env.c:380
-#, fuzzy, c-format
+#, c-format
 msgid "Unknown mode: %s"
-msgstr "Неизвестная станция %s."
+msgstr "Неизвестный режим: %s."
 
 #: src/errs.c:82
-#, fuzzy, c-format
+#, c-format
 msgid "Couldn't write to socket: %s."
-msgstr "Невозможно записать в сокет: %s."
+msgstr "Невозможно записать в гнездо: %s."
 
 #: src/errs.c:93
 #, c-format
@@ -271,7 +267,7 @@ msgstr "Сервер не принял команду AUTH."
 #: src/esmtp.c:71 src/esmtp.c:110 src/esmtp.c:121
 #, c-format
 msgid "Challenge decoded: %s"
-msgstr "Расшифрованая строка вызова: %s"
+msgstr "Расшифрованная строка вызова: %s"
 
 #: src/esmtp.c:90 src/esmtp.c:131
 #, c-format
@@ -321,9 +317,9 @@ msgid "socketpair() failed: %s."
 msgstr "ошибка socketpair(): %s."
 
 #: src/exec.c:134
-#, fuzzy, c-format
+#, c-format
 msgid "Local program [%lu] finished."
-msgstr "Локальная программа [%d] завершена."
+msgstr "Локальная программа [%lu] завершена."
 
 #: src/exec.c:170
 #, c-format
@@ -352,44 +348,43 @@ msgstr "Установите GPGME версии %s или выше."
 #: src/gpg.c:78
 #, c-format
 msgid "GPGME: failed. %s."
-msgstr "GPGME не удался: %s."
+msgstr "GPGME: неудача: %s."
 
 #: src/gpg.c:122 src/gpg.c:282
 #, c-format
 msgid "GPGME: Cannot list keys: %s"
-msgstr ""
+msgstr "GPGME: Невозможно распечатать ключи: %s"
 
 #: src/guile.c:79
 #, c-format
 msgid "cannot open guile output file %s: %s"
-msgstr ""
+msgstr "невозможно открыть файл диагностики Guile %s: %s"
 
 #: src/guile.c:258
 msgid "missing procedure name"
-msgstr ""
+msgstr "нет названия процедуры"
 
 #: src/guile.c:273
 #, c-format
 msgid "%s not a procedure object"
-msgstr ""
+msgstr "%s -- не процедурный объект"
 
 #: src/guile.c:309
 #, c-format
 msgid "Bad car type in return from %s"
-msgstr ""
+msgstr "Неверный тип ячейки car в возврате от %s"
 
 #: src/guile.c:324
 #, c-format
 msgid "Bad cdr type in return from %s"
-msgstr ""
+msgstr "Неверный тип ячейки cdr в возврате от %s"
 
 #: src/guile.c:328
 #, c-format
 msgid "Bad return type from %s"
-msgstr ""
+msgstr "Неверный тип данных возврата из %s"
 
 #: src/help.c:82
-#, fuzzy
 msgid ""
 "\n"
 "GNU Anubis is free software; you can redistribute it and/or modify\n"
@@ -397,7 +392,6 @@ msgid ""
 "the Free Software Foundation; either version 2 of the License, or\n"
 "(at your option) any later version."
 msgstr ""
-"\n"
 "\n"
 "GNU Anubis распространяется свободно; Вы имеете право\n"
 "распространять и/или изменять эту программу, соблюдая условия Всеобщей\n"
@@ -449,10 +443,8 @@ msgstr "Использование: anubis [опции]\n"
 
 #: src/help.c:102
 msgid ""
-" -b, --bind [HOST:]PORT       Specify the TCP port on which GNU Anubis "
-"listens\n"
-"                              for connections. The default HOST is "
-"INADDR_ANY,\n"
+" -b, --bind [HOST:]PORT       Specify the TCP port on which GNU Anubis listens\n"
+"                              for connections. The default HOST is INADDR_ANY,\n"
 "                              and default PORT is 24 (private mail system)."
 msgstr ""
 " -b, --bind [АДРЕC:]ПОРТ       Указать порт TCP для обслуживания Anubis-ом.\n"
@@ -461,69 +453,59 @@ msgstr ""
 
 #: src/help.c:105
 msgid ""
-" -r, --remote-mta HOST[:PORT] Specify a remote SMTP host name or IP "
-"address.\n"
+" -r, --remote-mta HOST[:PORT] Specify a remote SMTP host name or IP address.\n"
 "                              The default PORT number is 25."
 msgstr ""
-" -r, --remote-mta АДРЕС[:ПОРТ]  Указать имя или IP-адрес удаленного SMTP "
-"сервера.\n"
-"                                По умолчанию ПОРТ=25."
+" -r, --remote-mta АДРЕС[:ПОРТ] Указать имя или IP-адрес удаленного SMTP сервера.\n"
+"                               По умолчанию ПОРТ=25."
 
 #: src/help.c:107
 msgid ""
 " -l, --local-mta FILE         Execute a local SMTP server, which works on\n"
-"                              standard input and output (inetd-type "
-"program).\n"
+"                              standard input and output (inetd-type program).\n"
 "                              This option excludes the '--remote-mta' option."
 msgstr ""
-" -l, --local-mta ФАЙЛ         Использовать локальный SMTP сервер, работающий "
-"на\n"
-"                              стандартном входе/выходе (программа типа "
-"inetd).\n"
-"                              Эта опция несовместима с опцией '--remote-mta'."
+" -l, --local-mta ФАЙЛ          Использовать локальный SMTP сервер, работающий на\n"
+"                               стандартном входе/выходе (программа типа inetd).\n"
+"                               Эта опция несовместима с опцией '--remote-mta'."
 
 #: src/help.c:110
-#, fuzzy
 msgid " -m, --mode=MODE              Select operation mode."
-msgstr " -f, --foreground             Остаться на переднем плане."
+msgstr " -m, --mode=РЕЖИМ              Выбрать режим работы."
 
 #: src/help.c:111
-msgid ""
-"                              MODE is either \"transparent\" or \"auth\""
+msgid "                              MODE is either \"transparent\" or \"auth\""
 msgstr ""
+"                               РЕЖИМ должен быть либо \"transparent\", либо\n"
+"                               \"auth\""
 
 #: src/help.c:112
 msgid " -f, --foreground             Foreground mode."
-msgstr " -f, --foreground             Остаться на переднем плане."
+msgstr " -f, --foreground              Остаться на переднем плане."
 
 #: src/help.c:113
 msgid ""
-" -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as "
-"described\n"
+" -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as described\n"
 "                              in RFC 821 on standard input and output."
 msgstr ""
-" -i, --stdio                  Использовать протокол SMTP (OMP/Tunnel), как\n"
-"                              описано в RFC 821, на стандартном входе и "
-"выходе."
+" -i, --stdio                   Использовать протокол SMTP (OMP/Tunnel), как\n"
+"                               описано в RFC 821, на стандартном входе и выходе."
 
 #: src/help.c:115
 msgid "Output options:\n"
 msgstr "Управление выходом:\n"
 
 #: src/help.c:116
-#, fuzzy
 msgid " -s, --silent                 Work silently."
-msgstr " -s, --silent     Не выдавать диагностики."
+msgstr " -s, --silent                  Не выдавать диагностики."
 
 #: src/help.c:117
-#, fuzzy
 msgid " -v, --verbose                Work noisily."
-msgstr " -v, --verbose    Выдавать подробную диагностику."
+msgstr " -v, --verbose                 Выдавать подробную диагностику."
 
 #: src/help.c:118
-#, fuzzy
 msgid " -D, --debug                  Debug mode."
-msgstr " -D, --debug      Режим отладки."
+msgstr " -D, --debug                   Режим отладки."
 
 #: src/help.c:119
 msgid ""
@@ -534,44 +516,42 @@ msgstr ""
 "Дополнительные опции:        \n"
 
 #: src/help.c:120
-#, fuzzy
-msgid ""
-" -c, --check-config           Run the configuration file syntax checker."
-msgstr " --norc           Не обрабатывать системный конфигурационный файл."
+msgid " -c, --check-config           Run the configuration file syntax checker."
+msgstr ""
+" -c, --check-config            Запустить проверку синтаксиса конфигурационного\n"
+"                               файла."
 
 #: src/help.c:121
 msgid ""
 " --show-config-options        Print a list of configuration options used\n"
 "                              to build GNU Anubis."
 msgstr ""
+" --show-config-options         Распечатать список конфигурационных опций,\n"
+"                               использованных во время сборки GNU Anubis."
 
 #: src/help.c:123
-msgid ""
-" --relax-perm-check           Do not check a user config file permissions."
+msgid " --relax-perm-check           Do not check a user config file permissions."
 msgstr ""
+" --relax-perm-check            Не проверять права доступа на конфигурационный\n"
+"                               файл пользователя."
 
 #: src/help.c:124
-#, fuzzy
-msgid ""
-" --altrc FILE                 Specify alternate system configuration file."
-msgstr " --altrc ФАЙЛ     Читать конфигурацию из ФАЙЛА."
+msgid " --altrc FILE                 Specify alternate system configuration file."
+msgstr " --altrc ФАЙЛ                  Читать конфигурацию из ФАЙЛА."
 
 #: src/help.c:125
-#, fuzzy
 msgid " --norc                       Ignore system configuration file."
-msgstr " --norc           Не обрабатывать системный конфигурационный файл."
+msgstr " --norc                        Не обрабатывать системный конфигурационный файл."
 
 #: src/help.c:126
-#, fuzzy
 msgid " --version                    Print version number and copyright."
 msgstr ""
-" --version        Напечатать номер версии программы и условия "
-"распространения."
+" --version                     Напечатать номер версии программы и условия\n"
+"                               распространения."
 
 #: src/help.c:127
-#, fuzzy
 msgid " --help                       It's obvious..."
-msgstr " --help           Самооочевидно..."
+msgstr " --help                        Самооочевидно..."
 
 #: src/help.c:128
 #, c-format
@@ -601,15 +581,15 @@ msgstr "realloc() не удался. Невозможно перераспределить достаточно памяти."
 
 #: src/misc.c:308
 msgid "Can't find out my own hostname"
-msgstr ""
+msgstr "невозможно определить название собственной машины"
 
 #: src/net.c:45
 msgid "SERVER"
-msgstr ""
+msgstr "СЕРВЕР"
 
 #: src/net.c:48
 msgid "CLIENT"
-msgstr ""
+msgstr "КЛИЕНТ"
 
 #: src/net.c:122
 msgid "Getting remote host information..."
@@ -617,7 +597,7 @@ msgstr "Получение информации об удаленной машине..."
 
 #: src/net.c:152 src/net.c:184
 msgid "Can't create stream socket."
-msgstr "Невозможно создать потоковый сокет."
+msgstr "Невозможно создать гнездо потока."
 
 #: src/net.c:155
 #, c-format
@@ -646,7 +626,7 @@ msgstr "GNU Anubis обслуживает %s:%u"
 
 #: src/net.c:242
 msgid "Short write"
-msgstr ""
+msgstr "Ошибка записи"
 
 #: src/socks.c:53
 msgid "Using SOCKS Proxy..."
@@ -659,7 +639,7 @@ msgstr "сервер SOCKS: %s"
 
 #: src/socks.c:136
 msgid "Address must be an IP, not a domain name."
-msgstr "Адрес должен быть адресом IP, не доменным именем."
+msgstr "Адрес должен быть адресом IP, а не доменным именем."
 
 #: src/socks.c:171 src/socks.c:379
 msgid "SOCKS Proxy Connection: succeeded."
@@ -674,12 +654,8 @@ msgid "Request rejected."
 msgstr "Запрос отвергнут."
 
 #: src/socks.c:180
-msgid ""
-"Request rejected, because the client program and identd reported different "
-"User-IDs."
-msgstr ""
-"Запрос отвергнут поскольку идентификаторы, возвращенные клиентской "
-"программой и identd, не совпали."
+msgid "Request rejected, because the client program and identd reported different User-IDs."
+msgstr "Запрос отвергнут, поскольку не совпали идентификаторы, полученные от программы клиента и от identd."
 
 #: src/socks.c:184 src/socks.c:406
 msgid "Server reply is not valid."
@@ -760,12 +736,12 @@ msgstr "Время ожидания истекло. Завершение работы..."
 #: src/rcfile.c:121
 #, c-format
 msgid "cannot stat file `%s': %s"
-msgstr ""
+msgstr "ошибка stat(%s): %s"
 
 #: src/rcfile.c:131
 #, c-format
 msgid "File `%s' has already been read"
-msgstr ""
+msgstr "Файл `%s' уже был загружен"
 
 #: src/rcfile.c:177
 #, c-format
@@ -780,13 +756,12 @@ msgstr "Чтение пользовательского файла конфигурации %s..."
 #: src/rcfile.c:679
 #, c-format
 msgid "No such section: %s"
-msgstr ""
+msgstr "Нет такой секции: %s"
 
 #: src/rcfile.l:180
 #, c-format
-msgid ""
-"Stray character in config: \\%03o. Possibly missing quotes around the string"
-msgstr ""
+msgid "Stray character in config: \\%03o. Possibly missing quotes around the string"
+msgstr "Неожиданный символ в файле конфигурации: \\%03o. Возможно отсутствуют кавычки вокруг строки символов."
 
 #: src/rcfile.l:380
 #, c-format
@@ -796,78 +771,80 @@ msgstr "Ошибка файла RC: %s."
 #: src/rcfile.y:162 src/rcfile.y:170
 #, c-format
 msgid "Section %s already defined"
-msgstr ""
+msgstr "Секция %s уже определена."
 
 #: src/rcfile.y:217
-#, fuzzy, c-format
+#, c-format
 msgid "unknown keyword: %s"
-msgstr "Неизвестная станция %s."
+msgstr "неизвестное ключевое слово: %s."
 
 #: src/rcfile.y:510
 msgid "missing replacement value"
-msgstr ""
+msgstr "нет значения для замены"
 
 #: src/rcfile.y:1122
 msgid "Unknown regexp modifier"
-msgstr ""
+msgstr "Неизвестный модификатор для регулярного выражения"
 
 #: src/rcfile.y:1213
 msgid "STOP"
-msgstr ""
+msgstr "ОСТАНОВ"
 
 #: src/rcfile.y:1218
 #, c-format
 msgid "Calling %s"
-msgstr ""
+msgstr "Вызов %s"
 
 #: src/rcfile.y:1224
 #, c-format
 msgid "ADD %s [%s] %s"
-msgstr ""
+msgstr "ADD %s [%s] %s"
 
 #: src/rcfile.y:1234
 #, c-format
 msgid "MODIFY %s [%s] [%s] %s"
-msgstr ""
+msgstr "MODIFY %s [%s] [%s] %s"
 
 #: src/rcfile.y:1247
 #, c-format
 msgid "REMOVE HEADER [%s]"
-msgstr ""
+msgstr "REMOVE HEADER [%s]"
 
 #: src/rcfile.y:1270
-#, fuzzy, c-format
+#, c-format
 msgid "Executing %s"
-msgstr "Исполнение %s %s..."
+msgstr "Исполнение %s"
 
 #: src/rcfile.y:1341
 #, c-format
 msgid "Matched trigger \"%s\""
-msgstr ""
+msgstr "Переключатель \"%s\" удовлетворил ключу"
 
 #: src/rcfile.y:1345
 #, c-format
 msgid "Matched condition %s[%s] \"%s\""
-msgstr ""
+msgstr "Условие %s[%s] \"%s\" выполнилось"
 
 #: src/rcfile.y:1475
-#, fuzzy, c-format
+#, c-format
 msgid "Unknown section: %s"
-msgstr "Неизвестная станция %s."
+msgstr "Неизвестная секция: %s."
 
 #: src/rcfile.y:1517
 msgid "program is not allowed in this section"
-msgstr ""
+msgstr "использование программы в этой секции не разрешено."
 
 #: src/regex.c:109
 #, c-format
 msgid "INTERNAL ERROR at %s:%d: missing or invalid regex"
 msgstr ""
+"Внутренняя ошибка возле %s:%d: несуществующее или неверное регулярное\n"
+"выражение"
 
 #: src/regex.c:306
-#, fuzzy, c-format
+#, c-format
 msgid "regcomp() failed at %s: %s."
-msgstr "regcomp() не удался: %s"
+msgstr "regcomp() не удался возле %s: %s"
 
 #: src/regex.c:377
 #, c-format
@@ -875,9 +852,9 @@ msgid "pcre_compile() failed at offset %d: %s."
 msgstr "ошибка pcre_compile() в смещении %d: %s."
 
 #: src/regex.c:402
-#, fuzzy, c-format
+#, c-format
 msgid "pcre_fullinfo() failed: %d."
-msgstr "ошибка listen(): %s"
+msgstr "ошибка pcre_fullinfo(): %d."
 
 #: src/regex.c:414
 msgid "Matched, but too many substrings."
@@ -886,7 +863,7 @@ msgstr "Соответствие найдено, но подстрок слишком много."
 #: src/regex.c:425
 #, c-format
 msgid "Get substring %d failed (%d)."
-msgstr "Неуспешный поиск подстроки %d (%d)."
+msgstr "Неудачный поиск подстроки %d (%d)."
 
 #: src/ssl.c:57
 msgid "Seeding random number generator..."
@@ -897,14 +874,14 @@ msgid "Unable to seed random number generator."
 msgstr "Невозможно запустить генератор случайных чисел."
 
 #: src/ssl.c:76
-#, fuzzy, c-format
+#, c-format
 msgid "Write error: %s"
-msgstr "Ошибка файла RC: %s."
+msgstr "Ошибка записи: %s."
 
 #: src/ssl.c:93
-#, fuzzy, c-format
+#, c-format
 msgid "Read error: %s"
-msgstr "Ошибка файла RC: %s."
+msgstr "Ошибка чтения: %s."
 
 #: src/ssl.c:275
 msgid "SSLv23_client_method() failed."
@@ -927,9 +904,9 @@ msgid "Can't create a new SSL structure for a connection."
 msgstr "Невозможно создать новую структуру SSL для соединения."
 
 #: src/ssl.c:323 src/tls.c:193
-#, fuzzy, c-format
+#, c-format
 msgid "TLS/SSL handshake failed: %s"
-msgstr "Обмен TLS/SSL завершился неуспешно!"
+msgstr "Обмен TLS/SSL завершился неудачей: %s"
 
 #: src/ssl.c:353
 msgid "SSLv23_server_method() failed."
@@ -953,22 +930,22 @@ msgstr "Установка соединения с MUA по протоколу TLS/SSL..."
 
 #: src/ssl.c:405 src/tls.c:275
 msgid "TLS/SSL handshake failed!"
-msgstr "Обмен TLS/SSL завершился неуспешно!"
+msgstr "Обмен TLS/SSL завершился неудачей!"
 
 #: src/ssl.c:439
-#, fuzzy, c-format
+#, c-format
 msgid "%s connection using %s (%u bit)"
 msgid_plural "%s connection using %s (%u bits)"
 msgstr[0] "соединение %s использует %s (%u бит)"
-msgstr[1] "соединение %s использует %s (%u бит)"
+msgstr[1] "соединение %s использует %s (%u бита)"
 msgstr[2] "соединение %s использует %s (%u бит)"
 
 #: src/ssl.c:451
-#, fuzzy, c-format
+#, c-format
 msgid "Server public key is %d bit"
 msgid_plural "Server public key is %d bits"
 msgstr[0] "Длина публичного ключа сервера -- %d бит"
-msgstr[1] "Длина публичного ключа сервера -- %d бит"
+msgstr[1] "Длина публичного ключа сервера -- %d бита"
 msgstr[2] "Длина публичного ключа сервера -- %d бит"
 
 #: src/ssl.c:457
@@ -996,7 +973,7 @@ msgstr "Выдан:  %s"
 #: src/tls.c:176 src/tls.c:253
 #, c-format
 msgid "TLS Error reading `%s': %s"
-msgstr ""
+msgstr "Ошибка чтения TLS `%s': %s"
 
 #: src/tls.c:296
 msgid "No certificate was sent."
@@ -1023,19 +1000,19 @@ msgid "The certificate is trusted."
 msgstr "Оказано доверие сертификату."
 
 #: src/tls.c:351
-#, fuzzy, c-format
+#, c-format
 msgid "Anonymous DH using prime of %d bit."
 msgid_plural "Anonymous DH using prime of %d bits."
-msgstr[0] "Анонимный DH использует простые числа по %d бит."
-msgstr[1] "Анонимный DH использует простые числа по %d бит."
+msgstr[0] "Анонимный DH использует простые числа по %d биту."
+msgstr[1] "Анонимный DH использует простые числа по %d бита."
 msgstr[2] "Анонимный DH использует простые числа по %d бит."
 
 #: src/tls.c:361
-#, fuzzy, c-format
+#, c-format
 msgid "Ephemeral DH using prime of %d bit."
 msgid_plural "Ephemeral DH using prime of %d bits."
-msgstr[0] "Эфемеридный DH использует простые числа по %d бит."
-msgstr[1] "Эфемеридный DH использует простые числа по %d бит."
+msgstr[0] "Эфемеридный DH использует простые числа по %d биту."
+msgstr[1] "Эфемеридный DH использует простые числа по %d бита."
 msgstr[2] "Эфемеридный DH использует простые числа по %d бит."
 
 #: src/tls.c:373
@@ -1079,14 +1056,14 @@ msgid " - Certificate expires: %s"
 msgstr " - Срок действия сертификата истекает: %s"
 
 #: src/tls.c:424
-#, fuzzy, c-format
+#, c-format
 msgid " - Certificate fingerprint: "
-msgstr " - Отпечаток сертификата: %s\n"
+msgstr " - Отпечаток сертификата: "
 
 #: src/tls.c:434
-#, fuzzy, c-format
+#, c-format
 msgid " - Certificate serial number: "
-msgstr " - Серийный номер сертификата: %s\n"
+msgstr " - Серийный номер сертификата: "
 
 #: src/tls.c:443
 #, c-format
@@ -1099,11 +1076,11 @@ msgid "RSA\n"
 msgstr "RSA\n"
 
 #: src/tls.c:446
-#, fuzzy, c-format
+#, c-format
 msgid " Modulus: %d bit\n"
 msgid_plural " Modulus: %d bits\n"
 msgstr[0] " Модуль: %d бит\n"
-msgstr[1] " Модуль: %d бит\n"
+msgstr[1] " Модуль: %d бита\n"
 msgstr[2] " Модуль: %d бит\n"
 
 #: src/tls.c:451
@@ -1112,11 +1089,11 @@ msgid "DSA\n"
 msgstr "DSA\n"
 
 #: src/tls.c:452
-#, fuzzy, c-format
+#, c-format
 msgid " Exponent: %d bit\n"
 msgid_plural " Exponent: %d bits\n"
 msgstr[0] " Экспонента: %d бит\n"
-msgstr[1] " Экспонента: %d бит\n"
+msgstr[1] " Экспонента: %d бита\n"
 msgstr[2] " Экспонента: %d бит\n"
 
 #: src/tls.c:457
@@ -1130,9 +1107,9 @@ msgid " - Certificate version: #%d\n"
 msgstr " - Версия сертификата: #%d\n"
 
 #: src/tls.c:466
-#, fuzzy, c-format
+#, c-format
 msgid " - Certificate Issuer's DN: %s\n"
-msgstr " - Сертификат выдан:\n"
+msgstr " - Сертификат выдан: %s\n"
 
 #: src/tunnel.c:288 src/tunnel.c:351
 msgid "Transferring message(s)..."
@@ -1140,7 +1117,7 @@ msgstr "Передача сообщений..."
 
 #: src/tunnel.c:349
 msgid "Starting SMTP session..."
-msgstr ""
+msgstr "Начало сессии SMTP..."
 
 #: src/tunnel.c:429
 msgid "Using the TLS/SSL encryption..."
@@ -1225,7 +1202,7 @@ msgstr "%s: опция `-W %s' не берет аргументов\n"
 
 #: lib/obstack.c:403 lib/obstack.c:406
 msgid "memory exhausted"
-msgstr ""
+msgstr "память исчерпана"
 
 #~ msgid "The %s section has been found. Processing..."
 #~ msgstr "Обнаружена секция %s. Обрабатывается..."
