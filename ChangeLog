@@ -1,3 +1,9 @@
+2004-03-13  Sergey Poznyakoff 
+
+	* src/auth.c (auth_ident): Use streams appropriately
+	* src/exec.c (make_local_connection_fd): When closing
+	pipes be careful not to destroy stdin/stdout.
+
 2004-03-12  Sergey Poznyakoff
 
 	* po/POTFILES.in: Updated
