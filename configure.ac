@@ -51,6 +51,7 @@ dnl Checks for header files.
 AC_HEADER_STDC
 AC_TYPE_SIZE_T
 AC_TYPE_PID_T
+AC_CHECK_TYPE(u_char, unsigned char)
 
 AC_CHECK_HEADERS(arpa/inet.h syslog.h regex.h \
  sys/types.h sys/socket.h socket.h)
