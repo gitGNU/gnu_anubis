@@ -157,6 +157,7 @@ configuration files written in a flexible and easy to use
 command scripting language, specially desgined for this
 purpose.
 
+
 @node Glossary, Configuration, Overview, Top
 @chapter Glossary of Frequently Used Terms
 
@@ -199,6 +200,7 @@ For more information about Guile,
 @item GPG
 GNU Privacy Guard, a tool compatible with the Pretty Good Privacy.
 @end table
+
 
 @node Configuration, Rule System, Glossary, Top
 @chapter Configuration
@@ -546,6 +548,12 @@ which works on standard input and output, a supervisor must set
 this option to @samp{yes}. Only in system configuration file.
 @end deffn
 
+@deffn Option drop-unknown-user @var{yes-or-no}
+@opindex drop-unknown-user @var{yes-or-no}
+This option drops an unknown user, i.e. a client which has not
+been verified by IDENT service. Value @samp{no} is the default.
+@end deffn
+
 @deffn Option user-notprivileged @var{username}
 @opindex user-notprivileged @var{username}
 For security reasons, it is recommended to create an unprivileged user,
@@ -671,6 +679,7 @@ statement}.
 * Using Guile Actions::
 @end menu
 
+
 @node Actions, Conditional Statements, Rule System, Rule System
 @section Actions
 @cindex actions defined
@@ -686,6 +695,7 @@ over the message. Syntactically, each action is
 Where @var{command} specifies a particular operation and
 @var{right-hand-side} specifies the arguments for it. The equal sign
 is optional.
+
 
 @node Conditional Statements, Triggers, Actions, Rule System
 @section Conditional Statements
@@ -785,6 +795,7 @@ rule sets.
 
 [FIXME: elaborate on this. Provide an example]
 
+
 @node Triggers, Boolean Operators, Conditional Statements, Rule System
 @section Triggers
 @cindex Triggers
@@ -864,6 +875,7 @@ a subject @w{@samp{hello John!@@@@gpg-encrypt:john's_gpg_key}}.
 This way, you decide at a run time which public key should be used,
 without creating separate rules for each user; thanks to back-references,
 those 3---4 lines are enough.
+
 
 @node Boolean Operators, Regular Expressions, Triggers, Rule System
 @section Boolean Operators
@@ -1030,6 +1042,7 @@ can use for instance: @samp{add} or @samp{ADD} or @samp{AdD}, and so on.
 * Quick Example::          A quick example of using an action list.
 @end menu
 
+
 @node Stop Action, Call Action, Action List, Action List
 @subsection Stop Action
 @cindex @code{stop}
@@ -1043,6 +1056,7 @@ if not header[Content-Type] "text/plain; .*"
   stop;
 fi
 @end smallexample
+
 
 @node Call Action, Adding Headers or Text, Stop Action, Action List
 @subsection Call Action
@@ -1067,6 +1081,7 @@ BEGIN RULE
 call myproc
 END
 @end smallexample
+
 
 @node Adding Headers or Text, Removing Headers, Call Action, Action List
 @subsection Adding Headers or Text
@@ -1100,6 +1115,7 @@ add body <<-EOT
 @end smallexample
 @end deffn
 
+
 @node Removing Headers, Modifying Messages, Adding Headers or Text, Action List
 @subsection Removing Headers
 @cindex @code{remove}
@@ -1126,6 +1142,7 @@ The first example will remove the @samp{X-Mailer:} header from
 an outgoing message, and the second one will remove all "X-*"
 headers.
 @end deffn
+
 
 @node Modifying Messages, Inserting Files, Removing Headers, Action List
 @subsection Modifying Messages
@@ -1190,6 +1207,7 @@ Replaces all occurences of @var{key} with @var{string}. For example:
 modify body :extended ["the old \([[:alnum:]]+\)"] "the new \1"
 @end smallexample
 @end deffn
+
 
 @node Inserting Files, Mail Encryption, Modifying Messages, Action List
 @subsection Inserting Files
@@ -1320,6 +1338,7 @@ an outgoing message, add an extra header line (@samp{X-Comment:}), sign your
 message with your private key, and add a simple signature file from your
 home directory.
 
+
 @node Using Guile Actions, , Action List, Rule System
 @section Using Guile Actions
 @cindex Guile
@@ -1343,6 +1362,7 @@ Predefined Guile Actions
 * Rot-13::
 * Remailers::
 @end menu
+
 
 @node Defining Guile Actions, Invoking Guile Actions, Using Guile Actions, Using Guile Actions
 @subsection Defining Guile Actions
@@ -1441,6 +1461,7 @@ If REST is not empty, append its car to BODY"
 	    (string-append body "\n" (car rest)))))
 @end smalllisp
 
+
 @node Invoking Guile Actions, Rot-13, Defining Guile Actions, Using Guile Actions
 @subsection Invoking Guile Actions
 @cindex @code{guile-process}
@@ -1478,6 +1499,7 @@ guile-process fix-subject <<-EOT
 @noindent
 In this example, the additional argument (a string of three lines) is
 passed to the function, which will add it to the message of the body.
+
 
 @node Rot-13, Remailers, Invoking Guile Actions, Using Guile Actions
 @subsection Support for @sc{rot-13}
@@ -1524,6 +1546,7 @@ done
 @end group
 @end smallexample  
 @end deffn
+
 
 @node Remailers, , Rot-13, Using Guile Actions
 @subsection Remailers Type-I
@@ -1586,6 +1609,7 @@ done
 @end smallexample
 @end deffn
 
+
 @node Invoking Anubis, Sample Beginning, Rule System, Top
 @chapter Invoking GNU Anubis
 @cindex command line
@@ -1628,6 +1652,13 @@ Work noisily.
 @item --debug
 @itemx -D
 Debug mode.
+@item --check-config
+@itemx -c
+Run the configuration file syntax checker.
+@item --show-config-options
+Print a list of configuration options used to build GNU Anubis.
+@item --relax-perm-check
+Do not check a user config file permissions.
 @item --altrc @var{file}
 Specify alternate system configuration file.
 @item --norc
@@ -1759,6 +1790,7 @@ such a server. If not, try @samp{pidentd}, available at:
 All Mutt users, who would like to set up GNU Anubis between their MUA
 and MTA, should consider using the @samp{msg2smtp.pl} Perl script
 from the @file{contrib} directory (part of the distribution).
+
 
 @node TLS/SSL, Problems, Sample Beginning, Top
 @chapter Using the TLS/SSL Encryption

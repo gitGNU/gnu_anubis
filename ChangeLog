@@ -1,3 +1,10 @@
+2003-07-15  Wojciech Polak
+
+	* src/main.c: Bump to 3.9.90.
+	* src/mem.c: Minor changes.
+	* src/mem.h: Likewise.
+	* doc/anubis.texi: Updated.
+
 2003-07-15  Sergey Poznyakoff 
 
 	* TODO: Updated
