@@ -1,0 +1,301 @@
+@appendix Multi-Part Message Processing
+
+@enumerate 0
+@item PREFACE
+
+In its current state (as of Anubis version @value{VERSION}) Anubis
+has proven to be a useful tool for processing plain text outgoing
+messages. However, its use with MIME messages creates several problems
+despite of a flexible ruleset supported by the program.
+
+This RFC proposes a new mode of operation that should
+make processing of MIME messages more convenient.
+
+@item INTRODUCTION
+
+In general, Anubis processes a message using a set of user-defined
+rules, called @dfn{user program}, consisting of @dfn{conditional statements}
+and @dfn{actions}. Both of them may operate on message body as well as
+on its headers. This mode of operation suites excellently for plain text
+messages, however it does have its drawbacks when processing
+multi-part messages.
+
+To begin with, only the first part of multi-part messages is processed,
+the rest of message is usually passed to the MTA verbatim. Thus, this
+part can be processed by the user program only if it is in plain text:
+parts encoded by quoted-printable or, worse yet, base-64 encoding
+cannot be processed this way. The only way for the user to process
+non plain-text multi-part messages is by using some extension procedures
+(usually external scripts).
+
+A special configuration setting @code{read-entire-body} (@pxref{Basic
+Settings}) is provided that forces Anubis to process the entire body
+of a multi-part message (among other effects it means passing entire
+body to the external scripts as well). However, it does not help solve
+the problem, since no attempt is being made to decode parts of the
+message, so the user is left on his own when processing such messages.
+
+The solution proposed by this memo boils down to the following:
+process each part of the multi-part message as a message on its
+own allowing user to define different RULE sections for processing
+different MIME types. The following sections describe the approach in
+more detail.
+
+@item MULTI-PART MESSAGE PROCESSING
+
+When processing a multi part message, Anubis first determines its MIME
+type. A user is allowed to define several RULE sections@footnote{This
+is already possible, @xref{Call Action}.} that are supposed to handle
+different MIME types. Anubis keeps a @code{type <-> section}
+association table (a @dfn{dispatcher table}) which is used to
+determine the entry point for processing of each particular part. If
+the dispatcher table does not contain an entry for the given MIME
+type, the contents of the part is passed verbatim. Otherwise, Anubis
+decodes the part body and passes it for further processing to the
+RULE section. When invoking this particular section, MIME headers
+act as a message headers and MIME body acts as its body@FIXME{of course a
+mechanism should be provided for accessing upper-level message parts,
+see further versions of this memo}. After the code section finishes processing of the message
+part, it is encoded again@footnote{Note that the code section could
+have modified the @code{Content-Type} header and, particularly, its
+@code{encoding} part, therefore it is not necessary that the resulting
+part is encoded using the same method as the original one} and then
+passed to the output.
+
+@item RECURSIVE NATURE
+
+MIME standards allow multi-part messages to be nested to arbitrary
+depth, therefore the described above process is inherently recursive.
+This brings following implications:
+
+@enumerate 1
+@item The dispatcher table must contain several built-in entries that
+will handle recursive descent to the messages of determined MIME type.
+At least messages having @code{multipart/*} and @code{message/rfc822}
+contents must be handled. These entries must be configurable, thus
+giving final user a possibility to disable some of any of
+them. Preferably there should exist a way of specifying new recursive
+types as well. 
+
+@item A confuguration parameter must be provided that will limit the
+maximum recursion depth for such messages.
+@end enumerate
+
+@item MIME DISPATCHER TABLE
+
+The structure of MIME dispatcher table should allow for flexible
+search of user program entries depending on MIME type of the
+part being processed. It is important also that it allows for
+a @dfn{default entry}, i.e. an entry that will be used for processing
+a part whose type is not explicitely mentioned in the table. An
+absence of such default entry should be taken as indication that the
+part must be transferred verbatim.
+
+Thus, each entry of the dispatcher table must contain at least
+following members.
+
+@table @code
+@item type
+Specifies regular expressions describing MIME type this entry handles.
+For the sake of clarity this memo uses shell-style regular expressions
+(see @code{glob(7)} or @code{fnmatch(3)}). However, Anubis
+implementation may use any other regular expression style it deems
+appropriate.
+
+@item entry point
+Specifies an entry point to the code section that handles MIME
+parts of given type. The entry point is either @code{nil}, meaning default processing
+(thus the default entry can be represented as @code{("*" . nil)}
+@emph{at the end of the table}),
+or one of predefined entry points serving for recursive
+procession of message parts, or, finally, it is a code index of
+a user-defined rule section.
+@end table
+
+Dispatcher table may contain several entries matching a given
+MIME type. In this case, the @code{entry point} of each of them
+must be invoked in turn. For example, consider this dispatcher table:
+
+@smallexample
+@key{text/plain} @result{} @code{plaintext}
+@key{text/x-patch} @result{} @code{patchfile}
+@key{text/*} @result{} @code{anytext}
+@end smallexample
+
+@noindent
+When processing a part of type @code{text/plain} using this dispatcher
+table, first section named @code{plaintext} is called, then its output is
+gathered and used as input while calling section named @code{anytext}.
+Such approach allows for building flexible structured user programs.
+
+@item CONFIGURATION ENTITIES
+
+This memo proposes addition of following configuration entities
+to @code{CONTROL} section of Anubis configuration file. These
+entries may be used in both system-wide and user-specific
+configuration files, the order of their priority being
+determined as usual by @code{rule-priority} statement (@pxref{Security
+Settings}).
+
+@deffn Option clear-dispatch-table
+
+This option discards from the dispatcher table all entries gathered so
+far.
+@end deffn
+
+@deffn Option dispatch-mime-type @var{section-id} @var{regexp-list}
+
+This option adds or modifies entries in MIME dispatcher table. @var{Section-id}
+specifies the @dfn{section identifier}, i.e. either the name of a
+user-defined rule section, or one of the keywords @code{none} and
+@code{recurse}. In the former case, Anubis must make sure the named
+section is actually defined in the configuration file and issue an
+error message otherwise.
+
+@var{Regexp-list} is whitespace-separated list of regular expressions
+specifying MIME types that are to be handled by @var{section-id}.
+
+The effect of this option is that for each regular expression @var{re}
+from the list @var{regexp-list}, the dispatcher table is searched for
+an entry whose @code{type} field is exactly the same as
+@var{re}@footnote{Byte-for-byte comparison}. If
+such an entry is found, its @code{entry code} field is replaced with
+@var{section-id}. Otherwise, if no matching entry was found a new
+one is constructed:
+
+@smallexample
+(@var{section-id} . @var{re})
+@end smallexample
+
+@noindent
+and appended to the end of the list.
+
+For example:
+
+@smallexample
+dispatch-mime-type recurse "multipart/*" "message/rfc822"
+dispatch-mime-type Text "text/*"
+dispatch-mime-type none "*"
+@end smallexample
+
+This example specifies that messages (or parts) with types matching
+@code{multipart/*} and @code{message/rfc822} must be recursed into,
+those of type @code{text/*} must be processed by user-defined section
+@code{Text} and the rest of parts must be transferred verbatim. The
+section @code{Text} must be declared somewhere in the configuration
+file as
+
+@smallexample
+BEGIN Text
+@dots{}
+END
+@end smallexample
+
+@noindent
+Notice that the very first @code{dispatch-mime-type} specifies a
+built-in entry. This memo does not specify whether such a built-in
+entry must be present by default, or it should be explicitely declared
+as in the example above. The explicit declaration seems to have
+advantage of preserving backward compatibility with versions 4.0 and
+earlier of Anubis (@pxref{COMPATIBILITY CONSIDERATIONS}).
+
+Notice also that when encountering the very first
+@code{dispatch-mime-type} (or @code{dispatch-mime-type-prepend}, see
+below) statement @emph{in the user configuration file}, Anubis must
+remove the default entry (if any) from the existing dispatcher table.
+Such entry should be added back after processing user's @code{CONTROL}
+section, unless @code{clear-dispatch-table} has been used.
+
+@end deffn
+
+@deffn Option dispatch-mime-type-prepend @var{section-id} @var{regexp-list}
+
+Has the same effect as @code{dispatch-mime-type} except that the
+entries are prepended to the dispatcher table.
+@end deffn
+
+@deffn Option recursion-depth @var{number}
+This option limits the maximum recursion depth when processing
+multi-part messages to @var{number}.
+
+@end deffn
+
+@anchor{TEXT vs BINARY MIME PARTS}
+@item TEXT vs BINARY MIME PARTS
+
+This memo does not determine how exactly is Anubis supposed to discern
+between text and binary messages. The siplest way is possibly using
+@code{Content-Type} header: if it contains @code{charset=} then it
+describes a text part. Otherwise it describes a binary part. Probably
+some more sophisticated methods should be provided.
+
+To avoid dependency on any particular charset, text parts must be
+decoded to UTF-8. Correspondingly, any literals used in Anubis
+configuration files must represent valid UTF-8 strings. However,
+this memo does not specify whether Anubis implementation should
+enforce UTF-8 strings in its configuration files.
+
+It is possible to specify processing rules for binary MIME
+parts. However, Anubis does not provide any mechanism for
+binary processing, not is it supposed to provide any. This memo
+maintains that the existing @code{external-body-processor} and
+@code{guile-process} statements are quite sufficient for processing
+any binary message parts.
+
+@item SAMPLE CONFIGURATION FILE
+
+@smallexample
+@group
+BEGIN CONTROL
+  dispatch-mime-type recurse "multipart/*" "message/rfc822"
+  dispatch-mime-type plaintext "text/plain"
+  dispatch-mime-type image "img/*" 
+END CONTROL
+
+SECTION plaintext
+  modify body ["now"] "then"
+END
+
+SECTION image
+  external-body-processor resize-message
+END
+@end group
+@end smallexample
+
+This sample configuration shows the idea of using @code{external-body-processor}
+statement for binary part processing. Following version of
+@code{resize-message} script uses @command{convert} program for
+reducing image size to 120x120 pixels: 
+
+@smallexample
+#! /bin/sh
+TMP=$HOME/tmp/$$
+cat - > $TMP
+convert -size 120x120 $TMP.jpg -resize 120x120 +profile '*' out-$TMP
+rm $TMP
+cat out-$TMP
+rm out-$TMP
+@end smallexample
+
+@anchor{COMPATIBILITY CONSIDERATIONS}
+@item COMPATIBILITY CONSIDERATIONS
+
+In the absense of any @code{dispatch-mime-type} statements, Anubis
+should behave exactly as version 4.0 did. Specifying
+
+@smallexample
+clear-dispatch-table
+@end smallexample
+
+@noindent
+in the user configuration file should produce the same effect. This
+can be useful if system-wide configuration file contained some
+@code{dispatch-mime-type} statements.
+
+@item SECURITY CONSIDERATIONS
+
+This specification is believed to not introduce any special security
+considerations.
+ 
+@end enumerate
+
