@@ -144,9 +144,11 @@ main (int argc, char **argv)
       case 'c':
 	tls_cert = optarg;
 	break;
+	
       case 'C':
 	tls_cafile = optarg;
 	break;
+	
       case 'k':
 	tls_key = optarg;
 	break;
