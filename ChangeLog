@@ -1,3 +1,20 @@
+2003-08-14  Sergey Poznyakoff 
+
+	Added tracing the execution of config file sections.
+	
+	* src/log.c (trace): New function.
+	* src/message.c (expand_ampersand): Bugfix: missed terminating
+	zero.
+	* src/rc.c (open_rcfile): Destroy the previous parse tree only
+	if we really are going to re-read the system config.
+	(rule-priority, control-priority): Moved from init_kw to
+	init_supervisor_k to allow for redefining their values.
+	* src/rcfile.h (trace): New function.
+	(struct rc_loc): New data type.
+	(struct rc_section,rc_node,rc_stmt): Added RC_LOC member
+	for execution tracing.
+	* src/rcfile.y: Support for RC_LOC.
+
 2003-08-09  Sergey Poznyakoff 
 
 	* elisp/anubis-mode.el: Compatibility fix.
