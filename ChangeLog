@@ -1,5 +1,9 @@
 2003-06-07  Wojciech Polak
 
+	* src/Makefile.am: Bugfix. Added missing -I$(top_srcdir)/intl.
+
+2003-06-07  Wojciech Polak
+
 	* src/gettext.h: New file.
 	* src/headers.h: Include "gettext.h" instead of <libintl.h>.
 	* src/Makefile.am (EXTRA_DIST): Added gettext.h.
