@@ -2,7 +2,7 @@
    extern.h
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -41,9 +41,11 @@ struct session_struct {
  char mta[65];
  char mta_username[65];
  char mta_password[65];
+#ifdef USE_SOCKS_PROXY
  char socks[65];
  char socks_username[65];
  char socks_password[65];
+#endif /* USE_SOCKS_PROXY */
  char client[65];
  char *rc_file_name;	
  char supervisor[65];
@@ -61,11 +63,11 @@ struct assoc {
 };
 
 struct message_struct {
- LIST *commands; /* Associative list of SMTP commands */
- LIST *header;   /* Associative list of RFC822 headers */
- LIST *mime_hdr; /* List of lines before the first boundary marker */
- char *body;            /* Message body */
- char *boundary;        /* Additional data */
+ LIST *commands;       /* Associative list of SMTP commands */
+ LIST *header;         /* Associative list of RFC822 headers */
+ LIST *mime_hdr;       /* List of lines before the first boundary marker */
+ char *body;           /* Message body */
+ char *boundary;       /* Additional data */
 };
 
 #ifdef USE_SSL

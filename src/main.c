@@ -1,6 +1,6 @@
 /*
    GNU Anubis v3.9.94 -- an outgoing mail processor and the SMTP tunnel.
-   Copyright (C) 2001, 2002, 2003 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 ANUBIS_MODE anubis_mode = anubis_transparent;
 
 const char version[] = "GNU Anubis v"VERSION;
-const char copyright[] = "Copyright (C) 2001, 2002, 2003 The Anubis Team.";
+const char copyright[] = "Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.";
 
 struct options_struct options;
 struct session_struct session;
@@ -91,9 +91,11 @@ main(int argc, char *argv[])
 	options.termlevel = NORMAL;
 	options.uloglevel = FAILS;
 	session.tunnel_port = 24; /* private mail system */
+
+#ifdef USE_SOCKS_PROXY
 	session.mta_port = 25;
 	session.socks_port = 1080;
-
+#endif
 	/*
 	   Process the command line options.
 	*/
@@ -105,6 +107,7 @@ main(int argc, char *argv[])
 	/*
 	   Initialize various database formats
 	*/
+
 #if defined(WITH_GSASL)
 	dbtext_init();
 # if defined(HAVE_LIBGDBM)

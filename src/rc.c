@@ -2,7 +2,7 @@
    rc.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -375,6 +375,7 @@ control_parser(int method, int key, LIST *arglist,
 		anubis_domain = strdup(arg);
 		break;
 		
+#ifdef USE_SOCKS_PROXY
 	case KW_SOCKS_PROXY:
 		parse_mtaport(arg, session.socks, &session.socks_port);
 		if_empty_set(session.socks, topt, T_SOCKS);
@@ -395,6 +396,7 @@ control_parser(int method, int key, LIST *arglist,
 		}
 		break;
 	}
+#endif /* USE_SOCKS_PROXY */
 
 	case KW_READ_ENTIRE_BODY:
 		setbool(arg, topt, T_ENTIRE_BODY);
@@ -404,7 +406,7 @@ control_parser(int method, int key, LIST *arglist,
 		setbool(arg, topt, T_DROP_UNKNOWN_USER);
 		break;
 
-#if defined(WITH_GSASL)
+#ifdef WITH_GSASL
 	case KW_SASL_PASSWORD_DB:
 		if (list_count(arglist) != 1) 
 			return RC_KW_ERROR;
@@ -414,7 +416,8 @@ control_parser(int method, int key, LIST *arglist,
 	case KW_SASL_ALLOWED_MECH:
 		anubis_set_mech_list(arglist);
 		break;
-#endif
+#endif /* WITH_GSASL */
+
 	default:
 		return RC_KW_UNKNOWN;
 	}
@@ -436,14 +439,14 @@ static struct rc_secdef_child init_sect_child = {
 };
 
 static struct rc_kwdef init_supervisor_kw[] = {
-	{ "termlevel", KW_TERMLEVEL },
-	{ "allow-local-mta", KW_ALLOW_LOCAL_MTA },
+	{ "termlevel",          KW_TERMLEVEL },
+	{ "allow-local-mta",    KW_ALLOW_LOCAL_MTA },
 	{ "user-notprivileged", KW_USER_NOTPRIVILEGED },
-	{ "drop-unknown-user", KW_DROP_UNKNOWN_USER },
-	{ "rule-priority", KW_RULE_PRIORITY },
-	{ "control-priority", KW_CONTROL_PRIORITY },
-	{ "sasl-password-db", KW_SASL_PASSWORD_DB },
-	{ "sasl-allowed-mech", KW_SASL_ALLOWED_MECH },
+	{ "drop-unknown-user",  KW_DROP_UNKNOWN_USER },
+	{ "rule-priority",      KW_RULE_PRIORITY },
+	{ "control-priority",   KW_CONTROL_PRIORITY },
+	{ "sasl-password-db",   KW_SASL_PASSWORD_DB },
+	{ "sasl-allowed-mech",  KW_SASL_ALLOWED_MECH },
 	{ NULL }
 };
 
@@ -470,13 +473,15 @@ static struct rc_secdef_child client_sect_child = {
 };
 
 struct rc_kwdef control_kw[] = {
-	{ "remote-mta", KW_REMOTE_MTA },
-	{ "local-mta", KW_LOCAL_MTA },
-	{ "tracefile", KW_TRACEFILE },
-	{ "esmtp-auth", KW_ESMTP_AUTH, KWF_HIDDEN },
+	{ "remote-mta",  KW_REMOTE_MTA },
+	{ "local-mta",   KW_LOCAL_MTA },
+	{ "tracefile",   KW_TRACEFILE },
+	{ "esmtp-auth",  KW_ESMTP_AUTH, KWF_HIDDEN },
+#ifdef USE_SOCKS_PROXY
 	{ "socks-proxy", KW_SOCKS_PROXY },
-	{ "socks-v4", KW_SOCKS_V4 },
-	{ "socks-auth", KW_SOCKS_AUTH },
+	{ "socks-v4",    KW_SOCKS_V4 },
+	{ "socks-auth",  KW_SOCKS_AUTH },
+#endif /* USE_SOCKS_PROXY */
 	{ "read-entire-body", KW_READ_ENTIRE_BODY },
 	{ NULL },
 };

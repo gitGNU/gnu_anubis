@@ -2,7 +2,7 @@
    errs.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -81,12 +81,6 @@ socket_error(const char *msg)
 {
 	anubis_error(HARD, _("Couldn't write to socket: %s."),
 		     msg ? msg : strerror(errno));
-}
-
-void
-socks_error(const char *msg)
-{
-	anubis_error(HARD, _("SOCKS proxy: %s"), msg);
 }
 
 void

@@ -65,6 +65,12 @@ memcopy_offset(char *dst, char *what, int offset)
 	return i;
 }
 
+static void
+socks_error(const char *msg)
+{
+	anubis_error(HARD, _("SOCKS proxy: %s"), msg);
+}
+
 static int
 connect_through_socks_proxy(int sd, char *host, unsigned int port)
 {

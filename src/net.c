@@ -2,7 +2,7 @@
    net.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -90,23 +90,31 @@ int
 make_remote_connection(char *host, unsigned int port)
 {
 	int sd;
+
+#ifdef USE_SOCKS_PROXY
 	char host_backup[65];
 	unsigned int port_backup;
 	memset(host_backup, 0, sizeof(host_backup));
 
-	/*
-	   First of all, make a copy of 'host' and 'port'.
-	*/
-
 	safe_strcpy(host_backup, host);
 	port_backup = port;
 
-	check_all_proxies(host_backup, &port_backup);
+	if (topt & T_SOCKS) { /* SOCKS proxy */
+		strncpy(host_backup, session.socks, 64);
+		port_backup = session.socks_port;
+	}
+
 	sd = connect_directly_to(host_backup, port_backup);
-	if (sd == -1) /* an error */
+	if (sd == -1)
 		return -1;
 	if (check_socks_proxy(sd, host, port) == -1)
 		return -1;
+#else
+	sd = connect_directly_to (host, port);
+	if (sd == -1)
+		return -1;
+#endif /* USE_SOCKS_PROXY */
+
 	return sd;
 }
 

@@ -305,7 +305,6 @@ int  check_filename(char *, time_t *);
 /* errs.c */
 void anubis_error(int, const char *, ...);
 void socket_error(const char *);
-void socks_error(const char *);
 void hostname_error(char *);
 
 /* log.c */
