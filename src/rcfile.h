@@ -143,6 +143,7 @@ struct rc_secdef_child {
 
 struct rc_secdef {
 	char *name;
+	int allow_prog;
 	struct rc_secdef_child *child;
 };
 	
@@ -164,3 +165,4 @@ void rc_call_section(int, RC_SECTION *, struct rc_secdef *, void *, MESSAGE *);
 void rc_set_debug_level(char *);
 int rc_open(char *);
 struct rc_secdef *anubis_add_section(char *);
+struct rc_secdef *anubis_find_section(char *);
