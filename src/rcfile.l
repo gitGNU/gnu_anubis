@@ -112,6 +112,7 @@ END |
 [fF][iI]                     return FI;
 [eE][lL][sS][eE]             return ELSE;
 [rR][uU][lL][eE]             return RULE;
+[tT][rR][iI][gG][gG][eE][rR] return RULE;
 [dD][oO][nN][eE]             return DONE;
 [aA][dD][dD]                 return ADD;
 [rR][eE][mM][oO][vV][eE]     return REMOVE;
