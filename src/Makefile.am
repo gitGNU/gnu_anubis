@@ -27,7 +27,8 @@ anubis_LDADD = @LIBOBJS@ @LIBINTL@ $(GUILE_LIBS)
 anubis_SOURCES = main.c main.h extern.h headers.h mem.c mem.h env.c errs.c \
 	log.c misc.c regex.c exec.c net.c proxy.c daemon.c auth.c map.c \
 	esmtp.c tunnel.c rc.c files.c help.c quit.c getopt.h guile.c \
-        rcfile-gram.c rcfile-lex.c rcfile-gram.h rcfile.h list.c list.h
+        rcfile-gram.c rcfile-lex.c rcfile-gram.h rcfile.h list.c list.h \
+        message.c
 
 YLWRAP = $(SHELL) $(top_srcdir)/build/ylwrap
 AM_YFLAGS = -dtv
