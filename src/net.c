@@ -272,23 +272,10 @@ send_eol (int method, NET_STREAM sd)
   Read data
 ***************/
 
-int
-recvline (int method, NET_STREAM sd, void *vptr, size_t maxlen)
-{
-  int rc;
-  size_t nbytes;
-
-  rc = stream_readline (sd, vptr, maxlen, &nbytes);
-  if (rc)
-    socket_error (stream_strerror (sd, rc));
-  DPRINTF (method, 0, nbytes, (char *) vptr);
-  return nbytes;
-}
-
 #define INIT_RECVLINE_SIZE 81
 
 int
-recvline_ptr (int method, NET_STREAM sd, char **vptr, size_t * maxlen)
+recvline (int method, NET_STREAM sd, char **vptr, size_t * maxlen)
 {
   int rc;
   size_t off = 0;
@@ -323,37 +310,28 @@ recvline_ptr (int method, NET_STREAM sd, char **vptr, size_t * maxlen)
 ******************/
 
 void
-get_response_smtp (int method, NET_STREAM sd, char *buf, int size)
+get_response_smtp (int method, NET_STREAM sd, char **pbuf, size_t *psize)
 {
-  int n;
-  char line[LINEBUFFER + 1];
-  int overflow = 0; /* This will be removed when we finally get rid of
-		       static buffers */
+  char *line = NULL;
+  size_t size = 0;
+  char *buf = NULL;
   
-  if (buf != 0)
-    memset (buf, 0, size);
   do
     {
-      n = recvline (method, sd, line, LINEBUFFER);
-      if (buf != 0)
+      if (recvline (method, sd, &line, &size) == 0)
+	break;
+
+      if (!buf)
+	assign_string (&buf, line);
+      else
 	{
-	  if (size == 0)
-	    {
-	      if (!overflow)
-		{
-		  anubis_error (0, 0,
-			      _("INTERNAL ERROR (get_response_smtp): buffer exhausted. Please report."));
-		  overflow = 1;
-		}
-	    }
-	  else
-	    {
-	      strncat (buf, line, size);
-	      size -= n;
-	    }
+	  buf = xrealloc (buf, strlen (buf) + strlen (line) + 1);
+	  strcat (buf, line);
 	}
     }
   while (line[3] == '-');
+  *pbuf = buf;
+  *psize = strlen (buf) + 1;
 }
 
 /**************************
