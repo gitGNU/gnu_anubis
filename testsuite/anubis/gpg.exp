@@ -22,4 +22,6 @@ default_anubis_version
 if [anubis_check_capability GPG] {
     anubis_pat gpgcrypt.pat
     anubis_pat gpgsign.pat
+    anubis_pat gpgse.pat
 }
+
