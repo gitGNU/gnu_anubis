@@ -116,7 +116,7 @@ proc anubis_exec {args} {
 	set sw ""
     }
     
-    anubis_version
+    default_anubis_version
 
     set default 0
     set message ""
@@ -183,10 +183,10 @@ proc anubis_exec {args} {
 	}
 	set regexp 0
 
-	switch -regexp -- "[lindex $args $i]" {
-	    ^-re     { set regexp 1; incr i }
-	    ^-ex     -
-	    ^--      { incr i }
+	switch -exact -- "[lindex $args $i]" {
+	    -re     { set regexp 1; incr i }
+	    -ex     -
+	    --      { incr i }
 	}
 	    
 	set pattern [lindex $args $i]
@@ -238,12 +238,12 @@ proc anubis_exec {args} {
     return $result
 }
 
-proc anubis_version {} {
+proc default_anubis_version {} {
     global ANUBIS_TOOL
     global ANUBIS_TOOL_FLAGS
     global ANUBIS_TOOL_VERSION
     global ANUBIS_CAPABILITY
-    
+
     if [info exists ANUBIS_TOOL_VERSION] {
 	return
     }
@@ -251,9 +251,9 @@ proc anubis_version {} {
     set output [remote_exec host "$ANUBIS_TOOL --show-config-options"]
     set flg [split [lindex $output 1]]   	
     for {set i 0} {$i < [llength $flg]} {incr i} {
-	if [regexp "(.*)=(.*)" [lindex $flg $i] var name value] {
+	if [regexp "(.*)=(.*)$" [lindex $flg $i] var name value] {
 	    set ANUBIS_CAPABILITY($name) $value
-	} else {
+	} elseif {[lindex $flg $i] != ""} {
 	    set ANUBIS_CAPABILITY([lindex $flg $i]) 1
 	}
     }
@@ -261,6 +261,23 @@ proc anubis_version {} {
 	set ANUBIS_TOOL_VERSION $ANUBIS_CAPABILITY(VERSION)
     } else {
 	set ANUBIS_TOOL_VERSION "UNKNOWN"
+    }
+}
+
+proc anubis_version {} {
+    default_anubis_version
+}    
+
+proc anubis_check_capability {args} {
+    global ANUBIS_CAPABILITY
+
+    set name [lindex $args 0]
+
+    if {![info exists ANUBIS_CAPABILITY] || \
+	![info exists ANUBIS_CAPABILITY($name)]} {
+	return 0
+    } else {
+	return $ANUBIS_CAPABILITY($name)
     }
 }
 
@@ -369,13 +386,13 @@ proc anubis_expect_list {args} {
     set result 0
     for {set i 0} {$i < [llength $pattern]} {incr i} {
 	set regexp 0
-	switch -regexp -- "[lindex ${pattern} $i]" {
-	    ^-re.*$	{ set regexp 1; incr i }
-	    ^--         { incr i }
+	switch -exact -- "[lindex ${pattern} $i]" {
+	    -re		{ set regexp 1; incr i }
+	    --          { incr i }
 	}
 
 	regsub "\[ \t\]*$" [lindex ${pattern} $i] "" pat
-	verbose "i=$i, pat=$pat" 2
+	verbose "i=$i, pat=$pat, regexp=$regexp" 2
 
 	if {$regexp} {
 	   verbose "REGEX for $pat / [llength $pat] " 3
@@ -482,14 +499,15 @@ proc anubis_test { args } {
 
     set result 0
     for {set i 0} {$result == 0 && $i < [llength $pattern]} {incr i} {
+	verbose "NEXT ($i)"
 	set regexp 0
-	switch -regexp -- "[lindex ${pattern} $i]" {
-	    ^-re.*$	{ set regexp 1; incr i }
-	    ^--         { incr i }
+	switch -exact -- "[lindex ${pattern} $i]" {
+	    -re		{ set regexp 1; incr i }
+	    --          { incr i }
 	}
 
 	regsub "\[ \t\]*$" [lindex ${pattern} $i] "" pat
-	verbose "i=$i, pat=$pat" 2
+	verbose "i=$i, pat=$pat, regexp=$regexp" 2
 
 	if {$regexp} {
 	   verbose "REGEX for $pat / [llength $pat] " 3
@@ -550,7 +568,8 @@ proc anubis_test_file {args} {
     
     set default ""
     set message ""
-
+    set catprog "/bin/cat"
+    
     for {set i 0} {$i < [llength $args]} {incr i} {
 	set a [lindex $args $i]
 	if {"$a" == "-default"} {
@@ -562,6 +581,9 @@ proc anubis_test_file {args} {
 	} elseif {"$a" == "-message"} {
 	    incr i
 	    set message [lindex $args $i]
+	} elseif {"$a" == "-catprog"} {
+	    incr i
+	    set catprog [lindex $args $i]
 	} else {
 	    set args [lrange $args $i end]
 	    break
@@ -581,7 +603,7 @@ proc anubis_test_file {args} {
         set pattern [lrange $args 1 end]
     }
     
-    set res [remote_spawn host "/bin/cat $filename"]
+    set res [remote_spawn host "$catprog $filename"]
     if { $res < 0 || $res == "" } {
 	perror "Reading $filename failed."
 	return 1;
@@ -610,8 +632,10 @@ proc anubis_test_file {args} {
 #  0    -- command
 #  1    -- pattern
 proc anubis_pat {patname} {
+    global ANUBIS_DATA_DIR
     global ANUBIS_ETC_DIR
     global ANUBIS_RC_DIR
+    global gpg_prog
     
     verbose "ANUBIS_PAT $patname" 1
     set chan [open $ANUBIS_ETC_DIR/$patname r]
@@ -634,7 +658,17 @@ proc anubis_pat {patname} {
 		}
 		"^:OPTIONS" {
 		    regexp "^:OPTIONS (.*)" $line dummy opt
-		    lappend options $opt
+		    set x [split $opt]
+		    for {set n 0} {$n < [llength $x]} {incr n} {
+			set opt [lindex $x $n]
+			switch -re -- "$opt" {
+			    "^\\$.*"	{ lappend options [expr $opt] }
+			    default	{ if {$opt != ""} {
+						lappend options $opt
+					  }
+				        }
+		    }
+		}
 		}
 	        "^:RCFILE" {
 	            regexp "^:RCFILE (.*)" $line dummy rcfile
@@ -646,6 +680,7 @@ proc anubis_pat {patname} {
 		    set state 1
 	        }
 	        "^:END" {
+		    verbose "MODE $mode"
 		    if {$mode == "EXEC"} {
 			set inv anubis_exec
 			if {$options != ""} {
@@ -681,7 +716,14 @@ proc anubis_pat {patname} {
 			    if [regexp "^:EXPECT (.*)" $line dummy expect] {
 				anubis_expect {-re "$expect\[^\n\]*\n"}
 			    } elseif [regexp "^:ADD (.*)" $line dummy expect] {
-				lappend file_pattern $expect
+				if [regexp "^-- (.*)" $expect dummy str] {
+				    lappend file_pattern "--"
+				    set expect $str
+				} elseif [regexp "^-re (.*)" $expect dummy str] {
+				    lappend file_pattern "-re"
+				    set expect $str
+				}
+				lappend file_pattern "$expect"
 			    } elseif [regexp "^:DEL (.*)" $line dummy expect] {
 				verbose "DEL:: $expect"
 				anubis_command "$expect"
@@ -697,9 +739,16 @@ proc anubis_pat {patname} {
 			}
 			lappend inv "$ANUBIS_RC_DIR/mta.log"
 			eval $inv $file_pattern
+		    } elseif {$mode == "CAT"} {
+			verbose "OPT $options"
+			set inv anubis_test_file
+			lappend inv -catprog [concat $options]
+			lappend inv "$ANUBIS_RC_DIR/mta.log"
+			eval $inv $pattern
 		    }
-
 		    ## Reset all variables
+		    set pattern ""
+		    set file_pattern ""
                     set options ""
                     set testname ""
                     set mode ""
