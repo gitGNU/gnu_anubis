@@ -23,6 +23,8 @@
 #include "headers.h"
 #include "extern.h"
 
+ANUBIS_MODE anubis_mode = anubis_transparent;
+
 const char version[] = "GNU Anubis v"VERSION;
 const char copyright[] = "Copyright (C) 2001, 2002, 2003 The Anubis Team.";
 
@@ -35,6 +37,8 @@ struct secure_struct secure;
 unsigned long topt;
 void *remote_client;
 void *remote_server;
+
+char *anubis_domain;   /* Local domain for EHLO in authentication mode */
 
 #ifdef WITH_GUILE
 void
@@ -89,6 +93,16 @@ main(int argc, char *argv[])
 	get_options(argc, argv);
 	anubis_getlogin(session.supervisor, sizeof(session.supervisor));
 
+	/*
+	   Initialize various database formats
+	*/
+#if defined(WITH_GSASL)
+	dbtext_init();
+# if defined(HAVE_LIBGDBM)
+	gdbm_db_init();
+# endif
+#endif
+	
 	/*
 	   Initialize the rc parsing subsystem.
 	   Read the system configuration file (SUPERVISOR).
