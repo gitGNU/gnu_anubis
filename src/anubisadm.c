@@ -233,14 +233,24 @@ op_list (int argc, char **argv)
 	} else {
 		LIST *reclist;
 		rc = anubis_db_get_list(db, &reclist);
-		if (rc != ANUBIS_DB_SUCCESS) {
+		switch (rc) {
+		case ANUBIS_DB_SUCCESS:
+			rc = 0;
+			print_list_header();
+			list_iterate(reclist, record_printer, NULL);
+			list_destroy(&reclist, record_free, NULL);
+			break;
+
+		case ANUBIS_DB_NOT_FOUND:
+			rc = 0;
+			printf("# %s\n", _("Database is empty"));
+			break;
+			
+		default:
 			error(_("database error: %s"),
 			      anubis_db_strerror(db));
 			rc = 1;
 		}
-		print_list_header();
-		list_iterate(reclist, record_printer, NULL);
-		list_destroy(&reclist, record_free, NULL);
 	}
 	anubis_db_close(&db);	
 	return rc;
@@ -414,6 +424,9 @@ main (int argc, char **argv)
 # endif
 # ifdef WITH_MYSQL
 	mysql_db_init();
+# endif
+# ifdef WITH_PGSQL
+	pgsql_db_init();
 # endif
 
 	while ((c = getopt_long(argc, argv, "clarmi:u:f:p:?",
