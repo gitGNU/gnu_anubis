@@ -25,51 +25,72 @@
 #include "headers.h"
 #include "extern.h"
 
-struct list *
-new_element(struct list *p, struct list **head, char *newline)
+/* String lists */
+
+static int
+_mem_free(void *item, void *data)
 {
-	struct list *new;
-	new = (struct list *)xmalloc(sizeof(struct list));
-
-	if (*head == NULL)
-		p = NULL;
-
-	if (p) {
-		p->next = new;
-		new->next = NULL;
-		new->modify = NULL;
-		new->line = strdup(newline);
-	}
-	else {
-		new->next = *head;
-		new->line = strdup(newline);
-		new->modify = NULL;
-		*head = new;
-	}
-
-	return (struct list *)new;
+	free(item);
+	return 0;
 }
 
 void
-destroy_list(struct list **head)
+destroy_string_list(struct list **plist)
 {
-	struct list *p1 = *head;
-	struct list *p2 = NULL;
+	list_destroy(plist, _mem_free, NULL);
+}
 
-	if (*head == NULL)
-		return;
-	do {
-		p2 = p1->next;
-		free(p1->line);
-		if (p1->modify)
-			free(p1->modify);
-		free(p1);
-		if (p2)
-			p1 = p2;
-	} while (p2 != NULL);
-	*head = NULL;
+static int
+_assoc_free(void *item, void *data)
+{
+	assoc_free(item);
+	return 0;
+}
 
-	return;
+void
+destroy_assoc_list(struct list **plist)
+{
+	list_destroy(plist, _assoc_free, NULL);
+}
+
+void
+assoc_free(ASSOC *asc)
+{
+	free(asc->key);
+	free(asc->value);
+	free(asc);
+}
+
+ASSOC *
+header_assoc(char *line)
+{
+	char *p = strchr(line, ':');
+	ASSOC *entry = xmalloc(sizeof(*entry));
+	if (p) {
+		int len = p - line;
+		entry->key = xmalloc(len + 1);
+		memcpy(entry->key, line, len);
+		entry->key[len] = 0;
+		entry->value = strdup(p + 1);
+	} else {
+		/* Malformed header. Save everything as rhs */
+		entry->key = NULL;
+		entry->value = strdup(line);
+	}
+	return entry;
+}
+
+char *
+assoc_to_header(ASSOC *asc)
+{
+	char *buf;
+
+	if (asc->key) {
+		buf = xmalloc(strlen(asc->key) + strlen(asc->value) + 3);
+		sprintf(buf, "%s: %s", asc->key, asc->value);
+	} else
+		buf = strdup(asc->value);
+	return buf;
 }
 
 /****************************
