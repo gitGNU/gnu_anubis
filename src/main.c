@@ -116,6 +116,9 @@ main(int argc, char *argv[])
 # ifdef WITH_MYSQL
 	mysql_db_init();
 # endif
+# ifdef WITH_PGSQL
+	pgsql_db_init();
+# endif
 #endif /* WITH_GSASL */
 	
 	/*
