@@ -24,6 +24,7 @@
 
 bin_SCRIPTS = msg2smtp.pl
 EXTRA_DIST = msg2smtp.txt msg2smtp.pl
+AM_INSTALLCHECK_STD_OPTIONS_EXEMPT=msg2smtp.pl
 
 ## EOF
 
