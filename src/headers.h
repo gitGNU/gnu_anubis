@@ -219,7 +219,7 @@ typedef enum anubis_mode
 ANUBIS_MODE;
 
 /* bit values for topt */
-/* 0x00000001 is free. Used to be T_ERROR */
+#define T_DISABLE_SYSLOG    0x00000001 /* Used to be T_ERROR */
 #define T_SOCKS             0x00000002
 #define T_SOCKS_V4          0x00000004
 #define T_SOCKS_AUTH        0x00000008
