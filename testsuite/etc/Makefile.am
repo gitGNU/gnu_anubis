@@ -1,8 +1,5 @@
-##
-## Makefile.am
-##
 ## This file is part of GNU Anubis.
-## Copyright (C) 2001, 2002, 2003 The Anubis Team.
+## Copyright (C) 2003 The Anubis Team.
 ##
 ## GNU Anubis is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -22,9 +19,28 @@
 ## compiling, linking, and/or using OpenSSL is allowed.
 ##
 
-AUTOMAKE_OPTIONS = 1.7.2
-ACLOCAL_AMFLAGS = -I m4
-SUBDIRS = build m4 intl po doc scripts examples contrib src testsuite
+EXTRA_DIST = \
+ std.pat\
+ add1.pat\
+ add2.pat\
+ add3.pat\
+ empty.pat\
+ modify.pat\
+ mult.pat\
+ std.pat\
+ empty.in\
+ std.in\
+ simple.in
 
-## EOF
+noinst_DATA = empty.rc std.rc simple.rc
+CLEANFILES = empty.rc std.rc simple.rc
+DISTCLEANFILES = *.log
 
+empty.rc: empty.in
+std.rc: std.in
+simple.rc: simple.in
+
+SUFFIXES=.in .rc
+
+.in.rc:
+	m4 -DTESTDIR=`cd ..; pwd` $< > $@
