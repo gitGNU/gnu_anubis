@@ -13,6 +13,8 @@
 @c those working on the manual itself.
 @c ======================================================================
 
+@set PROOF_FOOTNOTED
+
 @ifclear PUBLISH
 @ifclear DISTRIB
 @ifclear PROOF
@@ -20,8 +22,6 @@
 @end ifclear
 @end ifclear
 @end ifclear
-
-@set FIXME_FOOTNOTE true
 
 @ifset PUBLISH
 @set RENDITION The book, version
@@ -47,32 +47,25 @@
 
 @c Output various FIXME information only in PROOF rendition.
 
-@ifset FIXME_FOOTNOTE
 @macro FIXME{string}
 @allow-recursion
 @quote-arg
 @ifset PROOF
+@ifset PROOF_FOOTNOTED
 @footnote{@strong{FIXME:} \string\}
 @end ifset
-@end macro
+@ifclear PROOF_FOOTNOTED
+@strong{<FIXME>} \string\ @strong{</>}
+@end ifclear
 @end ifset
 
-@ifclear FIXME_FOOTNOTE
-@macro FIXME{string}
-@allow-recursion
-@quote-arg
-@ifset PROOF
-@strong{<FIXME>} \string\ @strong{</>}
-@end ifset
 @end macro
-@end ifclear
 
 @macro FIXME-ref{string}
 @quote-arg
 @ifset PROOF
 @strong{<REF>} \string\ @strong{</>}
 @end ifset
-
 @end macro
 
 @macro FIXME-pxref{string}
