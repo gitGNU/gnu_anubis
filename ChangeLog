@@ -1,3 +1,9 @@
+2004-07-15  Sergey Poznyakoff 
+
+	* src/daemon.c (daemonize): Clear T_FOREGROUND flag.
+	* src/authmode.c (asmtp_ehlo): Return correct state if TLS
+	failed.
+
 2004-07-13  Wojciech Polak
 
 	* src/tunnel.c (handle_starttls): Improved diagnostics.
