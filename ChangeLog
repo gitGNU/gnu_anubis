@@ -1,3 +1,20 @@
+2005-02-03  Sergey Poznyakoff 
+
+	Further cleanup as per TODO:5. Removed fixed-size
+	buffers related to recvline calls.
+	
+	* src/headers.h (get_response_smtp): New function
+	(readline): Changed declaration
+	(recvline_ptr): Removed
+	* src/net.c (recvline): Removed
+	(recvline_ptr): Renamed to recvline. All callers changed
+	* src/authmode.c: Use new recvline.
+	* src/gsasl_srv.c: Likewise.
+	* src/ident.c: Likewise.
+	* src/mda.c: Likewise.
+	* src/tunnel.c: Likewise.
+	* src/xdatabase.c: Likewise.
+
 2005-01-21  Sergey Poznyakoff
 
 	* configure.ac: Raised version number to 4.1
