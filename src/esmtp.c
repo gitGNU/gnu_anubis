@@ -40,9 +40,12 @@ utf8cpy (char *dst, size_t * dstlen, char *src, size_t srclen)
   return GSASL_OK;
 }
 
-ANUBIS_LIST *anubis_client_mech_list;/* FIXME: init */
-char *anon_token;
-char *authorization_id;
+ANUBIS_LIST *anubis_client_mech_list;     /* List of auth methods allowed by
+					     the client */
+ANUBIS_LIST *anubis_encryption_mech_list; /* List of auth methods that require
+					     using encrypted channel */
+char *anon_token;                         /* Anonymous token */
+char *authorization_id;       
 char *authentication_id;
 char *auth_password;
 char *auth_service;
@@ -50,6 +53,18 @@ char *auth_hostname;
 char *generic_service_name;
 char *auth_passcode;
 char *auth_realm;
+
+void
+anubis_set_client_mech_list (ANUBIS_LIST *list)
+{
+  anubis_set_mech_list (&anubis_client_mech_list, list);
+}
+
+void
+anubis_set_encryption_mech_list (ANUBIS_LIST *list)
+{
+  anubis_set_mech_list (&anubis_encryption_mech_list, list);
+}
 
 static int
 cb_anonymous (Gsasl_session_ctx *ctx, char *out, size_t *outlen)
@@ -250,13 +265,17 @@ esmtp_auth (NET_STREAM *pstr, char *input)
       return 1;
     }
 
-  /* Backward compatibility hack */
-  authentication_id = authorization_id = session.mta_username;
-  auth_password = session.mta_password;
+  /* Provide reasonable defaults */
   if (!anubis_client_mech_list)
     {
       char *p = strdup ("CRAM-MD5 LOGIN PLAIN");
       anubis_client_mech_list = auth_method_list (p);
+      free (p);
+    }
+  if (!anubis_encryption_mech_list)
+    {
+      char *p = strdup ("LOGIN PLAIN");
+      anubis_encryption_mech_list = auth_method_list (p);
       free (p);
     }
   /* End of backward compatibility hack */
@@ -279,13 +298,25 @@ esmtp_auth (NET_STREAM *pstr, char *input)
 		   "%s %s:%d", _("INTERNAL ERROR"), __FILE__, __LINE__);
     }
 
-  info (VERBOSE, _("Selected authentication mechanism %s"), mech);
+  if (list_locate (anubis_encryption_mech_list, mech, anubis_name_cmp))
+    {
+      if (!(topt & T_SSL_FINISHED))
+	{
+	  anubis_warning (0,
+			  _("Selected authentication mechanism %s requires TLS encryption. Not using ESMTP authentication"),
+			  mech);
+	  list_destroy (&mech_list, anubis_free_list_item, NULL);
+	  return 1;
+	}
+    }
   
+  info (VERBOSE, _("Selected authentication mechanism %s"), mech);
+
   rc = gsasl_init (&ctx);
   
   if (rc != GSASL_OK)
     {
-      anubis_error (0, 0, _("cannot initialize libgsasl: %s"),
+      anubis_error (0, 0, _("Cannot initialize libgsasl: %s"),
 		    gsasl_strerror (rc));
       return 1;
     }
@@ -302,4 +333,12 @@ esmtp_auth (NET_STREAM *pstr, char *input)
   list_destroy (&mech_list, anubis_free_list_item, NULL);
   return rc;
 }
+#else
+int
+esmtp_auth (NET_STREAM *pstr, char *input)
+{
+  anubis_warning (0, _("ESMTP AUTH is not supported"));
+  return 1;
+}
 #endif
+
