@@ -879,7 +879,59 @@ non-whitespace symbols. A word may be composed of alphanumeric
 characters and any of the following punctuation symbols:
 @samp{_}, @samp{.}, @samp{/}, @samp{-}. Any arbitrary sequence
 of characters enclosed in a pair of double quotes is also recognized
-as a word.
+as a word. Such a sequence is called @dfn{quoted string}.
+
+@cindex Quoted Strings
+@cindex Escape Sequences
+Quoted strings follow the same syntax rules as in C language.
+A backslash character @samp{\} alters the meaning of the character
+following it. This special construct is called @dfn{escape sequence}.
+When processing an escape sequence, Anubis removes it from the string
+and replaces it with a single character as described in the following
+table:
+
+@table @asis
+@item \a
+Audible bell character (ASCII 7)
+@item \b
+@c FIXME: Remove the footnote when the next version is out
+Backspace (ASCII 8)@footnote{This escape is not supported by Anubis 4.0}
+@item \e
+Escape character (ASCII 27)
+@item \f
+Form feed (ASCII 12)
+@item \n
+Newline (ASCII 10)
+@item \r
+Carriage return (ASCII 13)
+@item \t
+Horizontal tab (ASCII 9)
+@item \d
+(where @samp{d} represents a single decimal digit) Reproduced
+verbatim.
+@end table
+
+A backslash followed by any character not listed above is replaced by
+the character alone. This can be used for inserting @samp{"} character
+within a string, as in the example below:
+
+@smallexample
+"This string contains \"quoted string\"."
+@end smallexample
+
+Similarly, backslash followed by a newline is replaced by the newline
+itself. Thus, the following two strings are equivalent:
+
+@smallexample
+"This string is split\nover two lines"
+
+"This string is split\
+over two lines"
+@end smallexample
+
+@FIXME{Should we support \ooo (o is an octal digit) and \\xHH (H is a
+hex digit) syntax? I'd say yes, but then a special exception should be
+made for back references \1 - \9.}
 
 The familiar shell @dfn{here document} syntax may be used to produce
 a word containing several lines of text. The syntax is:
@@ -1104,6 +1156,17 @@ are:
 @xref{Authentication}, for the detailed discussion of GNU Anubis
 operation modes.
 @end deffn
+
+@deffn Option read-entire-body @var{yes-or-no}
+@opindex read-entire-body @var{yes-or-no}
+When processing a multi-part message using an external
+filter (@pxref{External Processor}) Anubis normally feeds
+to it only the first part. The rest of the message is copied
+verbatim. To alter this behavior so that your external program
+sees the entire message body, set @code{read-entire-body yes}
+in your control  section.
+@end deffn
+
 
 @node Output Settings, Proxy Settings, Basic Settings, CONTROL Section
 @subsection Output Settings
@@ -1817,6 +1880,27 @@ the former are always supported, whereas the support for the latter
 depends on the configuration settings at compile time. The default
 type of regular expressions is POSIX Extended. 
 
+Notice, that regular expressions often contain characters, prefixed
+with backslash (e.g. @samp{\(} in basic POSIX or @samp{\s} in
+perl-style regexp). Due to escape substitution (@pxref{Configuration}),
+you will have to escape the backslash character, e.g. write:
+
+@smallexample
+modify :perl body ["\\stext"] "text"
+@end smallexample
+
+@noindent
+instead of
+
+@smallexample
+# WRONG!
+modify :perl body ["\stext"] "text"
+@end smallexample
+
+However, this rule does not apply to back references, i.e. @code{"\1"}
+is OK. @FIXME{This is clearly a special case. When we support \ooo and
+\xHH escapes, this will have to be handled separately...}
+
 A number of modifiers is provided to change the type of regular
 expressions. These are described in the following table.
 
@@ -1828,7 +1912,7 @@ expression. The default type for this expression is assumed.
 
 @item :perl
 @itemx :perlre
-The regular expression is a Perl-style one.
+The regular expression is a Perl-style one. 
 
 @item :exact
 @itemx :ex
@@ -2025,6 +2109,7 @@ or the body of the message.
 @deffn Command modify [@var{flags}] header @samp{[}@var{key}@samp{]} @samp{[}@var{new-key}@samp{]}
 @deffnx Command modify [@var{flags}] @samp{[}@var{key}@samp{]} @samp{[}@var{new-key}@samp{]}
 
+@cindex Back References
 For each header whose name matches @var{key}, replaces its name
 with @var{new-key}. If @var{key} is a regular expressions, @var{new-key}
 may contain back references. For example, the following statement will
@@ -2237,6 +2322,27 @@ from the @var{program} replaces the body of the message.
 @var{args} are any additional arguments the program may require.
 @end deffn
 
+@cindex read-entire-body
+@cindex Multi-part Messages, Processing with External Programs
+The amount of data fed to the external program depends on the
+message. For plain messages, the entire body is passed. For
+multi-part messages, only the first part is passed by default.
+This is based on the assumption that in most multi-part messages
+the first part contains textual data, while the rest contains
+various (mostly non-textual) attachments. There is a special
+configuration variable @code{read-entire-body} that controls this
+behavior (@pxref{Basic Settings}). Setting @code{read-entire-body yes}
+in @code{CONTROL} section of your configuration file instructs
+Anubis to pass the entire contents of multi-part messages to
+your external processor.
+
+There is a substantial difference between operating in
+@code{read-entire-body no} (the default) and @code{read-entire-body
+yes} modes. When operating in @code{read-entire-body no}, the first
+part of the message is decoded and then passed to the external
+program. In contrast, when @code{read-entire-body} is set to
+@code{yes}, the message is not decoded. Thus, your external processor
+must be able to cope with MIME messages.
 
 @node Quick Example, , External Processor, Action List
 @subsection Quick Example
@@ -2593,7 +2699,7 @@ BEGIN GUILE
 guile-load-program entire-msg.scm
 END
 
-SECTION RULE
+BEGIN RULE
 guile-process entire-msg-filter /usr/libexec/myfilter /tmp
 END
 @end smallexample
