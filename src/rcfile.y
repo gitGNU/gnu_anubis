@@ -53,7 +53,7 @@ static void rc_stmt_destroy(RC_STMT *);
 static void rc_stmt_list_destroy(RC_STMT *);
 static void rc_stmt_print(RC_STMT *, int);
 static int reg_modifier_add(int *, char *);
-static int check_kw(char *ident);
+static int check_kw(char *ident, int *flags);
 static int is_prog_allowed();
  
 static RC_SECTION *rc_section;
@@ -212,7 +212,8 @@ stmt     : /* empty */ EOL
 
 asgn_stmt: keyword arglist
            {
-		   if (!check_kw($1)) {
+		   int flags;
+		   if (!check_kw($1, &flags)) {
 			   parse_error(_("unknown keyword: %s"), $1);
 			   YYERROR;
 		   }
@@ -225,6 +226,7 @@ asgn_stmt: keyword arglist
 				   list_remove($2, s, NULL);
 		   }
 		   $$->v.asgn.rhs = $2;
+		   $$->v.asgn.flags = flags;
 	   }
          ;
 
@@ -1008,6 +1010,16 @@ _print_str(void *item, void *data)
 	return 0;
 }
 
+static int
+_print_stars(void *item, void *data)
+{
+	int i, len = strlen ((char*)item);
+	putchar(' ');
+	for (i = 0; i < len; i++)
+		putchar('*');
+	return 0;
+}
+
 void
 rc_stmt_print(RC_STMT *stmt, int level)
 {
@@ -1016,7 +1028,9 @@ rc_stmt_print(RC_STMT *stmt, int level)
 		case rc_stmt_asgn:
 			rc_level_print(level, "ASGN: ");
 			printf("%s =", stmt->v.asgn.lhs);
-			list_iterate(stmt->v.asgn.rhs, _print_str, NULL);
+			list_iterate(stmt->v.asgn.rhs,
+				     (stmt->v.asgn.flags & KWF_HIDDEN) ?
+				        _print_stars : _print_str, NULL);
 			break;
 			
 		case rc_stmt_cond:
@@ -1113,7 +1127,8 @@ rc_secdef_add_child(struct rc_secdef *def, struct rc_secdef_child *child)
 }
 
 struct rc_secdef_child *
-rc_child_lookup(struct rc_secdef_child *child, char *str, int method, int *key)
+rc_child_lookup(struct rc_secdef_child *child, char *str, int method,
+		int *key, int *flags)
 {
 	for (; child; child = child->next) {
 		if (child->method & method) {
@@ -1121,6 +1136,8 @@ rc_child_lookup(struct rc_secdef_child *child, char *str, int method, int *key)
 			for (kw = child->kwdef; kw->name; kw++)
 				if (strcmp(kw->name, str) == 0) {
 					*key = kw->tok;
+					if (flags)
+						*flags = kw->flags;
 					return child;
 				}
 		}
@@ -1220,7 +1237,7 @@ asgn_eval(struct eval_env *env, RC_ASGN *asgn)
 {
 	int key;
 	struct rc_secdef_child *p = rc_child_lookup(env->child, asgn->lhs,
-						    env->method, &key);
+						    env->method, &key, NULL);
 	if (!p)
 		return;
 
@@ -1454,14 +1471,14 @@ rc_run_section_list(int method, RC_SECTION *sec, struct rc_secdef *secdef)
 }
 
 static int
-check_kw(char *ident)
+check_kw(char *ident, int *flags)
 {
 	struct rc_secdef *p = rc_secdef;
 	int key;
 	
 	if (!p)
 		p = anubis_find_section("RULE");
-	return rc_child_lookup(p->child, ident, CF_ALL, &key) != NULL;
+	return rc_child_lookup(p->child, ident, CF_ALL, &key, flags) != NULL;
 }
 
 static int
