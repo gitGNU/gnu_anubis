@@ -1,3 +1,27 @@
+2004-02-11  Sergey Poznyakoff
+
+	* configure.ac: AC_REPLACE getline. Define ANUBISADM if
+	gsasl is requested.
+	* doc/Makefile.am (TEXINFO_TEX): Removed. It prevented automake
+	from copying texinfo.tex to build/
+	* lib/getline.c: New file
+	* lib/getline.h: New file
+	* lib/Makefile.am: Added getline.c, getline.h
+	* lib/lbuf.h: Removed leftover header dependency.
+	* lib/lbuf.c: Minor changes.
+	* src/anubisadm.c: New file. Interface for Anubis database
+	administration.
+	* src/Makefile.am (anubisadm, libanubisdb.a): New targets
+	* src/.cvsignore: Updated	
+	* src/anubisdb.c: Added new operation: list
+	* src/dbtext.c: Likewise.
+	* src/gdbm.c: Likewise.
+	* src/headers.h: Likewise.
+	* src/mysql.c: Likewise. Also fixed potential coredumps in
+	mysql_db_get.
+	* src/url.c (anubis_url_full_path): Fixes for a case when URL does
+	not have a host part.
+
 2004-01-06  Wojciech Polak
 
 	* m4/Makefile.am: Removed.

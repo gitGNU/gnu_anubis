@@ -3,6 +3,8 @@ Makefile
 .deps
 .libs
 anubis
+anubisadm
+libanubisdb.a
 y.output
 rcfile-lex.c
 rcfile-gram.c
