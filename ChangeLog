@@ -1,3 +1,13 @@
+2003-07-21  Wojciech Polak
+
+	* src/files.c (message_append_signature_file): Bugfix.
+	* src/headers.h (message_append_signature_file): Changed prototype.
+	* src/rc.c: Test YES-OR-NO arguments with strcasecmp().
+	* src/gpg.c: Likewise.
+
+	* configure.ac: Bump to 3.9.91.
+	* src/main.c: Likewise.
+
 2003-07-20  Wojciech Polak
 
 	* NEWS: Updated.
