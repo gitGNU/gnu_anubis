@@ -102,6 +102,13 @@ assoc_to_header (ASSOC * asc)
   return buf;
 }
 
+int
+anubis_assoc_cmp (void *item, void *data)
+{
+  ASSOC *p = item;
+  return strcmp (p->key, data);
+}
+
 static void
 get_port_number (int *port, char *str)
 {
@@ -376,17 +383,27 @@ void
 assign_string (char **pstr, const char *s)
 {
   free (*pstr);
-  *pstr = xmalloc (strlen (s) + 1);
-  strcpy (*pstr, s);
+  if (s)
+    {
+      *pstr = xmalloc (strlen (s) + 1);
+      strcpy (*pstr, s);
+    }
+  else
+    *pstr = NULL;
 }
 
 void
 assign_string_n (char **pstr, const char *s, size_t length)
 {
   free (*pstr);
-  *pstr = xmalloc (length + 1);
-  memcpy (*pstr, s, length);
-  (*pstr)[length] = 0;
+  if (s)
+    {
+      *pstr = xmalloc (length + 1);
+      memcpy (*pstr, s, length);
+      (*pstr)[length] = 0;
+    }
+  else
+    *pstr = NULL;
 }
 
 /* EOF */
