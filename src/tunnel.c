@@ -25,16 +25,129 @@
 #include "headers.h"
 #include "extern.h"
 
+typedef int (*read_fn_t)(void *data, char *buf, size_t size);
+
 static int  transfer_command(void *, void *, char *);
 static void process_command(void *, void *, char *, int);
-static void transfer_header(void *, void *);
+static void transfer_header(void *, void *, read_fn_t, void *);
 static void process_header_line(char *);
-static void transfer_body(void *, void *);
-static void static_body_transfer(void *, void *);
-static void dynamic_body_transfer(void *, void *);
+static void transfer_body(void *, void *, read_fn_t, void *);
+static void static_body_transfer(void *, void *, read_fn_t, void *);
+static void dynamic_body_transfer(void *, void *, read_fn_t, void *);
 static void clear_body_transfer(void *, void *);
 static void add_remailer_commands(void *);
 static void transform_body(void *sd_server);
+static void postprocess(void *sd_client, void *sd_server);
+static void collect_body(void *sd_client, char **retptr);
+static void collect_headers(void *sd_client, struct list **listp);
+
+int
+socket_reader(void *sd_client, char *buf, size_t size)
+{
+	return recvline(SERVER, sd_client, buf, size);
+}
+
+enum buf_state {
+	state_init,
+	state_end,
+	state_finish
+};
+	
+struct mem_buf {
+	char *buffer;
+	size_t pos;
+	size_t size;
+	enum buf_state state;
+};
+
+void
+init_mem_buf(struct mem_buf *mb, char *buf)
+{
+	memset(mb, 0, sizeof(*mb));
+	mb->buffer = buf;
+	mb->size = strlen(buf);
+	mb->pos = 0;
+	mb->state = state_init;
+}
+
+int
+memory_reader(void *closure, char *buf, size_t size)
+{
+	struct mem_buf *mb = closure;
+	int i;
+	int crlf;
+	
+	switch (mb->state) {
+	case state_init:
+		crlf = 0;
+		size--; /* make space for terminating zero */
+		for (i = 0; i < size; i++) {
+			if (mb->pos == mb->size) {
+				mb->state = state_end;
+				break;
+			}
+			*buf++ = mb->buffer[mb->pos++];
+			if (i > 2 && buf[-2] == '\r' && buf[-1] == '\n') {
+				crlf = 1;
+				break;
+			}
+		}
+
+		if (!crlf) {
+		        strcpy(buf, CRLF);
+			i += 2;
+			buf += 2;
+		}
+		*buf = 0;
+		break;
+
+	case state_end:
+		if (size < 4)
+			i = 0;
+		else {
+			strcpy(buf, "." CRLF);
+			i = 3;
+		}
+		break;
+		
+	case state_finish:
+		i = 0;
+	}
+	return i;
+}
+
+struct list_buf {
+	struct list *list;
+	enum buf_state state;
+};
+
+void
+init_list_buf(struct list_buf *lb, struct list *list)
+{
+	lb->list = list;
+	lb->state = state_init;
+}
+
+int
+list_reader(void *closure, char *buf, size_t size)
+{
+	struct list_buf *lb = closure;
+
+	switch (lb->state) {
+	case state_init:
+		if (!lb->list) {
+			lb->state = state_finish;
+			strncpy(buf, CRLF, size);
+		} else {
+			strncpy(buf, lb->list->line, size);
+			lb->list = lb->list->next;
+		}
+		return strlen(buf);
+
+	default:
+		return 0;
+	}
+}
 
 /******************
   The Tunnel core
@@ -128,12 +241,12 @@ process_command(void *sd_client, void *sd_server, char *command, int size)
 				if (ptr) {
 					ropt = optbackup; /* restore ropt settings */
 					if (regex_match(regex2, command) == 0) { /* FALSE */
-						while (read_action_block() != 0)
+						while (read_action_block(command) != 0)
 						{ }
 					}
 				}
 				else {
-					while (read_action_block() != 0)
+					while (read_action_block(command) != 0)
 					{ }
 				}
 			}
@@ -268,17 +381,13 @@ transfer_command(void *sd_client, void *sd_server, char *command)
 		if (strstr(reply, "STARTTLS"))
 			topt |= T_STARTTLS; /* Yes, we can use the TLS/SSL encryption. */
 
-		#if defined(HAVE_TLS) || defined(HAVE_SSL)
+#if defined(HAVE_TLS) || defined(HAVE_SSL)
 		if ((topt & T_SSL_ONEWAY) && (topt & T_STARTTLS)
 		&& !(topt & T_SSL_FINISHED) && !(topt & T_LOCAL_MTA)) {
 
 			struct sockaddr_in rclient;
 			char ehlo[LINEBUFFER+1];
-			#ifdef __socklen_t_defined
 			socklen_t addrlen;
-			#else
-			int addrlen;
-			#endif /* __socklen_t_defined */
 
 			/*
 			   The 'ONEWAY' method is used when your MUA doesn't
@@ -300,9 +409,9 @@ transfer_command(void *sd_client, void *sd_server, char *command)
 				return 1;
 			}
 
-			#ifdef HAVE_SSL
+#ifdef HAVE_SSL
 			secure.ctx_client = init_ssl_client();
-			#endif /* HAVE_SSL */
+#endif /* HAVE_SSL */
 
 			if (topt & T_ERROR) {
 				topt &= ~T_ERROR;
@@ -311,12 +420,12 @@ transfer_command(void *sd_client, void *sd_server, char *command)
 				return 1;
 			}
 
-			#ifdef HAVE_TLS
+#ifdef HAVE_TLS
 			secure.client = start_tls_client((int)sd_server);
-			#endif /* HAVE_TLS */
-			#ifdef HAVE_SSL
+#endif /* HAVE_TLS */
+#ifdef HAVE_SSL
 			secure.client = start_ssl_client((int)sd_server, secure.ctx_client);
-			#endif /* HAVE_SSL */
+#endif /* HAVE_SSL */
 
 			if (topt & T_ERROR) {
 				topt &= ~T_ERROR;
@@ -335,11 +444,11 @@ transfer_command(void *sd_client, void *sd_server, char *command)
 			if (getpeername((int)sd_client, (struct sockaddr *)&rclient, &addrlen) == -1)
 				anubis_error(HARD, _("getpeername() failed: %s."), strerror(errno));
 
-			#ifdef HAVE_SNPRINTF
+#ifdef HAVE_SNPRINTF
 			snprintf(ehlo, LINEBUFFER,
-			#else
+#else
 			sprintf(ehlo,
-			#endif /* HAVE_SNPRINTF */
+#endif /* HAVE_SNPRINTF */
 				"EHLO %s"CRLF,
 				(topt & T_ERROR) ? "localhost" : inet_ntoa(rclient.sin_addr));
 
@@ -347,7 +456,7 @@ transfer_command(void *sd_client, void *sd_server, char *command)
 			swrite(CLIENT, sd_server, ehlo);
 			get_response_smtp(CLIENT, sd_server, reply, 2 * LINEBUFFER);
 		}
-		#endif /* HAVE_TLS or HAVE_SSL */
+#endif /* HAVE_TLS or HAVE_SSL */
 
 		/*
 		   Remove the STARTTLS command from the EHLO list
@@ -397,10 +506,7 @@ transfer_command(void *sd_client, void *sd_server, char *command)
 				read_rcfile_allsection();
 		}
 		else if (strncmp(buf, "data", 4) == 0) {
-			alarm(1800);
-			transfer_header(sd_client, sd_server);
-			transfer_body(sd_client, sd_server);
-			alarm(0);
+			postprocess(sd_client, sd_server);
 			xfree(message.body);
 			xfree(message.boundary);
 			mopt = 0;
@@ -413,12 +519,90 @@ transfer_command(void *sd_client, void *sd_server, char *command)
 	return 1; /* OK */
 }
 
+#ifdef WITH_GUILE	
+static void
+collect_headers(void *sd_client, struct list **listp)
+{
+	struct list *tail;
+	char buf[LINEBUFFER+1];
+
+	*listp = tail = NULL;
+	while (recvline(SERVER, sd_client, buf, LINEBUFFER))
+	{
+		if (strncmp(buf, CRLF, 2) == 0)
+			break;
+
+		tail = new_element(tail, listp, buf);
+	}
+}
+		
+static void
+collect_body(void *sd_client, char **retptr)
+{
+	int nread;
+	int capacity = DATABUFFER;
+	char body_line[LINEBUFFER+1];
+	char *ptr;
+	
+	ptr = xmalloc(DATABUFFER);
+	while ((nread = recvline(SERVER, sd_client, body_line, LINEBUFFER))) {
+		if (strncmp(body_line, "."CRLF, 3) == 0) /* EOM */
+			break;
+		capacity -= nread;
+		if (capacity < nread) {
+			ptr = xrealloc(ptr,
+				       strlen(message.body) + DATABUFFER + 1);
+			capacity = DATABUFFER - nread;
+		}
+		strcat(ptr, body_line);
+	}
+	*retptr = ptr;
+}
+#endif
+
+void
+postprocess(void *sd_client, void *sd_server)
+{
+	alarm(1800);
+#ifdef WITH_GUILE	
+	if (options.guile_postprocess) {
+		struct mem_buf mb;
+		struct list_buf lb;
+		struct list *hdr_list;
+		char *body;
+
+		collect_headers(sd_client, &hdr_list);
+		collect_body(sd_client, &body);
+
+		guile_postprocess_proc(options.guile_postprocess,
+				       &hdr_list,
+				       &body);
+		init_mem_buf(&mb, body);
+		init_list_buf(&lb, hdr_list);
+		transfer_header(sd_client, sd_server, list_reader, &lb);
+		transfer_body(sd_client, sd_server, memory_reader, &mb);
+		destroy_list(&hdr_list);
+		xfree(body);
+	} else {
+		transfer_header(sd_client, sd_server,
+				socket_reader, sd_client);
+		transfer_body(sd_client, sd_server,
+			      socket_reader, sd_client);
+	}
+#else
+	transfer_header(sd_client, sd_server, socket_reader, sd_client);
+	transfer_body(sd_client, sd_server, socket_reader, sd_client);
+#endif	
+	alarm(0);
+}
+	
 /*****************
   MESSAGE HEADER
 ******************/
 
 static void
-transfer_header(void *sd_client, void *sd_server)
+transfer_header(void *sd_client, void *sd_server,
+		read_fn_t readfn, void *closure)
 {
 	struct list *header_buf = NULL;
 	struct list *header_tail = NULL;
@@ -426,7 +610,7 @@ transfer_header(void *sd_client, void *sd_server)
 	struct list *p2;
 	char header_line[LINEBUFFER+1];
 
-	while (recvline(SERVER, sd_client, header_line, LINEBUFFER))
+	while (readfn(closure, header_line, LINEBUFFER))
 	{
 		if (strncmp(header_line, CRLF, 2) == 0)
 			break;
@@ -642,12 +826,12 @@ process_header_line(char *header_line)
 				if (ptr) {
 					ropt = optbackup; /* restore ropt settings */
 					if (regex_match(regex2, p) == 0) { /* FALSE */
-						while (read_action_block() != 0)
+						while (read_action_block(header_line) != 0)
 						{ }
 					}
 				}
 				else {
-					while (read_action_block() != 0)
+					while (read_action_block(header_line) != 0)
 					{ }
 				}
 			}
@@ -661,7 +845,7 @@ process_header_line(char *header_line)
 ****************/
 
 static void
-transfer_body(void *sd_client, void *sd_server)
+transfer_body(void *sd_client, void *sd_server, read_fn_t readfn, void *closure)
 {
 	if (mopt & M_BODYCLEARAPPEND)
 		clear_body_transfer(sd_client, sd_server);
@@ -669,15 +853,18 @@ transfer_body(void *sd_client, void *sd_server)
 		if ((mopt & M_GPG_ENCRYPT) || (mopt & M_GPG_SIGN) || (mopt & M_ROT13B)
 		|| (mopt & M_RM) || (mopt & M_SIGNATURE) || (mopt & M_BODYAPPEND)
 		|| (mopt & M_EXTBODYPROC))
-			static_body_transfer(sd_client, sd_server);
+			static_body_transfer(sd_client, sd_server,
+					     readfn, closure);
 		else
-			dynamic_body_transfer(sd_client, sd_server);
+			dynamic_body_transfer(sd_client, sd_server,
+					      readfn, closure);
 	}
 	return;
 }
 
 static void
-static_body_transfer(void *sd_client, void *sd_server)
+static_body_transfer(void *sd_client, void *sd_server,
+		     read_fn_t readfn, void *data)
 {
 	int nb = 0;
 	int nread;
@@ -692,8 +879,7 @@ static_body_transfer(void *sd_client, void *sd_server)
 
 	if (topt & T_BOUNDARY) {
 		nb = strlen(message.boundary);
-		while (recvline(SERVER, sd_client, body_line, LINEBUFFER))
-		{
+		while (readfn(data, body_line, LINEBUFFER)) {
 			swrite(CLIENT, sd_server, body_line);
 			if (strncmp(body_line, message.boundary, nb) == 0) {
 				while (recvline(SERVER, sd_client, body_line, LINEBUFFER))
@@ -710,7 +896,7 @@ static_body_transfer(void *sd_client, void *sd_server)
 		   Now we have reached the message body...
 		*/
 
-		while ((nread = recvline(SERVER, sd_client, body_line, LINEBUFFER)))
+		while ((nread = readfn(data, body_line, LINEBUFFER)))
 		{
 			if (strncmp(body_line, message.boundary, nb) == 0)
 				break;
@@ -729,17 +915,17 @@ static_body_transfer(void *sd_client, void *sd_server)
 		remcrlf(message.body);
 		transform_body(sd_server);
 		swrite(CLIENT, sd_server, message.body);
-		#ifdef HAVE_GPG
+#ifdef HAVE_GPG
 		if ((mopt & M_GPG_ENCRYPT) || (mopt & M_GPG_SIGN))
 			swrite(CLIENT, sd_server, CRLF);
-		#endif /* HAVE_GPG */
+#endif /* HAVE_GPG */
 		swrite(CLIENT, sd_server, body_line);
 
 		/*
 		   Transfer everything else...
 		*/
 
-		dynamic_body_transfer(sd_client, sd_server);
+		dynamic_body_transfer(sd_client, sd_server, readfn, data);
 	}
 
 	/*
@@ -747,25 +933,23 @@ static_body_transfer(void *sd_client, void *sd_server)
 	*/
 
 	else {
-		while ((nread = recvline(SERVER, sd_client, body_line, LINEBUFFER)))
-		{
+		while ((nread = readfn(data, body_line, LINEBUFFER))) {
 			if (strncmp(body_line, "."CRLF, 3) == 0) /* EOM */
 				break;
 
 			capacity -= nread;
-			if (capacity >= nread)
-				strcat(message.body, body_line);
-			else {
+			if (capacity < nread) {
 				message.body = (char *)xrealloc((char *)message.body,
 				strlen(message.body) + DATABUFFER + 1);
-				strcat(message.body, body_line);
 				capacity = DATABUFFER - nread;
 			}
+			strcat(message.body, body_line);
 		}
 		remcrlf(message.body);
 		transform_body(sd_server);
 		swrite(CLIENT, sd_server, message.body);
-		swrite(CLIENT, sd_server, "."CRLF);
+		swrite(CLIENT, sd_server, CRLF"."CRLF);
+
 		recvline(CLIENT, sd_server, body_line, LINEBUFFER);
 		swrite(SERVER, sd_client, body_line);
 	}
@@ -773,11 +957,12 @@ static_body_transfer(void *sd_client, void *sd_server)
 }
 
 static void
-dynamic_body_transfer(void *sd_client, void *sd_server)
+dynamic_body_transfer(void *sd_client, void *sd_server,
+		      read_fn_t readfn, void *data)
 {
 	char body_line[LINEBUFFER+1];
 
-	while (recvline(SERVER, sd_client, body_line, LINEBUFFER))
+	while (readfn(data, body_line, LINEBUFFER))
 	{
 		swrite(CLIENT, sd_server, body_line);
 		if (strncmp(body_line, "."CRLF, 3) == 0) /* EOM */
