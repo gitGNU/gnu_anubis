@@ -1,5 +1,15 @@
 2003-06-27  Sergey Poznyakoff
 
+	* src/headers.h (message_modify_body): Added prototype.
+	* src/mem.h (xfree,xfree_pptr): Made safer.
+	* src/list.c: Standartize usage of xfree() and xfree_pptr().
+	* src/message.c: Likewise.
+	* src/rcfile.y: Likewise.
+	* src/regex.c: Likewise.
+	* src/tunnel.c: Likewise.
+
+2003-06-27  Sergey Poznyakoff
+
 	* src/daemon.c: Get rid of the unneded locals
 	* src/headers.h (smtp_session): Changed proto.
 	* src/rcfile.l: Allow the use of '\' to escape newlines
