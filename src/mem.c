@@ -98,20 +98,4 @@ strdup (const char *s)
 }
 #endif /* not HAVE_STRDUP */
 
-void
-free_pptr (char **pptr)
-{
-  char **p = pptr;
-
-  if (!pptr)
-    return;
-  while (*p)
-    {
-      free (*p);
-      p++;
-    }
-  free (pptr);
-  return;
-}
-
 /* EOF */
