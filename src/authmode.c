@@ -175,7 +175,7 @@ static void
 asmtp_capa_init (void)
 {
   asmtp_capa = list_create ();
-#ifdef HAVE_TLS
+#ifdef USE_SSL
   asmtp_capa_add ("STARTTLS");
 #endif
   auth_gsasl_init ();
@@ -442,7 +442,18 @@ anubis_smtp (ANUBIS_USER * usr)
       }
     }
 
-  topt &= ~T_SSL_FINISHED;
+  if (topt & T_SSL_FINISHED)
+    {
+      /* If `ssl yes' is requested, convert it to `ssl-oneway' for
+	 the mechanics of tunnel.c:handle_ehlo() to work properly. */
+	 
+      topt &= ~T_SSL_FINISHED;
+      if (topt & T_SSL)
+	{
+	  topt &= ~T_SSL;
+	  topt |= T_SSL_ONEWAY;
+	}
+    }
   xdatabase_enable ();
   
   return 0;
