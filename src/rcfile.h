@@ -30,6 +30,7 @@ typedef struct rc_cond RC_COND;
 typedef struct rc_asgn RC_ASGN;
 typedef struct rc_node RC_NODE;
 typedef struct rc_bool RC_BOOL;
+typedef struct rc_expr RC_EXPR;
 
 struct rc_section {          /* RC Section */
 	RC_SECTION *next;    /* Link to the next section */
@@ -62,19 +63,24 @@ struct rc_bool {             /* Boolean expression */
 
 enum rc_node_type {          /* Executable node type */
 	rc_node_bool,        /* Boolean instruction */
-	rc_node_re           /* Regular expression */
+	rc_node_expr         /* Regular expression */
+};
+
+struct rc_expr {
+	int part;  /* HEADER, COMMAND or BODY */
+	char *key;
+	RC_REGEX *re;
 };
 
 struct rc_node {             /* Executable node */
 	enum rc_node_type type;  /* Node type */
 	union {
-		RC_REGEX *re;      
+		RC_EXPR expr;
 		RC_BOOL bool;
 	} v;
 };
 
 struct rc_cond {             /* Conditional expression */
-	int method;          /* HEADER or COMMAND */
 	RC_NODE *node;       /* Condition node */
 	RC_STMT *iftrue;     /* Branch to follow when the condition is true */
 	RC_STMT *iffalse;    /* Branch to follow when the condition is false */
@@ -101,8 +107,8 @@ struct rc_stmt {             /* General statement representation */
 #define RC_KW_ERROR   2
 
 typedef int (*rc_kw_parser_t)(int method, int key, char *arg,
-			      void *inv_data, void *func_data, char *line);
-	
+			      void *inv_data, void *func_data, MESSAGE *msg);
+
 struct rc_kwdef {
 	char *name;
 	int tok;
@@ -141,7 +147,7 @@ int rc_run_cond(char *section, int method, char *str);
 void rc_run_section_list(int method, RC_SECTION *sec,
 			 struct rc_secdef *secdef);
 void rc_run_section(int method, RC_SECTION *sec, struct rc_secdef *secdef,
-		    int cmp_method, char *line, void *data);
+		    void *data, MESSAGE *msg);
 void rc_set_debug_level(char *);
 
 int rc_open(char *name);
