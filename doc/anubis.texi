@@ -408,9 +408,10 @@ This is the simplest database possible. It is kept in a plain text
 file. Each line in this file represents a single @dfn{record}, empty lines
 and lines beginning with @samp{#} (@dfn{comments}) sign are ignored.
 Records consist of @dfn{fields}, each field being a sequence of
-non-whitespace characters. Fields are separated by arbitrary amount
-of whitespace. A record may contain from two to four fields, whose
-meaning is as follows:
+characters. Fields are separated by colons (@samp{:}, ASCII 58).
+If @samp{:} character occurs in a field, it is preceeded by a single
+backslash character (@samp{\\}, ASCII 92). A record must contain
+at least two fields.
 
 @enumerate 1
 @item SMTP @samp{AUTHID}.
