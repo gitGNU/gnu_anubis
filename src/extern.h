@@ -45,6 +45,7 @@ struct session_struct {
  char socks_username[65];
  char socks_password[65];
  char client[65];
+ char *rc_file_name;	
  char supervisor[65];
  char notprivileged[65];
  char *execpath;
