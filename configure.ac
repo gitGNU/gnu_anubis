@@ -36,7 +36,7 @@ fi
 
 dnl Internationalization macros.
 AM_GNU_GETTEXT
-AM_GNU_GETTEXT_VERSION(0.13)
+AM_GNU_GETTEXT_VERSION(0.14.1)
 
 dnl Checks for programs.
 AC_PROG_CC
