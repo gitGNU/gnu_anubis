@@ -2,7 +2,7 @@
    headers.h
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -154,6 +154,29 @@
 #include "mem.h"		/* xfree(), xfree_pptr() */
 #include "list.h"
 
+#ifdef HAVE_SYSEXITS_H
+# include <sysexits.h>
+#else
+# define EX_OK          0       /* successful termination */
+# define EX__BASE       64      /* base value for error messages */
+# define EX_USAGE       64      /* command line usage error */
+# define EX_DATAERR     65      /* data format error */
+# define EX_NOINPUT     66      /* cannot open input */
+# define EX_NOUSER      67      /* addressee unknown */
+# define EX_NOHOST      68      /* host name unknown */
+# define EX_UNAVAILABLE 69      /* service unavailable */
+# define EX_SOFTWARE    70      /* internal software error */
+# define EX_OSERR       71      /* system error (e.g., can't fork) */
+# define EX_OSFILE      72      /* critical OS file missing */
+# define EX_CANTCREAT   73      /* can't create (user) output file */
+# define EX_IOERR       74      /* input/output error */
+# define EX_TEMPFAIL    75      /* temp failure; user is invited to retry */
+# define EX_PROTOCOL    76      /* remote error in protocol */
+# define EX_NOPERM      77      /* permission denied */
+# define EX_CONFIG      78      /* configuration error */
+# define EX__MAX        78      /* maximum listed value */
+#endif
+
 #ifndef INADDR_NONE
 # define INADDR_NONE (unsigned long)0xffffffff
 #endif /* not INADDR_NONE */
@@ -214,7 +237,8 @@
 typedef enum anubis_mode
 {
   anubis_transparent,
-  anubis_authenticate
+  anubis_authenticate,
+  anubis_mda
 }
 ANUBIS_MODE;
 
@@ -319,7 +343,7 @@ int setenv (const char *, const char *, int);
 /* env.c */
 void get_options (int, char *[]);
 void get_homedir (char *, char *, int);
-void anubis_getlogin (char *, int);
+void anubis_getlogin (char **);
 void anubis_changeowner (char *);
 int anubis_set_mode (char *modename);
 int check_superuser (void);
@@ -358,18 +382,24 @@ void loop (int);
 void stdinout (void);
 void service_unavailable (NET_STREAM *);
 void set_unprivileged_user (void);
+void create_stdio_stream (NET_STREAM *s);
 
 /* auth.c */
-int auth_ident (struct sockaddr_in *, char *, int);
+int auth_ident (struct sockaddr_in *, char **);
 
 /* map.c */
-void parse_transmap (int *, char *, char *, char *, int);
+void parse_transmap (int *, char *, char *, char **);
 void translate_section_init (void);
 
 /* tunnel.c */
 void smtp_session (void);
 void smtp_session_transparent (void);
 void set_ehlo_domain (char *domain);
+void transfer_header (ANUBIS_LIST *);
+void transfer_body (MESSAGE *);
+void collect_headers (MESSAGE * msg);
+void collect_body (MESSAGE * msg);
+
 
 /* message.c */
 void message_add_body (MESSAGE *, char *, char *);
@@ -380,10 +410,12 @@ void message_modify_body (MESSAGE *, RC_REGEX *, char *);
 void message_external_proc (MESSAGE *, char **);
 void message_init (MESSAGE *);
 void message_free (MESSAGE *);
+void message_copy (MESSAGE *dst, MESSAGE *src);
 
 /* exec.c */
 char **gen_execargs (const char *);
 NET_STREAM make_local_connection (char *, char **);
+NET_STREAM make_local_connection_arg (char *exec_path, char **exec_args, char *arg);
 char *external_program (int *, char *, char *, char *, int);
 char *exec_argv (int *, char *, char **, char *, char *, int);
 void cleanup_children (void);
@@ -398,8 +430,8 @@ void assoc_free (ASSOC *);
 ASSOC *header_assoc (char *);
 void destroy_assoc_list (ANUBIS_LIST **);
 void destroy_string_list (ANUBIS_LIST **);
-void parse_mtaport (char *, char *, unsigned int *);
-void parse_mtahost (char *, char *, unsigned int *);
+void parse_mtaport (char *, char **, unsigned int *);
+void parse_mtahost (char *, char **, unsigned int *);
 void remline (char *, char *);
 void remcrlf (char *);
 char *substitute (char *, char **);
@@ -407,6 +439,8 @@ char *make_uppercase (char *);
 char *make_lowercase (char *);
 char *get_localname (void);
 char *get_localdomain (void);
+void assign_string (char **pstr, const char *s);
+void assign_string_n (char **pstr, const char *s, size_t length);
 
 /* mime.c */
 void message_append_text_file (MESSAGE *, char *);
