@@ -110,6 +110,8 @@ case "${withval}" in
   *)   AC_MSG_ERROR(bad value ${withval} for --without-guile) ;;
 esac],[useguile=yes])
 
+AC_SUBST(M4_DEFS)
+
 AC_SUBST(GUILE_INCLUDES)
 AC_SUBST(GUILE_LIBS)
 AC_SUBST(GUILE_BINDIR)
@@ -122,6 +124,7 @@ if test x"$useguile" = x"yes"; then
     GUILE_LIBS=`guile-config link`
     GUILE_BINDIR=`guile-config info bindir`
     GUILE_SCRIPTS='$(GUILE_SCM)'
+    M4_DEFS="$M4_DEFS -DWITH_GUILE"
     case "$GUILE_VERSION" in
     16|17) GUILE_SNARF_VERSION="1.6";;
     *) GUILE_SNARF_VERSION="1.6";;
@@ -137,7 +140,7 @@ AC_SUBST(ANUBIS_GPGFILES)
 AC_ARG_WITH(gpgme,
 	AC_HELP_STRING([--without-gpgme],
 	[without GnuPG (GPGME library) support]),
-	[with_gpgme=no],
+	[with_gpgme=${withval}],
 	[with_gpgme=yes])
 if test "$with_gpgme" = "no"; then
  AC_DEFINE(NOGPG, 1, [Define to 1 if NOGPG is requested.])
@@ -168,6 +171,7 @@ else
  fi
  ANUBIS_GPGFILES='$(GPGFILES)'
  AC_LIBOBJ(gpg)
+ M4_DEFS="$M4_DEFS -DWITH_GPG"
 fi
 
 dnl Use option --without-gnutls to NOT compile GnuTLS library support.
@@ -210,6 +214,7 @@ if test "$with_openssl" = "yes"; then
   else
    AC_CHECK_HEADERS(openssl/ssl.h)
   fi
+  M4_DEFS="$M4_DEFS -DWITH_SSL"
   AC_LIBOBJ(ssl)
   AC_DEFINE(USE_OPENSSL, 1, [Define to 1 if USE_OPENSSL is requested.])
   AC_MSG_RESULT([Enabling OpenSSL support...])
@@ -218,17 +223,21 @@ fi
 
 if test $with_gnutls = yes; then
   AC_CHECK_HEADERS(gnutls/gnutls.h)
-  AM_PATH_LIBGNUTLS("0.9.6",
-                    [AC_LIBOBJ(tls)
-                    AC_DEFINE(USE_GNUTLS, 1, [Define to 1 if USE_GNUTLS is requested.])],
-                    [AC_MSG_RESULT([Disabling GnuTLS support...])])
+  if test $ac_cv_header_gnutls_gnutls_h != no; then
+    AM_PATH_LIBGNUTLS("0.9.6",
+                      [M4_DEFS="$M4_DEFS -DWITH_SSL"
+                      AC_LIBOBJ(tls)
+                      AC_DEFINE(USE_GNUTLS, 1,
+                                [Define to 1 if USE_GNUTLS is requested.])],
+                                [AC_MSG_RESULT([Disabling GnuTLS support...])])
+  fi
 fi
 
 dnl Use option --with-pcre to compile PCRE library support.
 AC_ARG_WITH(pcre,
 	AC_HELP_STRING([--with-pcre],
 	[with PCRE library support]),
-	[with_pcre=yes],
+	[with_pcre=${withval}],
 	[with_pcre=no])
 if test "$with_pcre" = "yes"; then
  AC_CHECK_LIB(pcre, main)
@@ -240,7 +249,7 @@ dnl Use option --with-pam to compile PAM support.
 AC_ARG_WITH(pam,
 	AC_HELP_STRING([--with-pam],
 	[with Pluggable Authentication Modules support]),
-	[with_pam=yes],
+	[with_pam=${withval}],
 	[with_pam=no])
 if test "$with_pam" = "yes"; then
  AC_CHECK_LIB(pam, main,, with_pam=no)
@@ -253,7 +262,7 @@ dnl Use option --with-tcp-wrappers to compile libwrap library support.
 AC_ARG_WITH(tcp-wrappers,
 	AC_HELP_STRING([--with-tcp-wrappers],
 	[with libwrap (TCP wrappers) support]),
-	[with_tcp_wrappers=yes],
+	[with_tcp_wrappers=${withval}],
 	[with_tcp_wrappers=no])
 if test "$with_tcp_wrappers" = "yes"; then
  AC_CHECK_LIB(wrap, main)
