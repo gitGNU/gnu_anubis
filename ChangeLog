@@ -1,3 +1,7 @@
+2003-07-01  Sergey Poznyakoff 
+
+	* src/rc.c: Forgotten to commit
+
 2003-06-30  Sergey Poznyakoff 
 
 	* configure.ac: Use AM_PATH_LIBGNUTLS

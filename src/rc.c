@@ -65,8 +65,19 @@ anubis_add_section(char *name)
 			return &anubis_rc_sections[i];
 	
 	anubis_rc_sections[anubis_rc_numsections].name = name;
+	anubis_rc_sections[anubis_rc_numsections].allow_prog = 0;
 	anubis_rc_sections[anubis_rc_numsections].child = NULL;
 	return &anubis_rc_sections[anubis_rc_numsections++];
+}
+
+struct rc_secdef *
+anubis_find_section(char *name)
+{
+	int i;
+	for (i = 0; i < anubis_rc_numsections; i++)
+		if (strcmp(anubis_rc_sections[i].name, name) == 0)
+			return &anubis_rc_sections[i];
+	return NULL;
 }
 
 void
@@ -460,7 +471,7 @@ rule_parser(int method, int key, LIST *arglist,
 		break;
 		
 	case KW_EXTERNAL_BODY_PROCESSOR:
-		session.execargs = list_to_argv(arglist);
+		argv = list_to_argv(arglist);
 		message_external_proc(msg, argv);
 		xfree_pptr(argv);
 		break;
@@ -491,7 +502,7 @@ void
 rule_section_init(void)
 {
 	struct rc_secdef *sp = anubis_add_section("RULE");
-	
+	sp->allow_prog = 1;
 	rc_secdef_add_child(sp, &rule_sect_child);
 }
 
