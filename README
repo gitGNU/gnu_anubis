@@ -99,7 +99,7 @@
  when editing appropriate configuration files. You will
  have to add the following to your .emacs or site-start file:
 
- (autoload 'anubis-mode "Anubis-Config")
+ (autoload 'anubis-mode "anubis-mode")
  (setq auto-mode-alist (append auto-mode-alist
                                 '(("/.anubisrc$" . anubis-mode)
                                   ("/anubisrc$" . anubis-mode))))
