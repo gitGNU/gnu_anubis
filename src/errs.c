@@ -26,37 +26,29 @@
 #include "extern.h"
 
 void
-anubis_error (int method, const char *fmt, ...)
+anubis_verror (int error_code, const char *pfx, const char *fmt, va_list ap)
 {
-  va_list arglist;
-
-  switch (method)
+  if (options.termlevel != SILENT)
     {
-    case HARD:
-      topt |= T_ERROR;
-      break;
-    case SOFT:
-    case SYNTAX:
-      topt &= ~T_ERROR;
-      break;
-    }
-
-  if (topt & T_SMTP_ERROR_CODES)
-    {
-      fprintf (stdout, "451 4.0.0 ");
-      va_start (arglist, fmt);
-      vfprintf (stdout, fmt, arglist);
-      va_end (arglist);
-      fputc ('\n', stdout);
-
-    }
-  else if (options.termlevel != SILENT)
-    {
+      int n;
       char msg[LINEBUFFER + 1];
+      size_t size = sizeof msg;
 
-      va_start (arglist, fmt);
-      vsnprintf (msg, LINEBUFFER, fmt, arglist);
-      va_end (arglist);
+      if (pfx)
+	{
+	  n = snprintf (msg, size, "%s: ", pfx);
+	  /* On some older systems *snprintf calls return -1 if the output
+	     was truncated */
+	  if (n < 0)
+	    size = 0;
+	  else
+	    size -= n;
+	}
+      
+      n = vsnprintf (msg, size, fmt, ap);
+      if (error_code && (n >= 0 && n < sizeof msg))
+	snprintf (msg + n, size - n, ": %s", strerror (error_code));
+	  
 #ifdef HAVE_SYSLOG
       if ((topt & T_DAEMON) && !(topt & T_FOREGROUND))
 	{
@@ -67,21 +59,44 @@ anubis_error (int method, const char *fmt, ...)
       else
 #endif /* HAVE_SYSLOG */
       if (topt & T_FOREGROUND)
-	mprintf ("%s[%d] %s",
-		 method == SYNTAX ? "" : ">>", (int) getpid (), msg);
+	mprintf ("[%lu] %s",
+		 (unsigned long) getpid (), msg);
       else
-	mprintf ("%s%s", method == SYNTAX ? "" : ">>", msg);
+	mprintf ("%s", msg);
     }
-  errno = 0;
-  if (method != SYNTAX && !(topt & T_DAEMON) && !(topt & T_FOREGROUND))
-    quit (EXIT_FAILURE);
+}
+
+void
+anubis_error (int exit_code, int error_code, const char *fmt, ...)
+{
+  va_list ap;
+  
+  va_start (ap, fmt);
+  anubis_verror (error_code, NULL, fmt, ap);
+  va_end (ap);
+  if (exit_code == EXIT_ABORT)
+    abort ();
+  else if (exit_code)
+    quit (exit_code);
+}  
+
+void
+anubis_warning (int error_code, const char *fmt, ...)
+{
+  va_list ap;
+  
+  va_start (ap, fmt);
+  anubis_verror (error_code, _("warning"), fmt, ap);
+  va_end (ap);
 }
 
 void
 socket_error (const char *msg)
 {
-  anubis_error (HARD, _("Couldn't write to socket: %s."),
-		msg ? msg : strerror (errno));
+  if (msg)
+    anubis_error (EXIT_FAILURE, 0, _("Could not write to socket: %s"), msg);
+  else
+    anubis_error (EXIT_FAILURE, errno, _("Could not write to socket"));
 }
 
 void
@@ -91,25 +106,20 @@ hostname_error (char *host)
     return;
 
   if (h_errno == HOST_NOT_FOUND)
-    anubis_error (HARD, _("Unknown host %s."), host);
+    anubis_error (EXIT_FAILURE, 0, _("Unknown host %s."), host);
   else if (h_errno == NO_ADDRESS)
-    anubis_error (HARD,
-		  _
-		  ("%s: host name is valid but does not have an IP address."),
+    anubis_error (EXIT_FAILURE, 0,
+		  _("%s: host name is valid but does not have an IP address."),
 		  host);
   else if (h_errno == NO_RECOVERY)
-    anubis_error (HARD,
+    anubis_error (EXIT_FAILURE, 0,
 		  _("%s: unrecoverable name server error occured."), host);
   else if (h_errno == TRY_AGAIN)
-    anubis_error (HARD,
-		  _
-		  ("%s: a temporary name server error occured. Try again later."),
+    anubis_error (EXIT_FAILURE, 0,
+		  _("%s: a temporary name server error occured. Try again later."),
 		  host);
   else
-    anubis_error (HARD, _("%s: unknown DNS error %d."), host, h_errno);
-
-  h_errno = 0;
-  return;
+    anubis_error (EXIT_FAILURE, _("%s: unknown DNS error %d."), host, h_errno);
 }
 
 /* EOF */
