@@ -682,6 +682,9 @@ proc anubis_pat {patname} {
 				anubis_expect {-re "$expect\[^\n\]*\n"}
 			    } elseif [regexp "^:ADD (.*)" $line dummy expect] {
 				lappend file_pattern $expect
+			    } elseif [regexp "^:DEL (.*)" $line dummy expect] {
+				verbose "DEL:: $expect"
+				anubis_command "$expect"
 			    } else {
 				anubis_command "$line"
 				lappend file_pattern $line
