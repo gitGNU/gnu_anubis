@@ -1,6 +1,6 @@
 # -*- tcl -*-
 # This file is part of GNU Anubis testsuite.
-# Copyright (C) 2003 The Anubis Team.
+# Copyright (C) 2003, 2004 The Anubis Team.
 #
 # GNU Anubis is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,6 +37,9 @@ anubis_pat add3.pat
 anubis_pat add-body.pat
 # Append a text file to the body
 anubis_pat add-body-file.pat
+
+# More conditional tests
+anubis_pat cond.pat
 
 # Modify the header
 anubis_pat mod-header.pat
