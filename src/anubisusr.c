@@ -49,6 +49,8 @@ char *progname;
 
 char *smtp_host = "localhost";
 int smtp_port = 24;
+char *rcfile_name = NULL;
+char *netrc_name = NULL;
 struct obstack input_stk;
 
 int verbose;
@@ -974,8 +976,12 @@ char *
 rc_name (void)
 {
   char *rc;
-  const char *home = get_home_dir ();
+  const char *home;
 
+  if (rcfile_name)
+    return rcfile_name;
+  
+  home = get_home_dir ();
   rc = xmalloc (strlen (home) + 1 + sizeof DEFAULT_LOCAL_RCFILE);
   strcpy (rc, home);
   strcat (rc, "/");
@@ -999,7 +1005,6 @@ diff (char *file, struct smtp_reply *repl)
       error (_("Cannot open file %s: %s"), file, strerror (errno));
       return CMP_ERROR;
     }
-
   anubis_md5_file (digest, fd);
   close (fd);
 
@@ -1133,26 +1138,32 @@ synch (void)
   
   send_line ("XDATABASE EXAMINE");
   smtp_get_reply (&repl);
-  if (repl.code != 250)
+  switch (repl.code)
     {
+    case 300:
+      rcname = rc_name ();
+      rc = CMP_CHANGED;
+      break;
+	
+    case 250:
+      rcname = rc_name ();
+      rc = diff (rcname, &repl);
+      break;
+      
+    default:
       error (_("EXAMINE failed"));
       smtp_print_reply (stderr, &repl);
       smtp_quit ();
       return 1;
     }
 
-  rcname = rc_name ();
-
-  rc = diff (rcname, &repl);
-
   if (rc == CMP_CHANGED)
     {
-      VDETAIL (1, (_("File changend\n")));
+      VDETAIL (1, (_("File changed\n")));
       smtp_upload (rcname);
     }
   else
-    VDETAIL (1, (_("File NOT changend\n")));
-  free (rcname);
+    VDETAIL (1, (_("File NOT changed\n")));
 
   smtp_quit ();
   return 0;
@@ -1167,6 +1178,8 @@ static struct option gnu_options[] = {
   {"verbose", no_argument, 0, 'v'},
   {"version", no_argument, 0, OPT_VERSION},
   {"help", no_argument, 0, OPT_HELP},
+  {"file", required_argument, 0, 'f'},
+  {"netrc", required_argument, 0, 'n'},
 #ifdef HAVE_TLS
   {"disable-tls", no_argument, 0, 'd'},
   {"tls-cafile", required_argument, 0, 'C'},
@@ -1185,7 +1198,9 @@ help (void)
   puts (_("  -d, --disable-tls       Disable TLS encryption"));
   puts (_("  -C, --tls-cafile FILE   Use given CA file"));
 #endif
+  puts (_("  -f, --file FILE         Set user configuration file name"));
   puts (_("  -m, --mechanism MECH    Restrict allowed SASL mechanisms"));
+  puts (_("  -n, --netrc FILE        Set .netrc file name"));
   puts (_("  -v, --verbose           Verbose output. Multiple options\n"
 	  "                          increase the verbosity. Maximum is\n"
 	  "                          3"));
@@ -1200,13 +1215,18 @@ help (void)
 void
 read_netrc (void)
 {
-  const char *home = get_home_dir ();
-  char *netrc = xmalloc (strlen (home) + 1 + sizeof NETRC_NAME);
-  strcpy (netrc, home);
-  strcat (netrc, "/");
-  strcat (netrc, NETRC_NAME);
-  parse_netrc (netrc);
-  free (netrc);
+  if (netrc_name)
+    parse_netrc (netrc_name);
+  else
+    {
+      const char *home = get_home_dir ();
+      char *netrc = xmalloc (strlen (home) + 1 + sizeof NETRC_NAME);
+      strcpy (netrc, home);
+      strcat (netrc, "/");
+      strcat (netrc, NETRC_NAME);
+      parse_netrc (netrc);
+      free (netrc);
+    }
 }
 
 
@@ -1221,7 +1241,7 @@ main (int argc, char **argv)
   else
     progname++;
 
-  while ((c = getopt_long (argc, argv, "dC:m:v", gnu_options, NULL)) != EOF)
+  while ((c = getopt_long (argc, argv, "dC:f:n:m:v", gnu_options, NULL)) != EOF)
     {
       switch (c)
 	{
@@ -1235,6 +1255,14 @@ main (int argc, char **argv)
 	  break;
 
 #endif
+	case 'f':
+	  rcfile_name = optarg;
+	  break;
+
+	case 'n':
+	  netrc_name = optarg;
+	  break;
+	  
 	case 'm':
 	  add_mech (optarg);
 	  break;
@@ -1252,6 +1280,7 @@ main (int argc, char **argv)
 	  break;
 
 	default:
+	  fprintf (stderr, "%s: unknown option -%c\n", progname, optopt);
 	  exit (1);
 	}
     }
