@@ -4,6 +4,7 @@
 	* m4/gpgme.m4: New file.
 	* m4/Makefile.am: Added gpgme.m4.
 	* src/gpg.c: Replaced puts(S) with fputs(S, stderr);.
+	(gpg_sign, gpg_sign_encrypt): Added gpgme_key_release(key).
 
 2003-08-28  Sergey Poznyakoff 
 
