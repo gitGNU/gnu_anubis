@@ -1,3 +1,40 @@
+2003-02-06  Sergey Poznyakoff
+
+	* configure.ac: Provide a replacement for snprintf
+	* examples/anubis.scm: Renamed postprocess to msg-process.
+	* examples/anubisrc.guile: Likewise.
+	* src/snprintf.c: New file. A replacement for snprintf function.
+	* src/Makefile.am: Added snprintf.c
+	* src/auth.c: Remove HAVE_SNPRINTF conditional
+	* src/esmtp.c: Likewise.
+	* src/exec.c: Likewise.
+	* src/files.c: Likewise.
+	* src/misc.c: Likewise.
+	* src/ssl.c: Likewise.
+	* src/tunnel.c: Likewise.
+	* src/daemon.c: Likewise.
+	  (stdinout): Removed call to process_rcfile().
+
+	* src/extern.h (struct options_struct): Removed guile_postprocess
+	  member.
+	* src/guile.c: Provide a placeholder for guile-postprocess
+	  functions.
+
+	* src/headers.h: Removed inclusion of <regex.h> and <pcre.h>
+	  (anubis_regex_match,anubis_regex_free,anubis_regex_source):
+	  Added new prototypes.
+	* src/rcfile.h (struct rc_regex,RC_REGEX): Removed. It is defined
+	  elsewhere.
+	  (struct rc_node): Changed type of 'v.re' member.
+
+	* src/rcfile.l: Fixed support for traditional syntax.
+	* src/rcfile.y: Fixed support for traditional syntax.
+	  Changed regular expression handling.
+
+	* src/regex.c: Modularized regular expressions. All implementation
+	  dependent parts (regex,pcre) live in this file. The rest of
+	  sources uses anubis_regex_.* interface.
+
 2003-02-05  Sergey Poznyakoff 
 
 	Rewritten RC file support using yacc and lex.
