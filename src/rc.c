@@ -48,7 +48,7 @@
 #define MAX_SECTIONS 10
 
 static RC_SECTION *parse_tree;
-static int parse_tree_method;
+static time_t global_mtime;
 static struct rc_secdef anubis_rc_sections[MAX_SECTIONS];
 static int anubis_rc_numsections;
 
@@ -69,8 +69,8 @@ anubis_add_section(char *name)
 	return &anubis_rc_sections[anubis_rc_numsections++];
 }
 
-RC_SECTION *
-_open_rcfile(int method)
+void
+open_rcfile(int method)
 {
 	char homedir[MAXPATHLEN+1];
 	char *rcfile = 0;
@@ -80,8 +80,6 @@ _open_rcfile(int method)
 	case CF_SUPERVISOR:
 	case CF_INIT:
 		if (topt & T_ALTRC) {
-			if (check_filename(options.altrc) == 0)
-				return NULL;
 			rcfile = strdup(options.altrc);
 		} else if (check_superuser())
 			rcfile = strdup(DEFAULT_GLOBAL_RCFILE);
@@ -93,8 +91,15 @@ _open_rcfile(int method)
 			sprintf(rcfile,	"%s/%s", homedir,
 				DEFAULT_LOCAL_RCFILE);
 		}
+		
+		if (check_filename(rcfile, &global_mtime) == 0) {
+			free(rcfile);
+			return;
+		}
 		info(DEBUG,
 		     _("Reading system configuration file %s..."), rcfile);
+		rc_section_list_destroy(parse_tree);
+		parse_tree = NULL;
 		break;
 
 	case CF_CLIENT:
@@ -109,28 +114,16 @@ _open_rcfile(int method)
 
 	if (check_filemode(rcfile) == 0) { /* Wrong permissions... */
 		free(rcfile);
-		return NULL;
+		return;
 	}
 
 	sec = rc_parse(rcfile);
-	/* FIXME:
-	   1) check 'sec' against anubis_rc_sections and remove the
-	   erroneous statements 
-	   2) rc_section_link(&rc_section, sec); */
+	/* FIXME: check 'sec' against anubis_rc_sections and remove the
+	   erroneous statements  */
 	free(rcfile);
-	return sec;
-}
 
-void
-open_rcfile(int method)
-{
-	if (!parse_tree || parse_tree_method != method) {
-		RC_SECTION *sec;
-		parse_tree_method = method;
-		sec = _open_rcfile(method);
-		if (sec)
-			rc_section_link(&parse_tree, sec);
-	}
+	if (sec)
+		rc_section_link(&parse_tree, sec);
 }
 
 void

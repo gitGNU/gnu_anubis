@@ -123,7 +123,7 @@ bind_and_listen(char *host, unsigned int port)
 	unsigned long inaddr;
 	struct sockaddr_in addr;
 	int true = 1;
-
+	
 	memset(&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
@@ -154,8 +154,8 @@ bind_and_listen(char *host, unsigned int port)
 	else
 		addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-	setsockopt (sd, SOL_SOCKET, SO_REUSEADDR, &true, sizeof (true));
-
+	setsockopt (sd, SOL_SOCKET, SO_REUSEADDR, &true, sizeof(true));
+	
 	if (bind(sd, (struct sockaddr *)&addr, sizeof(addr)))
 		anubis_error(HARD, _("bind() failed: %s."), strerror(errno));
 	info(VERBOSE, _("GNU Anubis bound to %s:%u"), inet_ntoa(addr.sin_addr),
