@@ -144,7 +144,8 @@ struct rc_secdef_child {
 /* Section priorities affect linking the user-defined sections to
    the parse tree left from parsing the system configuration file. */
 enum section_prio {
-	prio_override,  /* Only user-defined section is taken into account */
+	prio_user_only, /* Only user-defined section is taken into account */
+	prio_system_only,/* Only system-defined section */
 	prio_system,    /* System-defined section first, user-defined next */
 	prio_user       /* User-defined section first, system-defined next */
 };
@@ -170,7 +171,7 @@ RC_SECTION *rc_section_lookup(RC_SECTION *, char *);
 void rc_section_link(RC_SECTION **, RC_SECTION *);
 void rc_secdef_add_child(struct rc_secdef *, struct rc_secdef_child *);
 RC_SECTION *rc_parse(char *);
-void rc_section_list_destroy(RC_SECTION *);
+void rc_section_list_destroy(RC_SECTION **);
 int rc_run_cond(char *, int, char *);
 void rc_run_section_list(int, RC_SECTION *, struct rc_secdef *);
 void rc_run_section(int, RC_SECTION *, struct rc_secdef *, void *, MESSAGE *);
