@@ -1,3 +1,9 @@
+2004-02-14  Sergey Poznyakoff 
+
+	* src/mysql.c (mysql_db_put): Fixed query template
+	* src/anubisadm.c (op_create): Initialize rec. Print input line
+	number along with the error message.
+
 2004-02-12  Sergey Poznyakoff  
 
 	* src/mysql.c: Trivial fixes.
