@@ -25,6 +25,10 @@
 #include "headers.h"
 #include "extern.h"
 
+#define obstack_chunk_alloc malloc
+#define obstack_chunk_free free
+#include <obstack.h>
+
 typedef int (*read_fn_t)(void *data, char *buf, size_t size);
 
 static int  transfer_command(void *, void *, char *);
@@ -37,11 +41,10 @@ static void dynamic_body_transfer(void *, void *, read_fn_t, void *);
 static void clear_body_transfer(void *, void *);
 static void add_remailer_commands(void *);
 static void transform_body(void *sd_server);
-static void postprocess(void *sd_client, void *sd_server);
-#ifdef WITH_GUILE
+static void process_data(void *sd_client, void *sd_server);
+
 static void collect_body(void *sd_client, char **retptr);
 static void collect_headers(void *sd_client, struct list **listp);
-#endif /* WITH_GUILE */
 
 int
 socket_reader(void *sd_client, char *buf, size_t size)
@@ -151,6 +154,8 @@ list_reader(void *closure, char *buf, size_t size)
 	}
 }
 
+
+
 /******************
   The Tunnel core
 *******************/
@@ -167,7 +172,8 @@ smtp_session(void *sd_client, void *sd_server)
 	info(VERBOSE, _("Transferring message(s)..."));
 	get_response_smtp(CLIENT, sd_server, command, LINEBUFFER);
 
-	if (strncmp(command, "220 ", 4) == 0 && strstr(command, version) == 0) {
+	if (strncmp(command, "220 ", 4) == 0
+	    && strstr(command, version) == 0) {
 		char *ptr = 0;
 		char *banner_ptr = 0;
 		char host[65];
@@ -250,9 +256,11 @@ process_command(void *sd_client, void *sd_server, char *command, int size)
 		if (!(topt & T_LOCAL_MTA)) {
 			char reply[LINEBUFFER+1];
 			swrite(CLIENT, sd_server, "STARTTLS"CRLF);
-			get_response_smtp(CLIENT, sd_server, reply, LINEBUFFER);
+			get_response_smtp(CLIENT, sd_server,
+					  reply, LINEBUFFER);
 
-			if (!isdigit((unsigned char)reply[0]) || (unsigned char)reply[0] > '3') {
+			if (!isdigit((unsigned char)reply[0])
+			    || (unsigned char)reply[0] > '3') {
 				remcrlf(reply);
 				info(VERBOSE, _("WARNING: %s"), reply);
 				anubis_error(HARD, _("STARTTLS command failed."));
@@ -470,7 +478,7 @@ transfer_command(void *sd_client, void *sd_server, char *command)
 				rcfile_process_section(CF_CLIENT, "ALL", NULL);
 		}
 		else if (strncmp(buf, "data", 4) == 0) {
-			postprocess(sd_client, sd_server);
+			process_data(sd_client, sd_server);
 			xfree(message.body);
 			xfree(message.boundary);
 			mopt = 0;
@@ -483,7 +491,6 @@ transfer_command(void *sd_client, void *sd_server, char *command)
 	return 1; /* OK */
 }
 
-#ifdef WITH_GUILE	
 static void
 collect_headers(void *sd_client, struct list **listp)
 {
@@ -504,57 +511,42 @@ static void
 collect_body(void *sd_client, char **retptr)
 {
 	int nread;
-	int capacity = DATABUFFER;
 	char body_line[LINEBUFFER+1];
-	char *ptr;
-	
-	ptr = xmalloc(DATABUFFER);
+	struct obstack stk;
+
+	obstack_init (&stk);
 	while ((nread = recvline(SERVER, sd_client, body_line, LINEBUFFER))) {
 		if (strncmp(body_line, "."CRLF, 3) == 0) /* EOM */
 			break;
-		capacity -= nread;
-		if (capacity < nread) {
-			ptr = xrealloc(ptr,
-				       strlen(message.body) + DATABUFFER + 1);
-			capacity = DATABUFFER - nread;
-		}
-		strcat(ptr, body_line);
+		obstack_grow(&stk, body_line, strlen (body_line));
 	}
-	*retptr = ptr;
+	obstack_1grow(&stk, 0);
+	*retptr = strdup(obstack_finish(&stk));
+	obstack_free(&stk, NULL);
 }
-#endif
 
 void
-postprocess(void *sd_client, void *sd_server)
+process_data(void *sd_client, void *sd_server)
 {
+	struct list *message_hdr;
+	struct mem_buf mb;
+	struct list_buf lb;
+
 	alarm(1800);
-#ifdef WITH_GUILE	
-	if (!guile_proclist_empty()) {
-		struct mem_buf mb;
-		struct list_buf lb;
-		struct list *hdr_list;
-		char *body;
 
-		collect_headers(sd_client, &hdr_list);
-		collect_body(sd_client, &body);
+	collect_headers(sd_client, &message_hdr);
+	collect_body(sd_client, &message.body);
 
-		guile_process_list(&hdr_list, &body);
-		init_mem_buf(&mb, body);
-		init_list_buf(&lb, hdr_list);
-		transfer_header(sd_client, sd_server, list_reader, &lb);
-		transfer_body(sd_client, sd_server, memory_reader, &mb);
-		destroy_list(&hdr_list);
-		xfree(body);
-	} else {
-		transfer_header(sd_client, sd_server,
-				socket_reader, sd_client);
-		transfer_body(sd_client, sd_server,
-			      socket_reader, sd_client);
-	}
-#else
-	transfer_header(sd_client, sd_server, socket_reader, sd_client);
-	transfer_body(sd_client, sd_server, socket_reader, sd_client);
-#endif	
+	init_list_buf(&lb, message_hdr);
+	transfer_header(sd_client, sd_server, list_reader, &lb);
+
+	init_mem_buf(&mb, message.body);
+	transfer_body(sd_client, sd_server, memory_reader, &mb);
+
+	/* FIXME: 
+	   destroy_list(&message_hdr);
+	   xfree(message_body); */
+
 	alarm(0);
 }
 	
@@ -572,15 +564,22 @@ transfer_header(void *sd_client, void *sd_server,
 	struct list *p2;
 	char header_line[LINEBUFFER+1];
 
-	while (readfn(closure, header_line, LINEBUFFER))
-	{
+	while (readfn(closure, header_line, LINEBUFFER)) {
 		if (strncmp(header_line, CRLF, 2) == 0)
 			break;
 
 		process_header_line(header_line);
-		header_tail = new_element(header_tail, &header_buf, header_line);
+		header_tail = new_element(header_tail,
+					  &header_buf, header_line);
 	}
 
+#ifdef WITH_GUILE
+	guile_process_list(&header_buf, &message.body);
+	for (header_tail = header_buf; header_tail && header_tail->next;
+	     header_tail = header_tail->next)
+		;
+#endif
+		
 	if (message.remlist) {
 		struct list *h1;
 		struct list *h2;
@@ -673,6 +672,10 @@ transfer_header(void *sd_client, void *sd_server,
 		} while (p2 != NULL);
 		message.modlist = NULL;
 	}
+
+#ifdef WITH_GUILE
+	guile_postprocess_list(&header_buf, &message.body);
+#endif
 
 	p1 = header_buf;
 	do {
@@ -783,15 +786,17 @@ process_header_line(char *header_line)
   MESSAGE BODY
 ****************/
 
+#define M_OPT_STATIC (M_GPG_ENCRYPT | M_GPG_SIGN | M_ROT13B | M_RM \
+ | M_SIGNATURE | M_BODYAPPEND | M_EXTBODYPROC)
+
 static void
-transfer_body(void *sd_client, void *sd_server, read_fn_t readfn, void *closure)
+transfer_body(void *sd_client, void *sd_server,
+	      read_fn_t readfn, void *closure)
 {
 	if (mopt & M_BODYCLEARAPPEND)
 		clear_body_transfer(sd_client, sd_server);
 	else {
-		if ((mopt & M_GPG_ENCRYPT) || (mopt & M_GPG_SIGN) || (mopt & M_ROT13B)
-		|| (mopt & M_RM) || (mopt & M_SIGNATURE) || (mopt & M_BODYAPPEND)
-		|| (mopt & M_EXTBODYPROC))
+		if (mopt & M_OPT_STATIC)
 			static_body_transfer(sd_client, sd_server,
 					     readfn, closure);
 		else
