@@ -30,15 +30,21 @@ anubis_error(int method, char *format, ...)
 {
 	va_list arglist;
 	char txt[LINEBUFFER+1];
-
+	
 	va_start(arglist, format);
 	vsnprintf(txt, LINEBUFFER, format, arglist);
 	va_end(arglist);
 
-	if (method == HARD)
+	switch (method) {
+	case HARD:
 		topt |= T_ERROR;
-	else if (method == SOFT)
+		break;
+		
+	case SOFT:
+	case SYNTAX:
 		topt &= ~T_ERROR;
+		break;
+	}
 
 	if (options.termlevel != SILENT) {
 #ifdef HAVE_SYSLOG
@@ -54,12 +60,16 @@ anubis_error(int method, char *format, ...)
 		else
 #endif /* HAVE_SYSLOG */
 			if (topt & T_FOREGROUND)
-				mprintf(">>[%d] %s", (int)getpid(), txt);
+				mprintf("%s[%d] %s",
+					method == SYNTAX ? "" : ">>",
+					(int)getpid(), txt);
 			else
-				mprintf(">>%s", txt);
+				mprintf("%s%s",
+					method == SYNTAX ? "" : ">>",
+					txt);
 	}
 	errno = 0;
-	if (!(topt & T_DAEMON) && !(topt & T_FOREGROUND))
+	if (method != SYNTAX && !(topt & T_DAEMON) && !(topt & T_FOREGROUND))
 		quit(EXIT_FAILURE);
 	return;
 }
