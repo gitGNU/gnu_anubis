@@ -281,21 +281,30 @@ substitute (char *inbuf, char **subbuf)
   return tmpbuf;
 }
 
-/********************
- Change to lowercase
-*********************/
+/***************************
+ Change the case of letters
+****************************/
 
-void
+char *
 make_lowercase (char *s)
 {
-  int c, len;
-
+  unsigned char *p;
   if (!s)
     return;
-  len = strlen (s);
+  for (p = (unsigned char*) s; *p; p++)
+    *p = tolower (*p);
+  return s;
+}
 
-  for (c = len - 1; c >= 0; c--)
-    s[c] = tolower ((unsigned char) s[c]);
+char *
+make_uppercase (char *s)
+{
+  unsigned char *p;
+  if (!s)
+    return;
+  for (p = (unsigned char*) s; *p; p++)
+    *p = toupper (*p);
+  return s;
 }
 
 char *
