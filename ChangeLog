@@ -1,3 +1,12 @@
+2003-06-21  Sergey Poznyakoff 
+
+	* src/daemon.c (_stdio_read): Minor fix.
+	(set_nonblocking): Not needed anymore.
+	(stdinout): Removed calls to set_nonbloking.
+	* src/net.c (struct io_data): Use separate buffers for client
+	and server.
+	(mread): Likewise.
+
 2003-06-20  Sergey Poznyakoff 
 
 	* src/message.c (message_modify_body): Allow the NULL value
