@@ -87,11 +87,11 @@ message_modify_headers(MESSAGE *msg, char *key, char *key2, char *value)
 }
 
 void
-message_external_proc(MESSAGE *msg, char *name)
+message_external_proc(MESSAGE *msg, char **argv)
 {
 	int rc = 0;
 	char *extbuf = 0;
-	extbuf = external_program(&rc, name, msg->body, 0, 0);
+	extbuf = exec_argv(&rc, argv, msg->body, 0, 0);
 	if (rc != -1 && extbuf) {
 		xfree(msg->body);
 		msg->body = extbuf;
