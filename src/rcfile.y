@@ -366,6 +366,11 @@ regex    : modlist '[' string ']'
            {
 	     $$ = anubis_regex_compile ($3, $1);
 	     free ($3);
+	     if (!$$)
+	       {
+		 parse_error (_("Invalid regular expression (see the above message)"));
+		 YYERROR;
+	       }
 	   }
          ;
 
@@ -527,7 +532,7 @@ inst_stmt: STOP
 	     $$->v.inst.opcode = inst_modify;
 	     $$->v.inst.part = $2.part;
 	     $$->v.inst.key  = $2.key;
-	     if ($3 == NULL)
+	     if ($3 == NULL && anubis_regex_refcnt ($2.key))
 	       {
 		 parse_error (_("missing replacement value"));
 	       }
