@@ -2,6 +2,37 @@
  Release Notes
  =============
 
+ ****************
+ 4.0 (unreleased)
+ ****************
+
+* GNU Anubis 4.0 has been rewritten from scratch.
+  Changed the message processing algorithm to process
+  a message as a whole. Many changes, bugfixes,
+  and improvements have been made.
+* Rewritten configuration files support using yacc and lex.
+* Grammar rewritten and improved. The new syntax is:
+
+   if header[Subject] "regexp"
+
+  Multiple conditions are allowed:
+
+   if header[Subject] "Re: .*" and body ".*found.*"
+
+  New syntactical entities:
+
+   add header[KEY] VALUE
+   add body VALUE
+   remove header[KEY]
+   modify header[KEY] [NEW-KEY] VALUE
+
+* Support for the GNU extension language has been added
+  (via Guile 1.6 or newer).
+* Remailers and ROT-13 support has been removed from
+  the main engine (moved to Guile layer).
+* Added testsuite (make check).
+* New Ukrainian, Malay, and Romanian message translations.
+
  *******************
  3.6.2 (15 Dec 2002)
  *******************
