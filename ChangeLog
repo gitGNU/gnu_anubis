@@ -1,3 +1,12 @@
+2004-12-18  Wojciech Polak
+
+	======================
+	 Released version 4.0
+	======================
+
+	* NEWS: Updated.
+	* configure.ac: Raised version number to 4.0.
+
 2004-12-17  Wojciech Polak
 
 	* doc/anubis.texi: Updated.

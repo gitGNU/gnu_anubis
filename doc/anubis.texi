@@ -49,8 +49,8 @@ Software Foundation raise funds for GNU development.''
 
 
 @node Top, Overview, , (dir)
-@insertcopying
 @ifinfo
+@insertcopying
 @chapter GNU Anubis
 This edition of the @cite{GNU Anubis Manual}, last updated @value{UPDATED},
 documents GNU Anubis Version @value{VERSION}.
