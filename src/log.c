@@ -91,13 +91,13 @@ filelog(char *logfile, char *msg)
 }
 
 void
-trace(RC_LOC *loc, const char *fmt, ...)
+tracefile(RC_LOC *loc, const char *fmt, ...)
 {
 	va_list ap;
 	int n = 0;
 	char msg[LINEBUFFER+1];
 
-	if (options.termlevel < VERBOSE)
+	if (!(topt & (T_TRACEFILE_SYS | T_TRACEFILE_USR)))
 		return;
 
 	if (loc)
@@ -106,7 +106,21 @@ trace(RC_LOC *loc, const char *fmt, ...)
 	va_start(ap, fmt);
 	vsnprintf(msg + n, LINEBUFFER - n, fmt, ap);
 	va_end(ap);
-	info(VERBOSE, "%s", msg);
+
+	if ((topt & T_TRACEFILE_SYS) && options.termlevel != SILENT) {
+#ifdef HAVE_SYSLOG
+		if ((topt & T_DAEMON) && !(topt & T_FOREGROUND))
+			syslog(LOG_INFO | LOG_MAIL, msg);
+		else
+#endif /* HAVE_SYSLOG */
+			if (topt & T_FOREGROUND)
+				mprintf("> [%d] %s", (int)getpid(), msg);
+			else
+				mprintf("> %s", msg);
+	}
+
+	if (topt & T_TRACEFILE_USR)
+		filelog(options.tracefile, msg);
 }
 
 /* EOF */

@@ -1172,18 +1172,18 @@ inst_eval(struct eval_env *env, RC_INST *inst)
 	
 	switch (inst->opcode) {
 	case inst_stop:
-		trace(&env->loc, _("STOP"));
+		tracefile(&env->loc, _("STOP"));
 		longjmp(env->jmp, 1);
 		break;
 
 	case inst_call:
-		trace(&env->loc, _("Calling %s"), inst->arg);
+		tracefile(&env->loc, _("Calling %s"), inst->arg);
 		rcfile_call_section(env->method, inst->arg,
 				    env->data, env->msg);
 		break;
 		
 	case inst_add:
-		trace(&env->loc, _("ADD %s [%s] %s"),
+		tracefile(&env->loc, _("ADD %s [%s] %s"),
 		      (inst->part == BODY) ? "BODY" : "HEADER",
 		      VALID_STR(inst->key2), arg);
 		if (inst->part == BODY) 
@@ -1193,7 +1193,7 @@ inst_eval(struct eval_env *env, RC_INST *inst)
 		break;
 		
 	case inst_modify:
-		trace(&env->loc, _("MODIFY %s [%s] [%s] %s"),
+		tracefile(&env->loc, _("MODIFY %s [%s] [%s] %s"),
 		      (inst->part == BODY) ? "BODY" : "HEADER",
 		      anubis_regex_source(inst->key), 
 		      VALID_STR(inst->key2), arg);
@@ -1206,7 +1206,7 @@ inst_eval(struct eval_env *env, RC_INST *inst)
 		break;
 		
 	case inst_remove:
-		trace(&env->loc, _("REMOVE HEADER [%s]"),
+		tracefile(&env->loc, _("REMOVE HEADER [%s]"),
 		      anubis_regex_source(inst->key));
 		message_remove_headers(env->msg, inst->key);
 		break;
@@ -1228,7 +1228,7 @@ asgn_eval(struct eval_env *env, RC_ASGN *asgn)
 	if (!p)
 		return;
 
-	trace(&env->loc, _("executing %s"), asgn->lhs);
+	tracefile(&env->loc, _("Executing %s"), asgn->lhs);
 	if (env->refstr) {
 		char *s;
 		LIST *arg = list_create();
@@ -1298,7 +1298,7 @@ expr_eval(struct eval_env *env, RC_EXPR *expr)
 		abort();
 	}
 	if (rc)
-		trace(&env->loc, _("Matched condition %s[%s] \"%s\""),
+		tracefile(&env->loc, _("Matched condition %s[%s] \"%s\""),
 		      part_string(expr->part),
 		      VALID_STR(expr->key),
 		      anubis_regex_source(expr->re));
@@ -1404,7 +1404,7 @@ eval_section(int method, RC_SECTION *sec, struct rc_secdef *secdef,
 	env.data = data;
 	env.loc = sec->loc;
 	
-	trace(&sec->loc, "section %s", sec->name);
+	tracefile(&sec->loc, "Section %s", sec->name);
 	
 	if (setjmp(env.jmp) == 0)
 		stmt_list_eval(&env, sec->stmt);

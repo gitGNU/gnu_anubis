@@ -161,22 +161,23 @@ process_rcfile(int method)
 }
 
 /* ************************** The CONTROL Section ************************* */ 
-#define KW_BIND                0
-#define KW_TERMLEVEL           1
-#define KW_ALLOW_LOCAL_MTA     2
-#define KW_USER_NOTPRIVILEGED  3
-#define KW_LOGLEVEL            4
-#define KW_LOGFILE             5
-#define KW_REMOTE_MTA          6 
-#define KW_LOCAL_MTA           7
-#define KW_ESMTP_AUTH          8
-#define KW_SOCKS_PROXY         9
-#define KW_SOCKS_V4           10
-#define KW_SOCKS_AUTH         11
-#define KW_READ_ENTIRE_BODY   12
-#define KW_DROP_UNKNOWN_USER  13
-#define KW_RULE_PRIORITY      14
-#define KW_CONTROL_PRIORITY   15
+#define KW_BIND                 0
+#define KW_TERMLEVEL            1
+#define KW_LOGLEVEL             2
+#define KW_LOGFILE              3
+#define KW_TRACEFILE            4
+#define KW_REMOTE_MTA           5
+#define KW_LOCAL_MTA            6
+#define KW_RULE_PRIORITY        7
+#define KW_CONTROL_PRIORITY     8
+#define KW_ESMTP_AUTH           9
+#define KW_DROP_UNKNOWN_USER   10
+#define KW_USER_NOTPRIVILEGED  11
+#define KW_ALLOW_LOCAL_MTA     12
+#define KW_SOCKS_PROXY         13
+#define KW_SOCKS_V4            14
+#define KW_SOCKS_AUTH          15
+#define KW_READ_ENTIRE_BODY    16
 
 char **
 list_to_argv(LIST *list)
@@ -268,7 +269,31 @@ control_parser(int method, int key, LIST *arglist,
 		else
 			return RC_KW_ERROR;
 		break;
-		
+
+	case KW_TRACEFILE:
+		if (method & (CF_SUPERVISOR|CF_INIT))
+			setbool(arg, topt, T_TRACEFILE_SYS);
+		else if (method == CF_CLIENT) {
+			if (strcasecmp("no", arg) == 0)
+				topt &= ~T_TRACEFILE_USR;
+			else {
+				xfree(options.tracefile);
+				if (strcasecmp("yes", arg) == 0) {
+					if (options.ulogfile) {
+						options.tracefile = strdup(options.ulogfile);
+						topt |= T_TRACEFILE_USR;
+					}
+					else
+						topt &= ~T_TRACEFILE_USR;
+				}
+				else {
+					options.tracefile = allocbuf(arg, MAXPATHLEN);
+					topt |= T_TRACEFILE_USR;
+				}
+			}
+		}
+		break;
+	
 	case KW_REMOTE_MTA:
 		parse_mtaport(arg, session.mta, &session.mta_port);
 		break;
@@ -375,6 +400,7 @@ static struct rc_secdef_child client_sect_child = {
 struct rc_kwdef control_kw[] = {
 	{ "remote-mta", KW_REMOTE_MTA },
 	{ "local-mta", KW_LOCAL_MTA },
+	{ "tracefile", KW_TRACEFILE },
 	{ "esmtp-auth", KW_ESMTP_AUTH },
 	{ "socks-proxy", KW_SOCKS_PROXY },
 	{ "socks-v4", KW_SOCKS_V4 },

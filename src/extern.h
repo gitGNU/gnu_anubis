@@ -29,6 +29,7 @@ struct options_struct {
  int termlevel;
  int uloglevel;
  char *ulogfile;
+ char *tracefile;
 #ifdef WITH_GUILE
  char *guile_logfile;
 #endif /* WITH_GUILE */
