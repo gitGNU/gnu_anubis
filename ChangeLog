@@ -5,6 +5,8 @@
 	* src/headers.h: Likewise.
 	* src/message.c: Updated calls to exec_argv
 	* THANKS: Added Dominique Bordereaux.
+	* src/env.c (get_options): Fixed definition of
+	'c' option (needed double-colon).
 	
 2003-08-21  Wojciech Polak
 
