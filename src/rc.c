@@ -252,10 +252,7 @@ control_parser(int method, int key, LIST *arglist,
 		break;
 
 	case KW_LOGFILE:
-		if (method & (CF_SUPERVISOR|CF_INIT)) {
-			xfree(options.slogfile);
-			options.slogfile = allocbuf(arg, MAXPATHLEN);
-		} else if (method == CF_CLIENT) {
+		if (method == CF_CLIENT) {
 			xfree(options.ulogfile);
 			options.ulogfile = allocbuf(arg, MAXPATHLEN);
 		}
@@ -362,6 +359,7 @@ static struct rc_secdef_child init_supervisor_sect_child = {
 };
 
 struct rc_kwdef client_kw[] = {
+	{ "logfile", KW_LOGFILE },
 	{ "loglevel", KW_LOGLEVEL },
 	{ NULL },
 };
@@ -375,7 +373,6 @@ static struct rc_secdef_child client_sect_child = {
 };
 
 struct rc_kwdef control_kw[] = {
-	{ "logfile", KW_LOGFILE },
 	{ "remote-mta", KW_REMOTE_MTA },
 	{ "local-mta", KW_LOCAL_MTA },
 	{ "esmtp-auth", KW_ESMTP_AUTH },

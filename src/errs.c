@@ -49,31 +49,27 @@ anubis_error(int method, const char *fmt, ...)
 		
 	}
 	else if (options.termlevel != SILENT) {
-		char txt[LINEBUFFER+1];
+		char msg[LINEBUFFER+1];
 	
 		va_start(arglist, fmt);
-		vsnprintf(txt, LINEBUFFER, fmt, arglist);
+		vsnprintf(msg, LINEBUFFER, fmt, arglist);
 		va_end(arglist);
 #ifdef HAVE_SYSLOG
 		if ((topt & T_DAEMON) && !(topt & T_FOREGROUND)) {
-			if (options.slogfile)
-				filelog(options.slogfile, txt);
-			else
-				syslog(LOG_ERR | LOG_MAIL, txt);
-
+			syslog(LOG_ERR | LOG_MAIL, msg);
 			if (options.ulogfile && options.uloglevel >= FAILS)
-				filelog(options.ulogfile, txt);
+				filelog(options.ulogfile, msg);
 		}
 		else
 #endif /* HAVE_SYSLOG */
 			if (topt & T_FOREGROUND)
 				mprintf("%s[%d] %s",
 					method == SYNTAX ? "" : ">>",
-					(int)getpid(), txt);
+					(int)getpid(), msg);
 			else
 				mprintf("%s%s",
 					method == SYNTAX ? "" : ">>",
-					txt);
+					msg);
 	}
 	errno = 0;
 	if (method != SYNTAX && !(topt & T_DAEMON) && !(topt & T_FOREGROUND))

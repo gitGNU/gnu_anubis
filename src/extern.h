@@ -28,7 +28,6 @@ extern const char copyright[];
 struct options_struct {
  int termlevel;
  int uloglevel;
- char *slogfile;
  char *ulogfile;
 #ifdef WITH_GUILE
  char *guile_logfile;

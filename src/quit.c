@@ -52,7 +52,6 @@ free_mem(void)
 	gpg_free();
 #endif /* HAVE_GPG */
 
-	xfree(options.slogfile);
 	xfree(options.ulogfile);
 	xfree(session.execpath);
 	xfree_pptr(session.execargs);

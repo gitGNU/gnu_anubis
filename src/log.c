@@ -37,43 +37,38 @@ mprintf(const char *fmt, ...)
 	va_start(arglist, fmt);
 	vfprintf(stderr, fmt, arglist);
 	va_end(arglist);
-	fprintf(stderr, "\n");
+	fputc('\n', stderr);
 }
 
 void
 info(int mode, const char *fmt, ...)
 {
 	va_list arglist;
-	char txt[LINEBUFFER+1];
+	char msg[LINEBUFFER+1];
 
 	if (mode > options.termlevel)
 		return;
 
 	va_start(arglist, fmt);
-	vsnprintf(txt, LINEBUFFER, fmt, arglist);
+	vsnprintf(msg, LINEBUFFER, fmt, arglist);
 	va_end(arglist);
 
 #ifdef HAVE_SYSLOG
 	if ((topt & T_DAEMON) && !(topt & T_FOREGROUND)) {
-		if (options.slogfile)
-			filelog(options.slogfile, txt);
-		else
-			syslog(LOG_INFO | LOG_MAIL, txt);
-
+		syslog(LOG_INFO | LOG_MAIL, msg);
 		if (options.ulogfile && options.uloglevel >= ALL)
-			filelog(options.ulogfile, txt);
+			filelog(options.ulogfile, msg);
 	}
 	else
 #endif /* HAVE_SYSLOG */
 		if (topt & T_FOREGROUND)
-			mprintf("> [%d] %s", (int)getpid(), txt);
+			mprintf("> [%d] %s", (int)getpid(), msg);
 		else
-			mprintf("> %s", txt);
-	return;
+			mprintf("> %s", msg);
 }
 
 void
-filelog(char *logfile, char *txt)
+filelog(char *logfile, char *msg)
 {
 	FILE *fplog;
 
@@ -90,7 +85,7 @@ filelog(char *logfile, char *txt)
 		timeptr = localtime(&tp);
 		strftime(timebuf, sizeof(timebuf) - 1,
 			"%a, %d %b %Y %H:%M:%S", timeptr);
-		fprintf(fplog, "%s [%d] %s\n", timebuf, (int)getpid(), txt);
+		fprintf(fplog, "%s [%d] %s\n", timebuf, (int)getpid(), msg);
 		fclose(fplog);
 	}
 }
@@ -100,18 +95,18 @@ trace(RC_LOC *loc, const char *fmt, ...)
 {
 	va_list ap;
 	int n = 0;
-	char txt[LINEBUFFER+1];
+	char msg[LINEBUFFER+1];
 
 	if (options.termlevel < VERBOSE)
 		return;
 
 	if (loc)
-		n = snprintf(txt, sizeof(txt), "%s:%lu: ",
+		n = snprintf(msg, LINEBUFFER, "%s:%lu: ",
 			     loc->file, (unsigned long)loc->line);
 	va_start(ap, fmt);
-	vsnprintf(txt + n, LINEBUFFER - n, fmt, ap);
+	vsnprintf(msg + n, LINEBUFFER - n, fmt, ap);
 	va_end(ap);
-	info(VERBOSE, "%s", txt);
+	info(VERBOSE, "%s", msg);
 }
 
 /* EOF */
