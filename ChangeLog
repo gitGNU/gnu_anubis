@@ -1,3 +1,23 @@
+2003-07-15  Sergey Poznyakoff 
+
+	* TODO: Updated
+	* examples/1anubisrc: Updated to new syntax
+	* examples/2anubisrc: Likewise.
+	* src/rc.c (anubis_section_set_prio): New function.
+	(open_rcfile): Do not destroy the saved tree before processing the
+	new file.
+	(control_parser): Handle new keyword rule-priority
+	(rule_section_init): Initialize prio member
+	(rcfile_process_section): Process all sections whose names match,
+	not just the first of them.
+	* src/rcfile.h (enum section_prio): New datatype
+	(struct rc_secdef.prio): New member
+	* src/rcfile.y (begin): Signal error if the section has already
+	been declared.
+	(rc_section_link): Honor section priority when linking.
+	* src/regex.c (anubis_regex_free): May be called with NULL
+	argument.
+
 2003-07-13  Sergey Poznyakoff
 
 	* src/rcfile.h (lex_clear_state,error_sync_begin): New functions
