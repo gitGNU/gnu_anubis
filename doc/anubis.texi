@@ -1685,7 +1685,7 @@ done
 @end deffn
 
 Some remailers require the message to be GPG encrypted or signed.
-You can achive this by placing @code{gpg-encrypt} or @code{gpg-sign}
+You can achieve this by placing @code{gpg-encrypt} or @code{gpg-sign}
 statement right after the invocation of @code{remailer-I}, for
 example:
 
