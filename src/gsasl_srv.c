@@ -78,7 +78,7 @@ anubis_set_mech_list (ANUBIS_LIST * list)
     return;
   anubis_mech_list = list_create ();
   for (p = iterator_first (itr); p; p = iterator_next (itr))
-    list_append (anubis_mech_list, strdup (p));
+    list_append (anubis_mech_list, make_uppercase (strdup (p)));
   iterator_destroy (&itr);
 }
 
