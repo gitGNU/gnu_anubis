@@ -348,7 +348,7 @@ void message_free(MESSAGE *);
 char **gen_execargs(const char *);
 int  make_local_connection(char *, char **);
 char *external_program(int *, char *, char *, char *, int);
-char *exec_argv(int *, char **, char *, char *, int);
+char *exec_argv(int *, char *, char **, char *, char *, int);
 
 /* esmtp.c */
 void esmtp_auth(void *, char *);

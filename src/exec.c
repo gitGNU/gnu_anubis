@@ -149,8 +149,7 @@ make_local_connection(char *exec_path, char **exec_args)
 	memset(args, 0, LINEBUFFER + 1);
 	pargs = exec_args;
 	pargs++;
-	while (*pargs)
-	{
+	while (*pargs) {
 		strncat(args, *pargs, LINEBUFFER - strlen(args));
 		strncat(args, " ", LINEBUFFER - strlen(args));
 		pargs++;
@@ -219,20 +218,20 @@ external_program(int *rs, char *path, char *src, char *dst, int dstsize)
 	}
 	
 	args = gen_execargs(a);
-	ret = exec_argv(rs, args, src, dst, dstsize);
+	ret = exec_argv(rs, p, args, src, dst, dstsize);
 	xfree_pptr(args);
 	return ret;
 }
 
 char *
-exec_argv(int *rs, char **argv, char *src, char *dst, int dstsize)
+exec_argv(int *rs, char *path, char **argv, char *src, char *dst, int dstsize)
 {
 	int status;
 	int fd;
 	int n;
 	char *buf;
 	
-	fd = make_local_connection(argv[0], argv);
+	fd = make_local_connection(path ? path : argv[0], argv);
 	if (fd == -1) {
 		*rs = -1;
 		return 0;
