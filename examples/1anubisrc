@@ -11,19 +11,19 @@
 #
 
 ---BEGIN CONTROL---
-# logfile = FILE-NAME
-# loglevel = NONE-FAILS-ALL
-# remote-mta = HOST[:PORT]
-# local-mta = FILE-NAME [ARGS]
-# esmtp-auth = USERNAME:PASSWORD
-# socks-proxy = HOST[:PORT]
-# socks-v4 = YES-OR-NO
-# socks-auth = USERNAME:PASSWORD
-# ssl = YES-OR-NO
-# oneway-ssl = YES-OR-NO
-# cert = FILE NAME
-# key = FILE-NAME
-# cafile = FILE-NAME
+# logfile FILE-NAME
+# loglevel NONE-FAILS-ALL
+# remote-mta HOST[:PORT]
+# local-mta FILE-NAME [ARGS]
+# esmtp-auth USERNAME:PASSWORD
+# socks-proxy HOST[:PORT]
+# socks-v4 YES-OR-NO
+# socks-auth USERNAME:PASSWORD
+# ssl YES-OR-NO
+# ssl-oneway = YES-OR-NO
+# ssl-cert = FILE NAME
+# ssl-key = FILE-NAME
+# ssl-cafile = FILE-NAME
 ---END---
 
 #
@@ -33,11 +33,11 @@
 
 ---BEGIN RULE---
 
-gpg-passphrase = MYSECRETPASSPHRASE
+gpg-passphrase MYSECRETPASSPHRASE
 
 # Process the (E)SMTP commands.
 
-if command["mail from"] = ".*<?root@localhost>?"
+if command["mail from"] ".*<?root@localhost>?"
  STOP
 fi
 
@@ -45,54 +45,46 @@ fi
 # The Triggers:
 
 rule "^gpg-encrypt"
- gpg-encrypt = GPG-KEY(S)
+ gpg-encrypt GPG-KEY(S)
 done
 
 rule "^gpg-sign"
- gpg-sign = yes
+ gpg-sign yes
 done
 
 rule "^gpg-dynamic:(.*)"
  add header[X-GPG-Comment] "Encrypted for \1"
- gpg-encrypt = \1
+ gpg-encrypt \1
 done
 
 #
 #
 #
 
-if header[To] = ".*<?friend1@somewhere.net>?"
+if header[To] ".*<?friend1@somewhere.net>?"
  modify header[Reply-To] "mybox@myisp.net"
  add header[X-Comment] "GNU's Not Unix!"
 fi
 
-if header[X-Mailer] :perlre = "(.*)"
+if header[X-Mailer] :perlre "(.*)"
  add header[X-Comment] "\1 rocks!"
  modify header[X-Mailer] "The lousy mailer \1"
 fi
 
-if header[Subject] = "(.*)" and not header[Subject] :scase = "URGENT"
+if header[Subject] "(.*)" and not header[Subject] :scase "URGENT"
  add header[X-Comment] "This message is not URGENT (\1)."
 fi
 
-if header[Subject] = "rot13-body"
- rot13-body = yes
+if header[Subject] "gpg-encrypt"
+ gpg-encrypt GPG-KEY(S)
 fi
 
-if header[Subject] = "gpg-encrypt"
- gpg-encrypt = GPG-KEY(S)
+if header[Subject] "gpg-sign"
+ gpg-sign PASSPHRASE
 fi
 
-if header[Subject] = "gpg-sign"
- gpg-sign = PASSPHRASE
-fi
-
-if header[Subject] = "signature-file"
- signature-file-append = yes
-fi
-
-if header[Subject] = "rm-rrt"
- rm-rrt = EMAIL-ADDRESS
+if header[Subject] "signature-file"
+ signature-file-append yes
 fi
 
 ---END---

@@ -11,21 +11,21 @@
 #
 
 ---BEGIN CONTROL---
-# bind = [HOST:]PORT
-# remote-mta = HOST[:PORT]
-# local-mta = FILE-NAME [ARGS]
-# termlevel = NORMAL-VERBOSE-DEBUG-SILENT
-# esmtp-auth = USERNAME:PASSWORD
-# socks-proxy = HOST[:PORT]
-# socks-v4 = YES-OR-NO
-# socks-auth = USERNAME:PASSWORD
-# ssl = YES-OR-NO
-# oneway-ssl = YES-OR-NO
-# cert = FILE-NAME
-# key = FILE-NAME
-# cafile = FILE-NAME
-# allow-local-mta = YES-OR-NO
-# user-notprivileged = USERNAME
+# bind [HOST:]PORT
+# remote-mta HOST[:PORT]
+# local-mta FILE-NAME [ARGS]
+# termlevel NORMAL-VERBOSE-DEBUG-SILENT
+# esmtp-auth USERNAME:PASSWORD
+# socks-proxy HOST[:PORT]
+# socks-v4 YES-OR-NO
+# socks-auth USERNAME:PASSWORD
+# ssl YES-OR-NO
+# ssl-oneway YES-OR-NO
+# ssl-cert FILE-NAME
+# ssl-key FILE-NAME
+# ssl-cafile FILE-NAME
+# allow-local-mta YES-OR-NO
+# user-notprivileged USERNAME
 ---END---
 
 #
@@ -34,6 +34,6 @@
 #
 
 #---BEGIN TRANSLATION---
-#translate = [USER@]ADDRESS into = USERNAME
+#translate [USER@]ADDRESS into USERNAME
 #---END---
 
