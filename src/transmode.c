@@ -152,6 +152,7 @@ anubis_transparent_mode (NET_STREAM * psd_client, struct sockaddr_in *addr)
     }
   net_close_stream (&sd_server);
   net_close_stream (psd_client);
+  *psd_client = NULL;
 
   if (topt & T_ERROR)
     info (NORMAL, _("Connection terminated."));
