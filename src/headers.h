@@ -379,6 +379,7 @@ void rc_system_init();
 void open_rcfile(int);
 void process_rcfile(int method);
 void rcfile_process_section(int method, char *name, void *data, MESSAGE *msg);
+void rcfile_call_section(int method, char *name, void *data, MESSAGE *msg);
 
 /* help.c */
 void print_version(void);

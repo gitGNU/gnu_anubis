@@ -541,3 +541,14 @@ rcfile_process_section(int method, char *name, void *data, MESSAGE *msg)
 	rc_run_section(method, sec, anubis_rc_sections, data, msg);
 }
 
+void
+rcfile_call_section(int method, char *name, void *data, MESSAGE *msg)
+{
+	RC_SECTION *sec = rc_section_lookup(parse_tree, name);
+	if (!sec)
+		anubis_error(SOFT,
+			     _("No such section: %s"), name);
+	rc_call_section(method, sec, anubis_rc_sections, data, msg);
+}
+
+
