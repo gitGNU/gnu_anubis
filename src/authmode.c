@@ -261,13 +261,38 @@ asmtp_ehlo (enum asmtp_state state, ANUBIS_USER *usr)
 	char *mech;
 	char *init_input;
 	
-	recvline_ptr(SERVER, remote_client, &command, &s);
+	if (recvline_ptr(SERVER, remote_client, &command, &s) <= 0)
+		exit(1);
 
 	switch (asmtp_kw(get_command_word (command))) {
+	case KW_EHLO:
+		state = asmtp_ehlo_reply(command);
+		break;
+
+#ifdef USE_SSL
+	case KW_STARTTLS:
+		asmtp_reply(220, "Ready to start TLS");
+		secure.server = start_ssl_server(remote_client,
+						 secure.cafile,
+						 secure.cert,
+						 secure.key,
+						 options.termlevel > NORMAL);
+		if (!secure.server || (topt & T_ERROR)) {
+			asmtp_reply(454, "TLS not available"CRLF);
+			return 0;
+		}
+		remote_client = secure.server;
+		topt |= T_SSL_FINISHED;
+
+		state = state_ehlo;
+		break;
+#endif
+		
 	case KW_AUTH:
 		mech = get_command_arg ();
 		init_input = get_command_arg ();
-		if (anubis_auth_gsasl (mech, init_input, usr) == 0) 
+		if (anubis_auth_gsasl (mech, init_input, usr, &remote_client)
+		    == 0) 
 			state = state_auth;
 		break;
 		
@@ -314,10 +339,12 @@ anubis_smtp (ANUBIS_USER *usr)
 			return EXIT_FAILURE;
 
 		case state_auth:
-			xdatabase_enable();
 			break;
 		}
 	}
+
+	xdatabase_enable();
+	
 	return 0;
 }
 
@@ -378,13 +405,13 @@ anubis_get_db_record(char *username, ANUBIS_USER *usr)
 
 
 int
-anubis_authenticate_mode (int sd_client, struct sockaddr_in *addr)
+anubis_authenticate_mode(NET_STREAM *psd_client, struct sockaddr_in *addr)
 {	
 	int rc;
 	ANUBIS_USER usr;
 	
-	remote_client = (void *)sd_client;
-	remote_server = (void *)sd_client;
+	remote_client = *psd_client;
+	remote_server = *psd_client;
 	alarm(900);
 	if (anubis_smtp (&usr))
 		return EXIT_FAILURE;
@@ -461,17 +488,17 @@ anubis_authenticate_mode (int sd_client, struct sockaddr_in *addr)
 	
 	alarm(300);
 	if (topt & T_LOCAL_MTA) {
-		remote_server = (void*) make_local_connection(session.execpath,
-							      session.execargs);
-		if (remote_server == (void*)-1) {
-			service_unavailable((int)remote_client);
+		remote_server = make_local_connection(session.execpath,
+						      session.execargs);
+		if (!remote_server) {
+			service_unavailable(&remote_client);
 			return EXIT_FAILURE;
 		}
 	} else {
-		remote_server = (void*)make_remote_connection(session.mta,
-							      session.mta_port);
-		if (remote_server == (void*)-1)
-			service_unavailable((int)remote_client);
+		remote_server = make_remote_connection(session.mta,
+						       session.mta_port);
+		if (!remote_server)
+			service_unavailable(&remote_client);
 	}
 	alarm(0);
 	
@@ -480,8 +507,8 @@ anubis_authenticate_mode (int sd_client, struct sockaddr_in *addr)
 		smtp_session();
 		alarm(0);
 	}
-	net_close(SERVER, remote_client);
-	net_close(CLIENT, remote_server);
+	net_close_stream(&remote_client);
+	net_close_stream(&remote_server);
 	
 	if (topt & T_ERROR)
 		info(NORMAL, _("Connection terminated."));
