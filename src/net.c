@@ -258,6 +258,10 @@ _def_close(void *sd_unused)
 }
 
 struct io_data {
+	char buf[LINEBUFFER+1];          /* Input buffer */
+	size_t level;                    /* Buffer fill level */
+	char *read_ptr;                  /* Current buffer pointer */
+
 	net_io_t read;
 	net_io_t write;
 	strerror_t strerror;
@@ -266,9 +270,9 @@ struct io_data {
 
 struct io_data io_data[2] = {
 	/* CLIENT */
-	{ _def_read, _def_write, _def_strerror, _def_close },
+	{ "", 0, NULL, _def_read, _def_write, _def_strerror, _def_close },
 	/* SERVER */
-	{ _def_read, _def_write, _def_strerror, _def_close }
+	{ "", 0, NULL, _def_read, _def_write, _def_strerror, _def_close }
 };
 
 void
@@ -324,22 +328,19 @@ swrite(int method, void *sd, char *ptr)
 static int
 mread(int method, void *sd, char *ptr)
 {
-	static size_t nread = 0;
-	static char *read_ptr = 0;
-	static char buf[LINEBUFFER+1];
-
-	if (nread <= 0) {
-		int rc = io_data[method].read(sd, buf, LINEBUFFER, &nread);
+	struct io_data *ip = &io_data[method];
+	if (ip->level <= 0) {
+		int rc = ip->read(sd, ip->buf, LINEBUFFER, &ip->level);
 		if (rc) {
-			socket_error(io_data[method].strerror(rc));
+			socket_error(ip->strerror(rc));
 			return -1;
 		}
-		if (nread == 0)
+		if (ip->level == 0)
 			return 0;
-		read_ptr = buf;
+		ip->read_ptr = ip->buf;
 	}
-	nread--;
-	*ptr = *read_ptr++;
+	ip->level--;
+	*ptr = *ip->read_ptr++;
 	return 1;
 }
 
