@@ -25,6 +25,10 @@ gpg-home = TESTDIR/data
 
 rule "^gpgd:(.*)"
  gpg-encrypt = \1
- add = X-GPG-Comment: Encrypted for \1
+ add [X-GPG-Comment] "Encrypted for \1"
+done
+
+rule "^sign:(.*)"
+ gpg-sign = yes
 done
 ---END---

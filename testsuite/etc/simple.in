@@ -22,7 +22,7 @@ local-mta = TESTDIR/mta -bs -d TESTDIR/etc/mta.log
 
 ---BEGIN RULE---
 
-if header[Subject] ".*Part (.*)"
-  add = X-Part-Number: \1
+if header[Subject] = ".*Part (.*)"
+  add [X-Part-Number] "\1"
 fi
 ---END---

@@ -22,6 +22,6 @@ local-mta = TESTDIR/mta -bs -d TESTDIR/etc/mta.log
 
 ---BEGIN RULE---
 
-remove = ^X-.*:
+remove ["^X-.*"]
 
 ---END---

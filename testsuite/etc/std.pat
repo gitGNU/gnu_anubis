@@ -28,26 +28,26 @@ BEGIN SECTION CONTROL
 END SECTION CONTROL
 BEGIN SECTION ALL
   ASGN: gpg-passphrase = PASSWORD
-  ASGN: remove = ^Lines:
+  REMOVE HEADER[Lines]
 END SECTION ALL
 BEGIN SECTION RULE
-  COND: HEADER[To] .*<?USERNAME@localhost>?
+  COND: HEADER[To] ^(.*)<?(USERNAME@)(.*)>?(.*)
   IFTRUE:
-    ASGN: modify = ^(.*)<?(USERNAME@)(.*)>?(.*) >> \1\2\3.ORG\4
+    MODIFY HEADER[To] "\1\2\3.ORG\4"
   END COND
   COND: AND (HEADER[Subject] (.*),HEADER[Subject] URGENT)
   IFTRUE:
-    ASGN: add = X-Comment: This message is not URGENT (\1).
-    ASGN: add = X-Comment: GNU's Not Unix! (\1)
+    ADD HEADER[X-Comment] "This message is not URGENT (\1)."
+    ADD HEADER[X-Comment] "GNU's Not Unix! (\1)"
   END COND
   COND: HEADER[X-Mailer] (.*)
   IFTRUE:
-    ASGN: add = X-Comment: My love \1
-    ASGN: modify = ^X-Mailer: >> X-Mailer: The lousy mailer \1
+    ADD HEADER[X-Comment] "My love \1"
+    MODIFY HEADER[X-Mailer] "The lousy mailer \1"
   END COND
   RULE: HEADER gpgd:(.*)
   BODY
-    ASGN: add = X-GPG-Comment: Encrypted for \1
+    ADD HEADER[X-GPG-Comment] "Encrypted for \1"
     ASGN: gpg-encrypt = \1
   END RULE
   COND: HEADER[Subject] signature
