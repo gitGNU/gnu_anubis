@@ -135,10 +135,18 @@ start_ssl_client(int sd_server)
 	gnutls_mac_set_priority(session, mac_priority);
 
 	gnutls_certificate_allocate_credentials(&xcred);
-	if (secure.cafile)
-		gnutls_certificate_set_x509_trust_file(xcred,
-						       secure.cafile,
-						       GNUTLS_X509_FMT_PEM);
+	if (secure.cafile) {
+		rs = gnutls_certificate_set_x509_trust_file(xcred,
+							    secure.cafile,
+							    GNUTLS_X509_FMT_PEM);
+		if (rs < 0) {
+			anubis_error(HARD, _("TLS Error reading `%s': %s"),
+				     secure.cafile,
+				     gnutls_strerror(rs));
+			return 0;
+		}
+	}
+	
 	gnutls_credentials_set(session, GNUTLS_CRD_CERTIFICATE, xcred);
 	atexit(_tls_cleanup_xcred);
 	gnutls_transport_set_ptr(session, sd_server);
@@ -146,8 +154,8 @@ start_ssl_client(int sd_server)
 	rs = gnutls_handshake(session);
 	if (rs < 0) {
 		gnutls_deinit(session);
-		anubis_error(HARD, _("TLS/SSL handshake failed!"));
-		gnutls_perror(rs);
+		anubis_error(HARD, _("TLS/SSL handshake failed: %s"),
+			     gnutls_strerror(rs));
 		return 0;
 	}
 
