@@ -139,10 +139,6 @@ void
 anubis(char *arg)
 {	
 	if (topt & T_STDINOUT) { /* stdin/stdout */
-		if (options.termlevel != DEBUG)
-			options.termlevel = SILENT;
-		topt &= ~T_SSL;
-		topt |= T_FOREGROUND;
 		stdinout();
 	}
 	else { /* daemon */
