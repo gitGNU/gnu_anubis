@@ -1,3 +1,10 @@
+2003-11-08  Wojciech Polak
+
+	* src/tls.c (verify_certificate): Removed GNUTLS_CERT_CORRUPTED
+	(missing in GnuTLS >= 0.9.95 ?!).
+	Also GNUTLS_CERT_NOT_TRUSTED = GNUTLS_CERT_INVALID.
+	* configure.ac: Changed AM_CONFIG_HEADER to AC_CONFIG_HEADERS.
+
 2003-10-27  Wojciech Polak
 
 	* src/esmtp.c: Conform to libgcrypt >= 1.1.42 (a new API).
