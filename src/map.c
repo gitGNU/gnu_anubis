@@ -135,12 +135,13 @@ translate_parser(int method, int key, char *arg,
 
 		for (ptr2 += 4; *ptr2 && isspace(*ptr2); ptr2++)
 			;
-		if (!*ptr2 || strncmp(ptr2, "=", 1)) {
+		
+		if (*ptr2 != '=') {
 			info(VERBOSE, _("Translation map: incorrect syntax."));
 			break;
 		}
 
-		for (ptr2 += 1; *ptr2 && isspace(*ptr2); ptr2++)
+		for (ptr2++; *ptr2 && isspace(*ptr2); ptr2++)
 			;
 
 		safe_strcpy(env->translate, ptr1);
