@@ -3,6 +3,9 @@
 	* src/log.c: A few minor changes.
 	* src/headers.h (mprintf, info): Changed prototypes.
 
+	* testsuite/etc/mod-header.in: Added new subtest (&).
+	* testsuite/etc/mod-header.pat: Likewise.
+
 2003-08-14  Sergey Poznyakoff 
 
 	Added tracing the execution of config file sections.
