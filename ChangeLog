@@ -1,3 +1,22 @@
+2004-12-03  Sergey Poznyakoff 
+
+	* contrib/Makefile.am: Use AM_INSTALLCHECK_STD_OPTIONS_EXEMPT
+	for msg2smtp.pl
+	* src/daemon.c (loop): Block SIGCHLD while incrementing
+	nchild.
+	* src/esmtp.c (esmtp_auth): Minor fix.
+	* src/gpg.c (create_key_array): Dynamically allocate current_key.
+	* src/gsasl.c (install_gsasl_stream): Use xmalloc
+	* src/gsasl_srv.c (anubis_auth_gsasl): A bit of sugar for broken
+	printfs: print NULLs explicitely.
+	* src/net.c (get_response_smtp): Fix eventual buffer overflow
+	* src/tunnel.c: Fix typo in comment
+	* src/xdatabase.c (xdatabase): Handle NULL argument.
+	* testsuite/etc/Makefile.am: Add dependency
+	$(RCFILES) std.pat: Makefile.am
+	* testsuite/lib/anubis.exp (anubis_init): Do not pass -s option
+	to anubis.
+	
 2004-11-22  Wojciech Polak
 
 	Potential security fixes by Ulf Härnhammar:
