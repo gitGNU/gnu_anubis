@@ -202,7 +202,7 @@ proc anubis_init {args} {
 	    set ANUBIS_RC_DIR "[board_info $host_board objdir]/etc"
 	}
 
-	set ANUBIS_TOOL_FLAGS "--norc --relax-perm-check -s"
+	set ANUBIS_TOOL_FLAGS "--norc --relax-perm-check"
     }
     
     if {[info exists ANUBIS_AUTHMODE] && $ANUBIS_AUTHMODE} {
