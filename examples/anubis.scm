@@ -33,56 +33,18 @@
 		    rest)
 	  (newline)))))
 
-;;; A couple of auxiliary functions
-
-(define (isspace? c)
-  "Return #t if the character is a whitespace one"
-  (case c
-    ((#\space #\tab) #t)
-    (else #f)))
-
-(define (header->pair x)
-  "Convert RFC822 header string into cons (HEADER-NAME . VALUE),
-where HEADER-NAME is a Scheme internal symbol representing the header name
-(all downcase) and VALUE is the string containing the header value"
-  (let ((pos (string-index x #\:)))
-    (if pos
-	(cons
-	 (string->symbol (string-downcase (substring x 0 pos)))
-	 (let ((len (string-length x)))
-	   (do ((i (1+ pos) (1+ i)))
-	       ((or (= i len)
-		    (not (isspace? (string-ref x i))))
-		(substring x i)))))
-	#f)))
-
-(define (rewrite-subject subj)
-  "Rewrite the subject line. If the value of the subject line begins
-with \"ODP:\", replace it with \"Re:\". The original value of the subject
-is preserved in X-Anubis-Preserved-Header header"
-  (DEBUG 1 "rewrite-subject called with " subj)
-  (let ((hdr (header->pair subj)))
-    (cond
-     ((eq? (car hdr) 'subject)
-      (let ((val (header->pair (cdr hdr))))
-	(cond
-	 ((not val)
-	  #t)
-	 ((eq? (car val) 'odp)
-	  (list
-	   (string-append "Subject: Re: " (cdr val) "\n")
-	   (string-append "X-Anubis-Preserved-Header: " (cdr hdr))))
-	 (else #t))))
-     (else #t))))
-
-;;; The three functions below illustrate the concept of Anubis message
+;;; The function below illustrates the concept of Anubis message
 ;;; processing functions.
-;;; A processing function takes two arguments:
+;;; A processing function takes two required and any number of
+;;; optional arguments. The required arguments are:
 ;;;
 ;;;   HDR   -- A list of message headers. Each list element is a cons
 ;;;            (NAME . VALUE), where NAME is the name of the header field,
 ;;;            and VALUE is its VALUE with final CRLF stripped off.
 ;;;   BODY  -- The message body.
+;;;
+;;; The rest of arguments are collected from the invocation string in
+;;; the configuration file and passed to the function.
 ;;;
 ;;; The function is expected to return cons:
 ;;;
@@ -96,35 +58,27 @@ is preserved in X-Anubis-Preserved-Header header"
 ;;;     #f  --  delete entire body.
 ;;;     #t  --  preserve the body as is. 
 
-(define (anubis-rot-13-all hdr body)
-  "Encode the \"Subject\" header and the body using ROT-13. Add
-X-Processed-By header."
-  (DEBUG 1 "anubis-rot-13-all called with hdr=" hdr " and body=\"" body "\"")
+(define (sample-process-message hdr body . rest)
+  "If the Subject: field starts with characters \"ODP:\", replace
+them with \"Re:\".
+
+If REST is not empty, append its car to BODY"
+
+  (DEBUG 1 "rewrite-subject called with hdr=" hdr " and body=\"" body "\"")
+  (DEBUG 2 "optional args=" rest)
   (cons (append
 	 (map (lambda (x)
-		(if (string-ci=? (car x) "subject")
-		    (cons (car x) (rot-13 (cdr x)))
+		(if (and (string-ci=? (car x) "subject")
+			 (string-ci=? (substring (cdr x) 0 4) "ODP:"))
+		    (cons (car x)
+			  (string-append "Re:"
+					 (substring (cdr x) 4)))
 		    x))
 	      hdr)
 	 (list (cons "X-Processed-By" "GNU Anubis")))
-	(rot-13 body)))
-
-(define (anubis-rot-13-header hdr body . rest)
-  "Encode the \"Subject\" header using ROT-13."
-  (DEBUG 1 "anubis-rot-13-header called with hdr=" hdr
-	 " and body=\"" body "\" and rest=" rest ";")
-  (cons (map (lambda (x)
-	       (if (string-ci=? (car x) "subject")
-		   (cons (car x) (rot-13 (cdr x)))
-		   x))
-	     hdr)
-	 #t))
-
-(define (anubis-rot-13-body hdr body)
-  "Encode the message body using ROT-13."
-  (DEBUG 1 "anubis-rot-13-body called with hdr=" hdr " and body=\"" body "\"")
-  (cons #t
-	(rot-13 body)))
+	(if (null? rest)
+	    #t
+	    (string-append body "\n" (car rest)))))
 
 ;; To test your output redirection:
 (DEBUG 1 "LOADED anubis.scm")
