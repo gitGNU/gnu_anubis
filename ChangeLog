@@ -1,3 +1,16 @@
+2003-08-22  Wojciech Polak
+
+	New configuration file option `tracefile'.
+
+	* src/rcfile.y: Use tracefile instead of trace.
+	* src/rcfile.h (trace): Renamed to `tracefile'.
+	* src/rc.c (KW_TRACEFILE): New define.
+	* src/log.c (trace): Renamed to `tracefile'.
+	(tracefile): Added the support for `tracefile' option.
+	* src/quit.c (free_mem): Added `options.tracefile'.
+	* src/headers.h (T_TRACEFILE_SYS, T_TRACEFILE_USR): New defines.
+	* src/extern.h (options_struct): Added `tracefile'.
+
 2003-08-21  Wojciech Polak
 
 	* src/log.c (info): Removed `slogfile'.
