@@ -18,7 +18,7 @@
 ;;;; GNU Anubis is released under the GPL with the additional exemption that
 ;;;; compiling, linking, and/or using OpenSSL is allowed.
 
-(define debug-level 2)
+(define debug-level 0)
 
 (define (DEBUG level . rest)
   (if (>= debug-level level)
@@ -97,7 +97,7 @@ is preserved in X-Anubis-Preserved-Header header"
 ;;;     #t  --  preserve the body as is. 
 
 (define (postprocess hdr body)
-  "Encode the "Subject" header and the body using ROT-13. Add
+  "Encode the \"Subject\" header and the body using ROT-13. Add
 X-Processed-By header."
   (DEBUG 1 "postprocess called with hdr=" hdr " and body=\"" body "\"")
   (cons (append
