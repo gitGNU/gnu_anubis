@@ -1,3 +1,64 @@
+2003-02-11  Sergey Poznyakoff
+
+	* Makefile.am: Added testsuite
+	* configure.ac: Check for obstack, provide replacement
+	  if necessary.
+	  Check for reversed arguments to setvbuf.
+	  Generate Makefiles under testsuite/
+
+	* examples/anubis.scm: Split msg-process into two procedures:
+	  one for rotating the subject header and another for rotating
+	  the message body.
+	* examples/anubisrc.guile: Updated.
+
+	* src/obstack.c: New file. Obstack replacement for systems
+	  without it.
+	* src/obstack.h: Likewise.
+	* src/Makefile.am: Added obstack
+	* src/env.c: New options: --show-config-options displays
+	  configuration options for anubis, --relax-perm-check
+	  relaxes permission check on user rc file. Both are useful
+	  for testsuite.
+	* src/guile.c (guile_process_proc): Removed call to remcrlf.
+	  (guile_postprocess_list): New function.
+
+	* src/headers.h (T_RELAX_PERM_CHECK): New define. This bit
+	  is set in topts when --relax-perm-check is given in the
+	  command line.
+	  (print_config_options): New function.
+	  
+	* src/help.c (show_config_options, print_config_options): New
+	  functions.
+	  (print_version): Use show_config_options.
+	* src/rc.c (open_rcfile): Open only altrc if --altrc is given.
+	* src/tunnel.c: Started implementing new approach for collecting
+	  message header and body. Both are collected, processed and
+	  only then fed to the MTA.
+	  TODO: split off attachments to diminish memory consumption.
+
+	* testsute/: New directory
+	* testsuite/Makefile.am: New file
+	* testsuite/mta.c: New file
+	* testsuite/.cvsignore: New file
+	* testsuite/lib/: New directory
+	* testsuite/lib/anubis.exp: New file
+	* testsuite/lib/DISTFILES: New file
+	* testsuite/anubis/: New directory
+	* testsuite/anubis/base.exp: New file
+	* testsuite/anubis/DISTFILES: New file
+	* testsuite/etc/: New directory
+	* testsuite/etc/Makefile.am: New file
+	* testsuite/etc/.cvsignore: New file 
+	* testsuite/etc/add1.pat: New file
+	* testsuite/etc/add2.pat: New file
+	* testsuite/etc/add3.pat: New file
+	* testsuite/etc/empty.in: New file
+	* testsuite/etc/empty.pat: New file
+	* testsuite/etc/mult.pat: New file
+	* testsuite/etc/simple.in: New file
+	* testsuite/etc/std.in: New file
+	* testsuite/etc/std.pat: New file
+	  
 2003-02-08  Sergey Poznyakoff  
 
 	* src/regex.c: Rewritten using "control table" approach.
