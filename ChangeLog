@@ -1,3 +1,14 @@
+2004-02-12  Sergey Poznyakoff  
+
+	* src/mysql.c: Trivial fixes.
+	* src/Makefile.am: Moved mem.[ch] to libanubisdb
+	* src/anubisadm.c: Trivial fixes. Remove xmalloc duplication and
+	provide memory error handler hook.
+	* src/headers.h (memory_error): New external variable.
+	* src/main.c: Provide memory error handler hook.
+	* src/mem.c (xmalloc, xrealloc): Rely on user-defined hook
+	to handle memory allocation errors.
+
 2004-02-11  Sergey Poznyakoff
 
 	* configure.ac: AC_REPLACE getline. Define ANUBISADM if
