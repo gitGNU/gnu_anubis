@@ -16,26 +16,154 @@
 # along with GNU Anubis; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+# Authmode support
+proc repl_port {file port} {
+    global ANUBIS_RC_DIR
+    
+    set chan [open $ANUBIS_RC_DIR/$file.in.rc r]
+    set outchan [open $ANUBIS_RC_DIR/$file.rc w]
+    for {gets $chan line} {![eof $chan]} {gets $chan line} {
+	regsub -all "@ANUBIS_PORT@" $line "$port" tmp
+	puts $outchan $tmp
+    }
+    close $chan
+    close $outchan
+}
+
+proc anubis_authmode {} {
+    global ANUBIS_PID
+    if ![info exists ANUBIS_PID] {
+	return 0
+    }
+    verbose "AUTHMODE"
+    return $ANUBIS_PID
+}
+
+proc start_daemon {} {
+    global ANUBIS_TESTDIR
+    global ANUBIS_RC_DIR
+    global ANUBIS_TOOL
+    global ANUBIS_PORT
+    global ANUBIS_PID
+    
+    set port [remote_exec host $ANUBIS_TESTDIR/findport "-c1 -s1024 -f%d"]
+    set ANUBIS_PORT [lindex $port 1]
+    repl_port "target" $ANUBIS_PORT
+    repl_port "interface" $ANUBIS_PORT
+    set pidfile $ANUBIS_RC_DIR/anubis.pid
+    file delete $pidfile
+    remote_exec host "$ANUBIS_TOOL" \
+	             "--relax-perm-check \
+                      --pid-file $pidfile \
+                      --altrc $ANUBIS_RC_DIR/target.rc"
+    set attempt 0
+    while {![file exists $pidfile]} {
+	incr attempt
+	if {$attempt > 10} {
+	    fail "Cannot start anubis daemon"
+	    exit 1
+	}
+	sleep 1
+    }
+    set chan [open $pidfile r]
+    gets $chan ANUBIS_PID
+    verbose "Daemon PID $ANUBIS_PID"
+    close $chan
+}
+
+proc kill_daemon {} {
+    global ANUBIS_PID
+    
+    if {![info exists ANUBIS_PID]} {
+	return
+    }
+
+    # Tcl has no kill primitive. The following Ruby Goldberg trick is
+    # borrowed from DejaGNU (see remote.exp)
+    verbose "Killing anubis daemon $ANUBIS_PID"
+    exec sh -c "exec > /dev/null 2>&1 && \
+        (kill -2 $ANUBIS_PID || kill -2 $ANUBIS_PID) && \
+         sleep 5 && (kill -15 $ANUBIS_PID || kill $ANUBIS_PID) && \
+         sleep 5 && (kill -9 $ANUBIS_PID || kill -9 $ANUBIS_PID)" &;
+}
+
+proc update_config {name} {
+    global ANUBIS_PORT
+    global ANUBIS_USR
+    global ANUBIS_DATA_DIR
+    global ANUBIS_RC_DIR
+    global ANUBIS_ETC_DIR
+    
+    set rcname $ANUBIS_RC_DIR/$name
+    set chan [open $rcname r]
+    set outchan [open $rcname.tmp w]
+    for {gets $chan line} {![eof $chan]} {gets $chan line} {
+	switch -regexp -- "$line" {
+	    "^ *local-mta" { }
+	    ".*" {
+		puts $outchan "$line"
+	    }
+	}
+    }
+    close $outchan
+    close $chan
+    set res [remote_exec host "$ANUBIS_USR" \
+	      "--netrc $ANUBIS_ETC_DIR/net.rc \
+               --file $rcname.tmp -vvv localhost:$ANUBIS_PORT"]
+    verbose "RESULT $res"
+    return [lindex $res 0]
+}
+
+# Run given test script ($name) in authmode.
+proc run_in_authmode {name} {
+    if [anubis_check_capability "GSASL"] {
+	if {[anubis_check_capability "GNUTLS"] || [anubis_check_capability "OPENSSL"]} {
+	    clone_output "Running $name in authmode. This may take quite a while. Please, be patient."
+	}
+        start_daemon
+        source $name
+        kill_daemon
+    }
+}
+
+
+
 proc anubis_init {args} {
     global TOOL_EXECUTABLE
     global ANUBIS_TOOL
     global ANUBIS_RC_DIR
     global ANUBIS_ETC_DIR
-    global tool
     global ANUBIS_TOOL_FLAGS
     global ANUBIS_DATA_DIR
+    global ANUBIS_TESTDIR
+    global ANUBIS_SRCDIR
+    global ANUBIS_TOP_SRCDIR
+    global ANUBIS_USR
+    global ANUBIS_ADM
+    global ANUBIS_AUTHMODE
+    global tool
     global base_dir
     global top_srcdir
     global objdir
     global host_board
+    global srcdir
     
     if [info exists TOOL_EXECUTABLE] {
 	set ANUBIS_TOOL $TOOL_EXECUTABLE
     }
 
+    if {$args == "-authmode"} {
+	set ANUBIS_AUTHMODE 1
+    }
+
     if ![info exists ANUBIS_TOOL] {
 	if ![is_remote host] {
+	    set ANUBIS_ADM [findfile $base_dir/../src/anubisadm "$base_dir/../src/anubisadm" [transform anubisadm]]
+	    set ANUBIS_USR [findfile $base_dir/../src/anubisusr "$base_dir/../src/anubisusr" [transform anubisusr]]
 	    set ANUBIS_TOOL [findfile $base_dir/../src/$tool "$base_dir/../src/$tool" [transform $tool]]
+	    set ANUBIS_SRCDIR "$srcdir"
+	    set ANUBIS_TOP_SRCDIR "$top_srcdir"
+	    set ANUBIS_TESTDIR "$objdir"
 	    set ANUBIS_DATA_DIR "$objdir/data"
 	    set ANUBIS_ETC_DIR "$top_srcdir/testsuite/etc"
 	    set ANUBIS_RC_DIR "$objdir/etc"
@@ -54,12 +182,19 @@ proc anubis_init {args} {
 	        perror "for instructions on how to set up it."
 	        exit 1
 	    }
+	    set ANUBIS_SRCDIR "[board_info $host_board srcdir]"
+	    set ANUBIS_TOP_SRCDIR "[board_info $host_board top_srcdir]"
+	    set ANUBIS_TESTDIR "[board_info $host_board objdir]"
 	    set ANUBIS_ETC_DIR "[board_info $host_board top_srcdir]/testsuite/etc"
 	    set ANUBIS_DATA_DIR "[board_info $host_board objdir]/data"
 	    set ANUBIS_RC_DIR "[board_info $host_board objdir]/etc"
 	}
 
-	set ANUBIS_TOOL_FLAGS "--norc --relax-perm-check"
+	set ANUBIS_TOOL_FLAGS "--norc --relax-perm-check -s"
+    }
+    
+    if {[info exists ANUBIS_AUTHMODE] && $ANUBIS_AUTHMODE} {
+	start_daemon
     }
 }
 
@@ -68,6 +203,7 @@ proc default_anubis_start {args} {
     global ANUBIS_TOOL
     global ANUBIS_TOOL_FLAGS
     global expect_out
+    global anubis_iface_pid
     
     if [info exists ANUBIS_TOOL_FLAGS] {
 	set sw $ANUBIS_TOOL_FLAGS
@@ -84,8 +220,8 @@ proc default_anubis_start {args} {
     set cmd "$ANUBIS_TOOL $sw"
     verbose "Spawning $cmd"
 
-    set res [remote_spawn host $cmd]
-    if { $res < 0 || $res == "" } {
+    set anubis_iface_pid [remote_spawn host $cmd]
+    if { $anubis_iface_pid < 0 || $anubis_iface_pid == "" } {
 	perror "Spawning $cmd failed."
 	return 1;
     }
@@ -247,7 +383,6 @@ proc default_anubis_version {} {
     if [info exists ANUBIS_TOOL_VERSION] {
 	return
     }
-
     set output [remote_exec host "$ANUBIS_TOOL --show-config-options"]
     set flg [split [lindex $output 1]]   	
     for {set i 0} {$i < [llength $flg]} {incr i} {
@@ -272,6 +407,11 @@ proc anubis_check_capability {args} {
     global ANUBIS_CAPABILITY
 
     set name [lindex $args 0]
+
+    if {![info exists ANUBIS_CAPABILITY]} {
+	anubis_init
+	default_anubis_version
+    }
 
     if {![info exists ANUBIS_CAPABILITY] || \
 	![info exists ANUBIS_CAPABILITY($name)]} {
@@ -300,6 +440,16 @@ proc anubis_command { cmd } {
     }
     verbose "RESULT: $res" 2
     return $res
+}
+
+proc anubis_close {} {
+    global anubis_iface_pid
+    if [info exist anubis_iface_pid] {
+	if [is_remote host] {
+	    remote_close host
+	}
+	unset anubis_iface_pid
+    }
 }
 
 proc anubis_expect { args } {
@@ -668,12 +818,21 @@ proc anubis_pat {patname} {
 			    default	{ if {$opt != ""} {
 						lappend options $opt
 					  }
-				        }
+			                }
+			}
 		    }
-		}
 		}
 	        "^:RCFILE" {
 	            regexp "^:RCFILE (.*)" $line dummy rcfile
+		    if [anubis_authmode] {
+			# If we're acting in authmode, update the user's
+			# config and use the interface configuration
+			if [update_config $rcfile] {
+			    fail $testname
+			    return
+			}
+			set rcfile "interface.rc"
+		    }
 	        }
 	        "^:RETCODE" {
 	            regexp "^:RETCODE (.*)" $line dummy retcode
@@ -681,7 +840,7 @@ proc anubis_pat {patname} {
 	        "^:PATTERN" {
 		    set state 1
 	        }
-	        "^:END" {
+		"^:END" {
 		    verbose "MODE $mode"
 		    if {$mode == "EXEC"} {
 			set inv anubis_exec
@@ -715,7 +874,9 @@ proc anubis_pat {patname} {
 			    {set pat [lrange $pat 1 end]} {
 
 			    set line [lindex $pat 0]
-			    if [regexp "^:EXPECT (.*)" $line dummy expect] {
+			    if [regexp "^:EXPECT (\[0-9\]\[0-9\]*)" $line dummy expect] {
+				anubis_expect {-re "$expect \[^\n\]*\n"}
+			    } elseif [regexp "^:EXPECT (.*)" $line dummy expect] {
 				anubis_expect {-re "$expect\[^\n\]*\n"}
 			    } elseif [regexp "^:ADD (.*)" $line dummy expect] {
 				if [regexp "^-- (.*)" $expect dummy str] {
@@ -733,6 +894,7 @@ proc anubis_pat {patname} {
 				anubis_command "$line"
 				lappend file_pattern $line
 			    }
+			    anubis_close
 			}
 
 			set inv anubis_test_file
@@ -760,6 +922,18 @@ proc anubis_pat {patname} {
 	    }
 	} else {
 	    switch -regexp -- "$line" {
+		"^HELO" {
+		    if [anubis_authmode] {
+			regexp "^HELO *(\[^ \t\]*)" $line dummy rest
+			if [anubis_authmode] {
+			    verbose "REST $rest"
+			    lappend pattern "EHLO $rest"
+			    verbose "PATTERN $pattern"
+			}
+		    } else {
+			lappend pattern $line
+		    }
+		}
 		"^:END" { set state 0 }
 		"^-- (.*)" {
 		    regexp "^-- (.*)" $line dummy str
