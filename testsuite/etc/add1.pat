@@ -35,7 +35,7 @@ To: <polak@gnu.org>
 Subject: The Tao of Programming, Part I
 :ADD X-Part-Number: I
 
-        A manger went to his programmers and told them: "As regards to your
+        A manager went to his programmers and told them: "As regards to your
 work hours: you are going to have to come in at nine in the morning and leave
 at five in the afternoon."  At this, all of them became angry and several
 resigned on the spot.
