@@ -1,3 +1,9 @@
+2004-08-17  Wojciech Polak
+
+	* doc/anubis.texi (Sample Beginning): Removed text
+	about IDENT protocol server.
+	* TODO: Updated.
+
 2004-08-14  Sergey Poznyakoff
 
 	* testsuite/anubis.authmode/abase.exp: New file

@@ -16,8 +16,6 @@ same block of text. (Basically this means adding a rudimentary flow
 control analyzer).
 
 * The Core
-** Change the plain text database format and use `:' as the field separator.
-** Dixie: allow to omit the `account' field, but use the `config' field.
 ** RFC 3463 compatible.
 ** Error notification system (via email)
 ** HTML processing (also removing HTML part)
@@ -30,7 +28,8 @@ control analyzer).
 ** RFC 2017 support (requires above)
 
 * Other stuff
-** Dixie's testsuite.
+** a guile plugin to test message(s) with an anti-spam
+and/or anti-virus software.
 ** An external performance test.
 
 * Minor issues

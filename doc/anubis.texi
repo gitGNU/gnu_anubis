@@ -2675,7 +2675,6 @@ on standard input and output.
 
 @node Sample Beginning, TLS/SSL, Invoking Anubis, Top
 @chapter Sample Beginning
-@cindex IDENT protocol
 
 By default, GNU Anubis binds to port number 24 (private mail system),
 so there shouldn't be any conflict with your local MTA (Mail Transport
@@ -2731,12 +2730,6 @@ REMOTE-MTA localhost:1111
 @strong{Caution:} Make sure that your local machine doesn't accept any
 incoming mail (i.e. it is @emph{not} a POP or IMAP server), otherwise
 you cannot disable your MTA or change its port number!
-
-@strong{Caution:} It is required to install the TCP/IP IDENT protocol
-server (RFC 1413). Without it, an outgoing mail processor will fail.
-Most modern GNU/Linux (or *BSD) distributions have already installed
-such a server. If not, try @samp{pidentd}, available at:
-@w{@uref{ftp://ftp.lysator.liu.se/pub/ident/servers/}}
 
 All Mutt users, who would like to set up GNU Anubis between their MUA
 and MTA, should consider using the @samp{msg2smtp.pl} Perl script
