@@ -1,3 +1,16 @@
+2003-09-16  Sergey Poznyakoff
+
+	* src/rcfile.h (struct rc_kwdef.flags): New member
+	(struct rc_asgn.flags): New member
+	* src/rcfile.y: Take into account rc_kwdef.flags
+	when parsing and printing.
+	* src/rc.c (control_kw): Mark "esmtp-auth" with
+	KWF_HIDDEN.
+	* src/gpg.c (gpg_kw): Mark "gpg-passphrase" with
+	KWF_HIDDEN.
+	* testsuite/etc/std.pin: Modified to match the new debugging
+	output style.
+
 2003-09-09  Wojciech Polak
 
 	* src/rc.c (tls_parser): Removed T_SSL_CKCLIENT from
