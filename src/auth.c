@@ -29,15 +29,8 @@ void
 auth_tunnel(void)
 {
 	info(NORMAL, _("Welcome user %s !"), session.client);
-	open_rcfile(CLIENT);
-	read_rcfile(CLIENT);
-	read_rcfile_allsection();
-#ifdef WITH_GUILE
-	read_rcfile_guile();
-#endif
-	rule_position = get_position(BEGIN_RULE);
-	if (rule_position)
-		info(DEBUG, _("The %s section has been found. Processing..."), "RULE");
+	open_rcfile(CF_CLIENT);
+	process_rcfile(CF_CLIENT);
 	return;
 }
 
@@ -54,7 +47,8 @@ auth_ident(struct sockaddr_in *addr, char *user, int size)
 	int sd = 0;
 
 	if ((sd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-		anubis_error(SOFT, _("IDENT: socket() failed: %s."), strerror(errno));
+		anubis_error(SOFT, _("IDENT: socket() failed: %s."),
+			     strerror(errno));
 		return 0;
 	}
 	memcpy(&ident, addr, sizeof(ident));

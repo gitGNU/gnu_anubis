@@ -104,7 +104,6 @@ quit(int code)
 		closelog();
 	#endif /* HAVE_SYSLOG */
 
-	close_rcfile();
 	free_mem();
 	exit(code);
 }

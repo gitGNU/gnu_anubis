@@ -52,14 +52,14 @@ main(int argc, char *argv[])
 
 	/* Native Language Support */
 
-	#ifdef ENABLE_NLS
+#ifdef ENABLE_NLS
 	 /* Set locale via LC_ALL.  */
-	 #ifdef HAVE_SETLOCALE
+# ifdef HAVE_SETLOCALE
 	  setlocale(LC_ALL, "");
-	 #endif /* HAVE_SETLOCALE */
+# endif /* HAVE_SETLOCALE */
 	 bindtextdomain(PACKAGE, LOCALEDIR);
 	 textdomain(PACKAGE);
-	#endif /* ENABLE_NLS */
+#endif /* ENABLE_NLS */
 
 	/* default values */
 
@@ -77,21 +77,29 @@ main(int argc, char *argv[])
 	anubis_getlogin(session.supervisor, sizeof(session.supervisor));
 
 	/*
-	   Read the system configuration file (SUPERVISOR).
+	   Initialize the rc parsing subsystem
+	*/
+	rc_system_init();
+	
+	/*
+	  Read the system configuration file (SUPERVISOR).
 	*/
 
-	endsection_len = strlen(END_SECTION);
+	if (topt & T_CHECK_CONFIG) {
+		open_rcfile(CF_SUPERVISOR);
+		exit(0);
+	}
+	
 	if (!(topt & T_NORC)) {
-		open_rcfile(SUPERVISOR);
-		read_rcfile(INIT);
-		close_rcfile(); /* SUPERVISOR */
+		open_rcfile(CF_SUPERVISOR);
+		process_rcfile(CF_INIT);
 	}
 
 	/*
 	   DEBUG
 	*/
 
-	#if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
+#if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
 	if (options.termlevel != DEBUG) {
 		struct rlimit corelimit;
 		if (getrlimit(RLIMIT_CORE, &corelimit) == 0) {
@@ -99,7 +107,7 @@ main(int argc, char *argv[])
 			setrlimit(RLIMIT_CORE, &corelimit);
 		}
 	}
-	#endif /* HAVE_GETRLIMIT and HAVE_SETRLIMIT */
+#endif /* HAVE_GETRLIMIT and HAVE_SETRLIMIT */
 
 	info(DEBUG, _("UID:%d, GID:%d, EUID:%d, EGID:%d"), (int)getuid(),
 		(int)getgid(), (int)geteuid(), (int)getegid());
@@ -108,13 +116,13 @@ main(int argc, char *argv[])
 	   Initialize the GnuTLS or OpenSSL library and the PRNG.
 	*/
 
-	#ifdef HAVE_TLS
+#ifdef HAVE_TLS
 	init_tls_libs();
-	#endif /* HAVE_TLS */
+#endif /* HAVE_TLS */
 
-	#ifdef HAVE_SSL
+#ifdef HAVE_SSL
 	init_ssl_libs();
-	#endif /* HAVE_SSL */
+#endif /* HAVE_SSL */
 
 	/*
 	   Enter the main core...
@@ -126,7 +134,6 @@ main(int argc, char *argv[])
 void
 anubis(char *arg)
 {	
-	trigger_len = strlen(BEGIN_TRIGGER);
 	if (topt & T_STDINOUT) { /* stdin/stdout */
 		if (options.termlevel != DEBUG)
 			options.termlevel = SILENT;

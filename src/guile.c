@@ -24,6 +24,7 @@
 
 #include "headers.h"
 #include "extern.h"
+#include "rcfile.h"
 
 #ifdef WITH_GUILE
 
@@ -34,7 +35,6 @@ static SCM
 catch_body (void *data)
 {
 	scm_init_load_path();
-	read_rcfile_guile();
 	anubis(data);
 	return SCM_BOOL_F;
 }
@@ -69,7 +69,7 @@ guile_ports_open()
 	int fd = -1;
 	char *name = options.guile_logfile;
 
-	if (topt & T_FOREGROUND_INIT)
+	if (topt & (T_FOREGROUND_INIT|T_STDINOUT))
 		return;
 	
 	if (name) {
@@ -95,7 +95,7 @@ guile_ports_open()
 void
 guile_ports_close()
 {
-	if (topt & T_FOREGROUND_INIT)
+	if (topt & (T_FOREGROUND_INIT|T_STDINOUT))
 		return;
 	scm_close_output_port(scm_current_error_port());
 	scm_close_output_port(scm_current_output_port());
@@ -368,6 +368,104 @@ guile_postprocess_proc(char *procname, struct list **hdr, char **body)
 			     procname);
 	guile_ports_close();
 }
+
+/* RC file stuff */
+
+#define KW_GUILE_OUTPUT           0
+#define KW_GUILE_DEBUG            1
+#define KW_GUILE_LOAD_PATH_APPEND 2
+#define KW_GUILE_LOAD_PROGRAM     3
+#define KW_GUILE_PROCESS          4
+#define KW_GUILE_POSTPROCESS      5 
+#define KW_GUILE_REWRITE_LINE     6
+
+/* GUILE section */
+static struct rc_kwdef guile_kw[] = {
+	{ "guile-output",           KW_GUILE_OUTPUT },
+	{ "guile-debug",            KW_GUILE_DEBUG },
+	{ "guile-load-path-append", KW_GUILE_LOAD_PATH_APPEND }, 
+	{ "guile-load-program",     KW_GUILE_LOAD_PROGRAM },
+	{ "guile-process",          KW_GUILE_PROCESS },
+	{ "guile-postprocess",      KW_GUILE_POSTPROCESS },
+	{ NULL }
+};
+
+static struct rc_kwdef guile_rule_kw[] = {
+	{ "guile-debug",            KW_GUILE_DEBUG },
+	{ "guile-load-path-append", KW_GUILE_LOAD_PATH_APPEND }, 
+	{ "guile-load-program",     KW_GUILE_LOAD_PROGRAM },
+	{ "guile-rewrite-line",     KW_GUILE_REWRITE_LINE },
+	{ NULL }
+};
+
+int
+guile_parser(int method, int key, char *arg,
+	     void *inv_data, void *func_data, char *line)
+{
+	switch (key) {
+	case KW_GUILE_OUTPUT:
+		xfree(options.guile_logfile);
+		options.guile_logfile = strdup(arg);
+		break;
+		
+	case KW_GUILE_DEBUG:
+		guile_debug(strncmp("yes", arg, 3) == 0);
+		break;
+		
+	case KW_GUILE_LOAD_PATH_APPEND:
+		guile_load_path_append(arg);
+		break;
+		
+	case KW_GUILE_LOAD_PROGRAM:
+		guile_load_program(arg);
+		break;
+
+#if 0
+	case KW_GUILE_PROCESS:
+		xfree(options.guile_process);
+		options.guile_process = strdup(arg);
+		break;
+#endif
+	case KW_GUILE_POSTPROCESS:       
+		xfree(options.guile_postprocess);
+		options.guile_postprocess = strdup(arg);
+		break;
+
+	case KW_GUILE_REWRITE_LINE:
+		guile_rewrite_line(arg, line);
+		break;
+		
+	default:
+		return RC_KW_UNKNOWN;
+	}
+	return RC_KW_HANDLED;
+}
+
+static struct rc_secdef_child guile_secdef_child = {
+	NULL,
+	CF_SUPERVISOR|CF_CLIENT,
+	guile_kw,
+	guile_parser,
+	NULL
+};
+
+static struct rc_secdef_child guile_rule_secdef_child = {
+	NULL,
+	CF_SUPERVISOR|CF_CLIENT,
+	guile_rule_kw,
+	guile_parser,
+	NULL
+};
+
+void
+guile_section_init()
+{
+	struct rc_secdef *sp = anubis_add_section("GUILE");
+	rc_secdef_add_child(sp, &guile_secdef_child);
+	sp = anubis_add_section("RULE");
+	rc_secdef_add_child(sp, &guile_rule_secdef_child);
+}
+	
 
 #endif /* WITH_GUILE */
 

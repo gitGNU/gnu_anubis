@@ -225,36 +225,8 @@ process_command(void *sd_client, void *sd_server, char *command, int size)
 	safe_strcpy(buf, command); /* make a back-up */
 	change_to_lower(buf);
 
-	if (rule_position) {
-		char *ptr = 0;
-		char regex1[LINEBUFFER+1];
-		char regex2[LINEBUFFER+1];
-		unsigned long optbackup;
-		fseek(fp_rcfile, rule_position, SEEK_SET);
-		while (read_regex_block(COMMAND, regex1, LINEBUFFER) != 0)
-		{
-			if ((ptr = strstr(regex1, " != "))) {
-				*ptr = '\0';
-				ptr += 4;
-				safe_strcpy(regex2, ptr);
-			}
-			optbackup = ropt;
-			if (regex_match(regex1, command)) { /* TRUE */
-				if (ptr) {
-					ropt = optbackup; /* restore ropt settings */
-					if (regex_match(regex2, command) == 0) { /* FALSE */
-						while (read_action_block(command) != 0)
-						{ }
-					}
-				}
-				else {
-					while (read_action_block(command) != 0)
-					{ }
-				}
-			}
-		}
-	}
-
+	rcfile_process_cond("RULE", COMMAND, command);
+	
 	if (strncmp(buf, "starttls", 8) == 0) {
 
 #if defined(HAVE_TLS) || defined(HAVE_SSL)
@@ -502,8 +474,8 @@ transfer_command(void *sd_client, void *sd_server, char *command)
 			mopt = 0;
 			topt &= ~T_BOUNDARY;
 			topt &= ~T_ERROR;
-			if (all_position && (topt & T_SUPERCLIENT))
-				read_rcfile_allsection();
+			if (topt & T_SUPERCLIENT)
+				rcfile_process_section(CF_CLIENT, "ALL", NULL);
 		}
 		else if (strncmp(buf, "data", 4) == 0) {
 			postprocess(sd_client, sd_server);
@@ -512,8 +484,8 @@ transfer_command(void *sd_client, void *sd_server, char *command)
 			mopt = 0;
 			topt &= ~T_BOUNDARY;
 			topt &= ~T_ERROR;
-			if (all_position && (topt & T_SUPERCLIENT))
-				read_rcfile_allsection();
+			if (topt & T_SUPERCLIENT)
+				rcfile_process_section(CF_CLIENT, "ALL", NULL);
 		}
 	}
 	return 1; /* OK */
@@ -691,7 +663,8 @@ transfer_header(void *sd_client, void *sd_server,
 				strncpy(hline, h1->line, LINEBUFFER);
 				remcrlf(hline);
 				if (regex_match(p1->line, hline)) {
-					char *outbuf = substitute(p1->modify, submatch);
+					char *outbuf = substitute(p1->modify,
+								  submatch);
 					free(h1->line);
 					if (outbuf)
 						h1->line = outbuf;
@@ -803,40 +776,12 @@ process_header_line(char *header_line)
 		*p++ = '\n';
 		*p = '\0';
 		p = backup;
-		p += trigger_len;
+		p += sizeof(BEGIN_TRIGGER) - 1;
 	}
 	else
 		p = header_line;
 
-	if (rule_position) {
-		char *ptr = 0;
-		char regex1[LINEBUFFER+1];
-		char regex2[LINEBUFFER+1];
-		unsigned long optbackup;
-		fseek(fp_rcfile, rule_position, SEEK_SET);
-		while (read_regex_block(HEADER, regex1, LINEBUFFER) != 0)
-		{
-			if ((ptr = strstr(regex1, " != "))) {
-				*ptr = '\0';
-				ptr += 4;
-				safe_strcpy(regex2, ptr);
-			}
-			optbackup = ropt;
-			if (regex_match(regex1, p)) { /* TRUE */
-				if (ptr) {
-					ropt = optbackup; /* restore ropt settings */
-					if (regex_match(regex2, p) == 0) { /* FALSE */
-						while (read_action_block(header_line) != 0)
-						{ }
-					}
-				}
-				else {
-					while (read_action_block(header_line) != 0)
-					{ }
-				}
-			}
-		}
-	}
+	rcfile_process_cond("RULE", HEADER, p); 
 	return;
 }
 

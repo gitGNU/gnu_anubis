@@ -27,7 +27,7 @@
 
 /* TCP wrappers */
 #ifdef USE_LIBWRAP
- #include <tcpd.h>
+# include <tcpd.h>
  int deny_severity = LOG_INFO;
  int allow_severity = LOG_INFO;
 #endif /* USE_LIBWRAP */
@@ -45,10 +45,10 @@ static int nchild;
 void
 daemonize(void)
 {
-	#ifdef HAVE_DAEMON
+#ifdef HAVE_DAEMON
 	if (daemon(0, 0) == -1)
 		anubis_error(HARD, _("daemon() failed. %s."), strerror(errno));
-	#else
+#else
 	chdir("/");
 	umask(0);
 	switch(fork())
@@ -67,15 +67,15 @@ daemonize(void)
 	close(0);
 	close(1);
 	close(2);
-	#endif /* HAVE_DAEMON */
+#endif /* HAVE_DAEMON */
 
 	signal(SIGHUP, SIG_IGN);
 	topt |= T_DAEMON;
 
-	#ifdef HAVE_SYSLOG
+#ifdef HAVE_SYSLOG
 	openlog("anubis", LOG_PID, 0);
 	syslog(LOG_INFO, _("%s daemon startup succeeded."), version);
-	#endif /* HAVE_SYSLOG */
+#endif /* HAVE_SYSLOG */
 
 	return;
 }
@@ -105,11 +105,11 @@ service_unavailable(int sd_client)
 {
 	char buf[LINEBUFFER+1];
 
-	#ifdef HAVE_SNPRINTF
+#ifdef HAVE_SNPRINTF
 	snprintf(buf, LINEBUFFER,
-	#else
+#else
 	sprintf(buf,
-	#endif /* HAVE_SNPRINTF */
+#endif /* HAVE_SNPRINTF */
 	"421 %s Service not available, closing transmission channel."CRLF,
 		(topt & T_LOCAL_MTA) ? "localhost" : session.mta);
 
@@ -147,12 +147,12 @@ loop(int sd_bind)
 	int sd_client = 0;
 	int sd_server = 0;
 	socklen_t addrlen;
-	#ifdef USE_LIBWRAP
+#ifdef USE_LIBWRAP
 	struct request_info req;
-	#endif /* USE_LIBWRAP */
-	#ifdef HAVE_PAM
+#endif /* USE_LIBWRAP */
+#ifdef HAVE_PAM
 	int pam_retval;
-	#endif /* HAVE_PAM */
+#endif /* HAVE_PAM */
 
 	addrlen = sizeof(addr);
 	signal(SIGCHLD, sig_cld);
@@ -175,7 +175,7 @@ loop(int sd_bind)
 		   Check the TCP wrappers settings.
 		*/
 
-		#ifdef USE_LIBWRAP
+#ifdef USE_LIBWRAP
 		request_init(&req, RQ_DAEMON, "anubis", RQ_FILE, sd_client, 0);
 		fromhost(&req);
 		if (hosts_access(&req) == 0) {
@@ -184,16 +184,15 @@ loop(int sd_bind)
 			service_unavailable(sd_client);
 			continue;
 		}
-		#endif /* USE_LIBWRAP */
+#endif /* USE_LIBWRAP */
 
 		/*
 		   Read the system configuration file (SUPERVISOR).
 		*/
 
 		if (!(topt & T_NORC)) {
-			open_rcfile(SUPERVISOR);
-			read_rcfile(SUPERVISOR);
-			close_rcfile(); /* SUPERVISOR */
+			open_rcfile(CF_SUPERVISOR);
+			process_rcfile(CF_SUPERVISOR);
 		}
 
 		nchild++;
@@ -212,52 +211,41 @@ loop(int sd_bind)
 				anubis_error(HARD, _("daemon: Can't fork. %s."), strerror(errno));
 			else if (childpid == 0) { /* a child process */
 				int rs = 0;
+				int cs = 0;
 				signal(SIGCHLD, SIG_IGN);
 
-				rs = auth_ident(&addr, session.client, sizeof(session.client));
+				rs = auth_ident(&addr,
+						session.client,
+						sizeof(session.client));
 
-				if (topt & T_TRANSLATION_MAP) {
-					int cs = 0;
-					if (rs)
-						parse_transmap(&cs, session.client, inet_ntoa(addr.sin_addr),
-							session.client, sizeof(session.client));
-					else
-						parse_transmap(&cs, 0, inet_ntoa(addr.sin_addr),
-							session.client, sizeof(session.client));
-
-					if (cs == 1) {
+				parse_transmap(&cs,
+					       rs ? session.client : 0,
+					       inet_ntoa(addr.sin_addr),
+					       session.client,
+					       sizeof(session.client));
+				
+				if (cs == 1) {
+					topt |= T_SUPERCLIENT;
+					anubis_changeowner(session.client);
+					auth_tunnel();
+				}
+				else if (rs
+					 && cs == -1
+					 && ntohl(addr.sin_addr.s_addr)
+					 == INADDR_LOOPBACK) {
+					if (check_username(session.client)) {
 						topt |= T_SUPERCLIENT;
 						anubis_changeowner(session.client);
 						auth_tunnel();
 					}
-					else if (rs && cs == -1
-					&& ntohl(addr.sin_addr.s_addr) == INADDR_LOOPBACK) {
-						if (check_username(session.client)) {
-							topt |= T_SUPERCLIENT;
-							anubis_changeowner(session.client);
-							auth_tunnel();
-						}
-						else
-							set_unprivileged_user();
-					}
 					else
 						set_unprivileged_user();
 				}
-				else {
-					if (rs && ntohl(addr.sin_addr.s_addr) == INADDR_LOOPBACK) {
-						if (check_username(session.client)) {
-							topt |= T_SUPERCLIENT;
-							anubis_changeowner(session.client);
-							auth_tunnel();
-						}
-						else
-							set_unprivileged_user();
-					}
-					else
-						set_unprivileged_user();
-				}
+				else
+					set_unprivileged_user();
 
-				if (!(topt & T_LOCAL_MTA) && (strlen(session.mta) == 0)) {
+				if (!(topt & T_LOCAL_MTA)
+				    && strlen(session.mta) == 0) {
 					anubis_error(HARD, _("The MTA has not been specified. "
 						"Set the REMOTE-MTA or LOCAL-MTA."));
 					close_socket(sd_client);
@@ -327,32 +315,31 @@ loop(int sd_bind)
 					smtp_session((void *)sd_client, (void *)sd_server);
 					alarm(0);
 
-					#ifdef HAVE_TLS
+#ifdef HAVE_TLS
 					end_tls(SERVER, secure.server);
 					end_tls(CLIENT, secure.client);
 					secure.server = 0;
 					secure.client = 0;
-					#endif /* HAVE_TLS */
+#endif /* HAVE_TLS */
 
-					#ifdef HAVE_SSL
+#ifdef HAVE_SSL
 					end_ssl(SERVER, secure.server, secure.ctx_server);
 					end_ssl(CLIENT, secure.client, secure.ctx_client);
 					secure.server = 0;
 					secure.client = 0;
 					secure.ctx_server = 0;
 					secure.ctx_client = 0;
-					#endif /* HAVE_SSL */
+#endif /* HAVE_SSL */
 				}
 				close_socket(sd_server);
 				close_socket(sd_client);
-				close_rcfile(); /* CLIENT */
 
 				if (topt & T_ERROR)
 					info(NORMAL, _("Connection terminated."));
 				else
 					info(NORMAL, _("Connection closed successfully."));
 	
-				#ifdef HAVE_PAM	
+#ifdef HAVE_PAM	
 				pam_retval = pam_close_session(pamh, 0);
 				if (pam_retval == PAM_SUCCESS)
 					info(VERBOSE, _("PAM: Session closed."));
@@ -361,7 +348,7 @@ loop(int sd_bind)
 					info(NORMAL, _("PAM: failed to release authenticator."));
 					quit(EXIT_FAILURE);
 				}
-				#endif /* HAVE_PAM */
+#endif /* HAVE_PAM */
 
 				quit(0);
 			}
@@ -388,9 +375,8 @@ stdinout(void)
 	*/
 
 	if (!(topt & T_NORC)) {
-		open_rcfile(SUPERVISOR);
-		read_rcfile(SUPERVISOR);
-		close_rcfile(); /* SUPERVISOR */
+		open_rcfile(CF_SUPERVISOR);
+		process_rcfile(CF_SUPERVISOR);
 	}
 
 	anubis_getlogin(session.client, sizeof(session.client));
@@ -400,7 +386,6 @@ stdinout(void)
 		options.termlevel = NORMAL;
 		anubis_error(HARD, _("The MTA has not been specified. "
 			"Set the REMOTE-MTA or LOCAL-MTA."));
-		close_rcfile(); /* CLIENT */
 		free_mem();
 		return;
 	}
@@ -414,7 +399,6 @@ stdinout(void)
 
 	if (sd_server == -1) {
 		service_unavailable(sd_client);
-		close_rcfile(); /* CLIENT */
 		free_mem();
 		return;
 	}
@@ -423,7 +407,6 @@ stdinout(void)
 	smtp_session((void *)sd_client, (void *)sd_server);
 
 	close_socket(sd_server);
-	close_rcfile(); /* CLIENT */
 	free_mem();
 	return;
 }
