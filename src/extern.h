@@ -65,6 +65,7 @@ struct session_struct {
 struct message_struct {
  char *body;
  char *body_append;
+ struct list *mime_hdr;
  char *boundary;
  char *exteditor;
  struct list *addlist;
