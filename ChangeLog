@@ -1,3 +1,7 @@
+2003-06-29  Sergey Poznyakoff  
+
+	* src/rcfile.y: Force R_EXACT on r_msgpart production.
+
 2003-06-29  Sergey Poznyakoff 
 
 	* src/headers.h: Altered regexp modifiers.
