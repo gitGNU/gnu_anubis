@@ -245,11 +245,11 @@
 #define R_PERLRE            0x00000004
 /* Other modifiers */
 #define R_BASIC             0x00000010
-#define R_SCASE             0x00000012
+#define R_SCASE             0x00000020
 
 #define R_TYPEMASK          0x0000000f
 
-#define re_set_type(m,t) ((m) = ((m) & ~R_TYPEMASK) | ((m) & R_TYPEMASK))
+#define re_set_type(m,t) ((m) = ((m) & ~R_TYPEMASK) | ((t) & R_TYPEMASK))
 #define re_typeof(m) ((m) & R_TYPEMASK)
 #define re_set_flag(m,f) ((m) |= (f))
 #define re_clear_flag(m,f) ((m) &= ~(f))
@@ -377,6 +377,7 @@ void anubis_regex_free(RC_REGEX *);
 char *anubis_regex_source(RC_REGEX *);
 int anubis_regex_refcnt(RC_REGEX *);
 char *anubis_regex_replace(RC_REGEX *re, char *line, char *repl);
+void anubis_regex_print(RC_REGEX *re);
 
 /* rc.c */
 void rc_system_init(void);
