@@ -502,13 +502,13 @@ parse_error(const char *fmt, ...)
 	va_start(ap, fmt);
 	vsnprintf(buf, sizeof buf, fmt, ap);
 	va_end(ap);
-	anubis_error(SOFT, "%s:%d: %s", cfg_file, err_line_num(), buf);
+	anubis_error(SYNTAX, "%s:%d: %s", cfg_file, err_line_num(), buf);
 }
 
 int
 yyerror(char *s)
 {
-	anubis_error(SOFT, "%s:%d: %s", cfg_file, cfg_line_num, s);
+	anubis_error(SYNTAX, "%s:%d: %s", cfg_file, cfg_line_num, s);
 	error_count++;
 	return 0;
 }
