@@ -201,36 +201,7 @@ remcrlf(char *s)
  Substitutions (RE back-references)
 ************************************/
 
-char *
-substitute(char *inbuf, char **subbuf)
-{
-	char **tmp = subbuf;
-	char *tmpout = 0;
-	char *tmpbuf = 0;
-	char sign[5];
-	int i = 0;
-
-	if (inbuf == 0 || subbuf == 0)
-		return 0;
-
-	tmpbuf = allocbuf(inbuf, 0);
-	tmp++;
-	while (*tmp)
-	{
-		snprintf(sign, 4, "\\%d", i + 1);
-		tmpout = insert(tmpbuf, sign, *tmp);
-		if (tmpout) {
-			tmpbuf = (char *)xrealloc((char *)tmpbuf, strlen(tmpout) + 1);
-			strcpy(tmpbuf, tmpout);
-			free(tmpout);
-		}
-		tmp++;
-		i++;
-	}
-	return tmpbuf;
-}
-
-char *
+static char *
 insert(char *inbuf, char *sign, char *fill_in)
 {
 	int len1 = 0;
@@ -271,8 +242,37 @@ insert(char *inbuf, char *sign, char *fill_in)
 	return outbuf;
 }
 
+char *
+substitute(char *inbuf, char **subbuf)
+{
+	char **tmp = subbuf;
+	char *tmpout = 0;
+	char *tmpbuf = 0;
+	char sign[5];
+	int i = 0;
+
+	if (inbuf == 0 || subbuf == 0)
+		return 0;
+
+	tmpbuf = allocbuf(inbuf, 0);
+	tmp++;
+	while (*tmp)
+	{
+		snprintf(sign, 4, "\\%d", i + 1);
+		tmpout = insert(tmpbuf, sign, *tmp);
+		if (tmpout) {
+			tmpbuf = (char *)xrealloc((char *)tmpbuf, strlen(tmpout) + 1);
+			strcpy(tmpbuf, tmpout);
+			free(tmpout);
+		}
+		tmp++;
+		i++;
+	}
+	return tmpbuf;
+}
+
 /***************************
- change to lower characters
+ Change to lower characters
 ****************************/
 
 void
