@@ -55,17 +55,53 @@ sql_open_error_text (int s)
   return gettext (open_err_tab[s]);
 }
 
+static char *
+sql_escape_string (const char *ustr)
+{
+  char *str, *q;
+  const unsigned char *p;
+  size_t len = strlen (ustr);
+  
+  for (p = (const unsigned char *) ustr; *p; p++)
+    {
+      if (strchr ("'\"", *p))
+	len++;
+    }
+
+  str = malloc (len + 1);
+  if (!str)
+    return NULL;
+
+  for (p = (const unsigned char *) ustr, q = str; *p; p++)
+    {
+      if (strchr ("'\"", *p))
+	*q++ = '\\';
+      *q++ = *p;
+    }
+  *q = 0;
+  return str;
+}
+
 static int
 sql_db_get (void *d, const char *key, ANUBIS_USER * rec, int *errp)
 {
   const char *p;
   struct anubis_sql_db *amp = d;
+  char *escaped_key = sql_escape_string (key);
 
+  if (!escaped_key)
+    {
+      *errp = ENOMEM;
+      return ANUBIS_DB_FAIL;
+    }
+  
   snprintf (amp->buf, amp->bufsize,
 	    "SELECT %s,%s,%s,%s FROM %s WHERE %s='%s'",
 	    amp->authid,
-	    amp->passwd, amp->user, amp->rcfile, amp->table, amp->authid, key);
-
+	    amp->passwd, amp->user, amp->rcfile, amp->table, amp->authid,
+	    escaped_key);
+  free (escaped_key);
+  
   *errp = amp->query (amp);
   if (*errp)
     return ANUBIS_DB_FAIL;
@@ -135,9 +171,18 @@ static int
 sql_db_delete (void *d, const char *keystr, int *ecode)
 {
   struct anubis_sql_db *amp = d;
+  char *escaped_key = sql_escape_string (keystr);
+
+  if (!escaped_key)
+    {
+      *ecode = ENOMEM;
+      return ANUBIS_DB_FAIL;
+    }
 
   snprintf (amp->buf, amp->bufsize,
-	    "DELETE FROM %s WHERE %s='%s'", amp->table, amp->authid, keystr);
+	    "DELETE FROM %s WHERE %s='%s'",
+	    amp->table, amp->authid, escaped_key);
+  free (escaped_key);
   *ecode = amp->query (amp);
   if (*ecode)
     return ANUBIS_DB_FAIL;
@@ -150,20 +195,36 @@ static int
 sql_db_put (void *d, const char *key, ANUBIS_USER * rec, int *errp)
 {
   struct anubis_sql_db *amp = d;
-
+  char *smtp_authid, *smtp_passwd, *username, *rcfile_name;
+  
   if (sql_db_delete (d, rec->smtp_authid, errp))
     return 1;
 
-  snprintf (amp->buf, amp->bufsize,
-	    "INSERT INTO %s (%s,%s,%s,%s) VALUES ('%s','%s','%s','%s')",
-	    amp->table,
-	    amp->authid,
-	    amp->passwd,
-	    amp->user,
-	    amp->rcfile,
-	    rec->smtp_authid,
-	    rec->smtp_passwd, MSTR (rec->username), MSTR (rec->rcfile_name));
-  *errp = amp->query (amp);
+  smtp_authid = sql_escape_string (rec->smtp_authid);
+  smtp_passwd = sql_escape_string (rec->smtp_passwd);
+  username = sql_escape_string (MSTR (rec->username));
+  rcfile_name = sql_escape_string (MSTR (rec->rcfile_name));
+  if (!smtp_authid || !smtp_passwd || !username || !rcfile_name)
+    *errp = ENOMEM;
+  else
+    {
+      snprintf (amp->buf, amp->bufsize,
+		"INSERT INTO %s (%s,%s,%s,%s) VALUES ('%s','%s','%s','%s')",
+		amp->table,
+		amp->authid,
+		amp->passwd,
+		amp->user,
+		amp->rcfile,
+		smtp_authid,
+		smtp_passwd,
+		username,
+		rcfile_name);
+      *errp = amp->query (amp);
+    }
+  free (smtp_authid);
+  free (smtp_passwd);
+  free (username);
+  free (rcfile_name);
   if (*errp)
     return ANUBIS_DB_FAIL;
   return ANUBIS_DB_SUCCESS;
