@@ -238,18 +238,19 @@ match_action_guile(char *buf)
 	/*
 	    Guile
 	*/
+
 	if (strncmp("guile-output", buf, optlen) == 0) {
 		ptr = parse_line_option(buf);
 		if_empty_quit(ptr);
-
 		xfree(options.guile_logfile);
 		options.guile_logfile = allocbuf(ptr, MAXPATHLEN);
+		return;
 	}
 	if (strncmp("guile-debug", buf, optlen) == 0) {
 		ptr = parse_line_option(buf);
 		if_empty_quit(ptr);
-
 		guile_debug(strncmp("yes", ptr, 3) == 0);
+		return;
 	}	
 	if (strncmp("guile-load-path-append", buf, optlen) == 0) {
 		ptr = parse_line_option(buf);
@@ -266,7 +267,6 @@ match_action_guile(char *buf)
 	if (strncmp("guile-postprocess", buf, optlen) == 0) {
 		ptr = parse_line_option(buf);
 		if_empty_quit(ptr);
-
 		xfree(options.guile_postprocess);
 		options.guile_postprocess = allocbuf(ptr, MAXPATHLEN);
 		return;
