@@ -211,14 +211,14 @@ if test "$with_pam" = "yes"; then
 fi
 
 AC_ARG_WITH([guile],
-            AC_HELP_STRING([--with-guile],
-                           [with Guile support]),
+            AC_HELP_STRING([--without-guile],
+                           [disable Guile support]),
             [
 case "${withval}" in
   yes) useguile=yes ;;
   no)  useguile=no ;;
   *)   AC_MSG_ERROR(bad value ${withval} for --without-guile) ;;
-esac],[useguile=no])
+esac],[useguile=yes])
 
 AC_SUBST(GUILE_INCLUDES)
 AC_SUBST(GUILE_LIBS)
