@@ -325,6 +325,15 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
 	xfree (options.ulogfile);
 	options.ulogfile = allocbuf (arg, MAXPATHLEN);
       }
+    else if (getpid () == 0)
+      anubis_warning (0,
+	       _("`logfile' directive is ignored in main configuration file"));
+    else
+      {
+	topt |= T_DISABLE_SYSLOG;
+	xfree (options.ulogfile);
+	options.ulogfile = allocbuf (arg, MAXPATHLEN);
+      }
     break;
 
   case KW_LOGLEVEL:
@@ -466,6 +475,8 @@ static struct rc_kwdef init_supervisor_kw[] = {
   { "drop-unknown-user",  KW_DROP_UNKNOWN_USER },
   { "rule-priority",      KW_RULE_PRIORITY },
   { "control-priority",   KW_CONTROL_PRIORITY },
+  { "logfile",            KW_LOGFILE },
+  { "loglevel",           KW_LOGLEVEL },
   { NULL }
 };
 
