@@ -22,9 +22,11 @@
 ## compiling, linking, and/or using OpenSSL is allowed.
 ##
 
-adm_programs = anubisadm anubisusr
-sbin_PROGRAMS = anubis @ANUBISADM@
-EXTRA_PROGRAMS = $(adm_programs)
+adm_sbin_programs = anubisadm 
+adm_bin_programs = anubisusr
+sbin_PROGRAMS = anubis @ANUBIS_SBIN_ADM@
+bin_PROGRAMS = @ANUBIS_BIN_ADM@
+EXTRA_PROGRAMS = $(adm_bin_programs) $(adm_sbin_programs)
 
 noinst_LIBRARIES = libanubisdb.a
 anubis_LDADD = ./libanubisdb.a $(top_builddir)/lib/libanubis.a\

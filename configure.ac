@@ -181,13 +181,15 @@ AC_SUBST(GSASL_LIBS)
 AC_CHECK_LIB(resolv, res_query)
 
 AC_SUBST(ANUBIS_DEFINES)
-AC_SUBST(ANUBISADM)
+AC_SUBST(ANUBIS_SBIN_ADM)
+AC_SUBST(ANUBIS_BIN_ADM)
 
 dnl Use option --with-gsasl to compile GSASL library support.
 MU_CHECK_GSASL(0.0.2, [
     AC_DEFINE(WITH_GSASL,1,[Define if Anubis is using GNU SASL])
     AC_MSG_RESULT([Enabling GSASL support...])
-    ANUBISADM='$(adm_programs)'
+    ANUBIS_SBIN_ADM='$(adm_sbin_programs)'
+    ANUBIS_BIN_ADM='$(adm_bin_programs)'
 
     AC_CHECK_LIB(gdbm, gdbm_open,
                  [LIBS="$LIBS -lgdbm"
