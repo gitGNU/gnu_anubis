@@ -24,7 +24,6 @@
 
 #include "headers.h"
 #include "extern.h"
-#include <anubisdb.h>
 
 enum asmtp_state {
 	state_init,
