@@ -40,12 +40,7 @@ To: <polak@gnu.org>
 :ADD Anon-Post-To: comp.os.unix 
 :ADD Latent-Time: +2:00
 :ADD ##
-:ADD In /users3 did Kubla Kahn
-:ADD A stately pleasure dome decree,
-:ADD Where /bin, the sacred river ran
-:ADD Through Test Suites measureless to Man
-:ADD Down to a sunless C.
-:ADD 
+:ADD X-Processed-By: GNU Anubis & Remailer-I
 :ADD 
 USENET would be a better laboratory is there were
 more labor and less oratory.
