@@ -53,12 +53,9 @@ static RC_STMT *rc_stmt_create(enum rc_stmt_type type);
 static void rc_stmt_destroy(RC_STMT *stmt);
 static void rc_stmt_list_destroy(RC_STMT *stmt);
 static void rc_stmt_print(RC_STMT *stmt, int level);
-static void reg_option_init();
-static int reg_option_add(char *opt);
+static int reg_option_add(int *flag, char *opt);
 
 static RC_SECTION *rc_section;
-static int reg_opt;
-static int perlre;
 
 static int debug_level;
  
@@ -77,20 +74,19 @@ static int debug_level;
 };
 
 %token EOL T_BEGIN T_END AND OR EQ NE
-%token T_HEADER T_COMMAND IF FI ELSE RULE DONE
+%token T_HEADER T_COMMAND T_BODY IF FI ELSE RULE DONE
 %token <string> IDENT STRING REGEX D_BEGIN
 
 %left OR
 %left AND
+%left NOT
 
-%type <string> begin keyword
+%type <string> begin keyword string option
 %type <section> section seclist
 %type <stmtlist> stmtlist
 %type <stmt> stmt asgn_stmt cond_stmt rule_stmt 
-%type <cond> cond
-%type <num> cond_lhs
-%type <node> cond_rhs compat_rx_list rx_list regex rule_start
-%type <regex> compat_rx
+%type <num> part optlist
+%type <node> rule_start cond expr
 
 %%
 
@@ -184,27 +180,71 @@ keyword  : IDENT
 cond_stmt: if cond stmtlist fi
            {
 		   $$ = rc_stmt_create(rc_stmt_cond);
-		   $$->v.cond = $2;
+		   $$->v.cond.node = $2;
 		   $$->v.cond.iftrue = $3.head;
 		   $$->v.cond.iffalse = NULL;
 	   }
          | if cond stmtlist else stmtlist fi
            {
 		   $$ = rc_stmt_create(rc_stmt_cond);
-		   $$->v.cond = $2;
+		   $$->v.cond.node = $2;
 		   $$->v.cond.iftrue = $3.head;
 		   $$->v.cond.iffalse = $5.head;
 	   }
 	 ;
 
-cond     : cond_lhs { reg_option_init(); } optlist cond_rhs
+cond     : expr
+         | '(' cond ')'
            {
-		   $$.method = $1;
-		   $$.node = $4;
+		   $$ = $2;
+	   }
+         | cond AND cond
+           {
+		   $$ = rc_node_create(rc_node_bool);
+		   $$->v.bool.op = bool_and;
+		   $$->v.bool.left = $1;
+		   $$->v.bool.right = $3;
+	   }
+         | cond OR cond
+           {
+		   $$ = rc_node_create(rc_node_bool);
+		   $$->v.bool.op = bool_or;
+		   $$->v.bool.left = $1;
+		   $$->v.bool.right = $3;
+	   }
+         | NOT cond
+           {
+		   $$ = rc_node_create(rc_node_bool);
+		   $$->v.bool.op = bool_not;
+		   $$->v.bool.left = $2;
+		   $$->v.bool.right = NULL;
 	   }
          ;
 
-cond_lhs : T_HEADER
+expr     : part '[' string ']' optlist string
+           {
+		   $$ = rc_node_create(rc_node_expr);
+		   $$->v.expr.part = $1;
+		   $$->v.expr.key = $3;
+		   $$->v.expr.re = anubis_regex_compile($6, $5);
+	   }
+         | part optlist string
+           {
+		   $$ = rc_node_create(rc_node_expr);
+		   $$->v.expr.part = $1;
+		   $$->v.expr.key = NULL;
+		   $$->v.expr.re = anubis_regex_compile($3, $2);
+	   }
+         | T_BODY optlist string
+           {
+		   $$ = rc_node_create(rc_node_expr);
+		   $$->v.expr.part = BODY;
+		   $$->v.expr.key = NULL;
+		   $$->v.expr.re = anubis_regex_compile($3, $2);
+	   }
+         ;
+
+part     : T_HEADER
            {
 		   $$ = HEADER;
 	   }
@@ -215,102 +255,32 @@ cond_lhs : T_HEADER
          ;
 
 optlist  : /* empty */
+           {
+		   $$ = 0;
+	   }
          | option
+           {
+		   int rc;
+		   $$ = 0;
+		   rc = reg_option_add(&$$, $1);
+		   xfree($1);
+		   if (rc)
+			   YYERROR;
+	   }
          | optlist option
+           {
+		   int rc = reg_option_add(&$1, $2);
+		   xfree($2);
+		   if (rc)
+			   YYERROR;
+		   $$ = $1;
+	   }
          ;
 
 option   : ':' IDENT
            {
-		   int rc = reg_option_add($2);
-		   xfree($2);
-		   if (rc)
-			   YYERROR;
-	   }
-         ;
-
-cond_rhs : compat_rx_list
-         | rx_list
-         ;
-
-compat_rx_list: compat_rx
-           {
-		   $$ = rc_node_create(rc_node_re);
-		   $$->v.re = $1;
-	   }
-         | compat_rx_list compat_rx
-           {
-		   RC_NODE *node;
-
-		   node = rc_node_create(rc_node_bool);
-		   node->v.bool.op = bool_not;
-		   node->v.bool.left = rc_node_create(rc_node_re);
-		   node->v.bool.left->v.re = $2;
-			   
-		   $$ = rc_node_create(rc_node_bool);
-		   $$->v.bool.op = bool_and;
-		   $$->v.bool.left = $1;
-		   $$->v.bool.right = node;
-	   }
-         ;
-
-compat_rx: REGEX
-           {
-		   $$ = anubis_regex_compile($1, reg_opt);
-		   if (!$$)
-			   YYERROR;
-	   }
-         ;
-
-rx_list  : regex
-         | rx_list and regex
-           {
-		   $$ = rc_node_create(rc_node_bool);
-		   $$->v.bool.op = bool_and;
-		   $$->v.bool.left = $1;
-		   $$->v.bool.right = $3;
-	   }
-         | rx_list or regex
-           {
-		   $$ = rc_node_create(rc_node_bool);
-		   $$->v.bool.op = bool_or;
-		   $$->v.bool.left = $1;
-		   $$->v.bool.right = $3;
-	   }
-         ;
-
-regex    : '(' rx_list ')'
-           {
 		   $$ = $2;
 	   }
-         | EQ STRING
-           {
-		   RC_REGEX *re = anubis_regex_compile($2, reg_opt);
-		   
-		   if (!re)
-			   YYERROR;
-		   $$ = rc_node_create(rc_node_re);
-		   $$->v.re = re;
-	   }
-         | NE STRING
-           {
-		   RC_REGEX *re = anubis_regex_compile($2, reg_opt);
-		   
-		   if (!re)
-			   YYERROR;
-
-		   $$ = rc_node_create(rc_node_bool);
-		   $$->v.bool.op = bool_not;
-		   $$->v.bool.left = rc_node_create(rc_node_re);
-		   $$->v.bool.left->v.re = re;
-		   $$->v.bool.right = NULL;
-	   }
-         ;
-
-and      : /* empty */
-         | AND
-         ;
-
-or       : OR
          ;
 
 if       : IF
@@ -330,10 +300,17 @@ rule_stmt: rule_start EOL stmtlist DONE
 	   }
          ;
 
-rule_start: RULE optlist cond_rhs
+rule_start: RULE optlist string
            {
-		   $$ = $3;
+		   $$ = rc_node_create(rc_node_expr);
+		   $$->v.expr.part = HEADER;
+		   $$->v.expr.key = strdup(X_ANUBIS_RULE_HEADER);
+		   $$->v.expr.re = anubis_regex_compile($3, $2);
 	   }
+         ;
+
+string   : STRING
+         | IDENT
          ;
 
 %%
@@ -473,18 +450,39 @@ rc_node_destroy(RC_NODE *node)
 		rc_bool_destroy(&node->v.bool);
 		break;
 		
-	case rc_node_re:
-		anubis_regex_free(node->v.re);
+	case rc_node_expr:
+		free(node->v.expr.key);
+		anubis_regex_free(node->v.expr.re);
 	}
 	xfree(node);
+}
+
+static char *
+part_string(int part)
+{
+	switch (part) {
+	case NIL:
+		return "NIL";
+	case COMMAND:
+		return "COMMAND";
+	case HEADER:
+		return "HEADER";
+	case BODY:
+		return "BODY";
+	default:
+		return "UNKNOWN";
+	}
 }
 
 void
 rc_node_print(RC_NODE *node)
 {
 	switch (node->type) {
-	case rc_node_re:
-		printf("%s", anubis_regex_source(node->v.re));
+	case rc_node_expr:
+		printf("%s", part_string(node->v.expr.part));
+		if (node->v.expr.key && node->v.expr.key[0] != '\n')
+			printf("[%s]",node->v.expr.key);
+		printf(" %s", anubis_regex_source(node->v.expr.re));
 		break;
 		
 	case rc_node_bool:
@@ -621,23 +619,16 @@ rc_stmt_print(RC_STMT *stmt, int level)
 	}
 }
 
-
-void
-reg_option_init()
-{
-	reg_opt = 0;
-}
-
 int
-reg_option_add(char *opt)
+reg_option_add(int *flag, char *opt)
 {
 	if (strcasecmp(opt, "basic") == 0) 
-		reg_opt |= R_BASIC;
+		*flag |= R_BASIC;
 	else if (strcasecmp(opt, "scase") == 0)
-		reg_opt |= R_SCASE;
+		*flag |= R_SCASE;
 #ifdef HAVE_PCRE
 	else if (strcasecmp(opt, "perlre") == 0) 
-		reg_opt |= R_PERLRE;
+		*flag |= R_PERLRE;
 #endif
 	else {
 		yyerror(_("Unknown regexp option"));
@@ -691,8 +682,8 @@ struct eval_env {
 	int method;
 	int cmp_method;
 	struct rc_secdef_child *child;
+	MESSAGE *msg;
 	void *data;
-	char *line;
 	int refcnt;
 	char **refstr;
 };
@@ -717,7 +708,60 @@ asgn_eval(struct eval_env *env, RC_ASGN *asgn)
 		str = substitute(asgn->rhs, env->refstr);
 	else
 		str = asgn->rhs;
-	p->parser(env->method, key, str, env->data, p->data, env->line);
+	p->parser(env->method, key, str, p->data, env->data, env->msg);
+}
+
+
+int
+re_eval_list(struct eval_env *env, char *key, RC_REGEX *re, struct list *list)
+{
+	ASSOC *p;
+	int rc = 0;
+	
+	for (p = list_first(list); rc == 0 && p; p = list_next(list)) {
+		if (!p->key || strcasecmp(p->key, key) == 0) 
+			rc = anubis_regex_match(re, p->value,
+						&env->refcnt, &env->refstr);
+	}
+	return rc;
+}
+
+int
+re_eval_text(struct eval_env *env, RC_REGEX *re, char *text)
+{
+	/*FIXME*/
+	return anubis_regex_match(re, text, &env->refcnt, &env->refstr);
+}
+
+int
+expr_eval(struct eval_env *env, RC_EXPR *expr)
+{
+	int rc;
+	
+	if (env->refstr && anubis_regex_refcnt(expr->re)) {
+		xfree_pptr(env->refstr);
+		env->refstr = NULL;
+		env->refcnt = 0;
+	}
+
+	switch (expr->part) {
+	case COMMAND:
+		rc = re_eval_list(env, expr->key, expr->re,
+				  env->msg->commands);
+		break;
+		
+	case HEADER:
+		rc = re_eval_list(env, expr->key, expr->re, env->msg->header);
+		break;
+		
+	case BODY:
+		rc = re_eval_text(env, expr->re, env->msg->body);
+		break;
+
+	default:
+		abort();
+	}
+	return rc;
 }
 
 int
@@ -730,14 +774,8 @@ node_eval(struct eval_env *env, RC_NODE *node)
 	case rc_node_bool:
 		rc = bool_eval(env, &node->v.bool);
 		break;
-	case rc_node_re:
-		if (env->refstr && anubis_regex_refcnt(node->v.re)) {
-			xfree_pptr(env->refstr);
-			env->refstr = NULL;
-			env->refcnt = 0;
-		}
-		rc = anubis_regex_match(node->v.re, env->line,
-					&env->refcnt, &env->refstr);
+	case rc_node_expr:
+		rc = expr_eval(env, &node->v.expr);
 		break;
 		
 	default:
@@ -771,9 +809,7 @@ bool_eval(struct eval_env *env, RC_BOOL *bool)
 void
 cond_eval(struct eval_env *env, RC_COND *cond)
 {
-	if (cond->method != env->cmp_method)
-		stmt_list_eval(env, cond->iffalse);
-	else if (node_eval(env, cond->node))
+	if (node_eval(env, cond->node))
 		stmt_list_eval(env, cond->iftrue);
 	else
 		stmt_list_eval(env, cond->iffalse);
@@ -782,7 +818,7 @@ cond_eval(struct eval_env *env, RC_COND *cond)
 void
 rule_eval(struct eval_env *env, RC_RULE *rule)
 {
-	if (env->cmp_method == HEADER && node_eval(env, rule->node))
+	if (node_eval(env, rule->node))
 		stmt_list_eval(env, rule->stmt);
 }
 
@@ -806,7 +842,7 @@ stmt_list_eval(struct eval_env *env, RC_STMT *stmt)
 
 void
 rc_run_section(int method, RC_SECTION *sec, struct rc_secdef *secdef,
-	       int cmp_method, char *line, void *data)
+	       void *data, MESSAGE *msg)
 {
 	if (!sec)
 		return;
@@ -814,11 +850,10 @@ rc_run_section(int method, RC_SECTION *sec, struct rc_secdef *secdef,
 		if (strcmp(sec->name, secdef->name) == 0) {
 			struct eval_env env;
 			env.method = method;
-			env.cmp_method = cmp_method;
 			env.child = secdef->child;
-			env.line = line;
 			env.refcnt = 0;
 			env.refstr = NULL;
+			env.msg = msg;
 			env.data = data;
 			
 			stmt_list_eval(&env, sec->stmt);
@@ -835,7 +870,7 @@ void
 rc_run_section_list(int method, RC_SECTION *sec, struct rc_secdef *secdef)
 {
 	for (; sec; sec = sec->next)
-		rc_run_section(method, sec, secdef, NIL, NULL, NULL);
+		rc_run_section(method, sec, secdef, NULL, NULL);
 }
 
 
