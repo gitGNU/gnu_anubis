@@ -35,6 +35,18 @@ static struct pam_conv conv = {
 };
 #endif /* HAVE_PAM */
 
+static char **
+argv_dup(int argc, char **argv)
+{
+	char **xargv = xmalloc((argc + 1) * sizeof(*xargv));
+	int i;
+
+	for (i = 0; i < argc; i++)
+		xargv[i] = strdup(argv[i]);
+	xargv[i] = NULL;
+	return xargv;
+}
+
 static int gindex = 0;
 
 #define OPT_VERSION          257
@@ -70,7 +82,7 @@ get_options(int argc, char *argv[])
 	int c;
 
 	while ((c = getopt_long(argc, argv, "b:r:l:fisvD?",
-				gopt, &gindex)) != EOF)	{
+				gopt, &gindex)) != EOF) {
 		switch (c) {
 		case OPT_HELP:
 			print_usage();
@@ -154,11 +166,10 @@ get_options(int argc, char *argv[])
 				else
 					ptr = session.execpath;
 				session.execargs = gen_execargs(ptr);
-				topt |= T_RCEXECARGS;
 			}
 		}
 		else
-			session.execargs = argv + optind;
+			session.execargs = argv_dup(argc - optind, argv + optind);
 	}
 	return;
 }
@@ -226,15 +237,15 @@ check_superuser(void)
 void
 anubis_changeowner(char *user)
 {
-	#ifdef HAVE_PAM
+#ifdef HAVE_PAM
 	int pam_retval;
-	#endif /* HAVE_PAM */
+#endif /* HAVE_PAM */
 	struct passwd *pwd;
 
 	if (user == 0 || check_superuser() == 0)
 		return;
 
-	#ifdef HAVE_PAM
+#ifdef HAVE_PAM
 	pam_retval = pam_start("anubis", user, &conv, &pamh);
 	if (pam_retval == PAM_SUCCESS)
 		pam_retval = pam_authenticate(pamh, 0);
@@ -248,7 +259,7 @@ anubis_changeowner(char *user)
 		info(NORMAL, _("PAM: Not authenticated to use GNU Anubis."));
 		quit(EXIT_FAILURE);
 	}
-	#endif /* HAVE_PAM */
+#endif /* HAVE_PAM */
 
 	pwd = getpwnam(user);
 	if (pwd) {
