@@ -355,30 +355,23 @@ auth_gsasl_capa_init ()
 {
 	int rc;
 	char *listmech;
-	size_t size;
-	
-	rc = gsasl_server_listmech(ctx, NULL, &size);
-	if (rc != GSASL_OK)
-		return;
-	size++;
-	listmech = malloc(size);
-	if (!listmech) 
-		return;
-	
-	rc = gsasl_server_listmech(ctx, listmech, &size);
+
+	rc = gsasl_server_mechlist(ctx, &listmech);
 	if (rc != GSASL_OK) {
 		anubis_error(HARD, "%s", gsasl_strerror(rc));
 		return;
 	}
 
 	if (anubis_mech_list) {
+		size_t size = strlen(listmech);
 		LIST *mech = auth_method_list(listmech);
 		LIST *p = list_intersect(mech, anubis_mech_list, name_cmp);
 		auth_list_to_string(p, listmech, size);
 		list_destroy(&p, NULL, NULL);
 		list_destroy(&mech, anubis_free_list_item, NULL);
 	}
-	asmtp_capa_add_prefix("AUTH", listmech);
+	if (listmech[0])
+		asmtp_capa_add_prefix("AUTH", listmech);
       
 	free(listmech);
 }
