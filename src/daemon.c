@@ -73,27 +73,55 @@ daemonize (void)
 
 #ifdef HAVE_SYSLOG
   openlog ("anubis", LOG_PID, 0);
-  syslog (LOG_INFO, _("%s daemon startup succeeded."), version);
+  info (NORMAL, _("%s daemon startup succeeded."), version);
 #endif /* HAVE_SYSLOG */
   write_pid_file ();
   return;
 }
+
+char *
+format_exit_status (char *buffer, size_t buflen, int status)
+{
+  if (WIFEXITED(status))
+    {
+      if (WEXITSTATUS(status) == 0)
+	snprintf(buffer, buflen, _("Exited successfully"));
+      else
+	snprintf(buffer, buflen, _("Failed with status %d"),
+		 WEXITSTATUS(status));
+    }
+  else if (WIFSIGNALED(status)) 
+    snprintf(buffer, buflen,
+	     _("Terminated on signal %d"), WTERMSIG(status));
+  else if (WIFSTOPPED(status))
+    snprintf(buffer, buflen,
+	     _("Stopped on signal %d"), WSTOPSIG(status));
+#ifdef WCOREDUMP
+  else if (WCOREDUMP(status))
+    snprintf(buffer, buflen, _("Dumped core"));
+#endif
+  else
+    snprintf(buffer, buflen, _("Terminated"));
+  return buffer;
+}
+
 
 static RETSIGTYPE
 sig_cld (int code)
 {
   pid_t pid;
   int status;
-
+  char buffer[LINEBUFFER];
+  
   while ((pid = waitpid (-1, &status, WNOHANG)) > 0)
     {
       nchild--;
       info (VERBOSE,
 	    ngettext
-	    ("Child [%lu] finished. Exit status: %s. %d client left.",
-	     "Child [%lu] finished. Exit status: %s. %d clients left.",
+	    ("Child [%lu] finished. %s. %d client left.",
+	     "Child [%lu] finished. %s. %d clients left.",
 	     nchild), (unsigned long) pid,
-	    WIFEXITED (status) ? _("OK") : _("ERROR"), nchild);
+	    format_exit_status (buffer, sizeof buffer, status), nchild);
     }
   signal (code, sig_cld);
   return;
