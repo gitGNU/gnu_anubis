@@ -1,3 +1,30 @@
+2004-02-19  Sergey Poznyakoff
+
+	Initial implementation of "XDATABASE" command
+	
+	* src/xdatabase.c: New file	
+	* src/Makefile.am: Added xdatabase.c
+	* src/authmode.c (anubis_smtp): On successful
+	authentication add XDATABASE to the server capabilities
+	(anubis_authenticate_mode): Save the retrieved rc file
+	name in usr.rc_file_name.
+	* src/extern.h (struct session_struct.rc_file_name): New
+	member.
+	* src/headers.h (user_rcfile_name, xdatabase)
+	(xdatabase_capability): New functions
+	* src/rc.c (user_rcfile_name): New function
+	(open_rcfile): Use user_rcfile_name().
+	* src/rcfile.h (RC_ERROR_PRINTER): New data type
+	(rc_parse_ep): New function
+	* src/rcfile.y (rc_error_printer,rc_error_printer_data): New
+	variables.
+	(parse_error): Use rc_error_printer variable
+	to actually print the diagnostics.
+	(yyerror): Call parse_error() instead of calling anubis_error()
+	directly.
+	(rc_parse_ep): New function
+	* src/tunnel.c (process_command): Handle XDATABASE command
+	
 2004-02-18  Sergey Poznyakoff
 
 	* src/auth.c (auth_ident): Do not use sscanf.
