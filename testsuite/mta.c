@@ -163,6 +163,7 @@ main (int argc, char **argv)
 	break;
 	
       default:
+	error ("unknown option");
 	exit (1);
       }
     }
