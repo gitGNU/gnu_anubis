@@ -731,7 +731,7 @@ rc_parser (int method, int key, ANUBIS_LIST * arglist,
     break;
     
   case KW_SASL_ALLOWED_MECH:
-    anubis_set_mech_list (arglist);
+    anubis_set_server_mech_list (arglist);
     break;
 
   default:
