@@ -71,9 +71,10 @@ AC_CHECK_FUNCS(getopt_long,, [AC_LIBOBJ(getopt)
                               AC_LIBOBJ(getopt1)])
 
 dnl Checks for library functions.
-AC_CHECK_FUNCS(snprintf vsnprintf syslog getrlimit setrlimit socketpair strdup)
+AC_CHECK_FUNCS(syslog getrlimit setrlimit socketpair strdup)
 AC_CHECK_FUNCS(regcomp daemon isatty putenv)
-AC_CHECK_FUNCS(setenv,, [AC_LIBOBJ(setenv)])
+
+AC_REPLACE_FUNCS(snprintf setenv)
 
 AC_CHECK_LIB(socket, socket)
 AC_CHECK_LIB(nsl, gethostbyaddr)
