@@ -195,7 +195,8 @@ MU_CHECK_GSASL(0.0.2, [
 	AC_HELP_STRING([--with-mysql],
 	[Configure to work with MySQL]),
 	[case $withval in
-	 yes)  ANUBIS_CHECK_LIB(mysqlclient, 
+	 yes)  USE_SQL=0
+               ANUBIS_CHECK_LIB(mysqlclient, 
 	                        mysql_real_connect, 
 	                        [-lm],
                                 [ USE_SQL=1
@@ -207,11 +208,38 @@ MU_CHECK_GSASL(0.0.2, [
 			        [AC_MSG_FAILURE([The requested library libmysqlclient is not found or is unusable])],
                                 [/usr/local/lib/mysql /usr/lib/mysql])
                 if test "$USE_SQL" = "1" ;then
+		       WITH_SQL=1
                        LIBS="$LIBS $anubis_cv_lib_mysqlclient"
 		fi
 		;;
 	 no)    ;;
         esac])
+
+    AC_ARG_WITH(postgres,
+	AC_HELP_STRING([--with-postgres],
+	[Configure to work with Postgres]),
+	[case $withval in
+	yes)	USE_SQL=0
+                ANUBIS_CHECK_LIB(pq,
+				 PQconnectStart,
+			         [],
+				 [ USE_SQL=1
+ 				   AC_DEFINE(WITH_PGSQL,1,
+                                             [Define to 1 to enable PostgreSQL interface])
+                                 ],
+		                 [AC_MSG_FAILURE([The requested library libpq is not found or is unusable])],
+                                 [/usr/local/pgsql/lib /usr/pgsql/lib])
+                if test "$USE_SQL" = "1" ;then
+		       WITH_SQL=1
+                       LIBS="$LIBS $anubis_cv_lib_pq"
+		fi
+		;;
+	 no)    ;;
+        esac])
+
+    if test "$WITH_SQL" = "1"; then
+       AC_DEFINE(WITH_SQL, 1, [Define this if you use an SQL interface])
+    fi
 
     AC_LIBOBJ(lbuf)])
 
