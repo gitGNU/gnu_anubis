@@ -38,7 +38,7 @@ dbtext_open (void **dp, char *arg, enum anubis_db_mode mode)
 		break;
 
 	case anubis_db_rdwr:
-		tmode = "rw";
+		tmode = "a+";
 	}
 	
 	fp = fopen(arg, tmode);
