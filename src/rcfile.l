@@ -44,6 +44,7 @@ static void string_add(char *s, int len);
 static void string_add_char(int n);
 static void string_finish();
 static int escape(int c);
+char * trimws(char *s);
 
 static struct string_list *str_head, *str_tail;
 int cfg_line_num;
@@ -57,7 +58,7 @@ extern int yydebug;
  
 %}
 
-%x STR LIT RX
+%x STR LIT RX RXM
 
 WS [ \t][ \t]*
 IDENT [a-zA-Z_][a-zA-Z_0-9-]+
@@ -91,26 +92,40 @@ END |
 [hH][eE][aA][dD][eE][rR]     return T_HEADER;
 [cC][oO][mM][mM][aA][nN][dD] return T_COMMAND;
          /* Backward compatible (unquoted) regular expressions */
-!?=[^ \t][^!\n]*/\n {DBG("RX0", yytext);
-		     yylval.string = strdup(yytext);
+=[^ \t][^!\n]*/\n  { yylval.string = trimws(strdup(yytext + 1));
+		     DBG("RX0", yylval.string);
 		     return REGEX; }
-!?=[^ \t][^!\n]*/!= {DBG("RX1", yytext);
-		     yylval.string = strdup(yytext);
+=[^ \t][^!\n]*!=   { BEGIN(RXM);
+		     yylval.string = malloc(yyleng-2);
+		     memcpy(yylval.string, yytext + 1, yyleng-3);
+		     yylval.string[yyleng-3] = 0;
+		     trimws(yylval.string);
+		     DBG("RX1", yylval.string);
 		     return REGEX; }
-!?=[^ \t][^!\n]*! { BEGIN(RX);
-                    string_begin();
-	            string_add(yytext, yyleng); }
-<RX>[^!\n]*/!=    { BEGIN(INITIAL);
-		    string_add(yytext, yyleng);
-		    string_finish();
-                    DBG("RX2", yylval.string);
-		    return REGEX; }
-<RX>[^!\n]*/\n    { BEGIN(INITIAL);
-		    string_add(yytext, yyleng);
-		    string_finish();
-                    DBG("RX2", yylval.string);
-		    return REGEX; }
-<RX>[^!\n]*!      { string_add(yytext, yyleng); }
+=[^ \t][^!\n]*!    { BEGIN(RX);
+                     string_begin();
+	             string_add(yytext+1, yyleng-1); }
+<RX>[^!\n]*!=      { BEGIN(RXM);
+		     string_add(yytext, yyleng - 2);
+		     string_finish();
+		     trimws(yylval.string);
+                     DBG("RX2", yylval.string);
+		     return REGEX; }
+<RX>[^!\n]*/\n     { BEGIN(INITIAL);
+		     string_add(yytext, yyleng);
+		     string_finish();
+		     trimws(yylval.string);
+                     DBG("RX2", yylval.string);
+		     return REGEX; }
+<RX>[^!\n]*!       { string_add(yytext, yyleng); }
+<RXM>[^!\n]*/\n    { BEGIN(INITIAL); 
+		     yylval.string = strdup(yytext);
+		     trimws(yylval.string);
+		     DBG("RX3", yylval.string);
+		     return REGEX; }
+<RXM>[^!\n]*!      { BEGIN(RX);
+                     string_begin();
+	             string_add(yytext, yyleng); }
 =                 return EQ;
 !=                return NE;
 [iI][fF]          return IF;
@@ -250,6 +265,18 @@ escape(int c)
 		break;
 	}
 	return c;
+}
+
+char *
+trimws(char *s)
+{
+	int len;
+
+	for (len = strlen(s) - 1; len > 0 && isspace(s[len]); len--)
+		;
+	if (len > 0)
+		s[len+1] = 0;
+	return s;
 }
 
 int
