@@ -30,7 +30,7 @@ static void match_options_common(int, char *);
 static int  get_regex(int, char *, char *, int);
 static char *parse_line_regex(char *);
 static void get_action_line(char *);
-static void match_action(char *);
+static void match_action(char *, const char *);
 
 static time_t global_mtime;
 
@@ -218,11 +218,93 @@ read_rcfile_allsection(void)
 			break; /* THE END */
 		else {
 			get_action_line(rcline);
-			match_action(rcline);
+			match_action(rcline, NULL);
 		}
 	}
 	return;
 }
+
+#ifdef WITH_GUILE
+static void
+match_action_guile(char *buf)
+{
+	char *ptr = 0;
+	int optlen;
+	
+	optlen = optlength(buf);
+	if (optlen == 0)
+		return;
+
+	/*
+	    Guile
+	*/
+	if (strncmp("guile-output", buf, optlen) == 0) {
+		ptr = parse_line_option(buf);
+		if_empty_quit(ptr);
+
+		xfree(options.guile_logfile);
+		options.guile_logfile = allocbuf(ptr, MAXPATHLEN);
+	}
+	if (strncmp("guile-debug", buf, optlen) == 0) {
+		ptr = parse_line_option(buf);
+		if_empty_quit(ptr);
+
+		guile_debug(strncmp("yes", ptr, 3) == 0);
+	}	
+	if (strncmp("guile-load-path-append", buf, optlen) == 0) {
+		ptr = parse_line_option(buf);
+		if_empty_quit(ptr);
+		guile_load_path_append(ptr);
+		return;
+	}
+	if (strncmp("guile-load-program", buf, optlen) == 0) {
+		ptr = parse_line_option(buf);
+		if_empty_quit(ptr);
+		guile_load_program(ptr);
+		return;
+	}
+	if (strncmp("guile-postprocess", buf, optlen) == 0) {
+		ptr = parse_line_option(buf);
+		if_empty_quit(ptr);
+
+		xfree(options.guile_postprocess);
+		options.guile_postprocess = allocbuf(ptr, MAXPATHLEN);
+		return;
+	}
+}
+
+void
+read_rcfile_guile(void)
+{
+	char rcline[LINEBUFFER+1];
+
+	if (fp_rcfile == 0)
+		return;
+
+	if (guile_position == 0) {
+		guile_position = get_position(BEGIN_GUILE);
+		if (guile_position == 0)
+			return;
+		else
+			info(DEBUG, _("The %s section has been found. Processing..."), "GUILE");
+	}
+
+	fseek(fp_rcfile, guile_position, SEEK_SET);
+	while (fgets(rcline, LINEBUFFER, fp_rcfile) != 0)
+	{
+		if (strncmp(rcline, "#", 1) == 0
+		    || strncmp(rcline, LF, 1) == 0)
+			continue; /* skip: an empty line, comment (#) */
+		else if (strncmp(rcline, END_SECTION, endsection_len) == 0)
+			break; /* THE END */
+		else {
+			get_action_line(rcline);
+			match_action_guile(rcline);
+		}
+	}
+	return;
+}
+#endif WITH_GUILE
 
 void
 close_rcfile(void)
@@ -558,7 +640,7 @@ parse_line_regex(char *rcline)
 **********************/
 
 int
-read_action_block(void)
+read_action_block(const char *source_line)
 {
 	char rcline[LINEBUFFER+1];
 
@@ -573,7 +655,7 @@ read_action_block(void)
 			break; /* 'fi' - END OF REGEX BLOCK ACTION */
 		else {
 			get_action_line(rcline);
-			match_action(rcline);
+			match_action(rcline, source_line);
 			return 1;
 		}
 	}
@@ -597,7 +679,7 @@ get_action_line(char *rcline)
 }
 
 static void
-match_action(char *rcline)
+match_action(char *rcline, const char *source_line)
 {
 	char *ptr = 0;
 	char *outbuf = 0;
@@ -725,6 +807,18 @@ match_action(char *rcline)
 	}
 	#endif /* HAVE_GPG */
 
+	/*
+	   Guile support
+	*/
+#ifdef WITH_GUILE
+	if (strncmp("guile-rewrite-line", buf, optlen) == 0) {
+		ptr = parse_line_option(rcline);
+		if_empty_quit(ptr);
+		guile_rewrite_line(ptr, source_line);
+		return;
+	}
+#endif /* WITH_GUILE */
+	
 	/*
 	   Remailer Type-I support.
 	*/
