@@ -133,7 +133,18 @@
 	      "tracefile"
               "remote-mta"
               "local-mta"
+	      "esmtp-allowed-mech"
+	      "esmtp-require-encryption"
+	      "esmtp-auth-id"
+	      "esmtp-authz-id"
+	      "esmtp-password"
               "esmtp-auth"
+	      "esmtp-service"
+	      "esmtp-hostname"
+	      "esmtp-generic-service"
+	      "esmtp-passcode"
+	      "esmtp-realm"
+	      "esmtp-anonymous-token"
 	      "mode"
 	      "smtp-greeting-message"
 	      "smtp-help-message"
@@ -211,7 +222,18 @@
 		 tracefile
                  remote-mta
                  local-mta
-                 esmtp-auth
+		 esmtp-allowed-mech
+		 esmtp-require-encryption
+		 esmtp-auth-id
+		 esmtp-authz-id
+		 esmtp-password
+		 esmtp-auth
+		 esmtp-service
+		 esmtp-hostname
+		 esmtp-generic-service
+		 esmtp-passcode
+		 esmtp-realm
+		 esmtp-anonymous-token
 		 (mode           transparent
 				 auth)
                  socks-proxy         
@@ -281,7 +303,6 @@
     ("bind"                     "Basic Settings")
     ("remote-mta"               "Basic Settings")
     ("local-mta"                "Basic Settings")
-    ("esmtp-auth"               "Basic Settings")
     ("mode"                     "Basic Settings")
 
     ("smtp-greeting-message"    "AUTH Section")
@@ -297,6 +318,19 @@
     ("socks-proxy"              "Proxy Settings")
     ("socks-v4"                 "Proxy Settings")
     ("socks-auth"               "Proxy Settings")
+
+    ("esmtp-allowed-mech"       "ESMTP Authentication Settings")
+    ("esmtp-require-encryption" "ESMTP Authentication Settings")
+    ("esmtp-auth-id"            "ESMTP Authentication Settings")
+    ("esmtp-authz-id"           "ESMTP Authentication Settings")
+    ("esmtp-password"           "ESMTP Authentication Settings")
+    ("esmtp-auth"               "ESMTP Authentication Settings")
+    ("esmtp-service"            "ESMTP Authentication Settings")
+    ("esmtp-hostname"           "ESMTP Authentication Settings")
+    ("esmtp-generic-service"    "ESMTP Authentication Settings")
+    ("esmtp-passcode"           "ESMTP Authentication Settings")
+    ("esmtp-realm"              "ESMTP Authentication Settings")
+    ("esmtp-anonymous-token"    "ESMTP Authentication Settings")
 
     ("ssl"                      "Encryption Settings")
     ("ssl-oneway"               "Encryption Settings")
