@@ -1,3 +1,9 @@
+2003-03-07  Sergey Poznyakoff 
+
+	* po/POTFILES.in: Added missing files.
+	* src/map.c (translate_parser): Synchronized with the
+	  yesterday's changes.
+
 2003-03-07  Sergey Poznyakoff
 
 	* TODO: Updated
