@@ -43,7 +43,7 @@ static void process_data(MESSAGE *);
    snd sent in multiline lines. */
    
 static void
-get_boundary(MESSAGE *msg, char *line)
+get_boundary (MESSAGE *msg, char *line)
 {
 	char boundary_buf[LINEBUFFER+1], *p;
 
@@ -52,7 +52,7 @@ get_boundary(MESSAGE *msg, char *line)
 
 	/* Downcase the string to help search for boundary */
 	safe_strcpy(boundary_buf, line);
-	change_to_lower(boundary_buf);
+	make_lowercase(boundary_buf);
 	p = strstr(boundary_buf, "boundary=");
 	if (!p)
 		return;
@@ -70,7 +70,7 @@ get_boundary(MESSAGE *msg, char *line)
 }
 
 static void
-add_header(LIST *list, char *line)
+add_header (LIST *list, char *line)
 {
 	ASSOC *asc = header_assoc(line);
 	list_append(list, asc);
@@ -90,7 +90,7 @@ add_header(LIST *list, char *line)
 }
 
 static void
-collect_headers(MESSAGE *msg)
+collect_headers (MESSAGE *msg)
 {
 	char buf[LINEBUFFER+1];
 	char *line = NULL;
@@ -122,7 +122,7 @@ collect_headers(MESSAGE *msg)
 }
 
 static void
-write_header_line(void *sd_server, char *line)
+write_header_line (void *sd_server, char *line)
 {
 	char *p;
 
@@ -134,7 +134,7 @@ write_header_line(void *sd_server, char *line)
 }
 			
 static void
-write_assoc(void *sd_server, ASSOC *entry)
+write_assoc (void *sd_server, ASSOC *entry)
 {
 	if (entry->key) {
 		if (strcmp(entry->key, X_ANUBIS_RULE_HEADER) == 0)
@@ -146,7 +146,7 @@ write_assoc(void *sd_server, ASSOC *entry)
 }
 			
 void
-send_header(void *sd_server, LIST *list)
+send_header (void *sd_server, LIST *list)
 {
 	ASSOC *p;
 	ITERATOR *itr = iterator_create(list);
@@ -157,7 +157,7 @@ send_header(void *sd_server, LIST *list)
 }
 
 void
-send_string_list(void *sd_server, LIST *list)
+send_string_list (void *sd_server, LIST *list)
 {
 	char *p;
 	ITERATOR *itr = iterator_create(list);
@@ -185,7 +185,7 @@ send_string_list(void *sd_server, LIST *list)
 #define ST_DONE  3
 
 static void
-collect_body(MESSAGE *msg)
+collect_body (MESSAGE *msg)
 {
 	int nread;
 	char buf[LINEBUFFER+1];
@@ -241,7 +241,7 @@ collect_body(MESSAGE *msg)
 }
 
 void
-send_body(MESSAGE *msg, void *sd_server)
+send_body (MESSAGE *msg, void *sd_server)
 {
 	char *p;
 
@@ -276,7 +276,7 @@ send_body(MESSAGE *msg, void *sd_server)
 *******************/
 
 void
-smtp_session_transparent()
+smtp_session_transparent (void)
 {
 	char command[LINEBUFFER+1];
 	MESSAGE msg;
@@ -333,7 +333,7 @@ smtp_session_transparent()
 }
 
 void
-smtp_begin ()
+smtp_begin (void)
 {
 	char command[LINEBUFFER+1];
 
@@ -346,7 +346,7 @@ smtp_begin ()
 }
 
 void
-smtp_session()
+smtp_session (void)
 {
 	char command[LINEBUFFER+1];
 	MESSAGE msg;
@@ -376,7 +376,7 @@ smtp_session()
 *********************/
 
 static void
-save_command(MESSAGE *msg, char *line)
+save_command (MESSAGE *msg, char *line)
 {
 	int i;
 	ASSOC *asc = xmalloc(sizeof(*asc));
@@ -397,7 +397,7 @@ save_command(MESSAGE *msg, char *line)
 }
 
 static int
-handle_starttls(char *command)
+handle_starttls (char *command)
 {
 #ifdef USE_SSL
 	if (topt & T_SSL_FINISHED) {
@@ -479,14 +479,14 @@ handle_starttls(char *command)
 }
 
 static int
-process_command(MESSAGE *msg, char *command)
+process_command (MESSAGE *msg, char *command)
 {
 	char buf[LINEBUFFER+1];
 	
 	safe_strcpy(buf, command); /* make a back-up */
 	save_command(msg, buf);
 
-	change_to_lower(buf);
+	make_lowercase(buf);
 	
 	if (strncmp(buf, "starttls", 8) == 0) 
 		return handle_starttls(command);
@@ -494,7 +494,7 @@ process_command(MESSAGE *msg, char *command)
 }
 
 static int
-handle_ehlo(char *command, char *reply, size_t reply_size)
+handle_ehlo (char *command, char *reply, size_t reply_size)
 {
 	get_response_smtp(CLIENT, remote_server, reply, reply_size - 1);
 
@@ -596,13 +596,13 @@ handle_ehlo(char *command, char *reply, size_t reply_size)
 }
 
 static int
-transfer_command(MESSAGE *msg, char *command)
+transfer_command (MESSAGE *msg, char *command)
 {
 	char reply[2 * LINEBUFFER+1];
 	char buf[LINEBUFFER+1];
 
 	safe_strcpy(buf, command);
-	change_to_lower(buf);
+	make_lowercase(buf);
 	swrite(CLIENT, remote_server, command);
 	if (topt & T_ERROR)
 		return 0;
@@ -635,7 +635,7 @@ transfer_command(MESSAGE *msg, char *command)
 }
 
 void
-process_data(MESSAGE *msg)
+process_data (MESSAGE *msg)
 {
 	char buf[LINEBUFFER+1];
 
@@ -658,19 +658,18 @@ process_data(MESSAGE *msg)
 }
 	
 static void
-transfer_header(LIST *header_buf)
+transfer_header (LIST *header_buf)
 {
 	send_header(remote_server, header_buf);
 	swrite(CLIENT, remote_server, CRLF);
 }
-
 
 /***************
   MESSAGE BODY
 ****************/
 
 static void
-raw_transfer()
+raw_transfer (void)
 {
 	int nread;
 	char buf[LINEBUFFER+1];
@@ -684,7 +683,7 @@ raw_transfer()
 }
 
 void
-transfer_body(MESSAGE *msg)
+transfer_body (MESSAGE *msg)
 {
 	if (msg->boundary) {
 		send_body(msg, remote_server);
@@ -695,7 +694,6 @@ transfer_body(MESSAGE *msg)
 		send_body(msg, remote_server);
 	swrite(CLIENT, remote_server, "."CRLF);
 }
-
 
 /* EOF */
 
