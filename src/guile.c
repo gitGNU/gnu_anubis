@@ -130,7 +130,7 @@ guile_load_program(char *filename)
 static SCM
 eval_catch_body(void *list)
 {
-	return scm_primitive_eval_x((SCM)list);
+	return scm_primitive_eval((SCM)list);
 }
 
 static SCM
@@ -227,7 +227,7 @@ list_to_args(LIST *arglist)
 		} else
 			val = scm_makfrom0str(p);
 
-		SCM_SETCAR(cell, scm_list_2(scm_copy_tree(SCM_IM_QUOTE), val));
+		SCM_SETCAR(cell, scm_list_2(SCM_IM_QUOTE, val));
 			
 		if (head == SCM_EOL) 
 			head = cell;
@@ -282,9 +282,9 @@ guile_process_proc(LIST *arglist, MESSAGE *msg)
 
 	invlist = scm_append(
 		     SCM_LIST2(SCM_LIST3(procsym,
-					 SCM_LIST2(scm_copy_tree(SCM_IM_QUOTE),
+					 SCM_LIST2(SCM_IM_QUOTE,
 						   arg_hdr),
-					 SCM_LIST2(scm_copy_tree(SCM_IM_QUOTE),
+					 SCM_LIST2(SCM_IM_QUOTE,
 						   arg_body)),
 			       rest_arg));
 	res = scm_internal_lazy_catch(SCM_BOOL_T,
