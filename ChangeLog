@@ -2,6 +2,7 @@
 
 	* src/authmode.c (anubis_authenticate_mode): Fixed the bug,
 	where a specified config file was ignored.
+	* src/tunnel.c (smtp_begin): Send the EHLO command to MTA.
 	* THANKS: Added Jim Cheetham.
 
 	* src/*.[chly]: Indent all files using the GNU coding style.
