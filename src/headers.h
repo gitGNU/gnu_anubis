@@ -179,6 +179,7 @@
 #define DEFAULT_LOCAL_RCFILE ".anubisrc"
 #define DEFAULT_SSL_PEM "anubis.pem"
 #define DEFAULT_SIGFILE ".signature"
+#define DEFAULT_PIDFILE "anubis.pid"
 #define BEGIN_TRIGGER "@@"
 #define LF "\n"
 #define CRLF "\r\n"
@@ -330,6 +331,7 @@ int check_superuser (void);
 int check_username (char *);
 int check_filemode (char *);
 int check_filename (char *, time_t *);
+void write_pid_file (void);
 
 /* errs.c */
 void anubis_error (int, const char *, ...);
@@ -370,6 +372,7 @@ void translate_section_init (void);
 /* tunnel.c */
 void smtp_session (void);
 void smtp_session_transparent (void);
+void set_ehlo_domain (char *domain);
 
 /* message.c */
 void message_add_body (MESSAGE *, char *, char *);
