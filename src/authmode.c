@@ -319,7 +319,7 @@ asmtp_ehlo (enum asmtp_state state, ANUBIS_USER * usr)
 	if (!check_filename (secure.cert, NULL))
 	  {
 	    asmtp_reply (454, "TLS not available due to temporary reason");
-	    return 0;
+	    break;
 	  }
 
 	if (!secure.key)
@@ -327,7 +327,7 @@ asmtp_ehlo (enum asmtp_state state, ANUBIS_USER * usr)
 	else if (!check_filename (secure.key, NULL))
 	  {
 	    asmtp_reply (454, "TLS not available due to temporary reason");
-	    return 0;
+	    break;
 	  }
 
 	asmtp_reply (220, "Ready to start TLS");
@@ -339,7 +339,7 @@ asmtp_ehlo (enum asmtp_state state, ANUBIS_USER * usr)
 	if (!secure.server || (topt & T_ERROR))
 	  {
 	    asmtp_reply (454, "TLS not available" CRLF);
-	    return 0;
+	    break;
 	  }
 	remote_client = secure.server;
 	asmtp_capa_remove ("STARTTLS");
