@@ -62,7 +62,7 @@ gpgme_debug_info(GpgmeCtx ctx)
 	}
 }
 
-#define GPGME_REQ_VERSION "0.3.12" /* GPGME 0.3.12 or later */
+#define GPGME_REQ_VERSION "0.3.15" /* GPGME 0.3.15 or later */
 
 static int
 gpgme_init(void)
@@ -113,7 +113,10 @@ gpg_sign(char *gpg_data)
 		err = gpgme_op_keylist_start(ctx, gpg.sign_keys, 0);
 		if (!err) {
 			while ((err = gpgme_op_keylist_next(ctx, &key)) == 0)
+			{
 				err = gpgme_signers_add(ctx, key);
+				gpgme_key_release(key);
+			}
 		}
 		if (err && err != GPGME_EOF) {
 			anubis_error(HARD, _("GPGME: Cannot list keys: %s"),
@@ -270,7 +273,10 @@ gpg_sign_encrypt(char *gpg_data)
 		err = gpgme_op_keylist_start(ctx, gpg.sign_keys, 0);
 		if (!err) {
 			while ((err = gpgme_op_keylist_next(ctx, &key)) == 0)
+			{
 				err = gpgme_signers_add(ctx, key);
+				gpgme_key_release(key);
+			}
 		}
 		if (err && err != GPGME_EOF) {
 			anubis_error(HARD, _("GPGME: Cannot list keys: %s"),
