@@ -33,5 +33,14 @@ anubis_pat add2.pat
 # Add a header field to one message from the several ones
 anubis_pat add3.pat
 
+# Delete headers
+anubis_pat del1.pat
+# Delete headers from all messages
+anubis_pat del2.pat
+# Delete headers from some messages
+anubis_pat del3.pat
+# Delete all headers from a message
+anubis_pat del4.pat
+
 # End of parse.exp
 
