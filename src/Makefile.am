@@ -32,7 +32,6 @@ localedir = $(datadir)/locale
 
 DEFS = @DEFS@ -DLOCALEDIR=\"$(localedir)\"
 INCLUDES = @INCLUDES@
-DEFAULT_INCLUDES = -I$(top_srcdir) -I$(top_srcdir)/intl -I$(srcdir)
 
 ## EOF
 
