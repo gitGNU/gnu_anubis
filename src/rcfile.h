@@ -174,7 +174,7 @@ extern char *cfg_file;
 void verbatim(void);
 void lex_clear_state(void);
 
-void error_sync_begin();
+int error_sync_begin();
 
 RC_SECTION *rc_section_lookup(RC_SECTION *, char *);
 void rc_section_link(RC_SECTION **, RC_SECTION *);

@@ -387,12 +387,12 @@ rc_open(char *name)
 	return 0;
 }
 
-void
+int
 error_sync_begin()
 {
-        int c;
+	int c;
 	
-        while ((c = yylex()) > 0) {
+	while (yyin && (c = yylex()) > 0) {
                 if (c == T_BEGIN) {
 			yyless(0);
 			break;
@@ -402,5 +402,6 @@ error_sync_begin()
 			break;
 		}
 	}
+	return c;
 }
 
