@@ -2,7 +2,6 @@
  TO DO
  =====
 
-* Synchronize ssl.c with the recent changes. 
 * anubisusr.c: Provide (configuration file||command line||envar) options
 to hold authentication credentials. Turn off echo when asking for
 security-sensitive info.
