@@ -2,7 +2,7 @@
    authmode.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003 The Anubis Team.
+   Copyright (C) 2003, 2004 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -314,6 +314,7 @@ anubis_smtp (ANUBIS_USER *usr)
 			return EXIT_FAILURE;
 
 		case state_auth:
+			xdatabase_enable();
 			break;
 		}
 	}
@@ -392,6 +393,10 @@ anubis_authenticate_mode (int sd_client, struct sockaddr_in *addr)
 		strncpy(session.client, usr.username, sizeof session.client);
 	else
 		strncpy(session.client, usr.smtp_authid, sizeof session.client);
+
+	if (usr.rc_file_name) 
+		session.rc_file_name = usr.rc_file_name;
+	
 	parse_transmap(&rc,
 		       session.client,
 		       inet_ntoa(addr->sin_addr),
