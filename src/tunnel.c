@@ -282,12 +282,12 @@ process_command(void *sd_client, void *sd_server, char *command, int size)
 
 		if (secure.cert == 0)
 			secure.cert = allocbuf(DEFAULT_SSL_PEM, MAXPATHLEN);
-		if (check_filename(secure.cert) == 0)
+		if (check_filename(secure.cert, NULL) == 0)
 			return;
 		if (secure.key == 0)
 			secure.key = allocbuf(secure.cert, MAXPATHLEN);
 		else {
-			if (check_filename(secure.key) == 0)
+			if (check_filename(secure.key, NULL) == 0)
 				return;
 		}
 

@@ -142,7 +142,7 @@ make_local_connection(char *exec_path, char **exec_args)
 	char **pargs;
 	char args[LINEBUFFER+1];
 
-	if (check_filename(exec_path) == 0)
+	if (check_filename(exec_path, 0) == 0)
 		return -1;
 
 	memset(args, 0, LINEBUFFER + 1);
