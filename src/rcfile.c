@@ -258,6 +258,7 @@ process_rcfile (int method)
 #define KW_ESMTP_REQUIRE_ENCRYPTION 29
 #define KW_INCOMING_MAIL_RULE       30
 #define KW_OUTGOING_MAIL_RULE       31
+#define KW_HANG                     32
 
 char **
 list_to_argv (ANUBIS_LIST * list)
@@ -275,6 +276,12 @@ list_to_argv (ANUBIS_LIST * list)
   argv[i] = NULL;
   return argv;
 }
+
+/* When HANG=NUMBER is set in CONTROL section, `_anubis_hang' is set and
+   Anubis will sleep for one second intervals, decrementing `_anubis_hang'
+   until it's zero.  Thus you can force the program to continue by attaching
+   a debugger and setting it to 0 yourself.  */
+static volatile int _anubis_hang;
 
 int
 control_parser (int method, int key, ANUBIS_LIST * arglist,
@@ -534,6 +541,23 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
   case KW_OUTGOING_MAIL_RULE:
     outgoing_mail_rule = strdup (arg);
     break;
+
+  case KW_HANG:
+    {
+      int keep_termlevel = options.termlevel;
+
+      _anubis_hang = atoi (arg ? arg : "3600");
+      options.termlevel = DEBUG;
+      anubis_warning (0, ngettext ("Child process suspended for %lu second",
+				   "Child process suspended for %lu seconds",
+				   _anubis_hang),
+		      _anubis_hang);
+      options.termlevel = keep_termlevel;
+      
+      while (_anubis_hang-- > 0)
+	sleep (1);
+    }
+    break;
     
   default:
     return RC_KW_UNKNOWN;
@@ -581,6 +605,7 @@ static struct rc_secdef_child init_supervisor_sect_child = {
 struct rc_kwdef client_kw[] = {
   { "logfile",  KW_LOGFILE },
   { "loglevel", KW_LOGLEVEL },
+  { "HANG",     KW_HANG },
   { NULL },
 };
 
