@@ -44,7 +44,7 @@ struct anubis_sql_db
   char *authid;
   char *passwd;
   char *user;
-  char *rccol;
+  char *rcfile;
 };
 
 #define ERR_MISS         0

@@ -33,7 +33,7 @@
 
    PROTO://user:password@host/dbname;
           table=STRING;authid=STRING;passwd=STRING[;account=STRING]
-	  [;rccol=STRING][;port=NUMBER][;socket=STRING][;bufsize=NUMBER]
+	  [;rcfile=STRING][;port=NUMBER][;socket=STRING][;bufsize=NUMBER]
 
    Where PROTO is one of
      mysql         MySQL database
@@ -64,7 +64,7 @@ sql_db_get (void *d, const char *key, ANUBIS_USER * rec, int *errp)
   snprintf (amp->buf, amp->bufsize,
 	    "SELECT %s,%s,%s,%s FROM %s WHERE %s='%s'",
 	    amp->authid,
-	    amp->passwd, amp->user, amp->rccol, amp->table, amp->authid, key);
+	    amp->passwd, amp->user, amp->rcfile, amp->table, amp->authid, key);
 
   *errp = amp->query (amp);
   if (*errp)
@@ -100,7 +100,7 @@ sql_db_list (void *d, ANUBIS_LIST * list, int *ecode)
 
   snprintf (amp->buf, amp->bufsize,
 	    "SELECT %s,%s,%s,%s FROM %s",
-	    amp->authid, amp->passwd, amp->user, amp->rccol, amp->table);
+	    amp->authid, amp->passwd, amp->user, amp->rcfile, amp->table);
 
   *ecode = amp->query (amp);
   if (*ecode)
@@ -160,7 +160,7 @@ sql_db_put (void *d, const char *key, ANUBIS_USER * rec, int *errp)
 	    amp->authid,
 	    amp->passwd,
 	    amp->user,
-	    amp->rccol,
+	    amp->rcfile,
 	    rec->smtp_authid,
 	    rec->smtp_passwd, MSTR (rec->username), MSTR (rec->rcfile_name));
   *errp = amp->query (amp);

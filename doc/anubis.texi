@@ -531,9 +531,9 @@ Specifies the name of a column in @var{table} which holds
 the name of system account to be used for this @samp{AUTHID}. Default
 is @samp{account}.
 
-@item @var{rccol}=@var{string}
+@item @var{rcfile}=@var{string}
 Specifies the name of a column in @var{table} which holds
-path to the user's configuration file. Default is @samp{rccol}.
+path to the user's configuration file. Default is @samp{rcfile}.
 
 @FIXME{An example, please.}
 

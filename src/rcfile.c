@@ -218,6 +218,7 @@ process_rcfile (int method)
 #endif
 }
 
+
 /* ************************** The CONTROL Section ************************* */
 #define KW_BIND                 0
 #define KW_TERMLEVEL            1

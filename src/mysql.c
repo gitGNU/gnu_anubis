@@ -34,7 +34,7 @@
 
    mysql://user:password@host/dbname;
           table=STRING;authid=STRING;passwd=STRING[;account=STRING]
-	  [;rccol=STRING][;port=NUMBER][;socket=STRING][;bufsize=NUMBER]
+	  [;rcfile=STRING][;port=NUMBER][;socket=STRING][;bufsize=NUMBER]
 */
 
 struct mysql_db_data
@@ -126,7 +126,7 @@ mysql_db_open (void **dp, ANUBIS_URL * url, enum anubis_db_mode mode,
   const char *authid = anubis_url_get_arg (url, "authid");
   const char *passwd = anubis_url_get_arg (url, "passwd");
   const char *user = anubis_url_get_arg (url, "account");
-  const char *rccol = anubis_url_get_arg (url, "rccol");
+  const char *rcfile = anubis_url_get_arg (url, "rcfile");
   const char *portstr = anubis_url_get_arg (url, "port");
   const char *s = anubis_url_get_arg (url, "bufsize");
   int port = 0;
@@ -142,8 +142,8 @@ mysql_db_open (void **dp, ANUBIS_URL * url, enum anubis_db_mode mode,
     passwd = "passwd";
   if (!user)
     user = "account";
-  if (!rccol)
-    rccol = "rcfile";
+  if (!rcfile)
+    rcfile = "rcfile";
 
   if (s)
     {
@@ -195,7 +195,7 @@ mysql_db_open (void **dp, ANUBIS_URL * url, enum anubis_db_mode mode,
   amp->authid = strdup (authid);
   amp->passwd = strdup (passwd);
   amp->user = strdup (user);
-  amp->rccol = strdup (rccol);
+  amp->rcfile = strdup (rcfile);
 
   *dp = amp;
   return ANUBIS_DB_SUCCESS;
@@ -215,7 +215,7 @@ mysql_db_close (void *d)
   free (amp->authid);
   free (amp->passwd);
   free (amp->user);
-  free (amp->rccol);
+  free (amp->rcfile);
   free (amp->buf);
   return ANUBIS_DB_SUCCESS;
 }
