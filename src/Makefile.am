@@ -23,7 +23,7 @@
 ##
 
 sbin_PROGRAMS = anubis
-anubis_LDADD = @LIBOBJS@ @LIBINTL@ $(GUILE_LIBS)
+anubis_LDADD = @LIBOBJS@ @LIBINTL@ $(GUILE_LIBS) @LIBGNUTLS_LIBS@
 anubis_SOURCES = main.c extern.h headers.h mem.c mem.h env.c errs.c \
 	log.c list.c list.h misc.c regex.c exec.c net.c proxy.c daemon.c \
 	auth.c map.c message.c esmtp.c tunnel.c rc.c rcfile-gram.c \
@@ -51,7 +51,7 @@ rcfile-gram.c rcfile-gram.h: $(srcdir)/rcfile.y
 
 localedir = $(datadir)/locale
 DEFS = @DEFS@ -DLOCALEDIR=\"$(localedir)\"
-INCLUDES = @INCLUDES@ -I$(top_srcdir)/intl
+INCLUDES = @INCLUDES@ @LIBGNUTLS_CFLAGS@ -I$(top_srcdir)/intl
 
 ## EOF
 

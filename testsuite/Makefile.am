@@ -26,6 +26,9 @@ test_dirs = lib anubis
 noinst_PROGRAMS = mta
 SUBDIRS = etc data
 
+mta_LDADD = @LIBGNUTLS_LIBS@
+INCLUDES = @LIBGNUTLS_CFLAGS@
+
 dist-hook:
 	here=`cd $(top_builddir)/$(subdir) && pwd`; \
 	srcdir=`cd $(srcdir) && pwd`; \
