@@ -1,3 +1,72 @@
+2003-02-26  Sergey Poznyakoff 
+
+	Changed the message processing algorithm to process a
+	message as a whole. The rcfile grammar is changed
+	accordingly. The previous sources (with linie-by-line
+	message processing) are tagged 'ver-3-with-per-line-proc'.
+	TODO: remailer support.
+	
+	* src/list.c: New files.
+	* src/list.h: New files.
+	* src/Makefile.am: Added new files
+	* src/extern.h (struct line, struct message_struct)
+	  (struct gpg_struct): Removed.
+	  (struct session_struct): Removed unused members.
+	  (gpg, mopt): Removed
+	* src/headers.h (BODY,X_ANUBIS_RULE_HEADER): New define.
+	  Removed M_.* defines
+	  (ASSOC, MESSAGE): New aggregate types.
+	  (new_element,destroy_list): Removed.
+	  (rcfile_process_cond): Removed.
+	  (destroy_assoc_list, destroy_string_list): New functions.
+	  (rcfile_process_section): Changed declaration.
+	* src/main.h (gpg, mopt): Removed.
+	* src/map.c (parse_transmap): Updated call to
+	  rcfile_process_section.
+	  (translate_parser): Changed declaration
+	* src/files.c (check_all_files): Removed.
+	  (message_append_text_file)
+	  (message_append_signature_file): New functions.
+	* src/gpg.c (gpg_encrypt_to_remailer, check_gpg): Removed.
+	  (gpg_proc): New function.
+	  (gpg_parser): Rewritten.
+	* src/guile.c (guile_rewrite_line): Temporarly removed.
+	  (guile_to_anubis,anubis_to_guile): Rewritten.
+	  (guile_process_proc): Rewritten.
+	  (guile_process_list,guile_postprocess_list)
+	  (guile_postprocess_list,guile_proclist_empty): Removed.
+	  (guile_parser): Rewritten.
+	* src/misc.c (new_element): Removed.
+	  (destroy_string_list, destroy_assoc_list): New functions.
+	  (header_assoc, assoc_to_header): New functions.
+	* src/quit.c (free_mem): Updated.
+	* src/rc.c (control_parser,tls_parser,rule_parser): Rewritten.
+	  (all_parser): Removed.
+	  (rule_section_init,rc_system_init): Removed ALL section.
+	  (rcfile_process_cond): Removed.
+	  (rcfile_process_section): Changed declaration.
+	* src/rcfile.h (RC_EXPR): New data type.
+	  (enum rc_node_type): Replaced rc_node_re with rc_node_expr.
+	  (struct rc_node): Likewise.
+	  (struct rc_expr): New data type.
+	  (struct rc_cond): Removed method member.
+	  (rc_kw_parser_t): Changed declaration.
+	  (rc_run_section): Likewise.
+	* src/rcfile.l: Added "NOT" token.
+	* src/rcfile.y: Grammar rewritten. The support for old compatibility
+	  syntax (if header =^Subject) has been removed. The new syntax
+	  is
+		if header[Subject] "regexp"
+	  Multiple conditions are allowed:
+
+		if header[Subject] "Re: .*" and body ".*found.*"
+	* src/tunnel.c: Rewritten.
+
+	* testsuite/etc/gpg.in: Updated to new syntax.
+	* testsuite/etc/std.in: Likewise.
+	* testsuite/etc/simple.in: Likewise.
+	* testsuite/etc/std.pat: Likewise.
+	
 2003-02-20  Wojciech Polak
 
 	* configure.ac: Removed unused variables.
