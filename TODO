@@ -2,9 +2,6 @@
  TO DO
  =====
 
-* New settings (system configuration file)
-** `forbid-user-settings = yes | no'
-
 * New action commands
 ** `reject' action command
 

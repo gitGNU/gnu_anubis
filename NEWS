@@ -45,6 +45,7 @@
 * Remailers and ROT-13 support has been removed from
   the main engine (moved to Guile layer).
 * Added testsuite (make check).
+* Added new security option `drop-unknown-user'.
 * New Ukrainian, Malay, and Romanian message translations.
 * Added Polish and Russian message translations.
 

@@ -1,3 +1,12 @@
+2003-07-20  Wojciech Polak
+
+	* NEWS: Updated.
+	* TODO: Likewise.
+	* src/rc.c: Moved KW_DROP_UNKNOWN_USER to init_supervisor_kw.
+	(KW_ALLOW_NOTPRIVILEGED): Renamed to KW_USER_NOTPRIVILEGED.
+	* src/list.h: Clean up with prototypes.
+	* src/gpg.c: Likewise.
+
 2003-07-20  Sergey Poznyakoff
 
 	* NEWS: Updated
