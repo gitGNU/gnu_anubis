@@ -175,14 +175,15 @@ argcv_split(char *buf, int *pargc, char ***pargv)
 	return 0;
 }
 
-int
+void
 argcv_free(int argc, char **argv)
 {
+	if (argc == 0 || argv == NULL)
+		return;
 	while (--argc >= 0)
 		if (argv[argc])
 			free(argv[argc]);
 	free(argv);
-	return 1;
 }
 
 /* FIXME: Move to the library and unify with hostname_error() */
@@ -517,7 +518,7 @@ parse_netrc(const char *filename)
 	size_t n = 0;
 	int def_argc = 0;
 	char **def_argv;
-	char **p_argv;
+	char **p_argv = NULL;
 	int line = 0;
 	
 	VDETAIL(1,(_("Opening configuration file %s: "), filename));
