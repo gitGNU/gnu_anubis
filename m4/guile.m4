@@ -1,5 +1,5 @@
 dnl This file is part of GNU mailutils.
-dnl Copyright (C) 2001 Free Software Foundation, Inc.
+dnl Copyright (C) 2001,2003 Free Software Foundation, Inc.
 dnl
 dnl This program is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -45,11 +45,11 @@ AC_DEFUN(MU_CHECK_GUILE,
    fi
 
    if test $GUILE_CONFIG != no; then
-     AC_MSG_CHECKING(for guile version 1.4 or higher)
+     AC_MSG_CHECKING(for guile version 1.6 or higher)
      GUILE_VERSION=`($GUILE_CONFIG --version 2>&1; echo '')|sed -n 's/guile-config - Guile version \([[0-9]][[0-9]]*\)\.\([[0-9]][[0-9]]*\).*/\1\2/p'`
      case "x$GUILE_VERSION" in
      x[[0-9]]*)
-       if test $GUILE_VERSION -lt 14; then
+       if test $GUILE_VERSION -lt 16; then
          AC_MSG_RESULT(Nope. Version number too low.)
          mu_cv_lib_guile=no
        else
@@ -80,7 +80,7 @@ AC_DEFUN(MU_CHECK_GUILE,
  MU_RESULT_ACTIONS([mu_cv_lib_guile],[LIBGUILE],[$2],[$3])
  AC_MSG_RESULT(${cached}$mu_cv_lib_guile)
  if test $mu_cv_lib_guile = yes; then
-    if test $GUILE_VERSION -gt 14; then
+    if test $GUILE_VERSION -gt 16; then
       LIBS="$LIBS $GUILE_LIBS"
       CFLAGS="$CFLAGS $GUILE_INCLUDES"
       AC_CHECK_FUNCS(scm_long2num scm_cell scm_list_1 scm_list_n scm_c_define\
