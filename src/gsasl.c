@@ -28,6 +28,7 @@
 #include <gsasl.h>
 
 static Gsasl_ctx *ctx;   
+static LIST *anubis_mech_list;
 
 
 /* Basic I/O Functions */
@@ -242,11 +243,11 @@ anubis_auth_gsasl (char *auth_type, char *arg, char **username)
             length initial response is sent as a single equals sign */
 	if (input && strcmp(input, "=") == 0)
 		input = "";
-	
+
 	while ((rc = auth_step_base64 (sess_ctx, input, &output, &output_len))
 	       == GSASL_NEEDS_MORE) {
 		asmtp_reply (334, "%s", output);
-		recvline_ptr(CLIENT, remote_server, &input, &input_size);
+		recvline_ptr(SERVER, remote_client, &input, &input_size);
 		remcrlf(input);
 		if (strcmp (input, "*") == 0) {
 			asmtp_reply (501, "AUTH aborted");
@@ -289,7 +290,65 @@ anubis_auth_gsasl (char *auth_type, char *arg, char **username)
 }
 
 
+
+/* Converts the auth method list from a textual representation to
+   a LIST of string values */
+static LIST *
+auth_method_list(char *input)
+{
+	char *p;
+	LIST *list = list_create();
+	
+	for (p = strtok(input, " \t"); p; p = strtok(NULL, " \t"))
+		list_append(list, strdup(p));
+	return list;
+}
+
+/* Converts the authentication method LIST to its textual representation. */
+static void
+auth_list_to_string(LIST *list, char *buf, size_t bufsize)
+{
+	ITERATOR *itr = iterator_create(list);
+	char *p;
+	
+	if (!itr)
+		return;
+	for (p = iterator_first(itr); p; p = iterator_next(itr)) {
+		size_t len = strlen(p);
+		if (len + 1 >= bufsize)
+			break;
+		strcpy(buf, p);
+		buf += len;
+		*buf++ = ' ';
+		bufsize -= len + 1;
+	}
+	iterator_destroy(&itr);
+	*buf = 0;
+}
+
+/* Sets the list of allowed authentication mechanisms from its
+   argument */
+void
+anubis_set_mech_list(LIST *list)
+{
+	ITERATOR *itr = iterator_create(list);
+	char *p;
+
+	if (!itr)
+		return;
+	anubis_mech_list = list_create();
+	for (p = iterator_first(itr); p; p = iterator_next(itr)) 
+		list_append(anubis_mech_list, strdup(p));
+	iterator_destroy(&itr);
+}
+
 /* Capability list handling */
+
+static int
+name_cmp(void *item, void *data)
+{
+	return strcmp(item, data);
+}
 
 static void
 auth_gsasl_capa_init ()
@@ -297,21 +356,28 @@ auth_gsasl_capa_init ()
 	int rc;
 	char *listmech;
 	size_t size;
-
+	
 	rc = gsasl_server_listmech(ctx, NULL, &size);
 	if (rc != GSASL_OK)
 		return;
-
+	size++;
 	listmech = malloc(size);
-	if (!listmech)
+	if (!listmech) 
 		return;
-  
+	
 	rc = gsasl_server_listmech(ctx, listmech, &size);
-	if (rc != GSASL_OK)
+	if (rc != GSASL_OK) {
+		anubis_error(HARD, "%s", gsasl_strerror(rc));
 		return;
+	}
 
-	/*FIXME: Configurable subset of auth mechanisms and
-	  intersection function*/
+	if (anubis_mech_list) {
+		LIST *mech = auth_method_list(listmech);
+		LIST *p = list_intersect(mech, anubis_mech_list, name_cmp);
+		auth_list_to_string(p, listmech, size);
+		list_destroy(&p, NULL, NULL);
+		list_destroy(&mech, anubis_free_list_item, NULL);
+	}
 	asmtp_capa_add_prefix("AUTH", listmech);
       
 	free(listmech);
