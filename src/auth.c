@@ -32,6 +32,9 @@ auth_tunnel(void)
 	open_rcfile(CLIENT);
 	read_rcfile(CLIENT);
 	read_rcfile_allsection();
+#ifdef WITH_GUILE
+	read_rcfile_guile();
+#endif
 	rule_position = get_position(BEGIN_RULE);
 	if (rule_position)
 		info(DEBUG, _("The %s section has been found. Processing..."), "RULE");
