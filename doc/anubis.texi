@@ -50,6 +50,7 @@ documents GNU Anubis Version @value{VERSION}.
 @menu
 * Overview::                        Preliminary information.
 * Configuration::                   Writing your own configuration files.
+* Rule System::                     How to use the Rule System.
 * Invoking Anubis::                 How to invoke the GNU @command{anubis}.
 * Sample Beginning::                Here is a sample beginning.
 * TLS/SSL::                         Using the TLS/SSL Encryption.
@@ -126,7 +127,7 @@ to the proxy server, which forwards it to the real server outside, collects
 the response, and passes it back to the internal host.
 
 
-@node Configuration, Invoking Anubis, Overview, Top
+@node Configuration, Rule System, Overview, Top
 @chapter Configuration
 @cindex configuration
 @cindex settings
@@ -181,8 +182,7 @@ rules).
 @menu
 * CONTROL Section::
 * TRANSLATION Section::
-* GUILE section::
-* Rule System::
+* GUILE Section::
 @end menu
 
 
@@ -390,7 +390,7 @@ user-notprivileged = @var{username}  @r{(system config only)}
 @end example
 
 
-@node TRANSLATION Section, GUILE section, CONTROL Section, Configuration
+@node TRANSLATION Section, GUILE Section, CONTROL Section, Configuration
 @section The TRANSLATION Section
 @cindex TRANSLATION section, The
 
@@ -430,17 +430,18 @@ and this means that @emph{all} users at @samp{somewhere.net} are allowed to use
 the local john's configuration file.
 
 
-@node GUILE section, Rule System, TRANSLATION Section, Configuration
-@section The GUILE section
+@node GUILE Section, , TRANSLATION Section, Configuration
+@section The GUILE Section
 @cindex GUILE section, The
 @cindex Guile
+@cindex extension language
 @cindex Scheme
 
 [This section is missing :-P]
 
 
-@node Rule System, , GUILE section, Configuration
-@section The Rule System (The RULE Section)
+@node Rule System, Invoking Anubis, Configuration, Top
+@chapter The Rule System
 @cindex Basic regular expressions
 @cindex Extended regular expressions
 @cindex Perl regular expressions
@@ -474,14 +475,14 @@ and the @w{@code{---END---}} line ends it.
 
 
 @node Grammar, Action List, Rule System, Rule System
-@subsection Grammar (The Rule System)
+@section Grammar
 @cindex grammar
 
 [This section is missing :-P]
 
 
 @node Action List, Trigger, Grammar, Rule System
-@subsection The Action List
+@section The Action List
 @cindex Action List
 
 An @dfn{action list} is a list of action commands, which control processing
@@ -496,7 +497,7 @@ a long time.
 * Editing Headers::     How to edit a message header on-the-fly.
 * Inserting Files::     How to append text files to an outgoing message.
 * Mail Encryption::     How to encrypt a message on-the-fly.
-* Remailers::           How to enable the support for Remailers Type-I.
+* Scheme Programs::     How to execute an external Scheme programs.
 * External Processor::  How to process a message body using an external tool.
 
 * Command Summary::     A short command summary.
@@ -504,42 +505,48 @@ a long time.
 @end menu
 
 @node Editing Headers, Inserting Files, Action List, Action List
-@subsubsection Editing Headers
+@subsection Editing Headers
 @cindex message header
 
 @table @samp
-@item add = @var{header-line}
-This action command adds the @var{header-line} to an outgoing
-message. For example:
+@item add header[@var{key}] @var{value}
+This action command adds a header line to an outgoing message.
+The "header" keyword may be omitted. A @var{key} is the header
+name. For example:
 
 @example
-add = X-Comment: GNU's Not Unix!
+add header[X-Comment1] "GNU's Not Unix!"
+add [X-Comment2] "Support FSF!"
 @end example
 
-@item remove = @var{header-line} (a regular expression)
-This action command removes the header lines that match @var{header-line}
-from an outgoing message. This has to be a regular expression.
-For example:
+@item remove header[@var{key}]
+This action command removes the header lines that match a pattern
+from an outgoing message. The "header" keyword may be omitted.
+A @var{key} is the header name and it can be a regular expression
+matching a set of header names for "remove". For example:
 
 @example
-remove =^X-Mailer:
+remove header["^X-Mailer"]
+remove ["^X-.*"]
 @end example
 
-This will remove the @samp{X-Mailer:} line from an outgoing
-message.
+The first example will remove the @samp{X-Mailer:} line from
+an outgoing message, and the second one will remove all "X-*"
+header lines.
 
-@item modify = @var{old-header-line} >> @var{new-header-line}
+@item modify header[@var{key}] [@var{new-key}] @var{value}
 This action command modifies a message header line (entirely or partly).
-An old header line (must be a regular expression) and a new header line
-are separated with @code{ >> }, i.e. @code{@key{SPC}>>@key{SPC}}.
+The "header" keyword may be omitted. A @var{key} is the header name.
+It may be a regular expression matching a set of header names.
+A @var{new-key} is optional.
 
 For example, the following code will change the @samp{Reply-To:}
 line only if you would send an email to @url{friend@@somewhere.net}.
 
 @example
 @group
-if header =^To:.*<?friend@@somewhere.net>?
-   modify =^Reply-To: >> Reply-To: private@@somewhere.net
+if header[To] = ".*<?friend@@somewhere.net>?"
+   modify header[Reply-To] "private@@somewhere.net"
 fi
 @end group
 @end example
@@ -549,8 +556,8 @@ line to @samp{X-Mailer: The Big Boss} entirely.
 
 @example
 @group
-if header =^X-Mailer: PINE
-   modify =^X-Mailer: >> X-Mailer: The Big Boss
+if header[X-Mailer] = PINE
+   modify header[X-Mailer] "The Big Boss"
 fi
 @end group
 @end example
@@ -560,8 +567,8 @@ and @dfn{back-references}, you can make a substitution, like this:
 
 @example
 @group
-if header =^X-Mailer: (.*)
-   modify =^X-Mailer: >> X-Mailer: The lousy mailer \1
+if header[X-Mailer] = "(.*)"
+   modify [X-Mailer] "The lousy mailer \1"
 fi
 @end group
 @end example
@@ -569,8 +576,9 @@ fi
 It is allowed to make up to nine substitutions (range: \1---\9).
 @end table
 
+
 @node Inserting Files, Mail Encryption, Editing Headers, Action List
-@subsubsection Inserting Files
+@subsection Inserting Files
 
 @table @samp
 @item signature-file-append = @var{yes-or-no}
@@ -589,8 +597,8 @@ This action command is rarely useful.
 @end table
 
 
-@node Mail Encryption, Remailers, Inserting Files, Action List
-@subsubsection Mail Encryption
+@node Mail Encryption, Scheme Programs, Inserting Files, Action List
+@subsection Mail Encryption
 @cindex GNU Privacy Guard, GnuPG
 @cindex Pretty Good Privacy, PGP
 @cindex GPG/PGP private key
@@ -637,7 +645,25 @@ gpg-passphrase = @var{passphrase}
 gpg-sign = yes
 @end group
 @end example
+@end table
 
+
+@node Scheme Programs, External Processor, Mail Encryption, Action List
+@subsection Executing Scheme Programs
+@cindex Scheme
+@cindex Guile
+
+@menu
+* ROT-13::          ROT-13 support.
+* Remailers::       How to enable the support for Remailers Type-I.
+@end menu
+
+
+@node ROT-13, Remailers, Scheme Programs, Scheme Programs
+@subsubsection ROT-13
+@cindex ROT-13
+
+@table @samp
 @item rot13-subject = @var{yes-or-no}
 This command enables the simple ROT-13 message subject encoding.
 Value @samp{no} is the default. The ROT-13 encoding is a simple form
@@ -651,7 +677,7 @@ Value @samp{no} is the default.
 @end table
 
 
-@node Remailers, External Processor, Mail Encryption, Action List
+@node Remailers, , ROT-13, Scheme Programs
 @subsubsection Remailers Type-I
 @cindex remailer
 
@@ -694,8 +720,8 @@ and it is a random delay. Value @samp{no} is the default.
 @end table
 
 
-@node External Processor, Command Summary, Remailers, Action List
-@subsubsection Using an External Processor
+@node External Processor, Command Summary, Scheme Programs, Action List
+@subsection Using an External Processor
 
 @table @samp
 @item external-body-processor = @var{file-name} [@var{args}]
@@ -704,41 +730,34 @@ which works on standard input and output. It could be an additional
 crypto engine, a spell checker, some text generator, whatever.
 @end table
 
+
 @node Command Summary, Quick Example, External Processor, Action List
-@subsubsection Command Summary
+@subsection Command Summary
 
 @example
 @group
-add = @var{header-line}
-remove = @var{header-line} (a regular expression)
-modify = @var{old-header-line} >> @var{new-header-line}
+add header[@var{key}] @var{value}
+remove header[@var{key}] @var{value}
+modify header[@var{key}] [@var{new-key}] @var{value}
 signature-file-append = @var{yes-or-no}
 body-append = @var{file-name}
 body-clear-append = @var{file-name}
 gpg-passphrase = @var{passphrase}
 gpg-encrypt = @var{gpg-keys}
 gpg-sign = @var{passphrase} or @samp{yes} if @samp{gpg-passphrase} is specified.
-rot13-subject = @var{yes-or-no}
-rot13-body = @var{yes-or-no}
-rm-rrt = @var{email-address}
-rm-post = @var{news-group}
-rm-gpg = @var{gpg-key}
-rm-header = @var{header-line}
-rm-lt = @var{time}
-rm-rlt = @var{yes-or-no}
 external-body-processor = @var{file-name} [@var{args}]
 @end group
 @end example
 
 
 @node Quick Example, , Command Summary, Action List
-@subsubsection Quick Example
+@subsection Quick Example
 
 [This section is missing :-P]
 
 
 @node Trigger, , Action List, Rule System
-@subsection The Trigger
+@section The Trigger
 @cindex Trigger, The
 
 Adding the @samp{@@@@@var{rule-name}} code to your message header line,
@@ -780,7 +799,7 @@ while using a substitution and back-references:
 ---BEGIN RULE---
 rule "gpg-encrypt:(.*)"
    gpg-encrypt = \1
-   add = X-GPG-Comment: Encrypted for \1
+   add header[X-GPG-Comment] "Encrypted for \1"
 done
 ---END---
 @end group
@@ -794,7 +813,7 @@ without creating a separate rules for each user; thanks to back-references,
 those 3---4 lines are enough.
 
 
-@node Invoking Anubis, Sample Beginning, Configuration, Top
+@node Invoking Anubis, Sample Beginning, Rule System, Top
 @chapter Invoking GNU Anubis
 @cindex command line
 
