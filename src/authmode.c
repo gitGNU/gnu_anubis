@@ -252,13 +252,12 @@ asmtp_init(enum asmtp_state state)
 }
 
 static enum asmtp_state
-asmtp_ehlo (enum asmtp_state state)
+asmtp_ehlo (enum asmtp_state state, ANUBIS_USER *usr)
 {
 	char *command = NULL;
 	size_t s = 0;
 	char *mech;
 	char *init_input;
-	char *user;
 	
 	recvline_ptr(SERVER, remote_client, &command, &s);
 
@@ -266,10 +265,8 @@ asmtp_ehlo (enum asmtp_state state)
 	case KW_AUTH:
 		mech = get_command_arg ();
 		init_input = get_command_arg ();
-		if (anubis_auth_gsasl (mech, init_input, &user) == 0) {
-			strncpy(session.client, user, sizeof(session.client));
+		if (anubis_auth_gsasl (mech, init_input, usr) == 0) 
 			state = state_auth;
-		}
 		break;
 		
 	case KW_QUIT:
@@ -295,7 +292,7 @@ asmtp_ehlo (enum asmtp_state state)
 }
 
 static int
-anubis_smtp ()
+anubis_smtp (ANUBIS_USER *usr)
 {
 	enum asmtp_state state;
 
@@ -308,7 +305,7 @@ anubis_smtp ()
 			break;
 			
 		case state_ehlo:
-			state = asmtp_ehlo (state);
+			state = asmtp_ehlo (state, usr);
 			break;
 			
 		case state_quit:
@@ -338,46 +335,34 @@ int
 anubis_get_db_record(char *username, ANUBIS_USER *usr)
 {
 	void *db;
-	static ANUBIS_USER cache_usr;
 	int rc;
 
-	if (cache_usr.smtp_authid == 0
-	    || strcmp(username, cache_usr.smtp_authid)) {
-		anubis_db_free_record(&cache_usr);
-			
-		if (!anubis_dbtype
-		    || anubis_db_open(anubis_dbtype,
-				      anubis_dbarg, anubis_db_rdonly,
-				      &db) != ANUBIS_DB_SUCCESS)
-			return ANUBIS_DB_FAIL;
+	if (!anubis_dbtype
+	    || anubis_db_open(anubis_dbtype,
+			      anubis_dbarg, anubis_db_rdonly,
+			      &db) != ANUBIS_DB_SUCCESS)
+		return ANUBIS_DB_FAIL;
 		
-		rc = anubis_db_get_record(db, username, &cache_usr);
-		switch (rc) {
-		case ANUBIS_DB_SUCCESS:
-			info(VERBOSE,
-			     _("Found record for %s"), username);
-			break;
+	rc = anubis_db_get_record(db, username, usr);
+	switch (rc) {
+	case ANUBIS_DB_SUCCESS:
+		info(VERBOSE,
+		     _("Found record for %s"), username);
+		break;
 			
-		case ANUBIS_DB_FAIL:
-			memset(&cache_usr, 0, sizeof cache_usr);
-			anubis_error(SOFT,
+	case ANUBIS_DB_FAIL:
+		anubis_error(SOFT,
 			 _("Cannot retrieve data from the SASL database: %s"),
-				     anubis_db_strerror(db));
-			break;
+			     anubis_db_strerror(db));
+		break;
 			
-		case ANUBIS_DB_NOT_FOUND:
-			memset(&cache_usr, 0, sizeof cache_usr);
-			info(VERBOSE, _("Record for %s not found"),
-			     username);
-			break;
-		}
+	case ANUBIS_DB_NOT_FOUND:
+		info(VERBOSE, _("Record for %s not found"),
+		     username);
+		break;
+	}
 		
-		anubis_db_close(&db);
-	} else
-		rc = ANUBIS_DB_SUCCESS;
-
-	if (rc == ANUBIS_DB_SUCCESS)
-		*usr = cache_usr;
+	anubis_db_close(&db);
 	return rc;
 }
 
@@ -393,15 +378,13 @@ anubis_authenticate_mode (int sd_client, struct sockaddr_in *addr)
 	remote_client = (void *)sd_client;
 	remote_server = (void *)sd_client;
 	alarm(900);
-	if (anubis_smtp ())
+	if (anubis_smtp (&usr))
 		return EXIT_FAILURE;
-
-	if (anubis_get_db_record(session.client, &usr) != ANUBIS_DB_SUCCESS)
-		return EXIT_FAILURE; /* Shouldn't happen */
 
 	if (usr.username)
 		strncpy(session.client, usr.username, sizeof session.client);
-	
+	else
+		strncpy(session.client, usr.smtp_authid, sizeof session.client);
 	parse_transmap(&rc,
 		       session.client,
 		       inet_ntoa(addr->sin_addr),
