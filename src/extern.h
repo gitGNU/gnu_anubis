@@ -38,7 +38,6 @@ struct options_struct {
  char *ulogfile;
 #ifdef WITH_GUILE
  char *guile_logfile;
- char *guile_postprocess;	
 #endif /* WITH_GUILE */
  char *altrc;
 };
