@@ -132,9 +132,11 @@ seclist  : section
          | seclist error
            {
 		   lex_clear_state();
-		   error_sync_begin();
-		   yyerrok;
-		   yyclearin;
+		   yychar = error_sync_begin();
+		   if (yychar > 0) {
+			   yyerrok;
+			   yyclearin;
+		   }
 	   }
          ;
 
@@ -1136,6 +1138,7 @@ struct eval_env {
 	char **refstr;
 	jmp_buf jmp;
 	RC_LOC loc;
+	int traceable;
 };
 
 static void asgn_eval(struct eval_env *env, RC_ASGN *asgn);
@@ -1221,7 +1224,8 @@ asgn_eval(struct eval_env *env, RC_ASGN *asgn)
 	if (!p)
 		return;
 
-	tracefile(&env->loc, _("Executing %s"), asgn->lhs);
+	if (env->traceable)
+		tracefile(&env->loc, _("Executing %s"), asgn->lhs);
 	if (env->refstr) {
 		char *s;
 		LIST *arg = list_create();
@@ -1290,11 +1294,17 @@ expr_eval(struct eval_env *env, RC_EXPR *expr)
 	default:
 		abort();
 	}
-	if (rc)
-		tracefile(&env->loc, _("Matched condition %s[%s] \"%s\""),
-		      part_string(expr->part),
-		      VALID_STR(expr->key),
-		      anubis_regex_source(expr->re));
+	if (rc) {
+		if (strcmp(VALID_STR(expr->key), X_ANUBIS_RULE_HEADER) == 0)
+			tracefile(&env->loc, _("Matched trigger \"%s\""),
+				  anubis_regex_source(expr->re));
+		else
+			tracefile(&env->loc, 
+				  _("Matched condition %s[%s] \"%s\""),
+		      		  part_string(expr->part),
+		      		  VALID_STR(expr->key),
+		      		  anubis_regex_source(expr->re));
+	}
 	return rc;
 }
 
@@ -1396,8 +1406,10 @@ eval_section(int method, RC_SECTION *sec, struct rc_secdef *secdef,
 	env.msg = msg;
 	env.data = data;
 	env.loc = sec->loc;
+	env.traceable = secdef->allow_prog;
 	
-	tracefile(&sec->loc, "Section %s", sec->name);
+	if (env.traceable)
+		tracefile(&sec->loc, "Section %s", sec->name);
 	
 	if (setjmp(env.jmp) == 0)
 		stmt_list_eval(&env, sec->stmt);
