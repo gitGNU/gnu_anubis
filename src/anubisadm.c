@@ -58,7 +58,7 @@ char *rcfile;
 char *password;
 
 void
-error(const char *fmt, ...)
+error (const char *fmt, ...)
 {
 	va_list ap;
 	fprintf(stderr, "%s: ", progname);
@@ -69,21 +69,21 @@ error(const char *fmt, ...)
 }
 
 static void
-adm_memory_error(const char *msg)
+adm_memory_error (const char *msg)
 {
 	error(msg);
 	exit(1);
 }
 
 int
-op_usage(int argc, char **argv)
+op_usage (int argc, char **argv)
 {
 	error(_("%s: operation not specified"));
 	return 1;
 }
 
 int
-opendb(void **dptr, int argc, char **argv, enum anubis_db_mode mode)
+opendb (void **dptr, int argc, char **argv, enum anubis_db_mode mode)
 {
 	int rc;
 	char *err;
@@ -107,7 +107,7 @@ opendb(void **dptr, int argc, char **argv, enum anubis_db_mode mode)
 static const char delim[] = " \t\r\n";
 
 int
-op_create(int argc, char **argv)
+op_create (int argc, char **argv)
 {
 	ANUBIS_USER rec;
 	char *buf = NULL;
@@ -167,7 +167,7 @@ op_create(int argc, char **argv)
 }
 
 void
-print_record(ANUBIS_USER *rec)
+print_record (ANUBIS_USER *rec)
 {
 	printf("%s\t%s", rec->smtp_authid, rec->smtp_passwd);
 	if (rec->username) {
@@ -179,20 +179,20 @@ print_record(ANUBIS_USER *rec)
 }
 
 void
-print_list_header()
+print_list_header (void)
 {
 	printf("# %s\n", _("AuthID\tPassword\tUserName\tRCfile"));
 }
 
 int
-record_printer(void *item, void *data)
+record_printer (void *item, void *data)
 {
 	print_record(item);
 	return 0;
 }
 
 int
-record_free(void *item, void *data)
+record_free (void *item, void *data)
 {
 	anubis_db_free_record(item);
 	free(item);
@@ -200,7 +200,7 @@ record_free(void *item, void *data)
 }
 
 int
-op_list(int argc, char **argv)
+op_list (int argc, char **argv)
 {
 	ANUBIS_USER rec;
 	void *db;
@@ -247,7 +247,7 @@ op_list(int argc, char **argv)
 }
 
 int
-op_add_or_modify(char *database, int code, char *errmsg)
+op_add_or_modify (char *database, int code, char *errmsg)
 {
 	ANUBIS_USER rec;
 	void *db;
@@ -259,6 +259,7 @@ op_add_or_modify(char *database, int code, char *errmsg)
 		return 1;
 	}
 	if (!password) {
+/* fixme: call getpass() like function */
 		error(_("password not specified"));
 		return 1;
 	}
@@ -300,14 +301,14 @@ op_add_or_modify(char *database, int code, char *errmsg)
 }
 
 int
-op_add(int argc, char **argv)
+op_add (int argc, char **argv)
 {
 	return op_add_or_modify(argv[0], ANUBIS_DB_NOT_FOUND,
 				_("Record already exists. Use --modify to change it."));
 }
 
 int
-op_remove(int argc, char **argv)
+op_remove (int argc, char **argv)
 {
 	void *db;
 	int rc;
@@ -339,64 +340,57 @@ op_remove(int argc, char **argv)
 }
 
 int
-op_modify(int argc, char **argv)
+op_modify (int argc, char **argv)
 {
 	return op_add_or_modify(argv[0], ANUBIS_DB_SUCCESS,
 			       _("Record not found. Use --add to create it."));
 }
 
 void
-print_help()
+print_help (void)
 {
-	printf(_("\
-anubisadm - Interface for Anubis database administration.\n\
-Usage: anubisadm [COMMAND] [OPTIONS] URL\n\
-\n\
-COMMAND is one of\n\
-  -c, --create            Creates the database\n\
-  -l, --list              List the contents of an existing database\n\
-  -a, --add               Add a new record\n\
-  -m, --modify            Modify existing record\n\
-  -r, --remove            Remove existing record\n\
-  --version               Display program version number and exit.\n\
-  --help                  Display this help screen and exit\n\
-\n\
-OPTION is one or more of\n\
+  puts(_("anubisadm -- Interface for GNU Anubis database administration."));
+  puts(_("Usage: anubisadm [COMMAND] [OPTIONS] URL"));
 
-  -i, --authid=STRING     Specify the authid to operate upon. This option\n\
-                          is mandatory with --add, --modify and --remove.\n\
-                          It is optional when used with --list.\n\
-  -p, --password=STRING   Specify the password for the authid. Mandatory\n\
-                          with --add, --modify and --remove.\n\
-  -u, --user=STRING       Specify the system user name corresponding to\n\
-                          the given authid. Optional for --add, --modify\n\
-                          and --remove.\n\
-  -f, --rcfile=STRING     Specify the rc file to be used for this authid.\n\
-                          Optional for --add, --modify and --remove.\n\
+  puts(_("\nCOMMAND is one of\n"));
+  puts(_("  -c, --create            Creates the database."));
+  puts(_("  -l, --list              List the contents of an existing database."));
+  puts(_("  -a, --add               Add a new record."));
+  puts(_("  -m, --modify            Modify existing record."));
+  puts(_("  -r, --remove            Remove existing record."));
+  puts(_("  --version               Display program version number and exit."));
+  puts(_("  --help                  Display this help screen and exit."));
 
-EXAMPLES\n\
-\n\
-1. Create the GDBM database from a plaintext file:\n\
+  puts(_("\nOPTION is one or more of\n"));
+  puts(_("  -i, --authid=STRING     Specify the authid to operate upon. This option\n"
+         "                          is mandatory with --add, --modify and --remove.\n"
+         "                          It is optional when used with --list."));
+  puts(_("  -p, --password=STRING   Specify the password for the authid. Mandatory\n"
+	 "                          with --add, --modify and --remove."));
+  puts(_("  -u, --user=STRING       Specify the system user name corresponding to\n"
+         "                          the given authid. Optional for --add, --modify\n"
+         "                          and --remove."));
+  puts(_("  -f, --rcfile=STRING     Specify the rc file to be used for this authid.\n"
+         "                          Optional for --add, --modify and --remove."));
 
-example$ anubisadm --create gdbm:/etc/anubis.db < plaintext\n\
+  puts(_("\nEXAMPLES\n"));
+  puts(_("1. Create the GDBM database from a plaintext file:\n\n"
+	 "example$ anubisadm --create gdbm:/etc/anubis.db < plaintext\n"));
 
-2. Add SMTP authid \"test\" with password \"guessme\" and map it to the\n\
-system account \"gray\":\n\
+  puts(_("2. Add SMTP authid \"test\" with password \"guessme\" and map it\n"
+	 "to the system account \"gray\":\n\n"
+	 "example$ anubisadm --add --authid gray --password guessme \\\n"
+         "                   --user gray gdbm:/etc/anubis.db\n"));
 
-example$ anubisadm --add --authid gray --password guessme \\\n\
-                   --user gray gdbm:/etc/anubis.db\n\
-\n\
-3. List the entire database contents:\n\
+  puts(_("3. List the entire database contents:\n\n"
+	 "example$ anubisadm --list gdbm:/etc/anubis.db\n"));
 
-example$ anubisadm --list gdbm:/etc/anubis.db\n\
-\n\
-4. List only the record with authid \"test\":\n\
-\n\
-example$ anubisadm --list --authid test gdbm:/etc/anubis.db\n"));
+  puts(_("4. List only the record with authid \"test\":\n\n"
+	 "example$ anubisadm --list --authid test gdbm:/etc/anubis.db\n"));
 }
 
 int
-main(int argc, char **argv)
+main (int argc, char **argv)
 {
 	int c;
 	operation_fp operation = op_usage;
