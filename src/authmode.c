@@ -24,9 +24,31 @@
 
 #include "headers.h"
 #include "extern.h"
+#include "rcfile.h"
 
 #if defined(WITH_GSASL)
 
+static char *smtp_greeting_message;
+static LIST *smtp_help_message;
+
+
+
+void
+make_help_message(char *text)
+{
+	char *p;
+
+	if (smtp_help_message)
+		list_destroy(&smtp_help_message, anubis_free_list_item, NULL);
+	smtp_help_message = list_create();
+	
+	p = strtok(text, "\n");
+	do 
+		list_append(smtp_help_message, strdup(p));
+	while ((p = strtok(NULL, "\n")));
+}	
+
+
 enum asmtp_state {
 	state_init,
 	state_ehlo,
@@ -107,8 +129,7 @@ static void
 asmtp_greet ()
 {
 	char *name = get_localname ();
-	asmtp_reply(220, "%s GNU Anubis ESMTP; Identify yourself",
-		    name);
+	asmtp_reply(220, "%s %s", name, smtp_greeting_message);
 }
 
 static enum asmtp_state
@@ -201,10 +222,22 @@ asmtp_ehlo_reply(char *args)
 	}
 	
 	asmtp_reply(R_CONT|250, "Anubis is pleased to meet you.");
-	asmtp_capa_report ();
+	asmtp_capa_report();
 	return state_ehlo;
 }
 
+static void
+asmtp_help()
+{
+	if (smtp_help_message) {
+		char *s;
+		ITERATOR *itr = iterator_create(smtp_help_message);
+		for (s = iterator_first(itr); s; s = iterator_next(itr)) 
+			asmtp_reply(R_CONT|214, "%s", s);
+		iterator_destroy(&itr);
+	}
+	asmtp_reply(214, "End of HELP info");	
+}
 
 static enum asmtp_state
 asmtp_init(enum asmtp_state state)
@@ -224,7 +257,7 @@ asmtp_init(enum asmtp_state state)
 		break;
 		
 	case KW_HELP:
-		asmtp_reply(503, "No help available");
+		asmtp_help();
 		break;
 		
 	case KW_AUTH:
@@ -310,6 +343,10 @@ asmtp_ehlo (enum asmtp_state state, ANUBIS_USER *usr)
 		asmtp_reply(250, "OK"); /* FIXME: Fake RSET */
 		break;
 
+	case KW_HELP:
+		asmtp_help();
+		break;
+		
 	default:
 		asmtp_reply(500, "Unknown command");
 	}
@@ -526,6 +563,73 @@ anubis_authenticate_mode(NET_STREAM *psd_client, struct sockaddr_in *addr)
 	}
 #endif /* HAVE_PAM */
 	return 0;
+}
+
+#define KW_SASL_PASSWORD_DB      1
+#define KW_SASL_ALLOWED_MECH     2
+#define KW_SMTP_GREETING_MESSAGE 3
+#define KW_SMTP_HELP_MESSAGE     4
+
+static int
+rc_parser(int method, int key, LIST *arglist,
+	  void *inv_data, void *func_data, MESSAGE *msg)
+{
+	char *arg = list_item(arglist, 0);
+	
+	switch (key) {
+	case KW_SMTP_GREETING_MESSAGE:
+		if (list_count(arglist) != 1) 
+			return RC_KW_ERROR;
+		xfree(smtp_greeting_message);
+		smtp_greeting_message = strdup(arg);
+		break;
+		
+	case KW_SMTP_HELP_MESSAGE:
+		if (list_count(arglist) != 1) 
+			return RC_KW_ERROR;
+		make_help_message(arg);
+		break;
+		
+	case KW_SASL_PASSWORD_DB:
+		if (list_count(arglist) != 1) 
+			return RC_KW_ERROR;
+		anubis_set_password_db(arg);
+		break;
+
+	case KW_SASL_ALLOWED_MECH:
+		anubis_set_mech_list(arglist);
+		break;
+
+	default:
+		return RC_KW_UNKNOWN;
+	}
+	return RC_KW_HANDLED;
+}
+
+static struct rc_kwdef init_authmode_kw[] = {
+	{ "smtp-greeting-message", KW_SMTP_GREETING_MESSAGE },
+	{ "smtp-help-message",     KW_SMTP_HELP_MESSAGE }, 
+	{ "sasl-password-db",      KW_SASL_PASSWORD_DB },
+	{ "sasl-allowed-mech",     KW_SASL_ALLOWED_MECH },
+	{ NULL }
+};
+	
+static struct rc_secdef_child init_authmode_child = {
+	NULL,
+	CF_INIT,
+	init_authmode_kw,
+	rc_parser,
+	NULL
+};
+
+void
+authmode_section_init(void)
+{
+	struct rc_secdef *sp = anubis_add_section("AUTH");
+	rc_secdef_add_child(sp, &init_authmode_child);
+	smtp_greeting_message = strdup("GNU Anubis ESMTP; Identify yourself");
+	smtp_help_message = list_create();
+	list_append(smtp_help_message, strdup("Run 'info anubis' or visit http://www.gnu.org/software/anubis/doc/anubis.html"));
 }
 
 #endif
