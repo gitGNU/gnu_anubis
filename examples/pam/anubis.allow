@@ -8,6 +8,7 @@
 # Make sure that a user name below is the same one
 # as specified with the 'user-notprivileged' keyword.
 
+nobody
 anubis.unprivileged
 
 # user2
