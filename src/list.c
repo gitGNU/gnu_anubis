@@ -1,4 +1,6 @@
 /*
+   list.c
+
    This file is part of GNU Anubis.
    Copyright (C) 2003 The Anubis Team.
 
@@ -20,8 +22,7 @@
    compiling, linking, and/or using OpenSSL is allowed.
 */
 
-#include <stdlib.h>
-#include "list.h"
+#include "headers.h"
 
 struct list_entry {
 	struct list_entry *next;
@@ -237,3 +238,6 @@ list_append_list(struct list *a, struct list *b)
 
 	b->head = b->tail = b->cur = NULL;
 }
+
+/* EOF */
+
