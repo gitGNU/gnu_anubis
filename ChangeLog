@@ -1,3 +1,8 @@
+2003-11-22  Sergey Poznyakoff 
+
+	* src/gsasl.c (auth_gsasl_capa_init): Removed calls to obsolete
+	function gsasl_server_listmech. Use gsasl_server_mechlist instead.
+
 2003-11-22  Wojciech Polak
 
 	* src/help.c (config_opts): Added GSASL.
