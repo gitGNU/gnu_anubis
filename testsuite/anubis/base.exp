@@ -35,6 +35,8 @@ anubis_pat add2.pat
 anubis_pat add3.pat
 # Append a text to the body
 anubis_pat add-body.pat
+# Append a text file to the body
+anubis_pat add-body-file.pat
 
 # Modify the header
 anubis_pat mod-header.pat
