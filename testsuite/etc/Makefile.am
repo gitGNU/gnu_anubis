@@ -24,16 +24,19 @@ EXTRA_DIST = \
  add1.pat\
  add2.pat\
  add3.pat\
+ add-body.pat\
  del1.pat\
  del2.pat\
  del3.pat\
  del4.pat\
  empty.pat\
  gpgcrypt.pat\
+ gpgsign.pat\
  mime1.pat\
  mime2.pat\
  mult.pat\
  std.pat\
+ add.in\
  del.in\
  empty.in\
  entire.in\
@@ -42,6 +45,7 @@ EXTRA_DIST = \
  simple.in
 
 RCFILES = \
+ add.rc\
  del.rc\
  empty.rc\
  entire.rc\
