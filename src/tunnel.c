@@ -53,7 +53,7 @@ get_ehlo_domain (void)
 
 /* Headers spanning multiple lines are wrapped into a single line, preserving
    the newlines. When sending to the server they are split again at newlines
-   snd sent in multiline lines. */
+   and sent in multiline lines. */
 
 static void
 get_boundary (MESSAGE * msg, char *line)
