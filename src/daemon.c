@@ -43,6 +43,7 @@ static int nchild;
 void
 daemonize (void)
 {
+  signal (SIGHUP, SIG_IGN);
 #ifdef HAVE_DAEMON
   if (daemon (0, 0) == -1)
     anubis_error (HARD, _("daemon() failed. %s."), strerror (errno));
@@ -67,7 +68,6 @@ daemonize (void)
   close (2);
 #endif /* HAVE_DAEMON */
 
-  signal (SIGHUP, SIG_IGN);
   topt &= ~T_FOREGROUND;
   topt |= T_DAEMON;
 
@@ -75,7 +75,7 @@ daemonize (void)
   openlog ("anubis", LOG_PID, 0);
   syslog (LOG_INFO, _("%s daemon startup succeeded."), version);
 #endif /* HAVE_SYSLOG */
-
+  write_pid_file ();
   return;
 }
 
@@ -95,6 +95,7 @@ sig_cld (int code)
 	     nchild), (unsigned long) pid,
 	    WIFEXITED (status) ? _("OK") : _("ERROR"), nchild);
     }
+  signal (code, sig_cld);
   return;
 }
 
