@@ -41,6 +41,7 @@ EXTRA_DIST = \
  mod-header.pat\
  mult.pat\
  net.rc\
+ no-backref.pat\
  remail.pat\
  rot-13.pat\
  std.pin\
@@ -55,6 +56,7 @@ EXTRA_DIST = \
  gpg.in\
  mod-body.in\
  mod-header.in\
+ no-backref.in\
  remail.in\
  std.in\
  simple.in\
@@ -71,6 +73,7 @@ RCFILES = \
  interface.in.rc\
  mod-body.rc\
  mod-header.rc\
+ no-backref.rc\
  remail.rc\
  simple.rc\
  std.rc\
