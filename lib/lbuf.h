@@ -15,8 +15,6 @@
    License along with this library; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA  */
 
-#include <mailutils/types.h>
-
 struct _line_buffer;
 
 int _auth_lb_create (struct _line_buffer **s);
@@ -24,9 +22,8 @@ void _auth_lb_destroy (struct _line_buffer **s);
 void _auth_lb_drop (struct _line_buffer *s);
 
 int _auth_lb_grow (struct _line_buffer *s, const char *ptr, size_t size);
-int _auth_lb_read (struct _line_buffer *s, const char *ptr, size_t size);
-int _auth_lb_readline (struct _line_buffer *s, const char *ptr,
-		       size_t size);
+int _auth_lb_read (struct _line_buffer *s, char *ptr, size_t size);
+int _auth_lb_readline (struct _line_buffer *s, char *ptr, size_t size);
 int _auth_lb_writelines (struct _line_buffer *s, const char *iptr,
 			 size_t isize,
 			 int (*wr) (void *data, char *start, char *end),
