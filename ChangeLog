@@ -1,6 +1,15 @@
 2003-07-20  Sergey Poznyakoff
 
 	* NEWS: Updated
+	* configure.ac: Check if u_char is defined.
+	* src/env.c: Force the argument to ctype calls to be unsigned char.
+	* src/exec.c: Likewise.
+	* src/map.c: Likewise.
+	* src/misc.c: Likewise.
+	* src/proxy.c: Likewise.
+	* src/rcfile.l: Likewise.
+	* src/tunnel.c: Likewise.
+	* testsuite/mta.c: Likewise.
 
 2003-07-18  Wojciech Polak
 
