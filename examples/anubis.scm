@@ -75,9 +75,9 @@ is preserved in X-Anubis-Preserved-Header header"
 	 (else #t))))
      (else #t))))
 
-;;; This function illustrates the concept of Anubis postprocess
+;;; This function illustrates the concept of Anubis message processing
 ;;; functions.
-;;; A postprocess function takes two arguments:
+;;; A processing function takes two arguments:
 ;;;
 ;;;   HDR   -- A list of message headers. Each list element is a cons
 ;;;            (NAME . VALUE), where NAME is the name of the header field,
@@ -96,7 +96,7 @@ is preserved in X-Anubis-Preserved-Header header"
 ;;;     #f  --  delete entire body.
 ;;;     #t  --  preserve the body as is. 
 
-(define (postprocess hdr body)
+(define (msg-process hdr body)
   "Encode the \"Subject\" header and the body using ROT-13. Add
 X-Processed-By header."
   (DEBUG 1 "postprocess called with hdr=" hdr " and body=\"" body "\"")

@@ -25,7 +25,7 @@ guile-debug = yes
 guile-load-path-append = <path-to-anubis-directory>/examples
 guile-load-program = rot-13.scm
 guile-load-program = anubis.scm
-guile-postprocess = postprocess
+guile-process = msg-process
 ---END---
 
 ---BEGIN RULE---
