@@ -190,7 +190,7 @@ connect_through_socks_proxy(int sd, char *host, unsigned int port)
 		*/
 
 		if (send(sd, request, offset, 0) == -1) {
-			socket_error();
+			socket_error(NULL);
 			return -1;
 		}
 
@@ -243,7 +243,7 @@ connect_through_socks_proxy(int sd, char *host, unsigned int port)
 		*/
 
 		if (send(sd, request, offset, 0) == -1) {
-			socket_error();
+			socket_error(NULL);
 			return -1;
 		}
 
@@ -300,7 +300,7 @@ connect_through_socks_proxy(int sd, char *host, unsigned int port)
 				*/
 
 				if (send(sd, request, offset, 0) == -1) {
-					socket_error();
+					socket_error(NULL);
 					return -1;
 				}
 
@@ -430,7 +430,7 @@ connect_through_socks_proxy(int sd, char *host, unsigned int port)
 		*/
 
 		if (send(sd, request, offset, 0) == -1) {
-			socket_error();
+			socket_error(NULL);
 			return -1;
 		}
 
