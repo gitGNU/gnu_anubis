@@ -29,11 +29,6 @@ void
 anubis_error(int method, char *format, ...)
 {
 	va_list arglist;
-	char txt[LINEBUFFER+1];
-	
-	va_start(arglist, format);
-	vsnprintf(txt, LINEBUFFER, format, arglist);
-	va_end(arglist);
 
 	switch (method) {
 	case HARD:
@@ -46,7 +41,19 @@ anubis_error(int method, char *format, ...)
 		break;
 	}
 
-	if (options.termlevel != SILENT) {
+	if (topt & T_SMTP_ERROR_CODES) {
+		fprintf(stdout, "451 4.0.0 ");
+		va_start(arglist, format);
+		vfprintf(stdout, format, arglist);
+		va_end(arglist);
+		fprintf(stdout, "\n");
+		
+	} else if (options.termlevel != SILENT) {
+		char txt[LINEBUFFER+1];
+	
+		va_start(arglist, format);
+		vsnprintf(txt, LINEBUFFER, format, arglist);
+		va_end(arglist);
 #ifdef HAVE_SYSLOG
 		if ((topt & T_DAEMON) && !(topt & T_FOREGROUND)) {
 			if (options.slogfile)
