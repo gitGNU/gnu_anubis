@@ -125,7 +125,7 @@ ssl_error(char *txt)
 	if (options.termlevel != SILENT) {
 #ifdef HAVE_SYSLOG
 		if ((topt & T_DAEMON) && !(topt & T_FOREGROUND))
-			syslog(LOG_ERR | LOG_MAIL, string_error);
+			syslog(LOG_ERR | LOG_MAIL, "%s", string_error);
 		else
 #endif /* HAVE_SYSLOG */
 			mprintf(">>%s", string_error);

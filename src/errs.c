@@ -56,7 +56,7 @@ anubis_error(int method, const char *fmt, ...)
 		va_end(arglist);
 #ifdef HAVE_SYSLOG
 		if ((topt & T_DAEMON) && !(topt & T_FOREGROUND)) {
-			syslog(LOG_ERR | LOG_MAIL, msg);
+			syslog(LOG_ERR | LOG_MAIL, "%s", msg);
 			if (options.ulogfile && options.uloglevel >= FAILS)
 				filelog(options.ulogfile, msg);
 		}
