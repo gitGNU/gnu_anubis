@@ -1,3 +1,14 @@
+2003-02-11  Wojciech Polak
+
+	Removed ROT-13 support from main engine.
+
+	* src/misc.c (check_rot13): Removed function.
+	* src/tunnel.c (transfer_header): Removed rot13 subject encoding.
+	  (transform_body): Removed check_rot13() call.
+	* src/headers.h: Removed check_rot13 prototype.
+
+	* examples/anubisrc.guile: Updated.
+
 2003-02-11  Sergey Poznyakoff
 
 	* Makefile.am: Added testsuite
@@ -37,7 +48,7 @@
 	  only then fed to the MTA.
 	  TODO: split off attachments to diminish memory consumption.
 
-	* testsute/: New directory
+	* testsuite/: New directory
 	* testsuite/Makefile.am: New file
 	* testsuite/mta.c: New file
 	* testsuite/.cvsignore: New file
@@ -60,7 +71,7 @@
 	* testsuite/etc/std.in: New file
 	* testsuite/etc/std.pat: New file
 	  
-2003-02-08  Sergey Poznyakoff  
+2003-02-08  Sergey Poznyakoff
 
 	* src/regex.c: Rewritten using "control table" approach.
 
@@ -205,6 +216,7 @@
 2003-02-01  Wojciech Polak
 
 	* AUTHORS: Added Sergey Poznyakoff.
+
 	* configure.ac: Don't use `uname' for SunOS.
 	  Check -lsocket and -lnsl directly with AC_CHECK_LIB.
 

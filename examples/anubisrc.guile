@@ -1,5 +1,5 @@
 #
-# A sample user configuration file for anubis with Guile support.
+# A sample user configuration file for GNU Anubis with Guile support.
 # Copy this file to your HOME directory as `.anubisrc' file. To protect
 # your passwords in this configuration file, use the 0600 (u=rw,g=,o=)
 # permissions, otherwise GNU Anubis won't accept this file. Hash-marked
@@ -18,7 +18,6 @@ remote-mta = localhost
 termlevel = debug
 ---END---
 
-
 ---BEGIN GUILE---
 guile-output = /tmp/anubis.out
 guile-debug = yes
@@ -28,8 +27,6 @@ guile-load-program = anubis.scm
 ---END---
 
 ---BEGIN RULE---
-
-# Process the (E)SMTP commands.
 
 if header =^Subject:
  guile-rewrite-line = rewrite-subject
@@ -46,5 +43,4 @@ rule :basic =^rot13.*body
 done
 
 ---END---
-
 
