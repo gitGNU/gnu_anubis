@@ -15,7 +15,7 @@
 # along with GNU Anubis; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-:TEST Rot-13 support 
+:TEST ROT-13 support 
 :MODE SPAWN
 :OPTIONS --stdio
 :RCFILE remail.rc
