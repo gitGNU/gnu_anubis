@@ -28,167 +28,174 @@
 #if defined(WITH_GSASL)
 
 #include "lbuf.h"
-
 
+
 /* Basic I/O Functions */
 
-struct anubis_gsasl_stream {
-	Gsasl_session_ctx *sess_ctx; /* Context */
-	struct _line_buffer *lb;
-	NET_STREAM stream;
+struct anubis_gsasl_stream
+{
+  Gsasl_session_ctx *sess_ctx;	/* Context */
+  struct _line_buffer *lb;
+  NET_STREAM stream;
 };
 
 static const char *
-_gsasl_strerror(void *ignored_data, int rc)
+_gsasl_strerror (void *ignored_data, int rc)
 {
-	return gsasl_strerror(rc);
+  return gsasl_strerror (rc);
 }
 
 int
 write_chunk (void *data, char *start, char *end)
 {
-	struct anubis_gsasl_stream *s = data;
-	size_t chunk_size = end - start + 1;
-	size_t len;
-	size_t wrsize;
-	char *buf = NULL;
-      
-	len = UINT_MAX; /* override the bug in libgsasl */
-	gsasl_encode (s->sess_ctx, start, chunk_size, NULL, &len);
-	buf = malloc (len);
-	if (!buf)
-		return ENOMEM;
+  struct anubis_gsasl_stream *s = data;
+  size_t chunk_size = end - start + 1;
+  size_t len;
+  size_t wrsize;
+  char *buf = NULL;
 
-	gsasl_encode (s->sess_ctx, start, chunk_size, buf, &len);
+  len = UINT_MAX;		/* override the bug in libgsasl */
+  gsasl_encode (s->sess_ctx, start, chunk_size, NULL, &len);
+  buf = malloc (len);
+  if (!buf)
+    return ENOMEM;
 
-	wrsize = 0;
-	do {
-		size_t sz;
-		int rc = stream_write(s->stream, buf + wrsize, len - wrsize,
-				      &sz);
-		if (rc) {
-			if (rc == EINTR)
-				continue;
-			free (buf);
-			return rc;
-		}
-		wrsize += sz;
+  gsasl_encode (s->sess_ctx, start, chunk_size, buf, &len);
+
+  wrsize = 0;
+  do
+    {
+      size_t sz;
+      int rc = stream_write (s->stream, buf + wrsize, len - wrsize,
+			     &sz);
+      if (rc)
+	{
+	  if (rc == EINTR)
+	    continue;
+	  free (buf);
+	  return rc;
 	}
-	while (wrsize < len);
-	
-	free (buf);
-	
-	return 0;
+      wrsize += sz;
+    }
+  while (wrsize < len);
+
+  free (buf);
+
+  return 0;
 }
 
 
 static int
-_gsasl_write(void *sd, char *data, size_t size, size_t *nbytes)
+_gsasl_write (void *sd, char *data, size_t size, size_t * nbytes)
 {
-	struct anubis_gsasl_stream *s = sd;
-	int rc = _auth_lb_grow (s->lb, data, size);
-	if (rc)
-		return rc;
+  struct anubis_gsasl_stream *s = sd;
+  int rc = _auth_lb_grow (s->lb, data, size);
+  if (rc)
+    return rc;
 
-	return _auth_lb_writelines (s->lb, data, size, 
-				    write_chunk, s, nbytes);      
+  return _auth_lb_writelines (s->lb, data, size, write_chunk, s, nbytes);
 }
 
 static int
-_gsasl_read(void *sd, char *data, size_t size, size_t *nbytes)
+_gsasl_read (void *sd, char *data, size_t size, size_t * nbytes)
 {
-	size_t len;
-	struct anubis_gsasl_stream *s = sd;
-	int rc;
-	char *bufp;
-	
-	do {
-		char buf[80];
-		size_t sz;
-		
-		rc = stream_read(s->stream, buf, sizeof (buf), &sz);
-		if (rc) {
-			if (rc == EINTR)
-				continue;
-			return rc;
-		}
+  size_t len;
+  struct anubis_gsasl_stream *s = sd;
+  int rc;
+  char *bufp;
 
-		rc = _auth_lb_grow (s->lb, buf, sz);
-		if (rc)
-			return rc;
+  do
+    {
+      char buf[80];
+      size_t sz;
 
-		len = UINT_MAX; /* override the bug in libgsasl */
-		rc = gsasl_decode(s->sess_ctx,
-				  _auth_lb_data(s->lb),
-				  _auth_lb_level(s->lb),
-				  NULL, &len);
-	} while (rc == GSASL_NEEDS_MORE);
-
-	if (rc != GSASL_OK) 
-		return rc;
-
-	bufp = malloc (len + 1);
-	if (!bufp)
-		return ENOMEM;
-	rc = gsasl_decode (s->sess_ctx,
-			   _auth_lb_data (s->lb),
-			   _auth_lb_level (s->lb),
-			   bufp, &len);
-	
-	if (rc != GSASL_OK) {
-		free(bufp);
-		return rc;
+      rc = stream_read (s->stream, buf, sizeof (buf), &sz);
+      if (rc)
+	{
+	  if (rc == EINTR)
+	    continue;
+	  return rc;
 	}
-	
-	if (len > size) {
-		memcpy(data, bufp, size);
-		_auth_lb_drop (s->lb);
-		_auth_lb_grow (s->lb, bufp + size, len - size);
-		len = size;
-	} else {
-		_auth_lb_drop(s->lb);
-		memcpy(data, bufp, len);
-	}
-	if (nbytes)
-		*nbytes = len;
-	
-	free (bufp);
-	return 0;
+
+      rc = _auth_lb_grow (s->lb, buf, sz);
+      if (rc)
+	return rc;
+
+      len = UINT_MAX;		/* override the bug in libgsasl */
+      rc = gsasl_decode (s->sess_ctx,
+			 _auth_lb_data (s->lb),
+			 _auth_lb_level (s->lb), NULL, &len);
+    }
+  while (rc == GSASL_NEEDS_MORE);
+
+  if (rc != GSASL_OK)
+    return rc;
+
+  bufp = malloc (len + 1);
+  if (!bufp)
+    return ENOMEM;
+  rc = gsasl_decode (s->sess_ctx,
+		     _auth_lb_data (s->lb),
+		     _auth_lb_level (s->lb), bufp, &len);
+
+  if (rc != GSASL_OK)
+    {
+      free (bufp);
+      return rc;
+    }
+
+  if (len > size)
+    {
+      memcpy (data, bufp, size);
+      _auth_lb_drop (s->lb);
+      _auth_lb_grow (s->lb, bufp + size, len - size);
+      len = size;
+    }
+  else
+    {
+      _auth_lb_drop (s->lb);
+      memcpy (data, bufp, len);
+    }
+  if (nbytes)
+    *nbytes = len;
+
+  free (bufp);
+  return 0;
 }
 
 static int
-_gsasl_close(void *sd)
+_gsasl_close (void *sd)
 {
-	struct anubis_gsasl_stream *s = sd;
+  struct anubis_gsasl_stream *s = sd;
 
-	stream_close(s->stream);
-	return 0;
+  stream_close (s->stream);
+  return 0;
 }
 
 static int
-_gsasl_destroy(void *sd)
+_gsasl_destroy (void *sd)
 {
-	struct anubis_gsasl_stream *s = sd;
-	if (s->sess_ctx)
-		gsasl_server_finish(s->sess_ctx);
-	_auth_lb_destroy(&s->lb);
-	free(sd);
-	return 0;
+  struct anubis_gsasl_stream *s = sd;
+  if (s->sess_ctx)
+    gsasl_server_finish (s->sess_ctx);
+  _auth_lb_destroy (&s->lb);
+  free (sd);
+  return 0;
 }
 
 void
-install_gsasl_stream (Gsasl_session_ctx *sess_ctx, NET_STREAM *stream)
+install_gsasl_stream (Gsasl_session_ctx * sess_ctx, NET_STREAM * stream)
 {
-	struct anubis_gsasl_stream *s = malloc(sizeof *s);
+  struct anubis_gsasl_stream *s = malloc (sizeof *s);
 
-	s->sess_ctx = sess_ctx;
-	_auth_lb_create (&s->lb);
-	s->stream = *stream;
+  s->sess_ctx = sess_ctx;
+  _auth_lb_create (&s->lb);
+  s->stream = *stream;
 
-	stream_create(stream);
-	stream_set_io(*stream, s, 
-		      _gsasl_read, _gsasl_write,
-		      _gsasl_close, _gsasl_destroy, _gsasl_strerror);
+  stream_create (stream);
+  stream_set_io (*stream, s,
+		 _gsasl_read, _gsasl_write,
+		 _gsasl_close, _gsasl_destroy, _gsasl_strerror);
 }
 
 #endif

@@ -27,101 +27,103 @@
 #include "rcfile.h"
 
 void
-mprintf(const char *fmt, ...)
+mprintf (const char *fmt, ...)
 {
-	va_list arglist;
+  va_list arglist;
 
-	if (options.termlevel == SILENT)
-		return;
+  if (options.termlevel == SILENT)
+    return;
 
-	va_start(arglist, fmt);
-	vfprintf(stderr, fmt, arglist);
-	va_end(arglist);
-	fputc('\n', stderr);
+  va_start (arglist, fmt);
+  vfprintf (stderr, fmt, arglist);
+  va_end (arglist);
+  fputc ('\n', stderr);
 }
 
 void
-info(int mode, const char *fmt, ...)
+info (int mode, const char *fmt, ...)
 {
-	va_list arglist;
-	char msg[LINEBUFFER+1];
+  va_list arglist;
+  char msg[LINEBUFFER + 1];
 
-	if (mode > options.termlevel)
-		return;
+  if (mode > options.termlevel)
+    return;
 
-	va_start(arglist, fmt);
-	vsnprintf(msg, LINEBUFFER, fmt, arglist);
-	va_end(arglist);
+  va_start (arglist, fmt);
+  vsnprintf (msg, LINEBUFFER, fmt, arglist);
+  va_end (arglist);
 
 #ifdef HAVE_SYSLOG
-	if ((topt & T_DAEMON) && !(topt & T_FOREGROUND)) {
-		syslog(LOG_INFO | LOG_MAIL, "%s", msg);
-		if (options.ulogfile && options.uloglevel >= ALL)
-			filelog(options.ulogfile, msg);
-	}
-	else
+  if ((topt & T_DAEMON) && !(topt & T_FOREGROUND))
+    {
+      syslog (LOG_INFO | LOG_MAIL, "%s", msg);
+      if (options.ulogfile && options.uloglevel >= ALL)
+	filelog (options.ulogfile, msg);
+    }
+  else
 #endif /* HAVE_SYSLOG */
-		if (topt & T_FOREGROUND)
-			mprintf("> [%d] %s", (int)getpid(), msg);
-		else
-			mprintf("> %s", msg);
+  if (topt & T_FOREGROUND)
+    mprintf ("> [%d] %s", (int) getpid (), msg);
+  else
+    mprintf ("> %s", msg);
 }
 
 void
-filelog(char *logfile, char *msg)
+filelog (char *logfile, char *msg)
 {
-	FILE *fplog;
+  FILE *fplog;
 
-	fplog = fopen(logfile, "a");
-	if (fplog == NULL)
-		return;
-	else {
-		time_t tp;
-		struct tm *timeptr;
-		char timebuf[65];
-		memset(timebuf, 0, sizeof(timebuf));
+  fplog = fopen (logfile, "a");
+  if (fplog == NULL)
+    return;
+  else
+    {
+      time_t tp;
+      struct tm *timeptr;
+      char timebuf[65];
+      memset (timebuf, 0, sizeof (timebuf));
 
-		time(&tp);
-		timeptr = localtime(&tp);
-		strftime(timebuf, sizeof(timebuf) - 1,
-			"%a, %d %b %Y %H:%M:%S", timeptr);
-		fprintf(fplog, "%s [%d] %s\n", timebuf, (int)getpid(), msg);
-		fclose(fplog);
-	}
+      time (&tp);
+      timeptr = localtime (&tp);
+      strftime (timebuf, sizeof (timebuf) - 1,
+		"%a, %d %b %Y %H:%M:%S", timeptr);
+      fprintf (fplog, "%s [%d] %s\n", timebuf, (int) getpid (), msg);
+      fclose (fplog);
+    }
 }
 
 void
-tracefile(RC_LOC *loc, const char *fmt, ...)
+tracefile (RC_LOC * loc, const char *fmt, ...)
 {
-	va_list ap;
-	int n = 0;
-	char msg[LINEBUFFER+1];
+  va_list ap;
+  int n = 0;
+  char msg[LINEBUFFER + 1];
 
-	if (!(topt & (T_TRACEFILE_SYS | T_TRACEFILE_USR)))
-		return;
+  if (!(topt & (T_TRACEFILE_SYS | T_TRACEFILE_USR)))
+    return;
 
-	if (loc)
-		n = snprintf(msg, LINEBUFFER, "%s:%lu: ",
-			     loc->file, (unsigned long)loc->line);
-	va_start(ap, fmt);
-	vsnprintf(msg + n, LINEBUFFER - n, fmt, ap);
-	va_end(ap);
+  if (loc)
+    n = snprintf (msg, LINEBUFFER, "%s:%lu: ",
+		  loc->file, (unsigned long) loc->line);
+  va_start (ap, fmt);
+  vsnprintf (msg + n, LINEBUFFER - n, fmt, ap);
+  va_end (ap);
 
-	if ((topt & T_TRACEFILE_SYS) && options.termlevel != SILENT) {
+  if ((topt & T_TRACEFILE_SYS) && options.termlevel != SILENT)
+    {
 #ifdef HAVE_SYSLOG
-		if ((topt & T_DAEMON) && !(topt & T_FOREGROUND))
-			syslog(LOG_INFO | LOG_MAIL, "%s", msg);
-		else
+      if ((topt & T_DAEMON) && !(topt & T_FOREGROUND))
+	syslog (LOG_INFO | LOG_MAIL, "%s", msg);
+      else
 #endif /* HAVE_SYSLOG */
-			if (topt & T_FOREGROUND)
-				mprintf("> [%d] %s", (int)getpid(), msg);
-			else
-				mprintf("> %s", msg);
-	}
+      if (topt & T_FOREGROUND)
+	mprintf ("> [%d] %s", (int) getpid (), msg);
+      else
+	mprintf ("> %s", msg);
+    }
 
-	if (topt & T_TRACEFILE_USR)
-		filelog(options.tracefile, msg);
+  if (topt & T_TRACEFILE_USR)
+    filelog (options.tracefile, msg);
 }
 
 /* EOF */
-

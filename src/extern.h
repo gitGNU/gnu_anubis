@@ -25,58 +25,63 @@
 extern const char version[];
 extern const char copyright[];
 
-struct assoc {
- char *key;
- char *value;
+struct assoc
+{
+  char *key;
+  char *value;
 };
 
-struct options_struct {
- int termlevel;
- int uloglevel;
- char *ulogfile;
- char *tracefile;
+struct options_struct
+{
+  int termlevel;
+  int uloglevel;
+  char *ulogfile;
+  char *tracefile;
 #ifdef WITH_GUILE
- char *glogfile;
+  char *glogfile;
 #endif
- char *altrc;
+  char *altrc;
 };
 
-struct session_struct {
- char anubis[65];
- char mta[65];
- char mta_username[65];
- char mta_password[65];
- char supervisor[65];
- char clientname[65];
- char notprivileged[65];
- char *rcfile_name;
- char *execpath;
- char **execargs;
- unsigned int anubis_port;
- unsigned int mta_port;
+struct session_struct
+{
+  char anubis[65];
+  char mta[65];
+  char mta_username[65];
+  char mta_password[65];
+  char supervisor[65];
+  char clientname[65];
+  char notprivileged[65];
+  char *rcfile_name;
+  char *execpath;
+  char **execargs;
+  unsigned int anubis_port;
+  unsigned int mta_port;
 #ifdef USE_SOCKS_PROXY
- char socks[65];
- char socks_username[65];
- char socks_password[65];
- unsigned int socks_port;
-#endif /* USE_SOCKS_PROXY */
+  char socks[65];
+  char socks_username[65];
+  char socks_password[65];
+  unsigned int socks_port;
+#endif				/* USE_SOCKS_PROXY */
 };
 
-struct message_struct {
- ANUBIS_LIST *commands;       /* Associative list of SMTP commands */
- ANUBIS_LIST *header;         /* Associative list of RFC822 headers */
- ANUBIS_LIST *mime_hdr;       /* List of lines before the first boundary marker */
- char *body;           /* Message body */
- char *boundary;       /* Additional data */
+struct message_struct
+{
+  ANUBIS_LIST *commands;	/* Associative list of SMTP commands */
+  ANUBIS_LIST *header;		/* Associative list of RFC822 headers */
+  ANUBIS_LIST *mime_hdr;	/* List of lines before the first boundary marker */
+  char *body;			/* Message body */
+  char *boundary;		/* Additional data */
 };
 
 #ifdef USE_SSL
-struct secure_struct {
- NET_STREAM client;
- NET_STREAM server;
- char *cafile;
- char *cert;
- char *key;
+struct secure_struct
+{
+  NET_STREAM client;
+  NET_STREAM server;
+  char *cafile;
+  char *cert;
+  char *key;
 };
 extern struct secure_struct secure;
 #endif /* USE_SSL */
@@ -91,11 +96,10 @@ extern NET_STREAM remote_server;
 extern char *anubis_domain;
 
 #ifdef HAVE_PAM
- extern pam_handle_t *pamh;
- extern int pam_retval;
+extern pam_handle_t *pamh;
+extern int pam_retval;
 #endif /* HAVE_PAM */
 
 extern ANUBIS_MODE anubis_mode;
 
 /* EOF */
-

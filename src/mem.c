@@ -24,92 +24,94 @@
 
 #include "headers.h"
 
-void (*memory_error)(const char *message);
+void (*memory_error) (const char *message);
 
 void *
-xmalloc(int n)
+xmalloc (int n)
 {
-	void *p;
+  void *p;
 
-	p = malloc(n);
-	if (p == NULL) {
-		memory_error(
-			_("malloc() failed. Cannot allocate enough memory."));
-	}
-	memset(p, 0, n);
-	return p;
+  p = malloc (n);
+  if (p == NULL)
+    {
+      memory_error (_("malloc() failed. Cannot allocate enough memory."));
+    }
+  memset (p, 0, n);
+  return p;
 }
 
 void *
-xrealloc(void *p, int n)
+xrealloc (void *p, int n)
 {
-	if (p == NULL)
-		return xmalloc(n);
+  if (p == NULL)
+    return xmalloc (n);
 
-	p = realloc(p, n);
-	if (p == NULL) {
-		memory_error(
-		      _("realloc() failed. Cannot reallocate enough memory."));
-	}
-	return p;
+  p = realloc (p, n);
+  if (p == NULL)
+    {
+      memory_error (_("realloc() failed. Cannot reallocate enough memory."));
+    }
+  return p;
 }
 
 char *
-allocbuf(char *s, int maxsize)
+allocbuf (char *s, int maxsize)
 {
-	char *p = NULL;
-	int len;
+  char *p = NULL;
+  int len;
 
-	if (s == NULL)
-		return NULL;
+  if (s == NULL)
+    return NULL;
 
-	len = strlen(s);
-	if (maxsize != 0) {
-		if (len > maxsize)
-			len = maxsize;
-	}
-	len++;
+  len = strlen (s);
+  if (maxsize != 0)
+    {
+      if (len > maxsize)
+	len = maxsize;
+    }
+  len++;
 
-	p = (char *)xmalloc(len);
-	if (p) {
-		strncpy(p, s, len - 1);
-		return p;
-	}
-	else
-		return NULL;
+  p = (char *) xmalloc (len);
+  if (p)
+    {
+      strncpy (p, s, len - 1);
+      return p;
+    }
+  else
+    return NULL;
 }
 
 #ifndef HAVE_STRDUP
 char *
-strdup(const char *s)
+strdup (const char *s)
 {
-	char *p = NULL;
-	int len;
+  char *p = NULL;
+  int len;
 
-	if (s == NULL)
-		return NULL;
+  if (s == NULL)
+    return NULL;
 
-	len = strlen(s);
-	p = (char *)xmalloc(len + 1);
-	strncpy(p, s, len);
-	return p;
+  len = strlen (s);
+  p = (char *) xmalloc (len + 1);
+  strncpy (p, s, len);
+  return p;
 }
 #endif /* not HAVE_STRDUP */
 
 void
-free_pptr(char **pptr)
+free_pptr (char **pptr)
 {
-	char **p = pptr;
+  char **p = pptr;
 
-	if (!pptr)
-		return;
-	while (*p) {
-		free(*p);
-		p++;
-	}
-	free(pptr);
-	return;
+  if (!pptr)
+    return;
+  while (*p)
+    {
+      free (*p);
+      p++;
+    }
+  free (pptr);
+  return;
 }
 
 /* EOF */
-

@@ -29,172 +29,176 @@
 
 /* Open the plaintext database. ARG is the full pathname to the file */
 static int
-dbtext_open (void **dp, ANUBIS_URL *url, enum anubis_db_mode mode, char **errp)
+dbtext_open (void **dp, ANUBIS_URL * url, enum anubis_db_mode mode,
+	     char **errp)
 {
-	FILE *fp;
-	char *tmode;
-	char *path;
-	
-	switch (mode) {
-	case anubis_db_rdonly:
-		tmode = "r";
-		break;
+  FILE *fp;
+  char *tmode;
+  char *path;
 
-	case anubis_db_rdwr:
-		tmode = "a+";
-	}
+  switch (mode)
+    {
+    case anubis_db_rdonly:
+      tmode = "r";
+      break;
 
-	path = anubis_url_full_path(url);
-	fp = fopen(path, tmode);
-	free(path);
-	if (!fp) {
-		if (errp)
-			*errp = strerror(errno);
-		return ANUBIS_DB_FAIL;
-	}
-	*dp = fp;
-	return ANUBIS_DB_SUCCESS;
+    case anubis_db_rdwr:
+      tmode = "a+";
+    }
+
+  path = anubis_url_full_path (url);
+  fp = fopen (path, tmode);
+  free (path);
+  if (!fp)
+    {
+      if (errp)
+	*errp = strerror (errno);
+      return ANUBIS_DB_FAIL;
+    }
+  *dp = fp;
+  return ANUBIS_DB_SUCCESS;
 }
 
 static int
 dbtext_close (void *d)
 {
-	fclose((FILE*)d);
-	return ANUBIS_DB_SUCCESS;
+  fclose ((FILE *) d);
+  return ANUBIS_DB_SUCCESS;
 }
 
 static const char delim[] = " \t\r\n";
 
 int
-dbtext_to_record(char *p, ANUBIS_USER *rec)
+dbtext_to_record (char *p, ANUBIS_USER * rec)
 {
-	memset(rec, 0, sizeof *rec);	
-	while (*p && isspace(*p))
-		p++;
-	if (*p == '#')
-		return ANUBIS_DB_NOT_FOUND;
-	p = strtok(p, delim);
-	if (!p)
-		return ANUBIS_DB_NOT_FOUND;
-	rec->smtp_authid = strdup(p);
+  memset (rec, 0, sizeof *rec);
+  while (*p && isspace (*p))
+    p++;
+  if (*p == '#')
+    return ANUBIS_DB_NOT_FOUND;
+  p = strtok (p, delim);
+  if (!p)
+    return ANUBIS_DB_NOT_FOUND;
+  rec->smtp_authid = strdup (p);
 
-	p = strtok(NULL, delim);
-	if (!p) {
-		free(rec->smtp_authid);
-		return ANUBIS_DB_FAIL;
-	}
-	rec->smtp_passwd = strdup(p);
+  p = strtok (NULL, delim);
+  if (!p)
+    {
+      free (rec->smtp_authid);
+      return ANUBIS_DB_FAIL;
+    }
+  rec->smtp_passwd = strdup (p);
 
-	p = strtok(NULL, delim);
-	if (p) {
-		rec->username = strdup(p);
-		p = strtok(NULL, delim);
-		if (p) 
-			rec->rcfile_name = strdup(p);
-	}
-	return ANUBIS_DB_SUCCESS;
+  p = strtok (NULL, delim);
+  if (p)
+    {
+      rec->username = strdup (p);
+      p = strtok (NULL, delim);
+      if (p)
+	rec->rcfile_name = strdup (p);
+    }
+  return ANUBIS_DB_SUCCESS;
 }
 
 static int
-dbtext_get (void *d, const char *key, ANUBIS_USER *rec, int *errp)
+dbtext_get (void *d, const char *key, ANUBIS_USER * rec, int *errp)
 {
-	FILE *fp = d;
-	char buf[512], *p;
-	
-	memset(rec, 0, sizeof *rec);
-	fseek(fp, 0, SEEK_SET);
-	while ((p = fgets(buf, sizeof buf, fp)) != NULL) {
-		while (*p && isspace(*p))
-			p++;
-		if (*p == '#')
-			continue;
-		for (p = buf; *p && !strchr(delim, *p); p++)
-			;
-		if (!*p || memcmp(buf, key, p - buf))
-			continue;
-		return dbtext_to_record(buf, rec);
-	}
-	return ferror(fp) ? ANUBIS_DB_FAIL : ANUBIS_DB_NOT_FOUND;
+  FILE *fp = d;
+  char buf[512], *p;
+
+  memset (rec, 0, sizeof *rec);
+  fseek (fp, 0, SEEK_SET);
+  while ((p = fgets (buf, sizeof buf, fp)) != NULL)
+    {
+      while (*p && isspace (*p))
+	p++;
+      if (*p == '#')
+	continue;
+      for (p = buf; *p && !strchr (delim, *p); p++)
+	;
+      if (!*p || memcmp (buf, key, p - buf))
+	continue;
+      return dbtext_to_record (buf, rec);
+    }
+  return ferror (fp) ? ANUBIS_DB_FAIL : ANUBIS_DB_NOT_FOUND;
 }
 
 static int
-dbtext_put (void *d, const char *key, ANUBIS_USER *rec, int *errp)
+dbtext_put (void *d, const char *key, ANUBIS_USER * rec, int *errp)
 {
-	FILE *fp = d;
-	fprintf(fp, "%s\t%s",
-		rec->smtp_authid,
-		rec->smtp_passwd);
-	if (rec->username) {
-		fprintf(fp, "\t%s", rec->username);
-		if (rec->rcfile_name)
-			fprintf(fp, "\t%s", rec->rcfile_name);
-	}
-	fprintf(fp, "\n");
-	return ferror(fp) ? ANUBIS_DB_FAIL : ANUBIS_DB_SUCCESS;
+  FILE *fp = d;
+  fprintf (fp, "%s\t%s", rec->smtp_authid, rec->smtp_passwd);
+  if (rec->username)
+    {
+      fprintf (fp, "\t%s", rec->username);
+      if (rec->rcfile_name)
+	fprintf (fp, "\t%s", rec->rcfile_name);
+    }
+  fprintf (fp, "\n");
+  return ferror (fp) ? ANUBIS_DB_FAIL : ANUBIS_DB_SUCCESS;
 }
 
 static int
-dbtext_list(void *d, ANUBIS_LIST *list, int *ecode)
+dbtext_list (void *d, ANUBIS_LIST * list, int *ecode)
 {
-	FILE *fp = d;
-	char buf[512], *p;
-	
-	fseek(fp, 0, SEEK_SET);
-	while ((p = fgets(buf, sizeof buf, fp)) != NULL) {
-		ANUBIS_USER rec;
-		if (dbtext_to_record(buf, &rec) == ANUBIS_DB_SUCCESS) {
-			ANUBIS_USER *prec = xmalloc(sizeof(*prec));
-			memcpy(prec, &rec, sizeof(*prec));
-			list_append(list, prec);
-		}
+  FILE *fp = d;
+  char buf[512], *p;
+
+  fseek (fp, 0, SEEK_SET);
+  while ((p = fgets (buf, sizeof buf, fp)) != NULL)
+    {
+      ANUBIS_USER rec;
+      if (dbtext_to_record (buf, &rec) == ANUBIS_DB_SUCCESS)
+	{
+	  ANUBIS_USER *prec = xmalloc (sizeof (*prec));
+	  memcpy (prec, &rec, sizeof (*prec));
+	  list_append (list, prec);
 	}
-	return ANUBIS_DB_SUCCESS;
+    }
+  return ANUBIS_DB_SUCCESS;
 }
 
 static int
-dbtext_delete(void *d, const char *keystr, int *ecode)
+dbtext_delete (void *d, const char *keystr, int *ecode)
 {
-	FILE *fp = d;
-	char buf[512], *p;
-	int rc = ANUBIS_DB_FAIL;
-	
-	fseek(fp, 0, SEEK_SET);
-	while ((p = fgets(buf, sizeof buf, fp)) != NULL) {
-		size_t len;
-	
-		while (*p && isspace(*p))
-			p++;
-		if (*p == '#')
-			continue;
-		p = strtok(p, delim);
-		if (!p || strcmp(p, keystr))
-			continue;
-		len = strlen(buf);
-		memset(buf, '#', len-1);
-		buf[len-1] = 0;
-		fseek(fp, - (off_t) len, SEEK_CUR);
-		fputs(buf, fp);
-		rc = ANUBIS_DB_SUCCESS;
-		break;
-	}
+  FILE *fp = d;
+  char buf[512], *p;
+  int rc = ANUBIS_DB_FAIL;
 
-	return rc;
+  fseek (fp, 0, SEEK_SET);
+  while ((p = fgets (buf, sizeof buf, fp)) != NULL)
+    {
+      size_t len;
+
+      while (*p && isspace (*p))
+	p++;
+      if (*p == '#')
+	continue;
+      p = strtok (p, delim);
+      if (!p || strcmp (p, keystr))
+	continue;
+      len = strlen (buf);
+      memset (buf, '#', len - 1);
+      buf[len - 1] = 0;
+      fseek (fp, -(off_t) len, SEEK_CUR);
+      fputs (buf, fp);
+      rc = ANUBIS_DB_SUCCESS;
+      break;
+    }
+
+  return rc;
 }
 
 void
 dbtext_init (void)
 {
-	anubis_db_register("text",
-			   dbtext_open,
-			   dbtext_close,
-			   dbtext_get,
-			   dbtext_put,
-			   dbtext_delete,
-			   dbtext_list,
-			   NULL);
+  anubis_db_register ("text",
+		      dbtext_open,
+		      dbtext_close,
+		      dbtext_get,
+		      dbtext_put, dbtext_delete, dbtext_list, NULL);
 }
 
 #endif /* WITH_GSASL */
 
 /* EOF */
-

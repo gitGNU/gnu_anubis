@@ -25,59 +25,67 @@
 #include "headers.h"
 #include "extern.h"
 
-static int connect_directly_to(char *, unsigned int);
+static int connect_directly_to (char *, unsigned int);
 
-static struct _debug_cache {
-	int method;
-	int output;
-	int newline;
-	size_t count;
-} debug_cache = { -1, -1, 0, 0 };
+static struct _debug_cache
+{
+  int method;
+  int output;
+  int newline;
+  size_t count;
+}
+debug_cache =
+{
+-1, -1, 0, 0};
 
 static void
-_debug_printer(int method, int output, unsigned long nleft, char *ptr)
+_debug_printer (int method, int output, unsigned long nleft, char *ptr)
 {
-	int i;
-	char *mode = "?";
+  int i;
+  char *mode = "?";
 
-	switch (method) {
-	case CLIENT:
-		mode = _("SERVER");
-		break;
-	case SERVER:
-		mode = _("CLIENT");
-	}
+  switch (method)
+    {
+    case CLIENT:
+      mode = _("SERVER");
+      break;
+    case SERVER:
+      mode = _("CLIENT");
+    }
 
-	if (debug_cache.newline
-	    || method != debug_cache.method || output != debug_cache.output) {
-		if (!debug_cache.newline && debug_cache.count)
-			fprintf(stderr, "(%lu)\n",
-				(unsigned long)debug_cache.count);
-		debug_cache.method = method;
-		debug_cache.output = output;
-		debug_cache.newline = 0;
-		debug_cache.count = 0;
-		fprintf(stderr, "%s %s ", mode, output ? "<<<" : ">>>");
-	}
+  if (debug_cache.newline
+      || method != debug_cache.method || output != debug_cache.output)
+    {
+      if (!debug_cache.newline && debug_cache.count)
+	fprintf (stderr, "(%lu)\n", (unsigned long) debug_cache.count);
+      debug_cache.method = method;
+      debug_cache.output = output;
+      debug_cache.newline = 0;
+      debug_cache.count = 0;
+      fprintf (stderr, "%s %s ", mode, output ? "<<<" : ">>>");
+    }
 
-	for (i = 0; i < nleft; i++, ptr++) {
-		debug_cache.count++;
-		debug_cache.newline = 0;
-		if (*ptr == '\r')
-			continue;
-		if (*ptr == '\n') {
-			fprintf(stderr, "(%ld)\n",
-				(unsigned long)debug_cache.count);
-			debug_cache.count = 0;
-			if (i != nleft-1) {
-				fprintf(stderr, "%s %s ",
-					mode, output ? "<<<" : ">>>");
-				debug_cache.newline = 0;
-			} else
-				debug_cache.newline = 1;
-		} else 
-			fputc(*ptr, stderr);
+  for (i = 0; i < nleft; i++, ptr++)
+    {
+      debug_cache.count++;
+      debug_cache.newline = 0;
+      if (*ptr == '\r')
+	continue;
+      if (*ptr == '\n')
+	{
+	  fprintf (stderr, "(%ld)\n", (unsigned long) debug_cache.count);
+	  debug_cache.count = 0;
+	  if (i != nleft - 1)
+	    {
+	      fprintf (stderr, "%s %s ", mode, output ? "<<<" : ">>>");
+	      debug_cache.newline = 0;
+	    }
+	  else
+	    debug_cache.newline = 1;
 	}
+      else
+	fputc (*ptr, stderr);
+    }
 }
 
 #define DPRINTF(method, output, nleft, ptr) do {\
@@ -86,82 +94,91 @@ _debug_printer(int method, int output, unsigned long nleft, char *ptr)
   } while (0)
 
 NET_STREAM
-make_remote_connection(char *host, unsigned int port)
+make_remote_connection (char *host, unsigned int port)
 {
-	int sd;
-	NET_STREAM str;
+  int sd;
+  NET_STREAM str;
 
 #ifdef USE_SOCKS_PROXY
-        if (topt & T_SOCKS) { /* SOCKS proxy */
-                host = session.socks;
-                port = session.socks_port;
-        }
+  if (topt & T_SOCKS)
+    {				/* SOCKS proxy */
+      host = session.socks;
+      port = session.socks_port;
+    }
 #endif /* USE_SOCKS_PROXY */
 
-        if ((sd = connect_directly_to (host, port)) == -1)
-                return NULL;
+  if ((sd = connect_directly_to (host, port)) == -1)
+    return NULL;
 
-	net_create_stream(&str, sd);
-	return str;
+  net_create_stream (&str, sd);
+  return str;
 }
 
 static int
-connect_directly_to(char *host, unsigned int port)
+connect_directly_to (char *host, unsigned int port)
 {
-	int sd = 0;
-	unsigned long inaddr;
-	struct sockaddr_in addr;
+  int sd = 0;
+  unsigned long inaddr;
+  struct sockaddr_in addr;
 
-	/*
-	   Find out the IP address.
-	*/
+  /*
+     Find out the IP address.
+   */
 
-	memset(&addr, 0, sizeof(addr));
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(port);
-	info(VERBOSE, _("Getting remote host information..."));
+  memset (&addr, 0, sizeof (addr));
+  addr.sin_family = AF_INET;
+  addr.sin_port = htons (port);
+  info (VERBOSE, _("Getting remote host information..."));
 
-	inaddr = inet_addr(host);
-	if (inaddr != INADDR_NONE)
-		memcpy(&addr.sin_addr, &inaddr, sizeof(inaddr));
-	else {
-		struct hostent *hp = 0;
-		hp = gethostbyname(host);
-		if (hp == 0) {
-			hostname_error(host);
-			return -1;
-		}
-		else {
-			if (hp->h_length != 4 && hp->h_length != 8) {
-				anubis_error(HARD,
-				_("Illegal address length received for host %s"), host);
-				return -1;
-			}
-			else {
-				memcpy((char *)&addr.sin_addr.s_addr, hp->h_addr,
-					hp->h_length);
-			}
-		}
+  inaddr = inet_addr (host);
+  if (inaddr != INADDR_NONE)
+    memcpy (&addr.sin_addr, &inaddr, sizeof (inaddr));
+  else
+    {
+      struct hostent *hp = 0;
+      hp = gethostbyname (host);
+      if (hp == 0)
+	{
+	  hostname_error (host);
+	  return -1;
 	}
-
-	/*
-	   Create socket, and connect.
-	*/
-
-	if ((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-		anubis_error(HARD, _("Can't create stream socket."));
-		return -1;
+      else
+	{
+	  if (hp->h_length != 4 && hp->h_length != 8)
+	    {
+	      anubis_error (HARD,
+			    _("Illegal address length received for host %s"),
+			    host);
+	      return -1;
+	    }
+	  else
+	    {
+	      memcpy ((char *) &addr.sin_addr.s_addr, hp->h_addr,
+		      hp->h_length);
+	    }
 	}
-	info(VERBOSE, _("Connecting to %s:%u..."), host, port);
-	if (connect(sd, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
-		anubis_error(HARD, _("Couldn't connect to %s:%u. %s."),
-			host, port, strerror(errno));
-		return -1;
-	}
-	else
-		info(NORMAL, _("Connected to %s:%u"), host, port);
+    }
 
-	return sd;
+  /*
+     Create socket, and connect.
+   */
+
+  if ((sd = socket (AF_INET, SOCK_STREAM, 0)) == -1)
+    {
+      anubis_error (HARD, _("Can't create stream socket."));
+      return -1;
+    }
+  info (VERBOSE, _("Connecting to %s:%u..."), host, port);
+  if (connect (sd, (struct sockaddr *) &addr, sizeof (addr)) == -1)
+    {
+      anubis_error (HARD, _("Couldn't connect to %s:%u. %s."),
+		    host, port, strerror (errno));
+      return -1;
+    }
+  else
+    info (NORMAL, _("Connected to %s:%u"), host, port);
+
+  return sd;
 }
 
 /*****************
@@ -169,52 +186,58 @@ connect_directly_to(char *host, unsigned int port)
 ******************/
 
 int
-bind_and_listen(char *host, unsigned int port)
+bind_and_listen (char *host, unsigned int port)
 {
-	int sd = 0;
-	unsigned long inaddr;
-	struct sockaddr_in addr;
-	int true = 1;
-	
-	memset(&addr, 0, sizeof(addr));
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(port);
+  int sd = 0;
+  unsigned long inaddr;
+  struct sockaddr_in addr;
+  int true = 1;
 
-	if ((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-		anubis_error(HARD, _("Can't create stream socket."));
+  memset (&addr, 0, sizeof (addr));
+  addr.sin_family = AF_INET;
+  addr.sin_port = htons (port);
 
-	if (topt & T_NAMES) {
-		inaddr = inet_addr(host);
-		if (inaddr != INADDR_NONE)
-			memcpy(&addr.sin_addr, &inaddr, sizeof(inaddr));
-		else {
-			struct hostent *hp = 0;
-			hp = gethostbyname(host);
-			if (hp == 0)
-				hostname_error(host);
-			else {
-				if (hp->h_length != 4 && hp->h_length != 8)
-					anubis_error(HARD,
-					_("Illegal address length received for host %s"), host);
-				else {
-					memcpy((char *)&addr.sin_addr.s_addr, hp->h_addr,
-						hp->h_length);
-				}
-			}
+  if ((sd = socket (AF_INET, SOCK_STREAM, 0)) == -1)
+    anubis_error (HARD, _("Can't create stream socket."));
+
+  if (topt & T_NAMES)
+    {
+      inaddr = inet_addr (host);
+      if (inaddr != INADDR_NONE)
+	memcpy (&addr.sin_addr, &inaddr, sizeof (inaddr));
+      else
+	{
+	  struct hostent *hp = 0;
+	  hp = gethostbyname (host);
+	  if (hp == 0)
+	    hostname_error (host);
+	  else
+	    {
+	      if (hp->h_length != 4 && hp->h_length != 8)
+		anubis_error (HARD,
+			      _
+			      ("Illegal address length received for host %s"),
+			      host);
+	      else
+		{
+		  memcpy ((char *) &addr.sin_addr.s_addr, hp->h_addr,
+			  hp->h_length);
 		}
+	    }
 	}
-	else
-		addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    }
+  else
+    addr.sin_addr.s_addr = htonl (INADDR_ANY);
 
-	setsockopt (sd, SOL_SOCKET, SO_REUSEADDR, &true, sizeof(true));
-	
-	if (bind(sd, (struct sockaddr *)&addr, sizeof(addr)))
-		anubis_error(HARD, _("bind() failed: %s."), strerror(errno));
-	info(VERBOSE, _("GNU Anubis bound to %s:%u"), inet_ntoa(addr.sin_addr),
-		ntohs(addr.sin_port));
-	if (listen(sd, 5))
-		anubis_error(HARD, _("listen() failed: %s."), strerror(errno));
-	return sd;
+  setsockopt (sd, SOL_SOCKET, SO_REUSEADDR, &true, sizeof (true));
+
+  if (bind (sd, (struct sockaddr *) &addr, sizeof (addr)))
+    anubis_error (HARD, _("bind() failed: %s."), strerror (errno));
+  info (VERBOSE, _("GNU Anubis bound to %s:%u"), inet_ntoa (addr.sin_addr),
+	ntohs (addr.sin_port));
+  if (listen (sd, 5))
+    anubis_error (HARD, _("listen() failed: %s."), strerror (errno));
+  return sd;
 }
 
 /**************
@@ -222,25 +245,27 @@ bind_and_listen(char *host, unsigned int port)
 ***************/
 
 void
-swrite(int method, NET_STREAM sd, char *ptr)
+swrite (int method, NET_STREAM sd, char *ptr)
 {
-	int rc;
-	size_t nleft, nwritten = 0;
+  int rc;
+  size_t nleft, nwritten = 0;
 
-	if (ptr == 0)
-		return;
+  if (ptr == 0)
+    return;
 
-	nleft = strlen(ptr);
-	rc = stream_write(sd, ptr, nleft, &nwritten);
-	if (rc) {
-		socket_error(stream_strerror(sd, rc));
-		return;
-	}
-	DPRINTF(method, 1, nwritten, ptr);
-	if (nwritten != nleft) {
-		/* Should not happen */
-		anubis_error(HARD, _("Short write"));
-	}
+  nleft = strlen (ptr);
+  rc = stream_write (sd, ptr, nleft, &nwritten);
+  if (rc)
+    {
+      socket_error (stream_strerror (sd, rc));
+      return;
+    }
+  DPRINTF (method, 1, nwritten, ptr);
+  if (nwritten != nleft)
+    {
+      /* Should not happen */
+      anubis_error (HARD, _("Short write"));
+    }
 }
 
 /**************
@@ -248,51 +273,55 @@ swrite(int method, NET_STREAM sd, char *ptr)
 ***************/
 
 int
-recvline(int method, NET_STREAM sd, void *vptr, size_t maxlen)
+recvline (int method, NET_STREAM sd, void *vptr, size_t maxlen)
 {
-	int rc;
-	size_t nbytes;
-	
-	rc = stream_readline(sd, vptr, maxlen, &nbytes);
-	if (rc) {
-		socket_error(stream_strerror(sd, rc));
-		return 0; /* FIXME: nbytes? */
-	}
-	DPRINTF(method, 0, nbytes, (char *)vptr);
-	return nbytes;
+  int rc;
+  size_t nbytes;
+
+  rc = stream_readline (sd, vptr, maxlen, &nbytes);
+  if (rc)
+    {
+      socket_error (stream_strerror (sd, rc));
+      return 0;			/* FIXME: nbytes? */
+    }
+  DPRINTF (method, 0, nbytes, (char *) vptr);
+  return nbytes;
 }
 
 #define INIT_RECVLINE_SIZE 81
 
 int
-recvline_ptr(int method, NET_STREAM sd, char **vptr, size_t *maxlen)
+recvline_ptr (int method, NET_STREAM sd, char **vptr, size_t * maxlen)
 {
-	int rc;
-	size_t off = 0;
+  int rc;
+  size_t off = 0;
 
-	*vptr = NULL;
-	*maxlen = 0;
-	while (1) {
-		size_t nbytes;
-		
-		if (off == *maxlen) {
-			*maxlen += INIT_RECVLINE_SIZE;
-			*vptr = xrealloc(*vptr, *maxlen);
-		}
-		rc = stream_readline(sd, *vptr + off, *maxlen - off, &nbytes);
-		if (rc) {
-			socket_error(stream_strerror(sd, rc));
-			return 0; /* FIXME: ptr - buf ? */
-		}
-		if (nbytes == 0)
-			break;
-		off += nbytes;
-		if ((*vptr)[off - 1] == '\n')
-			break;
+  *vptr = NULL;
+  *maxlen = 0;
+  while (1)
+    {
+      size_t nbytes;
+
+      if (off == *maxlen)
+	{
+	  *maxlen += INIT_RECVLINE_SIZE;
+	  *vptr = xrealloc (*vptr, *maxlen);
 	}
-	(*vptr)[off] = 0;
-	DPRINTF(method, 0, off, *vptr);
-	return off;
+      rc = stream_readline (sd, *vptr + off, *maxlen - off, &nbytes);
+      if (rc)
+	{
+	  socket_error (stream_strerror (sd, rc));
+	  return 0;		/* FIXME: ptr - buf ? */
+	}
+      if (nbytes == 0)
+	break;
+      off += nbytes;
+      if ((*vptr)[off - 1] == '\n')
+	break;
+    }
+  (*vptr)[off] = 0;
+  DPRINTF (method, 0, off, *vptr);
+  return off;
 }
 
 /*****************
@@ -300,52 +329,52 @@ recvline_ptr(int method, NET_STREAM sd, char **vptr, size_t *maxlen)
 ******************/
 
 void
-get_response_smtp(int method, NET_STREAM sd, char *buf, int size)
+get_response_smtp (int method, NET_STREAM sd, char *buf, int size)
 {
-	int n;
-	char line[LINEBUFFER+1];
+  int n;
+  char line[LINEBUFFER + 1];
 
-	if (buf != 0)
-		memset(buf, 0, size);
-	do {
-		n = recvline(method, sd, line, LINEBUFFER);
-		if (buf != 0) {
-			strncat(buf, line, size);
-			size -= n;
-		}
-	} while (line[3] == '-');
-	return;
+  if (buf != 0)
+    memset (buf, 0, size);
+  do
+    {
+      n = recvline (method, sd, line, LINEBUFFER);
+      if (buf != 0)
+	{
+	  strncat (buf, line, size);
+	  size -= n;
+	}
+    }
+  while (line[3] == '-');
+  return;
 }
 
 /**************************
  Close a socket descriptor
 ***************************/
 void
-close_socket(int sd)
+close_socket (int sd)
 {
-	if (sd)
-		close(sd);
-	return;
+  if (sd)
+    close (sd);
+  return;
 }
 
 void
-net_close_stream(NET_STREAM *sd)
+net_close_stream (NET_STREAM * sd)
 {
-	stream_close(*sd);
-	stream_destroy(sd);
-	return;
+  stream_close (*sd);
+  stream_destroy (sd);
+  return;
 }
 
 
 void
-net_create_stream(NET_STREAM *str, int fd)
+net_create_stream (NET_STREAM * str, int fd)
 {
-	stream_create(str);
-	stream_set_io(*str,
-		      (void *)fd,
-		      NULL, NULL, NULL, NULL, NULL);
+  stream_create (str);
+  stream_set_io (*str, (void *) fd, NULL, NULL, NULL, NULL, NULL);
 }
 
 
 /* EOF */
-

@@ -44,64 +44,68 @@ typedef int (*_refcnt_fp) (RC_REGEX *);
 typedef int (*_compile_fp) (RC_REGEX *, char *, int);
 typedef void (*_free_fp) (RC_REGEX *);
 
-struct regex_vtab {
- int mask;
- _match_fp  match;
- _refcnt_fp refcnt;
- _compile_fp compile;
- _free_fp free;
+struct regex_vtab
+{
+  int mask;
+  _match_fp match;
+  _refcnt_fp refcnt;
+  _compile_fp compile;
+  _free_fp free;
 };
 
-static int exact_compile(RC_REGEX *, char *, int);
-static void exact_free(RC_REGEX *);
-static int exact_match(RC_REGEX *, char *, int *, char ***, int *, int *);
-static int exact_refcnt(RC_REGEX *);
+static int exact_compile (RC_REGEX *, char *, int);
+static void exact_free (RC_REGEX *);
+static int exact_match (RC_REGEX *, char *, int *, char ***, int *, int *);
+static int exact_refcnt (RC_REGEX *);
 
-static int posix_compile(RC_REGEX *, char *, int);
-static void posix_free(RC_REGEX *);
-static int posix_match(RC_REGEX *, char *, int *, char ***, int *, int *);
-static int posix_refcnt(RC_REGEX *);
+static int posix_compile (RC_REGEX *, char *, int);
+static void posix_free (RC_REGEX *);
+static int posix_match (RC_REGEX *, char *, int *, char ***, int *, int *);
+static int posix_refcnt (RC_REGEX *);
 #ifdef HAVE_PCRE
-static int perl_compile(RC_REGEX *, char *, int);
-static void perl_free(RC_REGEX *);
-static int perl_match(RC_REGEX *, char *, int *, char ***, int *, int *);
-static int perl_refcnt(RC_REGEX *);
+static int perl_compile (RC_REGEX *, char *, int);
+static void perl_free (RC_REGEX *);
+static int perl_match (RC_REGEX *, char *, int *, char ***, int *, int *);
+static int perl_refcnt (RC_REGEX *);
 #endif /* HAVE_PCRE */
 
 static struct regex_vtab vtab[] = {
-	{ R_EXACT, exact_match, exact_refcnt, exact_compile, exact_free },
+  {R_EXACT, exact_match, exact_refcnt, exact_compile, exact_free},
 #ifdef HAVE_PCRE
-	{ R_PERLRE, perl_match, perl_refcnt, perl_compile, perl_free },
+  {R_PERLRE, perl_match, perl_refcnt, perl_compile, perl_free},
 #endif
-	{ R_POSIX, posix_match, posix_refcnt, posix_compile, posix_free },
-	{ 0 }
+  {R_POSIX, posix_match, posix_refcnt, posix_compile, posix_free},
+  {0}
 };
-		
-struct rc_regex {     /* Regular expression */
- char *src;           /* Raw-text representation */
- int flags;           /* Compilation flags */
- union {
-  regex_t re;         /* POSIX regex */
+
+struct rc_regex
+{				/* Regular expression */
+  char *src;			/* Raw-text representation */
+  int flags;			/* Compilation flags */
+  union
+  {
+    regex_t re;			/* POSIX regex */
 #ifdef HAVE_PCRE
-  pcre *pre;          /* Perl */
+    pcre *pre;			/* Perl */
 #endif
-  } v;
+  }
+  v;
 };
 
 static struct regex_vtab *
-regex_vtab_lookup(int flags)
+regex_vtab_lookup (int flags)
 {
-	struct regex_vtab *p;
+  struct regex_vtab *p;
 
-	for (p = vtab; p->mask; p++)
-		if (p->mask & flags)
-			break;
-	if (p->mask == 0)
-		return NULL;
-	return p;
+  for (p = vtab; p->mask; p++)
+    if (p->mask & flags)
+      break;
+  if (p->mask == 0)
+    return NULL;
+  return p;
 }
-
 
+
 /* ************************** Interface Functions ************************** */
 #define ASSERT_RE(re,vp) \
  if (!(re) || (vp = regex_vtab_lookup((re)->flags)) == NULL) {\
@@ -112,340 +116,354 @@ regex_vtab_lookup(int flags)
  }
 
 void
-regex_print_flags(int flags)
+regex_print_flags (int flags)
 {
-	printf(":");
-	if (flags & R_EXACT)
-		printf("exact");
-	else if (flags & R_POSIX)
-		printf("posix");
-	else if (flags & R_PERLRE)
-		printf("perl");
+  printf (":");
+  if (flags & R_EXACT)
+    printf ("exact");
+  else if (flags & R_POSIX)
+    printf ("posix");
+  else if (flags & R_PERLRE)
+    printf ("perl");
 
-	if (flags & R_SCASE)
-		printf(" :scase");
-	if (flags & R_BASIC)
-		printf(" :basic");
+  if (flags & R_SCASE)
+    printf (" :scase");
+  if (flags & R_BASIC)
+    printf (" :basic");
 }
 
 void
-anubis_regex_print(RC_REGEX *re)
+anubis_regex_print (RC_REGEX * re)
 {
-	regex_print_flags(re->flags);
-	printf(" [%s]", anubis_regex_source(re));
+  regex_print_flags (re->flags);
+  printf (" [%s]", anubis_regex_source (re));
 }
 
 int
-anubis_regex_match(RC_REGEX *re, char *line, int *refc, char ***refv)
+anubis_regex_match (RC_REGEX * re, char *line, int *refc, char ***refv)
 {
-	int so, eo;
-	struct regex_vtab *vp;
+  int so, eo;
+  struct regex_vtab *vp;
 
-	ASSERT_RE(re, vp);
-	return vp->match(re, line, refc, refv, &so, &eo) == 0;
+  ASSERT_RE (re, vp);
+  return vp->match (re, line, refc, refv, &so, &eo) == 0;
 }
 
 char *
-anubis_regex_replace(RC_REGEX *re, char *line, char *repl)
+anubis_regex_replace (RC_REGEX * re, char *line, char *repl)
 {
-	int so, eo;
-	int refc;
-	char **refv;
-	char *newstr = NULL;
-	char *savep = NULL;
-	int newlen;
-	int off = 0;
-	int alloc = 0;
-	struct regex_vtab *vp;
+  int so, eo;
+  int refc;
+  char **refv;
+  char *newstr = NULL;
+  char *savep = NULL;
+  int newlen;
+  int off = 0;
+  int alloc = 0;
+  struct regex_vtab *vp;
 
-	ASSERT_RE(re, vp);
-	while (vp->match(re, line + off, &refc, &refv, &so, &eo) == 0) {
-		char *p;
-		int plen;
-		
-		if (so == -1) {
-			char *q;
-			
-			alloc = 0;
-			p = repl;
-			plen = strlen(p);
-			q = strstr(line + off, anubis_regex_source(re));
-			
-			so = (q - (line + off));
-			eo = so + strlen(anubis_regex_source(re));
-		} else {
-			alloc = 1;
-			p = substitute(repl, refv);
-			plen = strlen(p);
-			xfree_pptr(refv);
-		}
+  ASSERT_RE (re, vp);
+  while (vp->match (re, line + off, &refc, &refv, &so, &eo) == 0)
+    {
+      char *p;
+      int plen;
 
-		savep = newstr;
-		newlen = strlen(line) - (eo - so) + plen + 1;
-		newstr = xmalloc(newlen);
-		memcpy(newstr, line, off + so);
-		memcpy(newstr + off + so, p, plen);
-		strcpy(newstr + off + so + plen, line + off + eo);
+      if (so == -1)
+	{
+	  char *q;
 
-		if (alloc)
-			xfree(p);
-		if (savep)
-			xfree(savep);
-		line = newstr;
-		off += eo;
+	  alloc = 0;
+	  p = repl;
+	  plen = strlen (p);
+	  q = strstr (line + off, anubis_regex_source (re));
+
+	  so = (q - (line + off));
+	  eo = so + strlen (anubis_regex_source (re));
 	}
-	return newstr;
+      else
+	{
+	  alloc = 1;
+	  p = substitute (repl, refv);
+	  plen = strlen (p);
+	  xfree_pptr (refv);
+	}
+
+      savep = newstr;
+      newlen = strlen (line) - (eo - so) + plen + 1;
+      newstr = xmalloc (newlen);
+      memcpy (newstr, line, off + so);
+      memcpy (newstr + off + so, p, plen);
+      strcpy (newstr + off + so + plen, line + off + eo);
+
+      if (alloc)
+	xfree (p);
+      if (savep)
+	xfree (savep);
+      line = newstr;
+      off += eo;
+    }
+  return newstr;
 }
 
 int
-anubis_regex_refcnt(RC_REGEX *re)
+anubis_regex_refcnt (RC_REGEX * re)
 {
-	struct regex_vtab *vp;
+  struct regex_vtab *vp;
 
-	ASSERT_RE(re, vp);
-	return vp->refcnt(re);
+  ASSERT_RE (re, vp);
+  return vp->refcnt (re);
 }
 
 RC_REGEX *
-anubis_regex_compile(char *line, int opt)
+anubis_regex_compile (char *line, int opt)
 {
-	struct regex_vtab *vp = regex_vtab_lookup(opt);
-	RC_REGEX *p;
-	
-	if (!vp)
-		return 0;
-	p = xmalloc(sizeof(*p));
-	if (vp->compile(p, line, opt)) {
-		xfree(p);
-	} else {
-		p->src = strdup(line);
-		p->flags = opt;
-	}
-	return p;
+  struct regex_vtab *vp = regex_vtab_lookup (opt);
+  RC_REGEX *p;
+
+  if (!vp)
+    return 0;
+  p = xmalloc (sizeof (*p));
+  if (vp->compile (p, line, opt))
+    {
+      xfree (p);
+    }
+  else
+    {
+      p->src = strdup (line);
+      p->flags = opt;
+    }
+  return p;
 }
 
 void
-anubis_regex_free(RC_REGEX **pre)
+anubis_regex_free (RC_REGEX ** pre)
 {
-	struct regex_vtab *vp;
+  struct regex_vtab *vp;
 
-	if (!*pre)
-		return;
-	ASSERT_RE(*pre, vp);
-	free((*pre)->src);
-	vp->free(*pre);
-	xfree(*pre);
+  if (!*pre)
+    return;
+  ASSERT_RE (*pre, vp);
+  free ((*pre)->src);
+  vp->free (*pre);
+  xfree (*pre);
 }
 
 char *
-anubis_regex_source(RC_REGEX *re)
+anubis_regex_source (RC_REGEX * re)
 {
-	if (!re)
-		return NULL;
-	return re->src;
+  if (!re)
+    return NULL;
+  return re->src;
 }
-
 
+
 /* **************************** Exact strings ***************************** */
 static int
-exact_compile(RC_REGEX *regex, char *line, int opt)
+exact_compile (RC_REGEX * regex, char *line, int opt)
 {
-	return 0;
+  return 0;
 }
 
 static void
-exact_free(RC_REGEX *regex)
+exact_free (RC_REGEX * regex)
 {
-	/* nothing */
+  /* nothing */
 }
 
 
 static int
-exact_match(RC_REGEX *regex, char *line, int *refc, char ***refv,
-	    int *so, int *eo)
+exact_match (RC_REGEX * regex, char *line, int *refc, char ***refv,
+	     int *so, int *eo)
 {
-	int code;
+  int code;
 
-	*eo = *so = -1;
-	*refc = 0;
-	*refv = NULL;
-	
-	if (regex->flags & R_SCASE)
-		code = strcmp(line, regex->src);
-	else
-		code = strcasecmp(line, regex->src);
-	return code;
+  *eo = *so = -1;
+  *refc = 0;
+  *refv = NULL;
+
+  if (regex->flags & R_SCASE)
+    code = strcmp (line, regex->src);
+  else
+    code = strcasecmp (line, regex->src);
+  return code;
 }
 
 static int
-exact_refcnt(RC_REGEX *regex)
+exact_refcnt (RC_REGEX * regex)
 {
-	return 0;
+  return 0;
 }
-
-
 
+
+
 /* ********************* POSIX Regular Expressions ************************ */
 
 static int
-posix_compile(RC_REGEX *regex, char *line, int opt)
+posix_compile (RC_REGEX * regex, char *line, int opt)
 {
-	int rc;
-	int cflags = 0;
-	
-	if (!(opt & R_SCASE))
-		cflags |= REG_ICASE;
-	if (!(opt & R_BASIC))
-		cflags |= REG_EXTENDED;
-		
-	rc = regcomp(&regex->v.re, line, cflags);
-	if (rc) {
-		char errbuf[512];
-		regerror(rc, &regex->v.re, errbuf, sizeof(errbuf));
-		anubis_error(SOFT,
-			     _("regcomp() failed at %s: %s."),
-			     line, errbuf);
-	}
-	return rc;
-}	
+  int rc;
+  int cflags = 0;
+
+  if (!(opt & R_SCASE))
+    cflags |= REG_ICASE;
+  if (!(opt & R_BASIC))
+    cflags |= REG_EXTENDED;
+
+  rc = regcomp (&regex->v.re, line, cflags);
+  if (rc)
+    {
+      char errbuf[512];
+      regerror (rc, &regex->v.re, errbuf, sizeof (errbuf));
+      anubis_error (SOFT, _("regcomp() failed at %s: %s."), line, errbuf);
+    }
+  return rc;
+}
 
 static void
-posix_free(RC_REGEX *regex)
+posix_free (RC_REGEX * regex)
 {
-	regfree(&regex->v.re);
+  regfree (&regex->v.re);
 }
 
 static int
-posix_match(RC_REGEX *regex, char *line, int *refc, char ***refv,
-	    int *so, int *eo)
+posix_match (RC_REGEX * regex, char *line, int *refc, char ***refv,
+	     int *so, int *eo)
 {
-	regmatch_t *rmp;
-	int rc;
-	regex_t *re = &regex->v.re;
-	
-	rmp = xmalloc((re->re_nsub + 1) * sizeof(*rmp));
-	rc = regexec(re, line, re->re_nsub + 1, rmp, 0);
-	if (rc == 0 && re->re_nsub) {
-		int i;
-		*refv = xmalloc((re->re_nsub + 2) * sizeof(**refv));
-		*eo = rmp[0].rm_eo;
-		*so = rmp[0].rm_so;
-		for (i = 0; i <= re->re_nsub; i++) {
-			if (rmp[i].rm_so != -1) {
-				size_t matchlen = rmp[i].rm_eo - rmp[i].rm_so;
-				(*refv)[i] = xmalloc(matchlen + 1);
-				memcpy((*refv)[i], line + rmp[i].rm_so,
-				       matchlen);
-				(*refv)[i][matchlen] = 0;
-				remcrlf((*refv)[i]);
-			} else
-				(*refv)[i] = strdup("");
-		}
-		(*refv)[i] = NULL;
-		*refc = re->re_nsub;
-	} else {
-		*eo = *so = -1;
-		*refc = 0;
+  regmatch_t *rmp;
+  int rc;
+  regex_t *re = &regex->v.re;
+
+  rmp = xmalloc ((re->re_nsub + 1) * sizeof (*rmp));
+  rc = regexec (re, line, re->re_nsub + 1, rmp, 0);
+  if (rc == 0 && re->re_nsub)
+    {
+      int i;
+      *refv = xmalloc ((re->re_nsub + 2) * sizeof (**refv));
+      *eo = rmp[0].rm_eo;
+      *so = rmp[0].rm_so;
+      for (i = 0; i <= re->re_nsub; i++)
+	{
+	  if (rmp[i].rm_so != -1)
+	    {
+	      size_t matchlen = rmp[i].rm_eo - rmp[i].rm_so;
+	      (*refv)[i] = xmalloc (matchlen + 1);
+	      memcpy ((*refv)[i], line + rmp[i].rm_so, matchlen);
+	      (*refv)[i][matchlen] = 0;
+	      remcrlf ((*refv)[i]);
+	    }
+	  else
+	    (*refv)[i] = strdup ("");
 	}
-	xfree(rmp);
-	return rc;
+      (*refv)[i] = NULL;
+      *refc = re->re_nsub;
+    }
+  else
+    {
+      *eo = *so = -1;
+      *refc = 0;
+    }
+  xfree (rmp);
+  return rc;
 }
 
 static int
-posix_refcnt(RC_REGEX *regex)
+posix_refcnt (RC_REGEX * regex)
 {
-	return regex->v.re.re_nsub;
+  return regex->v.re.re_nsub;
 }
-
 
+
 /* ********************* PERL Regular Expressions ************************ */
 
 #ifdef HAVE_PCRE
 
 static int
-perl_compile(RC_REGEX *regex, char *line, int opt)
+perl_compile (RC_REGEX * regex, char *line, int opt)
 {
-	const char *error;
-	int error_offset;
-	int cflags = 0;
-	
-	if (!(opt & R_SCASE))
-		cflags |= PCRE_CASELESS;
-	regex->v.pre = pcre_compile(line, cflags, &error, &error_offset, 0);
-	if (regex->v.pre == 0) {
-		anubis_error(SOFT,
-			     _("pcre_compile() failed at offset %d: %s."),
-			     error_offset, error);
-		return 1;
-	}
-	return 0;
+  const char *error;
+  int error_offset;
+  int cflags = 0;
+
+  if (!(opt & R_SCASE))
+    cflags |= PCRE_CASELESS;
+  regex->v.pre = pcre_compile (line, cflags, &error, &error_offset, 0);
+  if (regex->v.pre == 0)
+    {
+      anubis_error (SOFT,
+		    _("pcre_compile() failed at offset %d: %s."),
+		    error_offset, error);
+      return 1;
+    }
+  return 0;
 }
 
 static void
-perl_free(RC_REGEX *regex)
+perl_free (RC_REGEX * regex)
 {
-	pcre_free(regex->v.pre);
+  pcre_free (regex->v.pre);
 }
 
 static int
-perl_match(RC_REGEX *regex, char *line, int *refc, char ***refv,
-	   int *so, int *eo)
+perl_match (RC_REGEX * regex, char *line, int *refc, char ***refv,
+	    int *so, int *eo)
 {
-	int rc;
-	int ovsize, count;
-	int *ovector;
-	pcre *re = regex->v.pre;
-	
-	rc = pcre_fullinfo(re, NULL, PCRE_INFO_CAPTURECOUNT, &count);
-	if (rc) {
-		anubis_error(SOFT,
-			     _("pcre_fullinfo() failed: %d."), rc);
-		return rc;
-	}
+  int rc;
+  int ovsize, count;
+  int *ovector;
+  pcre *re = regex->v.pre;
 
-	/* According to pcre docs: */
-	ovsize = (count + 1) * 3;
-	ovector = xmalloc(ovsize * sizeof(*ovector));
-	
-	rc = pcre_exec(re, 0, line, strlen(line), 0, 0,
-		       ovector, ovsize);
-	if (rc == 0) {
-		/* shouldn't happen, but still ... */
-		anubis_error(SOFT, _("Matched, but too many substrings."));
-	} else if (rc > 0) {
-		/* Collect captured substrings */
-		int i;
-		
-		*refv = xmalloc((rc + 1) * sizeof(**refv));
-		for (i = 0; i < rc; i++) {
-			int c = pcre_get_substring(line, ovector, ovsize, i,
-						   (const char **)&(*refv)[i]);
-			if (c < 0)
-				anubis_error(SOFT,
-					  _("Get substring %d failed (%d)."),
-					     i, c);
-		}
-		(*refv)[i] = NULL;
-		*refc = count;
-		*so = ovector[0];
-		*eo = ovector[1];
-	} else {
-		*so = *eo = -1;
-		*refc = 0;
+  rc = pcre_fullinfo (re, NULL, PCRE_INFO_CAPTURECOUNT, &count);
+  if (rc)
+    {
+      anubis_error (SOFT, _("pcre_fullinfo() failed: %d."), rc);
+      return rc;
+    }
+
+  /* According to pcre docs: */
+  ovsize = (count + 1) * 3;
+  ovector = xmalloc (ovsize * sizeof (*ovector));
+
+  rc = pcre_exec (re, 0, line, strlen (line), 0, 0, ovector, ovsize);
+  if (rc == 0)
+    {
+      /* shouldn't happen, but still ... */
+      anubis_error (SOFT, _("Matched, but too many substrings."));
+    }
+  else if (rc > 0)
+    {
+      /* Collect captured substrings */
+      int i;
+
+      *refv = xmalloc ((rc + 1) * sizeof (**refv));
+      for (i = 0; i < rc; i++)
+	{
+	  int c = pcre_get_substring (line, ovector, ovsize, i,
+				      (const char **) &(*refv)[i]);
+	  if (c < 0)
+	    anubis_error (SOFT, _("Get substring %d failed (%d)."), i, c);
 	}
-	xfree(ovector);
-	return rc < 0;
+      (*refv)[i] = NULL;
+      *refc = count;
+      *so = ovector[0];
+      *eo = ovector[1];
+    }
+  else
+    {
+      *so = *eo = -1;
+      *refc = 0;
+    }
+  xfree (ovector);
+  return rc < 0;
 }
 
 static int
-perl_refcnt(RC_REGEX *regex)
+perl_refcnt (RC_REGEX * regex)
 {
-	int count = 0;
-	
-	pcre_fullinfo(regex->v.pre, NULL, PCRE_INFO_CAPTURECOUNT, &count);
-	return count;
+  int count = 0;
+
+  pcre_fullinfo (regex->v.pre, NULL, PCRE_INFO_CAPTURECOUNT, &count);
+  return count;
 }
 #endif /* HAVE_PCRE */
 
 /* EOF */
-

@@ -26,135 +26,150 @@
 #include "extern.h"
 
 int
-anubis_transparent_mode(NET_STREAM *psd_client, struct sockaddr_in *addr)
+anubis_transparent_mode (NET_STREAM * psd_client, struct sockaddr_in *addr)
 {
-	int rs = 0;
-	int cs = 0;
-	NET_STREAM sd_server = NULL;
-		
-	rs = auth_ident(addr,
-			session.clientname,
-			sizeof(session.clientname));
+  int rs = 0;
+  int cs = 0;
+  NET_STREAM sd_server = NULL;
 
-	if ((topt & T_DROP_UNKNOWN_USER) && !rs) {
-		service_unavailable(psd_client);
-		return 0;
+  rs = auth_ident (addr, session.clientname, sizeof (session.clientname));
+
+  if ((topt & T_DROP_UNKNOWN_USER) && !rs)
+    {
+      service_unavailable (psd_client);
+      return 0;
+    }
+
+  parse_transmap (&cs,
+		  rs ? session.clientname : 0,
+		  inet_ntoa (addr->sin_addr),
+		  session.clientname, sizeof (session.clientname));
+
+  if (cs == 1)
+    {
+      anubis_changeowner (session.clientname);
+      auth_tunnel ();
+    }
+  else if (rs && cs == -1 && ntohl (addr->sin_addr.s_addr) == INADDR_LOOPBACK)
+    {
+      if (check_username (session.clientname))
+	{
+	  anubis_changeowner (session.clientname);
+	  auth_tunnel ();
 	}
-	
-	parse_transmap(&cs,
-		       rs ? session.clientname : 0,
-		       inet_ntoa(addr->sin_addr),
-		       session.clientname,
-		       sizeof(session.clientname));
-				
-	if (cs == 1) {
-		anubis_changeowner(session.clientname);
-		auth_tunnel();
-	} else if (rs
-		   && cs == -1
-		   && ntohl(addr->sin_addr.s_addr) == INADDR_LOOPBACK) {
-		if (check_username(session.clientname)) {
-			anubis_changeowner(session.clientname);
-			auth_tunnel();
-		} else
-			set_unprivileged_user();
-	} else
-		set_unprivileged_user();
-	
-	if (!(topt & T_LOCAL_MTA)
-	    && strlen(session.mta) == 0) {
-		anubis_error(HARD, _("The MTA has not been specified. "
-				     "Set the REMOTE-MTA or LOCAL-MTA."));
-		return EXIT_FAILURE;
-	}
-	
-	/*
-	  Protection against a loop connection.
-	*/
-	
-	if (!(topt & T_LOCAL_MTA)) {
-		unsigned long inaddr;
-		struct sockaddr_in ad;
-		
-		memset(&ad, 0, sizeof(ad));
-		inaddr = inet_addr(session.mta);
-		if (inaddr != INADDR_NONE)
-			memcpy(&ad.sin_addr, &inaddr, sizeof(inaddr));
-		else {
-			struct hostent *hp = 0;
-			hp = gethostbyname(session.mta);
-			if (hp == 0) {
-				hostname_error(session.mta);
-				return EXIT_FAILURE;
-			} else {
-				if (hp->h_length != 4 && hp->h_length != 8) {
-					anubis_error(HARD,
-		_("Illegal address length received for host %s"), session.mta);
-					return EXIT_FAILURE;
-				} else {
-					memcpy((char *)&ad.sin_addr.s_addr,
-					       hp->h_addr,
-					       hp->h_length);
-				}
-			}
+      else
+	set_unprivileged_user ();
+    }
+  else
+    set_unprivileged_user ();
+
+  if (!(topt & T_LOCAL_MTA) && strlen (session.mta) == 0)
+    {
+      anubis_error (HARD, _("The MTA has not been specified. "
+			    "Set the REMOTE-MTA or LOCAL-MTA."));
+      return EXIT_FAILURE;
+    }
+
+  /*
+     Protection against a loop connection.
+   */
+
+  if (!(topt & T_LOCAL_MTA))
+    {
+      unsigned long inaddr;
+      struct sockaddr_in ad;
+
+      memset (&ad, 0, sizeof (ad));
+      inaddr = inet_addr (session.mta);
+      if (inaddr != INADDR_NONE)
+	memcpy (&ad.sin_addr, &inaddr, sizeof (inaddr));
+      else
+	{
+	  struct hostent *hp = 0;
+	  hp = gethostbyname (session.mta);
+	  if (hp == 0)
+	    {
+	      hostname_error (session.mta);
+	      return EXIT_FAILURE;
+	    }
+	  else
+	    {
+	      if (hp->h_length != 4 && hp->h_length != 8)
+		{
+		  anubis_error (HARD,
+				_
+				("Illegal address length received for host %s"),
+				session.mta);
+		  return EXIT_FAILURE;
 		}
-		if (ntohl(ad.sin_addr.s_addr) == INADDR_LOOPBACK
-		    && session.anubis_port == session.mta_port) {
-			anubis_error(SOFT, _("Loop not allowed. Connection rejected."));
-			return EXIT_FAILURE;
+	      else
+		{
+		  memcpy ((char *) &ad.sin_addr.s_addr,
+			  hp->h_addr, hp->h_length);
 		}
+	    }
 	}
-	
-	alarm(300);
-	if (topt & T_LOCAL_MTA) {
-		sd_server = make_local_connection(session.execpath,
-						  session.execargs);
-		if (!sd_server) {
-			service_unavailable(psd_client);
-			return EXIT_FAILURE;
-		}
-	} else {
-		sd_server = make_remote_connection(session.mta,
-						   session.mta_port);
-		if (!sd_server)
-			service_unavailable(psd_client);
+      if (ntohl (ad.sin_addr.s_addr) == INADDR_LOOPBACK
+	  && session.anubis_port == session.mta_port)
+	{
+	  anubis_error (SOFT, _("Loop not allowed. Connection rejected."));
+	  return EXIT_FAILURE;
 	}
-	alarm(0);
-	
-	if (!(topt & T_ERROR)) {
-		remote_client = *psd_client;
-		remote_server = sd_server;
-		alarm(900);
-		smtp_session_transparent();
-		alarm(0);
-		
+    }
+
+  alarm (300);
+  if (topt & T_LOCAL_MTA)
+    {
+      sd_server = make_local_connection (session.execpath, session.execargs);
+      if (!sd_server)
+	{
+	  service_unavailable (psd_client);
+	  return EXIT_FAILURE;
+	}
+    }
+  else
+    {
+      sd_server = make_remote_connection (session.mta, session.mta_port);
+      if (!sd_server)
+	service_unavailable (psd_client);
+    }
+  alarm (0);
+
+  if (!(topt & T_ERROR))
+    {
+      remote_client = *psd_client;
+      remote_server = sd_server;
+      alarm (900);
+      smtp_session_transparent ();
+      alarm (0);
+
 #ifdef USE_SSL
-		net_close_stream(&secure.client);
-		net_close_stream(&secure.server);
-		secure.server = 0;
-		secure.client = 0;
+      net_close_stream (&secure.client);
+      net_close_stream (&secure.server);
+      secure.server = 0;
+      secure.client = 0;
 #endif
-	}
-	net_close_stream(&sd_server);
-	net_close_stream(psd_client);
-	
-	if (topt & T_ERROR)
-		info(NORMAL, _("Connection terminated."));
-	else
-		info(NORMAL, _("Connection closed successfully."));
-	
-#ifdef HAVE_PAM	
-	pam_retval = pam_close_session(pamh, 0);
-	if (pam_retval == PAM_SUCCESS)
-		info(VERBOSE, _("PAM: Session closed."));
-	if (pam_end(pamh, pam_retval) != PAM_SUCCESS) {
-		pamh = NULL;
-		info(NORMAL, _("PAM: failed to release authenticator."));
-		return EXIT_FAILURE;
-	}
+    }
+  net_close_stream (&sd_server);
+  net_close_stream (psd_client);
+
+  if (topt & T_ERROR)
+    info (NORMAL, _("Connection terminated."));
+  else
+    info (NORMAL, _("Connection closed successfully."));
+
+#ifdef HAVE_PAM
+  pam_retval = pam_close_session (pamh, 0);
+  if (pam_retval == PAM_SUCCESS)
+    info (VERBOSE, _("PAM: Session closed."));
+  if (pam_end (pamh, pam_retval) != PAM_SUCCESS)
+    {
+      pamh = NULL;
+      info (NORMAL, _("PAM: failed to release authenticator."));
+      return EXIT_FAILURE;
+    }
 #endif /* HAVE_PAM */
-	return 0;
+  return 0;
 }
 
 /* EOF */
-

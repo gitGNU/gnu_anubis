@@ -28,33 +28,33 @@
 
 # if defined(HAVE_GNUTLS_GNUTLS_H)
 #  define HAVE_GNUTLS
-# endif /* HAVE_GNUTLS_GNUTLS_H */
+# endif	/* HAVE_GNUTLS_GNUTLS_H */
 # if defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 #  if defined(HAVE_OPENSSL_SSL_H)
 #   define HAVE_OPENSSL
 #  endif /* HAVE_OPENSSL_SSL_H */
-# endif /* HAVE_LIBSSL and HAVE_LIBCRYPTO */
+# endif	/* HAVE_LIBSSL and HAVE_LIBCRYPTO */
 # if defined(HAVE_LIBGPGME) && defined(HAVE_GPGME_H) && !defined(NOGPG)
 #  define HAVE_GPG
-# endif /* HAVE_LIBGPGME and HAVE_GPGME_H and not NOGPG */
+# endif	/* HAVE_LIBGPGME and HAVE_GPGME_H and not NOGPG */
 # if defined(HAVE_LIBPCRE)
 #  if defined(HAVE_PCRE_H) || defined(HAVE_PCRE_PCRE_H)
 #   define HAVE_PCRE
 #  endif /* HAVE_PCRE_H or HAVE_PCRE_PCRE_H */
-# endif /* HAVE_LIBPCRE */
+# endif	/* HAVE_LIBPCRE */
 # if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
 #  define HAVE_REGEX
 # else
 #  error POSIX Regular Expressions are required!
-# endif /* HAVE_REGEX_H and HAVE_REGCOMP */
+# endif	/* HAVE_REGEX_H and HAVE_REGCOMP */
 # if defined(HAVE_LIBPAM) && defined(HAVE_LIBPAM_MISC)
 #  if defined(HAVE_SECURITY_PAM_APPL_H) && defined(HAVE_SECURITY_PAM_MISC_H)
 #   define HAVE_PAM
 #  endif /* HAVE_SECURITY_PAM_APPL_H and HAVE_SECURITY_PAM_MISC_H */
-# endif /* HAVE_LIBPAM and HAVE_LIBPAM_MISC */
+# endif	/* HAVE_LIBPAM and HAVE_LIBPAM_MISC */
 # if defined(HAVE_LIBWRAP) && defined(HAVE_TCPD_H)
 #  define USE_LIBWRAP
-# endif /* HAVE_LIBWRAP and HAVE_TCPD_H */
+# endif	/* HAVE_LIBWRAP and HAVE_TCPD_H */
 
 #endif /* HAVE_CONFIG_H */
 
@@ -141,7 +141,7 @@
 # define _(String) gettext(String)
 # ifdef HAVE_LOCALE_H
 #  include <locale.h>
-# endif /* HAVE_LOCALE_H */
+# endif	/* HAVE_LOCALE_H */
 #else
 # define _(String) (String)
 #endif /* ENABLE_NLS */
@@ -151,7 +151,7 @@
 # include <libguile.h>
 #endif /* WITH_GUILE */
 
-#include "mem.h" /* xfree(), xfree_pptr() */
+#include "mem.h"		/* xfree(), xfree_pptr() */
 #include "list.h"
 
 #ifndef INADDR_NONE
@@ -169,7 +169,7 @@
 #  define MAXPATHLEN PATH_MAX
 # else
 #  define MAXPATHLEN 1024
-# endif /* PATH_MAX */
+# endif	/* PATH_MAX */
 #endif /* not MAXPATHLEN */
 
 #define MAXCLIENTS 50
@@ -215,10 +215,12 @@
 #define HARD   2
 #define SYNTAX 3
 
-typedef enum anubis_mode {
-	anubis_transparent,
-	anubis_authenticate
-} ANUBIS_MODE;
+typedef enum anubis_mode
+{
+  anubis_transparent,
+  anubis_authenticate
+}
+ANUBIS_MODE;
 
 /* bit values for topt */
 #define T_ERROR             0x00000001
@@ -283,293 +285,296 @@ typedef int (*stream_close_t) (void *);
 typedef int (*stream_destroy_t) (void *);
 typedef const char *(*stream_strerror_t) (void *, int);
 
-void stream_create(NET_STREAM *str);
-int stream_set_io(NET_STREAM str,
-		  void *data,
-		  stream_io_t read, stream_io_t write,
-		  stream_close_t close,
-		  stream_destroy_t destroy,
-		  stream_strerror_t strerror);
-int stream_set_read(struct net_stream *str, stream_io_t read);
-int stream_set_write(struct net_stream *str, stream_io_t write);
-int stream_set_strerror(struct net_stream *str, stream_strerror_t strerr);
-int stream_close(NET_STREAM str);
-const char *stream_strerror(NET_STREAM str, int errcode);
-int stream_read(NET_STREAM str, char *buf, size_t size,
-		size_t *nbytes);
-int stream_write(NET_STREAM str, char *buf, size_t size,
-		 size_t *nbytes);
-int stream_readline(NET_STREAM str, char *buf, size_t size,
-		    size_t *nbytes);
-int stream_destroy(NET_STREAM *);
+void stream_create (NET_STREAM * str);
+int stream_set_io (NET_STREAM str,
+		   void *data,
+		   stream_io_t read, stream_io_t write,
+		   stream_close_t close,
+		   stream_destroy_t destroy, stream_strerror_t strerror);
+int stream_set_read (struct net_stream *str, stream_io_t read);
+int stream_set_write (struct net_stream *str, stream_io_t write);
+int stream_set_strerror (struct net_stream *str, stream_strerror_t strerr);
+int stream_close (NET_STREAM str);
+const char *stream_strerror (NET_STREAM str, int errcode);
+int stream_read (NET_STREAM str, char *buf, size_t size, size_t * nbytes);
+int stream_write (NET_STREAM str, char *buf, size_t size, size_t * nbytes);
+int stream_readline (NET_STREAM str, char *buf, size_t size, size_t * nbytes);
+int stream_destroy (NET_STREAM *);
 
 /* main.c */
-void anubis(char *);
+void anubis (char *);
 
 /* mem.c */
-extern void (*memory_error)(const char *message);
-void *xmalloc(int);
-void *xrealloc(void *, int);
-char *allocbuf(char *, int);
+extern void (*memory_error) (const char *message);
+void *xmalloc (int);
+void *xrealloc (void *, int);
+char *allocbuf (char *, int);
 #ifndef HAVE_STRDUP
-char *strdup(const char *);
+char *strdup (const char *);
 #endif /* not HAVE_STRDUP */
-void free_pptr(char **);
+void free_pptr (char **);
 
 /* setenv.c */
 #if !defined(HAVE_SETENV) && defined(HAVE_PUTENV)
-int setenv(const char *, const char *, int);
+int setenv (const char *, const char *, int);
 #endif
 
 /* env.c */
-void get_options(int, char *[]);
-void get_homedir(char *, char *, int);
-void anubis_getlogin(char *, int);
-void anubis_changeowner(char *);
-int anubis_set_mode(char *modename);
-int  check_superuser(void);
-int  check_username(char *);
-int  check_filemode(char *);
-int  check_filename(char *, time_t *);
+void get_options (int, char *[]);
+void get_homedir (char *, char *, int);
+void anubis_getlogin (char *, int);
+void anubis_changeowner (char *);
+int anubis_set_mode (char *modename);
+int check_superuser (void);
+int check_username (char *);
+int check_filemode (char *);
+int check_filename (char *, time_t *);
 
 /* errs.c */
-void anubis_error(int, const char *, ...);
-void socket_error(const char *);
-void hostname_error(char *);
+void anubis_error (int, const char *, ...);
+void socket_error (const char *);
+void hostname_error (char *);
 
 /* log.c */
-void mprintf(const char *, ...);
-void info(int, const char *, ...);
-void filelog(char *, char *);
+void mprintf (const char *, ...);
+void info (int, const char *, ...);
+void filelog (char *, char *);
 
 /* net.c */
-NET_STREAM make_remote_connection(char *, unsigned int);
-int  bind_and_listen(char *, unsigned int);
-void swrite(int, NET_STREAM, char *);
-int  recvline(int, NET_STREAM, void *, size_t);
-int  recvline_ptr(int method, NET_STREAM sd, char **vptr, size_t *maxlen);
-void get_response_smtp(int, NET_STREAM, char *, int);
-void close_socket(int sd);
-	
-void net_create_stream(NET_STREAM *str, int fd);
-void net_close_stream(NET_STREAM *sd);
+NET_STREAM make_remote_connection (char *, unsigned int);
+int bind_and_listen (char *, unsigned int);
+void swrite (int, NET_STREAM, char *);
+int recvline (int, NET_STREAM, void *, size_t);
+int recvline_ptr (int method, NET_STREAM sd, char **vptr, size_t * maxlen);
+void get_response_smtp (int, NET_STREAM, char *, int);
+void close_socket (int sd);
+
+void net_create_stream (NET_STREAM * str, int fd);
+void net_close_stream (NET_STREAM * sd);
 
 /* daemon.c */
-void daemonize(void);
-void loop(int);
-void stdinout(void);
-void service_unavailable(NET_STREAM *);
-void set_unprivileged_user(void);
+void daemonize (void);
+void loop (int);
+void stdinout (void);
+void service_unavailable (NET_STREAM *);
+void set_unprivileged_user (void);
 
 /* auth.c */
-void auth_tunnel(void);
-int  auth_ident(struct sockaddr_in *, char *, int);
+void auth_tunnel (void);
+int auth_ident (struct sockaddr_in *, char *, int);
 
 /* map.c */
-void parse_transmap(int *, char *, char *, char *, int);
-void translate_section_init(void);
+void parse_transmap (int *, char *, char *, char *, int);
+void translate_section_init (void);
 
 /* tunnel.c */
-void smtp_session(void);
-void smtp_session_transparent(void);
+void smtp_session (void);
+void smtp_session_transparent (void);
 
 /* message.c */
-void message_add_body(MESSAGE *, char *, char *);
-void message_add_header(MESSAGE *, char *, char *);
-void message_remove_headers(MESSAGE *, RC_REGEX *);
-void message_modify_headers(MESSAGE *, RC_REGEX *, char *, char *);
-void message_modify_body(MESSAGE *, RC_REGEX *, char *);
-void message_external_proc(MESSAGE *, char **);
-void message_init(MESSAGE *);
-void message_free(MESSAGE *);
+void message_add_body (MESSAGE *, char *, char *);
+void message_add_header (MESSAGE *, char *, char *);
+void message_remove_headers (MESSAGE *, RC_REGEX *);
+void message_modify_headers (MESSAGE *, RC_REGEX *, char *, char *);
+void message_modify_body (MESSAGE *, RC_REGEX *, char *);
+void message_external_proc (MESSAGE *, char **);
+void message_init (MESSAGE *);
+void message_free (MESSAGE *);
 
 /* exec.c */
-char **gen_execargs(const char *);
-NET_STREAM make_local_connection(char *, char **);
-char *external_program(int *, char *, char *, char *, int);
-char *exec_argv(int *, char *, char **, char *, char *, int);
-void cleanup_children();
+char **gen_execargs (const char *);
+NET_STREAM make_local_connection (char *, char **);
+char *external_program (int *, char *, char *, char *, int);
+char *exec_argv (int *, char *, char **, char *, char *, int);
+void cleanup_children ();
 
 /* esmtp.c */
-void esmtp_auth(NET_STREAM, char *);
+void esmtp_auth (NET_STREAM, char *);
 
 /* misc.c */
-int anubis_free_list_item(void *item, void *data);
-void assoc_free(ASSOC *);
-ASSOC *header_assoc(char *);
-void destroy_assoc_list(ANUBIS_LIST **);
-void destroy_string_list(ANUBIS_LIST **);
-void parse_mtaport(char *, char *, unsigned int *);
-void parse_mtahost(char *, char *, unsigned int *);
-void remline(char *, char *);
-void remcrlf(char *);
-char *substitute(char *, char **);
-void make_lowercase(char *);
-char *get_localname(void);
-char *get_localdomain(void);
+int anubis_free_list_item (void *item, void *data);
+void assoc_free (ASSOC *);
+ASSOC *header_assoc (char *);
+void destroy_assoc_list (ANUBIS_LIST **);
+void destroy_string_list (ANUBIS_LIST **);
+void parse_mtaport (char *, char *, unsigned int *);
+void parse_mtahost (char *, char *, unsigned int *);
+void remline (char *, char *);
+void remcrlf (char *);
+char *substitute (char *, char **);
+void make_lowercase (char *);
+char *get_localname (void);
+char *get_localdomain (void);
 
 /* mime.c */
-void message_append_text_file(MESSAGE *, char *);
-void message_append_signature_file(MESSAGE *);
+void message_append_text_file (MESSAGE *, char *);
+void message_append_signature_file (MESSAGE *);
 
 /* regex.c */
-int anubis_regex_match(RC_REGEX *, char *, int *, char ***);
-RC_REGEX *anubis_regex_compile(char *, int);
-void anubis_regex_free(RC_REGEX **);
-char *anubis_regex_source(RC_REGEX *);
-int anubis_regex_refcnt(RC_REGEX *);
-char *anubis_regex_replace(RC_REGEX *, char *, char *);
-void anubis_regex_print(RC_REGEX *);
+int anubis_regex_match (RC_REGEX *, char *, int *, char ***);
+RC_REGEX *anubis_regex_compile (char *, int);
+void anubis_regex_free (RC_REGEX **);
+char *anubis_regex_source (RC_REGEX *);
+int anubis_regex_refcnt (RC_REGEX *);
+char *anubis_regex_replace (RC_REGEX *, char *, char *);
+void anubis_regex_print (RC_REGEX *);
 
 /* rc.c */
-void rc_system_init(void);
-void open_rcfile(int);
-void process_rcfile(int);
-void rcfile_process_section(int, char *, void *, MESSAGE *);
-void rcfile_call_section(int, char *, void *, MESSAGE *);
-char *user_rcfile_name();
+void rc_system_init (void);
+void open_rcfile (int);
+void process_rcfile (int);
+void rcfile_process_section (int, char *, void *, MESSAGE *);
+void rcfile_call_section (int, char *, void *, MESSAGE *);
+char *user_rcfile_name ();
 
 /* help.c */
-void print_version(void);
-void print_usage(void);
-void print_config_options(void);
+void print_version (void);
+void print_usage (void);
+void print_config_options (void);
 
 /* quit.c */
-RETSIGTYPE sig_exit(int);
-RETSIGTYPE sig_timeout(int);
-void free_mem(void);
-void quit(int);
+RETSIGTYPE sig_exit (int);
+RETSIGTYPE sig_timeout (int);
+void free_mem (void);
+void quit (int);
 
 /* socks.c */
 #ifdef USE_SOCKS_PROXY
-int check_socks_proxy(int, char *, unsigned int);
+int check_socks_proxy (int, char *, unsigned int);
 #endif /* USE_SOCKS_PROXY */
 
 /* tls.c or ssl.c */
 #ifdef USE_SSL
-void init_ssl_libs(void);
-NET_STREAM start_ssl_client(NET_STREAM str, const char *cafile, int verbose);
-NET_STREAM start_ssl_server(NET_STREAM str, const char *cafile,
-			    const char *cert, const char *key, int verbose);
+void init_ssl_libs (void);
+NET_STREAM start_ssl_client (NET_STREAM str, const char *cafile, int verbose);
+NET_STREAM start_ssl_server (NET_STREAM str, const char *cafile,
+			     const char *cert, const char *key, int verbose);
 #endif /* USE_SSL */
 
 /* gpg.c */
 #ifdef HAVE_GPG
-void gpg_free(void);
-void gpg_section_init(void);
+void gpg_free (void);
+void gpg_section_init (void);
 #endif /* HAVE_GPG */
 
 /* guile.c */
 #ifdef WITH_GUILE
-void anubis_boot(void *, int, char **);
-void guile_load_path_append(char *);
-void guile_debug(int);
-void guile_load_program(char *);
-void guile_rewrite_line(char *, const char *);
-void guile_postprocess_proc(char *, ANUBIS_LIST **, char **);
-void guile_section_init(void);
+void anubis_boot (void *, int, char **);
+void guile_load_path_append (char *);
+void guile_debug (int);
+void guile_load_program (char *);
+void guile_rewrite_line (char *, const char *);
+void guile_postprocess_proc (char *, ANUBIS_LIST **, char **);
+void guile_section_init (void);
 #endif /* WITH_GUILE */
 
 /* url.c */
-   
-typedef struct anubis_url {
-	char *method;
-	char *host;
-	char *path;
-	char *user;
-	char *passwd;
-	int argc;
-	ASSOC *argv;
-} ANUBIS_URL;
 
-void anubis_url_destroy(ANUBIS_URL **url);
-int anubis_url_parse(ANUBIS_URL **url, char *str);
-char *anubis_url_full_path(ANUBIS_URL *url);
-const char *anubis_url_get_arg(ANUBIS_URL *url, const char *argname);
+typedef struct anubis_url
+{
+  char *method;
+  char *host;
+  char *path;
+  char *user;
+  char *passwd;
+  int argc;
+  ASSOC *argv;
+}
+ANUBIS_URL;
+
+void anubis_url_destroy (ANUBIS_URL ** url);
+int anubis_url_parse (ANUBIS_URL ** url, char *str);
+char *anubis_url_full_path (ANUBIS_URL * url);
+const char *anubis_url_get_arg (ANUBIS_URL * url, const char *argname);
 
 /* anubisdb.c */
 
-typedef struct anubis_user {
-  char *smtp_authid;         /* ESMTP authentication ID */
-  char *smtp_passwd;         /* A corresponding password */
-  char *username;            /* System user name to switch to */
-  char *rcfile_name;         /* Optional configuration file. 
-				When NULL, defaults to
-				~username/.anubisrc */
-} ANUBIS_USER;
+typedef struct anubis_user
+{
+  char *smtp_authid;		/* ESMTP authentication ID */
+  char *smtp_passwd;		/* A corresponding password */
+  char *username;		/* System user name to switch to */
+  char *rcfile_name;		/* Optional configuration file. 
+				   When NULL, defaults to
+				   ~username/.anubisrc */
+}
+ANUBIS_USER;
 
-enum anubis_db_mode {
-	anubis_db_rdonly,
-	anubis_db_rdwr
+enum anubis_db_mode
+{
+  anubis_db_rdonly,
+  anubis_db_rdwr
 };
 
-#define ANUBIS_DB_SUCCESS   0   /* Operations successful */
-#define ANUBIS_DB_FAIL      1   /* Operation failed */
-#define ANUBIS_DB_NOT_FOUND 2   /* Record not found (for db_get_record
+#define ANUBIS_DB_SUCCESS   0	/* Operations successful */
+#define ANUBIS_DB_FAIL      1	/* Operation failed */
+#define ANUBIS_DB_NOT_FOUND 2	/* Record not found (for db_get_record
 				   only) */
 
-typedef int (*anubis_db_open_t) (void **d, ANUBIS_URL *url,
+typedef int (*anubis_db_open_t) (void **d, ANUBIS_URL * url,
 				 enum anubis_db_mode mode, char **errp);
 typedef int (*anubis_db_close_t) (void *d);
-typedef int (*anubis_db_io_t) (void *d, const char *key, ANUBIS_USER *rec,
+typedef int (*anubis_db_io_t) (void *d, const char *key, ANUBIS_USER * rec,
 			       int *ecode);
 typedef const char *(*anubis_db_strerror_t) (void *d, int rc);
 typedef int (*anubis_db_delete_t) (void *d, const char *key, int *ecode);
-typedef int (*anubis_db_get_list_t) (void *d, ANUBIS_LIST *list, int *ecode);
-	     
-int anubis_db_register(const char *dbid, 
-		       anubis_db_open_t _db_open,
-		       anubis_db_close_t _db_close,
-		       anubis_db_io_t _db_get,
-		       anubis_db_io_t _db_put,
-		       anubis_db_delete_t _db_delete,
-		       anubis_db_get_list_t _db_list,
-		       anubis_db_strerror_t _db_strerror);
-int anubis_db_open(char *arg, enum anubis_db_mode mode, void **dptr,
-		   char **errp);
-int anubis_db_close(void **dptr);
-int anubis_db_get_record(void *dptr, const char *key, ANUBIS_USER *rec);
-int anubis_db_put_record(void *dptr, const char *key, ANUBIS_USER *rec);
-int anubis_db_delete_record(void *dptr, const char *key);
-int anubis_db_get_list(void *dptr, ANUBIS_LIST **list);
-const char *anubis_db_strerror(void *dptr);
-void anubis_db_free_record(ANUBIS_USER *rec);
+typedef int (*anubis_db_get_list_t) (void *d, ANUBIS_LIST * list, int *ecode);
+
+int anubis_db_register (const char *dbid,
+			anubis_db_open_t _db_open,
+			anubis_db_close_t _db_close,
+			anubis_db_io_t _db_get,
+			anubis_db_io_t _db_put,
+			anubis_db_delete_t _db_delete,
+			anubis_db_get_list_t _db_list,
+			anubis_db_strerror_t _db_strerror);
+int anubis_db_open (char *arg, enum anubis_db_mode mode, void **dptr,
+		    char **errp);
+int anubis_db_close (void **dptr);
+int anubis_db_get_record (void *dptr, const char *key, ANUBIS_USER * rec);
+int anubis_db_put_record (void *dptr, const char *key, ANUBIS_USER * rec);
+int anubis_db_delete_record (void *dptr, const char *key);
+int anubis_db_get_list (void *dptr, ANUBIS_LIST ** list);
+const char *anubis_db_strerror (void *dptr);
+void anubis_db_free_record (ANUBIS_USER * rec);
 
 /* dbtext.c */
-void dbtext_init();
+void dbtext_init ();
 
 /* gdbm.c */
-void gdbm_db_init();
+void gdbm_db_init ();
 
 /* mysql.c */
-void mysql_db_init();
+void mysql_db_init ();
 
 /* pgsql.c */
-void pgsql_db_init();
+void pgsql_db_init ();
 
 /* transmode.c */
-int anubis_transparent_mode(NET_STREAM *sd_client, struct sockaddr_in *addr);
+int anubis_transparent_mode (NET_STREAM * sd_client,
+			     struct sockaddr_in *addr);
 
 /* authmode.c */
-int anubis_authenticate_mode(NET_STREAM *sd_client, struct sockaddr_in *addr);
-void anubis_set_password_db(char *arg);
-void asmtp_reply(int code, char *fmt, ...);
-void asmtp_capa_add_prefix(char *prefix, char *name);
-int anubis_get_db_record(const char *username, ANUBIS_USER *usr);
-void authmode_section_init(void);
+int anubis_authenticate_mode (NET_STREAM * sd_client,
+			      struct sockaddr_in *addr);
+void anubis_set_password_db (char *arg);
+void asmtp_reply (int code, char *fmt, ...);
+void asmtp_capa_add_prefix (char *prefix, char *name);
+int anubis_get_db_record (const char *username, ANUBIS_USER * usr);
+void authmode_section_init (void);
 
 /* gsasl.c */
-void auth_gsasl_init();
-int anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER *usr, NET_STREAM *stream);
-void anubis_set_mech_list(ANUBIS_LIST *list);
+void auth_gsasl_init ();
+int anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER * usr,
+		       NET_STREAM * stream);
+void anubis_set_mech_list (ANUBIS_LIST * list);
 #if defined(WITH_GSASL)
-void install_gsasl_stream (Gsasl_session_ctx *sess_ctx, NET_STREAM *stream);
+void install_gsasl_stream (Gsasl_session_ctx * sess_ctx, NET_STREAM * stream);
 #endif
 
 /* xdatabase.c */
-int xdatabase(char *command);
-void xdatabase_capability(char *reply, size_t reply_size);
-void xdatabase_enable(void);
+int xdatabase (char *command);
+void xdatabase_capability (char *reply, size_t reply_size);
+void xdatabase_enable (void);
 
 /* EOF */
-

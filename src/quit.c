@@ -26,57 +26,56 @@
 #include "extern.h"
 
 RETSIGTYPE
-sig_exit(int code)
+sig_exit (int code)
 {
-	info(NORMAL, _("Signal Caught. Exiting Cleanly..."));
-	quit(code);
+  info (NORMAL, _("Signal Caught. Exiting Cleanly..."));
+  quit (code);
 }
 
 RETSIGTYPE
-sig_timeout(int code)
+sig_timeout (int code)
 {
-	info(NORMAL, _("Timeout! Exiting..."));
-	quit(code);
+  info (NORMAL, _("Timeout! Exiting..."));
+  quit (code);
 }
 
 void
-free_mem(void)
+free_mem (void)
 {
 #ifdef USE_SSL
-	xfree(secure.cafile);
-	xfree(secure.cert);
-	xfree(secure.key);
+  xfree (secure.cafile);
+  xfree (secure.cert);
+  xfree (secure.key);
 #endif /* HAVE_TLS or HAVE_SSL */
 
 #ifdef HAVE_GPG
-	gpg_free();
+  gpg_free ();
 #endif /* HAVE_GPG */
 
-	xfree(options.ulogfile);
-	xfree(options.tracefile);
-	xfree(session.execpath);
-	xfree_pptr(session.execargs);
+  xfree (options.ulogfile);
+  xfree (options.tracefile);
+  xfree (session.execpath);
+  xfree_pptr (session.execargs);
 }
 
 void
-quit(int code)
+quit (int code)
 {
-	memset(session.mta_username, 0, sizeof(session.mta_username));
-	memset(session.mta_password, 0, sizeof(session.mta_password));
+  memset (session.mta_username, 0, sizeof (session.mta_username));
+  memset (session.mta_password, 0, sizeof (session.mta_password));
 
 #ifdef USE_SSL
-	/*FIXME!!!*/
-	net_close_stream(&secure.client);
-	net_close_stream(&secure.server);
+  /*FIXME!!! */
+  net_close_stream (&secure.client);
+  net_close_stream (&secure.server);
 #endif
 #ifdef HAVE_SYSLOG
-	if ((topt & T_DAEMON) && !(topt & T_FOREGROUND))
-		closelog();
+  if ((topt & T_DAEMON) && !(topt & T_FOREGROUND))
+    closelog ();
 #endif /* HAVE_SYSLOG */
 
-	free_mem();
-	exit(code);
+  free_mem ();
+  exit (code);
 }
 
 /* EOF */
-

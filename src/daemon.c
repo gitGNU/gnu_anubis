@@ -28,11 +28,11 @@
 /* TCP wrappers */
 #ifdef USE_LIBWRAP
 # include <tcpd.h>
- int deny_severity = LOG_INFO;
- int allow_severity = LOG_INFO;
+int deny_severity = LOG_INFO;
+int allow_severity = LOG_INFO;
 #endif /* USE_LIBWRAP */
 
-static RETSIGTYPE sig_cld(int);
+static RETSIGTYPE sig_cld (int);
 
 static int nchild;
 
@@ -41,60 +41,60 @@ static int nchild;
 *************/
 
 void
-daemonize(void)
+daemonize (void)
 {
 #ifdef HAVE_DAEMON
-	if (daemon(0, 0) == -1)
-		anubis_error(HARD, _("daemon() failed. %s."), strerror(errno));
+  if (daemon (0, 0) == -1)
+    anubis_error (HARD, _("daemon() failed. %s."), strerror (errno));
 #else
-	chdir("/");
-	umask(0);
-	switch(fork())
-	{
-		case -1: /* fork() failed */
-			anubis_error(HARD, _("Can't fork. %s."), strerror(errno));
-			break;
-		case 0: /* child process */
-			break;
-		default: /* parent process */
-			quit(0);
-	}
-	if (setsid() == -1)
-		anubis_error(HARD, _("setsid() failed."));
+  chdir ("/");
+  umask (0);
+  switch (fork ())
+    {
+    case -1:			/* fork() failed */
+      anubis_error (HARD, _("Can't fork. %s."), strerror (errno));
+      break;
+    case 0:			/* child process */
+      break;
+    default:			/* parent process */
+      quit (0);
+    }
+  if (setsid () == -1)
+    anubis_error (HARD, _("setsid() failed."));
 
-	close(0);
-	close(1);
-	close(2);
+  close (0);
+  close (1);
+  close (2);
 #endif /* HAVE_DAEMON */
 
-	signal(SIGHUP, SIG_IGN);
-	topt |= T_DAEMON;
+  signal (SIGHUP, SIG_IGN);
+  topt |= T_DAEMON;
 
 #ifdef HAVE_SYSLOG
-	openlog("anubis", LOG_PID, 0);
-	syslog(LOG_INFO, _("%s daemon startup succeeded."), version);
+  openlog ("anubis", LOG_PID, 0);
+  syslog (LOG_INFO, _("%s daemon startup succeeded."), version);
 #endif /* HAVE_SYSLOG */
 
-	return;
+  return;
 }
 
 static RETSIGTYPE
-sig_cld(int code)
+sig_cld (int code)
 {
-	pid_t pid;
-	int status;
+  pid_t pid;
+  int status;
 
-	while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
-	{
-		nchild--;
-		info(VERBOSE,
-		     ngettext("Child [%lu] finished. Exit status: %s. %d client left.",
-			      "Child [%lu] finished. Exit status: %s. %d clients left.",
-			       nchild),
-		     (unsigned long) pid,
-		     WIFEXITED(status) ? _("OK") : _("ERROR"), nchild);
-	}
-	return;
+  while ((pid = waitpid (-1, &status, WNOHANG)) > 0)
+    {
+      nchild--;
+      info (VERBOSE,
+	    ngettext
+	    ("Child [%lu] finished. Exit status: %s. %d client left.",
+	     "Child [%lu] finished. Exit status: %s. %d clients left.",
+	     nchild), (unsigned long) pid,
+	    WIFEXITED (status) ? _("OK") : _("ERROR"), nchild);
+    }
+  return;
 }
 
 /************************************
@@ -103,18 +103,18 @@ sig_cld(int code)
 *************************************/
 
 void
-service_unavailable(NET_STREAM *sd_client)
+service_unavailable (NET_STREAM * sd_client)
 {
-	char buf[LINEBUFFER+1];
+  char buf[LINEBUFFER + 1];
 
-	snprintf(buf, LINEBUFFER,
-	"421 %s Service not available, closing transmission channel."CRLF,
-		(topt & T_LOCAL_MTA) ? "localhost" : session.mta);
+  snprintf (buf, LINEBUFFER,
+	    "421 %s Service not available, closing transmission channel."
+	    CRLF, (topt & T_LOCAL_MTA) ? "localhost" : session.mta);
 
-	swrite(SERVER, *sd_client, buf);
-	stream_close(*sd_client);
-	stream_destroy(sd_client);
-	return;
+  swrite (SERVER, *sd_client, buf);
+  stream_close (*sd_client);
+  stream_destroy (sd_client);
+  return;
 }
 
 /*************************
@@ -123,44 +123,47 @@ service_unavailable(NET_STREAM *sd_client)
 **************************/
 
 void
-set_unprivileged_user(void)
+set_unprivileged_user (void)
 {
-	if (topt & T_USER_NOTPRIVIL) {
-		if (check_username(session.notprivileged))
-			anubis_changeowner(session.notprivileged);
-	}
-	else {
-		if (check_username(DEFAULT_UNPRIVILEGED_USER))
-			anubis_changeowner(DEFAULT_UNPRIVILEGED_USER);
-		else
-			info(NORMAL,
-			_("WARNING: An unprivileged user has not been specified!"));
-	}
-	return;
+  if (topt & T_USER_NOTPRIVIL)
+    {
+      if (check_username (session.notprivileged))
+	anubis_changeowner (session.notprivileged);
+    }
+  else
+    {
+      if (check_username (DEFAULT_UNPRIVILEGED_USER))
+	anubis_changeowner (DEFAULT_UNPRIVILEGED_USER);
+      else
+	info (NORMAL,
+	      _("WARNING: An unprivileged user has not been specified!"));
+    }
+  return;
 }
 
 int
-anubis_child_main (NET_STREAM *sd_client, struct sockaddr_in *addr)
+anubis_child_main (NET_STREAM * sd_client, struct sockaddr_in *addr)
 {
-	int rc;
+  int rc;
 
-	topt &= ~T_FOREGROUND;
-	
+  topt &= ~T_FOREGROUND;
+
 #ifdef WITH_GSASL
-	switch (anubis_mode) {
-	case anubis_transparent:
-		rc = anubis_transparent_mode(sd_client, addr);
-		break;
+  switch (anubis_mode)
+    {
+    case anubis_transparent:
+      rc = anubis_transparent_mode (sd_client, addr);
+      break;
 
-	case anubis_authenticate:
-		rc = anubis_authenticate_mode(sd_client, addr);
-	}
+    case anubis_authenticate:
+      rc = anubis_authenticate_mode (sd_client, addr);
+    }
 #else
-	rc = anubis_transparent_mode(sd_client, addr);
+  rc = anubis_transparent_mode (sd_client, addr);
 #endif /* WITH_GSASL */
 
-	net_close_stream(sd_client);
-	return rc;
+  net_close_stream (sd_client);
+  return rc;
 }
 
 /**************
@@ -168,93 +171,100 @@ anubis_child_main (NET_STREAM *sd_client, struct sockaddr_in *addr)
 ***************/
 
 void
-loop(int sd_bind)
+loop (int sd_bind)
 {
-	struct sockaddr_in addr;
-	pid_t childpid = 0;
-	socklen_t addrlen;
+  struct sockaddr_in addr;
+  pid_t childpid = 0;
+  socklen_t addrlen;
 #ifdef USE_LIBWRAP
-	struct request_info req;
+  struct request_info req;
 #endif /* USE_LIBWRAP */
 #ifdef HAVE_PAM
-	int pam_retval;
+  int pam_retval;
 #endif /* HAVE_PAM */
 
-	addrlen = sizeof(addr);
-	signal(SIGCHLD, sig_cld);
+  addrlen = sizeof (addr);
+  signal (SIGCHLD, sig_cld);
 
-	info(VERBOSE, _("GNU Anubis is running..."));
+  info (VERBOSE, _("GNU Anubis is running..."));
 
-	for (;;) {
-		NET_STREAM sd_client = NULL;
-		int fd = accept(sd_bind, (struct sockaddr *)&addr, &addrlen);
-		if (fd < 0) {
-			if (errno == EINTR)
-				continue;
-			else {
-				anubis_error(SOFT,
-					     _("accept() failed: %s."),
-					     strerror(errno));
-				continue;
-			}
-		}
+  for (;;)
+    {
+      NET_STREAM sd_client = NULL;
+      int fd = accept (sd_bind, (struct sockaddr *) &addr, &addrlen);
+      if (fd < 0)
+	{
+	  if (errno == EINTR)
+	    continue;
+	  else
+	    {
+	      anubis_error (SOFT,
+			    _("accept() failed: %s."), strerror (errno));
+	      continue;
+	    }
+	}
 
-		/* Create the TCP stream */
-		net_create_stream(&sd_client, fd);
-		
-		/*
-		   Check the TCP wrappers settings.
-		*/
+      /* Create the TCP stream */
+      net_create_stream (&sd_client, fd);
+
+      /*
+         Check the TCP wrappers settings.
+       */
 
 #ifdef USE_LIBWRAP
-		request_init(&req, RQ_DAEMON, "anubis", RQ_FILE, fd, 0);
-		fromhost(&req);
-		if (hosts_access(&req) == 0) {
-			info(NORMAL,
-			     _("TCP wrappers: connection from %s:%u rejected."),
-			     inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
-			service_unavailable(&sd_client);
-			continue;
-		}
+      request_init (&req, RQ_DAEMON, "anubis", RQ_FILE, fd, 0);
+      fromhost (&req);
+      if (hosts_access (&req) == 0)
+	{
+	  info (NORMAL,
+		_("TCP wrappers: connection from %s:%u rejected."),
+		inet_ntoa (addr.sin_addr), ntohs (addr.sin_port));
+	  service_unavailable (&sd_client);
+	  continue;
+	}
 #endif /* USE_LIBWRAP */
 
-		/*
-		   Read the system configuration file (SUPERVISOR).
-		*/
+      /*
+         Read the system configuration file (SUPERVISOR).
+       */
 
-		if (!(topt & T_NORC)) {
-			open_rcfile(CF_SUPERVISOR);
-			process_rcfile(CF_SUPERVISOR);
-		}
-
-		nchild++;
-		if (nchild > MAXCLIENTS) {
-			info(NORMAL, _("Too many clients. Connection from %s:%u rejected."),
-				inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
-			service_unavailable(&sd_client);
-			nchild--;
-		}
-		else {
-			info(NORMAL, _("Connection from %s:%u"),
-				inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
-
-			childpid = fork();
-			if (childpid == -1)
-				anubis_error(HARD,
-					     _("daemon: Can't fork. %s."),
-					     strerror(errno));
-			else if (childpid == 0) { /* a child process */
-				/* FIXME */
-				signal(SIGCHLD, SIG_IGN);
-				quit(anubis_child_main(&sd_client, &addr));
-			}
-			
-			net_close_stream(&sd_client);
-		}
-		topt &= ~T_ERROR;
-		cleanup_children();
+      if (!(topt & T_NORC))
+	{
+	  open_rcfile (CF_SUPERVISOR);
+	  process_rcfile (CF_SUPERVISOR);
 	}
-	return;
+
+      nchild++;
+      if (nchild > MAXCLIENTS)
+	{
+	  info (NORMAL,
+		_("Too many clients. Connection from %s:%u rejected."),
+		inet_ntoa (addr.sin_addr), ntohs (addr.sin_port));
+	  service_unavailable (&sd_client);
+	  nchild--;
+	}
+      else
+	{
+	  info (NORMAL, _("Connection from %s:%u"),
+		inet_ntoa (addr.sin_addr), ntohs (addr.sin_port));
+
+	  childpid = fork ();
+	  if (childpid == -1)
+	    anubis_error (HARD,
+			  _("daemon: Can't fork. %s."), strerror (errno));
+	  else if (childpid == 0)
+	    {			/* a child process */
+	      /* FIXME */
+	      signal (SIGCHLD, SIG_IGN);
+	      quit (anubis_child_main (&sd_client, &addr));
+	    }
+
+	  net_close_stream (&sd_client);
+	}
+      topt &= ~T_ERROR;
+      cleanup_children ();
+    }
+  return;
 }
 
 /********************************************
@@ -263,102 +273,103 @@ loop(int sd_bind)
 *********************************************/
 
 static int
-_stdio_write(void *sd, char *data, size_t size, size_t *nbytes)
+_stdio_write (void *sd, char *data, size_t size, size_t * nbytes)
 {
-	int rc;
-	int fd = (int)sd;
+  int rc;
+  int fd = (int) sd;
 
-	if (fd == 0)
-		fd = 1;
-	rc = write(fd, data, size);
-	if (rc > 0) {
-		*nbytes = rc;
-		return 0;
-	}
-	return errno;
+  if (fd == 0)
+    fd = 1;
+  rc = write (fd, data, size);
+  if (rc > 0)
+    {
+      *nbytes = rc;
+      return 0;
+    }
+  return errno;
 }
 
 static int
-_stdio_read(void *sd, char *data, size_t size, size_t *nbytes)
+_stdio_read (void *sd, char *data, size_t size, size_t * nbytes)
 {
-	int n;
-	int fd = (int)sd;
-	fd_set rds;
+  int n;
+  int fd = (int) sd;
+  fd_set rds;
 
-	errno = 0;
-	FD_ZERO(&rds);
-	FD_SET(fd, &rds);
-	do
-		n = select(fd + 1, &rds, NULL, NULL, NULL);
-	while (n < 0 && errno == EINTR);
-	if (n > 0) {
-		n = read(fd, data, size);
-		if (n >= 0) 
-			*nbytes = n;
-	}
-	return errno;
+  errno = 0;
+  FD_ZERO (&rds);
+  FD_SET (fd, &rds);
+  do
+    n = select (fd + 1, &rds, NULL, NULL, NULL);
+  while (n < 0 && errno == EINTR);
+  if (n > 0)
+    {
+      n = read (fd, data, size);
+      if (n >= 0)
+	*nbytes = n;
+    }
+  return errno;
 }
 
 static const char *
-_stdio_strerror(void *ignored_data, int rc)
+_stdio_strerror (void *ignored_data, int rc)
 {
-	return strerror(rc);
+  return strerror (rc);
 }
 
 void
-stdinout(void)
+stdinout (void)
 {
-	NET_STREAM sd_client = NULL; 
-	NET_STREAM sd_server = NULL;
+  NET_STREAM sd_client = NULL;
+  NET_STREAM sd_server = NULL;
 
-	topt &= ~T_SSL;
-	topt |= T_FOREGROUND;
-	topt |= T_SMTP_ERROR_CODES;
-	
-	anubis_getlogin(session.clientname, sizeof(session.clientname));
-	auth_tunnel(); /* session.clientname = session.supervisor */
+  topt &= ~T_SSL;
+  topt |= T_FOREGROUND;
+  topt |= T_SMTP_ERROR_CODES;
 
-	if (!(topt & T_LOCAL_MTA) && (strlen(session.mta) == 0)) {
-		options.termlevel = NORMAL;
-		anubis_error(HARD, _("The MTA has not been specified. "
-			"Set the REMOTE-MTA or LOCAL-MTA."));
-		free_mem();
-		return;
-	}
+  anubis_getlogin (session.clientname, sizeof (session.clientname));
+  auth_tunnel ();		/* session.clientname = session.supervisor */
 
-	net_create_stream(&sd_client, 0);
-	stream_set_read(sd_client, _stdio_read);
-	stream_set_write(sd_client, _stdio_write);
-	stream_set_strerror(sd_client, _stdio_strerror);
+  if (!(topt & T_LOCAL_MTA) && (strlen (session.mta) == 0))
+    {
+      options.termlevel = NORMAL;
+      anubis_error (HARD, _("The MTA has not been specified. "
+			    "Set the REMOTE-MTA or LOCAL-MTA."));
+      free_mem ();
+      return;
+    }
 
-	alarm(300);
-	if (topt & T_LOCAL_MTA)
-		sd_server = make_local_connection(session.execpath,
-						  session.execargs);
-	else
-		sd_server = make_remote_connection(session.mta,
-						   session.mta_port);
-	alarm(0);
+  net_create_stream (&sd_client, 0);
+  stream_set_read (sd_client, _stdio_read);
+  stream_set_write (sd_client, _stdio_write);
+  stream_set_strerror (sd_client, _stdio_strerror);
 
-	if (sd_server == NULL) {
-		service_unavailable(&sd_client);
-		free_mem();
-		return;
-	}
-	stream_set_read(sd_server, _stdio_read);
-	stream_set_write(sd_server, _stdio_write);
-	stream_set_strerror(sd_server, _stdio_strerror);
+  alarm (300);
+  if (topt & T_LOCAL_MTA)
+    sd_server = make_local_connection (session.execpath, session.execargs);
+  else
+    sd_server = make_remote_connection (session.mta, session.mta_port);
+  alarm (0);
 
-	remote_client = sd_client;
-	remote_server = sd_server;
+  if (sd_server == NULL)
+    {
+      service_unavailable (&sd_client);
+      free_mem ();
+      return;
+    }
+  stream_set_read (sd_server, _stdio_read);
+  stream_set_write (sd_server, _stdio_write);
+  stream_set_strerror (sd_server, _stdio_strerror);
 
-	smtp_session_transparent();
-	cleanup_children();
-	
-	net_close_stream(&sd_server);
-	free_mem();
-	return;
+  remote_client = sd_client;
+  remote_server = sd_server;
+
+  smtp_session_transparent ();
+  cleanup_children ();
+
+  net_close_stream (&sd_server);
+  free_mem ();
+  return;
 }
 
 /* EOF */
-
