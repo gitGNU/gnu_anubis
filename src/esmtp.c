@@ -131,7 +131,6 @@ esmtp_auth(void *sd_server, char *reply)
 			anubis_error(SOFT, _("ESMTP AUTH: %s."), tmp);
 		}
 	}
-	return;
 }
 
 /************************************
@@ -254,7 +253,7 @@ b64decode(char *in, char **ptr)
 static void
 cram_md5(char *secret, char *challenge, unsigned char *digest)
 {
-	GCRY_MD_HD context;
+	gcry_md_hd_t context;
 	unsigned char ipad[64];
 	unsigned char opad[64];
 	int secret_len;
@@ -270,7 +269,7 @@ cram_md5(char *secret, char *challenge, unsigned char *digest)
 	memset(opad, 0, sizeof(opad));
 
 	if (secret_len > 64) {
-		context = gcry_md_open(GCRY_MD_MD5, 0);
+		gcry_md_open(&context, GCRY_MD_MD5, 0);
 		gcry_md_write(context, (unsigned char *)secret, secret_len);
 		gcry_md_final(context);
 		memcpy(ipad, gcry_md_read(context, 0), 64);
@@ -288,21 +287,19 @@ cram_md5(char *secret, char *challenge, unsigned char *digest)
 		opad[i] ^= 0x5c;
 	}
 
-	context = gcry_md_open(GCRY_MD_MD5, 0);
+	gcry_md_open(&context, GCRY_MD_MD5, 0);
 	gcry_md_write(context, ipad, 64);
 	gcry_md_write(context, (unsigned char *)challenge, challenge_len);
 	gcry_md_final(context);
 	memcpy(digest, gcry_md_read(context, 0), 16);
 	gcry_md_close(context);
 
-	context = gcry_md_open(GCRY_MD_MD5, 0);
+	gcry_md_open(&context, GCRY_MD_MD5, 0);
 	gcry_md_write(context, opad, 64);
 	gcry_md_write(context, digest, 16);
 	gcry_md_final(context);
 	memcpy(digest, gcry_md_read(context, 0), 16);
 	gcry_md_close(context);
-
-	return;
 }
 
 #else
@@ -352,8 +349,6 @@ cram_md5(char *secret, char *challenge, unsigned char *digest)
 	MD5_Update(&context, opad, 64);
 	MD5_Update(&context, digest, 16);
 	MD5_Final(digest, &context);
-
-	return;
 }
 
 #endif /* HAVE_SSL */
