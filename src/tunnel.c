@@ -612,6 +612,8 @@ handle_ehlo (char *command, char *reply, size_t reply_size)
          The 'ONEWAY' method is used when your MUA doesn't
          support the TLS/SSL, but your MTA does.
          Make the TLS/SSL connection with ESMTP server.
+	 FIXME: The diagnostic message below is not correct in
+	 authmode.
        */
 
       info (NORMAL,
@@ -793,3 +795,4 @@ transfer_body (MESSAGE * msg)
 }
 
 /* EOF */
+
