@@ -211,9 +211,15 @@ start_ssl_server(int sd_client)
 	gnutls_certificate_allocate_credentials(&x509_cred);
 	atexit(_tls_cleanup_x509);
 	if (secure.cafile) {
-		gnutls_certificate_set_x509_trust_file(x509_cred,
-						       secure.cafile,
-						       GNUTLS_X509_FMT_PEM);
+		rs = gnutls_certificate_set_x509_trust_file(xcred,
+							    secure.cafile,
+							    GNUTLS_X509_FMT_PEM);
+		if (rs < 0) {
+			anubis_error(HARD, _("TLS Error reading `%s': %s"),
+				     secure.cafile,
+				     gnutls_strerror(rs));
+			return 0;
+		}
 	}
 	gnutls_certificate_set_x509_key_file(x509_cred,
 					     secure.cert, secure.key,
@@ -223,6 +229,7 @@ start_ssl_server(int sd_client)
 	gnutls_certificate_set_dh_params(x509_cred, dh_params);
 
 	session = initialize_tls_session();
+
 	gnutls_transport_set_ptr(session, sd_client);
 	rs = gnutls_handshake(session);
 	if (rs < 0) {
@@ -416,4 +423,3 @@ print_x509_certificate_info(gnutls_session session)
 #endif /* HAVE_TLS */
 
 /* EOF */
-
