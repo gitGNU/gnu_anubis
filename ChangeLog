@@ -5,7 +5,7 @@
 	(anubis_changeowner): Use change_privs to correctly switch
 	privileges.
 
-2004-08-07  Sergey Poznyakoff  <gray@Noldor.runasimi.org>
+2004-08-07  Sergey Poznyakoff
 
 	* configure.ac: Raised version number to 3.9.96
 	* src/md5.c: New file.
