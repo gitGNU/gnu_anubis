@@ -241,7 +241,7 @@ parse_host(char *host, int port, struct sockaddr_in *addr)
 
 /* GSASL mechanisms */
 
-static LIST *auth_mech_list;
+static ANUBIS_LIST *auth_mech_list;
 
 void
 add_mech(char *arg)
@@ -286,7 +286,7 @@ name_cmp(void *item, void *data)
 }
 
 char *
-find_capa_v(struct smtp_reply *repl, const char *name, LIST *list)
+find_capa_v(struct smtp_reply *repl, const char *name, ANUBIS_LIST *list)
 {
 	int i;
 	for (i = 0; i < repl->argc; i++) {
@@ -1208,7 +1208,7 @@ help()
 	puts(_("  -d, --disable-tls       Disable TLS encryption"));
 	puts(_("  -C, --tls-cafile FILE   Use given CA file"));
 #endif
-	puts(_("  -m, --mechanism LIST    Restrict allowed SASL mechanisms"));
+	puts(_("  -m, --mechanism MECH    Restrict allowed SASL mechanisms"));
 	puts(_("  -v, --verbose           Verbose output. Multiple options\n"
 	       "                          increase the verbosity. Maximum is\n"
 	       "                          3"));

@@ -397,8 +397,8 @@ void esmtp_auth(NET_STREAM, char *);
 int anubis_free_list_item(void *item, void *data);
 void assoc_free(ASSOC *);
 ASSOC *header_assoc(char *);
-void destroy_assoc_list(LIST **);
-void destroy_string_list(LIST **);
+void destroy_assoc_list(ANUBIS_LIST **);
+void destroy_string_list(ANUBIS_LIST **);
 void parse_mtaport(char *, char *, unsigned int *);
 void parse_mtahost(char *, char *, unsigned int *);
 void remline(char *, char *);
@@ -466,7 +466,7 @@ void guile_load_path_append(char *);
 void guile_debug(int);
 void guile_load_program(char *);
 void guile_rewrite_line(char *, const char *);
-void guile_postprocess_proc(char *, LIST **, char **);
+void guile_postprocess_proc(char *, ANUBIS_LIST **, char **);
 void guile_section_init(void);
 #endif /* WITH_GUILE */
 
@@ -515,7 +515,7 @@ typedef int (*anubis_db_io_t) (void *d, const char *key, ANUBIS_USER *rec,
 			       int *ecode);
 typedef const char *(*anubis_db_strerror_t) (void *d, int rc);
 typedef int (*anubis_db_delete_t) (void *d, const char *key, int *ecode);
-typedef int (*anubis_db_get_list_t) (void *d, LIST *list, int *ecode);
+typedef int (*anubis_db_get_list_t) (void *d, ANUBIS_LIST *list, int *ecode);
 	     
 int anubis_db_register(const char *dbid, 
 		       anubis_db_open_t _db_open,
@@ -531,7 +531,7 @@ int anubis_db_close(void **dptr);
 int anubis_db_get_record(void *dptr, const char *key, ANUBIS_USER *rec);
 int anubis_db_put_record(void *dptr, const char *key, ANUBIS_USER *rec);
 int anubis_db_delete_record(void *dptr, const char *key);
-int anubis_db_get_list(void *dptr, LIST **list);
+int anubis_db_get_list(void *dptr, ANUBIS_LIST **list);
 const char *anubis_db_strerror(void *dptr);
 void anubis_db_free_record(ANUBIS_USER *rec);
 
@@ -561,7 +561,7 @@ void authmode_section_init(void);
 /* gsasl.c */
 void auth_gsasl_init();
 int anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER *usr, NET_STREAM *stream);
-void anubis_set_mech_list(LIST *list);
+void anubis_set_mech_list(ANUBIS_LIST *list);
 #if defined(WITH_GSASL)
 void install_gsasl_stream (Gsasl_session_ctx *sess_ctx, NET_STREAM *stream);
 #endif

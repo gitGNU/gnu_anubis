@@ -37,7 +37,7 @@ struct list {
 
 struct iterator {
 	struct iterator *next;
-	LIST *list;
+	ANUBIS_LIST *list;
 	struct list_entry *cur;
 	int advanced;
 };
@@ -79,7 +79,7 @@ iterator_current(ITERATOR *ip)
 }
 
 ITERATOR *
-iterator_create(LIST *list)
+iterator_create(ANUBIS_LIST *list)
 {
 	ITERATOR *itr;
 
@@ -277,10 +277,10 @@ list_locate(struct list *list, void *data, list_comp_t cmp)
 /* Computes an intersection of the two lists. The resulting list
    contains elements from the list A that are also encountered
    in the list B. Elements are compared using function CMP. */
-LIST *
-list_intersect(LIST *a, LIST *b, list_comp_t cmp)
+ANUBIS_LIST *
+list_intersect(ANUBIS_LIST *a, ANUBIS_LIST *b, list_comp_t cmp)
 {
-	LIST *res;
+	ANUBIS_LIST *res;
 	ITERATOR *itr = iterator_create(a);
 	void *p;
 	

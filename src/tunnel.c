@@ -31,7 +31,7 @@
 
 static int  transfer_command(MESSAGE *, char *);
 static int  process_command(MESSAGE *, char *);
-static void transfer_header(LIST *);
+static void transfer_header(ANUBIS_LIST *);
 static void transfer_body(MESSAGE *);
 static void process_data(MESSAGE *);
 
@@ -70,7 +70,7 @@ get_boundary (MESSAGE *msg, char *line)
 }
 
 static void
-add_header (LIST *list, char *line)
+add_header (ANUBIS_LIST *list, char *line)
 {
 	ASSOC *asc = header_assoc(line);
 	list_append(list, asc);
@@ -146,7 +146,7 @@ write_assoc (NET_STREAM sd_server, ASSOC *entry)
 }
 			
 void
-send_header (NET_STREAM sd_server, LIST *list)
+send_header (NET_STREAM sd_server, ANUBIS_LIST *list)
 {
 	ASSOC *p;
 	ITERATOR *itr = iterator_create(list);
@@ -157,7 +157,7 @@ send_header (NET_STREAM sd_server, LIST *list)
 }
 
 void
-send_string_list (NET_STREAM sd_server, LIST *list)
+send_string_list (NET_STREAM sd_server, ANUBIS_LIST *list)
 {
 	char *p;
 	ITERATOR *itr = iterator_create(list);
@@ -680,7 +680,7 @@ process_data (MESSAGE *msg)
 }
 	
 static void
-transfer_header (LIST *header_buf)
+transfer_header (ANUBIS_LIST *header_buf)
 {
 	send_header(remote_server, header_buf);
 	swrite(CLIENT, remote_server, CRLF);

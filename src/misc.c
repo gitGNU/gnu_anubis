@@ -37,7 +37,7 @@ anubis_free_list_item(void *item, void *data)
 /* String lists */
 
 void
-destroy_string_list(LIST **plist)
+destroy_string_list(ANUBIS_LIST **plist)
 {
 	list_destroy(plist, anubis_free_list_item, NULL);
 }
@@ -50,7 +50,7 @@ _assoc_free(void *item, void *data)
 }
 
 void
-destroy_assoc_list(LIST **plist)
+destroy_assoc_list(ANUBIS_LIST **plist)
 {
 	list_destroy(plist, _assoc_free, NULL);
 }

@@ -83,7 +83,7 @@ static struct rc_secdef *rc_secdef;
 		size_t line;
 		char *name;
 	} begin_sec;
-	LIST *list;
+	ANUBIS_LIST *list;
 };
 
 %token EOL T_BEGIN T_END AND OR
@@ -622,7 +622,7 @@ struct strobj {
 };
 
 /* A list of string objects */
-static LIST /* of struct strobj */ *string_list;
+static ANUBIS_LIST /* of struct strobj */ *string_list;
 
 static int
 string_comparator(void *item, void *data)
@@ -1270,7 +1270,7 @@ asgn_eval(struct eval_env *env, RC_ASGN *asgn)
 		tracefile(&env->loc, _("Executing %s"), asgn->lhs);
 	if (env->refstr) {
 		char *s;
-		LIST *arg = list_create();
+		ANUBIS_LIST *arg = list_create();
 		ITERATOR *itr = iterator_create(asgn->rhs);
 		for (s = iterator_first(itr); s; s = iterator_next(itr)) {
 			char *str = substitute(s, env->refstr);
@@ -1286,7 +1286,7 @@ asgn_eval(struct eval_env *env, RC_ASGN *asgn)
 
 
 int
-re_eval_list(struct eval_env *env, char *key, RC_REGEX *re, LIST *list)
+re_eval_list(struct eval_env *env, char *key, RC_REGEX *re, ANUBIS_LIST *list)
 {
 	ASSOC *p;
 	ITERATOR *itr;

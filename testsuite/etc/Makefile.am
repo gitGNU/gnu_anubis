@@ -45,6 +45,7 @@ EXTRA_DIST = \
  tlsoneway.pat\
  trigger.pat\
  add.in\
+ cond.in\
  del.in\
  empty.in\
  entire.in\

@@ -22,25 +22,25 @@
    compiling, linking, and/or using OpenSSL is allowed.
 */
 
-typedef struct list LIST;
+typedef struct list ANUBIS_LIST;
 typedef struct iterator ITERATOR;
 
 typedef int (*list_iterator_t)(void *, void *);
 typedef int (*list_comp_t)(void *, void *);
 
-LIST *list_create(void);
-void list_destroy(LIST **, list_iterator_t, void *);
-void list_iterate(LIST *, list_iterator_t, void *);
-void *list_item(LIST *, size_t);
-size_t list_count(LIST *);
-void list_append(LIST *, void *);
-void list_prepend(LIST *, void *);
-void *list_locate(LIST *, void *, list_comp_t);
-void *list_remove(LIST *, void *, list_comp_t);
-LIST *list_intersect(LIST *a, LIST *b, list_comp_t cmp);
+ANUBIS_LIST *list_create(void);
+void list_destroy(ANUBIS_LIST **, list_iterator_t, void *);
+void list_iterate(ANUBIS_LIST *, list_iterator_t, void *);
+void *list_item(ANUBIS_LIST *, size_t);
+size_t list_count(ANUBIS_LIST *);
+void list_append(ANUBIS_LIST *, void *);
+void list_prepend(ANUBIS_LIST *, void *);
+void *list_locate(ANUBIS_LIST *, void *, list_comp_t);
+void *list_remove(ANUBIS_LIST *, void *, list_comp_t);
+ANUBIS_LIST *list_intersect(ANUBIS_LIST *a, ANUBIS_LIST *b, list_comp_t cmp);
 
 void *iterator_current(ITERATOR *);
-ITERATOR *iterator_create(LIST *);
+ITERATOR *iterator_create(ANUBIS_LIST *);
 void iterator_destroy(ITERATOR **);
 void *iterator_first(ITERATOR *);
 void *iterator_next(ITERATOR *);

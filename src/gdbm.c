@@ -112,7 +112,7 @@ gdbm_db_get (void *d, const char *keystr, ANUBIS_USER *rec, int *errp)
 }
 
 static int
-gdbm_db_list(void *d, LIST *list, int *ecode)
+gdbm_db_list(void *d, ANUBIS_LIST *list, int *ecode)
 {
 	datum key, content;
 

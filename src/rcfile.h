@@ -55,7 +55,7 @@ enum rc_stmt_type {          /* Statement type: */
 
 struct rc_asgn {             /* Assignment */
 	char *lhs;           /* Left-hand side: A keyword */
-	LIST *rhs;    /* Right-hand side: A list of character strings */
+	ANUBIS_LIST *rhs;    /* Right-hand side: A list of character strings */
 	int flags;           /* Flags control various aspects of assignment
 				functionality */
 };
@@ -136,7 +136,7 @@ struct rc_stmt {             /* General statement representation */
 #define RC_KW_UNKNOWN 1
 #define RC_KW_ERROR   2
 
-typedef int (*rc_kw_parser_t)(int method, int key, LIST *arg,
+typedef int (*rc_kw_parser_t)(int method, int key, ANUBIS_LIST *arg,
 			      void *inv_data, void *func_data, MESSAGE *msg);
 
 /* Keyword flags */

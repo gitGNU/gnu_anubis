@@ -28,24 +28,24 @@
 #if defined(WITH_GSASL)
 
 static Gsasl_ctx *ctx;   
-static LIST *anubis_mech_list;
+static ANUBIS_LIST *anubis_mech_list;
 
 /* Converts the auth method list from a textual representation to
-   a LIST of string values */
-static LIST *
+   a ANUBIS_LIST of string values */
+static ANUBIS_LIST *
 auth_method_list(char *input)
 {
 	char *p;
-	LIST *list = list_create();
+	ANUBIS_LIST *list = list_create();
 	
 	for (p = strtok(input, " \t"); p; p = strtok(NULL, " \t"))
 		list_append(list, strdup(p));
 	return list;
 }
 
-/* Converts the authentication method LIST to its textual representation. */
+/* Converts the authentication method ANUBIS_LIST to its textual representation. */
 static void
-auth_list_to_string(LIST *list, char *buf, size_t bufsize)
+auth_list_to_string(ANUBIS_LIST *list, char *buf, size_t bufsize)
 {
 	ITERATOR *itr = iterator_create(list);
 	char *p;
@@ -68,7 +68,7 @@ auth_list_to_string(LIST *list, char *buf, size_t bufsize)
 /* Sets the list of allowed authentication mechanisms from its
    argument */
 void
-anubis_set_mech_list(LIST *list)
+anubis_set_mech_list(ANUBIS_LIST *list)
 {
 	ITERATOR *itr = iterator_create(list);
 	char *p;
@@ -103,8 +103,8 @@ auth_gsasl_capa_init ()
 
 	if (anubis_mech_list) {
 		size_t size = strlen(listmech);
-		LIST *mech = auth_method_list(listmech);
-		LIST *p = list_intersect(mech, anubis_mech_list, name_cmp);
+		ANUBIS_LIST *mech = auth_method_list(listmech);
+		ANUBIS_LIST *p = list_intersect(mech, anubis_mech_list, name_cmp);
 		auth_list_to_string(p, listmech, size);
 		list_destroy(&p, NULL, NULL);
 		list_destroy(&mech, anubis_free_list_item, NULL);

@@ -44,7 +44,7 @@ struct anubis_db_instance {
 	void *db_handle;
 };
 
-static LIST /* of anubis_db_type */ *dbtab;
+static ANUBIS_LIST /* of anubis_db_type */ *dbtab;
 
 static int
 dbid_cmp(void *item, void *data)
@@ -163,7 +163,7 @@ anubis_db_delete_record(void *dptr, const char *key)
 }
 
 int
-anubis_db_get_list(void *dptr, LIST **list)
+anubis_db_get_list(void *dptr, ANUBIS_LIST **list)
 {
 	struct anubis_db_instance *inst = dptr;
 	*list = list_create();

@@ -134,7 +134,7 @@ dbtext_put (void *d, const char *key, ANUBIS_USER *rec, int *errp)
 }
 
 static int
-dbtext_list(void *d, LIST *list, int *ecode)
+dbtext_list(void *d, ANUBIS_LIST *list, int *ecode)
 {
 	FILE *fp = d;
 	char buf[512], *p;

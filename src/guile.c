@@ -141,10 +141,10 @@ eval_catch_handler(void *data, SCM tag, SCM throw_args)
 }
 
 
-static LIST *
+static ANUBIS_LIST *
 guile_to_anubis(SCM cell)
 {
-	static LIST *list;
+	static ANUBIS_LIST *list;
 
 	list = list_create();
 	for (; cell != SCM_EOL; cell = SCM_CDR(cell)) {
@@ -161,7 +161,7 @@ guile_to_anubis(SCM cell)
 }
 
 static SCM
-anubis_to_guile(LIST *list)
+anubis_to_guile(ANUBIS_LIST *list)
 {
 	ASSOC *asc;
 	ITERATOR *itr;
@@ -196,7 +196,7 @@ anubis_to_guile(LIST *list)
 }
 
 static SCM
-list_to_args(LIST *arglist)
+list_to_args(ANUBIS_LIST *arglist)
 {
 	char *p;
 	ITERATOR *itr;
@@ -244,7 +244,7 @@ list_to_args(LIST *arglist)
 /* (define (postproc header-list body) */
 
 void
-guile_process_proc(LIST *arglist, MESSAGE *msg)
+guile_process_proc(ANUBIS_LIST *arglist, MESSAGE *msg)
 {
 	char *procname;
 	SCM arg_hdr, arg_body;
@@ -359,7 +359,7 @@ static struct rc_kwdef guile_rule_kw[] = {
 };
 
 int
-guile_parser(int method, int key, LIST *arglist,
+guile_parser(int method, int key, ANUBIS_LIST *arglist,
 	     void *inv_data, void *func_data, MESSAGE *msg)
 {
 	char *arg = list_item(arglist, 0);

@@ -231,7 +231,7 @@ op_list (int argc, char **argv)
 			break;
 		}
 	} else {
-		LIST *reclist;
+		ANUBIS_LIST *reclist;
 		rc = anubis_db_get_list(db, &reclist);
 		switch (rc) {
 		case ANUBIS_DB_SUCCESS:
@@ -390,7 +390,7 @@ print_help (void)
 
   puts(_("2. Add SMTP authid \"test\" with password \"guessme\" and map it\n"
 	 "to the system account \"gray\":\n\n"
-	 "example$ anubisadm --add --authid gray --password guessme \\\n"
+	 "example$ anubisadm --add --authid test --password guessme \\\n"
          "                   --user gray gdbm:/etc/anubis.db\n"));
 
   puts(_("3. List the entire database contents:\n\n"

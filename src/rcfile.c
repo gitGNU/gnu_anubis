@@ -97,7 +97,7 @@ struct file_id {
 
 /* A list of struct file_id used to prevent duplicate parsing of the
    same file */
-static LIST *file_id_list;
+static ANUBIS_LIST *file_id_list;
 
 /* Comparator for two struct file_id */
 static int
@@ -235,7 +235,7 @@ process_rcfile(int method)
 #define KW_MODE                18
 
 char **
-list_to_argv(LIST *list)
+list_to_argv(ANUBIS_LIST *list)
 {
 	int i, argc;
 	char **argv, *p;
@@ -252,7 +252,7 @@ list_to_argv(LIST *list)
 }
 
 int
-control_parser(int method, int key, LIST *arglist,
+control_parser(int method, int key, ANUBIS_LIST *arglist,
 	       void *inv_data, void *func_data, MESSAGE *msg)
 {
 	char *arg = list_item(arglist, 0);
@@ -502,7 +502,7 @@ static struct rc_secdef_child control_sect_child = {
 #define KW_SSL_CAFILE          5
 
 int
-tls_parser(int method, int key, LIST *arglist,
+tls_parser(int method, int key, ANUBIS_LIST *arglist,
 	   void *inv_data, void *func_data, MESSAGE *msg)
 {
 	char *arg = list_item(arglist, 0);
@@ -578,7 +578,7 @@ control_section_init(void)
 #define KW_BODY_CLEAR               5
 
 int
-rule_parser(int method, int key, LIST *arglist,
+rule_parser(int method, int key, ANUBIS_LIST *arglist,
 	    void *inv_data, void *func_data, MESSAGE *msg)
 {
 	char *arg = list_item(arglist, 0);

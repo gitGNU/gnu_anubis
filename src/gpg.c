@@ -390,7 +390,7 @@ gpg_free(void)
 #define KW_GPG_HOME               5
 
 int
-gpg_parser(int method, int key, LIST *arglist,
+gpg_parser(int method, int key, ANUBIS_LIST *arglist,
 	   void *inv_data, void *func_data, MESSAGE *msg)
 {
 	char *arg = list_item(arglist, 0);

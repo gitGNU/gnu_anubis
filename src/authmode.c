@@ -29,7 +29,7 @@
 #ifdef WITH_GSASL
 
 static char *smtp_greeting_message;
-static LIST *smtp_help_message;
+static ANUBIS_LIST *smtp_help_message;
 
 
 
@@ -147,7 +147,7 @@ asmtp_helo_reply(char *args)
 	return state_ehlo;
 }
 
-static LIST *asmtp_capa;
+static ANUBIS_LIST *asmtp_capa;
 
 void
 asmtp_capa_add(char *name)
@@ -552,7 +552,7 @@ anubis_authenticate_mode(NET_STREAM *psd_client, struct sockaddr_in *addr)
 #define KW_SMTP_HELP_MESSAGE     4
 
 static int
-rc_parser(int method, int key, LIST *arglist,
+rc_parser(int method, int key, ANUBIS_LIST *arglist,
 	  void *inv_data, void *func_data, MESSAGE *msg)
 {
 	char *arg = list_item(arglist, 0);
