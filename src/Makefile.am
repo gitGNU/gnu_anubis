@@ -31,7 +31,7 @@ anubis_SOURCES = main.c main.h extern.h headers.h mem.c mem.h env.c errs.c \
 
 YLWRAP = $(SHELL) $(top_srcdir)/build/ylwrap
 AM_YFLAGS = -dtv
-EXTRA_DIST = rcfile.y rcfile.l snprintf.c
+EXTRA_DIST = rcfile.y rcfile.l snprintf.c obstack.c obstack.h
 
 BUILT_SOURCES= \
   rcfile-gram.c rcfile-gram.h \
