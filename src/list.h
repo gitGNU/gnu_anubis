@@ -37,6 +37,7 @@ void list_append(LIST *, void *);
 void list_prepend(LIST *, void *);
 void *list_locate(LIST *, void *, list_comp_t);
 void *list_remove(LIST *, void *, list_comp_t);
+LIST *list_intersect(LIST *a, LIST *b, list_comp_t cmp);
 
 void *iterator_current(ITERATOR *);
 ITERATOR *iterator_create(LIST *);
