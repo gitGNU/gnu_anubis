@@ -354,16 +354,16 @@ check_filemode (char *path)
 **************************/
 
 int
-check_filename (char *path, time_t * timep)
+check_filename (char *path, time_t *timep)
 {
   struct stat st;
 
-  if (path == 0)
+  if (path == NULL)
     return 0;
 
   if (stat (path, &st) == -1)
     {
-      anubis_error (HARD, "%s -- %s.", path, strerror (errno));
+      anubis_error (HARD, "%s: %s.", path, strerror (errno));
       return 0;			/* FALSE */
     }
   if (!(st.st_mode & S_IFREG) || !(st.st_mode & S_IFLNK))
