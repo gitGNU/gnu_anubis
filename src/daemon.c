@@ -146,11 +146,7 @@ loop(int sd_bind)
 	pid_t childpid = 0;
 	int sd_client = 0;
 	int sd_server = 0;
-	#ifdef __socklen_t_defined
 	socklen_t addrlen;
-	#else
-	int addrlen;
-	#endif /* __socklen_t_defined */
 	#ifdef USE_LIBWRAP
 	struct request_info req;
 	#endif /* USE_LIBWRAP */
