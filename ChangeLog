@@ -1,3 +1,10 @@
+2003-08-28  Wojciech Polak
+
+	* configure.ac: Added AM_PATH_GPGME.
+	* m4/gpgme.m4: New file.
+	* m4/Makefile.am: Added gpgme.m4.
+	* src/gpg.c: Replaced puts(S) with fputs(S, stderr);.
+
 2003-08-28  Sergey Poznyakoff 
 
 	* src/rcfile.h (error_sync_begin): Changed return type.
