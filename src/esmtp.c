@@ -68,6 +68,9 @@ esmtp_auth (NET_STREAM sd_server, char *reply)
 	}
 
       p = strchr (tmp, ' ');
+      if (!p)
+	anubis_error (1, 0, _("ESMTP AUTH: %s."), _("Malformed response"));
+      
       p++;
       b64decode (p, &b64buf);
       if (options.termlevel == DEBUG)
@@ -122,6 +125,9 @@ esmtp_auth (NET_STREAM sd_server, char *reply)
       get_response_smtp (CLIENT, sd_server, tmp, LINEBUFFER);
 
       p = strchr (tmp, ' ');
+      if (!p)
+	anubis_error (1, 0, _("ESMTP AUTH: %s."), _("Malformed response"));
+      
       p++;
       b64decode (p, &b64buf);
       if (options.termlevel == DEBUG)
