@@ -28,7 +28,7 @@ EXTRA_DIST = $(man_MANS) pixie-dixie.pl.txt gendocs_template
 RENDITION=DISTRIB
 MAKEINFOFLAGS=-D$(RENDITION)
 info_TEXINFOS = anubis.texi
-anubis_TEXINFOS = fdl.texi mime.texipixie-dixie.texi rendition.texi
+anubis_TEXINFOS = fdl.texi mime.texi pixie-dixie.texi rendition.texi
 
 clean-local:
 	rm -rf manual
