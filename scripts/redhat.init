@@ -24,7 +24,7 @@ PROGRAM="anubis"
 
 start () {
 	echo -n $"Starting $PROGRAM: "
-	daemon $PROGRAM $OPTIONS
+	daemon $PROGRAM
 	RETVAL=$?
 	echo
 	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/$PROGRAM
