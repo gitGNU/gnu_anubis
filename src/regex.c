@@ -171,22 +171,38 @@ anubis_regex_replace (RC_REGEX * re, char *line, char *repl)
 	{
 	  char *q;
 
-	  alloc = 0;
-	  p = repl;
-	  plen = strlen (p);
 	  q = strstr (line + off, anubis_regex_source (re));
 
-	  so = (q - (line + off));
-	  eo = so + strlen (anubis_regex_source (re));
+	  if (q)
+	    {
+	      alloc = 0;
+	      p = repl;
+	      so = (q - (line + off));
+	      eo = so + strlen (anubis_regex_source (re));
+	    }
+	  else
+	    {
+	      char *x[2];
+
+	      x[0] = line + off;
+	      x[1] = NULL;
+
+	      alloc = 1;
+	      p = substitute (repl, x);
+	      
+	      so = 0;
+	      eo = strlen (line + off);
+	    }
 	}
       else
 	{
 	  alloc = 1;
 	  p = substitute (repl, refv);
-	  plen = strlen (p);
 	  xfree_pptr (refv);
 	}
 
+      plen = strlen (p);
+      
       savep = newstr;
       newlen = strlen (line) - (eo - so) + plen + 1;
       newstr = xmalloc (newlen);
