@@ -497,8 +497,6 @@ tls_parser(int method, int key, LIST *arglist,
 	case KW_SSL_CERT:
 		xfree(secure.cert);
 		secure.cert = allocbuf(arg, MAXPATHLEN);
-		if (method == CF_CLIENT)
-			topt |= T_SSL_CKCLIENT;		
 		break;
 		
 	case KW_SSL_KEY:
