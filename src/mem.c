@@ -29,25 +29,24 @@ xmalloc(int n)
 {
 	void *p;
 
-	p = (void *)malloc(n);
-	if (p == 0) {
+	p = malloc(n);
+	if (p == NULL) {
 		anubis_error(HARD,
 			_("malloc() failed. Cannot allocate enough memory."));
 		quit(EXIT_FAILURE); /* force exit */
 	}
-	else
-		memset(p, 0, n);
+	memset(p, 0, n);
 	return p;
 }
 
 void *
 xrealloc(void *p, int n)
 {
-	if (p == 0)
+	if (p == NULL)
 		return xmalloc(n);
 
-	p = (void *)realloc(p, n);
-	if (p == 0) {
+	p = realloc(p, n);
+	if (p == NULL) {
 		anubis_error(HARD,
 			_("realloc() failed. Cannot reallocate enough memory."));
 		quit(EXIT_FAILURE); /* force exit */
@@ -58,11 +57,11 @@ xrealloc(void *p, int n)
 char *
 allocbuf(char *s, int maxsize)
 {
-	char *p = 0;
+	char *p = NULL;
 	int len;
 
-	if (s == 0)
-		return 0;
+	if (s == NULL)
+		return NULL;
 
 	len = strlen(s);
 	if (maxsize != 0) {
@@ -77,18 +76,18 @@ allocbuf(char *s, int maxsize)
 		return p;
 	}
 	else
-		return 0;
+		return NULL;
 }
 
 #ifndef HAVE_STRDUP
 char *
 strdup(const char *s)
 {
-	char *p = 0;
+	char *p = NULL;
 	int len;
 
-	if (s == 0)
-		return 0;
+	if (s == NULL)
+		return NULL;
 
 	len = strlen(s);
 	p = (char *)xmalloc(len + 1);

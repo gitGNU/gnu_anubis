@@ -29,14 +29,14 @@
 #define xfree(p) do\
 	if (p) { \
 		free(p); \
-		p = 0; \
+		p = NULL; \
 	}\
      while (0)
 
 #define xfree_pptr(p) do\
 	if (p) { \
 		free_pptr(p); \
-		p = 0; \
+		p = NULL; \
 	}\
      while (0)
 
