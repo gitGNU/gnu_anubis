@@ -112,13 +112,14 @@ AC_SUBST(GUILE_INCLUDES)
 AC_SUBST(GUILE_LIBS)
 AC_SUBST(GUILE_BINDIR)
 AC_SUBST(GUILE_SNARF_VERSION)
-
+AC_SUBST(GUILE_SCRIPTS)
 if test x"$useguile" = x"yes"; then
   MU_CHECK_GUILE(,[
     AC_DEFINE(WITH_GUILE,1,[Enable Guile support])
     GUILE_INCLUDES=`guile-config compile`
     GUILE_LIBS=`guile-config link`
     GUILE_BINDIR=`guile-config info bindir`
+    GUILE_SCRIPTS='$(GUILE_SCM)'
     case "$GUILE_VERSION" in
     16|17) GUILE_SNARF_VERSION="1.6";;
     *) GUILE_SNARF_VERSION="1.6";;
@@ -169,17 +170,20 @@ fi
 dnl Use option --without-gnutls to NOT compile GnuTLS library support.
 AC_ARG_WITH(gnutls,
 	[  --without-gnutls        without GnuTLS library support],
-	[with_gnutls=no],
+	[with_gnutls=${withval}],
 	[with_gnutls=yes])
 
 dnl Use option --with-openssl to compile OpenSSL support.
 AC_ARG_WITH(openssl,
 	[  --with-openssl          with OpenSSL library support (disable GnuTLS)],
-	[with_openssl=yes
-         with_gnutls=no],
+	[with_openssl=${withval}],
 	[with_openssl=no])
 
-if test "$with_openssl" = "yes" && (test "$with_gnutls" = "no"); then
+if test "$with_openssl" = "yes"; then
+  with_gnutls = no
+fi
+
+if test "$with_openssl" = "yes"; then
  AC_CHECK_LIB(crypto, main,, with_openssl=no)
  AC_CHECK_LIB(ssl, main,, with_openssl=no)
  if test "$with_openssl" = "yes"; then
@@ -205,7 +209,8 @@ if test "$with_openssl" = "yes" && (test "$with_gnutls" = "no"); then
   AC_DEFINE(USE_OPENSSL, 1, [Define to 1 if USE_OPENSSL is requested.])
   AC_MSG_RESULT([Enabling OpenSSL support...])
  fi
-else
+fi
+
  if test "$with_gnutls" = "yes"; then
   AC_CHECK_LIB(gcrypt, main,, with_gnutls=no)
   AC_CHECK_LIB(gnutls, main,, with_gnutls=no)
@@ -234,7 +239,6 @@ else
  else
   AC_MSG_RESULT([Disabling GnuTLS support...])
  fi
-fi
 
 dnl Use option --with-pcre to compile PCRE library support.
 AC_ARG_WITH(pcre,
@@ -299,6 +303,7 @@ AC_CONFIG_FILES([Makefile
  src/Makefile
  scripts/Makefile
  examples/Makefile
+ guile/Makefile
  examples/pam/Makefile
  testsuite/Makefile
  testsuite/data/Makefile
