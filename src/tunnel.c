@@ -91,7 +91,6 @@ collect_headers(void *sd_client, MESSAGE *msg)
 	char buf[LINEBUFFER+1];
 	char *line = NULL;
 
-	msg->header = list_create();
 	while (recvline(SERVER, sd_client, buf, LINEBUFFER)) {
 		remcrlf(buf);
 		if (isspace(buf[0])) {
@@ -109,6 +108,7 @@ collect_headers(void *sd_client, MESSAGE *msg)
 				    && msg->boundary == NULL)
 					get_boundary(msg, line);
 				add_header(msg->header, line);
+				xfree(line);
 				line = NULL;
 			} 
 			if (buf[0] == 0)
@@ -312,13 +312,13 @@ smtp_session(void *sd_client, void *sd_server)
 	*/
 
 	message_init(&msg);
-	while (recvline(SERVER, sd_client, command, LINEBUFFER))
-	{
+	while (recvline(SERVER, sd_client, command, LINEBUFFER)) {
 		process_command(sd_client, sd_server, &msg,
 				command, LINEBUFFER);
+
 		sd_client = remote_client;
 		sd_server = remote_server;
-
+		
 		if (topt & T_ERROR)
 			break;
 		if (strlen(command) == 0)
@@ -327,6 +327,8 @@ smtp_session(void *sd_client, void *sd_server)
 		if (transfer_command(sd_client, sd_server, &msg, command) == 0)
 			break;
 	}
+
+	message_free(&msg);
 	return;
 }
 
@@ -560,10 +562,11 @@ transfer_command(void *sd_client, void *sd_server, MESSAGE *msg, char *command)
 
 	if (isdigit((unsigned char)reply[0])
 	    && (unsigned char)reply[0] < '4') {
-		if (strncmp(buf, "quit", 4) == 0)
+		if (strncmp(buf, "quit", 4) == 0) 
 			return 0; /* The QUIT command */
 		else if (strncmp(buf, "rset", 4) == 0) {
 			message_free(msg);
+			message_init(msg);
 			topt &= ~T_ERROR;
 		}
 		else if (strncmp(buf, "data", 4) == 0) {
@@ -583,7 +586,7 @@ process_data(void *sd_client, void *sd_server, MESSAGE *msg)
 
 	collect_headers(sd_client, msg);
 	collect_body(sd_client, msg);
-
+	
 	rcfile_process_section(CF_CLIENT, "RULE", NULL, msg);
 	
 	transfer_header(sd_client, sd_server, msg->header);
@@ -593,7 +596,7 @@ process_data(void *sd_client, void *sd_server, MESSAGE *msg)
 	swrite(SERVER, sd_client, buf);
 
 	message_free(msg);
-
+	message_init(msg);
 	alarm(0);
 }
 	
