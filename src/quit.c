@@ -42,12 +42,6 @@ sig_timeout(int code)
 void
 free_mem(void)
 {
-	xfree(rm.rrt);
-	xfree(rm.post);
-	xfree(rm.header);
-	xfree(rm.gpg_file);
-	xfree(rm.latent_time);
-
 #if defined(HAVE_TLS) || defined(HAVE_SSL)
 	xfree(secure.cafile);
 	xfree(secure.cert);
