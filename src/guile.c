@@ -2,7 +2,7 @@
    guile.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2004 The Anubis Team.
+   Copyright (C) 2003, 2004, 2005 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -103,8 +103,9 @@ guile_ports_close (void)
 }
 
 void
-guile_load_path_append (char *path)
+guile_load_path_append (ANUBIS_LIST *arglist, MESSAGE *msg)
 {
+  char *path = list_item (arglist, 0);
   SCM scm, path_scm, *pscm;
   path_scm = SCM_VARIABLE_REF (scm_c_lookup ("%load-path"));
   for (scm = path_scm; scm != SCM_EOL; scm = SCM_CDR (scm))
@@ -122,17 +123,9 @@ guile_load_path_append (char *path)
 }
 
 void
-guile_load_program (char *filename)
+guile_load_program (ANUBIS_LIST *arglist, MESSAGE *msg)
 {
-  guile_ports_open ();
-  scm_primitive_load_path (scm_makfrom0str (filename));
-  guile_ports_close ();
-}
-
-static SCM
-eval_catch_body (void *list)
-{
-  return scm_primitive_eval ((SCM) list);
+  scm_primitive_load_path (scm_makfrom0str (list_item (arglist, 0)));
 }
 
 static SCM
@@ -251,13 +244,12 @@ list_to_args (ANUBIS_LIST * arglist)
 /* (define (postproc header-list body) */
 
 void
-guile_process_proc (ANUBIS_LIST * arglist, MESSAGE * msg)
+guile_process_proc (ANUBIS_LIST *arglist, MESSAGE *msg)
 {
   char *procname;
   SCM arg_hdr, arg_body;
   SCM invlist, rest_arg;
   SCM procsym;
-  jmp_buf jmp_env;
   SCM res;
 
   procname = list_item (arglist, 0);
@@ -282,23 +274,14 @@ guile_process_proc (ANUBIS_LIST * arglist, MESSAGE * msg)
       return;
     }
 
-  guile_ports_open ();
-  if (setjmp (jmp_env))
-    {
-      guile_ports_close ();
-      return;
-    }
-
   invlist = scm_append (SCM_LIST2 (SCM_LIST3 (procsym,
 					      SCM_LIST2 (SCM_IM_QUOTE,
 							 arg_hdr),
 					      SCM_LIST2 (SCM_IM_QUOTE,
 							 arg_body)),
 				   rest_arg));
-  res = scm_internal_lazy_catch (SCM_BOOL_T,
-				 eval_catch_body,
-				 (void *) invlist,
-				 eval_catch_handler, &jmp_env);
+
+  res = scm_primitive_eval (invlist);
 
   if (SCM_IMP (res) && SCM_BOOLP (res))
     {
@@ -343,7 +326,6 @@ guile_process_proc (ANUBIS_LIST * arglist, MESSAGE * msg)
     }
   else
     anubis_error (0, 0, _("Bad return type from %s"), procname);
-  guile_ports_close ();
 }
 
 /* RC file stuff */
@@ -374,42 +356,75 @@ static struct rc_kwdef guile_rule_kw[] = {
   {NULL}
 };
 
+struct inner_closure
+{
+  ANUBIS_LIST *arglist;
+  MESSAGE *msg;
+  void (*fun) (ANUBIS_LIST *arglist, MESSAGE *msg);
+};
+
+static SCM
+inner_catch_body (void *data)
+{
+  struct inner_closure *closure = data;
+  closure->fun (closure->arglist, closure->msg);
+  return SCM_BOOL_F;
+}
+
 int
 guile_parser (int method, int key, ANUBIS_LIST * arglist,
 	      void *inv_data, void *func_data, MESSAGE * msg)
 {
   char *arg = list_item (arglist, 0);
+  struct inner_closure closure;
+  jmp_buf jmp_env;
+  
+  closure.arglist = arglist;
+  closure.msg = msg;
+
+  guile_ports_open ();
+  if (setjmp (jmp_env))
+    {
+      guile_ports_close ();
+      return RC_KW_ERROR;
+    }
+
   switch (key)
     {
     case KW_GUILE_OUTPUT:
       xfree (options.glogfile);
       options.glogfile = strdup (arg);
-      break;
+      return RC_KW_HANDLED;
 
     case KW_GUILE_DEBUG:
       guile_debug (strncmp ("yes", arg, 3) == 0);
-      break;
+      return RC_KW_HANDLED;
 
     case KW_GUILE_LOAD_PATH_APPEND:
-      guile_load_path_append (arg);
+      closure.fun = guile_load_path_append;
       break;
 
     case KW_GUILE_LOAD_PROGRAM:
-      guile_load_program (arg);
+      closure.fun = guile_load_program;
       break;
 
     case KW_GUILE_PROCESS:
-      guile_process_proc (arglist, msg);
+      closure.fun = guile_process_proc;
       break;
 
     case KW_GUILE_REWRITE_LINE:
-       /*FIXME*/
-	/*guile_rewrite_line(arg, line); */
-	break;
+      /*FIXME*/
+      /*guile_rewrite_line(arg, line); */
+      return RC_KW_HANDLED;
 
     default:
       return RC_KW_UNKNOWN;
     }
+
+  scm_internal_lazy_catch (SCM_BOOL_T,
+			   inner_catch_body,
+			   &closure,
+			   eval_catch_handler, &jmp_env);
   return RC_KW_HANDLED;
 }
 
