@@ -127,8 +127,8 @@ proc update_config {name} {
 # Run given test script ($name) in authmode.
 proc run_in_authmode {name} {
     if [anubis_check_capability "GSASL"] {
-	if {[anubis_check_capability "GNUTLS"] || [anubis_check_capability "OPENSSL"]} {
-	    clone_output "Running $name in authmode. This may take quite a while. Please, be patient."
+	if [anubis_check_capability "GNUTLS"] {
+	    clone_output "Running $name in authmode over TLS. This may take quite a while. Please, be patient."
 	}
         start_daemon
         source $name
