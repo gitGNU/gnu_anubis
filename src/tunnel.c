@@ -554,6 +554,9 @@ handle_ehlo (char *command, char *reply, size_t reply_size)
 
   xdatabase_capability (reply, reply_size);
 
+  if (topt & T_SSL_FINISHED)
+    fprintf (stderr, " + FIXME +\n"); /* FIXME!!! */
+
 #ifdef USE_SSL
   if ((topt & T_SSL_ONEWAY)
       && (topt & T_STARTTLS) && !(topt & T_SSL_FINISHED))
