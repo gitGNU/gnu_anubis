@@ -1,3 +1,7 @@
+2004-02-22  Sergey Poznyakoff
+
+	* src/log.c: Bugfixes
+	
 2004-02-21  Wojciech Polak
 
 	* configure.ac: Added new option `--with-socks-proxy'.

@@ -55,7 +55,7 @@ info(int mode, const char *fmt, ...)
 
 #ifdef HAVE_SYSLOG
 	if ((topt & T_DAEMON) && !(topt & T_FOREGROUND)) {
-		syslog(LOG_INFO | LOG_MAIL, msg);
+		syslog(LOG_INFO | LOG_MAIL, "%s", msg);
 		if (options.ulogfile && options.uloglevel >= ALL)
 			filelog(options.ulogfile, msg);
 	}
@@ -110,7 +110,7 @@ tracefile(RC_LOC *loc, const char *fmt, ...)
 	if ((topt & T_TRACEFILE_SYS) && options.termlevel != SILENT) {
 #ifdef HAVE_SYSLOG
 		if ((topt & T_DAEMON) && !(topt & T_FOREGROUND))
-			syslog(LOG_INFO | LOG_MAIL, msg);
+			syslog(LOG_INFO | LOG_MAIL, "%s", msg);
 		else
 #endif /* HAVE_SYSLOG */
 			if (topt & T_FOREGROUND)
