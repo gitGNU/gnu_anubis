@@ -168,7 +168,6 @@ connect_directly_to (char *host, unsigned int port)
       anubis_error (HARD, _("Can't create stream socket."));
       return -1;
     }
-  info (VERBOSE, _("Connecting to %s:%u..."), host, port);
   if (connect (sd, (struct sockaddr *) &addr, sizeof (addr)) == -1)
     {
       anubis_error (HARD, _("Couldn't connect to %s:%u. %s."),
