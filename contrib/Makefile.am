@@ -22,7 +22,8 @@
 ## compiling, linking, and/or using OpenSSL is allowed.
 ##
 
-EXTRA_DIST = msg2smtp.pl msg2smtp.txt
+bin_SCRIPTS = msg2smtp.pl
+EXTRA_DIST = msg2smtp.txt
 
 ## EOF
 
