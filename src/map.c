@@ -61,7 +61,7 @@ parse_transmap(int *cs, char *extuser, char *extaddr, char *dst, int size)
 	env.extaddr = extaddr;
 	env.size = size;
 
-	rcfile_process_section(CF_SUPERVISOR, "TRANSLATION", &env);
+	rcfile_process_section(CF_SUPERVISOR, "TRANSLATION", &env, NULL);
 	*cs = env.cs;
 	if (*cs == 1) { /* success */
 		if (check_username(env.into)) {
@@ -88,8 +88,8 @@ struct rc_kwdef translate_kw[] = {
 
 
 int
-translate_parser(int method, int key, char *arg,
-		 void *inv_data, void *func_data, char *line)
+translate_parser(int method, int key, char *arg, void *inv_data,
+		 void *func_data, MESSAGE *msg)
 {
 	struct translate_env *env = inv_data;
 	char *p = 0;
