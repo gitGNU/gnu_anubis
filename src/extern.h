@@ -89,7 +89,6 @@ struct secure_struct {
 
 extern struct options_struct options;
 extern struct session_struct session;
-extern struct message_struct message;
 extern struct rm_struct rm;
 
 #if defined(HAVE_TLS) || defined(HAVE_SSL)
