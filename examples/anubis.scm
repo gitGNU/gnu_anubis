@@ -109,10 +109,10 @@ X-Processed-By header."
 	 (list (cons "X-Processed-By" "GNU Anubis")))
 	(rot-13 body)))
 
-(define (anubis-rot-13-header hdr body)
+(define (anubis-rot-13-header hdr body . rest)
   "Encode the \"Subject\" header using ROT-13."
   (DEBUG 1 "anubis-rot-13-header called with hdr=" hdr
-	 " and body=\"" body "\"")
+	 " and body=\"" body "\" and rest=" rest ";")
   (cons (map (lambda (x)
 	       (if (string-ci=? (car x) "subject")
 		   (cons (car x) (rot-13 (cdr x)))
