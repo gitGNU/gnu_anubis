@@ -1,3 +1,8 @@
+2004-09-02  Sergey Poznyakoff 
+
+	* doc/anubis.texi (Mutt): New node documenting the existing
+	methods of interfacing mutt with anubis.
+
 2004-08-17  Wojciech Polak
 
 	* doc/anubis.texi (Sample Beginning): Removed text
