@@ -89,5 +89,30 @@
  such a server. If not, try `pidentd', available at:
  ftp://ftp.lysator.liu.se/pub/ident/servers/
 
+ Editing Configuration Files with GNU Emacs
+ ==========================================
+
+ The file elisp/anubis-mode.el provides the Emacs major mode for
+ editing Anubis configuration files.
+
+ After `make install' Emacs should be able to use anubis-mode
+ when editing appropriate configuration files. You will
+ have to add the following to your .emacs or site-start file:
+
+ (autoload 'anubis-mode "Anubis-Config")
+ (setq auto-mode-alist (append auto-mode-alist
+                                '(("/.anubisrc$" . anubis-mode)
+                                  ("/anubisrc$" . anubis-mode))))
+
+ You may also wish to modify the following variables:
+
+ * anubis-section-body-indent
+
+ Sets the indentation level for a section body. Defaults to 0.
+
+ * anubis-level-indent
+
+ Sets amount of indentation per block nesting level. Defaults to 2.
+
  EOF
 

@@ -46,6 +46,8 @@
   the main engine (moved to Guile layer).
 * Added testsuite (make check).
 * Added new security option `drop-unknown-user'.
+* New file anubis-mode.el provides an Emacs major mode for editing
+  Anubis configuration files.
 * New Ukrainian, Malay, and Romanian message translations.
 * Added Polish and Russian message translations.
 

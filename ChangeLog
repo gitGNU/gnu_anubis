@@ -1,3 +1,14 @@
+2003-08-05  Sergey Poznyakoff 
+
+	* Makefile.am (SUBDIRS): Added elisp
+	* configure.ac: Detect the emacs lisp directory.
+	* elisp: New directory
+	* elisp/Makefile.am: New file
+	* elisp/anubis-mode.el: New file
+	* README: Updated
+	* TODO: Updated
+	* NEWS: Updated
+
 2003-07-30  Sergey Poznyakoff
 
 	* doc/anubis.texi (Remailers): Document the ways of
