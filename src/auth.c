@@ -104,7 +104,10 @@ auth_ident(struct sockaddr_in *addr, char *user, int size)
 	struct sockaddr_in ident;
 	char buf[LINEBUFFER+1];
 	int sd = 0;
-
+	int rc;
+	NET_STREAM str;
+	size_t nbytes;
+	
 	if ((sd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		anubis_error(SOFT, _("IDENT: socket() failed: %s."),
 			     strerror(errno));
@@ -122,26 +125,32 @@ auth_ident(struct sockaddr_in *addr, char *user, int size)
 		close_socket(sd);
 		return 0;
 	}
+	net_create_stream(&str, sd);
+
 	info(VERBOSE, _("IDENT: connected to %s:%u"),
 	inet_ntoa(ident.sin_addr), ntohs(ident.sin_port));
 
 	snprintf(buf, LINEBUFFER,
-		"%u , %u"CRLF, ntohs(addr->sin_port), session.tunnel_port);
+		 "%u , %u"CRLF, ntohs(addr->sin_port), session.tunnel_port);
 
-	if (send(sd, buf, strlen(buf), 0) == -1) {
-		anubis_error(SOFT, _("IDENT: send() failed: %s."), strerror(errno));
-		close_socket(sd);
+	if ((rc = stream_write(str, buf, strlen(buf), &nbytes))) {
+		anubis_error(SOFT,
+			     _("IDENT: stream_write() failed: %s."),
+			     stream_strerror(str, rc));
+		net_close_stream(&str);
 		return 0;
 	}
-	if (recvline(CLIENT, (void *)sd, buf, LINEBUFFER) == -1) {
-		anubis_error(SOFT, _("IDENT: recvline() failed: %s."), strerror(errno));
-		close_socket(sd);
+	if (recvline(CLIENT, str, buf, LINEBUFFER) == 0) {
+		anubis_error(SOFT,
+			     _("IDENT: recvline() failed: %s."),
+			     stream_strerror(str, rc));
+		net_close_stream(&str);
 		return 0;
 	}
-	close_socket(sd);
+	net_close_stream(&str);
 	memset(user, 0, size);
 
-	remcrlf (buf);
+	remcrlf(buf);
 	if (ident_extract_username(buf, user, size)) {
 		info(VERBOSE, _("IDENT: incorrect data."));
 		return 0;
