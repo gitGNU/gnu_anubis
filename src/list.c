@@ -69,7 +69,7 @@ list_iterate(struct list *list, list_iterator_t itr, void *data)
 		return;
 	for (list->cur = list->head; list->cur; list->cur = list->next) {
 		list->next = list->cur->next;
-		itr(list->cur, data);
+		itr(list->cur->data, data);
 	}
 }
 
@@ -103,6 +103,17 @@ list_next(struct list *list)
 	return list_current(list);
 }	
 
+void *
+list_item(struct list *list, size_t n)
+{
+	struct list_entry *p;
+	if (n > list->count)
+		return NULL;
+	for (p = list->head; n > 0 && p; p = p->next, n--)
+		;
+	return p->data;
+}
+
 size_t
 list_count(struct list *list)
 {
@@ -126,6 +137,7 @@ list_append(struct list *list, void *data)
 	else
 		list->head = ep;
 	list->tail = ep;
+	list->count++;
 }
 
 void
