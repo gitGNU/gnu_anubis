@@ -47,6 +47,21 @@ Don't turn your back on me
 I won't be ignored
 .
 :EXPECT 250
+MAIL FROM: <polak@gnu.org>
+:EXPECT 250
+RCPT TO: <gray@gnu.org>
+:EXPECT 250
+DATA
+:EXPECT 354
+From: <polak@gnu.org>
+To: <gray@gnu.org>
+:DEL Subject: Renegades of Funk
+:ADD Subject: [RATM & music] Renegades of Funk
+
+No matter how hard you try,
+you can't stop us now!
+.
+:EXPECT 250
 QUIT
 :EXPECT 221
 :END PATTERN
