@@ -85,10 +85,14 @@ extern unsigned long topt;
 extern void *remote_client;
 extern void *remote_server;
 
+extern char *anubis_domain;
+
 #ifdef HAVE_PAM
  extern pam_handle_t *pamh;
  extern int pam_retval;
 #endif /* HAVE_PAM */
+
+extern ANUBIS_MODE anubis_mode;
 
 /* EOF */
 
