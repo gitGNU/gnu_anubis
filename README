@@ -66,6 +66,7 @@
  For better control, use the options below.
  Set the `./configure' script with:
 
+ `--with-guile'        to support Guile.
  `--with-pcre'         to support Perl-compatible regular expressions.
  `--with-pam'          to support Pluggable Authentication Modules.
  `--with-tcp-wrappers' to support libwrap (TCP wrappers).

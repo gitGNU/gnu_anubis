@@ -1,3 +1,14 @@
+2003-02-02  Wojciech Polak
+
+	* README: Updated.
+	* TODO: Likewise.
+
+	* src/headers.h: Added conditional WITH_GUILE.
+	* src/tunnel.c: Likewise.
+	  (memory_reader): Removed compiler warning about `i'.
+	* src/rc.c (match_action_guile): Added missing returns.
+	* src/guile.c: Fixed copyright comment at top of the file.
+
 2003-02-01  Sergey Poznyakoff
 
 	* examples/anubis.scm (postprocess): Escape quotes inside the 
