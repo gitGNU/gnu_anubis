@@ -132,17 +132,10 @@ extern struct gpg_struct gpg;
 extern unsigned long topt;
 extern unsigned long mopt;
 extern unsigned long ropt;
-extern unsigned long rule_position;
-extern unsigned long all_position;
-extern unsigned long guile_position;
 
-extern FILE *fp_rcfile;
 extern void *remote_client;
 extern void *remote_server;
 extern char **submatch;
-
-extern int trigger_len;
-extern int endsection_len;
 
 #ifdef HAVE_PAM
  extern pam_handle_t *pamh;

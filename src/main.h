@@ -41,17 +41,10 @@ struct rm_struct rm;
 unsigned long topt;
 unsigned long mopt;
 unsigned long ropt;
-unsigned long rule_position;
-unsigned long all_position;
-unsigned long guile_position;
 
-FILE *fp_rcfile;
 void *remote_client;
 void *remote_server;
 char **submatch;
-
-int trigger_len;
-int endsection_len;
 
 /* EOF */
 

@@ -183,16 +183,11 @@
 #define DEFAULT_SSL_PEM "anubis.pem"
 #define DEFAULT_SIGFILE ".signature"
 #define BEGIN_TRIGGER "@@"
-#define BEGIN_CONTROL "---BEGIN CONTROL---"
-#define BEGIN_TRANSLATION "---BEGIN TRANSLATION---"
-#define BEGIN_ALL "---BEGIN ALL---"
-#define BEGIN_RULE "---BEGIN RULE---"
-#define BEGIN_GUILE "---BEGIN GUILE---"
-#define END_SECTION "---END---"
 #define LF "\n"
 #define CRLF "\r\n"
 
 /* REGEX action methods */
+#define NIL    -1
 #define COMMAND 0
 #define HEADER  1
 
@@ -201,9 +196,11 @@
 #define SERVER 1
 
 /* configuration file access */
-/*      CLIENT     0 (defined above) */
-#define SUPERVISOR 1
-#define INIT       2
+#define CF_CLIENT     0x0001
+#define CF_SUPERVISOR 0x0002
+#define CF_INIT       0x0004
+
+#define CF_ALL CF_INIT|CF_SUPERVISOR|CF_CLIENT
 
 /* output modes */
 #define SILENT  0
@@ -247,6 +244,7 @@
 #define T_BOUNDARY          0x00800000
 #define T_NORC              0x01000000
 #define T_ALTRC             0x02000000
+#define T_CHECK_CONFIG      0x04000000
 
 /* bit values for mopt */
 #define M_GPG_ENCRYPT       0x00000001
@@ -336,6 +334,7 @@ int  auth_ident(struct sockaddr_in *, char *, int);
 
 /* map.c */
 void parse_transmap(int *, char *, char *, char *, int);
+void translate_section_init();
 
 /* tunnel.c */
 void smtp_session(void *, void *);
@@ -367,17 +366,11 @@ void check_all_files(char *);
 int regex_match(char *, char *);
 
 /* rc.c */
+void rc_system_init();
 void open_rcfile(int);
-void read_rcfile(int);
-void read_rcfile_allsection(void);
-#ifdef WITH_GUILE
-void read_rcfile_guile(void);
-#endif
-void close_rcfile(void);
-char *parse_line_option(char *);
-int  read_regex_block(int, char *, int);
-int  read_action_block(const char *source_line);
-unsigned long get_position(char *);
+void process_rcfile(int method);
+void rcfile_process_section(int method, char *name, void *data);
+void rcfile_process_cond(char *name, int method, char *line);
 
 /* help.c */
 void print_version(void);
@@ -420,7 +413,8 @@ void guile_debug(int enable);
 void guile_load_program(char *name);
 void guile_rewrite_line(char *procname, const char *source_line);
 void guile_postprocess_proc(char *procname, struct list **hdr, char **body);
-#endif /* WITH_GUILE */
+void guile_section_init();
+#endif
 
 /* EOF */
 
