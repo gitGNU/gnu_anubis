@@ -499,11 +499,7 @@ void gpg_section_init (void);
 /* guile.c */
 #ifdef WITH_GUILE
 void anubis_boot (void *, int, char **);
-void guile_load_path_append (char *);
 void guile_debug (int);
-void guile_load_program (char *);
-void guile_rewrite_line (char *, const char *);
-void guile_postprocess_proc (char *, ANUBIS_LIST **, char **);
 void guile_section_init (void);
 #endif /* WITH_GUILE */
 
