@@ -893,7 +893,7 @@ smtp_auth()
 
 	rc = gsasl_init(&ctx);
 	if (rc != GSASL_OK) {
-		info (NORMAL, _("cannot initialize libgsasl: %s"),
+		error(_("cannot initialize libgsasl: %s"),
 		      gsasl_strerror(rc));
 		smtp_quit();
 		exit(1);
@@ -1244,10 +1244,11 @@ main (int argc, char **argv)
 	while ((c = getopt_long(argc, argv, "dC:m:v", gnu_options, NULL))
 	       != EOF) {
 		switch (c) {
+#ifdef HAVE_TLS
 		case 'd':
 			enable_tls = 0;
 			break;
-#ifdef HAVE_TLS
+			
 		case 'C':
 			tls_cafile = optarg;
 			break;
