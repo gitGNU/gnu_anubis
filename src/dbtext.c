@@ -45,6 +45,10 @@ dbtext_open (void **dp, ANUBIS_URL * url, enum anubis_db_mode mode,
     case anubis_db_rdwr:
       tmode = "a+";
       break;
+
+    default:
+      *errp = strerror (EINVAL);
+      return ANUBIS_DB_FAIL;
     }
 
   path = anubis_url_full_path (url);
