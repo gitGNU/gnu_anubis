@@ -164,7 +164,7 @@ process_rcfile(int method)
 #define KW_BIND                0
 #define KW_TERMLEVEL           1
 #define KW_ALLOW_LOCAL_MTA     2
-#define KW_ALLOW_NOTPRIVILEGED 3 
+#define KW_USER_NOTPRIVILEGED  3
 #define KW_LOGLEVEL            4
 #define KW_LOGFILE             5
 #define KW_REMOTE_MTA          6 
@@ -247,7 +247,7 @@ control_parser(int method, int key, LIST *arglist,
 		setbool(arg, topt, T_ALLOW_LOCAL_MTA);
 		break;
 		
-	case KW_ALLOW_NOTPRIVILEGED:
+	case KW_USER_NOTPRIVILEGED:
 		safe_strcpy(session.notprivileged, arg);
 		break;
 
@@ -348,7 +348,8 @@ static struct rc_secdef_child init_sect_child = {
 static struct rc_kwdef init_supervisor_kw[] = {
 	{ "termlevel", KW_TERMLEVEL },
 	{ "allow-local-mta", KW_ALLOW_LOCAL_MTA },
-	{ "user-notprivileged", KW_ALLOW_NOTPRIVILEGED },
+	{ "user-notprivileged", KW_USER_NOTPRIVILEGED },
+	{ "drop-unknown-user", KW_DROP_UNKNOWN_USER },
 	{ NULL }
 };
 
@@ -382,7 +383,6 @@ struct rc_kwdef control_kw[] = {
 	{ "socks-v4", KW_SOCKS_V4 },
 	{ "socks-auth", KW_SOCKS_AUTH },
 	{ "read-entire-body", KW_READ_ENTIRE_BODY },
-	{ "drop-unknown-user", KW_DROP_UNKNOWN_USER },
 	{ NULL },
 };
 
