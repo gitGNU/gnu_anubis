@@ -573,6 +573,7 @@ anubis_authenticate_mode (NET_STREAM *psd_client,
   if (usr.username)
     {
       strncpy (session.clientname, usr.username, sizeof (session.clientname));
+      session.clientname[sizeof (session.clientname) - 1] = '\0';
       if (check_username (session.clientname))
 	anubis_changeowner (session.clientname);
       else
@@ -582,6 +583,7 @@ anubis_authenticate_mode (NET_STREAM *psd_client,
     {
       strncpy (session.clientname, usr.smtp_authid,
 	       sizeof (session.clientname));
+      session.clientname[sizeof (session.clientname) - 1] = '\0';
       set_unprivileged_user ();
     }
 
