@@ -537,7 +537,7 @@ handle_ehlo (char *command, char *reply, size_t reply_size)
 		*/
 
 		char newreply[LINEBUFFER+1];
-		info(NORMAL, _("Using TLS/SSL encryption only between Anubis and remote MTA..."));
+		info(NORMAL, _("Using TLS/SSL encryption between Anubis and remote MTA only..."));
 		swrite(CLIENT, remote_server, "STARTTLS"CRLF);
 		get_response_smtp(CLIENT, remote_server, newreply,
 				  sizeof(newreply) - 1);
