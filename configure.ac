@@ -100,7 +100,7 @@ esac
 dnl Use option --without-guile to NOT compile Guile support.
 AC_ARG_WITH([guile],
             AC_HELP_STRING([--without-guile],
-                           [without Guile support]),
+	    [without Guile support]),
             [
 case "${withval}" in
   yes) useguile=yes ;;
@@ -133,7 +133,8 @@ fi
 dnl Use option --without-gpgme to NOT compile GnuPG (GPGME library) support.
 AC_SUBST(ANUBIS_GPGFILES)
 AC_ARG_WITH(gpgme,
-	[  --without-gpgme         without GnuPG (GPGME library) support],
+	AC_HELP_STRING([--without-gpgme],
+	[without GnuPG (GPGME library) support]),
 	[with_gpgme=no],
 	[with_gpgme=yes])
 if test "$with_gpgme" = "no"; then
@@ -169,13 +170,15 @@ fi
 
 dnl Use option --without-gnutls to NOT compile GnuTLS library support.
 AC_ARG_WITH(gnutls,
-	[  --without-gnutls        without GnuTLS library support],
+	AC_HELP_STRING([--without-gnutls],
+	[without GnuTLS library support]),
 	[with_gnutls=${withval}],
 	[with_gnutls=yes])
 
 dnl Use option --with-openssl to compile OpenSSL support.
 AC_ARG_WITH(openssl,
-	[  --with-openssl          with OpenSSL library support (disable GnuTLS)],
+	AC_HELP_STRING([--with-openssl],
+	[with OpenSSL library support (disable GnuTLS)]),
 	[with_openssl=${withval}],
 	[with_openssl=no])
 
@@ -242,7 +245,8 @@ fi
 
 dnl Use option --with-pcre to compile PCRE library support.
 AC_ARG_WITH(pcre,
-	[  --with-pcre             with PCRE library support],
+	AC_HELP_STRING([--with-pcre],
+	[with PCRE library support]),
 	[with_pcre=yes],
 	[with_pcre=no])
 if test "$with_pcre" = "yes"; then
@@ -253,7 +257,8 @@ fi
 
 dnl Use option --with-pam to compile PAM support.
 AC_ARG_WITH(pam,
-	[  --with-pam              with Pluggable Authentication Modules support],
+	AC_HELP_STRING([--with-pam],
+	[with Pluggable Authentication Modules support]),
 	[with_pam=yes],
 	[with_pam=no])
 if test "$with_pam" = "yes"; then
@@ -265,7 +270,8 @@ fi
 
 dnl Use option --with-tcp-wrappers to compile libwrap library support.
 AC_ARG_WITH(tcp-wrappers,
-	[  --with-tcp-wrappers     with libwrap (TCP wrappers) support],
+	AC_HELP_STRING([--with-tcp-wrappers],
+	[with libwrap (TCP wrappers) support]),
 	[with_tcp_wrappers=yes],
 	[with_tcp_wrappers=no])
 if test "$with_tcp_wrappers" = "yes"; then
@@ -275,9 +281,20 @@ if test "$with_tcp_wrappers" = "yes"; then
  AC_MSG_RESULT([Enabling libwrap (TCP wrappers) support...])
 fi
 
+dnl Use option --with-unprivileged-user
+AC_ARG_WITH(unprivileged-user,
+	AC_HELP_STRING([--with-unprivileged-user=USER],
+	[set an unprivileged user (default is "nobody")]))
+if test -z "$with_unprivileged_user"; then
+ with_unprivileged_user="nobody"
+fi
+AC_DEFINE_UNQUOTED(DEFAULT_UNPRIVILEGED_USER, "$with_unprivileged_user",
+[Define the default unprivileged user.])
+
 dnl Use option --enable-gcc-debug to enable GCC debug code.
 AC_ARG_ENABLE(gcc-debug,
-	[  --enable-gcc-debug      enable GCC DEBUG code],
+	AC_HELP_STRING([--enable-gcc-debug],
+	[enable GCC DEBUG code]),
 	[enable_gcc_debug=yes],
 	[enable_gcc_debug=no])
 if test "$enable_gcc_debug" = "yes" && (test "$GCC" = "yes"); then
