@@ -40,6 +40,8 @@
   style of the regular expressions.
 * The order of processing user CONTROL sections may be altered by
   setting `control-priority' in the system-wide CONTROL section.
+* Execution of the configuration files can be traced by setting
+  termlevel to `verbose'.
 * Support for the GNU extension language has been added
   (via Guile 1.6 or newer).
 * Remailers and ROT-13 support has been removed from
