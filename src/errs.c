@@ -26,7 +26,7 @@
 #include "extern.h"
 
 void
-anubis_error(int method, char *format, ...)
+anubis_error(int method, const char *fmt, ...)
 {
 	va_list arglist;
 
@@ -34,7 +34,6 @@ anubis_error(int method, char *format, ...)
 	case HARD:
 		topt |= T_ERROR;
 		break;
-		
 	case SOFT:
 	case SYNTAX:
 		topt &= ~T_ERROR;
@@ -43,16 +42,17 @@ anubis_error(int method, char *format, ...)
 
 	if (topt & T_SMTP_ERROR_CODES) {
 		fprintf(stdout, "451 4.0.0 ");
-		va_start(arglist, format);
-		vfprintf(stdout, format, arglist);
+		va_start(arglist, fmt);
+		vfprintf(stdout, fmt, arglist);
 		va_end(arglist);
-		fprintf(stdout, "\n");
+		fputc('\n', stdout);
 		
-	} else if (options.termlevel != SILENT) {
+	}
+	else if (options.termlevel != SILENT) {
 		char txt[LINEBUFFER+1];
 	
-		va_start(arglist, format);
-		vsnprintf(txt, LINEBUFFER, format, arglist);
+		va_start(arglist, fmt);
+		vsnprintf(txt, LINEBUFFER, fmt, arglist);
 		va_end(arglist);
 #ifdef HAVE_SYSLOG
 		if ((topt & T_DAEMON) && !(topt & T_FOREGROUND)) {
@@ -78,7 +78,6 @@ anubis_error(int method, char *format, ...)
 	errno = 0;
 	if (method != SYNTAX && !(topt & T_DAEMON) && !(topt & T_FOREGROUND))
 		quit(EXIT_FAILURE);
-	return;
 }
 
 void
@@ -86,14 +85,12 @@ socket_error(const char *msg)
 {
 	anubis_error(HARD, _("Couldn't write to socket: %s."),
 		     msg ? msg : strerror(errno));
-	return;
 }
 
 void
-socks_error(char *txt)
+socks_error(const char *msg)
 {
-	anubis_error(HARD, _("SOCKS proxy: %s"), txt);
-	return;
+	anubis_error(HARD, _("SOCKS proxy: %s"), msg);
 }
 
 void
