@@ -1,3 +1,9 @@
+2003-08-27  Wojciech Polak
+
+	* configure.ac: Bump to 3.9.93.
+	Removed isatty from AC_CHECK_FUNCS.
+	* src/main.c: Added SETVBUF(stderr, NULL, _IOLBF, 0);.
+
 2003-08-26  Wojciech Polak
 
 	* examples/1anubisrc: Updated.
