@@ -25,10 +25,10 @@ dnl
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT([GNU Anubis], [3.9.94], [bug-anubis@gnu.org], [anubis])
 AC_PREREQ([2.57])
+AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([build])
 AC_CONFIG_SRCDIR([src/main.c])
 AM_INIT_AUTOMAKE
-AM_CONFIG_HEADER(config.h)
 
 if test "$CFLAGS"; then
  CFLAGS_CUSTOM=yes
@@ -57,7 +57,8 @@ AC_CHECK_TYPE(u_char, unsigned char)
 AC_CHECK_HEADERS(arpa/inet.h syslog.h regex.h \
  sys/types.h sys/socket.h socket.h)
 
-AC_CHECK_TYPE(socklen_t, , AC_DEFINE(socklen_t, int, [Define to int if <sys/types.h> does not define]),
+AC_CHECK_TYPE(socklen_t, , AC_DEFINE(socklen_t, int,
+[Define to int if <sys/types.h> does not define]),
 [
 #if HAVE_SYS_TYPES_H
 # include <sys/types.h>
@@ -303,7 +304,7 @@ else
  fi
 fi
 
-### Check for Emacs site-lisp directory
+dnl Check for Emacs site-lisp directory
 AM_PATH_LISPDIR
 if test "$EMACS" != "no"; then
 	lisp_LISP='$(LISPSRC)'
