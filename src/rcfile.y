@@ -348,7 +348,7 @@ rc_parse(char *name)
 {
 	int status;
 	if (rc_open(name))
-		return 1;
+		return NULL;
 	rc_section = NULL;
 	status = yyparse();
 	if (status) {
@@ -714,7 +714,7 @@ node_eval(struct eval_env *env, RC_NODE *node)
 		rc = bool_eval(env, &node->v.bool);
 		break;
 	case rc_node_re:
-		if (env->refstr) {
+		if (env->refstr && anubis_regex_refcnt(node->v.re)) {
 			xfree_pptr(env->refstr);
 			env->refstr = NULL;
 			env->refcnt = 0;
