@@ -1,3 +1,7 @@
+2004-07-31  Sergey Poznyakoff
+
+	* NEWS: Updated time and version stamps.
+
 2004-07-22  Wojciech Polak
 
 	* src/authmode.c: Added initial XELO implementation (the seed).
