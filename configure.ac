@@ -79,7 +79,7 @@ dnl Checks for library functions.
 AC_CHECK_FUNCS(syslog getrlimit setrlimit socketpair strdup)
 AC_CHECK_FUNCS(regcomp daemon putenv)
 
-AC_REPLACE_FUNCS(snprintf setenv)
+AC_REPLACE_FUNCS(snprintf setenv getline)
 AC_CHECK_FUNCS(_obstack_begin,
                [AC_DEFINE(HAVE_OBSTACK,1,[Define if GNU obstack is present])],
                [AC_LIBOBJ(obstack)])
@@ -181,9 +181,12 @@ AC_SUBST(GSASL_LIBS)
 AC_CHECK_LIB(resolv, res_query)
 
 AC_SUBST(ANUBIS_DEFINES)
+AC_SUBST(ANUBISADM)
 
 MU_CHECK_GSASL(0.0.2, [
     AC_DEFINE(WITH_GSASL,1,[Define if Anubis is using GNU SASL])
+    ANUBISADM=anubisadm
+
     AC_CHECK_LIB(gdbm, gdbm_open,
                  [LIBS="$LIBS -lgdbm"
                   AC_DEFINE(HAVE_LIBGDBM,1,[Define if you have libgdbm])])
