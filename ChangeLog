@@ -1,5 +1,13 @@
 2003-06-06  Wojciech Polak
 
+	* src/obstack.c: Provide newer version.
+	* src/obstack.h: Likewise.
+	* src/getopt1.c: Likewise.
+	* src/getopt.c: Likewise.
+	* src/getopt.h: Likewise.
+
+2003-06-06  Wojciech Polak
+
 	* src/errs.c (anubis_error): Removed unneeded HAVE_VSNPRINTF.
 	* src/log.c (mprintf): Likewise.
 	* testsuite/mta.c: Clean up with prototypes.
