@@ -102,11 +102,11 @@ assoc_to_header(ASSOC *asc)
 *****************************/
 
 void
-parse_mtaport(char *opt, char *host, unsigned int *port)
+parse_mtaport (char *opt, char *host, unsigned int *port)
 {
 	struct servent *p;
 	char opt_tmp[256];
-	char *port_tmp = 0;
+	char *port_tmp = NULL;
 	safe_strcpy(opt_tmp, opt);
 
 	if ((port_tmp = strrchr(opt_tmp, ':'))) {
@@ -117,7 +117,6 @@ parse_mtaport(char *opt, char *host, unsigned int *port)
 			*port = (unsigned int)atoi(port_tmp);
 	}
 	strncpy(host, opt_tmp, sizeof(session.mta) - 1);
-	return;
 }
 
 /**************************
@@ -125,11 +124,11 @@ parse_mtaport(char *opt, char *host, unsigned int *port)
 ***************************/
 
 void
-parse_mtahost(char *opt, char *host, unsigned int *port)
+parse_mtahost (char *opt, char *host, unsigned int *port)
 {
 	struct servent *p;
 	char opt_tmp[256];
-	char *port_tmp = 0;
+	char *port_tmp = NULL;
 	safe_strcpy(opt_tmp, opt);
 
 	if ((port_tmp = strrchr(opt_tmp, ':'))) {
@@ -146,7 +145,6 @@ parse_mtahost(char *opt, char *host, unsigned int *port)
 		else
 			*port = (unsigned int)atoi(opt);
 	}
-	return;
 }
 
 /*********************
@@ -154,16 +152,16 @@ parse_mtahost(char *opt, char *host, unsigned int *port)
 **********************/
 
 void
-remline(char *s, char *line)
+remline (char *s, char *line)
 {
-	char *pos1 = 0;
-	char *pos2 = 0;
+	char *pos1 = NULL;
+	char *pos2 = NULL;
 	int len;
 
-	if (s == 0 || line == 0)
+	if (!s || !line)
 		return;
 	pos1 = strstr(s, line);
-	if (pos1 == 0)
+	if (!pos1)
 		return;
 
 	pos2 = pos1;
@@ -174,15 +172,14 @@ remline(char *s, char *line)
 	len = strlen(pos2);
 	pos2 = (char *)memmove(pos1, pos2, len);
 	pos2[len] = '\0';
-	return;
 }
 
 void
-remcrlf(char *s)
+remcrlf (char *s)
 {
 	int len;
 
-	if (s == 0)
+	if (!s)
 		return;
 	len = strlen(s);
 
@@ -196,7 +193,6 @@ remcrlf(char *s)
 		s[len - 1] = '\0';
 	else if (len >= 1 && s[len - 1] == '\n') /* LF */
 		s[len - 1] = '\0';
-	return;
 }
 
 /***********************************
@@ -204,20 +200,20 @@ remcrlf(char *s)
 ************************************/
 
 static char *
-insert(char *inbuf, char *sign, char *fill_in)
+insert (char *inbuf, char *sign, char *fill_in)
 {
 	int len1 = 0;
 	int len2 = 0;
 	int psign_len = 0;
-	char *psign = 0;
-	char *outbuf = 0;
+	char *psign = NULL;
+	char *outbuf = NULL;
 
-	if (inbuf == 0 || sign == 0 || fill_in == 0)
-		return 0;
+	if (!inbuf || !sign || !fill_in)
+		return NULL;
 
 	psign = strstr(inbuf, sign);
-	if (psign == 0)
-		return 0;
+	if (!psign)
+		return NULL;
 
 	psign_len = strlen(psign);
 	len1 = strlen(inbuf);
@@ -235,8 +231,7 @@ insert(char *inbuf, char *sign, char *fill_in)
 	strcat(outbuf, psign);
 
 	if (strstr(outbuf, sign)) {
-		char *outbuf2 = 0;
-		outbuf2 = insert(outbuf, sign, fill_in);
+		char *outbuf2 = insert(outbuf, sign, fill_in);
 		free(outbuf);
 		outbuf = outbuf2;
 	}
@@ -245,16 +240,16 @@ insert(char *inbuf, char *sign, char *fill_in)
 }
 
 char *
-substitute(char *inbuf, char **subbuf)
+substitute (char *inbuf, char **subbuf)
 {
 	char **tmp = subbuf;
-	char *tmpout = 0;
-	char *tmpbuf = 0;
+	char *tmpout = NULL;
+	char *tmpbuf = NULL;
 	char sign[5];
 	int i = 0;
 
-	if (inbuf == 0 || subbuf == 0)
-		return 0;
+	if (!inbuf || !subbuf)
+		return NULL;
 
 	tmpbuf = allocbuf(inbuf, 0);
 	tmp++;
@@ -273,27 +268,25 @@ substitute(char *inbuf, char **subbuf)
 	return tmpbuf;
 }
 
-/***************************
- Change to lower characters
-****************************/
+/********************
+ Change to lowercase
+*********************/
 
 void
-change_to_lower(char *s)
+make_lowercase (char *s)
 {
-	int c;
-	int len;
+	int c, len;
 
-	if (s == 0)
+	if (!s)
 		return;
 	len = strlen(s);
 
 	for (c = len - 1; c >= 0; c--)
 		s[c] = tolower((unsigned char)s[c]);
-	return;
 }
 
 char *
-get_localname ()
+get_localname (void)
 {
 	static char *localname = NULL;
 
@@ -333,7 +326,7 @@ get_localname ()
 }
 
 char *
-get_localdomain()
+get_localdomain (void)
 {
 	if (!anubis_domain) {
 		char *localname = get_localname(),
@@ -345,5 +338,6 @@ get_localdomain()
 	}
 	return anubis_domain;
 }
+
 /* EOF */
 
