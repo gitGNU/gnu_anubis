@@ -181,12 +181,7 @@ open_rcfile(int method)
 		if ((topt & (T_ALTRC|T_NORC)) == (T_ALTRC|T_NORC)) {
 			rcfile = strdup(options.altrc);
 		} else {
-			get_homedir(session.client,
-				    homedir, sizeof(homedir));
-			rcfile = xmalloc(strlen(homedir) +
-					 strlen(DEFAULT_LOCAL_RCFILE) + 2);
-			sprintf(rcfile,	"%s/%s", homedir,
-				DEFAULT_LOCAL_RCFILE);
+			rcfile = user_rcfile_name();
 		}
 		info(DEBUG,
 		     _("Reading user configuration file %s..."), rcfile);
@@ -676,6 +671,26 @@ rcfile_call_section(int method, char *name, void *data, MESSAGE *msg)
 	if (!sec)
 		anubis_error(SOFT, _("No such section: %s"), name);
 	rc_call_section(method, sec, anubis_rc_sections, data, msg);
+}
+
+char *
+user_rcfile_name()
+{
+	if (session.rc_file_name)
+		return strdup(session.rc_file_name);
+	else {
+		char homedir[MAXPATHLEN+1];
+		char *buf;
+		size_t len;
+		
+		get_homedir(session.client, homedir, sizeof(homedir));
+		len = strlen(homedir) + 1 + sizeof DEFAULT_LOCAL_RCFILE;
+		buf = xmalloc(len);
+		strcpy(buf, homedir);
+		strcat(buf, "/");
+		strcat(buf, DEFAULT_LOCAL_RCFILE);
+		return buf;
+	}
 }
 
 /* EOF */
