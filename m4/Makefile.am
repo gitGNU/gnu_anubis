@@ -23,6 +23,7 @@
 ##
 
 EXTRA_DIST = \
+ anubis.m4\
  codeset.m4\
  gettext.m4\
  glibc21.m4\
