@@ -24,12 +24,19 @@ local-mta TESTDIR/mta -bs -d TESTDIR/etc/mta.log
 ---BEGIN RULE---
 gpg-home TESTDIR/data
 
-trigger "^gpgd:(.*)"
+trigger "encrypt:(.*)"
   gpg-encrypt \1
   add [X-GPG-Comment] "Encrypted for \1"
 done
 
-trigger "^sign:(.*)"
-  gpg-sign yes
+trigger "sign:(.*)"
+  gpg-sign "default"
+  add [X-GPG-Comment] "Signed by \1"
+done
+
+trigger "se:(.*):(.*)"
+  gpg-se \1:\2
+  add [X-GPG-Comment1] "Encrypted for \1"
+  add [X-GPG-Comment2] "Signed by \2"
 done
 ---END---

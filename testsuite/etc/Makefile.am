@@ -32,6 +32,7 @@ EXTRA_DIST = \
  empty.pat\
  gpgcrypt.pat\
  gpgsign.pat\
+ gpgse.pat\
  mime1.pat\
  mime2.pat\
  mod-body.pat\

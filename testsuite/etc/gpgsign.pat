@@ -34,6 +34,7 @@ From: <gray@gnu.org>
 To: <polak@gnu.org>
 :DEL Subject: Signing messages@@sign:anubis
 :ADD Subject: Signing messages
+:ADD X-GPG-Comment: Signed by anubis
 
 :ADD -----BEGIN PGP SIGNED MESSAGE-----
 :ADD Hash: SHA1

@@ -32,7 +32,7 @@ DATA
 :EXPECT 354
 From: <gray@gnu.org>
 To: <polak@gnu.org>
-:DEL Subject: Does it work?@@gpgd:anubis
+:DEL Subject: Does it work?@@encrypt:anubis
 :ADD Subject: Does it work?
 :ADD X-GPG-Comment: Encrypted for anubis
 
