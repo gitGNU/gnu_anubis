@@ -259,6 +259,7 @@ process_rcfile (int method)
 #define KW_INCOMING_MAIL_RULE       30
 #define KW_OUTGOING_MAIL_RULE       31
 #define KW_HANG                     32
+#define KW_ALLOW_HANG               33
 
 char **
 list_to_argv (ANUBIS_LIST * list)
@@ -282,6 +283,9 @@ list_to_argv (ANUBIS_LIST * list)
    until it's zero.  Thus you can force the program to continue by attaching
    a debugger and setting it to 0 yourself.  */
 static volatile int _anubis_hang;
+
+/* List of users who are allowed to use HANG in their profiles */
+ANUBIS_LIST *allow_hang_users; 
 
 int
 control_parser (int method, int key, ANUBIS_LIST * arglist,
@@ -419,8 +423,8 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
       char *p = strchr (arg, ':');
       if (p)
 	{
-	  auth_password = strdup (++p);
-	  *--p = '\0';
+	  *p++ = 0;
+	  auth_password = strdup (p);
 	  authentication_id = strdup (arg);
 	  authorization_id = strdup (arg);
 	  topt |= T_ESMTP_AUTH;
@@ -504,8 +508,8 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
       p = strchr (arg, ':');
       if (p)
 	{
-	  assign_string (&session.socks_password, ++p);
-	  *--p = '\0';
+	  *p++ = 0;
+	  assign_string (&session.socks_password, p);
 	  assign_string (session.socks_username, arg);
 	  topt |= T_SOCKS_AUTH;
 	}
@@ -542,21 +546,37 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
     outgoing_mail_rule = strdup (arg);
     break;
 
-  case KW_HANG:
+  case KW_ALLOW_HANG:
     {
-      int keep_termlevel = options.termlevel;
-
-      _anubis_hang = atoi (arg ? arg : "3600");
-      options.termlevel = DEBUG;
-      anubis_warning (0, ngettext ("Child process suspended for %lu second",
-				   "Child process suspended for %lu seconds",
-				   _anubis_hang),
-		      _anubis_hang);
-      options.termlevel = keep_termlevel;
+      char *p;
+      ITERATOR *itr = iterator_create (arglist);
       
-      while (_anubis_hang-- > 0)
-	sleep (1);
+      allow_hang_users = list_create ();
+      for (p = iterator_first (itr); p; p = iterator_next (itr))
+	list_append (allow_hang_users, strdup (p));
     }
+    break;
+    
+  case KW_HANG:
+    if (list_locate (allow_hang_users, session.clientname, anubis_name_cmp))
+      {
+	int keep_termlevel = options.termlevel;
+
+	_anubis_hang = atoi (arg ? arg : "3600");
+	options.termlevel = DEBUG;
+	anubis_warning (0, ngettext ("Child process suspended for %lu second",
+				     "Child process suspended for %lu seconds",
+				     _anubis_hang),
+			_anubis_hang);
+	options.termlevel = keep_termlevel;
+	
+	while (_anubis_hang-- > 0)
+	  sleep (1);
+      }
+    else
+      anubis_warning (0,
+		      _("Command HANG is not allowed for user `%s'"),
+		      session.clientname);
     break;
     
   default:
@@ -571,6 +591,7 @@ static struct rc_kwdef init_kw[] = {
   { "mode",         KW_MODE },
   { "incoming-mail-rule", KW_INCOMING_MAIL_RULE },
   { "outgoing-mail-rule", KW_OUTGOING_MAIL_RULE },
+  { "ALLOW-HANG",   KW_ALLOW_HANG },
   { NULL },
 };
 
