@@ -1,10 +1,16 @@
+2004-08-06  Sergey Poznyakoff 
+
+	* configure.ac: Require gpgme 0.9.0. Check for
+	AC_SYS_LARGEFILE (needed by gpgme).
+	* src/gpg.c: Rewritten for gpgme 0.9.0
+
 2004-08-06  Sergey Poznyakoff
 
 	* src/anubisusr.c: Use XELO
 	* src/authmode.c: Implemented XELO
 	* src/tunnel.c (process_command): Minor change.
 	* src/xdatabase.c (xdatabase)" Minor change.
-
+	
 2004-07-31  Sergey Poznyakoff
 
 	Released version 3.9.95
