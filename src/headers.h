@@ -122,6 +122,12 @@
 # define HAVE_SSL
 #endif /* USE_OPENSSL and HAVE_OPENSSL */
 
+#if defined(HAVE_TLS) || defined(HAVE_SSL)
+# define USE_SSL
+#else
+# undef USE_SSL
+#endif /* HAVE_TLS or HAVE_SSL */
+
 #ifdef HAVE_PAM
 # include <security/pam_appl.h>
 # include <security/pam_misc.h>
@@ -218,26 +224,24 @@
 #define T_DAEMON            0x00000040
 #define T_STDINOUT          0x00000080
 #define T_SSL               0x00000100
-/* -- #define T_SSL_CLIENT        0x00000200 */
-/* -- #define T_SSL_SERVER        0x00000400 */
-#define T_SSL_FINISHED      0x00000800
-#define T_SSL_ONEWAY        0x00001000
-#define T_SSL_CKCLIENT      0x00002000
-#define T_NAMES             0x00004000
-#define T_LOCAL_MTA         0x00008000
-#define T_ALLOW_LOCAL_MTA   0x00010000
-#define T_TRANSLATION_MAP   0x00020000
-#define T_SUPERCLIENT       0x00040000
-#define T_USER_NOTPRIVIL    0x00080000
-#define T_STARTTLS          0x00100000
-#define T_ESMTP_AUTH        0x00200000
-#define T_NORC              0x00400000
-#define T_ALTRC             0x00800000
-#define T_CHECK_CONFIG      0x01000000
-#define T_RELAX_PERM_CHECK  0x02000000
-#define T_ENTIRE_BODY       0x04000000
+#define T_SSL_FINISHED      0x00000200
+#define T_SSL_ONEWAY        0x00000400
+#define T_SSL_CKCLIENT      0x00000800
+#define T_NAMES             0x00001000
+#define T_LOCAL_MTA         0x00002000
+#define T_ALLOW_LOCAL_MTA   0x00004000
+#define T_TRANSLATION_MAP   0x00008000
+#define T_SUPERCLIENT       0x00010000
+#define T_USER_NOTPRIVIL    0x00020000
+#define T_STARTTLS          0x00040000
+#define T_ESMTP_AUTH        0x00080000
+#define T_NORC              0x00100000
+#define T_ALTRC             0x00200000
+#define T_CHECK_CONFIG      0x00400000
+#define T_RELAX_PERM_CHECK  0x00800000
+#define T_ENTIRE_BODY       0x01000000
 
-/* Regular expression flags */
+/* Tags */
 #define R_BASIC             0x00000001
 #define R_PERLRE            0x00000002
 #define R_SCASE             0x00000004
@@ -248,32 +252,15 @@
 #define safe_strcpy(s, ct) \
  (s[sizeof(s) - 1] = '\0', strncpy((char *)s, (char *)ct, sizeof(s) - 1))
 
-struct rc_regex; 
 typedef struct rc_regex RC_REGEX;
-
 typedef struct assoc ASSOC;
-struct assoc {
-	char *key;
-	char *value;
-};
-
 typedef struct message_struct MESSAGE;
-struct message_struct {
-	struct list *commands; /* Associative list of SMTP commands */
-	struct list *header;   /* Associative list of RFC822 headers */
-	struct list *mime_hdr; /* List of lines before the first boundary
-				  marker */
-	char *body;            /* Message body */
-	/* Additional data */
-	char *boundary;
-};
-
-typedef int (*net_io_t) (void *sd, char *data, size_t size, size_t *nbytes);
-typedef int (*net_close_t) (void *sd);
-typedef const char *(*strerror_t) (int e);
+typedef int (*net_io_t) (void *, char *, size_t, size_t *);
+typedef int (*net_close_t) (void *);
+typedef const char *(*strerror_t) (int);
 
 /* main.c */
-void anubis(char *arg);
+void anubis(char *);
 
 /* mem.c */
 void *xmalloc(int);
@@ -287,7 +274,7 @@ void free_pptr(char **);
 /* setenv.c */
 #if !defined(HAVE_SETENV) && defined(HAVE_PUTENV)
  int setenv(const char *, const char *, int);
-#endif /* not HAVE_SETENV and HAVE_PUTENV */
+#endif
 
 /* env.c */
 void get_options(int, char *[]);
@@ -306,14 +293,13 @@ void socks_error(char *);
 void hostname_error(char *);
 
 /* log.c */
-void mprintf(char *format, ...);
+void mprintf(char *, ...);
 void info(int, char *, ...);
 void filelog(char *, char *);
 
 /* net.c */
-void net_set_io(int method, net_io_t read, net_io_t write, net_close_t close,
-		strerror_t strerror);
-void net_close(int method, void *sd);
+void net_set_io(int, net_io_t, net_io_t, net_close_t, strerror_t);
+void net_close(int, void *);
 int  make_remote_connection(char *, unsigned int);
 int  bind_and_listen(char *, unsigned int);
 void swrite(int, void *, char *);
@@ -336,40 +322,39 @@ int  auth_ident(struct sockaddr_in *, char *, int);
 
 /* map.c */
 void parse_transmap(int *, char *, char *, char *, int);
-void translate_section_init();
+void translate_section_init(void);
 
 /* tunnel.c */
 void smtp_session(void *, void *);
 
 /* message.c */
-void message_add_body(MESSAGE *msg, char *key, char *value);
-void message_add_header(MESSAGE *msg, char *hdr, char *value);
-void message_remove_headers(MESSAGE *msg, char *arg);
-void message_modify_headers(MESSAGE *msg, char *key, char *key2, char *value);
-void message_external_proc(MESSAGE *msg, char **argv);
-void message_init(MESSAGE *msg);
-void message_free(MESSAGE *msg);
+void message_add_body(MESSAGE *, char *, char *);
+void message_add_header(MESSAGE *, char *, char *);
+void message_remove_headers(MESSAGE *, char *);
+void message_modify_headers(MESSAGE *, char *, char *, char *);
+void message_external_proc(MESSAGE *, char **);
+void message_init(MESSAGE *);
+void message_free(MESSAGE *);
 
 /* exec.c */
 char **gen_execargs(const char *);
 int  make_local_connection(char *, char **);
 char *external_program(int *, char *, char *, char *, int);
-char *exec_argv(int *rs, char **argv, char *src, char *dst, int dstsize);
+char *exec_argv(int *, char **, char *, char *, int);
 
 /* esmtp.c */
 void esmtp_auth(void *, char *);
 
 /* misc.c */
-void assoc_free(ASSOC *asc);
-ASSOC *header_assoc(char *line);
-void destroy_assoc_list(struct list **plist);
-void destroy_string_list(struct list **plist);
+void assoc_free(ASSOC *);
+ASSOC *header_assoc(char *);
+void destroy_assoc_list(struct list **);
+void destroy_string_list(struct list **);
 void parse_mtaport(char *, char *, unsigned int *);
 void parse_mtahost(char *, char *, unsigned int *);
 void remline(char *, char *);
 void remcrlf(char *);
 char *substitute(char *, char **);
-char *insert(char *, char *, char *);
 void change_to_lower(char *);
 
 /* files.c */
@@ -377,18 +362,18 @@ void message_append_text_file(MESSAGE *, char *);
 void message_append_signature_file(MESSAGE *, char *);
 
 /* regex.c */
-int anubis_regex_match(RC_REGEX *re, char *line, int *refc, char ***refv);
-RC_REGEX *anubis_regex_compile(char *line, int opt);
-void anubis_regex_free(RC_REGEX *re);
-char *anubis_regex_source(RC_REGEX *re);
-int anubis_regex_refcnt(RC_REGEX *re);
+int anubis_regex_match(RC_REGEX *, char *, int *, char ***);
+RC_REGEX *anubis_regex_compile(char *, int);
+void anubis_regex_free(RC_REGEX *);
+char *anubis_regex_source(RC_REGEX *);
+int anubis_regex_refcnt(RC_REGEX *);
 
 /* rc.c */
-void rc_system_init();
+void rc_system_init(void);
 void open_rcfile(int);
-void process_rcfile(int method);
-void rcfile_process_section(int method, char *name, void *data, MESSAGE *msg);
-void rcfile_call_section(int method, char *name, void *data, MESSAGE *msg);
+void process_rcfile(int);
+void rcfile_process_section(int, char *, void *, MESSAGE *);
+void rcfile_call_section(int, char *, void *, MESSAGE *);
 
 /* help.c */
 void print_version(void);
@@ -416,13 +401,13 @@ void *start_ssl_server(int);
 
 /* guile.c */
 #ifdef WITH_GUILE
-void anubis_boot(void *closure, int argc, char **argv);
-void guile_load_path_append(char *filename);
-void guile_debug(int enable);
-void guile_load_program(char *name);
-void guile_rewrite_line(char *procname, const char *source_line);
-void guile_postprocess_proc(char *procname, struct list **hdr, char **body);
-void guile_section_init();
+void anubis_boot(void *, int, char **);
+void guile_load_path_append(char *);
+void guile_debug(int);
+void guile_load_program(char *);
+void guile_rewrite_line(char *, const char *);
+void guile_postprocess_proc(char *, struct list **, char **);
+void guile_section_init(void);
 #endif /* WITH_GUILE */
 
 /* EOF */

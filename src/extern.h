@@ -54,11 +54,18 @@ struct session_struct {
  unsigned int socks_port;
 };
 
-#if defined(HAVE_TLS) || defined(HAVE_SSL)
-# define USE_SSL
-#else
-# undef USE_SSL
-#endif
+struct assoc {
+ char *key;
+ char *value;
+};
+
+struct message_struct {
+ struct list *commands; /* Associative list of SMTP commands */
+ struct list *header;   /* Associative list of RFC822 headers */
+ struct list *mime_hdr; /* List of lines before the first boundary marker */
+ char *body;            /* Message body */
+ char *boundary;        /* Additional data */
+};
 
 #ifdef USE_SSL
 struct secure_struct {
@@ -69,7 +76,7 @@ struct secure_struct {
  char *key;
 };
 extern struct secure_struct secure;
-#endif
+#endif /* USE_SSL */
 
 extern struct options_struct options;
 extern struct session_struct session;
