@@ -23,7 +23,7 @@ dnl compiling, linking, and/or using OpenSSL is allowed.
 dnl
 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT([GNU Anubis], [3.9.93], [bug-anubis@gnu.org], [anubis])
+AC_INIT([GNU Anubis], [3.9.94], [bug-anubis@gnu.org], [anubis])
 AC_PREREQ([2.57])
 AC_CONFIG_AUX_DIR([build])
 AC_CONFIG_SRCDIR([src/main.c])
@@ -227,7 +227,7 @@ fi
 if test $with_gnutls = yes; then
   AC_CHECK_HEADERS(gnutls/gnutls.h)
   if test $ac_cv_header_gnutls_gnutls_h != no; then
-    AM_PATH_LIBGNUTLS("0.9.6",
+    AM_PATH_LIBGNUTLS("0.9.93",
                       [M4_DEFS="$M4_DEFS -DWITH_SSL"
                       AC_LIBOBJ(tls)
                       AC_DEFINE(USE_GNUTLS, 1,
