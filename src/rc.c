@@ -208,6 +208,9 @@ process_rcfile(int method)
 #ifdef WITH_GUILE
 	rcfile_process_section(method, "GUILE", NULL, NULL);
 #endif
+#if defined(WITH_GSASL)
+	rcfile_process_section(method, "AUTH", NULL, NULL);
+#endif
 }
 
 /* ************************** The CONTROL Section ************************* */ 
@@ -229,8 +232,7 @@ process_rcfile(int method)
 #define KW_SOCKS_AUTH          15
 #define KW_READ_ENTIRE_BODY    16
 #define KW_LOCAL_DOMAIN        17
-#define KW_SASL_PASSWORD_DB    18
-#define KW_SASL_ALLOWED_MECH   19
+#define KW_MODE                18
 
 char **
 list_to_argv(LIST *list)
@@ -407,15 +409,13 @@ control_parser(int method, int key, LIST *arglist,
 		break;
 
 #ifdef WITH_GSASL
-	case KW_SASL_PASSWORD_DB:
+	case KW_MODE:
 		if (list_count(arglist) != 1) 
 			return RC_KW_ERROR;
-		anubis_set_password_db (arg);
+		if (anubis_set_mode(arg))
+			return RC_KW_ERROR;
 		break;
-
-	case KW_SASL_ALLOWED_MECH:
-		anubis_set_mech_list(arglist);
-		break;
+		
 #endif /* WITH_GSASL */
 
 	default:
@@ -427,6 +427,7 @@ control_parser(int method, int key, LIST *arglist,
 static struct rc_kwdef init_kw[] = {
 	{ "bind", KW_BIND },
 	{ "local-domain", KW_LOCAL_DOMAIN },
+	{ "mode", KW_MODE },
 	{ NULL },
 };
 
@@ -445,8 +446,6 @@ static struct rc_kwdef init_supervisor_kw[] = {
 	{ "drop-unknown-user",  KW_DROP_UNKNOWN_USER },
 	{ "rule-priority",      KW_RULE_PRIORITY },
 	{ "control-priority",   KW_CONTROL_PRIORITY },
-	{ "sasl-password-db",   KW_SASL_PASSWORD_DB },
-	{ "sasl-allowed-mech",  KW_SASL_ALLOWED_MECH },
 	{ NULL }
 };
 
@@ -656,6 +655,9 @@ rc_system_init(void)
 #ifdef HAVE_GPG
 	gpg_section_init();
 #endif /* HAVE_GPG */
+#if defined(WITH_GSASL)
+	authmode_section_init();
+#endif
 }
 
 void
