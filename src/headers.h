@@ -369,9 +369,8 @@ NET_STREAM make_remote_connection (char *, unsigned int);
 int bind_and_listen (char *, unsigned int);
 void swrite (int, NET_STREAM, char *);
 void send_eol (int method, NET_STREAM sd);
-int recvline (int, NET_STREAM, void *, size_t);
-int recvline_ptr (int method, NET_STREAM sd, char **vptr, size_t * maxlen);
-void get_response_smtp (int, NET_STREAM, char *, int);
+int recvline (int method, NET_STREAM sd, char **vptr, size_t * maxlen);
+void get_response_smtp (int, NET_STREAM, char **, size_t *);
 void close_socket (int sd);
 
 void net_create_stream (NET_STREAM * str, int fd);
