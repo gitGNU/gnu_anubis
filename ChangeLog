@@ -1,7 +1,8 @@
 2004-05-22  Sergey Poznyakoff  
 
 	* doc/anubis.texi: Updated
-
+	* doc/rendition.texi (macro FIXME): Rewritten
+	
 2004-05-21  Sergey Poznyakoff 
 
 	* doc/pixie-dixie.txt: New file
