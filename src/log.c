@@ -30,16 +30,14 @@ void
 mprintf(const char *fmt, ...)
 {
 	va_list arglist;
-	char txt[LINEBUFFER+1];
 
 	if (options.termlevel == SILENT)
 		return;
 
 	va_start(arglist, fmt);
-	vsnprintf(txt, LINEBUFFER, fmt, arglist);
+	vfprintf(stderr, fmt, arglist);
 	va_end(arglist);
-
-	puts(txt);
+	fprintf(stderr, "\n");
 }
 
 void
