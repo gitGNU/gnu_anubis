@@ -1,3 +1,12 @@
+2004-09-13  Sergey Poznyakoff
+
+	* src/authmode.c (anubis_smtp): Force T_SSL_ONEWAY if `ssl yes'
+	is requested and SSL connection between the MUA and Anubis has been
+	successfully established. Necessary for handle_ehlo() to
+	work.
+	(asmtp_capa_init) [HAVE_TLS]: Changed to USE_SSL.
+	* src/tunnel.c (handle_ehlo): Comment updated.
+
 2004-09-03  Sergey Poznyakoff  
 
 	* src/authmode.c: Added missing pam_retval declaration.
