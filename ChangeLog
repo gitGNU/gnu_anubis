@@ -1,5 +1,14 @@
 2003-02-19  Wojciech Polak
 
+	* src/main.h: Removed no longer used variable `submatch'.
+	* src/extern.h: Likewise.
+	* src/quit.c (free_mem): Likewise.
+	* src/help.c (print_version): Minor change.
+
+	* testsuite/mta.c (smtp_reply): Added prototype.
+
+2003-02-19  Wojciech Polak
+
 	* src/env.c (argv_dup): New static function.
 	* src/headers.h (T_RCEXECARGS): Removed flag.
 	* src/rc.c: Likewise.
