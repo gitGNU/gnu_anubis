@@ -5,8 +5,8 @@
 ;; Keywords: anubis
 ;; $Id$
 
-;; This file is part of GNU Anubis
-;; Copyright (C) 2003, The Anubis Team.
+;; This file is part of GNU Anubis.
+;; Copyright (C) 2003, 2004 The Anubis Team.
 
 ;; GNU Anubis is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -134,6 +134,11 @@
               "remote-mta"
               "local-mta"
               "esmtp-auth"
+	      "mode"
+	      "smtp-greeting-message"
+	      "smtp-help-message"
+	      "sasl-password-db"
+	      "sasl-allowed-mech"
               "socks-proxy"
               "socks-v4"
               "socks-auth"
@@ -204,9 +209,11 @@
 				 all)
                  logfile
 		 tracefile
-                 remote-mta           
-                 local-mta           
-                 esmtp-auth          
+                 remote-mta
+                 local-mta
+                 esmtp-auth
+		 (mode           transparent
+				 auth)
                  socks-proxy         
                  (socks-v4       yes no)
                  socks-auth         
@@ -221,7 +228,13 @@
 		 (ssl-oneway     yes no)
 		 (ssl-cert       yes no)
 		 (ssl-key        yes no)
-		 (ssl-cafile     yes no))   
+		 (ssl-cafile     yes no))
+
+    (AUTH        END
+		 smtp-greeting-message
+		 smtp-help-message
+		 sasl-password-db
+		 sasl-allowed-mech)
 
     (TRANSLATION END
                  translate)
@@ -259,6 +272,7 @@
 (defconst anubis-keyword-nodes
   ;; Block kwd                   Info node            Opt. Info file     
   '(("CONTROL"                  "CONTROL Section")
+    ("AUTH"                     "AUTH Section")
     ("TRANSLATION"              "TRANSLATION Section")
     ("translate"                "TRANSLATION Section")
     ("GUILE"                    "GUILE Section")
@@ -268,28 +282,34 @@
     ("remote-mta"               "Basic Settings")
     ("local-mta"                "Basic Settings")
     ("esmtp-auth"               "Basic Settings")
-			        
+    ("mode"                     "Basic Settings")
+
+    ("smtp-greeting-message"    "AUTH Section")
+    ("smtp-help-message"        "AUTH Section")
+    ("sasl-password-db"         "AUTH Section")
+    ("sasl-allowed-mech"        "AUTH Section")
+
     ("termlevel"                "Output Settings")
     ("logfile"                  "Output Settings")
     ("loglevel"                 "Output Settings")
     ("tracefile"                "Output Settings")
-			        
+
     ("socks-proxy"              "Proxy Settings")
     ("socks-v4"                 "Proxy Settings")
     ("socks-auth"               "Proxy Settings")
- 
+
     ("ssl"                      "Encryption Settings")
     ("ssl-oneway"               "Encryption Settings")
     ("ssl-cert"                 "Encryption Settings")
     ("ssl-key"                  "Encryption Settings")
     ("ssl-cafile"               "Encryption Settings")
-		         
+
     ("allow-local-mta"          "Security Settings")
     ("drop-unknown-user"        "Security Settings")
     ("user-notprivileged"       "Security Settings")
     ("rule-priority"            "Security Settings")
     ("control-priority"         "Security Settings")
-     
+
     ("stop"                     "Stop Action")
     ("call"                     "Call Action")
     ("add"                      "Adding Headers or Text")
