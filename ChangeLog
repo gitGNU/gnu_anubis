@@ -1,3 +1,20 @@
+2004-03-11  Sergey Poznyakoff
+
+	* src/anubisusr.c (smtp_auth): Use error() instead of info()
+	(main): Minor fix
+	* src/authmode.c: Provide special section AUTH for configuring
+	auth mode. Move sasl-password-db and sasl-allowed-mech
+	to AUTH. New keywords smtp-greeting-message and stmp-help-message
+	allow to set the corresponding SMTP messages.
+	* src/env.c (get_options): Use anubis_set_mode().
+	(anubis_set_mode): New function.
+	* src/gsasl_srv.c: Protect inclusion of gsasl.h
+	* src/headers.h: Added missing prototypes
+	* src/rc.c (process_rcfile): Load AUTH section
+	(control_parser): New keyword 'mode'. Equivalent to specifying
+	--mode in the command line.
+	* src/url.c: Removed debugging functions.
+
 2004-03-08  Sergey Poznyakoff
 
 	* src/main.c: Fixed improper #ifdef'ing
