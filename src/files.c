@@ -73,20 +73,21 @@ message_append_text_file(MESSAGE *msg, char *filename)
 }
 
 void
-message_append_signature_file(MESSAGE *msg, char *user)
+message_append_signature_file(MESSAGE *msg)
 {
 	char homedir[MAXPATHLEN+1];
 	char signature_file[] = DEFAULT_SIGFILE;
-	char *signature_path = 0;
+	char *signature_path;
 	size_t n;
-	
-	get_homedir(user, homedir, sizeof(homedir));
+
+	get_homedir(session.client, homedir, sizeof(homedir));
 
 	n = strlen(homedir) + strlen(signature_file) + 2;
+	n = n > MAXPATHLEN ? MAXPATHLEN + 1 : n + 1;
 	signature_path = (char *)xmalloc(n);
 	snprintf(signature_path, n - 1, "%s/%s", homedir, signature_file);
 
-	_append_text_file(msg, signature_path, "\n-- \n");
+	_append_text_file(msg, signature_path, "-- \n");
 	free(signature_path);
 	return;
 }
