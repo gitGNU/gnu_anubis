@@ -431,13 +431,13 @@ process_command(void *sd_client, void *sd_server, MESSAGE *msg,
 		if (topt & T_SSL_CKCLIENT)
 			check_filemode(secure.key);
 
+		swrite(SERVER, sd_client, "220 2.0.0 Ready to start TLS"CRLF);
 		secure.server = start_ssl_server((int)sd_client);
 		if (!secure.server || (topt & T_ERROR)) {
 			swrite(SERVER, sd_client,
 			       "454 4.3.3 TLS not available"CRLF);
 			return;
 		}
-		swrite(SERVER, sd_client, "220 2.0.0 Ready to start TLS"CRLF);
 		sd_client = remote_client = (void *)secure.server;
 		topt |= T_SSL_FINISHED;
 #else
