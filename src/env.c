@@ -36,18 +36,6 @@ static struct pam_conv conv = {
 };
 #endif /* HAVE_PAM */
 
-static char **
-argv_dup (int argc, char **argv)
-{
-  char **xargv = xmalloc ((argc + 1) * sizeof (*xargv));
-  int i;
-
-  for (i = 0; i < argc; i++)
-    xargv[i] = strdup (argv[i]);
-  xargv[i] = NULL;
-  return xargv;
-}
-
 static int gindex = 0;
 
 static char *pidfile;
@@ -141,9 +129,14 @@ get_options (int argc, char *argv[])
 	  break;
 
 	case 'l':		/* a local SMTP mode */
-	  session.execargs = gen_execargs (optarg);
-	  session.execpath = strdup (session.execargs[0]);
-	  topt |= T_LOCAL_MTA;
+	  {
+	    int rc;
+	    int argc;
+	    if ((rc = argcv_get (optarg, "", "#", &argc, &session.execargs)))
+	      anubis_error (EX_SOFTWARE, rc, _("argcv_get failed"));
+	    session.execpath = strdup (session.execargs[0]);
+	    topt |= T_LOCAL_MTA;
+	  }
 	  break;
 
 	case 'f':		/* foreground mode */
