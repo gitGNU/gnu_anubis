@@ -360,7 +360,6 @@ void service_unavailable (NET_STREAM *);
 void set_unprivileged_user (void);
 
 /* auth.c */
-void auth_tunnel (void);
 int auth_ident (struct sockaddr_in *, char *, int);
 
 /* map.c */
@@ -422,6 +421,7 @@ void anubis_regex_print (RC_REGEX *);
 
 /* rc.c */
 void rc_system_init (void);
+void auth_tunnel (void);
 void open_rcfile (int);
 void process_rcfile (int);
 void rcfile_process_section (int, char *, void *, MESSAGE *);

@@ -33,7 +33,6 @@ anubis_LDADD = ./libanubisdb.a $(top_builddir)/lib/libanubis.a\
  @LIBINTL@ $(GUILE_LIBS) @LIBGNUTLS_LIBS@ @GSASL_LIBS@ 
 
 anubis_SOURCES = \
- auth.c \
  authmode.c \
  daemon.c \
  env.c \
@@ -46,6 +45,7 @@ anubis_SOURCES = \
  guile.c \
  headers.h \
  help.c \
+ ident.c \
  log.c \
  main.c \
  map.c \

@@ -1,3 +1,15 @@
+2004-07-13  Wojciech Polak
+
+	* src/tunnel.c (handle_starttls): Improved diagnostics.
+	* src/authmode.c (asmtp_ehlo): Likewise.
+	* src/misc.c (make_lowercase, make_uppercase): Return NULL
+	if needed.
+
+	* src/auth.c: Renamed to ident.c.
+	(auth_tunnel): Moved to rcfile.c.
+	* src/headers.h: Updated.
+	* src/Makefile.am: Updated.
+
 2004-07-13  Sergey Poznyakoff
 
 	* src/gsasl_srv.c (anubis_set_mech_list): Convert mechanism
