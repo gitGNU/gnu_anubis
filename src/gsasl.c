@@ -186,41 +186,18 @@ install_gsasl_stream (Gsasl_session_ctx *sess_ctx)
 
 /* GSASL Authentication */
 
-#define AUTHBUFSIZE 512
-
-static int
-auth_step_base64(Gsasl_session_ctx *sess_ctx, char *input,
-		 char **output, size_t *output_len)
-{
-	int rc;
-	
-	while (1) {
-		rc = gsasl_server_step_base64 (sess_ctx,
-					       input,
-					       *output, *output_len);
-
-		if (rc == GSASL_TOO_SMALL_BUFFER) {
-			*output_len += AUTHBUFSIZE;
-			*output = realloc(*output, *output_len);
-			if (output)
-				continue; 
-		}
-		break;
-	}
-	return rc;
-}
-
 int
-anubis_auth_gsasl (char *auth_type, char *arg, char **username)
+anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER *usr)
 {
 	char *input = arg;
 	size_t input_size = 0;
 	char *output;
-	size_t output_len;
 	int rc;
 	Gsasl_session_ctx *sess_ctx = NULL; 
 
 	info(DEBUG, "mech=%s, inp=%s", auth_type, arg);
+
+	memset(usr, 0, sizeof(*usr));
 	rc = gsasl_server_start (ctx, auth_type, &sess_ctx);
 	if (rc != GSASL_OK) {
 		info(NORMAL, _("SASL gsasl_server_start: %s"),
@@ -228,23 +205,17 @@ anubis_auth_gsasl (char *auth_type, char *arg, char **username)
 		asmtp_reply(504, "%s", gsasl_strerror(rc));
 		return 1;
 	}
-	
-	gsasl_server_application_data_set (sess_ctx, username);
-	
-	output_len = AUTHBUFSIZE;
-	output = malloc (output_len);
-	if (!output)
-		anubis_error(HARD, _("Not enough memory"));
 
-	output[0] = '\0';
-
+	gsasl_server_application_data_set (sess_ctx, usr);
+	
+	output = NULL;
 	/* RFC 2554 4.:
 	    Unlike a zero-length client answer to a 334 reply, a zero-
             length initial response is sent as a single equals sign */
 	if (input && strcmp(input, "=") == 0)
 		input = "";
 
-	while ((rc = auth_step_base64 (sess_ctx, input, &output, &output_len))
+	while ((rc = gsasl_step64 (sess_ctx, input, &output))
 	       == GSASL_NEEDS_MORE) {
 		asmtp_reply (334, "%s", output);
 		recvline_ptr(SERVER, remote_client, &input, &input_size);
@@ -271,19 +242,20 @@ anubis_auth_gsasl (char *auth_type, char *arg, char **username)
 		asmtp_reply (334, "%s", output);
   
 	free (output);
-	info(NORMAL, "Authentication passed. User name %s", *username);
 	     
-	if (*username == NULL) {
+	if (usr->smtp_authid == NULL) {
 		info (NORMAL,
 		      _("GSASL %s: cannot get username"), auth_type);
 		asmtp_reply(535, "Authentication failed"); /* FIXME */
 		return 1;
 	}
 
-	if (sess_ctx) {
-		/* FIXME! */
+	info(NORMAL, "Authentication passed. User name %s, Local user %s",
+	     usr->smtp_authid,
+	     usr->username ? usr->username : "NONE");
+
+	if (sess_ctx) 
 		install_gsasl_stream (sess_ctx);
-	}
 
 	asmtp_reply (235, "Authentication successful.");
 	return 0;
@@ -405,10 +377,17 @@ cb_validate (Gsasl_session_ctx *ctx,
 	     const char *authentication_id,
 	     const char *password)
 {
-	char **username = gsasl_server_application_data_get (ctx);
+	ANUBIS_USER *usr = gsasl_server_application_data_get (ctx);
 
-	*username = strdup (authentication_id ?
-			    authentication_id : authorization_id);
+	if (usr->smtp_authid == NULL
+	    && anubis_get_db_record(authentication_id, usr)
+	    != ANUBIS_DB_SUCCESS)
+		return GSASL_AUTHENTICATION_ERROR;
+	
+	if (usr->smtp_authid == NULL
+	    || strcmp (usr->smtp_authid, authentication_id)
+	    || strcmp (usr->smtp_passwd, password))
+		return GSASL_AUTHENTICATION_ERROR;
 	return GSASL_OK;
 }
 
@@ -460,23 +439,22 @@ cb_retrieve (Gsasl_session_ctx *ctx,
 	     char *key,
 	     size_t *keylen)
 {
-	ANUBIS_USER usr;
-	char **username = gsasl_server_application_data_get (ctx);
+	ANUBIS_USER *usr = gsasl_server_application_data_get (ctx);
 
-	if (username && authentication_id)
-		*username = strdup (authentication_id);
+	if (usr->smtp_authid == NULL
+	    && anubis_get_db_record(authentication_id, usr)
+	    != ANUBIS_DB_SUCCESS)
+		return GSASL_AUTHENTICATION_ERROR;
 
-	if (anubis_get_db_record(*username, &usr) == ANUBIS_DB_SUCCESS) {
-		if (key) 
-			strncpy(key, usr.smtp_passwd, *keylen);
-		else
-			*keylen = strlen(usr.smtp_passwd);
-		return GSASL_OK;
-	}
-	
-	return GSASL_AUTHENTICATION_ERROR;
+	if (key) {
+		if (*keylen < strlen(usr->smtp_passwd))
+			return GSASL_TOO_SMALL_BUFFER;
+		strncpy(key, usr->smtp_passwd, *keylen);
+	} else
+		*keylen = strlen(usr->smtp_passwd);
+	return GSASL_OK;
 }
-
+	
 
 /* Initialization function */
 void
@@ -495,7 +473,7 @@ auth_gsasl_init ()
   gsasl_server_callback_validate_set (ctx, cb_validate);
   gsasl_server_callback_service_set (ctx, cb_service);
   gsasl_server_callback_retrieve_set (ctx, cb_retrieve);
-  
-  auth_gsasl_capa_init (0);
+	  
+  auth_gsasl_capa_init ();
 }
 
