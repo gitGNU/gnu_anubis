@@ -226,34 +226,36 @@ process_rcfile (int method)
 
 
 /* ************************** The CONTROL Section ************************* */
-#define KW_BIND                 0
-#define KW_TERMLEVEL            1
-#define KW_LOGLEVEL             2
-#define KW_LOGFILE              3
-#define KW_TRACEFILE            4
-#define KW_REMOTE_MTA           5
-#define KW_LOCAL_MTA            6
-#define KW_RULE_PRIORITY        7
-#define KW_CONTROL_PRIORITY     8
-#define KW_ESMTP_AUTH           9
-#define KW_DROP_UNKNOWN_USER   10
-#define KW_USER_NOTPRIVILEGED  11
-#define KW_ALLOW_LOCAL_MTA     12
-#define KW_SOCKS_PROXY         13
-#define KW_SOCKS_V4            14
-#define KW_SOCKS_AUTH          15
-#define KW_READ_ENTIRE_BODY    16
-#define KW_LOCAL_DOMAIN        17
-#define KW_MODE                18
+#define KW_BIND                      0
+#define KW_TERMLEVEL                 1
+#define KW_LOGLEVEL                  2
+#define KW_LOGFILE                   3
+#define KW_TRACEFILE                 4
+#define KW_REMOTE_MTA                5
+#define KW_LOCAL_MTA                 6
+#define KW_RULE_PRIORITY             7
+#define KW_CONTROL_PRIORITY          8
+#define KW_ESMTP_AUTH                9
+#define KW_DROP_UNKNOWN_USER        10
+#define KW_USER_NOTPRIVILEGED       11
+#define KW_ALLOW_LOCAL_MTA          12
+#define KW_SOCKS_PROXY              13
+#define KW_SOCKS_V4                 14
+#define KW_SOCKS_AUTH               15
+#define KW_READ_ENTIRE_BODY         16
+#define KW_LOCAL_DOMAIN             17
+#define KW_MODE                     18
 #define KW_ESMTP_ANONYMOUS_TOKEN    19 
-#define KW_ESMTP_AUTH_ID       20
-#define KW_ESMTP_AUTHZ_ID      21 
-#define KW_ESMTP_PASSWORD      22
-#define KW_ESMTP_SERVICE       23
-#define KW_ESMTP_HOSTNAME      24
-#define KW_ESMTP_GENERIC_SERVICE 25
-#define KW_ESMTP_PASSCODE      26
-#define KW_ESMTP_REALM         27
+#define KW_ESMTP_AUTH_ID            20
+#define KW_ESMTP_AUTHZ_ID           21 
+#define KW_ESMTP_PASSWORD           22
+#define KW_ESMTP_SERVICE            23
+#define KW_ESMTP_HOSTNAME           24
+#define KW_ESMTP_GENERIC_SERVICE    25
+#define KW_ESMTP_PASSCODE           26
+#define KW_ESMTP_REALM              27
+#define KW_ESMTP_ALLOWED_MECH       28
+#define KW_ESMTP_REQUIRE_ENCRYPTION 29
 
 char **
 list_to_argv (ANUBIS_LIST * list)
@@ -389,6 +391,7 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
     parse_mtaport (arg, session.mta, &session.mta_port);
     break;
 
+#if defined (WITH_GSASL)
   case KW_LOCAL_MTA:
     xfree (session.execpath);
     xfree_pptr (session.execargs);
@@ -402,9 +405,10 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
       char *p = strchr (arg, ':');
       if (p)
 	{
-	  safe_strcpy (session.mta_password, ++p);
+	  auth_password = strdup (++p);
 	  *--p = '\0';
-	  safe_strcpy (session.mta_username, arg);
+	  authentication_id = strdup (arg);
+	  authorization_id = strdup (arg);
 	  topt |= T_ESMTP_AUTH;
 	}
     }
@@ -412,40 +416,60 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
 
   case KW_ESMTP_ANONYMOUS_TOKEN:
     anon_token = strdup (arg);
+    topt |= T_ESMTP_AUTH;
     break;
     
   case KW_ESMTP_AUTH_ID:
     authentication_id = strdup (arg);
+    topt |= T_ESMTP_AUTH;
     break;
     
   case KW_ESMTP_AUTHZ_ID:
     authorization_id = strdup (arg);
+    topt |= T_ESMTP_AUTH;
     break;
     
   case KW_ESMTP_PASSWORD:
     auth_password = strdup (arg);
+    topt |= T_ESMTP_AUTH;
     break;
     
   case KW_ESMTP_SERVICE:
     auth_service = strdup (arg);
+    topt |= T_ESMTP_AUTH;
     break;
     
   case KW_ESMTP_HOSTNAME:
     auth_hostname = strdup (arg);
+    topt |= T_ESMTP_AUTH;
     break;
     
   case KW_ESMTP_GENERIC_SERVICE:
     generic_service_name = strdup (arg);
+    topt |= T_ESMTP_AUTH;
     break;
     
   case KW_ESMTP_PASSCODE:
     auth_passcode = strdup (arg);
+    topt |= T_ESMTP_AUTH;
     break;
     
   case KW_ESMTP_REALM:
     auth_realm = strdup (arg);
+    topt |= T_ESMTP_AUTH;
+    break;
+
+  case KW_ESMTP_ALLOWED_MECH:
+    anubis_set_client_mech_list (arglist);
+    topt |= T_ESMTP_AUTH;
+    break;
+
+  case KW_ESMTP_REQUIRE_ENCRYPTION:
+    anubis_set_encryption_mech_list (arglist);
     break;
     
+#endif 
+
   case KW_LOCAL_DOMAIN:
     anubis_domain = strdup (arg);
     break;
@@ -561,6 +585,8 @@ struct rc_kwdef control_kw[] = {
   { "esmtp-generic-service", KW_ESMTP_SERVICE, KWF_HIDDEN },
   { "esmtp-passcode", KW_ESMTP_PASSCODE, KWF_HIDDEN },
   { "esmtp-realm", KW_ESMTP_REALM, KWF_HIDDEN },
+  { "esmtp-allowed-mech", KW_ESMTP_ALLOWED_MECH },
+  { "esmtp-require-encryption", KW_ESMTP_REQUIRE_ENCRYPTION },
 #ifdef USE_SOCKS_PROXY
   { "socks-proxy",  KW_SOCKS_PROXY },
   { "socks-v4",     KW_SOCKS_V4 },
