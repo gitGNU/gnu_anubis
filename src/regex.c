@@ -103,6 +103,30 @@ regex_vtab_lookup(int flags)
 
 
 /* ************************** Interface Functions ************************** */
+void
+regex_print_flags(int flags)
+{
+	printf(":");
+	if (flags & R_EXACT)
+		printf("exact");
+	else if (flags & R_POSIX)
+		printf("posix");
+	else if (flags & R_PERLRE)
+		printf("perl");
+
+	if (flags & R_SCASE)
+		printf(" :scase");
+	if (flags & R_BASIC)
+		printf(" :basic");
+}
+
+void
+anubis_regex_print(RC_REGEX *re)
+{
+	regex_print_flags(re->flags);
+	printf(" [%s]", anubis_regex_source(re));
+}
+
 int
 anubis_regex_match(RC_REGEX *re, char *line, int *refc, char ***refv)
 {
