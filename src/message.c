@@ -211,7 +211,7 @@ message_external_proc(MESSAGE *msg, char **argv)
 {
 	int rc = 0;
 	char *extbuf = 0;
-	extbuf = exec_argv(&rc, argv, msg->body, 0, 0);
+	extbuf = exec_argv(&rc, NULL, argv, msg->body, 0, 0);
 	if (rc != -1 && extbuf) {
 		xfree(msg->body);
 		msg->body = extbuf;
