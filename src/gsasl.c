@@ -24,6 +24,9 @@
 
 #include "headers.h"
 #include "extern.h"
+
+#if defined(WITH_GSASL)
+
 #include "lbuf.h"
 #include <gsasl.h>
 
@@ -477,3 +480,4 @@ auth_gsasl_init ()
   auth_gsasl_capa_init ();
 }
 
+#endif

@@ -25,6 +25,8 @@
 #include "headers.h"
 #include "extern.h"
 
+#if defined(WITH_GSASL)
+
 enum asmtp_state {
 	state_init,
 	state_ehlo,
@@ -319,14 +321,11 @@ anubis_smtp (ANUBIS_USER *usr)
 }
 
 
-static char *anubis_dbtype;
 static char *anubis_dbarg;
 
 void
-anubis_set_password_db (char *type, char *arg)
+anubis_set_password_db (char *arg)
 {
-	free(anubis_dbtype);
-	anubis_dbtype = strdup(type);
 	free(anubis_dbarg);
 	anubis_dbarg = strdup(arg);
 }
@@ -337,9 +336,8 @@ anubis_get_db_record(char *username, ANUBIS_USER *usr)
 	void *db;
 	int rc;
 
-	if (!anubis_dbtype
-	    || anubis_db_open(anubis_dbtype,
-			      anubis_dbarg, anubis_db_rdonly,
+	if (!anubis_dbarg
+	    || anubis_db_open(anubis_dbarg, anubis_db_rdonly,
 			      &db) != ANUBIS_DB_SUCCESS)
 		return ANUBIS_DB_FAIL;
 		
@@ -489,3 +487,4 @@ anubis_authenticate_mode (int sd_client, struct sockaddr_in *addr)
 	return 0;
 }
 
+#endif

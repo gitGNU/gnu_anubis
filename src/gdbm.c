@@ -23,6 +23,7 @@
 */
 
 #include "headers.h"
+#if defined(HAVE_LIBGDBM)
 #include <gdbm.h>
 
 /* Format of an GDBM record:
@@ -35,10 +36,11 @@
 			 The last two items are optional */
 
 static int
-gdbm_db_open (void **dp, char *arg, enum anubis_db_mode mode)
+gdbm_db_open (void **dp, ANUBIS_URL *url, enum anubis_db_mode mode)
 {
 	GDBM_FILE dbf;
 	int flags;
+	char *path;
 	
 	switch (mode) {
 	case anubis_db_rdonly:
@@ -49,8 +51,9 @@ gdbm_db_open (void **dp, char *arg, enum anubis_db_mode mode)
 		flags = GDBM_WRCREAT;
 	}
 	
-	
-	dbf = gdbm_open(arg, 0, flags, 0644, NULL);
+	path = anubis_url_full_path(url);
+	dbf = gdbm_open(path, 0, flags, 0644, NULL);
+	free(path);
 	if (!dbf)
 		return ANUBIS_DB_FAIL;
 	*dp = dbf;
@@ -138,6 +141,21 @@ gdbm_db_put (void *d, char *keystr, ANUBIS_USER *rec, int *errp)
 	return rc;
 }
 
+static int
+gdbm_db_delete(void *d, char *keystr, int *ecode)
+{
+	int rc;
+	datum key;
+
+	key.dptr = keystr;
+	key.dsize = strlen(keystr);
+	if (gdbm_delete((GDBM_FILE)d, key))
+		rc = ANUBIS_DB_FAIL;
+	else
+		rc = ANUBIS_DB_SUCCESS;
+	return rc;
+}
+
 void
 gdbm_db_init()
 {
@@ -146,5 +164,7 @@ gdbm_db_init()
 			   gdbm_db_close,
 			   gdbm_db_get,
 			   gdbm_db_put,
+			   gdbm_db_delete,
 			   NULL);
 }
+#endif

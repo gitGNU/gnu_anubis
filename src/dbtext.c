@@ -25,13 +25,16 @@
 #include "headers.h"
 #include "extern.h"
 
+#if defined(WITH_GSASL)
+
 /* Open the plaintext database. ARG is the full pathname to the file */
 static int
-dbtext_open (void **dp, char *arg, enum anubis_db_mode mode)
+dbtext_open (void **dp, ANUBIS_URL *url, enum anubis_db_mode mode)
 {
 	FILE *fp;
 	char *tmode;
-
+	char *path;
+	
 	switch (mode) {
 	case anubis_db_rdonly:
 		tmode = "r";
@@ -40,8 +43,10 @@ dbtext_open (void **dp, char *arg, enum anubis_db_mode mode)
 	case anubis_db_rdwr:
 		tmode = "a+";
 	}
-	
-	fp = fopen(arg, tmode);
+
+	path = anubis_url_full_path(url);
+	fp = fopen(path, tmode);
+	free(path);
 	if (!fp)
 		return errno;
 	*dp = fp;
@@ -55,12 +60,13 @@ dbtext_close (void *d)
 	return ANUBIS_DB_SUCCESS;
 }
 
+static const char delim[] = " \t\r\n";
+
 static int
 dbtext_get (void *d, char *key, ANUBIS_USER *rec, int *errp)
 {
 	FILE *fp = d;
 	char buf[512], *p;
-	static const char delim[] = " \t\r\n";
 	
 	memset(rec, 0, sizeof *rec);
 	fseek(fp, 0, SEEK_SET);
@@ -107,6 +113,36 @@ dbtext_put (void *d, char *key, ANUBIS_USER *rec, int *errp)
 	return ferror(fp) ? ANUBIS_DB_FAIL : ANUBIS_DB_SUCCESS;
 }
 
+static int
+dbtext_delete(void *d, char *keystr, int *ecode)
+{
+	FILE *fp = d;
+	char buf[512], *p;
+	int rc = ANUBIS_DB_FAIL;
+	
+	fseek(fp, 0, SEEK_SET);
+	while ((p = fgets(buf, sizeof buf, fp)) != NULL) {
+		size_t len;
+	
+		while (*p && isspace(*p))
+			p++;
+		if (*p == '#')
+			continue;
+		p = strtok(p, delim);
+		if (!p || strcmp(p, keystr))
+			continue;
+		len = strlen(buf);
+		memset(buf, '#', len-1);
+		buf[len-1] = 0;
+		fseek(fp, - (off_t) len, SEEK_CUR);
+		fputs(buf, fp);
+		rc = ANUBIS_DB_SUCCESS;
+		break;
+	}
+
+	return rc;
+}
+
 void
 dbtext_init ()
 {
@@ -115,5 +151,8 @@ dbtext_init ()
 			   dbtext_close,
 			   dbtext_get,
 			   dbtext_put,
+			   dbtext_delete,
 			   NULL);
 }
+
+#endif

@@ -24,12 +24,15 @@
 
 #include "headers.h"
 
+#if defined(WITH_GSASL)
+
 struct anubis_db_type {
 	char *db_id;          
 	anubis_db_open_t db_open;
 	anubis_db_close_t db_close;
 	anubis_db_io_t db_get_record;
 	anubis_db_io_t db_put_record;
+	anubis_db_delete_t db_delete;
 	anubis_db_strerror_t db_strerror;
 };
 
@@ -61,6 +64,7 @@ anubis_db_register(char *dbid,
 		   anubis_db_close_t _db_close,
 		   anubis_db_io_t _db_get,
 		   anubis_db_io_t _db_put,
+		   anubis_db_delete_t _db_delete,
 		   anubis_db_strerror_t _db_strerror)
 {
 	struct anubis_db_type *dbt = xmalloc(sizeof *dbt);
@@ -69,6 +73,7 @@ anubis_db_register(char *dbid,
 	dbt->db_close = _db_close;
 	dbt->db_get_record = _db_get;
 	dbt->db_put_record = _db_put;
+	dbt->db_delete = _db_delete;
 	dbt->db_strerror = _db_strerror;
 	if (!dbtab)
 		dbtab = list_create();
@@ -78,10 +83,17 @@ anubis_db_register(char *dbid,
 
 
 int
-anubis_db_open(char *dbid, char *arg, enum anubis_db_mode mode, void **dptr)
+anubis_db_open(char *arg, enum anubis_db_mode mode, void **dptr)
 {
 	struct anubis_db_instance *inst;
-	struct anubis_db_type *dbt = anubis_db_locate(dbid);
+	ANUBIS_URL *url;
+	struct anubis_db_type *dbt;
+	int rc;
+		
+	if (anubis_url_parse(&url, arg))
+		return EINVAL;
+	
+	dbt = anubis_db_locate(url->method);
 	if (!dbt)
 		return ENOENT;
 	inst = xmalloc(sizeof *inst);
@@ -90,7 +102,9 @@ anubis_db_open(char *dbid, char *arg, enum anubis_db_mode mode, void **dptr)
 	inst->mode = mode;
 	inst->error_code = 0;
 	*dptr = inst;
-	return dbt->db_open(&inst->db_handle, arg, mode);
+	rc = dbt->db_open(&inst->db_handle, url, mode);
+	anubis_url_destroy(&url);
+	return rc;
 }
 
 int
@@ -128,6 +142,19 @@ anubis_db_put_record(void *dptr, char *key, ANUBIS_USER *rec)
 					    &inst->error_code);
 }
 
+int
+anubis_db_delete_record(void *dptr, char *key)
+{
+	struct anubis_db_instance *inst = dptr;
+	if (inst->mode == anubis_db_rdonly) {
+		inst->error_code = 0;
+		errno = EACCES;
+		return 1;
+	}
+	return inst->db_type->db_delete(inst->db_handle, key,
+					&inst->error_code);
+}
+
 const char *
 anubis_db_strerror(void *dptr)
 {
@@ -150,3 +177,5 @@ anubis_db_free_record(ANUBIS_USER *rec)
 	free(rec->rc_file_name);
 	memset(rec, 0, sizeof *rec);
 }
+
+#endif
