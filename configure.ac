@@ -180,7 +180,7 @@ AC_ARG_WITH(openssl,
 	[with_openssl=no])
 
 if test "$with_openssl" = "yes"; then
-  with_gnutls = no
+ with_gnutls=no
 fi
 
 if test "$with_openssl" = "yes"; then
@@ -211,34 +211,34 @@ if test "$with_openssl" = "yes"; then
  fi
 fi
 
- if test "$with_gnutls" = "yes"; then
-  AC_CHECK_LIB(gcrypt, main,, with_gnutls=no)
-  AC_CHECK_LIB(gnutls, main,, with_gnutls=no)
- fi
- if test "$with_gnutls" = "yes"; then
-  findgnutlsdir() { :
-   if test -f "$1/include/gnutls/gnutls.h"; then
-    gnutlsdir=1
-    INCLUDES="$INCLUDES -I$1/include"
-    AC_MSG_CHECKING(for $1/include/gnutls/gnutls.h)
-    AC_MSG_RESULT([yes])
-    return 0
-   fi
-   return 1
-  }
-  for maindir in /usr/pkg /opt /sw; do
-   findgnutlsdir $maindir && break 2
-  done
-  if test $gnutlsdir; then
-   AC_DEFINE(HAVE_GNUTLS_GNUTLS_H, 1, [Define to 1 if HAVE_GNUTLS_GNUTLS_H is requested.])
-  else
-   AC_CHECK_HEADERS(gnutls/gnutls.h)
+if test "$with_gnutls" = "yes"; then
+ AC_CHECK_LIB(gcrypt, main,, with_gnutls=no)
+ AC_CHECK_LIB(gnutls, main,, with_gnutls=no)
+fi
+if test "$with_gnutls" = "yes"; then
+ findgnutlsdir() { :
+  if test -f "$1/include/gnutls/gnutls.h"; then
+   gnutlsdir=1
+   INCLUDES="$INCLUDES -I$1/include"
+   AC_MSG_CHECKING(for $1/include/gnutls/gnutls.h)
+   AC_MSG_RESULT([yes])
+   return 0
   fi
-  AC_LIBOBJ(tls)
-  AC_DEFINE(USE_GNUTLS, 1, [Define to 1 if USE_GNUTLS is requested.])
+  return 1
+ }
+ for maindir in /usr/pkg /opt /sw; do
+  findgnutlsdir $maindir && break 2
+ done
+ if test $gnutlsdir; then
+  AC_DEFINE(HAVE_GNUTLS_GNUTLS_H, 1, [Define to 1 if HAVE_GNUTLS_GNUTLS_H is requested.])
  else
-  AC_MSG_RESULT([Disabling GnuTLS support...])
+  AC_CHECK_HEADERS(gnutls/gnutls.h)
  fi
+ AC_LIBOBJ(tls)
+ AC_DEFINE(USE_GNUTLS, 1, [Define to 1 if USE_GNUTLS is requested.])
+else
+ AC_MSG_RESULT([Disabling GnuTLS support...])
+fi
 
 dnl Use option --with-pcre to compile PCRE library support.
 AC_ARG_WITH(pcre,
@@ -296,19 +296,19 @@ fi
 AC_CONFIG_FILES([Makefile
  build/Makefile
  build/guile-1.6/Makefile
- m4/Makefile
- intl/Makefile
- po/Makefile.in
+ contrib/Makefile
  doc/Makefile
- src/Makefile
- scripts/Makefile
  examples/Makefile
- guile/Makefile
  examples/pam/Makefile
+ guile/Makefile
+ intl/Makefile
+ m4/Makefile
+ po/Makefile.in
+ scripts/Makefile
+ src/Makefile
  testsuite/Makefile
  testsuite/data/Makefile
  testsuite/etc/Makefile
- contrib/Makefile
  ])
 AC_OUTPUT
 
