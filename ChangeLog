@@ -1,3 +1,9 @@
+2003-05-08  Wojciech Polak
+
+	* configure.ac: Fixed OpenSSL compilation (broken with_gnutls=no).
+	* src/ssl.c (start_ssl_server): Added missing SESS *sd.
+	  (_ssl_strerror): Changed return type to static const char *.
+
 2003-05-02  Wojciech Polak
 
 	* headers.h: Clean up with prototypes. Moved some stuff
