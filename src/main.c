@@ -24,6 +24,17 @@
 #include "extern.h"
 #include "main.h"
 
+#ifdef WITH_GUILE
+void
+anubis_core()
+{
+	char *argv[] = { "anubis", NULL };
+	scm_boot_guile (1, argv, anubis_boot, NULL);
+}
+#else
+# define anubis_core() anubis(NULL)
+#endif
+
 int
 main(int argc, char *argv[])
 {
@@ -108,7 +119,13 @@ main(int argc, char *argv[])
 	/*
 	   Enter the main core...
 	*/
+	anubis_core();
+	return 0;
+}
 
+void
+anubis(char *arg)
+{	
 	trigger_len = strlen(BEGIN_TRIGGER);
 	if (topt & T_STDINOUT) { /* stdin/stdout */
 		if (options.termlevel != DEBUG)
@@ -126,7 +143,6 @@ main(int argc, char *argv[])
 			daemonize();
 		loop(sd_bind);
 	}
-	return 0;
 }
 
 /* EOF */
