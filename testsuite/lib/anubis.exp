@@ -759,6 +759,14 @@ proc anubis_pat {patname} {
 	} else {
 	    switch -regexp -- "$line" {
 		"^:END" { set state 0 }
+		"^-- (.*)" {
+		    regexp "^-- (.*)" $line dummy str
+		    lappend pattern "--" $str
+		}
+		"^-re (.*)" {
+		    regexp "^-re (.*)" $line dummy str
+		    lappend pattern "-re" $str
+		}
 		default { lappend pattern $line }
 	    }
 	}    
