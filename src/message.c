@@ -151,20 +151,23 @@ expand_ampersand(char *value, char *old_value)
 	} else {
 		struct obstack stk;
 		int old_length = strlen(old_value);
-		
-		obstack_init(&stk);
-		for (; p; p = strchr(value, '&')) {
-			int length = p - value;
 
-			obstack_grow(&stk, value, length);
-			if (p > value && p[-1] == '\\') 
-				obstack_1grow(&stk, *p);
-			else 
+		obstack_init(&stk);
+		for (; *value; value++) {
+			switch (*value) {
+			case '\\':
+				value++;
+				if (*value != '&')
+					obstack_1grow(&stk, '\\');
+				obstack_1grow(&stk, *value);
+				break;
+			case '&':
 				obstack_grow(&stk, old_value, old_length);
-			value = p + 1;
+				break;
+			default:
+				obstack_1grow(&stk, *value);
+			}
 		}
-		if (value && value[0])
-			obstack_grow(&stk, value, strlen(value));
 		obstack_1grow(&stk, 0);
 		p = strdup(obstack_finish(&stk));
 		obstack_free(&stk, NULL);
@@ -235,4 +238,3 @@ message_free(MESSAGE *msg)
 }
 
 /* EOF */
-
