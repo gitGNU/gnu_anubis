@@ -36,7 +36,8 @@
 			 The last two items are optional */
 
 static int
-gdbm_db_open (void **dp, ANUBIS_URL *url, enum anubis_db_mode mode)
+gdbm_db_open (void **dp, ANUBIS_URL *url, enum anubis_db_mode mode,
+	      char **errp)
 {
 	GDBM_FILE dbf;
 	int flags;
@@ -54,8 +55,10 @@ gdbm_db_open (void **dp, ANUBIS_URL *url, enum anubis_db_mode mode)
 	path = anubis_url_full_path(url);
 	dbf = gdbm_open(path, 0, flags, 0644, NULL);
 	free(path);
-	if (!dbf)
+	if (!dbf) {
+		*errp = gdbm_strerror(gdbm_errno);
 		return ANUBIS_DB_FAIL;
+	}
 	*dp = dbf;
 	return ANUBIS_DB_SUCCESS;
 }
@@ -133,9 +136,10 @@ gdbm_db_put (void *d, char *keystr, ANUBIS_USER *rec, int *errp)
 	content.dptr = text;
 	content.dsize = size;
 
-	if (gdbm_store((GDBM_FILE)d, key, content, GDBM_REPLACE))
+	if (gdbm_store((GDBM_FILE)d, key, content, GDBM_REPLACE)) {
+		*errp = gdbm_errno;
 		rc = ANUBIS_DB_FAIL;
-	else
+	} else
 		rc = ANUBIS_DB_SUCCESS;
 	free(text);
 	return rc;
@@ -149,11 +153,19 @@ gdbm_db_delete(void *d, char *keystr, int *ecode)
 
 	key.dptr = keystr;
 	key.dsize = strlen(keystr);
-	if (gdbm_delete((GDBM_FILE)d, key))
+	if (gdbm_delete((GDBM_FILE)d, key)) {
+		*ecode = gdbm_errno;
 		rc = ANUBIS_DB_FAIL;
-	else
+	} else
 		rc = ANUBIS_DB_SUCCESS;
 	return rc;
+}
+
+const char *
+gdbm_db_strerror(void *d, int rc)
+{
+	struct anubis_mysql_db *amp = d;
+	return gdbm_strerror(rc);
 }
 
 void
@@ -165,6 +177,6 @@ gdbm_db_init()
 			   gdbm_db_get,
 			   gdbm_db_put,
 			   gdbm_db_delete,
-			   NULL);
+			   gdbm_db_strerror);
 }
 #endif

@@ -33,8 +33,6 @@
           table=STRING;authid=STRING;passwd=STRING[;user=STRING][;rccol=STRING]
           [;port=NUMBER][;socket=STRING][;bufsize=NUMBER]
 
-   mysql://anubis:seCReT@localhost/ANUBIS;table=users;usercol=user;\
-           passcol=pass;pathcol=rcfile
 */
 
 struct anubis_mysql_db {
@@ -48,9 +46,24 @@ struct anubis_mysql_db {
 	size_t bufsize;
 };
 
+#define ERR_MISS         0
+#define ERR_BADBUFSIZE   1
+#define ERR_BADPORT      2 
+#define ERR_CANTCONNECT  3 
+
+static char *open_err_tab[] = {
+	N_("Required parameters are missing"), /* ERR_MISS */
+	N_("Invalid buffer size"),             /* ERR_BADBUFSIZE */
+	N_("Invalid port number"),             /* ERR_BADPORT */
+	N_("Cannot connect to the database"),  /* ERR_CANTCONNECT */
+};
+
+#define open_error_text(s) gettext(open_err_tab[s])
+
 /* Open the plaintext database. ARG is the full pathname to the file */
 static int
-mysql_db_open (void **dp, ANUBIS_URL *url, enum anubis_db_mode mode)
+mysql_db_open (void **dp, ANUBIS_URL *url, enum anubis_db_mode mode,
+	       char **errp)
 {
 	struct anubis_mysql_db *amp = NULL;
 	const char *table = anubis_url_get_arg(url, "table");
@@ -62,17 +75,28 @@ mysql_db_open (void **dp, ANUBIS_URL *url, enum anubis_db_mode mode)
 	const char *s = anubis_url_get_arg(url, "bufsize");
 	int port = 0;
 	size_t bufsize = 1024;
-	
+
+	if (!table || !authid || !passwd || !user || !rccol) {
+		*errp = open_error_text(ERR_MISS);
+		return ANUBIS_DB_FAIL;
+	}
+	 
 	if (s) {
 		char *p;
 		bufsize = strtoul(s, &p, 10);
+		if (*p) {
+			*errp = open_error_text(ERR_BADBUFSIZE);
+			return ANUBIS_DB_FAIL;
+		}
 	}
 		
 	if (portstr) {
 		char *p;
 		port = strtoul(portstr, &p, 10);
-		if (*p)
-			return EINVAL;
+		if (*p) {
+			*errp = open_error_text(ERR_BADPORT);
+			return ANUBIS_DB_FAIL;
+		}
 	}
 
 	amp = xmalloc(sizeof(*amp));
@@ -85,7 +109,8 @@ mysql_db_open (void **dp, ANUBIS_URL *url, enum anubis_db_mode mode)
 				anubis_url_get_arg(url, "socket"),
 				0)) {
 		free(amp);
-		return EINVAL;
+		*errp = open_error_text(ERR_CANTCONNECT);
+		return ANUBIS_DB_FAIL;
 	}
 	amp->table = strdup(table);
 	amp->authid = strdup(authid);

@@ -29,7 +29,7 @@
 
 /* Open the plaintext database. ARG is the full pathname to the file */
 static int
-dbtext_open (void **dp, ANUBIS_URL *url, enum anubis_db_mode mode)
+dbtext_open (void **dp, ANUBIS_URL *url, enum anubis_db_mode mode, char **errp)
 {
 	FILE *fp;
 	char *tmode;
@@ -47,8 +47,11 @@ dbtext_open (void **dp, ANUBIS_URL *url, enum anubis_db_mode mode)
 	path = anubis_url_full_path(url);
 	fp = fopen(path, tmode);
 	free(path);
-	if (!fp)
-		return errno;
+	if (!fp) {
+		if (errp)
+			*errp = strerror(errno);
+		return ANUBIS_DB_FAIL;
+	}
 	*dp = fp;
 	return ANUBIS_DB_SUCCESS;
 }
