@@ -1,0 +1,108 @@
+# -*- tcl -*-
+# This file is part of GNU Anubis testsuite.
+# Copyright (C) 2004 The Anubis Team.
+#
+# GNU Anubis is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# GNU Anubis is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Anubis; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+if [anubis_check_capability "GSASL"] {
+
+    set rmbin [findfile "/bin/rm" "/bin/rm" 0]
+    set cmpbin [findfile "/usr/bin/cmp" "/usr/bin/cmp" 0]
+    if {$rmbin == 0 || $cmpbin == 0} {
+	untested "anubisusr"
+	return
+    }
+    
+    start_daemon
+
+    remote_exec host "$rmbin" "$ANUBIS_RC_DIR/user.rc"
+
+    # First upload:
+    #  user.rc is missing, we upload std.rc
+    #  anubisusr should return 0. std.rc and user.rc should be identical
+    #  after this test
+    set message "anubisusr first upload"
+    set res [remote_exec host "$ANUBIS_USR" \
+              "--netrc $ANUBIS_ETC_DIR/net.rc \
+               --file $ANUBIS_RC_DIR/std.rc localhost:$ANUBIS_PORT"]
+    if {[llength $res] < 1 || [lindex $res 0]} {
+	fail "$message"
+	return
+    }
+
+    set res [remote_exec host "$cmpbin" \
+		 "$ANUBIS_RC_DIR/std.rc $ANUBIS_RC_DIR/user.rc"]
+    if {[llength $res] < 1} {
+	fail "$message: executing cmp failed"
+    } elseif {[lindex $res 0]} {
+	fail "$message: files differ"
+    } else {
+	pass "$message"
+    }
+
+    # Second upload:
+    #  We upload the same file, running anubisusr in verbose mode.
+    #  Its output should contain string "File NOT changed",
+    #  otherwise we declare test failure.
+    set message "anubisusr second upload"
+    set res [remote_exec host "$ANUBIS_USR" \
+              "-v --netrc $ANUBIS_ETC_DIR/net.rc \
+               --file $ANUBIS_RC_DIR/std.rc localhost:$ANUBIS_PORT"]
+    if {[llength $res] < 1 || [lindex $res 0]} {
+	fail $message
+    } else {
+	set output [split [lindex $res 1] "\r\n"]
+	set passed 0
+	for {set i 0} {$i < [llength $output]} {incr i} {
+	    verbose "LINE [lindex $output $i]"
+	    switch -exact -- "[lindex $output $i]" {
+		"File NOT changed" { set passed 1; break }
+	    }
+	}
+
+	if {$passed} {
+	    pass $message
+	} else {
+	    fail $message
+	}
+    }
+
+    # Third upload:
+    #  Upload add.rc. After this test user.rc and add.rc must be identical.
+    set message "anubisusr third upload"
+    set res [remote_exec host "$ANUBIS_USR" \
+              "--netrc $ANUBIS_ETC_DIR/net.rc \
+               --file $ANUBIS_RC_DIR/add.rc localhost:$ANUBIS_PORT"]
+    if {[llength $res] < 1 || [lindex $res 0]} {
+	fail $message
+    } else {
+	set res [remote_exec host "$cmpbin" \
+		     "$ANUBIS_RC_DIR/add.rc $ANUBIS_RC_DIR/user.rc"]
+	if {[llength $res] < 1} {
+	    fail "$message: executing cmp failed"
+	} elseif {[lindex $res 0]} {
+	    fail "$message: files differ"
+	} else {
+	    pass "$message"
+	}
+    }
+    
+    kill_daemon
+} else {
+    unsupported "anubisusr tests"
+}
+
+# End of abase.exp
+    
