@@ -23,7 +23,7 @@
 ##
 
 bin_SCRIPTS = msg2smtp.pl
-EXTRA_DIST = msg2smtp.txt
+EXTRA_DIST = msg2smtp.txt msg2smtp.pl
 
 ## EOF
 
