@@ -1684,6 +1684,26 @@ done
 @end smallexample
 @end deffn
 
+Some remailers require the message to be GPG encrypted or signed.
+You can achive this by placing @code{gpg-encrypt} or @code{gpg-sign}
+statement right after the invocation of @code{remailer-I}, for
+example:
+
+@smallexample
+@group
+trigger "remail:(.*)/(.*)"
+ guile-process remailer-I \
+             #:rrt antonius_block@@helsingor.net \
+             #:post \1 \
+             #:latent \2 \
+             #:header "X-Processed-By: GNU Anubis & Remailer-I"
+ gpg-sign mykey
+done
+@end group
+@end smallexample
+
+@xref{Mail Encryption}, for more information on mail encryption in
+GNU Anubis.
 
 @node Invoking Anubis, Sample Beginning, Rule System, Top
 @chapter Invoking GNU Anubis
