@@ -29,7 +29,7 @@
 
 /*
    SOCKS proxy support.
-   Based on Request For Comments: 1928 ("SOCKS Protocol Version 5").
+   Based on RFC 1928 ("SOCKS Protocol Version 5").
 */
 
 #define SOCKS_VERSION       0x05	/* SOCKS PROTOCOL VERSION 5 */
@@ -118,7 +118,9 @@ connect_through_socks_proxy (int sd, char *host, unsigned int port)
 	  memset (tmp, 0, sizeof (tmp));
 
 	  strcat (host, ".");
-	  for (i = 0; host[i] != '\0'; i++)
+	  for (i = 0; host[i] != '\0'
+		 && j < sizeof (tmp) - 1
+		 && z < sizeof (ip) - 1; i++)
 	    {
 	      if (host[i] != '.')
 		{
@@ -317,9 +319,7 @@ connect_through_socks_proxy (int sd, char *host, unsigned int port)
       for (i = 0; host[i] != '\0'; i++)
 	{
 	  if (isdigit ((u_char) host[i]) || host[i] == '.')
-	    {
-	      ip = 1;		/* IPv4 */
-	    }
+	    ip = 1;		/* IPv4 */
 	  else
 	    ip = 0;		/* a domain name */
 	}
@@ -335,7 +335,9 @@ connect_through_socks_proxy (int sd, char *host, unsigned int port)
 	  request[offset++] = ATYP_IPv4;	/* it's an IPv4 */
 
 	  strcat (host, ".");
-	  for (i = 0; host[i] != '\0'; i++)
+	  for (i = 0; host[i] != '\0'
+		 && j < sizeof (tmp) - 1
+		 && z < sizeof (ip) - 1; i++)
 	    {
 	      if (host[i] != '.')
 		{
@@ -355,7 +357,7 @@ connect_through_socks_proxy (int sd, char *host, unsigned int port)
 	}
       else
 	{			/* a domain name */
-	  request[offset++] = ATYP_DOMAINNAME;	/* it's a domain name */
+	  request[offset++] = ATYP_DOMAINNAME;
 	  request[offset++] = strlen (host);
 	  offset = memcopy_offset ((char *) request, host, offset);
 	}
@@ -385,7 +387,7 @@ connect_through_socks_proxy (int sd, char *host, unsigned int port)
 
       sleep (1);
       memset (reply, 0, sizeof (reply));
-      recv (sd, reply, 4, 0);	/* We don`t know how long is a reply. */
+      recv (sd, reply, 4, 0);	/* We don't know how long is a reply. */
 
       /*
          Process a connection reply.
