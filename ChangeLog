@@ -1,3 +1,19 @@
+2004-12-15  Sergey Poznyakoff
+
+	* configure.ac: Bail out if required SQL libraries are not
+	found. Strictly control arguments to --with-postgres/--with-mysql
+	* src/anubisusr.c (smtp_get_reply): Minor fix: clear trailing \r
+	in buf as well.
+	(cb_service): Fixed typo
+	* src/gsasl.c (write_chunk,_gsasl_read): Removed old usage of
+	gsasl_decode/gsasl_encode.
+	* src/help.c (config_opts): Reflect WITH_PGSQL
+	* src/net.c (recvline_ptr): Fixeb buffer reallocation condition
+	(it didn't take null terminator into account).
+	* src/sql.c (sql_db_get,sql_db_delete,sql_db_put): Fixed eventual
+	sql injection.
+	* THANKS: Added Daniel S. Haischt 
+
 2004-12-09  Wojciech Polak
 
 	* src/socks.c: Fixed possible buffer overflow.
