@@ -1,3 +1,8 @@
+2003-07-09  Wojciech Polak
+
+	* nb.po: New file (Geir Helland)
+	* LINGUAS: Added 'nb'.
+
 2003-06-25  Wojciech Polak
 
 	* pl.po: New file (Sergey Poznyakoff).
