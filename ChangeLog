@@ -1,3 +1,15 @@
+2003-08-08  Sergey Poznyakoff 
+
+	* elisp/anubis-mode.el (anubis-keyword-dict): Added font-lock
+	support.
+	(anubis-check-syntax): New command.
+	* src/rcfile.y (rc_set_debug_level): Default debugging level is 0.
+	* testsuite/etc/std.pin: Provide an explicit argument to
+	--check-config
+	* doc/anubis.texi (Invoking Anubis): Improved the description of
+	--check-config option.
+	* README: Updated
+	
 2003-08-06  Sergey Poznyakoff
 
 	* elisp/Makefile.am: Bugfix, the el file was not compiled
