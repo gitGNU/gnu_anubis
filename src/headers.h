@@ -127,10 +127,6 @@
 # include <security/pam_misc.h>
 #endif /* HAVE_PAM */
 
-#include "mem.h" /* xfree(), xfree_pptr() */
-
-#include "list.h"
-
 #ifdef ENABLE_NLS
 # include <libintl.h>
 # define _(String) gettext(String)
@@ -147,6 +143,9 @@
 #ifdef WITH_GUILE
 # include <libguile.h>
 #endif /* WITH_GUILE */
+
+#include "mem.h" /* xfree(), xfree_pptr() */
+#include "list.h"
 
 #ifndef INADDR_NONE
 # define INADDR_NONE (unsigned long)0xffffffff
@@ -191,7 +190,6 @@
 #define CF_CLIENT     0x0001
 #define CF_SUPERVISOR 0x0002
 #define CF_INIT       0x0004
-
 #define CF_ALL CF_INIT|CF_SUPERVISOR|CF_CLIENT
 
 /* output modes */
@@ -269,9 +267,7 @@ struct message_struct {
 	char *boundary;
 };
 
-
 /* main.c */
-
 void anubis(char *arg);
 
 /* mem.c */
@@ -367,8 +363,9 @@ char *substitute(char *, char **);
 char *insert(char *, char *, char *);
 void change_to_lower(char *);
 
-/* file.c */
-void check_all_files(char *);
+/* files.c */
+void message_append_text_file(MESSAGE *, char *);
+void message_append_signature_file(MESSAGE *, char *);
 
 /* regex.c */
 int anubis_regex_match(RC_REGEX *re, char *line, int *refc, char ***refv);
@@ -428,7 +425,6 @@ void guile_rewrite_line(char *procname, const char *source_line);
 void guile_postprocess_proc(char *procname, struct list **hdr, char **body);
 void guile_section_init();
 #endif /* WITH_GUILE */
-
 
 /* EOF */
 
