@@ -286,7 +286,7 @@ asmtp_init (enum asmtp_state state)
   char *command = NULL;
   size_t s = 0;
 
-  recvline_ptr (SERVER, remote_client, &command, &s);
+  recvline (SERVER, remote_client, &command, &s);
 
   switch (asmtp_kw (get_command_word (command))) {
   case KW_EHLO:
@@ -335,7 +335,7 @@ asmtp_ehlo (enum asmtp_state state, ANUBIS_USER * usr)
   char *mech;
   char *init_input;
 
-  if (recvline_ptr (SERVER, remote_client, &command, &s) <= 0)
+  if (recvline (SERVER, remote_client, &command, &s) <= 0)
     exit (1);
 
   switch (asmtp_kw (get_command_word (command))) {
@@ -469,7 +469,7 @@ xdb_loop (void)
   info (VERBOSE, _("Entering XDB loop..."));
 
   asmtp_capa_add ("XDATABASE");
-  while (recvline_ptr (SERVER, remote_client, &command, &s) > 0)
+  while (recvline (SERVER, remote_client, &command, &s) > 0)
     {
       switch (asmtp_kw (get_command_word (command))) {
       case KW_HELP:

@@ -122,10 +122,10 @@ _xdb_error_printer (void *data,
 static void
 xupload ()
 {
-  int n;
   char *tempname;
   FILE *tempfile;
-  char line[LINEBUFFER + 1];
+  char *line = NULL;
+  size_t size = 0;
   RC_SECTION *sec;
   struct obstack stk;
   char *rcname;
@@ -146,7 +146,7 @@ xupload ()
   swrite (SERVER, remote_client,
 	  "354 Enter configuration settings, end with \".\" on a line by itself\r\n");
 
-  while ((n = recvline (SERVER, remote_client, line, sizeof (line) - 1)) > 0)
+  while (recvline (SERVER, remote_client, &line, &size) > 0)
     {
       remcrlf (line);
       if (strcmp (line, ".") == 0)	/* EOM */
@@ -154,6 +154,7 @@ xupload ()
       fputs (line, tempfile);
       fputc ('\n', tempfile);
     }
+  free (line);  
 
   fclose (tempfile);
 

@@ -90,7 +90,8 @@ auth_ident (struct sockaddr_in *addr, char **user)
 {
   struct servent *sp;
   struct sockaddr_in ident;
-  char buf[LINEBUFFER + 1];
+  char *buf = NULL;
+  size_t size = 0;
   int sd = 0;
   int rc;
   NET_STREAM str;
@@ -130,7 +131,7 @@ auth_ident (struct sockaddr_in *addr, char **user)
       net_close_stream (&str);
       return 0;
     }
-  if (recvline (CLIENT, str, buf, LINEBUFFER) == 0)
+  if (recvline (CLIENT, str, &buf, &size) == 0)
     {
       anubis_error (0, 0,
 		    _("IDENT: recvline() failed: %s."),
@@ -144,8 +145,10 @@ auth_ident (struct sockaddr_in *addr, char **user)
   if (ident_extract_username (buf, user))
     {
       info (VERBOSE, _("IDENT: incorrect data."));
+      free (buf);
       return 0;
     }
+  free (buf);
 
   /******************************
    IDENTD DES decryption support

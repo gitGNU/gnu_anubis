@@ -283,7 +283,8 @@ mda ()
 {
   char **p;
   MESSAGE msg;
-  char buf[128];
+  char *buf = NULL;
+  size_t size = 0;
   char *line = NULL;
   
   create_stdio_stream (&remote_client);
@@ -291,13 +292,15 @@ mda ()
   message_init (&msg);
 
   /* Read eventual From line */
-  recvline (SERVER, remote_client, buf, sizeof (buf) - 1);
+  if (recvline (SERVER, remote_client, &buf, &size) == 0)
+    exit (EX_OK);
   if (memcmp (buf, "From ", 5) == 0)
     save_sender_address (buf);
   else
     assign_string (&line, buf);
   
   collect_headers (&msg, line);
+  free (buf);
   ensure_sender_address (&msg);
   collect_body (&msg);
 

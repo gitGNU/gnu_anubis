@@ -165,7 +165,7 @@ anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER * usr,
   while ((rc = gsasl_step64 (sess_ctx, input, &output)) == GSASL_NEEDS_MORE)
     {
       asmtp_reply (334, "%s", output);
-      recvline_ptr (SERVER, remote_client, &input, &input_size);
+      recvline (SERVER, remote_client, &input, &input_size);
       remcrlf (input);
       if (strcmp (input, "*") == 0)
 	{

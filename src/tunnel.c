@@ -32,7 +32,7 @@
 static int transfer_command (MESSAGE *, char *);
 static int process_command (MESSAGE *, char *);
 static void process_data (MESSAGE *);
-static int handle_ehlo (char *, char *, size_t);
+static int handle_ehlo (char *, char **);
 
 
 
@@ -107,9 +107,10 @@ add_header (ANUBIS_LIST * list, char *line)
 void
 collect_headers (MESSAGE * msg, char *line)
 {
-  char buf[LINEBUFFER + 1];
-
-  while (recvline (SERVER, remote_client, buf, sizeof (buf) - 1))
+  char *buf = NULL;
+  size_t size = 0;
+  
+  while (recvline (SERVER, remote_client, &buf, &size))
     {
       remcrlf (buf);
       if (isspace ((u_char) buf[0]))
@@ -208,7 +209,8 @@ void
 collect_body (MESSAGE * msg)
 {
   int nread;
-  char buf[LINEBUFFER + 1];
+  char *buf = NULL;
+  size_t size = 0;
   struct obstack stk;
   int state = 0;
   int len;
@@ -220,7 +222,7 @@ collect_body (MESSAGE * msg)
     }
   obstack_init (&stk);
   while (state != ST_DONE
-	 && (nread = recvline (SERVER, remote_client, buf, sizeof (buf) - 1)))
+	 && (nread = recvline (SERVER, remote_client, &buf, &size)))
     {
       if (strncmp (buf, "." CRLF, 3) == 0)	/* EOM */
 	break;
@@ -259,6 +261,7 @@ collect_body (MESSAGE * msg)
 	  obstack_1grow (&stk, '\n');
 	}
     }
+  free (buf);
   obstack_1grow (&stk, 0);
   msg->body = strdup (obstack_finish (&stk));
   obstack_free (&stk, NULL);
@@ -305,7 +308,8 @@ send_body (MESSAGE * msg, NET_STREAM sd_server)
 void
 smtp_session_transparent (void)
 {
-  char command[LINEBUFFER + 1];
+  char *command = NULL;
+  size_t size = 0;
   MESSAGE msg;
 
   /*
@@ -313,9 +317,10 @@ smtp_session_transparent (void)
    */
 
   info (VERBOSE, _("Transferring message(s)..."));
-  get_response_smtp (CLIENT, remote_server, command, sizeof (command) - 1);
+  get_response_smtp (CLIENT, remote_server, &command, &size);
 
-  if (strncmp (command, "220 ", 4) == 0 && strstr (command, version) == 0)
+  if (command &&
+      strncmp (command, "220 ", 4) == 0 && strstr (command, version) == 0)
     {
       char *ptr = 0;
       char *banner_ptr = 0;
@@ -347,7 +352,7 @@ smtp_session_transparent (void)
    */
 
   message_init (&msg);
-  while (recvline (SERVER, remote_client, command, sizeof (command) - 1))
+  while (recvline (SERVER, remote_client, &command, &size))
     {
       if (process_command (&msg, command))
 	continue;
@@ -355,6 +360,7 @@ smtp_session_transparent (void)
       if (transfer_command (&msg, command) == 0)
 	break;
     }
+  free (command);
 
   message_free (&msg);
 }
@@ -362,22 +368,27 @@ smtp_session_transparent (void)
 void
 smtp_begin (void)
 {
-  char command[LINEBUFFER + 1];
-
+  char *command = NULL;
+  size_t size;
+  char *reply;
+  
   /* first get an mta banner */
-  get_response_smtp (CLIENT, remote_server, command, sizeof (command) - 1);
+  get_response_smtp (CLIENT, remote_server, &command, &size);
 
   /* now send the ehlo command */
-  snprintf (command, sizeof (command), "EHLO %s", get_ehlo_domain ());
-  swrite (CLIENT, remote_server, command);
+  swrite (CLIENT, remote_server, "HELO ");
+  swrite (CLIENT, remote_server, get_ehlo_domain ());
   send_eol (CLIENT, remote_server);
-  handle_ehlo (command, command, sizeof (command) - 1);
+  handle_ehlo (command, &reply); // FIXME: tak?
+  free (command);
+  free (reply);
 }
 
 void
 smtp_session (void)
 {
-  char command[LINEBUFFER + 1];
+  char *command = NULL;
+  size_t size = 0;
   MESSAGE msg;
 
   info (VERBOSE, _("Starting SMTP session..."));
@@ -385,7 +396,7 @@ smtp_session (void)
   info (VERBOSE, _("Transferring message(s)..."));
 
   message_init (&msg);
-  while (recvline (SERVER, remote_client, command, sizeof (command) - 1))
+  while (recvline (SERVER, remote_client, &command, &size))
     {
       if (process_command (&msg, command))
 	continue;
@@ -393,7 +404,7 @@ smtp_session (void)
       if (transfer_command (&msg, command) == 0)
 	break;
     }
-
+  free (command);
   message_free (&msg);
 }
 
@@ -582,18 +593,21 @@ save_ehlo_domain (char *command)
 }
 
 static int
-handle_ehlo (char *command, char *reply, size_t reply_size)
+handle_ehlo (char *command, char **reply)
 {
+  size_t reply_size = 0;
+  
+  *reply = NULL;
   if (!smtp_ehlo_domain_name)
     save_ehlo_domain (command);
     
-  get_response_smtp (CLIENT, remote_server, reply, reply_size - 1);
+  get_response_smtp (CLIENT, remote_server, reply, &reply_size);
 
-  if (strstr (reply, "STARTTLS"))
+  if (strstr (*reply, "STARTTLS"))
     topt |= T_STARTTLS;		/* Yes, we can use the TLS/SSL
 				   encryption. */
 
-  xdatabase_capability (reply, reply_size);
+  xdatabase_capability (*reply, reply_size);
 
 #ifdef USE_SSL
   if ((topt & T_SSL_ONEWAY)
@@ -601,7 +615,8 @@ handle_ehlo (char *command, char *reply, size_t reply_size)
     {
       NET_STREAM stream;
       char ehlo[128];
-      char newreply[LINEBUFFER + 1];
+      char *newreply = NULL;
+      size_t nsize = 0;
 
       /*
          The 'ONEWAY' method is used when your MUA doesn't
@@ -614,14 +629,14 @@ handle_ehlo (char *command, char *reply, size_t reply_size)
       info (NORMAL,
 	    _("Using TLS/SSL encryption between Anubis and remote MTA only..."));
       swrite (CLIENT, remote_server, "STARTTLS" CRLF);
-      get_response_smtp (CLIENT, remote_server, newreply,
-			 sizeof (newreply) - 1);
+      get_response_smtp (CLIENT, remote_server, &newreply, &nsize);
 
       if (!isdigit ((unsigned char) newreply[0])
 	  || (unsigned char) newreply[0] > '3')
 	{
 	  remcrlf (newreply);
 	  info (VERBOSE, _("WARNING: %s"), newreply);
+	  free (newreply);
 	  anubis_error (0, 0, _("STARTTLS (ONEWAY) command failed."));
 	  topt &= ~T_SSL_ONEWAY;
 	  swrite (SERVER, remote_client, reply);
@@ -645,9 +660,10 @@ handle_ehlo (char *command, char *reply, size_t reply_size)
          Send the EHLO command (after the TLS/SSL negotiation).
        */
 
-      snprintf (ehlo, sizeof (ehlo), "EHLO %s" CRLF, get_ehlo_domain ());
-      swrite (CLIENT, remote_server, ehlo);
-      get_response_smtp (CLIENT, remote_server, reply, reply_size);
+      swrite (CLIENT, remote_server, "EHLO ");
+      swrite (CLIENT, remote_server, get_ehlo_domain ());
+      send_eol (CLIENT, remote_server);
+      get_response_smtp (CLIENT, remote_server, reply, &reply_size);
     }
 #endif /* USE_SSL */
 
@@ -661,10 +677,10 @@ handle_ehlo (char *command, char *reply, size_t reply_size)
     {
       char *starttls1 = "250-STARTTLS";
       char *starttls2 = "STARTTLS";
-      if (strstr (reply, starttls1))
-	remline (reply, starttls1);
-      else if (strstr (reply, starttls2))
-	remline (reply, starttls2);
+      if (strstr (*reply, starttls1))
+	remline (*reply, starttls1);
+      else if (strstr (*reply, starttls2))
+	remline (*reply, starttls2);
     }
 
   /*
@@ -673,7 +689,7 @@ handle_ehlo (char *command, char *reply, size_t reply_size)
 
   if (topt & T_ESMTP_AUTH)
     {
-      char *p = strstr (reply, "AUTH ");
+      char *p = strstr (*reply, "AUTH ");
       if (p && (p[-1] == '-' || p[-1] == ' ') && memcmp (p-4, "250", 3) == 0)
 	{
 	  char *q = strchr (p, '\r');
@@ -691,27 +707,33 @@ handle_ehlo (char *command, char *reply, size_t reply_size)
 static int
 transfer_command (MESSAGE * msg, char *command)
 {
-  char reply[2 * LINEBUFFER + 1];
-  char buf[LINEBUFFER + 1];
-
-  safe_strcpy (buf, command);
+  char *reply = NULL;
+  size_t reply_size = 0;
+  char *buf = NULL;
+  int rc = 1; /* OK */
+  
+  assign_string (&buf, command);
   make_lowercase (buf);
+  
   swrite (CLIENT, remote_server, command);
 
   if (!strncmp (buf, "ehlo", 4))
     {
-      if (handle_ehlo (command, reply, sizeof (reply)))
-	return 0;
+      if (handle_ehlo (command, &reply))
+	{
+	  free (reply);
+	  return 0;
+	}
     }
   else
-    get_response_smtp (CLIENT, remote_server, reply, sizeof (reply));
+    get_response_smtp (CLIENT, remote_server, &reply, &reply_size);
 
   swrite (SERVER, remote_client, reply);
 
   if (isdigit ((unsigned char) reply[0]) && (unsigned char) reply[0] < '4')
     {
       if (strncmp (buf, "quit", 4) == 0)
-	return 0;		/* The QUIT command */
+	rc = 0;		/* The QUIT command */
       else if (strncmp (buf, "rset", 4) == 0)
 	{
 	  message_free (msg);
@@ -722,13 +744,16 @@ transfer_command (MESSAGE * msg, char *command)
 	  process_data (msg);
 	}
     }
-  return 1;			/* OK */
+  free (buf);
+  free (reply);
+  return rc;
 }
 
 void
 process_data (MESSAGE * msg)
 {
-  char buf[LINEBUFFER + 1];
+  char *buf = NULL;
+  size_t size = 0;
 
   alarm (1800);
 
@@ -740,8 +765,9 @@ process_data (MESSAGE * msg)
   transfer_header (msg->header);
   transfer_body (msg);
 
-  recvline (CLIENT, remote_server, buf, sizeof (buf) - 1);
-  swrite (SERVER, remote_client, buf);
+  if (recvline (CLIENT, remote_server, &buf, &size))
+    swrite (SERVER, remote_client, buf);
+  free (buf);
 
   message_free (msg);
   message_init (msg);
@@ -762,15 +788,15 @@ transfer_header (ANUBIS_LIST * header_buf)
 static void
 raw_transfer (void)
 {
-  int nread;
-  char buf[LINEBUFFER + 1];
-  while ((nread = recvline (SERVER, remote_client, buf,
-			    sizeof (buf) - 1)) > 0)
+  size_t size = 0;
+  char *buf = NULL;
+  while (recvline (SERVER, remote_client, &buf, &size) > 0)
     {
       if (strncmp (buf, "." CRLF, 3) == 0)	/* EOM */
 	break;
       swrite (CLIENT, remote_server, buf);
     }
+  free (buf);
 }
 
 void
