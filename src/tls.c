@@ -207,6 +207,7 @@ cipher_info(gnutls_session session)
 	const char *tmp;
 	gnutls_credentials_type cred;
 	gnutls_kx_algorithm kx;
+	int bits;
 
 	kx = gnutls_kx_get(session);
 	tmp = gnutls_kx_get_name(kx);
@@ -216,13 +217,22 @@ cipher_info(gnutls_session session)
 	switch (cred)
 	{
 		case GNUTLS_CRD_ANON: /* anonymous authentication */
-			info(VERBOSE, _("Anonymous DH using prime of %d bits."),
-				gnutls_dh_get_prime_bits(session));
+			bits = gnutls_dh_get_prime_bits(session);
+			info(VERBOSE,
+			     ngettext("Anonymous DH using prime of %d bit.",
+				      "Anonymous DH using prime of %d bits.",
+				      bits),
+			     bits);
 			break;
 		case GNUTLS_CRD_CERTIFICATE: /* certificate authentication */
-			if (kx == GNUTLS_KX_DHE_RSA || kx == GNUTLS_KX_DHE_DSS) {
-				info(VERBOSE, _("Ephemeral DH using prime of %d bits."),
-					gnutls_dh_get_prime_bits(session));
+			if (kx == GNUTLS_KX_DHE_RSA
+			    || kx == GNUTLS_KX_DHE_DSS) {
+				bits = gnutls_dh_get_prime_bits(session);
+				info(VERBOSE,
+				     ngettext("Ephemeral DH using prime of %d bit.",
+					      "Ephemeral DH using prime of %d bits.",
+					      bits),
+				     bits);
 			}
 			print_x509_certificate_info(session);
 			break;
@@ -294,11 +304,13 @@ print_x509_certificate_info(gnutls_session session)
 		printf(_("Certificate public key: "));
 		if (algo == GNUTLS_PK_RSA) {
 			printf(_("RSA\n"));
-			printf(_(" Modulus: %d bits\n"), bits);
+			printf(ngettext(" Modulus: %d bit\n",
+					" Modulus: %d bits\n", bits), bits);
 		}
 		else if (algo == GNUTLS_PK_DSA) {
 			printf(_("DSA\n"));
-			printf(_(" Exponent: %d bits\n"), bits);
+			printf(ngettext(" Exponent: %d bit\n",
+					" Exponent: %d bits\n", bits), bits);
 		}
 		else
 			printf(_("UNKNOWN\n"));

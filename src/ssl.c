@@ -203,15 +203,22 @@ cipher_info(SSL *ssl_local)
 
 	if (cipher) {
 		SSL_CIPHER_get_bits(cipher, &bits);
-		info(VERBOSE, _("%s connection using %s (%u bits)"),
-		SSL_CIPHER_get_version(cipher), SSL_CIPHER_get_name(cipher), bits);
+		info(VERBOSE,
+		     ngettext("%s connection using %s (%u bit)",
+			      "%s connection using %s (%u bits)"
+			      bits),
+		     SSL_CIPHER_get_version(cipher),
+		     SSL_CIPHER_get_name(cipher), bits);
 	}
 	cert = SSL_get_peer_certificate(ssl_local);
 	if (cert == 0)
 		return;
 
-	info(VERBOSE, _("Server public key is %d bits"),
-	EVP_PKEY_bits(X509_get_pubkey(cert)));
+	bits = EVP_PKEY_bits(X509_get_pubkey(cert));
+	info(VERBOSE,
+	     ngettext("Server public key is %d bit",
+		      "Server public key is %d bits", bits),
+	     bits);
 
 	x509buf = (char *)xmalloc(X509BUFSIZE + 1);
 

@@ -89,8 +89,12 @@ sig_cld(int code)
 	while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
 	{
 		nchild--;
-		info(VERBOSE, _("Child [%d] finished. Exit status: %s. %d client(s) left."),
-			pid, WIFEXITED(status) ? _("OK") : _("ERROR"), nchild);
+		info(VERBOSE,
+		     ngettext("Child [%lu] finished. Exit status: %s. %d client left.",
+			      "Child [%lu] finished. Exit status: %s. %d clients left.",
+			       nchild),
+		     (unsigned long) pid,
+		     WIFEXITED(status) ? _("OK") : _("ERROR"), nchild);
 	}
 	return;
 }
