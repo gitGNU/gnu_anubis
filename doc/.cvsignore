@@ -23,5 +23,11 @@ anubis.pdf
 anubis.cms
 anubis.cm
 anubis.ops
+anubis.pdf
 *.inc
 tmp-*
+tmp2-*
+html_mono
+html_node
+html_chapter
+*.stamp

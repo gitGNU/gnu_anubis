@@ -1,3 +1,9 @@
+2004-05-29  Sergey Poznyakoff 
+
+	* doc/Makefile.am: Added rules for generating web docs
+	* doc/index.html.in: New file
+	* doc/.cvsignore: Updated
+
 2004-05-27  Wojciech Polak
 
 	* doc/anubis.texi: Updated (fixed some typos).
