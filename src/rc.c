@@ -66,6 +66,7 @@ anubis_add_section(char *name)
 	
 	anubis_rc_sections[anubis_rc_numsections].name = name;
 	anubis_rc_sections[anubis_rc_numsections].allow_prog = 0;
+	anubis_rc_sections[anubis_rc_numsections].prio = prio_user_only;
 	anubis_rc_sections[anubis_rc_numsections].child = NULL;
 	return &anubis_rc_sections[anubis_rc_numsections++];
 }
@@ -98,6 +99,7 @@ open_rcfile(int method)
 	switch (method) {
 	case CF_SUPERVISOR:
 	case CF_INIT:
+		rc_section_list_destroy(&parse_tree);
 		if (topt & T_ALTRC) {
 			rcfile = strdup(options.altrc);
 		} else if (check_superuser())
@@ -208,10 +210,12 @@ control_parser(int method, int key, LIST *arglist,
 	case KW_RULE_PRIORITY:
 		if (strcasecmp(arg, "user") == 0)
 			anubis_section_set_prio("RULE", prio_user);
+		else if (strcasecmp(arg, "user-only") == 0)
+			anubis_section_set_prio("RULE", prio_user_only);
 		else if (strcasecmp(arg, "system") == 0)
 			anubis_section_set_prio("RULE", prio_system);
-		else if (strcasecmp(arg, "override") == 0)
-			anubis_section_set_prio("RULE", prio_override);
+		else if (strcasecmp(arg, "system-only") == 0)
+			anubis_section_set_prio("RULE", prio_system_only);
 		else
 			return RC_KW_ERROR;
 		break;
