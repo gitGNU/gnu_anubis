@@ -37,10 +37,12 @@ static struct pam_conv conv = {
 
 static int gindex = 0;
 
-#define OPT_VERSION  257
-#define OPT_HELP     258
-#define OPT_ALTRC    259
-#define OPT_NORC     260
+#define OPT_VERSION          257
+#define OPT_HELP             258
+#define OPT_ALTRC            259
+#define OPT_NORC             260
+#define OPT_SHOW_CONFIG      261
+#define OPT_RELAX_PERM_CHECK 262
 
 static struct option gopt[] =
 {
@@ -57,6 +59,8 @@ static struct option gopt[] =
 	{"altrc",       required_argument, 0, OPT_ALTRC},
 	{"norc",        no_argument,       0, OPT_NORC},
 	{"check-config",optional_argument, 0, 'c'},
+	{"show-config-options", no_argument, 0, OPT_SHOW_CONFIG },
+	{"relax-perm-check", no_argument,  0, OPT_RELAX_PERM_CHECK },
 	{0, 0, 0, 0}
 };
 
@@ -66,67 +70,81 @@ get_options(int argc, char *argv[])
 	int c;
 
 	while ((c = getopt_long(argc, argv, "b:r:l:fisvD?",
-				gopt, &gindex)) != EOF)
-	{
-		switch (c)
-		{
-		        case OPT_HELP:
-				print_usage();
-				break;
+				gopt, &gindex)) != EOF)	{
+		switch (c) {
+		case OPT_HELP:
+			print_usage();
+			break;
 			       
-		        case OPT_VERSION:
-				print_version();
-				break;
+		case OPT_VERSION:
+			print_version();
+			break;
 
-		        case OPT_NORC:
-				topt |= T_NORC;
-				break;
+		case OPT_NORC:
+			topt |= T_NORC;
+			break;
 
-		        case OPT_ALTRC:
-				options.altrc = optarg;
-				topt |= T_ALTRC;
-				break;
-			       
-		        case 'c':
-				rc_set_debug_level(optarg);
-				topt |= T_CHECK_CONFIG;
-				break;
-				
-			case 'b': /* daemon's port number, host name */
-				parse_mtahost(optarg, session.tunnel,
-					&session.tunnel_port);
-				if (strlen(session.tunnel) != 0)
-					topt |= T_NAMES;
-				break;
+		case OPT_ALTRC:
+			options.altrc = optarg;
+			topt |= T_ALTRC;
+			break;
 
-			case 'r': /* a remote SMTP host name or IP address */
-				parse_mtaport(optarg, session.mta, &session.mta_port);
-				break;
-			case 'l': /* a local SMTP mode */
-				session.execpath = allocbuf(optarg, MAXPATHLEN);
-				topt |= T_LOCAL_MTA;
-				break;
-			case 'f': /* foreground mode */
-				topt |= T_FOREGROUND_INIT;
-				break;
-			case 'i': /* stdin/stdout */
-				topt |= T_STDINOUT;
-				break;
-			case 'v': /* verbose */
-				options.termlevel = VERBOSE;
-				break;
-			case 'D': /* debug */
-				options.termlevel = DEBUG;
-				break;
-			case 's': /* silent */
-				options.termlevel = SILENT;
-				break;
-			case '?':
-			default:
-				mprintf(_("Try '%s --help' for more information."), argv[0]);
-				quit(0);
+		case OPT_SHOW_CONFIG:
+			print_config_options();
+			break;
+
+		case OPT_RELAX_PERM_CHECK:
+			topt |= T_RELAX_PERM_CHECK;
+			break;
+			
+		case 'c':
+			rc_set_debug_level(optarg);
+			topt |= T_CHECK_CONFIG;
+			break;
+			
+		case 'b': /* daemon's port number, host name */
+			parse_mtahost(optarg, session.tunnel,
+				      &session.tunnel_port);
+			if (strlen(session.tunnel) != 0)
+				topt |= T_NAMES;
+			break;
+
+		case 'r': /* a remote SMTP host name or IP address */
+			parse_mtaport(optarg, session.mta, &session.mta_port);
+			break;
+			
+		case 'l': /* a local SMTP mode */
+			session.execpath = allocbuf(optarg, MAXPATHLEN);
+			topt |= T_LOCAL_MTA;
+			break;
+			
+		case 'f': /* foreground mode */
+			topt |= T_FOREGROUND_INIT;
+			break;
+			
+		case 'i': /* stdin/stdout */
+			topt |= T_STDINOUT;
+			break;
+			
+		case 'v': /* verbose */
+			options.termlevel = VERBOSE;
+			break;
+			
+		case 'D': /* debug */
+			options.termlevel = DEBUG;
+			break;
+
+		case 's': /* silent */
+			options.termlevel = SILENT;
+			break;
+
+		case '?':
+		default:
+			mprintf(_("Try '%s --help' for more information."), argv[0]);
+			quit(0);
 		}
 	}
+	
 	if (topt & T_LOCAL_MTA) {
 		if (optind == argc) { /* No extra arguments specified. */
 			if (session.execpath) {
