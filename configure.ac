@@ -2,7 +2,7 @@ dnl
 dnl configure.ac
 dnl
 dnl This file is part of GNU Anubis.
-dnl Copyright (C) 2001, 2002, 2003 The Anubis Team.
+dnl Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 dnl
 dnl GNU Anubis is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ dnl
 
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT([GNU Anubis], [3.9.94], [bug-anubis@gnu.org], [anubis])
-AC_PREREQ([2.57])
+AC_PREREQ([2.59])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([build])
 AC_CONFIG_SRCDIR([src/main.c])
@@ -354,7 +354,6 @@ AC_CONFIG_FILES([Makefile
  guile/Makefile
  intl/Makefile
  lib/Makefile
- m4/Makefile
  po/Makefile.in
  scripts/Makefile
  src/Makefile
