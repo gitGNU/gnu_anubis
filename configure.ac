@@ -215,7 +215,7 @@ MU_CHECK_GSASL(0.2.3, [
     ANUBIS_BIN_ADM='$(adm_bin_programs)'
     M4_DEFS="$M4_DEFS -DWITH_GSASL"
     if test "$GCC" = "yes"; then
-	CFLAGS="$CFLAGS -Wno-deprecated"
+	CFLAGS="$CFLAGS -Wno-deprecated-declarations"
     fi
 
     AC_CHECK_LIB(gdbm, gdbm_open,
