@@ -579,4 +579,11 @@ int xdatabase (char *command);
 void xdatabase_capability (char *reply, size_t reply_size);
 void xdatabase_enable (void);
 
+/* md5.c */
+int anubis_md5_file (unsigned char *digest, int fd);
+void string_bin_to_hex (unsigned char *output, unsigned char *input, int inlen);
+int string_hex_to_bin (unsigned char *output, unsigned char *input, int inlen);
+
+#define MD5_DIGEST_BYTES 16
+
 /* EOF */
