@@ -624,6 +624,11 @@ rc_set_debug_level (char *arg)
 {
   if (!arg)
     debug_level = 0;
+  else if (arg[1] != 0 || !isdigit (arg[0]))
+    {
+      mprintf (_("Not a valid debugging level: %s"), arg);
+      return;
+    }
   else
     debug_level = arg[0] - '0';
   if (debug_level > 1)
