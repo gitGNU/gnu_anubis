@@ -103,16 +103,22 @@ open_rcfile(int method)
 		break;
 
 	case CF_CLIENT:
-		get_homedir(session.client,
-			    homedir, sizeof(homedir));
-		rcfile = xmalloc(strlen(homedir) +
-				 strlen(DEFAULT_LOCAL_RCFILE) + 2);
-		sprintf(rcfile,	"%s/%s", homedir, DEFAULT_LOCAL_RCFILE);
+		if (topt & T_ALTRC) {
+			rcfile = strdup(options.altrc);
+		} else {
+			get_homedir(session.client,
+				    homedir, sizeof(homedir));
+			rcfile = xmalloc(strlen(homedir) +
+					 strlen(DEFAULT_LOCAL_RCFILE) + 2);
+			sprintf(rcfile,	"%s/%s", homedir,
+				DEFAULT_LOCAL_RCFILE);
+		}
 		info(DEBUG,
 		     _("Reading user configuration file %s..."), rcfile);
 	}
 
-	if (check_filemode(rcfile) == 0) { /* Wrong permissions... */
+	if ((topt & T_RELAX_PERM_CHECK) == 0
+	    && check_filemode(rcfile) == 0) { /* Wrong permissions... */
 		free(rcfile);
 		return;
 	}
