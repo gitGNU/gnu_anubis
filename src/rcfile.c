@@ -146,6 +146,14 @@ file_id_destroy ()
 }
 
 void
+auth_tunnel (void) /* FIXME: Change to a proper name */
+{
+  info (NORMAL, _("Welcome user %s !"), session.clientname);
+  open_rcfile (CF_CLIENT);
+  process_rcfile (CF_CLIENT);
+}
+
+void
 open_rcfile (int method)
 {
   char homedir[MAXPATHLEN + 1];
