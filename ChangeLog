@@ -1,3 +1,8 @@
+2003-06-02  Sergey Poznyakoff
+
+	* src/net.c (_debug_printer): Avoid splitting debug transcript
+	lines.
+
 2003-05-30  Wojciech Polak
 
 	* configure.ac: Added new option --with-unprivileged-user.
