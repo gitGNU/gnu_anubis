@@ -301,6 +301,13 @@ else
  fi
 fi
 
+### Check for Emacs site-lisp directory
+AM_PATH_LISPDIR
+if test "$EMACS" != "no"; then
+	lisp_LISP='$(LISPSRC)'
+fi
+AC_SUBST(lisp_LISP)
+
 AC_CONFIG_FILES([Makefile
  build/Makefile
  build/guile-1.6/Makefile
@@ -314,6 +321,7 @@ AC_CONFIG_FILES([Makefile
  po/Makefile.in
  scripts/Makefile
  src/Makefile
+ elisp/Makefile
  testsuite/Makefile
  testsuite/data/Makefile
  testsuite/etc/Makefile
