@@ -84,7 +84,7 @@ message_append_signature_file(MESSAGE *msg)
 	char *signature_path;
 	size_t n;
 
-	get_homedir(session.client, homedir, sizeof(homedir));
+	get_homedir(session.clientname, homedir, sizeof(homedir));
 
 	n = strlen(homedir) + strlen(signature_file) + 2;
 	n = n > MAXPATHLEN ? MAXPATHLEN + 1 : n + 1;

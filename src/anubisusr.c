@@ -25,13 +25,15 @@
 # include <config.h>
 #endif
 #include "headers.h"
-#include <getopt.h>
 #include "extern.h"
 #include "rcfile.h"
+#include <gsasl.h>
+#include <getopt.h>
+#include <getline.h>
+
 #define obstack_chunk_alloc malloc
 #define obstack_chunk_free free
 #include <obstack.h>
-#include <gsasl.h>
 
 #if defined(USE_GNUTLS) && defined(HAVE_GNUTLS_GNUTLS_H)
 # include <gnutls/gnutls.h>

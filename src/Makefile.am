@@ -25,8 +25,11 @@
 adm_programs = anubisadm anubisusr
 sbin_PROGRAMS = anubis @ANUBISADM@
 EXTRA_PROGRAMS = $(adm_programs)
+
 noinst_LIBRARIES = libanubisdb.a
-anubis_LDADD = ./libanubisdb.a $(top_builddir)/lib/libanubis.a @LIBINTL@ $(GUILE_LIBS) @LIBGNUTLS_LIBS@ @GSASL_LIBS@ 
+anubis_LDADD = ./libanubisdb.a $(top_builddir)/lib/libanubis.a\
+ @LIBINTL@ $(GUILE_LIBS) @LIBGNUTLS_LIBS@ @GSASL_LIBS@ 
+
 anubis_SOURCES = \
  auth.c \
  authmode.c \
@@ -49,11 +52,11 @@ anubis_SOURCES = \
  misc.c \
  net.c \
  quit.c \
- rc.c \
+ rcfile.c \
+ rcfile.h \
  rcfile-gram.c \
  rcfile-gram.h \
  rcfile-lex.c \
- rcfile.h \
  regex.c \
  socks.c \
  transmode.c \

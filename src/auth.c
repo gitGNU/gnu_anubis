@@ -28,7 +28,7 @@
 void
 auth_tunnel(void)
 {
-	info(NORMAL, _("Welcome user %s !"), session.client);
+	info(NORMAL, _("Welcome user %s !"), session.clientname);
 	open_rcfile(CF_CLIENT);
 	process_rcfile(CF_CLIENT);
 }
@@ -131,7 +131,7 @@ auth_ident(struct sockaddr_in *addr, char *user, int size)
 	inet_ntoa(ident.sin_addr), ntohs(ident.sin_port));
 
 	snprintf(buf, LINEBUFFER,
-		 "%u , %u"CRLF, ntohs(addr->sin_port), session.tunnel_port);
+		 "%u , %u"CRLF, ntohs(addr->sin_port), session.anubis_port);
 
 	if ((rc = stream_write(str, buf, strlen(buf), &nbytes))) {
 		anubis_error(SOFT,

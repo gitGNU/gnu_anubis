@@ -2,7 +2,7 @@
    env.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -118,9 +118,9 @@ get_options(int argc, char *argv[])
 			break;
 			
 		case 'b': /* daemon's port number, host name */
-			parse_mtahost(optarg, session.tunnel,
-				      &session.tunnel_port);
-			if (strlen(session.tunnel) != 0)
+			parse_mtahost(optarg, session.anubis,
+				      &session.anubis_port);
+			if (strlen(session.anubis) != 0)
 				topt |= T_NAMES;
 			break;
 

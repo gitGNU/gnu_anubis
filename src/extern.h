@@ -25,41 +25,41 @@
 extern const char version[];
 extern const char copyright[];
 
+struct assoc {
+ char *key;
+ char *value;
+};
+
 struct options_struct {
  int termlevel;
  int uloglevel;
  char *ulogfile;
  char *tracefile;
 #ifdef WITH_GUILE
- char *guile_logfile;
-#endif /* WITH_GUILE */
+ char *glogfile;
+#endif
  char *altrc;
 };
 
 struct session_struct {
- char tunnel[65];
+ char anubis[65];
  char mta[65];
  char mta_username[65];
  char mta_password[65];
+ char supervisor[65];
+ char clientname[65];
+ char notprivileged[65];
+ char *rcfile_name;
+ char *execpath;
+ char **execargs;
+ unsigned int anubis_port;
+ unsigned int mta_port;
 #ifdef USE_SOCKS_PROXY
  char socks[65];
  char socks_username[65];
  char socks_password[65];
-#endif /* USE_SOCKS_PROXY */
- char client[65];
- char *rc_file_name;	
- char supervisor[65];
- char notprivileged[65];
- char *execpath;
- char **execargs;
- unsigned int tunnel_port;
- unsigned int mta_port;
  unsigned int socks_port;
-};
-
-struct assoc {
- char *key;
- char *value;
+#endif /* USE_SOCKS_PROXY */
 };
 
 struct message_struct {

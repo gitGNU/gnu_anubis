@@ -2,7 +2,7 @@
    transmode.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003 The Anubis Team.
+   Copyright (C) 2003, 2004 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -33,8 +33,8 @@ anubis_transparent_mode(NET_STREAM *psd_client, struct sockaddr_in *addr)
 	NET_STREAM sd_server = NULL;
 		
 	rs = auth_ident(addr,
-			session.client,
-			sizeof(session.client));
+			session.clientname,
+			sizeof(session.clientname));
 
 	if ((topt & T_DROP_UNKNOWN_USER) && !rs) {
 		service_unavailable(psd_client);
@@ -42,19 +42,19 @@ anubis_transparent_mode(NET_STREAM *psd_client, struct sockaddr_in *addr)
 	}
 	
 	parse_transmap(&cs,
-		       rs ? session.client : 0,
+		       rs ? session.clientname : 0,
 		       inet_ntoa(addr->sin_addr),
-		       session.client,
-		       sizeof(session.client));
+		       session.clientname,
+		       sizeof(session.clientname));
 				
 	if (cs == 1) {
-		anubis_changeowner(session.client);
+		anubis_changeowner(session.clientname);
 		auth_tunnel();
 	} else if (rs
 		   && cs == -1
 		   && ntohl(addr->sin_addr.s_addr) == INADDR_LOOPBACK) {
-		if (check_username(session.client)) {
-			anubis_changeowner(session.client);
+		if (check_username(session.clientname)) {
+			anubis_changeowner(session.clientname);
 			auth_tunnel();
 		} else
 			set_unprivileged_user();
@@ -99,7 +99,7 @@ anubis_transparent_mode(NET_STREAM *psd_client, struct sockaddr_in *addr)
 			}
 		}
 		if (ntohl(ad.sin_addr.s_addr) == INADDR_LOOPBACK
-		    && session.tunnel_port == session.mta_port) {
+		    && session.anubis_port == session.mta_port) {
 			anubis_error(SOFT, _("Loop not allowed. Connection rejected."));
 			return EXIT_FAILURE;
 		}
@@ -155,3 +155,6 @@ anubis_transparent_mode(NET_STREAM *psd_client, struct sockaddr_in *addr)
 #endif /* HAVE_PAM */
 	return 0;
 }
+
+/* EOF */
+

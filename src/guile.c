@@ -2,7 +2,7 @@
    guile.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003 The Anubis Team.
+   Copyright (C) 2003, 2004 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -67,17 +67,17 @@ guile_ports_open(void)
 {
 	SCM port;
 	int fd = -1;
-	char *name = options.guile_logfile;
+	char *name = options.glogfile;
 
 	if (topt & (T_FOREGROUND_INIT|T_STDINOUT))
 		return;
 	
 	if (name) {
-		fd = open(options.guile_logfile, O_CREAT|O_WRONLY|O_APPEND, 0644);
+		fd = open(options.glogfile, O_CREAT|O_WRONLY|O_APPEND, 0644);
 		if (fd == -1) {
 			anubis_error(SOFT,
 				     _("cannot open guile output file %s: %s"),
-				     options.guile_logfile, strerror(errno));
+				     options.glogfile, strerror(errno));
 		}
 	} else
 		name = "/dev/null";
@@ -365,8 +365,8 @@ guile_parser(int method, int key, LIST *arglist,
 	char *arg = list_item(arglist, 0);
 	switch (key) {
 	case KW_GUILE_OUTPUT:
-		xfree(options.guile_logfile);
-		options.guile_logfile = strdup(arg);
+		xfree(options.glogfile);
+		options.glogfile = strdup(arg);
 		break;
 		
 	case KW_GUILE_DEBUG:

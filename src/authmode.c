@@ -26,7 +26,7 @@
 #include "extern.h"
 #include "rcfile.h"
 
-#if defined(WITH_GSASL)
+#ifdef WITH_GSASL
 
 static char *smtp_greeting_message;
 static LIST *smtp_help_message;
@@ -450,29 +450,32 @@ anubis_authenticate_mode(NET_STREAM *psd_client, struct sockaddr_in *addr)
 	remote_client = *psd_client;
 	remote_server = *psd_client;
 	alarm(900);
+
 	if (anubis_smtp (&usr))
 		return EXIT_FAILURE;
 
 	if (usr.username)
-		strncpy(session.client, usr.username, sizeof session.client);
+		strncpy(session.clientname, usr.username,
+			sizeof(session.clientname));
 	else
-		strncpy(session.client, usr.smtp_authid, sizeof session.client);
+		strncpy(session.clientname, usr.smtp_authid,
+			sizeof(session.clientname));
 
-	if (usr.rc_file_name) 
-		session.rc_file_name = usr.rc_file_name;
+	if (usr.rc_file_name)
+		session.rcfile_name = usr.rc_file_name;
 	
 	parse_transmap(&rc,
-		       session.client,
+		       session.clientname,
 		       inet_ntoa(addr->sin_addr),
-		       session.client,
-		       sizeof(session.client));
+		       session.clientname,
+		       sizeof(session.clientname));
 				
 	if (rc == 1) {
-		anubis_changeowner(session.client);
+		anubis_changeowner(session.clientname);
 		auth_tunnel();
 	} else if (rc == -1) {
-		if (check_username(session.client)) {
-			anubis_changeowner(session.client);
+		if (check_username(session.clientname)) {
+			anubis_changeowner(session.clientname);
 			auth_tunnel();
 		} else
 			set_unprivileged_user();
@@ -517,7 +520,7 @@ anubis_authenticate_mode(NET_STREAM *psd_client, struct sockaddr_in *addr)
 			}
 		}
 		if (ntohl(ad.sin_addr.s_addr) == INADDR_LOOPBACK
-		    && session.tunnel_port == session.mta_port) {
+		    && session.anubis_port == session.mta_port) {
 			anubis_error(SOFT, _("Loop not allowed. Connection rejected."));
 			return EXIT_FAILURE;
 		}
@@ -629,7 +632,11 @@ authmode_section_init(void)
 	rc_secdef_add_child(sp, &init_authmode_child);
 	smtp_greeting_message = strdup("GNU Anubis ESMTP; Identify yourself");
 	smtp_help_message = list_create();
-	list_append(smtp_help_message, strdup("Run 'info anubis' or visit http://www.gnu.org/software/anubis/doc/anubis.html"));
+	list_append(smtp_help_message,
+		    strdup("Run 'info anubis' or visit http://www.gnu.org/software/anubis/doc/anubis.html"));
 }
 
-#endif
+#endif /* WITH_GSASL */
+
+/* EOF */
+

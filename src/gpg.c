@@ -2,7 +2,7 @@
    gpg.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -30,10 +30,10 @@
 #include <gpgme.h>
 
 struct gpg_struct {
-	int inited;
-	char *sign_keys;
-	char *encryption_keys;
-	char *passphrase;
+  int inited;
+  char *sign_keys;
+  char *encryption_keys;
+  char *passphrase;
 };
 
 static struct gpg_struct gpg;
@@ -355,7 +355,7 @@ gpg_proc(MESSAGE *msg, char *(*proc)(char *input))
 	char homedir_c[MAXPATHLEN+1]; /* CLIENT */
 
 	get_homedir(session.supervisor, homedir_s, sizeof(homedir_s));
-	get_homedir(session.client, homedir_c, sizeof(homedir_c));
+	get_homedir(session.clientname, homedir_c, sizeof(homedir_c));
 	setenv("HOME", homedir_c, 1);
 #endif /* HAVE_SETENV or HAVE_PUTENV */
 

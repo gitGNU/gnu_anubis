@@ -1,5 +1,5 @@
 /*
-   rc.c
+   rcfile.c
 
    This file is part of GNU Anubis.
    Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
@@ -259,8 +259,8 @@ control_parser(int method, int key, LIST *arglist,
 	
 	switch (key) {
 	case KW_BIND:                
-		parse_mtahost(arg, session.tunnel, &session.tunnel_port);
-		if (strlen(session.tunnel) != 0)
+		parse_mtahost(arg, session.anubis, &session.anubis_port);
+		if (strlen(session.anubis) != 0)
 			topt |= T_NAMES;
 		break;
 
@@ -683,14 +683,14 @@ rcfile_call_section(int method, char *name, void *data, MESSAGE *msg)
 char *
 user_rcfile_name()
 {
-	if (session.rc_file_name)
-		return strdup(session.rc_file_name);
+	if (session.rcfile_name)
+		return strdup(session.rcfile_name);
 	else {
 		char homedir[MAXPATHLEN+1];
 		char *buf;
 		size_t len;
 		
-		get_homedir(session.client, homedir, sizeof(homedir));
+		get_homedir(session.clientname, homedir, sizeof(homedir));
 		len = strlen(homedir) + 1 + sizeof DEFAULT_LOCAL_RCFILE;
 		buf = xmalloc(len);
 		strcpy(buf, homedir);

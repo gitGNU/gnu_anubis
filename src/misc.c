@@ -137,7 +137,7 @@ parse_mtahost (char *opt, char *host, unsigned int *port)
 			*port = ntohs(p->s_port);
 		else
 			*port = (unsigned int)atoi(port_tmp);
-		strncpy(host, opt_tmp, sizeof(session.tunnel) - 1);
+		strncpy(host, opt_tmp, sizeof(session.anubis) - 1);
 	}
 	else { /* only port number available */
 		if ((p = getservbyname(opt, "tcp")))

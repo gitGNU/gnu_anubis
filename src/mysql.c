@@ -2,7 +2,7 @@
    mysql.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003 The Anubis Team.
+   Copyright (C) 2003, 2004 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -24,7 +24,9 @@
 
 #include "headers.h"
 #include "extern.h"
-#if defined(WITH_MYSQL)
+
+#ifdef WITH_MYSQL
+
 #include <mysql/mysql.h>
 
 /* MySQL URL:
@@ -32,7 +34,6 @@
    mysql://user:password@host/dbname;
           table=STRING;authid=STRING;passwd=STRING[;user=STRING][;rccol=STRING]
           [;port=NUMBER][;socket=STRING][;bufsize=NUMBER]
-
 */
 
 struct anubis_mysql_db {
@@ -266,7 +267,7 @@ mysql_db_strerror(void *d, int rc)
 }
 
 void
-mysql_db_init ()
+mysql_db_init (void)
 {
 	anubis_db_register("mysql",
 			   mysql_db_open,
@@ -277,4 +278,8 @@ mysql_db_init ()
 			   mysql_db_list,
 			   mysql_db_strerror);
 }
-#endif
+
+#endif /* WITH_MYSQL */
+
+/* EOF */
+

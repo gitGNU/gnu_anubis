@@ -2,7 +2,7 @@
    daemon.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -146,7 +146,7 @@ anubis_child_main (NET_STREAM *sd_client, struct sockaddr_in *addr)
 
 	topt &= ~T_FOREGROUND;
 	
-#if defined(WITH_GSASL)
+#ifdef WITH_GSASL
 	switch (anubis_mode) {
 	case anubis_transparent:
 		rc = anubis_transparent_mode(sd_client, addr);
@@ -156,8 +156,9 @@ anubis_child_main (NET_STREAM *sd_client, struct sockaddr_in *addr)
 		rc = anubis_authenticate_mode(sd_client, addr);
 	}
 #else
-	rc = anubis_transparent_mode(*sd_client, addr);
-#endif
+	rc = anubis_transparent_mode(sd_client, addr);
+#endif /* WITH_GSASL */
+
 	net_close_stream(sd_client);
 	return rc;
 }
@@ -314,8 +315,8 @@ stdinout(void)
 	topt |= T_FOREGROUND;
 	topt |= T_SMTP_ERROR_CODES;
 	
-	anubis_getlogin(session.client, sizeof(session.client));
-	auth_tunnel(); /* session.client = session.supervisor */
+	anubis_getlogin(session.clientname, sizeof(session.clientname));
+	auth_tunnel(); /* session.clientname = session.supervisor */
 
 	if (!(topt & T_LOCAL_MTA) && (strlen(session.mta) == 0)) {
 		options.termlevel = NORMAL;
@@ -360,3 +361,4 @@ stdinout(void)
 }
 
 /* EOF */
+

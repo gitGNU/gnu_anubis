@@ -90,7 +90,7 @@ main(int argc, char *argv[])
 
 	options.termlevel = NORMAL;
 	options.uloglevel = FAILS;
-	session.tunnel_port = 24; /* private mail system */
+	session.anubis_port = 24; /* private mail system */
 	session.mta_port = 25;
 
 #ifdef USE_SOCKS_PROXY
@@ -108,15 +108,15 @@ main(int argc, char *argv[])
 	   Initialize various database formats
 	*/
 
-#if defined(WITH_GSASL)
+#ifdef WITH_GSASL
 	dbtext_init();
-# if defined(HAVE_LIBGDBM)
+# ifdef HAVE_LIBGDBM
 	gdbm_db_init();
 # endif
-# if defined(WITH_MYSQL)
+# ifdef WITH_MYSQL
 	mysql_db_init();
 # endif
-#endif
+#endif /* WITH_GSASL */
 	
 	/*
 	   Initialize the rc parsing subsystem.
@@ -173,7 +173,7 @@ anubis(char *arg)
 	}
 	else { /* daemon */
 		int sd_bind;
-		sd_bind = bind_and_listen(session.tunnel, session.tunnel_port);
+		sd_bind = bind_and_listen(session.anubis, session.anubis_port);
 		if (topt & T_FOREGROUND_INIT)
 			topt |= T_FOREGROUND;
 		else

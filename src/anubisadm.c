@@ -407,11 +407,12 @@ main (int argc, char **argv)
 	memory_error = adm_memory_error;
 	
 	/* Initialize various database formats */
+
 	dbtext_init();
-# if defined(HAVE_LIBGDBM)
+# ifdef HAVE_LIBGDBM
 	gdbm_db_init();
 # endif
-# if defined(WITH_MYSQL)
+# ifdef WITH_MYSQL
 	mysql_db_init();
 # endif
 
@@ -471,3 +472,6 @@ main (int argc, char **argv)
 
 	return operation (argc - optind, argv + optind);
 }
+
+/* EOF */
+
