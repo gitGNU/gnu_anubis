@@ -317,7 +317,7 @@ loop(int sd_bind)
 					remote_client = (void *)sd_client;
 					remote_server = (void *)sd_server;
 					alarm(900);
-					smtp_session((void *)sd_client, (void *)sd_server);
+					smtp_session();
 					alarm(0);
 
 #ifdef USE_SSL
@@ -436,7 +436,7 @@ stdinout(void)
 	remote_server = (void *)sd_server;
 	net_set_io(CLIENT, _stdio_read, _stdio_write, NULL, _stdio_strerror);
 	net_set_io(SERVER, _stdio_read, _stdio_write, NULL, _stdio_strerror);
-	smtp_session((void *)sd_client, (void *)sd_server);
+	smtp_session();
 
 	close_socket(sd_server);
 	free_mem();
