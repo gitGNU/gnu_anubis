@@ -136,13 +136,6 @@ anubis_transparent_mode (NET_STREAM * psd_client, struct sockaddr_in *addr)
   smtp_session_transparent ();
   alarm (0);
 
-#ifdef USE_SSL
-  net_close_stream (&secure.client);
-  net_close_stream (&secure.server);
-  secure.server = 0;
-  secure.client = 0;
-#endif
-
   net_close_stream (&sd_server);
   net_close_stream (psd_client);
   *psd_client = NULL;

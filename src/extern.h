@@ -77,8 +77,6 @@ struct message_struct
 #ifdef USE_SSL
 struct secure_struct
 {
-  NET_STREAM client;
-  NET_STREAM server;
   char *cafile;
   char *cert;
   char *key;

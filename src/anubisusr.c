@@ -71,6 +71,7 @@ void error (const char *, ...);
 int send_line (char *buf);
 int smtp_get_reply (struct smtp_reply *repl);
 void smtp_free_reply (struct smtp_reply *repl);
+static void smtp_quit (void);
 
 #define R_CONT     0x8000
 #define R_CODEMASK 0xfff

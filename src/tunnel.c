@@ -445,6 +445,8 @@ static int
 handle_starttls (char *command)
 {
 #ifdef USE_SSL
+  NET_STREAM stream;
+  
   if (topt & T_SSL_FINISHED)
     {
       if (topt & T_SSL_ONEWAY)
@@ -468,6 +470,7 @@ handle_starttls (char *command)
 
   if (!(topt & T_LOCAL_MTA))
     {
+      NET_STREAM stream;
       char reply[LINEBUFFER + 1];
       swrite (CLIENT, remote_server, "STARTTLS" CRLF);
 
@@ -482,14 +485,14 @@ handle_starttls (char *command)
 	  return 0;
 	}
 
-      secure.client = start_ssl_client (remote_server,
-					secure.cafile,
-					options.termlevel > NORMAL);
-      if (!secure.client)
+      stream = start_ssl_client (remote_server,
+				 secure.cafile,
+				 options.termlevel > NORMAL);
+      if (!stream)
 	return 0;
-      remote_server = (void *) secure.client;
+      remote_server = stream;
     }
-
+  
   /*
      Make the TLS/SSL connection with SMTP client
      (client connected with the Tunnel).
@@ -522,16 +525,16 @@ handle_starttls (char *command)
     check_filemode (secure.key);
 
   swrite (SERVER, remote_client, "220 2.0.0 Ready to start TLS" CRLF);
-  secure.server = start_ssl_server (remote_client,
-				    secure.cafile,
-				    secure.cert,
-				    secure.key, options.termlevel > NORMAL);
-  if (!secure.server)
+  stream = start_ssl_server (remote_client,
+			     secure.cafile,
+			     secure.cert,
+			     secure.key, options.termlevel > NORMAL);
+  if (!stream)
     {
       swrite (SERVER, remote_client, "454 4.3.3 TLS not available" CRLF);
       return 0;
     }
-  remote_client = secure.server;
+  remote_client = stream;
   topt |= T_SSL_FINISHED;
 #else
   swrite (SERVER, remote_client, "503 5.5.0 TLS not available" CRLF);
@@ -599,6 +602,7 @@ handle_ehlo (char *command, char *reply, size_t reply_size)
   if ((topt & T_SSL_ONEWAY)
       && (topt & T_STARTTLS) && !(topt & T_SSL_FINISHED))
     {
+      NET_STREAM stream;
       char ehlo[128];
       char newreply[LINEBUFFER + 1];
 
@@ -627,17 +631,17 @@ handle_ehlo (char *command, char *reply, size_t reply_size)
 	  return 1;
 	}
 
-      secure.client = start_ssl_client (remote_server,
-					secure.cafile,
-					options.termlevel > NORMAL);
-      if (!secure.client)
+      stream = start_ssl_client (remote_server,
+				 secure.cafile,
+				 options.termlevel > NORMAL);
+      if (!stream)
 	{
 	  topt &= ~T_SSL_ONEWAY;
 	  swrite (SERVER, remote_client, reply);
 	  return 1;
 	}
 
-      remote_server = (void *) secure.client;
+      remote_server = stream;
       topt |= T_SSL_FINISHED;
 
       /*

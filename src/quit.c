@@ -63,17 +63,10 @@ quit (int code)
 {
   memset (session.mta_username, 0, sizeof (session.mta_username));
   memset (session.mta_password, 0, sizeof (session.mta_password));
-
-#ifdef USE_SSL
-  /*FIXME!!! */
-  net_close_stream (&secure.client);
-  net_close_stream (&secure.server);
-#endif
 #ifdef HAVE_SYSLOG
   if ((topt & T_DAEMON) && !(topt & T_FOREGROUND))
     closelog ();
 #endif /* HAVE_SYSLOG */
-
   free_mem ();
   exit (code);
 }
