@@ -27,6 +27,8 @@ noinst_LIBRARIES = libanubis.a
 libanubis_a_SOURCES = 
 
 EXTRA_DIST = \
+ getline.h \
+ getopt.h \
  getopt.h \
  getopt.c \
  getopt1.c \
