@@ -23,7 +23,7 @@
 ##
 
 man_MANS = anubis.1
-EXTRA_DIST = $(man_MANS) pixie-dixie.pl.txt
+EXTRA_DIST = $(man_MANS) pixie-dixie.pl.txt index.html.in
 
 RENDITION=DISTRIB
 MAKEINFOFLAGS=-D$(RENDITION)
