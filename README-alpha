@@ -1,0 +1,31 @@
+This is the GNU Anubis package.
+
+This is a *pre-release* version, and not ready for production
+use yet. If you are taking source from CVS, you will need to
+have autoconf, automake, yacc*, lex**, and gettext installed
+to help contribute. The script `autogen.sh' is provided to help
+autoconfigure Anubis from the CVS src. After you run `autogen.sh',
+there should be a file `INSTALL' with (generic) installation
+instructions.
+
+*  or bison
+** or flex
+
+Report bugs to <bug-anubis@gnu.org>
+
+To get this information from CVS issue the following commands:
+
+ cvs -d :pserver:anoncvs@subversions.gnu.org:/cvsroot/anubis login
+
+Press enter when prompted for a password.
+
+ cvs -d :pserver:anoncvs@subversions.gnu.org:/cvsroot/anubis checkout anubis
+
+This will give you read-only access. If you think you need write access,
+contact the mailing list.
+
+In order to build this you will need to call the auto* tools with
+the right arguments, see or run the `autogen.sh'.
+
+EOF
+
