@@ -1,3 +1,34 @@
+2005-01-21  Sergey Poznyakoff
+
+	* configure.ac: Raised version number to 4.1
+	* src/env.c: New option --from
+	* src/help.c: Document --from option
+	* src/exec.c (make_local_connection_arg): Removed. Not needed
+	any more.
+	* src/extern.h (incoming_mail_rule,outgoing_mail_rule)
+	(from_address): New variables.
+	* src/headers.h (send_eol,mda)
+	(anubis_set_encryption_mech_list): New prototype.
+	(anubis_assoc_cmp): New function
+	(collect_headers): Changed prototype
+	(make_local_connection_arg): Removed.
+	* src/main.c (incoming_mail_rule,outgoing_mail_rule): New
+	variables.
+	* src/mda.c (deliver): Expand macro notations in local mailer
+	command line before invoking it.
+	Use rcfile_call_section to process incoming mail rules.
+	(mda): Ensure from_address is set.
+	* src/misc.c (anubis_assoc_cmp): New function
+	(assign_string, assign_string_n): Accept NULL argument.
+	* src/rcfile.c (control_parser): Handle incoming-mail-rule
+	and outgoing-mail-rule options.
+	* src/tunnel.c (collect_headers): Take second argument, specifying
+	the first header line (or NULL).
+	(process_data): Use rcfile_call_section to process outgoing mail
+	rules.
+	
+	* doc/anubis.texi: Initial documentation for MDA mode
+
 2005-01-20  Sergey Poznyakoff
 
 	Initial implementation of MDA mode, allowing Anubis to
