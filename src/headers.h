@@ -232,12 +232,11 @@
 #define T_USER_NOTPRIVIL    0x00080000
 #define T_STARTTLS          0x00100000
 #define T_ESMTP_AUTH        0x00200000
-#define T_BOUNDARY          0x00400000
-#define T_NORC              0x00800000
-#define T_ALTRC             0x01000000
-#define T_CHECK_CONFIG      0x02000000
-#define T_RELAX_PERM_CHECK  0x04000000
-#define T_ENTIRE_BODY       0x08000000
+#define T_NORC              0x00400000
+#define T_ALTRC             0x00800000
+#define T_CHECK_CONFIG      0x01000000
+#define T_RELAX_PERM_CHECK  0x02000000
+#define T_ENTIRE_BODY       0x04000000
 
 /* Regular expression flags */
 #define R_BASIC             0x00000001
@@ -337,10 +336,15 @@ void translate_section_init();
 
 /* tunnel.c */
 void smtp_session(void *, void *);
-void message_add_header(MESSAGE *msg, char *hdr);
+
+/* message.c */
+void message_add_body(MESSAGE *msg, char *key, char *value);
+void message_add_header(MESSAGE *msg, char *hdr, char *value);
 void message_remove_headers(MESSAGE *msg, char *arg);
-void message_modify_headers(MESSAGE *msg, char *arg, char *modify);
+void message_modify_headers(MESSAGE *msg, char *key, char *key2, char *value);
 void message_external_proc(MESSAGE *msg, char *name);
+void message_init(MESSAGE *msg);
+void message_free(MESSAGE *msg);
 
 /* exec.c */
 char **gen_execargs(const char *);
