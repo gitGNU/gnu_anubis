@@ -272,6 +272,17 @@ if test $with_gnutls = yes; then
   fi
 fi
 
+dnl Use option --with-socks-proxy to compile SOCKS v4/5 proxy support.
+AC_ARG_WITH(socks-proxy,
+	AC_HELP_STRING([--with-socks-proxy],
+	[with SOCKS v4/5 proxy support]),
+	[with_socks_proxy=${withval}],
+	[with_socks_proxy=no])
+if test "$with_socks_proxy" = "yes"; then
+ AC_DEFINE(USE_SOCKS_PROXY, 1, [Define to 1 if USE_SOCKS_PROXY is requested.])
+ AC_MSG_RESULT([Enabling SOCKS v4/5 proxy support...])
+fi
+
 dnl Use option --with-pcre to compile PCRE library support.
 AC_ARG_WITH(pcre,
 	AC_HELP_STRING([--with-pcre],
