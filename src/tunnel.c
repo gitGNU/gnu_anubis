@@ -49,12 +49,16 @@ get_boundary(MESSAGE *msg, char *line)
 
 	if (strncmp(line, "Content-Type:", 13))
 		return;
-	
+
+	/* Downcase the string to help search for boundary */
 	safe_strcpy(boundary_buf, line);
 	change_to_lower(boundary_buf);
 	p = strstr(boundary_buf, "boundary=");
 	if (!p)
 		return;
+	/* Now use the unaltered string. P still points past the
+	   `boundary=' */
+	safe_strcpy(boundary_buf, line);
 	p += 9;
 	if (*p == '"') {
 		char *q = strchr(++p, '"');
