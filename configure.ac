@@ -23,7 +23,7 @@ dnl compiling, linking, and/or using OpenSSL is allowed.
 dnl
 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT([GNU Anubis], [3.9.91], [bug-anubis@gnu.org], [anubis])
+AC_INIT([GNU Anubis], [3.9.92], [bug-anubis@gnu.org], [anubis])
 AC_PREREQ([2.57])
 AC_CONFIG_AUX_DIR([build])
 AC_CONFIG_SRCDIR([src/main.c])
@@ -313,6 +313,7 @@ AC_CONFIG_FILES([Makefile
  build/guile-1.6/Makefile
  contrib/Makefile
  doc/Makefile
+ elisp/Makefile
  examples/Makefile
  examples/pam/Makefile
  guile/Makefile
@@ -321,7 +322,6 @@ AC_CONFIG_FILES([Makefile
  po/Makefile.in
  scripts/Makefile
  src/Makefile
- elisp/Makefile
  testsuite/Makefile
  testsuite/data/Makefile
  testsuite/etc/Makefile
