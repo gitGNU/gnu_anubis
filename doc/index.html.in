@@ -3,14 +3,14 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 <HEAD>
- <TITLE>%PACKAGE_NAME% Reference Manual - Table of Contents - GNU Project - Free Software Foundation (FSF)</TITLE>
+ <TITLE>%PACKAGE_NAME% Manual - Table of Contents - GNU Project - Free Software Foundation (FSF)</TITLE>
  <LINK REV="made" HREF="mailto:gray@gnu.org">
  <BASE HREF="%BASE_URL%">
  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; CHARSET=US-ASCII">
  <META NAME="keywords" CONTENT="Anubis SMTP processor">
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="#1F00FF" ALINK="#FF0000" VLINK="#9900DD">
-<H1>%PACKAGE_NAME% Reference Manual - Table of Contents</H1>
+<H1>%PACKAGE_NAME% Manual - Table of Contents</H1>
 <ADDRESS>Free Software Foundation</ADDRESS>
 <ADDRESS>last updated %UPDATED%</ADDRESS>
 <P>

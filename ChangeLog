@@ -1,3 +1,7 @@
+2004-05-29  Wojciech Polak
+
+	* doc/Makefile.am: Changed date format to '%B %d, %Y'.
+
 2004-05-29  Sergey Poznyakoff 
 
 	* doc/Makefile.am: Added rules for generating web docs
