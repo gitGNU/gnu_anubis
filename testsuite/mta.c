@@ -75,9 +75,10 @@ int port = 0;            /* Port number (for smtp mode) */
 
 char *progname;
 
-int mta_daemon(int argc, char **argv);
-int mta_stdio(int argc, char **argv);
-void error(const char *fmt, ...);
+int mta_daemon(int, char **);
+int mta_stdio(int, char **);
+void error(const char *, ...);
+void smtp_reply(int, char *, ...);
 
 int
 main (int argc, char **argv)
@@ -476,5 +477,5 @@ mta_stdio(int argc, char **argv)
 	return 0;
 }
 
-
+/* EOF */
 
