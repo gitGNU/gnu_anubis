@@ -1,3 +1,8 @@
+2003-02-01  Sergey Poznyakoff
+
+	* examples/anubis.scm (postprocess): Escape quotes inside the 
+	  comment string
+
 2003-02-01  Wojciech Polak
 
 	* AUTHORS: Added Sergey Poznyakoff.
