@@ -1,3 +1,27 @@
+2004-09-22  Sergey Poznyakoff
+
+	* src/anubisusr.c: Got read of secure.client and secure.server
+	globals
+	* src/extern.h: Likewise
+	* src/quit.c: Likewise
+	* src/transmode.c: Likewise
+	* src/tunnel.c: Likewise
+	
+	* src/rcfile.c: Allow use of `logfiles' and `loglevel' in main
+	configuration file, provided that the uid is not 0.
+	* src/headers.h: New macro T_DISABLE_SYSLOG
+	* src/log.c: Do not use syslog if T_DISABLE_SYSLOG is set
+	
+	* src/daemon.c (daemonize): Use info() instead of syslog().
+	(sig_cld): Improved diagnostics.
+	* src/stream.c (stream_destroy): Use xfree() for consistency
+	
+	* src/errs.c: Minor formatting fix.
+	* src/message.c: Likewise
+
+	* testsuite/etc/interface.in.in: Use logfile directive
+	* testsuite/etc/target.in.in: Likewise
+	
 2004-09-17  Sergey Poznyakoff
 
 	* testsuite/lib/anubis.exp (anubis_pat): Updated to
