@@ -161,6 +161,7 @@ anubis_regex_replace (RC_REGEX * re, char *line, char *repl)
   int alloc = 0;
   struct regex_vtab *vp;
 
+  wd();
   ASSERT_RE (re, vp);
   while (vp->match (re, line + off, &refc, &refv, &so, &eo) == 0)
     {
@@ -215,7 +216,7 @@ anubis_regex_replace (RC_REGEX * re, char *line, char *repl)
       if (savep)
 	xfree (savep);
       line = newstr;
-      off += eo;
+      off += so;
     }
   return newstr;
 }
@@ -350,7 +351,7 @@ posix_match (RC_REGEX * regex, char *line, int *refc, char ***refv,
 
   rmp = xmalloc ((re->re_nsub + 1) * sizeof (*rmp));
   rc = regexec (re, line, re->re_nsub + 1, rmp, 0);
-  if (rc == 0 && re->re_nsub)
+  if (rc == 0)
     {
       int i;
       *refv = xmalloc ((re->re_nsub + 2) * sizeof (**refv));
@@ -443,6 +444,8 @@ perl_match (RC_REGEX * regex, char *line, int *refc, char ***refv,
     {
       /* shouldn't happen, but still ... */
       anubis_error (0, 0, _("Matched, but too many substrings."));
+      *so = *eo = -1;
+      *refc = 0;
     }
   else if (rc > 0)
     {
@@ -482,3 +485,9 @@ perl_refcnt (RC_REGEX * regex)
 #endif /* HAVE_PCRE */
 
 /* EOF */
+wd()
+{
+  static int _st=1;
+  while (!_st)
+    _st=_st;
+}
