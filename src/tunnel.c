@@ -29,133 +29,233 @@
 #define obstack_chunk_free free
 #include <obstack.h>
 
-typedef int (*read_fn_t)(void *data, char *buf, size_t size);
-
 static int  transfer_command(void *, void *, char *);
 static void process_command(void *, void *, char *, int);
-static void transfer_header(void *, void *, read_fn_t, void *);
+static void transfer_header(void *, void *, struct list *list);
 static void process_header_line(char *);
-static void transfer_body(void *, void *, read_fn_t, void *);
-static void static_body_transfer(void *, void *, read_fn_t, void *);
-static void dynamic_body_transfer(void *, void *, read_fn_t, void *);
-static void clear_body_transfer(void *, void *);
+static void transfer_body(void *, void *);
 static void add_remailer_commands(void *);
 static void transform_body(void *sd_server);
 static void process_data(void *sd_client, void *sd_server);
 
-static void collect_body(void *sd_client, char **retptr);
-static void collect_headers(void *sd_client, struct list **listp);
-
-int
-socket_reader(void *sd_client, char *buf, size_t size)
-{
-	return recvline(SERVER, sd_client, buf, size);
-}
-
-enum buf_state {
-	state_init,
-	state_end,
-	state_finish
-};
-	
-struct mem_buf {
-	char *buffer;
-	size_t pos;
-	size_t size;
-	enum buf_state state;
-};
+
+/* Auxiliary list handling functions */ 
+/* These belong to the future list.c */
+typedef int (*list_iterator_t)(struct list *list, void *data);
 
 void
-init_mem_buf(struct mem_buf *mb, char *buf)
+list_iterate(struct list *p, list_iterator_t itr, void *data)
 {
-	memset(mb, 0, sizeof(*mb));
-	mb->buffer = buf;
-	mb->size = strlen(buf);
-	mb->pos = 0;
-	mb->state = state_init;
+	while (p) {
+		struct list *q = p->next;
+		itr(p, data);
+		p = q;
+	};
 }
 
-int
-memory_reader(void *closure, char *buf, size_t size)
+void
+list_append(struct list **a, struct list *b)
 {
-	struct mem_buf *mb = closure;
-	int i = 0;
-	int crlf;
-	
-	switch (mb->state) {
-	case state_init:
-		crlf = 0;
-		size--; /* make space for terminating zero */
-		for (i = 0; i < size; i++) {
-			if (mb->pos == mb->size) {
-				mb->state = state_end;
-				break;
-			}
-			*buf++ = mb->buffer[mb->pos++];
-			if (i > 2 && buf[-2] == '\r' && buf[-1] == '\n') {
-				crlf = 1;
-				break;
-			}
-		}
-
-		if (!crlf) {
-		        strcpy(buf, CRLF);
-			i += 2;
-			buf += 2;
-		}
-		*buf = 0;
-		break;
-
-	case state_end:
-		if (size < 4)
-			i = 0;
-		else {
-			strcpy(buf, "." CRLF);
-			i = 3;
-		}
-		break;
+	if (!*a)
+		*a = b;
+	else {
+		struct list *p;
 		
-	case state_finish:
-		i = 0;
+		for (p = *a; p->next; p = p->next)
+			;
+		p->next = b;
 	}
-	return i;
 }
 
-struct list_buf {
-	struct list *list;
-	enum buf_state state;
-};
+
+/* Collect and send headers */
+
+/* Headers spanning multiple lines are wrapped into a single line, preserving
+   the newlines. When sending to the server they are split again at newlines
+   snd sent in multiline lines. */
+   
+static void
+get_boundary(char *line)
+{
+	char boundary_buf[LINEBUFFER+1], *p;
+
+	if (strncmp(line, "Content-Type:", 13))
+		return;
+	
+	safe_strcpy(boundary_buf, line);
+	change_to_lower(boundary_buf);
+	p = strstr(boundary_buf, "boundary=");
+	if (!p)
+		return;
+	p += 9;
+	if (*p == '"') {
+		char *q = strchr(++p, '"');
+		if (*q)
+			*q = 0;
+	}
+	message.boundary = xmalloc(strlen(p) + 3);
+	sprintf(message.boundary, "--%s", p);
+	topt |= T_BOUNDARY;
+}
+
+static void
+collect_headers(void *sd_client, struct list **listp)
+{
+	struct list *tail;
+	char buf[LINEBUFFER+1];
+
+	*listp = tail = NULL;
+	while (recvline(SERVER, sd_client, buf, LINEBUFFER)) {
+		if (strncmp(buf, CRLF, 2) == 0)
+			break;
+		remcrlf(buf);
+		if (isspace(buf[0])) {
+			if (!tail) 
+				/* Something wrong, assume we've got no
+				   headers */
+				break;
+			tail->line = xrealloc(tail->line,
+					      strlen(tail->line) +
+					      strlen(buf) + 2);
+			strcat(tail->line, "\n");
+			strcat(tail->line, buf);
+		} else {
+			if (!(topt & (T_BOUNDARY|T_ENTIRE_BODY)) && tail)
+			    get_boundary(tail->line);
+			tail = new_element(tail, listp, buf);
+		}
+	}
+}
+static void
+write_header_line (void *sd_server, char *line)
+{
+	char *p;
+
+	p = strtok(line, "\n");
+	do {
+		swrite(CLIENT, sd_server, p);
+		swrite(CLIENT, sd_server, CRLF);
+	} while (p = strtok(NULL, "\n"));
+}
+			
+void
+send_header (void *sd_server, struct list **plist)
+{
+	struct list *p;
+	p = *plist;
+	while (p) {
+		struct list *q = p->next;
+		write_header_line(sd_server, p->line);
+		free(p->line);
+		free(p);
+		p = q;
+	}
+	*plist = NULL;
+}
+
+
+/* Collect and sent the message body */
+
+/* When read each CRLF is replaced by a single newline.
+   When sent, the reverse procedure is performed.
+
+   The handling of MIME encoded messages depends on the
+   setting of T_ENTIRE_BODY bit in topt. If the bit is set, the
+   entire body is read into memory. Otherwise, only the first
+   part is read and processed, all the rest is passed to the
+   server verbatim. */
+
+#define ST_INIT  0
+#define ST_HDR   1
+#define ST_BODY  2
+#define ST_DONE  3
+
+static void
+collect_body(void *sd_client, char **retptr)
+{
+	int nread;
+	char buf[LINEBUFFER+1];
+	struct obstack stk;
+	int state = 0;
+	struct list *tail = NULL;
+	int len;
+
+	if (topt & T_BOUNDARY) 
+		len = strlen(message.boundary);
+	
+	obstack_init (&stk);
+	while (state != ST_DONE
+	       && (nread = recvline(SERVER, sd_client, buf, LINEBUFFER))) {
+		if (strncmp(buf, "."CRLF, 3) == 0) /* EOM */
+			break;
+		
+		remcrlf(buf);
+		
+		if (topt & T_BOUNDARY) {
+			switch (state) {
+			case ST_INIT:
+				if (strcmp(buf, message.boundary) == 0) 
+					state = ST_HDR;
+				break;
+
+			case ST_HDR:
+				if (buf[0] == 0) 
+					state = ST_BODY;
+				else
+					tail = new_element(tail,
+							   &message.mime_hdr,
+							   buf);
+				break;
+
+			case ST_BODY:
+				if (strncmp(buf, message.boundary, len) == 0)
+					state = ST_DONE;
+				else {
+					obstack_grow(&stk, buf, strlen(buf));
+					obstack_1grow(&stk, '\n');
+				}
+			}
+		} else {
+			obstack_grow(&stk, buf, strlen(buf));
+			obstack_1grow(&stk, '\n');
+		}
+	}
+	obstack_1grow(&stk, 0);
+	*retptr = strdup(obstack_finish(&stk));
+	obstack_free(&stk, NULL);
+}
 
 void
-init_list_buf(struct list_buf *lb, struct list *list)
+send_body(void *sd_server)
 {
-	lb->list = list;
-	lb->state = state_init;
-}
+	char *p;
 
-int
-list_reader(void *closure, char *buf, size_t size)
-{
-	struct list_buf *lb = closure;
+	if (topt & T_BOUNDARY) {
+		swrite(CLIENT, sd_server, message.boundary);
+		swrite(CLIENT, sd_server, CRLF);
+		send_header(sd_server, &message.mime_hdr);
+		swrite(CLIENT, sd_server, CRLF);
+	}
 
-	switch (lb->state) {
-	case state_init:
-		if (!lb->list) {
-			lb->state = state_finish;
-			strncpy(buf, CRLF, size);
-		} else {
-			strncpy(buf, lb->list->line, size);
-			lb->list = lb->list->next;
-		}
-		return strlen(buf);
+	for (p = message.body; *p; ) {
+		char *q = strchr(p, '\n');
+		if (q)
+			*q++ = 0;
+		else
+			q = p + strlen(p);
+		
+		swrite(CLIENT, sd_server, p);
+		swrite(CLIENT, sd_server, CRLF);
+		p = q;
+	}
 
-	default:
-		return 0;
+	if (topt & T_BOUNDARY) {
+		swrite(CLIENT, sd_server, message.boundary);
+		swrite(CLIENT, sd_server, CRLF);
 	}
 }
 
-
-
+
 /******************
   The Tunnel core
 *******************/
@@ -491,61 +591,25 @@ transfer_command(void *sd_client, void *sd_server, char *command)
 	return 1; /* OK */
 }
 
-static void
-collect_headers(void *sd_client, struct list **listp)
-{
-	struct list *tail;
-	char buf[LINEBUFFER+1];
-
-	*listp = tail = NULL;
-	while (recvline(SERVER, sd_client, buf, LINEBUFFER))
-	{
-		if (strncmp(buf, CRLF, 2) == 0)
-			break;
-
-		tail = new_element(tail, listp, buf);
-	}
-}
-		
-static void
-collect_body(void *sd_client, char **retptr)
-{
-	int nread;
-	char body_line[LINEBUFFER+1];
-	struct obstack stk;
-
-	obstack_init (&stk);
-	while ((nread = recvline(SERVER, sd_client, body_line, LINEBUFFER))) {
-		if (strncmp(body_line, "."CRLF, 3) == 0) /* EOM */
-			break;
-		obstack_grow(&stk, body_line, strlen (body_line));
-	}
-	obstack_1grow(&stk, 0);
-	*retptr = strdup(obstack_finish(&stk));
-	obstack_free(&stk, NULL);
-}
-
 void
 process_data(void *sd_client, void *sd_server)
 {
 	struct list *message_hdr;
-	struct mem_buf mb;
-	struct list_buf lb;
+	char buf[LINEBUFFER+1];
 
 	alarm(1800);
 
 	collect_headers(sd_client, &message_hdr);
 	collect_body(sd_client, &message.body);
 
-	init_list_buf(&lb, message_hdr);
-	transfer_header(sd_client, sd_server, list_reader, &lb);
+	transfer_header(sd_client, sd_server, message_hdr);
+	transform_body(sd_server);
+	transfer_body(sd_client, sd_server);
 
-	init_mem_buf(&mb, message.body);
-	transfer_body(sd_client, sd_server, memory_reader, &mb);
+	recvline(CLIENT, sd_server, buf, LINEBUFFER);
+	swrite(SERVER, sd_client, buf);
 
-	/* FIXME: 
-	   destroy_list(&message_hdr);
-	   xfree(message_body); */
+	/* FIXME: xfree(message_body); */
 
 	alarm(0);
 }
@@ -554,193 +618,133 @@ process_data(void *sd_client, void *sd_server)
   MESSAGE HEADER
 ******************/
 
-static void
-transfer_header(void *sd_client, void *sd_server,
-		read_fn_t readfn, void *closure)
+struct header_data {
+	void *sd_client;
+	void *sd_server;
+	struct list *header;
+};
+
+struct closure {
+	RC_REGEX *regex;
+	char *modify;
+	struct list *head, *tail;
+};
+
+int
+action_remove2(struct list *p, void *data)
 {
-	struct list *header_buf = NULL;
-	struct list *header_tail = NULL;
-	struct list *p1;
-	struct list *p2;
-	char header_line[LINEBUFFER+1];
-
-	while (readfn(closure, header_line, LINEBUFFER)) {
-		if (strncmp(header_line, CRLF, 2) == 0)
-			break;
-
-		process_header_line(header_line);
-		header_tail = new_element(header_tail,
-					  &header_buf, header_line);
+	struct closure *clos = data;
+	int rc, stat;
+	char **rv = NULL;
+	
+	stat = anubis_regex_match(clos->regex, p->line, &rc, &rv);
+	free_pptr(rv);
+	if (stat) {
+		free(p->line);
+		free(p);
+	} else {
+		p->next = NULL;
+		if (clos->head == NULL)
+			clos->head = p;
+		if (clos->tail)
+			clos->tail->next = p;
+		clos->tail = p;
 	}
+	return 0;
+}
 
+int
+action_remove(struct list *p, void *data)
+{
+	struct header_data *hp = data;
+	struct closure clos;
+
+	clos.regex = anubis_regex_compile(p->line, 0);
+	clos.head = clos.tail = NULL;
+	list_iterate(hp->header, action_remove2, &clos);
+	hp->header = clos.head;
+	anubis_regex_free(clos.regex);
+	free(p->line);
+	free(p);
+	return 0;
+}
+
+int
+action_mod2(struct list *p, void *data)
+{
+	struct closure *clos = data;
+	int rc, stat;
+	char **rv = NULL;
+	
+	stat = anubis_regex_match(clos->regex, p->line, &rc, &rv);
+	if (stat) {
+		free(p->line);
+		p->line = substitute(clos->modify, rv);
+		if (!p->line)
+			p->line = strdup(clos->modify);
+		free_pptr(rv);
+	}
+	return 0;
+}
+
+int
+action_mod(struct list *p, void *data)
+{
+	struct header_data *hp = data;
+	struct closure clos;
+
+	clos.regex = anubis_regex_compile(p->line, 0);
+	clos.head = clos.tail = NULL;
+	clos.modify = p->modify;
+	list_iterate(hp->header, action_mod2, &clos);
+	anubis_regex_free(clos.regex);
+	free(p->line);
+	free(p);
+	return 0;
+}
+
+int
+action_free(struct list *p, void *data)
+{
+	free(p->line);
+	free(p);
+	return 0;
+}
+
+static void
+transfer_header(void *sd_client, void *sd_server, struct list *header_buf)
+{
+	struct list *p;
+	struct header_data hd;
+	
+	hd.sd_server = sd_server;
+	hd.sd_client = sd_client;
+	hd.header = header_buf;
+
+	for (p = hd.header; p; p = p->next) 
+		process_header_line(p->line);
+	
 #ifdef WITH_GUILE
 	guile_process_list(&header_buf, &message.body);
-	for (header_tail = header_buf; header_tail && header_tail->next;
-	     header_tail = header_tail->next)
-		;
 #endif /* WITH_GUILE */
-		
-	if (message.remlist) {
-		struct list *h1;
-		struct list *h2;
-		struct list *previous;
-		char hline[LINEBUFFER+1];
+	
+	list_iterate(message.remlist, action_remove, &hd);
+	message.remlist = NULL;
 
-		p1 = message.remlist;
-		do {
-			p2 = p1->next;
-			h1 = header_buf;
-			previous = NULL;
-
-			do {
-				h2 = h1->next;
-				strncpy(hline, h1->line, LINEBUFFER);
-				remcrlf(hline);
-				if (regex_match(p1->line, hline)) {
-					if (previous)
-						previous->next = h2;
-					else
-						header_buf = h2;
-					free(h1->line);
-					free(h1);
-					if (h2)
-						h1 = h2;
-				}
-				else {
-					if (h2) {
-						previous = h1;
-						h1 = h2;
-					}
-				}
-			} while (h2 != NULL);
-
-			free(p1->line);
-			free(p1);
-			if (p2)
-				p1 = p2;
-		} while (p2 != NULL);
-		message.remlist = NULL;
-	}
-
-	if (message.addlist) {
-		p1 = message.addlist;
-		do {
-			p2 = p1->next;
-			strncpy(header_line, p1->line, LINEBUFFER-2);
-			strcat(header_line, CRLF);
-			header_tail = new_element(header_tail, &header_buf, header_line);
-			free(p1->line);
-			free(p1);
-			if (p2)
-				p1 = p2;
-		} while (p2 != NULL);
-		message.addlist = NULL;
-	}
-
-	if (message.modlist) {
-		struct list *h1;
-		struct list *h2;
-		char hline[LINEBUFFER+1];
-
-		p1 = message.modlist;
-		do {
-			p2 = p1->next;
-			h1 = header_buf;
-
-			do {
-				h2 = h1->next;
-				strncpy(hline, h1->line, LINEBUFFER);
-				remcrlf(hline);
-				if (regex_match(p1->line, hline)) {
-					char *outbuf = substitute(p1->modify,
-								  submatch);
-					free(h1->line);
-					if (outbuf)
-						h1->line = outbuf;
-					else
-						h1->line = strdup(p1->modify);
-				}
-				if (h2)
-					h1 = h2;
-			} while (h2 != NULL);
-
-			free(p1->line);
-			free(p1->modify);
-			free(p1);
-			if (p2)
-				p1 = p2;
-		} while (p2 != NULL);
-		message.modlist = NULL;
-	}
-
+	list_append(&hd.header, message.addlist);
+	message.addlist = NULL;
+	
+	list_iterate(message.modlist, action_mod, &hd);
+	message.modlist = NULL;
+	
 #ifdef WITH_GUILE
-	guile_postprocess_list(&header_buf, &message.body);
+	guile_postprocess_list(&hd.header, &message.body);
 #endif /* WITH_GUILE */
 
-	p1 = header_buf;
-	do {
-		p2 = p1->next;
-
-		/*
-		   If there are any attachments, find the BOUNDARY.
-		*/
-
-		if (strncmp(p1->line, "Content-Type:", 13) == 0) {
-			if (mopt & M_BODYCLEARAPPEND) {
-				message.remlist_tail = new_element(message.remlist_tail,
-					&message.remlist, "^Content-Type:");
-				message.remlist_tail = new_element(message.remlist_tail,
-					&message.remlist, "^Content-Transfer-Encoding:");
-			}
-			else {
-				char *ptr1 = 0;
-				char *ptr2 = 0;
-				char boundary_buf[LINEBUFFER+1];
-				struct list *plist = p1;
-
-				safe_strcpy(boundary_buf, plist->line);
-				change_to_lower(boundary_buf);
-
-				ptr1 = strstr(boundary_buf, "boundary=");
-				if (ptr1 == 0) {
-					plist = plist->next;
-					safe_strcpy(boundary_buf, plist->line);
-					change_to_lower(boundary_buf);
-					ptr1 = strstr(boundary_buf, "boundary=");
-				}
-
-				if (ptr1) {
-					topt |= T_BOUNDARY;
-					safe_strcpy(boundary_buf, plist->line);
-
-					ptr2 = strchr(boundary_buf, '=');
-					if (!ptr2)
-						ptr2 = boundary_buf;
-					else
-						ptr2 = parse_line_option(ptr2);
-					message.boundary = (char *)xmalloc(strlen(ptr2) + 3);
-					if (*ptr2 == '"') {
-						ptr2++;
-						sprintf(message.boundary, "--%s", ptr2);
-						ptr2 = strstr(message.boundary, "\"");
-						*ptr2 = '\0';
-					}
-					else
-						sprintf(message.boundary, "--%s", ptr2);
-				}
-			}
-		}
-
-		swrite(CLIENT, sd_server, p1->line);
-		free(p1->line);
-		free(p1);
-		if (p2)
-			p1 = p2;
-	} while (p2 != NULL);
-	header_buf = NULL;
-
+	send_header(sd_server, &hd.header);
 	swrite(CLIENT, sd_server, CRLF);
-	return;
+	
+	list_iterate(hd.header, action_free, NULL);
 }
 
 static void
@@ -756,13 +760,10 @@ process_header_line(char *header_line)
 	p = strstr(header_line, BEGIN_TRIGGER);
 	if (p) {
 		safe_strcpy(backup, p);
-		*p++ = '\r';
-		*p++ = '\n';
 		*p = '\0';
 		p = backup;
 		p += sizeof(BEGIN_TRIGGER) - 1;
-	}
-	else
+	} else
 		p = header_line;
 
 	rcfile_process_cond("RULE", HEADER, p); 
@@ -773,159 +774,38 @@ process_header_line(char *header_line)
   MESSAGE BODY
 ****************/
 
-#define M_OPT_STATIC (M_GPG_ENCRYPT | M_GPG_SIGN | M_RM \
- | M_SIGNATURE | M_BODYAPPEND | M_EXTBODYPROC)
+
 
 static void
-transfer_body(void *sd_client, void *sd_server,
-	      read_fn_t readfn, void *closure)
+raw_transfer(void *sd_client, void *sd_server)
 {
-	if (mopt & M_BODYCLEARAPPEND)
-		clear_body_transfer(sd_client, sd_server);
-	else {
-		if (mopt & M_OPT_STATIC)
-			static_body_transfer(sd_client, sd_server,
-					     readfn, closure);
-		else
-			dynamic_body_transfer(sd_client, sd_server,
-					      readfn, closure);
+	int nread;
+	char buf[LINEBUFFER+1];
+	
+	while ((nread = recvline(SERVER, sd_client, buf, LINEBUFFER)) > 0) {
+		if (strncmp(buf, "."CRLF, 3) == 0) /* EOM */
+			break;
+		swrite(CLIENT, sd_server, buf);
 	}
-	return;
 }
 
-static void
-static_body_transfer(void *sd_client, void *sd_server,
-		     read_fn_t readfn, void *data)
+void
+transfer_body(void *sd_client, void *sd_server)
 {
-	int nb = 0;
-	int nread;
-	int capacity = DATABUFFER;
-	char body_line[LINEBUFFER+1];
-
-	message.body = (char *)xmalloc(DATABUFFER);
-
-	/*
-	   If there are some attachments...
-	*/
-
 	if (topt & T_BOUNDARY) {
-		nb = strlen(message.boundary);
-		while (readfn(data, body_line, LINEBUFFER)) {
-			swrite(CLIENT, sd_server, body_line);
-			if (strncmp(body_line, message.boundary, nb) == 0) {
-				while (recvline(SERVER, sd_client, body_line, LINEBUFFER))
-				{
-					swrite(CLIENT, sd_server, body_line);
-					if (strncmp(body_line, CRLF, 2) == 0)
-						break;
-				}
-				break;
-			}
-		}
-
-		/*
-		   Now we have reached the message body...
-		*/
-
-		while ((nread = readfn(data, body_line, LINEBUFFER)))
-		{
-			if (strncmp(body_line, message.boundary, nb) == 0)
-				break;
-
-			capacity -= nread;
-			if (capacity >= nread)
-				strcat(message.body, body_line);
-			else {
-				message.body = (char *)xrealloc((char *)message.body,
-				strlen(message.body) + DATABUFFER + 1);
-				strcat(message.body, body_line);
-				capacity = DATABUFFER - nread;
-			}
-		}
-
-		remcrlf(message.body);
-		transform_body(sd_server);
-		swrite(CLIENT, sd_server, message.body);
+		send_body(sd_server);
 #ifdef HAVE_GPG
 		if ((mopt & M_GPG_ENCRYPT) || (mopt & M_GPG_SIGN))
 			swrite(CLIENT, sd_server, CRLF);
 #endif /* HAVE_GPG */
-		swrite(CLIENT, sd_server, body_line);
-
-		/*
-		   Transfer everything else...
-		*/
-
-		dynamic_body_transfer(sd_client, sd_server, readfn, data);
-	}
-
-	/*
-	   else... No attachments.
-	*/
-
-	else {
-		while ((nread = readfn(data, body_line, LINEBUFFER))) {
-			if (strncmp(body_line, "."CRLF, 3) == 0) /* EOM */
-				break;
-
-			capacity -= nread;
-			if (capacity < nread) {
-				message.body = (char *)xrealloc((char *)message.body,
-				strlen(message.body) + DATABUFFER + 1);
-				capacity = DATABUFFER - nread;
-			}
-			strcat(message.body, body_line);
-		}
-		remcrlf(message.body);
-		transform_body(sd_server);
-		swrite(CLIENT, sd_server, message.body);
-		swrite(CLIENT, sd_server, CRLF"."CRLF);
-
-		recvline(CLIENT, sd_server, body_line, LINEBUFFER);
-		swrite(SERVER, sd_client, body_line);
-	}
-	return;
+		
+		/* Transfer everything else */
+		raw_transfer(sd_client, sd_server);
+	} else
+		send_body(sd_server);
+	swrite(CLIENT, sd_server, "."CRLF);
 }
 
-static void
-dynamic_body_transfer(void *sd_client, void *sd_server,
-		      read_fn_t readfn, void *data)
-{
-	char body_line[LINEBUFFER+1];
-
-	while (readfn(data, body_line, LINEBUFFER))
-	{
-		swrite(CLIENT, sd_server, body_line);
-		if (strncmp(body_line, "."CRLF, 3) == 0) /* EOM */
-			break;
-	}
-
-	recvline(CLIENT, sd_server, body_line, LINEBUFFER);
-	swrite(SERVER, sd_client, body_line);
-
-	return;
-}
-
-static void
-clear_body_transfer(void *sd_client, void *sd_server)
-{
-	char body_line[LINEBUFFER+1];
-	message.body = (char *)xmalloc(1);
-
-	while (recvline(SERVER, sd_client, body_line, LINEBUFFER))
-	{
-		if (strncmp(body_line, "."CRLF, 3) == 0) /* EOM */
-			break;
-	}
-
-	transform_body(sd_server);
-	swrite(CLIENT, sd_server, message.body);
-	swrite(CLIENT, sd_server, body_line);
-	recvline(CLIENT, sd_server, body_line, LINEBUFFER);
-	swrite(SERVER, sd_client, body_line);
-
-	return;
-}
 
 static void
 add_remailer_commands(void *sd_server)
@@ -978,7 +858,7 @@ transform_body(void *sd_server)
 
 #ifdef HAVE_GPG
 	if (!(topt & T_ERROR) && ((mopt & M_GPG_ENCRYPT)
-	|| (mopt & M_GPG_SIGN) || (mopt & M_RMGPG)))
+				  || (mopt & M_GPG_SIGN) || (mopt & M_RMGPG)))
 		check_gpg();
 #endif /* HAVE_GPG */
 
