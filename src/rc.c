@@ -86,22 +86,22 @@ open_rcfile(int method)
 				rcfile = allocbuf(DEFAULT_GLOBAL_RCFILE, MAXPATHLEN);
 			else {
 				rcfile = (char *)xmalloc(n);
-				#ifdef HAVE_SNPRINTF
+#ifdef HAVE_SNPRINTF
 				snprintf(rcfile, n - 1,
-				#else
+#else
 				sprintf(rcfile,
-				#endif /* HAVE_SNPRINTF */
+#endif /* HAVE_SNPRINTF */
 					"%s/%s", homedir, local_rcfile);
 			}
 		}
 	}
 	else if (method == CLIENT) {
 		rcfile = (char *)xmalloc(n);
-		#ifdef HAVE_SNPRINTF
+#ifdef HAVE_SNPRINTF
 		snprintf(rcfile, n - 1,
-		#else
+#else
 		sprintf(rcfile,
-		#endif /* HAVE_SNPRINTF */
+#endif /* HAVE_SNPRINTF */
 			"%s/%s", homedir, local_rcfile);
 	}
 
@@ -304,7 +304,7 @@ read_rcfile_guile(void)
 	}
 	return;
 }
-#endif WITH_GUILE
+#endif /* WITH_GUILE */
 
 void
 close_rcfile(void)
@@ -442,11 +442,11 @@ match_options_common(int method, char *rcline)
 				p++;
 			else
 				p = ptr;
-			#ifdef HAVE_SNPRINTF
+#ifdef HAVE_SNPRINTF
 			snprintf(tmp, LINEBUFFER,
-			#else
+#else
 			sprintf(tmp,
-			#endif /* HAVE_SNPRINTF */
+#endif /* HAVE_SNPRINTF */
 				"%s %s", p, a);
 			p = ptr;
 			a = tmp;
@@ -514,7 +514,7 @@ match_options_common(int method, char *rcline)
 	   TLS/SSL.
 	*/
 
-	#if defined(HAVE_TLS) || defined(HAVE_SSL)
+#if defined(HAVE_TLS) || defined(HAVE_SSL)
 	if (strncmp("ssl", buf, optlen) == 0) {
 		set(parse_line_option(buf), topt, T_SSL);
 	}
@@ -546,7 +546,7 @@ match_options_common(int method, char *rcline)
 		secure.cafile = allocbuf(ptr, MAXPATHLEN);
 		return;
 	}
-	#endif /* HAVE_TLS or HAVE_SSL */
+#endif /* HAVE_TLS or HAVE_SSL */
 
 	return;
 }
@@ -623,10 +623,10 @@ parse_line_regex(char *rcline)
 			ropt |= R_BASIC;
 		if (strstr(optptr, "scase"))
 			ropt |= R_SCASE;
-		#ifdef HAVE_PCRE
+#ifdef HAVE_PCRE
 		if (strstr(optptr, "perlre"))
 			ropt |= R_PERLRE;
-		#endif /* HAVE_PCRE */
+#endif /* HAVE_PCRE */
 	}
 	else
 		ropt = 0;
@@ -769,7 +769,7 @@ match_action(char *rcline, const char *source_line)
 	   GnuPG support.
 	*/
 
-	#ifdef HAVE_GPG
+#ifdef HAVE_GPG
 	if (strncmp("gpg-passphrase", buf, optlen) == 0) {
 		ptr = parse_line_option(rcline);
 		if_empty_quit(ptr);
@@ -805,7 +805,7 @@ match_action(char *rcline, const char *source_line)
 		mopt |= M_GPG_SIGN;
 		return;
 	}
-	#endif /* HAVE_GPG */
+#endif /* HAVE_GPG */
 
 	/*
 	   Guile support
@@ -841,7 +841,7 @@ match_action(char *rcline, const char *source_line)
 		mopt |= M_RMPOST;
 		return;
 	}
-	#ifdef HAVE_GPG
+#ifdef HAVE_GPG
 	if (strncmp("rm-gpg", buf, optlen) == 0) {
 		ptr = parse_line_option(rcline);
 		if_empty_quit(ptr);
@@ -850,7 +850,7 @@ match_action(char *rcline, const char *source_line)
 		mopt |= M_RMGPG;
 		return;
 	}
-	#endif /* HAVE_GPG */
+#endif /* HAVE_GPG */
 	if (strncmp("rm-header", buf, optlen) == 0) {
 		ptr = parse_line_option(rcline);
 		if_empty_quit(ptr);
