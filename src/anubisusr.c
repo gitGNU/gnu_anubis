@@ -548,16 +548,18 @@ parse_netrc(const char *filename)
 		
 		argcv_split(buf, &argc, &argv);
 
-		if (strcmp(argv[0], "machine") == 0
-		    && hostcmp(argv[1], smtp_host) == 0) {
-			VDETAIL(1,(_("Found matching line %d\n"), line));
+		if (strcmp(argv[0], "machine") == 0) {
+			if (hostcmp(argv[1], smtp_host) == 0) {
+				VDETAIL(1,
+					(_("Found matching line %d\n"), line));
 
-			if (def_argc)
-				argcv_free(def_argc, def_argv);
-			def_argc = argc;
-			def_argv = argv;
-			p_argv = argv + 2;
-			break;
+				if (def_argc)
+					argcv_free(def_argc, def_argv);
+				def_argc = argc;
+				def_argv = argv;
+				p_argv = argv + 2;
+				break;
+			}
 		} else if (strcmp(argv[0], "default") == 0) {
 			VDETAIL(1,(_("Found default line %d\n"), line));
 			
@@ -567,7 +569,7 @@ parse_netrc(const char *filename)
 			def_argv = argv;
 			p_argv = argv + 1;
 		} else {
-			VDETAIL(1,(_("Ignoring unrecognized line %d"), line));
+			VDETAIL(1,(_("Ignoring unrecognized line %d\n"), line));
 			argcv_free(argc, argv);
 		}
 	}
