@@ -49,12 +49,12 @@
 
 (eval-when-compile
   ;; We use functions from these modules
-  (mapcar 'require '(info)))
+  (mapcar 'require '(info compile font-lock)))
 
 (defvar anubis-mode-syntax-table nil
   "Syntax table used in anubis-mode buffers.")
-(if anubis-mode-syntax-table
-    ()
+
+(unless anubis-mode-syntax-table
   (setq anubis-mode-syntax-table (make-syntax-table))
   (modify-syntax-entry ?\# "<" anubis-mode-syntax-table)
   (modify-syntax-entry ?\n ">" anubis-mode-syntax-table)
@@ -75,17 +75,112 @@
 (defvar anubis-mode-map ()
   "Keymap used in anubis-mode buffers.")
 
-(if anubis-mode-map
-    ()
+(unless anubis-mode-map
   (setq anubis-mode-map (make-sparse-keymap))
+
   (define-key anubis-mode-map "\t" 'anubis-complete-or-indent)
   (define-key anubis-mode-map "\e\t" 'anubis-indent-line)
-  (define-key anubis-mode-map "\e?" 'anubis-describe-keywords))
+  (define-key anubis-mode-map "\e?" 'anubis-describe-keywords)
+  (define-key anubis-mode-map "\C-c\C-c" 'anubis-check-syntax)
+
+  (define-key anubis-mode-map [menu-bar] (make-sparse-keymap))
+  (define-key anubis-mode-map [menu-bar Anubis]
+    (cons "Anubis" anubis-mode-map))
+  (define-key anubis-mode-map [anubis-check-syntax]
+    '("Check syntax" . anubis-check-syntax)))
+
+(defvar anubis-path nil
+  "Path to the anubis executable")
 
 (defvar anubis-section-body-indent 0
   "Indent of a section body in an Anubis rc file")
 (defvar anubis-level-indent 2
   "Amount of additional indentation per nesting level of statements")
+
+
+;; Font lock stuff
+
+(defconst anubis-font-lock-keywords
+  (eval-when-compile
+    (list
+     (list "\\(BEGIN\\)[ \t]+\\(\\sw+\\)"
+	   '(1 font-lock-keyword-face)
+	   '(2 font-lock-function-name-face))
+     (cons "^\\s *\\(---\\)?\\s *END\\s *\\(---\\)?" font-lock-keyword-face)
+     (cons (regexp-opt
+	    '("if" "else" "fi" "rule" "trigger" "done")
+	    'words)
+	   font-lock-keyword-face)
+     (cons (regexp-opt
+	    '("stop" "call" "add" "remove" "modify" "regexp") 'words)
+	   font-lock-keyword-face)
+     (cons (regexp-opt
+	    '("and" "or" "not") 'words)
+	   font-lock-keyword-face)
+     (cons (regexp-opt
+	     '("header" "body" "command") 'words)
+	   font-lock-type-face)
+     (cons (regexp-opt
+	    '("bind"
+	      "rule-priority"
+	      "control-priority"
+              "termlevel"
+              "allow-local-mta"
+              "user-notprivileged"
+              "drop-unknown-user"
+              "loglevel"
+              "logfile"
+              "remote-mta"
+              "local-mta"
+              "esmtp-auth"
+              "socks-proxy"
+              "socks-v4"
+              "socks-auth"
+              "read-entire-body"
+              "ssl"
+              "ssl-oneway"
+              "ssl-cert"
+              "ssl-key"
+              "ssl-cafile"
+              "signature-file-append"
+              "body-append"
+              "body-clear-append"
+              "body-clear"
+              "external-body-processor"
+              "gpg-passphrase"
+              "gpg-encrypt"
+              "gpg-sign"
+              "gpg-home"
+              "guile-output"
+              "guile-debug"
+              "guile-load-path-append"
+              "guile-load-program"
+	      "guile-debug"           
+	      "guile-load-path-append"
+	      "guile-load-program" 
+	      "guile-rewrite-line"    
+	      "guile-process") 'words)
+	   font-lock-keyword-face)
+
+     (list (concat ":"
+		   (regexp-opt
+		    '("re" "regex"
+		      "perl" "perlre"
+		      "ex" "exact"
+		      "scase"
+		      "icase"
+		      "basic"
+		      "extended") t)) ; FIXME: 'words does not work
+	   1 font-lock-builtin-face)
+     
+     (list "#:\\(\\sw+\\)" 1 font-lock-constant-face 'prepend)
+
+     (cons "\\[\\sw+\\]" font-lock-string-face) ) )
+     
+  "Expressions to highlight in Anubis mode.")
+
+
+
 
 ;; A list of keywords allowed in each section
 
@@ -292,7 +387,7 @@
   (let ((dict anubis-keyword-dict)
 	(ctx (anubis-locate-context anubis-block-dict)))
     (if (not (car ctx))
-	f
+	nil
       (let ((dict (assoc (cadr ctx) dict)))
 	(if dict
 	    (let ((compl (completing-read (or prompt "what? ")
@@ -370,6 +465,21 @@
           (goto-char (+ here off)) )
       (anubis-indent-line) )))
 
+
+(defun anubis-check-syntax (arg)
+  "Checks the syntax of the current Anubis RC buffer. Optional argument
+specifies the detail level (from 0 to 3)."
+  (interactive "p")
+  (let ((compile-command compile-command))
+    (compile (concat
+	      (if anubis-path anubis-path "anubis")
+	      " --check="
+	      (number-to-string (or current-prefix-arg 0))
+	      " --norc --relax --altrc "
+		   (buffer-file-name)))))
+
+
+
 ;;;###autoload
 (defun anubis-mode ()
   "Major mode for editing GNU Anubis configuration files.
@@ -387,7 +497,14 @@ Key bindings:
         indent-line-function 'anubis-indent-line
         completion-ignore-case t)
 
-  (use-local-map anubis-mode-map))
+  (use-local-map anubis-mode-map)
+  
+  (make-local-variable 'font-lock-defaults)
+  (setq font-lock-defaults
+        '((anubis-font-lock-keywords)
+          nil t (("+-*/.<>=!?$%_&~^:" . "w")) beginning-of-defun
+          (font-lock-mark-block-function . mark-defun)))
+  )
 
 (require 'info) 
 (provide 'anubis-mode)
