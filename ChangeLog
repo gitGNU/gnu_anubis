@@ -1,3 +1,7 @@
+2003-12-22  Wojciech Polak
+
+	* testsuite/mta.c: Adapt to GnuTLS >= 1.0.0.
+
 2003-12-17  Wojciech Polak
 
 	* src/tls.c: Adapt to GnuTLS >= 1.0.0.
