@@ -54,13 +54,8 @@ write_chunk (void *data, char *start, char *end)
   size_t wrsize;
   char *buf = NULL;
 
-  len = UINT_MAX;		/* override the bug in libgsasl */
-  gsasl_encode (s->sess_ctx, start, chunk_size, NULL, &len);
-  buf = malloc (len);
-  if (!buf)
-    return ENOMEM;
-
-  gsasl_encode (s->sess_ctx, start, chunk_size, buf, &len);
+  len = 0;
+  gsasl_encode (s->sess_ctx, start, chunk_size, &buf, &len);
 
   wrsize = 0;
   do
@@ -99,10 +94,10 @@ _gsasl_write (void *sd, char *data, size_t size, size_t * nbytes)
 static int
 _gsasl_read (void *sd, char *data, size_t size, size_t * nbytes)
 {
-  size_t len;
   struct anubis_gsasl_stream *s = sd;
   int rc;
-  char *bufp;
+  char *bufp = NULL;
+  size_t len = 0;
 
   do
     {
@@ -121,28 +116,14 @@ _gsasl_read (void *sd, char *data, size_t size, size_t * nbytes)
       if (rc)
 	return rc;
 
-      len = UINT_MAX;		/* override the bug in libgsasl */
       rc = gsasl_decode (s->sess_ctx,
 			 _auth_lb_data (s->lb),
-			 _auth_lb_level (s->lb), NULL, &len);
+			 _auth_lb_level (s->lb), &bufp, &len);
     }
   while (rc == GSASL_NEEDS_MORE);
 
   if (rc != GSASL_OK)
     return rc;
-
-  bufp = malloc (len + 1);
-  if (!bufp)
-    return ENOMEM;
-  rc = gsasl_decode (s->sess_ctx,
-		     _auth_lb_data (s->lb),
-		     _auth_lb_level (s->lb), bufp, &len);
-
-  if (rc != GSASL_OK)
-    {
-      free (bufp);
-      return rc;
-    }
 
   if (len > size)
     {
