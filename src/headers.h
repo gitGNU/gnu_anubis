@@ -105,6 +105,7 @@
 
 #if defined(USE_GNUTLS) && defined(HAVE_GNUTLS)
 # include <gnutls/gnutls.h>
+# include <gnutls/x509.h>
 # define HAVE_TLS
 # undef USE_OPENSSL
 #endif /* USE_GNUTLS and HAVE_GNUTLS */

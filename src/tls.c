@@ -203,15 +203,8 @@ start_ssl_client(int sd_server)
 static void
 generate_dh_params(void)
 {
-	gnutls_datum prime, generator;
-
-	gnutls_dh_params_init(&dh_params);
-	gnutls_dh_params_generate(&prime, &generator, DH_BITS);
-	gnutls_dh_params_set(dh_params, prime, generator, DH_BITS);
-
-	free(prime.data);
-	free(generator.data);
-	return;
+	gnutls_dh_params_init (&dh_params);
+	gnutls_dh_params_generate2 (dh_params, DH_BITS);
 }
 
 static gnutls_session
@@ -379,25 +372,34 @@ cipher_info(gnutls_session session)
 static void
 print_x509_certificate_info(gnutls_session session)
 {
+	char dn[128];
 	char digest[20];
 	char serial[40];
-	size_t digest_size = sizeof(digest);
-	int serial_size = sizeof(serial);
-	time_t expiret = gnutls_certificate_expiration_time_peers(session);
-	time_t activet = gnutls_certificate_activation_time_peers(session);
-	const gnutls_datum *cert_list;
+	size_t dn_size = sizeof (dn);
+	size_t digest_size = sizeof (digest);
+	int serial_size = sizeof (serial);
+	time_t expiret, activet;
 	int algo, bits, i;
 	int cert_list_size = 0;
-	gnutls_x509_dn dn;
+	const gnutls_datum *cert_list;
+	gnutls_x509_crt cert;
 
-	cert_list = gnutls_certificate_get_peers(session, &cert_list_size);
+	cert_list = gnutls_certificate_get_peers (session, &cert_list_size);
+
 	if (cert_list_size > 0
-	    && gnutls_certificate_type_get(session) == GNUTLS_CRT_X509) {
-		fprintf(stderr, _(" - Certificate info:\n"));
-		fprintf(stderr, _(" - Certificate is valid since: %s"),
-			ctime(&activet));
-		fprintf(stderr, _(" - Certificate expires: %s"),
-			ctime(&expiret));
+	    && gnutls_certificate_type_get (session) == GNUTLS_CRT_X509) {
+
+		gnutls_x509_crt_init (&cert);
+		gnutls_x509_crt_import (cert, &cert_list[0], GNUTLS_X509_FMT_PEM);
+
+		fprintf (stderr, _(" - Certificate info:\n"));
+
+		expiret = gnutls_x509_crt_get_expiration_time (cert);
+		activet = gnutls_x509_crt_get_activation_time (cert);
+		fprintf (stderr, _(" - Certificate is valid since: %s"),
+			 ctime (&activet));
+		fprintf (stderr, _(" - Certificate expires: %s"),
+			 ctime (&expiret));
 
 		if (gnutls_x509_fingerprint(GNUTLS_DIG_MD5,
 					    &cert_list[0], digest,
@@ -410,44 +412,43 @@ print_x509_certificate_info(gnutls_session session)
 			fprintf(stderr, "\n");
 		}
 
-		if (gnutls_x509_extract_certificate_serial(&cert_list[0],
-							   serial,
-							   &serial_size) >= 0) {
-			fprintf(stderr,
-				_(" - Certificate serial number: "));
+		if (gnutls_x509_crt_get_serial (cert, serial, &serial_size) >= 0) {
+			fprintf (stderr,
+				 _(" - Certificate serial number: "));
 			for (i = 0; i < serial_size; i++) {
-				fprintf(stderr, "%.2x ",
-					(unsigned char) serial[i]);
+				fprintf (stderr, "%.2x ",
+					 (unsigned char) serial[i]);
 			}
-			fprintf(stderr, "\n");
+			fprintf (stderr, "\n");
 		}
-		algo = gnutls_x509_extract_certificate_pk_algorithm(&cert_list[0], &bits);
+		algo = gnutls_x509_crt_get_pk_algorithm (cert, &bits);
 
-		fprintf(stderr, _("Certificate public key: "));
+		fprintf (stderr, _("Certificate public key: "));
 		if (algo == GNUTLS_PK_RSA) {
-			fprintf(stderr, _("RSA\n"));
-			fprintf(stderr, ngettext(" Modulus: %d bit\n",
-						 " Modulus: %d bits\n", bits),
-				bits);
+			fprintf (stderr, _("RSA\n"));
+			fprintf (stderr, ngettext(" Modulus: %d bit\n",
+						  " Modulus: %d bits\n", bits),
+				 bits);
 		}
 		else if (algo == GNUTLS_PK_DSA) {
-			fprintf(stderr, _("DSA\n"));
-			fprintf(stderr, ngettext(" Exponent: %d bit\n",
-						 " Exponent: %d bits\n", bits),
-				bits);
+			fprintf (stderr, _("DSA\n"));
+			fprintf (stderr, ngettext(" Exponent: %d bit\n",
+						  " Exponent: %d bits\n", bits),
+				 bits);
 		}
 		else
-			fprintf(stderr, _("UNKNOWN\n"));
+			fprintf (stderr, _("UNKNOWN\n"));
 
-		fprintf(stderr, _(" - Certificate version: #%d\n"),
-			gnutls_x509_extract_certificate_version(&cert_list[0]));
+		fprintf (stderr, _(" - Certificate version: #%d\n"),
+			 gnutls_x509_crt_get_version (cert));
 
-		gnutls_x509_extract_certificate_dn(&cert_list[0], &dn);
-		PRINT_DN(dn);
+		gnutls_x509_crt_get_dn (cert, dn, &dn_size);
+		fprintf (stderr, "- DN: %s\n", dn);
 
-		gnutls_x509_extract_certificate_issuer_dn(&cert_list[0], &dn);
-		fprintf(stderr, _(" - Certificate Issuer's info:\n"));
-		PRINT_DN(dn);
+		gnutls_x509_crt_get_issuer_dn (cert, dn, &dn_size);
+		fprintf (stderr, _(" - Certificate Issuer's DN: %s\n"), dn);
+
+		gnutls_x509_crt_deinit (cert);
 	}
 }
 

@@ -259,17 +259,10 @@ _tls_cleanup_x509(void)
 }
 
 static void
-generate_dh_params(void)
+generate_dh_params (void)
 {
-	gnutls_datum prime, generator;
-
-	gnutls_dh_params_init(&dh_params);
-	gnutls_dh_params_generate(&prime, &generator, DH_BITS);
-	gnutls_dh_params_set(dh_params, prime, generator, DH_BITS);
-
-	free(prime.data);
-	free(generator.data);
-	return;
+	gnutls_dh_params_init (&dh_params);
+	gnutls_dh_params_generate2 (dh_params, DH_BITS);
 }
 
 void
@@ -283,9 +276,8 @@ tls_init(void)
 	atexit(_tls_cleanup_x509);
 	if (tls_cafile) {
 		int rc = gnutls_certificate_set_x509_trust_file(x509_cred,
-
 								tls_cafile,
-							    GNUTLS_X509_FMT_PEM);
+								GNUTLS_X509_FMT_PEM);
 		if (rc < 0) {
 			gnutls_perror(rc);
 			return;
