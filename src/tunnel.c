@@ -29,11 +29,11 @@
 #define obstack_chunk_free free
 #include <obstack.h>
 
-static int  transfer_command(void *, void *, MESSAGE *msg, char *);
-static void process_command(void *, void *, MESSAGE *msg, char *, int);
-static void transfer_header(void *, void *, struct list *list);
-static void transfer_body(void *, void *, MESSAGE *msg);
-static void process_data(void *sd_client, void *sd_server, MESSAGE *msg);
+static int  transfer_command(void *, void *, MESSAGE *, char *);
+static void process_command(void *, void *, MESSAGE *, char *, int);
+static void transfer_header(void *, void *, struct list *);
+static void transfer_body(void *, void *, MESSAGE *);
+static void process_data(void *, void *, MESSAGE *);
 
 
 /* Collect and send headers */
@@ -127,7 +127,7 @@ write_header_line(void *sd_server, char *line)
 	do {
 		swrite(CLIENT, sd_server, p);
 		swrite(CLIENT, sd_server, CRLF);
-	} while (p = strtok(NULL, "\n"));
+	} while ((p = strtok(NULL, "\n")));
 }
 			
 static void
