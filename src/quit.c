@@ -61,8 +61,6 @@ free_mem (void)
 void
 quit (int code)
 {
-  memset (session.mta_username, 0, sizeof (session.mta_username));
-  memset (session.mta_password, 0, sizeof (session.mta_password));
 #ifdef HAVE_SYSLOG
   if ((topt & T_DAEMON) && !(topt & T_FOREGROUND))
     closelog ();

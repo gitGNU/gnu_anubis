@@ -684,8 +684,6 @@ handle_ehlo (char *command, char *reply, size_t reply_size)
 	  esmtp_auth (&remote_server, p + 5);
 	  if (q)
 	    memmove (p - 4, q + 1, strlen (q + 1) + 1);
-	  memset (session.mta_username, 0, sizeof (session.mta_username));
-	  memset (session.mta_password, 0, sizeof (session.mta_password));
 	}
     }
   
