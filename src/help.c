@@ -31,30 +31,33 @@ print_version(void)
 	printf("\n%s\n", version);
 	printf("%s\n\n", copyright);
 	printf(_("Built-in support for: "));
-	#ifdef HAVE_REGEX
+#ifdef HAVE_REGEX
 	 printf("REGEX ");
-	#endif /* HAVE_REGEX */
-	#ifdef HAVE_PCRE
+#endif /* HAVE_REGEX */
+#ifdef HAVE_PCRE
 	 printf("PCRE ");
-	#endif /* HAVE_PCRE */
-	#ifdef HAVE_TLS
+#endif /* HAVE_PCRE */
+#ifdef WITH_GUILE
+	 printf("GUILE ");
+#endif /* WITH_GUILE */
+#ifdef HAVE_TLS
 	 printf("GNUTLS ");
-	#endif /* HAVE_TLS */
-	#ifdef HAVE_SSL
+#endif /* HAVE_TLS */
+#ifdef HAVE_SSL
 	 printf("OPENSSL ");
-	#endif /* HAVE_SSL */
-	#ifdef HAVE_GPG
+#endif /* HAVE_SSL */
+#ifdef HAVE_GPG
 	 printf("GPG ");
-	#endif /* HAVE_GPG */
-	#ifdef HAVE_PAM
+#endif /* HAVE_GPG */
+#ifdef HAVE_PAM
 	 printf("PAM ");
-	#endif /* HAVE_PAM */
-	#ifdef USE_LIBWRAP
+#endif /* HAVE_PAM */
+#ifdef USE_LIBWRAP
 	 printf("LIBWRAP ");
-	#endif /* USE_LIBWRAP */
-	#ifdef ENABLE_NLS
+#endif /* USE_LIBWRAP */
+#ifdef ENABLE_NLS
 	 printf("NLS ");
-	#endif /* ENABLE_NLS */
+#endif /* ENABLE_NLS */
 
 	puts(_("\n\nGNU Anubis is free software; you can redistribute it and/or modify\n"
 	       "it under the terms of the GNU General Public License as published by\n"
