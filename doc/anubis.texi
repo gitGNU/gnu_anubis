@@ -66,6 +66,7 @@ documents GNU Anubis Version @value{VERSION}.
 * Sample Beginning::                Here is a sample beginning.
 * TLS/SSL::                         Using the TLS/SSL Encryption.
 * S/MIME::                          Using S/MIME signatures.
+* Mutt::                            Using Anubis with Mutt.
 * Problems::                        Reporting bugs.
 
 Appendices
@@ -2735,7 +2736,6 @@ All Mutt users, who would like to set up GNU Anubis between their MUA
 and MTA, should consider using the @samp{msg2smtp.pl} Perl script
 from the @file{contrib} directory (part of the distribution).
 
-
 @node TLS/SSL, S/MIME, Sample Beginning, Top
 @chapter Using the TLS/SSL Encryption
 @cindex Transport Layer Security, TLS
@@ -2809,7 +2809,7 @@ keywords in its own user configuration file.
 @noindent
 @xref{Encryption Settings}, for details.
 
-@node S/MIME, Problems, TLS/SSL, Top
+@node S/MIME, Mutt, TLS/SSL, Top
 @chapter Using S/MIME Signatures
 @cindex smime
 @cindex openssl
@@ -2843,7 +2843,240 @@ guile-process openssl-filter /usr/local/ssl/bin/openssl \
 END
 @end smallexample
 
-@node Problems, Pixie-Dixie, S/MIME, Top
+@node Mutt, Problems, S/MIME, Top
+@chapter Using Mutt with Anubis
+@cindex mutt
+
+At the time of this writing @command{mutt}@footnote{versions 1.4.1 and
+1.5.3}is not able to send mail via @acronym{SMTP} channell, instead it
+invokes local mailer program to transmit the message. There are at
+least three possible ways to overcome this difficulty:
+
+@enumerate 1
+@item Using @command{mail.remote} from GNU mailutils
+@item Using @command{msg2smtp.pl} script provided with Anubis
+@item Using a patch by Steven Engelhardt
+(@code{patch-@var{version}.sde.libesmtp.3}) that enables
+@command{mutt} to use @acronym{SMTP}.
+@end enumerate 
+
+The following sections discuss each method in detail.
+
+@menu
+* mail.remote::          Using GNU Mailutils
+* msg2smtp.pl::          Using @command{msg2smtp.pl}
+* patch.sde.libesmtp.3:: Enabling @command{mutt} to talk
+* comparison::           Which method to choose?
+@end menu
+
+@node mail.remote
+@section Using GNU mailutils as an interface to mutt
+@cindex mail.remote
+@cindex mailutils
+@cindex GNU mailutils
+
+GNU Mailutils is a collection of utilities for handling electronic
+mail. It includes lots of programs necessary for dealing with
+e-mail messages. One of them is @command{mail.remote}, which is
+designed as a drop-in replacement for @command{sendmail} to forward
+all mail directly to an @acronym{SMTP} gateway. Its interface is
+compatible with @command{sendmail} which makes the program
+especially useful as an interface between @command{mutt} and
+@command{anubis}. The package can be downloaded from
+@url{ftp://ftp.gnu.org/@/gnu/@/mailutils} or any of the mirrors
+(See @url{http://www.gnu.org/@/order/@/ftp.html} for a complete
+list of these. Please, select the mirror closest too you). The
+complete information about the package is available from its
+home page at @url{http://www.gnu.org/@/software/@/mailutils/} 
+
+To use @command{mail.remote}, first download and install GNU mailutils
+(as usual the package is shipped with files @file{README} and
+@file{INSTALL} which provide the necessary guidelines). Then
+add to your @file{.muttrc} file the following line:
+
+@smallexample
+set sendmail="@var{mail.remote} smtp://@var{hostname}[:@var{port}]"
+@end smallexample
+
+@noindent
+where @var{mail.remote} stands for the full file name of
+@command{mail.remote} utility, @var{hostname} and optional
+@var{port} specify the host name (or IP address) of the machine
+running @command{anubis} and the port it listens on. Notice, that
+default port value for @command{mail.remote} is 25, which means
+that in most cases you will have to specify it explicitely.
+
+For example, suppose you run @command{anubis} on machine
+@samp{anubis.domain.org} and that it listens on port 24.
+Let's also assume you have installed mailutils in the default
+location, so that full file name of @command{mail.remote} is
+@file{/usr/local/libexec/mail.remote}. Then, your @file{.muttrc}
+will contain:
+
+@smallexample
+set sendmail="/usr/local/libexec/mail.remote \
+              smtp://anubis.domain.org:24"
+@end smallexample
+
+@noindent
+(the line being split for readability).
+
+@node msg2smtp.pl
+@section Using msg2smtp.pl as an interface to mutt
+@cindex msg2smtp.pl
+
+GNU Anubis is shipped with @code{msg2smtp.pl} --- a perl script
+designed as an interface between it and @command{mutt}. The script
+is kindly contributed by Michael de Beer. 
+
+The script is located in the subdirectory @file{contrib} of 
+GNU Anubis distribution. To use it:
+
+@enumerate 1
+@item Make sure its first line correctly refers to the full file name
+of the @command{perl} interpreter on your system. By default the first
+line reads 
+
+@smallexample
+#!/usr/bin/perl
+@end smallexample
+
+@noindent
+If the file name after @samp{!} differs from the actual file name of
+the @command{perl} interpreter, update it. For example, if
+@command{perl} is installed in @file{/usr/local/bin/perl}, the first
+line of @command{msg2smtp.pl} should read
+
+@smallexample
+#!/usr/local/bin/perl
+@end smallexample
+
+@item Copy the script to any convenient location. Simply running @code{cp}
+will do, e.g.
+
+@smallexample
+cp anubis-@value{VERSION}/contrib/msg2smtp.pl /usr/local/libexec
+@end smallexample
+
+@item Add to your @file{.muttrc} the following line:
+
+@smallexample
+set sendmail="/usr/local/libexec/msg2smtp.pl -h @var{hostname} -p @var{port}"
+@end smallexample
+
+@noindent
+where @var{hostname} and @var{port} specify the host name (or IP
+address) of the machine running @command{anubis} and the port it
+listens on, respectively.
+@end enumerate
+
+Complete description of @command{msg2smtp.pl} and a discussion of
+its command line switches can be found in file @file{contrib/msg2smtp.txt}.
+
+@node patch.sde.libesmtp.3
+@section Patching mutt
+@cindex mutt, using SMTP gateways
+
+Steven Engelhardt modified @command{mutt} so that it is able to use
+@acronym{SMTP} to transfer messages. For the time being the patch is
+not accepted by the mainline @command{mutt} distribution, but one
+of the authors of GNU Anubis@footnote{Sergey Poznyakoff, blame it on
+him:^)}, has tested it extensively and has found it to be quite adequate
+for interfacing between @command{anubis} and @command{mutt}. The
+patch is described in detail at
+@url{http://www.deez.info/@/sengelha/@/projects/@/mutt/@/libesmtp/} and is
+available for @command{mutt} versions 1.4.x and 1.5.3.
+
+To use it, follow the instructions on the page mentioned above. Once
+you compile the patched @command{mutt} you will be able to use the
+following new keywords in its configuration file:
+
+@table @code
+@item set smtp_host = @var{hostname}
+Sets the hostname or IP address of the remote @acronym{SMTP} host.
+
+@item set smtp_port = @var{port}
+Sets the port number to use.
+
+@item set smtp_auth_username = @var{user-name}
+Sets the username to use with @acronym{SMTP AUTH} command (optional).
+@end table
+
+So, assuming you run @command{anubis} on machine
+@samp{anubis.domain.org} and it is listening on port 24, you will
+add to your @file{.muttrc} the following two lines:
+
+@smallexample
+@group
+set smtp_host = anubis.domain.org
+set smtp_port = 24
+@end group
+@end smallexample
+
+@node comparison
+@section Comparison of the Three Interface Methods
+@cindex mail.remote
+@cindex mailutils
+@cindex GNU mailutils
+@cindex msg2smtp.pl
+@cindex mutt, using SMTP gateways
+
+The following short discussion summarizes the advantages and
+deficiencies of the three interface methods described in the
+previous sections. It could serve you as a guideline on which
+interface method to choose.
+
+@subheading Using mail.remote
+
+Advanatages:
+@enumerate
+@item Does not require modifying @command{mutt}.
+@item Is compatible with any version of @command{mutt}.
+@item Runs faster than @command{msg2smtp.pl}
+@end enumerate
+
+@noindent
+Deficiences:
+@enumerate
+@item @anchor{extprog}Running an external program to transmit the message is not
+the best idea. However, it is mutt default, anyway...
+@item Runs slower than directly connecting to @command{anubis} using @acronym{SMTP}
+@end enumerate
+
+@subheading Using msg2smtp.pl
+
+Advantages:
+@enumerate
+@item Does not require modifying @command{mutt}.
+@item Is compatible with any version of @command{mutt}.
+@end enumerate
+
+@noindent
+Deficiences:
+@enumerate
+@item @xref{extprog}.
+@item Runs slower than the other two methods (sending each message
+requires loading @command{perl} interpreter, which is rather expensive).
+@end enumerate
+
+@subheading Using patch.sde.libesmtp.3
+
+Advantages:
+@enumerate
+@item Is the fastest of the three methods.
+@item Does not require any intermediate programs.
+@end enumerate
+
+@noindent
+Deficiences:
+@enumerate
+@item Requires patching @command{mutt}, which is not always possible
+or acceptable.
+@item May not work for versions of mutt newer than 1.5.3 (but then,
+again, not necessarily so).
+@end enumerate
+
+@node Problems, Pixie-Dixie, Mutt, Top
 @chapter Reporting Bugs
 @cindex bugs
 @cindex problems
