@@ -1,3 +1,14 @@
+2003-08-28  Sergey Poznyakoff 
+
+	* src/rcfile.h (error_sync_begin): Changed return type.
+	* src/rcfile.l: Likewise.
+	* src/rcfile.y (seclist production): Set yychar. Clear
+	error state only if not at EOF, otherwise yylex will be
+	called again and will coredump.
+	(struct eval_env.traceable): New member. Controls whether
+	tracing should be enabled for this section.
+	(asgn_eval): Fixed printing of trigger rules.
+	
 2003-08-27  Wojciech Polak
 
 	* configure.ac: Bump to 3.9.93.
