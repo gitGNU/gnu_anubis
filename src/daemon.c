@@ -315,21 +315,10 @@ loop(int sd_bind)
 					smtp_session((void *)sd_client, (void *)sd_server);
 					alarm(0);
 
-#ifdef HAVE_TLS
-					end_tls(SERVER, secure.server);
-					end_tls(CLIENT, secure.client);
+					net_close(CLIENT, secure.client);
+					net_close(SERVER, secure.server);
 					secure.server = 0;
 					secure.client = 0;
-#endif /* HAVE_TLS */
-
-#ifdef HAVE_SSL
-					end_ssl(SERVER, secure.server, secure.ctx_server);
-					end_ssl(CLIENT, secure.client, secure.ctx_client);
-					secure.server = 0;
-					secure.client = 0;
-					secure.ctx_server = 0;
-					secure.ctx_client = 0;
-#endif /* HAVE_SSL */
 				}
 				close_socket(sd_server);
 				close_socket(sd_client);
@@ -364,10 +353,77 @@ loop(int sd_bind)
  input and output as described in RFC 821.
 *********************************************/
 
+static int
+_stdio_write(void *sd, char *data, size_t size, size_t *nbytes)
+{
+	int rc;
+	int fd = (int)sd;
+
+	if (fd == 0)
+		fd = 1;
+	rc = write(fd, data, size);
+	if (rc > 0) {
+		*nbytes = rc;
+		return 0;
+	}
+	return errno;
+}
+
+static int
+_stdio_read(void *sd, char *data, size_t size, size_t *nbytes)
+{
+	int n;
+	int fd = (int)sd;
+	fd_set rds;
+
+	errno = 0;
+	FD_ZERO(&rds);
+	FD_SET(fd, &rds);
+	do
+		n = select(fd + 1, &rds, NULL, NULL, NULL);
+	while (errno == EINTR);
+	if (n > 0) {
+		n = read(fd, data, size);
+		if (n >= 0) 
+			*nbytes = n;
+	}
+	return errno;
+}
+
+static const char *
+_stdio_strerror(int rc)
+{
+	return strerror(rc);
+}
+
+#if defined(O_NONBLOCK)
+# define FCNTL_NONBLOCK O_NONBLOCK
+#elif defined(O_NDELAY)
+# define FCNTL_NONBLOCK O_NDELAY
+#else
+# error "Neither O_NONBLOCK nor O_NDELAY are defined"
+#endif
+
+int
+set_nonblocking(int fd)
+{
+	int flags;
+	
+	if ((flags = fcntl(fd, F_GETFL, 0)) < 0) {
+		perror("F_GETFL");
+		return -1;
+	}
+	if (fcntl(fd, F_SETFL, flags | FCNTL_NONBLOCK) < 0) {
+		perror("F_GETFL");
+		return -1;
+	}
+	return 0;
+}
+
 void
 stdinout(void)
 {
-	int sd_client = -1; /* stdin/stdout */
+	int sd_client = 0; 
 	int sd_server = 0;
 
 	anubis_getlogin(session.client, sizeof(session.client));
@@ -393,8 +449,12 @@ stdinout(void)
 		free_mem();
 		return;
 	}
+	set_nonblocking(sd_client);
+	set_nonblocking(sd_server);
 	remote_client = (void *)sd_client;
 	remote_server = (void *)sd_server;
+	net_set_io(CLIENT, _stdio_read, _stdio_write, NULL, _stdio_strerror);
+	net_set_io(SERVER, _stdio_read, _stdio_write, NULL, _stdio_strerror);
 	smtp_session((void *)sd_client, (void *)sd_server);
 
 	close_socket(sd_server);

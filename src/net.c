@@ -194,6 +194,74 @@ bind_and_listen(char *host, unsigned int port)
 	return sd;
 }
 
+static const char *
+_def_strerror(int rc)
+{
+	return strerror(rc);
+}
+
+static int
+_def_write(void *sd, char *data, size_t size, size_t *nbytes)
+{
+	int rc = send((int)sd, data, size, 0);
+	if (rc >= 0) {
+		*nbytes = rc;
+		return 0;
+	}
+	return errno;
+}
+
+static int
+_def_read(void *sd, char *data, size_t size, size_t *nbytes)
+{
+	int rc = recv((int)sd, data, size, 0);
+	if (rc >= 0) {
+		*nbytes = rc;
+		return 0;
+	}
+	return errno;
+}
+
+static int
+_def_close(void *sd_unused)
+{
+	return 0;
+}
+
+struct io_data {
+	net_io_t read;
+	net_io_t write;
+	strerror_t strerror;
+	net_close_t close;
+};
+
+struct io_data io_data[2] = {
+	/* CLIENT */
+	{ _def_read, _def_write, _def_strerror, _def_close },
+	/* SERVER */
+	{ _def_read, _def_write, _def_strerror, _def_close }
+};
+
+void
+net_set_io(int method, net_io_t read, net_io_t write,
+	   net_close_t close,
+	   strerror_t strerror)
+{
+	io_data[method].read = read ? read : _def_read;
+	io_data[method].write = write ? write : _def_write;
+	io_data[method].close = close;
+	io_data[method].strerror = strerror ? strerror : _def_strerror;
+}
+
+void
+net_close(int method, void *sd)
+{
+	if (io_data[method].close) {
+		io_data[method].close(sd);
+		net_set_io(method, NULL, NULL, NULL, NULL);
+	}
+}
+
 /**************
   Send a data
 ***************/
@@ -201,82 +269,20 @@ bind_and_listen(char *host, unsigned int port)
 void
 swrite(int method, void *sd, char *ptr)
 {
-	unsigned long nleft;
-	unsigned long nwritten = 0;
+	int rc;
+	size_t nleft, nwritten = 0;
 
 	if (ptr == 0)
 		return;
 
 	nleft = (unsigned long)strlen(ptr);
-	while (nleft > 0)
-	{
-		if (method == CLIENT) {
-
-#ifdef HAVE_TLS
-			if (topt & T_SSL_CLIENT) {
-				if ((nwritten = (unsigned long)gnutls_record_send(
-						(gnutls_session)sd, ptr, nleft)) <= 0) {
-					socket_error();
-					return;
-				}
-			} else
-#endif /* HAVE_TLS */
-
-#ifdef HAVE_SSL
-			if (topt & T_SSL_CLIENT) {
-				if ((nwritten = (unsigned long)SSL_write((SSL *)sd,
-						ptr, nleft)) <= 0) {
-					socket_error();
-					return;
-				}
-			} else
-#endif /* HAVE_SSL */
-
-			if (!(topt & T_SSL_CLIENT)) {
-				if ((nwritten = (unsigned long)send((int)sd,
-						ptr, nleft, 0)) == -1) {
-					socket_error();
-					return;
-				}
-			}
-		}
-		else if (method == SERVER) {
-
-#ifdef HAVE_TLS
-			if (topt & T_SSL_SERVER) {
-				if ((nwritten = (unsigned long)gnutls_record_send(
-						(gnutls_session)sd, ptr, nleft)) <= 0) {
-					socket_error();
-					return;
-				}
-			} else
-#endif /* HAVE_TLS */
-
-#ifdef HAVE_SSL
-			if (topt & T_SSL_SERVER) {
-				if ((nwritten = (unsigned long)SSL_write((SSL *)sd,
-						ptr, nleft)) <= 0) {
-					socket_error();
-					return;
-				}
-			} else
-#endif /* HAVE_SSL */
-
-			if ((int)sd == -1) { /* standard output */
-				nwritten = (unsigned long)write(1, ptr, nleft);
-			}
-			else if (!(topt & T_SSL_SERVER)) {
-				if ((nwritten = (unsigned long)send((int)sd,
-						ptr, nleft, 0)) == -1) {
-					socket_error();
-					return;
-				}
-			}
-		}
-		DPRINTF(method, 1, nleft, ptr);
-		if (nwritten <= 0)
+	while (nleft > 0) {
+		rc = io_data[method].write(sd, ptr, nleft, &nwritten);
+		if (rc) {
+			socket_error(io_data[method].strerror(rc));
 			return;
-
+		}
+		DPRINTF(method, 1, nwritten, ptr);
 		nleft -= nwritten;
 		ptr   += nwritten;
 	}
@@ -290,52 +296,17 @@ swrite(int method, void *sd, char *ptr)
 static int
 mread(int method, void *sd, char *ptr)
 {
-	static int nread = 0;
+	static size_t nread = 0;
 	static char *read_ptr = 0;
 	static char buf[LINEBUFFER+1];
 
 	if (nread <= 0) {
-	again:
-		if (method == CLIENT) {
-
-#ifdef HAVE_TLS
-			if (topt & T_SSL_CLIENT)
-				nread = gnutls_record_recv((gnutls_session)sd, buf, LINEBUFFER);
-			else
-#endif /* HAVE_TLS */
-
-#ifdef HAVE_SSL
-			if (topt & T_SSL_CLIENT)
-				nread = SSL_read((SSL *)sd, buf, LINEBUFFER);
-			else
-#endif /* HAVE_SSL */
-
-			if (!(topt & T_SSL_CLIENT))
-				nread = recv((int)sd, buf, LINEBUFFER, 0);
-		}
-		else if (method == SERVER) {
-
-#ifdef HAVE_TLS
-			if (topt & T_SSL_SERVER)
-				nread = gnutls_record_recv((gnutls_session)sd, buf, LINEBUFFER);
-			else
-#endif /* HAVE_TLS */
-
-#ifdef HAVE_SSL
-			if (topt & T_SSL_SERVER)
-				nread = SSL_read((SSL *)sd, buf, LINEBUFFER);
-			else
-#endif /* HAVE_SSL */
-
-			if (!(topt & T_SSL_SERVER))
-				nread = recv((int)sd, buf, LINEBUFFER, 0);
-		}
-		if (nread < 0) {
-			if (errno == EINTR)
-				goto again;
+		int rc = io_data[method].read(sd, buf, LINEBUFFER, &nread);
+		if (rc) {
+			socket_error(io_data[method].strerror(rc));
 			return -1;
 		}
-		else if (nread == 0)
+		if (nread == 0)
 			return 0;
 		read_ptr = buf;
 	}
@@ -350,43 +321,20 @@ recvline(int method, void *sd, void *vptr, int maxlen)
 	int n, rc;
 	char c, *ptr;
 
-	if ((int)sd == -1 && method == SERVER) { /* standard input */
-		memset(vptr, 0, maxlen);
-#ifdef HAVE_ISATTY
-		if (!isatty(fileno(stdin))) {
-			fgets((char *)vptr, maxlen, stdin);
-			remcrlf((char *)vptr);
-			strcat((char *)vptr, CRLF);
-			if (vptr)
-				n = strlen((char *)vptr);
-			else
-				n = 0;
-		}
-		else
-#endif /* HAVE_ISATTY */
-		{
-			n = read(0, (char *)vptr, maxlen - 1);
-			remcrlf((char *)vptr);
-			strcat((char *)vptr, CRLF);
-		}
-		return n;
-	}
-
 	ptr = vptr;
-	for (n = 1; n < maxlen; n++)
-	{
+	for (n = 1; n < maxlen; n++) {
 		if ((rc = mread(method, sd, &c)) == 1) {
+			if (c == '\n' && n > 1 && ptr[-1] != '\r') 
+				*ptr++ = '\r';
 			*ptr++ = c;
-			if (c == '\n')
+			if (c == '\n') 
 				break;
-		}
-		else if (rc == 0) {
+		} else if (rc == 0) {
 			if (n == 1)
 				return 0;
 			else
 				break;
-		}
-		else
+		} else
 			return -1;
 	}
 	*ptr = 0;

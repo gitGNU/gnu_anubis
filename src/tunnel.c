@@ -363,8 +363,7 @@ process_command(void *sd_client, void *sd_server, MESSAGE *msg,
 	
 	if (strncmp(buf, "starttls", 8) == 0) {
 
-#if defined(HAVE_TLS) || defined(HAVE_SSL)
-
+#ifdef USE_SSL
 		if (topt & T_SSL_FINISHED) {
 			if (topt & T_SSL_ONEWAY)
 				swrite(SERVER, sd_client, "503 5.0.0 TLS (ONEWAY) already started"CRLF);
@@ -372,8 +371,7 @@ process_command(void *sd_client, void *sd_server, MESSAGE *msg,
 				swrite(SERVER, sd_client, "503 5.0.0 TLS already started"CRLF);
 			strncpy(command, "", 1);
 			return;
-		}
-		else if (!(topt & T_STARTTLS) || !(topt & T_SSL)) {
+		} else if (!(topt & T_STARTTLS) || !(topt & T_SSL)) {
 			swrite(SERVER, sd_client, "503 5.5.0 TLS not available"CRLF);
 			strncpy(command, "", 1);
 			return;
@@ -399,18 +397,8 @@ process_command(void *sd_client, void *sd_server, MESSAGE *msg,
 				return;
 			}
 
-#ifdef HAVE_TLS
-			secure.client = start_tls_client((int)sd_server);
-#endif /* HAVE_TLS */
-
-#ifdef HAVE_SSL
-			secure.ctx_client = init_ssl_client();
-			if (topt & T_ERROR)
-				return;
-			secure.client = start_ssl_client((int)sd_server, secure.ctx_client);
-#endif /* HAVE_SSL */
-
-			if (topt & T_ERROR)
+			secure.client = start_ssl_client((int)sd_server);
+			if (!secure.client || (topt & T_ERROR))
 				return;
 			sd_server = remote_server = (void *)secure.client;
 		}
@@ -439,31 +427,18 @@ process_command(void *sd_client, void *sd_server, MESSAGE *msg,
 		if (topt & T_SSL_CKCLIENT)
 			check_filemode(secure.key);
 
-#ifdef HAVE_SSL
-		secure.ctx_server = init_ssl_server();
-#endif /* HAVE_SSL */
-
-		if (topt & T_ERROR) {
-			swrite(SERVER, sd_client, "454 4.3.3 TLS not available"CRLF);
+		secure.server = start_ssl_server((int)sd_client);
+		if (!secure.server || (topt & T_ERROR)) {
+			swrite(SERVER, sd_client,
+			       "454 4.3.3 TLS not available"CRLF);
 			return;
 		}
 		swrite(SERVER, sd_client, "220 2.0.0 Ready to start TLS"CRLF);
-
-#ifdef HAVE_TLS
-		secure.server = start_tls_server((int)sd_client);
-#endif /* HAVE_TLS */
-#ifdef HAVE_SSL
-		secure.server = start_ssl_server((int)sd_client, secure.ctx_server);
-#endif /* HAVE_SSL */
-
-		if (topt & T_ERROR)
-			return;
 		sd_client = remote_client = (void *)secure.server;
 		topt |= T_SSL_FINISHED;
-
 #else
 		swrite(SERVER, sd_client, "503 5.5.0 TLS not available"CRLF);
-#endif /* HAVE_TLS or HAVE_SSL */
+#endif /* USE_SSL */
 
 		strncpy(command, "", 1);
 		return;
@@ -489,9 +464,9 @@ transfer_command(void *sd_client, void *sd_server, MESSAGE *msg, char *command)
 		if (strstr(reply, "STARTTLS"))
 			topt |= T_STARTTLS; /* Yes, we can use the TLS/SSL encryption. */
 
-#if defined(HAVE_TLS) || defined(HAVE_SSL)
+#ifdef USE_SSL
 		if ((topt & T_SSL_ONEWAY) && (topt & T_STARTTLS)
-		&& !(topt & T_SSL_FINISHED) && !(topt & T_LOCAL_MTA)) {
+		    && !(topt & T_SSL_FINISHED) && !(topt & T_LOCAL_MTA)) {
 
 			struct sockaddr_in rclient;
 			char ehlo[LINEBUFFER+1];
@@ -517,30 +492,14 @@ transfer_command(void *sd_client, void *sd_server, MESSAGE *msg, char *command)
 				return 1;
 			}
 
-#ifdef HAVE_SSL
-			secure.ctx_client = init_ssl_client();
-#endif /* HAVE_SSL */
-
-			if (topt & T_ERROR) {
+			secure.client = start_ssl_client((int)sd_server);
+			if (!secure.client || (topt & T_ERROR)) {
 				topt &= ~T_ERROR;
 				topt &= ~T_SSL_ONEWAY;
 				swrite(SERVER, sd_client, reply);
 				return 1;
 			}
 
-#ifdef HAVE_TLS
-			secure.client = start_tls_client((int)sd_server);
-#endif /* HAVE_TLS */
-#ifdef HAVE_SSL
-			secure.client = start_ssl_client((int)sd_server, secure.ctx_client);
-#endif /* HAVE_SSL */
-
-			if (topt & T_ERROR) {
-				topt &= ~T_ERROR;
-				topt &= ~T_SSL_ONEWAY;
-				swrite(SERVER, sd_client, reply);
-				return 1;
-			}
 			sd_server = remote_server = (void *)secure.client;
 			topt |= T_SSL_FINISHED;
 
@@ -560,7 +519,7 @@ transfer_command(void *sd_client, void *sd_server, MESSAGE *msg, char *command)
 			swrite(CLIENT, sd_server, ehlo);
 			get_response_smtp(CLIENT, sd_server, reply, 2 * LINEBUFFER);
 		}
-#endif /* HAVE_TLS or HAVE_SSL */
+#endif /* USE_SSL */
 
 		/*
 		   Remove the STARTTLS command from the EHLO list
@@ -568,7 +527,8 @@ transfer_command(void *sd_client, void *sd_server, MESSAGE *msg, char *command)
 		   or we're using the 'ONEWAY' TLS/SSL encryption.
 		*/
 
-		if ((topt & T_STARTTLS) && (!(topt & T_SSL) || (topt & T_SSL_ONEWAY))) {
+		if ((topt & T_STARTTLS)
+		    && (!(topt & T_SSL) || (topt & T_SSL_ONEWAY))) {
 			char *starttls1 = "250-STARTTLS";
 			char *starttls2 = "STARTTLS";
 			if (strstr(reply, starttls1))
