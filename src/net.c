@@ -28,6 +28,35 @@
 static int connect_directly_to(char *, unsigned int);
 static int mread(int, void *, char *);
 
+static void
+_debug_printer(int method, int output, unsigned long nleft, char *ptr)
+{
+	int len;
+	char *mode = "?";
+
+	if (strcmp(ptr, CRLF) == 0)
+		return;
+
+	switch (method) {
+	case CLIENT:
+		mode = _("SERVER");
+		break;
+	case SERVER:
+		mode = _("CLIENT");
+	}
+		
+	fprintf(stderr, "(%ld)%s %s %s", nleft, mode,
+		output ? ">>>" : "<<<", ptr);
+	len = strlen (ptr);
+	if (len > 0 && ptr[len-1] != '\n')
+		fprintf(stderr, "\n");
+}
+
+#define DPRINTF(method, output, nleft, ptr) do {\
+  if (options.termlevel == DEBUG) \
+     _debug_printer(method, output, nleft, ptr);\
+  } while (0)
+
 int
 make_remote_connection(char *host, unsigned int port)
 {
@@ -210,8 +239,6 @@ swrite(int method, void *sd, char *ptr)
 					return;
 				}
 			}
-			if (options.termlevel == DEBUG)
-				fprintf(stderr, _("(%ld)SERVER >>> %s"), nleft, ptr);
 		}
 		else if (method == SERVER) {
 
@@ -245,9 +272,8 @@ swrite(int method, void *sd, char *ptr)
 					return;
 				}
 			}
-			if (options.termlevel == DEBUG)
-				fprintf(stderr, _("(%ld)CLIENT >>> %s"), nleft, ptr);
 		}
+		DPRINTF(method, 1, nleft, ptr);
 		if (nwritten <= 0)
 			return;
 
@@ -364,12 +390,7 @@ recvline(int method, void *sd, void *vptr, int maxlen)
 			return -1;
 	}
 	*ptr = 0;
-	if (options.termlevel == DEBUG) {
-		if (method == CLIENT)
-			fprintf(stderr, _("(%d)SERVER <<< %s"), n, (char *)vptr);
-		else if (method == SERVER)
-			fprintf(stderr, _("(%d)CLIENT <<< %s"), n, (char *)vptr);
-	}
+	DPRINTF(method, 0, n, (char *)vptr);
 	return n;
 }
 
@@ -406,6 +427,7 @@ close_socket(int sd)
 		close(sd);
 	return;
 }
+
 
 /* EOF */
 
