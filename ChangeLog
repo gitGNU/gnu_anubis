@@ -1,3 +1,22 @@
+2003-08-24  Sergey Poznyakoff  
+
+	* configure.ac: Determine signal handler return type.
+	* src/headers.h (sig_exit,sig_timeout): Fixed protos.
+	(cleanup_children): New function.
+	(anubis_free_list_item): New function.
+	* src/daemon.c (sig_cld): Fixed return type
+	(loop,stdinout): Call cleanup_children()
+	* src/exec.c (sig_local): Changed return type. Removed code.
+	(cleanup_children): New function.
+	* src/misc.c (_mem_free): Removed
+	(anubis_free_list_item): New function.
+	(destroy_string_list): Use anubis_free_list_item().
+	* src/quit.c (sig_exit,sig_timeout): Fixed return types.
+	* src/rc.c (open_rcfile): Prevent the same file from
+	being read twice (as a system-wide and per-user config).
+	* src/rcfile.y (_free_mem): Removed
+	(rc_asgn_destroy,asgn_eval): Use anubis_free_list_item()
+
 2003-08-24  Wojciech Polak
 
 	* src/gpg.c: General fixes and improvements.
