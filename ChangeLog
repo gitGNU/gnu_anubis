@@ -1,3 +1,7 @@
+2003-11-26  Sergey Poznyakoff
+
+	* doc/anubis.texi: Fixed a couple of misspellings.
+	
 2003-11-22  Wojciech Polak
 
 	* src/net.c (_debug_printer): Invert debug arrows.
