@@ -1,3 +1,25 @@
+2003-05-02  Wojciech Polak
+
+	* headers.h: Clean up with prototypes. Moved some stuff
+	  to extern.h and vice versa.
+	* extern.h: Likewise.
+	* list.h: Clean up with prototypes.
+	* rcfile.h: Likewise.
+	* rcfile.l: Likewise.
+	* rcfile.y: Likewise.
+	* rc.c: Likewise.
+	* regex.c: Likewise
+	* main.c: Likewise.
+	* map.c: Likewise.
+	* net.c: Likewise.
+	* guile.c: Likewise.
+	  (list_to_args): Put parentheses around assignment.
+	* tunnel.c: (write_header_line): Put parentheses
+	  around assignment.
+	* misc.c (insert): Convert to a static function.
+	* env.c (get_options): Added missing option `c'
+	  to getopt_long().
+
 2003-04-26  Wojciech Polak
 
 	* doc/anubis.texi: Changed @dircategory to Email.
