@@ -1451,7 +1451,7 @@ eval_section(int method, RC_SECTION *sec, struct rc_secdef *secdef,
 	env.traceable = secdef->allow_prog;
 	
 	if (env.traceable)
-		tracefile(&sec->loc, "Section %s", sec->name);
+		tracefile(&sec->loc, _("Section %s"), sec->name);
 	
 	if (setjmp(env.jmp) == 0)
 		stmt_list_eval(&env, sec->stmt);
