@@ -25,40 +25,62 @@
 #include "headers.h"
 #include "extern.h"
 
+static char *config_opts[] = {
+#ifdef HAVE_REGEX
+	"REGEX",
+#endif /* HAVE_REGEX */
+#ifdef HAVE_PCRE
+	"PCRE",
+#endif /* HAVE_PCRE */
+#ifdef WITH_GUILE
+	"GUILE",
+#endif /* WITH_GUILE */
+#ifdef HAVE_TLS
+	"GNUTLS",
+#endif /* HAVE_TLS */
+#ifdef HAVE_SSL
+	"OPENSSL",
+#endif /* HAVE_SSL */
+#ifdef HAVE_GPG
+	"GPG",
+#endif /* HAVE_GPG */
+#ifdef HAVE_PAM
+	"PAM",
+#endif /* HAVE_PAM */
+#ifdef USE_LIBWRAP
+	"LIBWRAP",
+#endif /* USE_LIBWRAP */
+#ifdef ENABLE_NLS
+	"NLS",
+#endif /* ENABLE_NLS */
+	NULL
+};
+
+void
+show_config_options(int delim)
+{
+	int i;
+
+	for (i = 0; config_opts[i]; i++) 
+		printf("%s%c", config_opts[i], delim);
+}
+
+void
+print_config_options()
+{
+	show_config_options('\n');
+	exit(0);
+}
+
 void
 print_version(void)
 {
 	printf("\n%s\n", version);
 	printf("%s\n\n", copyright);
 	printf(_("Built-in support for: "));
-#ifdef HAVE_REGEX
-	 printf("REGEX ");
-#endif /* HAVE_REGEX */
-#ifdef HAVE_PCRE
-	 printf("PCRE ");
-#endif /* HAVE_PCRE */
-#ifdef WITH_GUILE
-	 printf("GUILE ");
-#endif /* WITH_GUILE */
-#ifdef HAVE_TLS
-	 printf("GNUTLS ");
-#endif /* HAVE_TLS */
-#ifdef HAVE_SSL
-	 printf("OPENSSL ");
-#endif /* HAVE_SSL */
-#ifdef HAVE_GPG
-	 printf("GPG ");
-#endif /* HAVE_GPG */
-#ifdef HAVE_PAM
-	 printf("PAM ");
-#endif /* HAVE_PAM */
-#ifdef USE_LIBWRAP
-	 printf("LIBWRAP ");
-#endif /* USE_LIBWRAP */
-#ifdef ENABLE_NLS
-	 printf("NLS ");
-#endif /* ENABLE_NLS */
-
+	show_config_options(' ');
+	printf("\n");
+		
 	puts(_("\n\nGNU Anubis is free software; you can redistribute it and/or modify\n"
 	       "it under the terms of the GNU General Public License as published by\n"
 	       "the Free Software Foundation; either version 2 of the License, or\n"
