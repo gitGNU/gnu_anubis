@@ -35,11 +35,11 @@ mprintf(char *format, ...)
 		return;
 
 	va_start(arglist, format);
-	#ifdef HAVE_VSNPRINTF
+#ifdef HAVE_VSNPRINTF
 	vsnprintf(txt, LINEBUFFER,
-	#else
+#else
 	vsprintf(txt,
-	#endif /* HAVE_VSNPRINTF */
+#endif /* HAVE_VSNPRINTF */
 		format, arglist);
 	va_end(arglist);
 
@@ -57,15 +57,15 @@ info(int mode, char *format, ...)
 		return;
 
 	va_start(arglist, format);
-	#ifdef HAVE_VSNPRINTF
+#ifdef HAVE_VSNPRINTF
 	vsnprintf(txt, LINEBUFFER,
-	#else
+#else
 	vsprintf(txt,
-	#endif /* HAVE_VSNPRINTF */
+#endif /* HAVE_VSNPRINTF */
 		format, arglist);
 	va_end(arglist);
 
-	#ifdef HAVE_SYSLOG
+#ifdef HAVE_SYSLOG
 	if ((topt & T_DAEMON) && !(topt & T_FOREGROUND)) {
 		if (options.slogfile)
 			filelog(options.slogfile, txt);
@@ -76,7 +76,7 @@ info(int mode, char *format, ...)
 			filelog(options.ulogfile, txt);
 	}
 	else
-	#endif /* HAVE_SYSLOG */
+#endif /* HAVE_SYSLOG */
 		if (topt & T_FOREGROUND)
 			mprintf("> [%d] %s", (int)getpid(), txt);
 		else

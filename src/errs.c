@@ -32,11 +32,11 @@ anubis_error(int method, char *format, ...)
 	char txt[LINEBUFFER+1];
 
 	va_start(arglist, format);
-	#ifdef HAVE_VSNPRINTF
+#ifdef HAVE_VSNPRINTF
 	vsnprintf(txt, LINEBUFFER,
-	#else
+#else
 	vsprintf(txt,
-	#endif /* HAVE_VSNPRINTF */
+#endif /* HAVE_VSNPRINTF */
 		format, arglist);
 	va_end(arglist);
 
@@ -46,7 +46,7 @@ anubis_error(int method, char *format, ...)
 		topt &= ~T_ERROR;
 
 	if (options.termlevel != SILENT) {
-		#ifdef HAVE_SYSLOG
+#ifdef HAVE_SYSLOG
 		if ((topt & T_DAEMON) && !(topt & T_FOREGROUND)) {
 			if (options.slogfile)
 				filelog(options.slogfile, txt);
@@ -57,7 +57,7 @@ anubis_error(int method, char *format, ...)
 				filelog(options.ulogfile, txt);
 		}
 		else
-		#endif /* HAVE_SYSLOG */
+#endif /* HAVE_SYSLOG */
 			if (topt & T_FOREGROUND)
 				mprintf(">>[%d] %s", (int)getpid(), txt);
 			else
