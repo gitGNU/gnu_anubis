@@ -1,3 +1,23 @@
+2005-02-12  Sergey Poznyakoff
+
+	* TODO: Minor issue regarding session.execpath.
+	* lib/argcv.c: New file.
+	* lib/argcv.h: New file.
+	* lib/Makefile.am (libanubis_a_SOURCES): Add argcv.c and
+	argcv.h
+	* src/anubisusr.c: Use argcv_get/argcv_free
+	* src/message.c: Likewise.
+	* src/quit.c: Likewise.
+	* src/rcfile.c: Likewise.
+	* src/rcfile.y: Likewise.
+	* src/regex.c: Likewise.
+	* src/exec.c: Likewise.
+	(gen_execargs): Removed.
+	* src/env.c: Likewise.
+	(argcv_dup): Removed
+	* src/headers.h: Include argcv.h
+	* src/mem.c (free_pptr): Removed
+	
 2005-02-07  Sergey Poznyakoff
 
 	* src/esmtp.c (get_reply): Changed declaration. All callers
