@@ -148,7 +148,6 @@ init_ssl_libs (void)
 {
   gnutls_global_init ();
   atexit (gnutls_global_deinit);
-  return;
 }
 
 NET_STREAM
@@ -183,7 +182,7 @@ start_ssl_client (NET_STREAM sd_server, const char *cafile, int verbose)
 						   GNUTLS_X509_FMT_PEM);
       if (rs < 0)
 	{
-	  anubis_error (HARD, _("TLS Error reading `%s': %s"),
+	  anubis_error (HARD, _("TLS error reading `%s': %s"),
 			cafile, gnutls_strerror (rs));
 	  return 0;
 	}
@@ -261,7 +260,7 @@ start_ssl_server (NET_STREAM sd_client, const char *cafile, const char *cert,
 						   GNUTLS_X509_FMT_PEM);
       if (rs < 0)
 	{
-	  anubis_error (HARD, _("TLS Error reading `%s': %s"),
+	  anubis_error (HARD, _("TLS error reading `%s': %s"),
 			cafile, gnutls_strerror (rs));
 	  return 0;
 	}
@@ -332,8 +331,8 @@ verify_certificate (gnutls_session session)
 	  return;
 	}
     }
+
   info (VERBOSE, _("The certificate is trusted."));
-  return;
 }
 
 #define PRINTX(x,y) if (y[0]!=0) fprintf(stderr, " -   %s %s\n", x, y);
@@ -362,17 +361,17 @@ cipher_info (gnutls_session session)
     {
     case GNUTLS_CRD_ANON:	/* anonymous authentication */
       bits = gnutls_dh_get_prime_bits (session);
-      info (VERBOSE,
-	    ngettext ("Anonymous DH using prime of %d bit.",
-		      "Anonymous DH using prime of %d bits.", bits), bits);
+      fprintf (stderr,
+	    ngettext ("- Anonymous DH using prime of %d bit.\n",
+		      "- Anonymous DH using prime of %d bits.\n", bits), bits);
       break;
     case GNUTLS_CRD_CERTIFICATE:	/* certificate authentication */
       if (kx == GNUTLS_KX_DHE_RSA || kx == GNUTLS_KX_DHE_DSS)
 	{
 	  bits = gnutls_dh_get_prime_bits (session);
-	  info (VERBOSE,
-		ngettext ("Ephemeral DH using prime of %d bit.",
-			  "Ephemeral DH using prime of %d bits.",
+	  fprintf (stderr,
+		ngettext ("- Ephemeral DH using prime of %d bit.\n",
+			  "- Ephemeral DH using prime of %d bits.\n",
 			  bits), bits);
 	}
       print_x509_certificate_info (session);

@@ -132,7 +132,8 @@ anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER * usr,
   int rc;
   Gsasl_session_ctx *sess_ctx = NULL;
 
-  info (DEBUG, "mech=%s, inp=%s", auth_type, arg);
+  if (options.termlevel == DEBUG)
+    fprintf (stderr, "SASL mech=%s, inp=%s\n", auth_type, arg);
 
   memset (usr, 0, sizeof (*usr));
   rc = gsasl_server_start (ctx, auth_type, &sess_ctx);
@@ -188,7 +189,7 @@ anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER * usr,
       return 1;
     }
 
-  info (NORMAL, "Authentication passed. User name %s, Local user %s",
+  info (NORMAL, "Authentication passed. User name %s, Local user %s. Welcome!",
 	usr->smtp_authid, usr->username ? usr->username : "NONE");
 
   if (sess_ctx)

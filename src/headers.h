@@ -386,7 +386,7 @@ char **gen_execargs (const char *);
 NET_STREAM make_local_connection (char *, char **);
 char *external_program (int *, char *, char *, char *, int);
 char *exec_argv (int *, char *, char **, char *, char *, int);
-void cleanup_children ();
+void cleanup_children (void);
 
 /* esmtp.c */
 void esmtp_auth (NET_STREAM, char *);
@@ -425,7 +425,7 @@ void open_rcfile (int);
 void process_rcfile (int);
 void rcfile_process_section (int, char *, void *, MESSAGE *);
 void rcfile_call_section (int, char *, void *, MESSAGE *);
-char *user_rcfile_name ();
+char *user_rcfile_name (void);
 
 /* help.c */
 void print_version (void);
@@ -539,16 +539,16 @@ const char *anubis_db_strerror (void *dptr);
 void anubis_db_free_record (ANUBIS_USER * rec);
 
 /* dbtext.c */
-void dbtext_init ();
+void dbtext_init (void);
 
 /* gdbm.c */
-void gdbm_db_init ();
+void gdbm_db_init (void);
 
 /* mysql.c */
-void mysql_db_init ();
+void mysql_db_init (void);
 
 /* pgsql.c */
-void pgsql_db_init ();
+void pgsql_db_init (void);
 
 /* transmode.c */
 int anubis_transparent_mode (NET_STREAM * sd_client,
@@ -564,11 +564,11 @@ int anubis_get_db_record (const char *username, ANUBIS_USER * usr);
 void authmode_section_init (void);
 
 /* gsasl.c */
-void auth_gsasl_init ();
+void auth_gsasl_init (void);
 int anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER * usr,
 		       NET_STREAM * stream);
 void anubis_set_mech_list (ANUBIS_LIST * list);
-#if defined(WITH_GSASL)
+#ifdef WITH_GSASL
 void install_gsasl_stream (Gsasl_session_ctx * sess_ctx, NET_STREAM * stream);
 #endif
 

@@ -154,7 +154,7 @@ main (int argc, char *argv[])
     }
 #endif /* HAVE_GETRLIMIT and HAVE_SETRLIMIT */
 
-  info (DEBUG, _("UID:%d, GID:%d, EUID:%d, EGID:%d"), (int) getuid (),
+  info (VERBOSE, _("UID:%d, GID:%d, EUID:%d, EGID:%d"), (int) getuid (),
 	(int) getgid (), (int) geteuid (), (int) getegid ());
 
   /*

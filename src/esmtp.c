@@ -70,7 +70,8 @@ esmtp_auth (NET_STREAM sd_server, char *reply)
       p = strchr (tmp, ' ');
       p++;
       b64decode (p, &b64buf);
-      info (DEBUG, _("Challenge decoded: %s"), b64buf);
+      if (options.termlevel == DEBUG)
+	fprintf (stderr, _("Challenge decoded: %s\n"), b64buf);
 
       cram_md5 (session.mta_password, b64buf, digest);
       xfree (b64buf);
@@ -111,7 +112,8 @@ esmtp_auth (NET_STREAM sd_server, char *reply)
       p = strchr (tmp, ' ');
       p++;
       b64decode (p, &b64buf);
-      info (DEBUG, _("Challenge decoded: %s"), b64buf);
+      if (options.termlevel == DEBUG)
+	fprintf (stderr, _("Challenge decoded: %s\n"), b64buf);
 
       p = b64encode (session.mta_username);
       snprintf (tmp, LINEBUFFER, "%s" CRLF, p);
@@ -122,7 +124,8 @@ esmtp_auth (NET_STREAM sd_server, char *reply)
       p = strchr (tmp, ' ');
       p++;
       b64decode (p, &b64buf);
-      info (DEBUG, _("Challenge decoded: %s"), b64buf);
+      if (options.termlevel == DEBUG)
+	fprintf (stderr, _("Challenge decoded: %s\n"), b64buf);
 
       p = b64encode (session.mta_password);
       snprintf (tmp, LINEBUFFER, "%s" CRLF, p);

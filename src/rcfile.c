@@ -150,46 +150,45 @@ open_rcfile (int method)
   char *rcfile = 0;
   RC_SECTION *sec;
 
-  switch (method)
-    {
-    case CF_SUPERVISOR:
-    case CF_INIT:
-      if (topt & T_ALTRC)
-	{
-	  rcfile = strdup (options.altrc);
-	}
-      else if (check_superuser ())
-	rcfile = strdup (DEFAULT_GLOBAL_RCFILE);
-      else
-	{
-	  get_homedir (session.supervisor, homedir, sizeof (homedir));
-	  rcfile = xmalloc (strlen (homedir) +
-			    strlen (DEFAULT_LOCAL_RCFILE) + 2);
-	  sprintf (rcfile, "%s/%s", homedir, DEFAULT_LOCAL_RCFILE);
-	}
-
-      if (check_filename (rcfile, &global_mtime) == 0)
-	{
-	  free (rcfile);
-	  return;
-	}
-      rc_section_list_destroy (&parse_tree);
-      file_id_destroy ();
-      info (DEBUG, _("Reading system configuration file %s..."), rcfile);
-      break;
-
-    case CF_CLIENT:
-      if ((topt & (T_ALTRC | T_NORC)) == (T_ALTRC | T_NORC))
-	{
-	  rcfile = strdup (options.altrc);
-	}
-      else
-	{
-	  rcfile = user_rcfile_name ();
-	}
-      info (DEBUG, _("Reading user configuration file %s..."), rcfile);
-    }
-
+  switch (method) {
+  case CF_INIT:
+  case CF_SUPERVISOR:
+    if (topt & T_ALTRC)
+      {
+	rcfile = strdup (options.altrc);
+      }
+    else if (check_superuser ())
+      rcfile = strdup (DEFAULT_GLOBAL_RCFILE);
+    else
+      {
+	get_homedir (session.supervisor, homedir, sizeof (homedir));
+	rcfile = xmalloc (strlen (homedir) +
+			  strlen (DEFAULT_LOCAL_RCFILE) + 2);
+	sprintf (rcfile, "%s/%s", homedir, DEFAULT_LOCAL_RCFILE);
+      }
+    
+    if (check_filename (rcfile, &global_mtime) == 0)
+      {
+	free (rcfile);
+	return;
+      }
+    rc_section_list_destroy (&parse_tree);
+    file_id_destroy ();
+    info (VERBOSE, _("Reading system configuration file %s..."), rcfile);
+    break;
+    
+  case CF_CLIENT:
+    if ((topt & (T_ALTRC | T_NORC)) == (T_ALTRC | T_NORC))
+      {
+	rcfile = strdup (options.altrc);
+      }
+    else
+      {
+	rcfile = user_rcfile_name ();
+      }
+    info (VERBOSE, _("Reading user configuration file %s..."), rcfile);
+  }
+  
   if ((topt & T_RELAX_PERM_CHECK) == 0 && check_filemode (rcfile) == 0)
     {				/* Wrong permissions... */
       free (rcfile);
@@ -696,7 +695,7 @@ rcfile_call_section (int method, char *name, void *data, MESSAGE * msg)
 }
 
 char *
-user_rcfile_name ()
+user_rcfile_name (void)
 {
   if (session.rcfile_name)
     return strdup (session.rcfile_name);
