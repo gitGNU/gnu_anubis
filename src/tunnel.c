@@ -2,7 +2,7 @@
    tunnel.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -490,6 +490,8 @@ process_command (MESSAGE *msg, char *command)
 	
 	if (strncmp(buf, "starttls", 8) == 0) 
 		return handle_starttls(command);
+	else if (strncmp(buf, "xdatabase", 8) == 0) 
+		return xdatabase (buf);
 	return 0;
 }
 
@@ -499,8 +501,11 @@ handle_ehlo (char *command, char *reply, size_t reply_size)
 	get_response_smtp(CLIENT, remote_server, reply, reply_size - 1);
 
 	if (strstr(reply, "STARTTLS"))
-		topt |= T_STARTTLS; /* Yes, we can use the TLS/SSL encryption. */
+		topt |= T_STARTTLS; /* Yes, we can use the TLS/SSL
+				       encryption. */
 
+	xdatabase_capability (reply, reply_size);
+	
 #ifdef USE_SSL
 	if ((topt & T_SSL_ONEWAY)
 	    && (topt & T_STARTTLS)
