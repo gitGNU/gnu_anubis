@@ -388,7 +388,7 @@ _stdio_read(void *sd, char *data, size_t size, size_t *nbytes)
 	FD_SET(fd, &rds);
 	do
 		n = select(fd + 1, &rds, NULL, NULL, NULL);
-	while (errno == EINTR);
+	while (n < 0 && errno == EINTR);
 	if (n > 0) {
 		n = read(fd, data, size);
 		if (n >= 0) 
@@ -401,30 +401,6 @@ static const char *
 _stdio_strerror(int rc)
 {
 	return strerror(rc);
-}
-
-#if defined(O_NONBLOCK)
-# define FCNTL_NONBLOCK O_NONBLOCK
-#elif defined(O_NDELAY)
-# define FCNTL_NONBLOCK O_NDELAY
-#else
-# error "Neither O_NONBLOCK nor O_NDELAY are defined"
-#endif
-
-int
-set_nonblocking(int fd)
-{
-	int flags;
-	
-	if ((flags = fcntl(fd, F_GETFL, 0)) < 0) {
-		perror("F_GETFL");
-		return -1;
-	}
-	if (fcntl(fd, F_SETFL, flags | FCNTL_NONBLOCK) < 0) {
-		perror("F_GETFL");
-		return -1;
-	}
-	return 0;
 }
 
 void
@@ -456,8 +432,6 @@ stdinout(void)
 		free_mem();
 		return;
 	}
-	set_nonblocking(sd_client);
-	set_nonblocking(sd_server);
 	remote_client = (void *)sd_client;
 	remote_server = (void *)sd_server;
 	net_set_io(CLIENT, _stdio_read, _stdio_write, NULL, _stdio_strerror);
