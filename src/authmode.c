@@ -40,6 +40,7 @@ enum asmtp_state {
 #define KW_STARTTLS  5
 #define KW_MAIL      6
 #define KW_RCPT      7
+#define KW_RSET      8
 
 static int
 asmtp_kw (const char *name)
@@ -48,21 +49,24 @@ asmtp_kw (const char *name)
 		char *name;
 		int code;
 	} kw[] = {
-		{ "ehlo", KW_EHLO },      
-		{ "helo", KW_HELO },       
-		{ "auth", KW_AUTH },
-		{ "help", KW_HELP },
-		{ "quit", KW_QUIT },
+		{ "ehlo",     KW_EHLO },
+		{ "helo",     KW_HELO },
+		{ "auth",     KW_AUTH },
+		{ "help",     KW_HELP },
+		{ "quit",     KW_QUIT },
 		{ "starttls", KW_STARTTLS },
-		{ "mail", KW_MAIL },
-		{ "rcpt", KW_RCPT },
+		{ "mail",     KW_MAIL },
+		{ "rcpt",     KW_RCPT },
+		{ "rset",     KW_RSET },
 		{ NULL },
 	};
 	int i;
 
-	for (i = 0; kw[i].name != NULL; i++)
-		if (strcasecmp (name, kw[i].name) == 0)
-			return kw[i].code;
+	if (name) {
+		for (i = 0; kw[i].name != NULL; i++)
+			if (strcasecmp (name, kw[i].name) == 0)
+				return kw[i].code;
+	}
 	return -1;
 }
 
@@ -236,8 +240,12 @@ asmtp_init(enum asmtp_state state)
 			    "Command disabled. Proper authentication required.");
 		break;
 
+	case KW_RSET:
+		asmtp_reply(250, "OK"); /* FIXME: Fake RSET */
+		break;
+
 	default:
-		asmtp_reply(503, "Unknown command");
+		asmtp_reply(500, "Unknown command");
 	}
 	free (command);
 	return state;
@@ -274,8 +282,12 @@ asmtp_ehlo (enum asmtp_state state)
 			    "Command disabled. Proper authentication required.");
 		break;
 
+	case KW_RSET:
+		asmtp_reply(250, "OK"); /* FIXME: Fake RSET */
+		break;
+
 	default:
-		asmtp_reply(503, "Unknown command");
+		asmtp_reply(500, "Unknown command");
 	}
 	free(command);
 	
@@ -493,3 +505,4 @@ anubis_authenticate_mode (int sd_client, struct sockaddr_in *addr)
 #endif /* HAVE_PAM */
 	return 0;
 }
+
