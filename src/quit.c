@@ -42,8 +42,11 @@ sig_timeout(int code)
 void
 free_mem(void)
 {
+	destroy_assoc_list(&message.commands);
+	destroy_assoc_list(&message.header);
+	destroy_string_list(&message.mime_hdr);
+	
 	xfree(message.body);
-	xfree(message.body_append);
 	xfree(message.boundary);
 	xfree(rm.rrt);
 	xfree(rm.post);
@@ -57,16 +60,6 @@ free_mem(void)
 	xfree(secure.key);
 #endif /* HAVE_TLS or HAVE_SSL */
 
-#ifdef HAVE_GPG
-	xfree(gpg.keys);
-	xfree(gpg.rm_key);
-	if (gpg.passphrase) {
-		memset(gpg.passphrase, 0, strlen(gpg.passphrase));
-		xfree(gpg.passphrase);
-	}
-#endif /* HAVE_GPG */
-
-	destroy_list(&session.transmap);
 	xfree(options.slogfile);
 	xfree(options.ulogfile);
 	xfree(session.execpath);
