@@ -151,12 +151,13 @@ cb_realm (Gsasl_session_ctx *ctx, char *out, size_t *outlen)
 }
 
 static char *
-get_reply (NET_STREAM str, int *code, char *buf, size_t size)
+get_reply (NET_STREAM str, int *code, char **buf, size_t *psize)
 {
   char *p;
-  get_response_smtp (CLIENT, str, buf, size);
-  remcrlf (buf);
-  *code = strtoul (buf, &p, 10);
+  
+  get_response_smtp (CLIENT, str, buf, psize);
+  remcrlf (*buf);
+  *code = strtoul (*buf, &p, 10);
   if (*p == 0 || *p == '\r')
     return p;
 
@@ -176,12 +177,14 @@ do_gsasl_auth (NET_STREAM *pstr, Gsasl_ctx * ctx, char *mech)
   char *output;
   int rc;
   Gsasl_session_ctx *sess_ctx = NULL;
-  char buf[LINEBUFFER + 1];
+  char sbuf[LINEBUFFER + 1];
+  char *buf = NULL;
+  size_t size = 0;
   char *p;
   int code;
   
-  snprintf (buf, sizeof buf, "AUTH %s" CRLF, mech);
-  swrite (CLIENT, *pstr, buf);
+  snprintf (sbuf, sizeof sbuf, "AUTH %s" CRLF, mech);
+  swrite (CLIENT, *pstr, sbuf);
 
   rc = gsasl_client_start (ctx, mech, &sess_ctx);
   if (rc != GSASL_OK)
@@ -192,10 +195,11 @@ do_gsasl_auth (NET_STREAM *pstr, Gsasl_ctx * ctx, char *mech)
 
   output = NULL;
 
-  p = get_reply (*pstr, &code, buf, sizeof buf);
+  p = get_reply (*pstr, &code, &buf, &size);
   if (code != 334)
     {
       anubis_error (0, 0, _("GSASL handshake aborted: %d %s"), code, p);
+      free (buf);
       return 1;
     }
 
@@ -210,30 +214,31 @@ do_gsasl_auth (NET_STREAM *pstr, Gsasl_ctx * ctx, char *mech)
 
       if (rc == GSASL_OK)
 	break;
-      p = get_reply (*pstr, &code, buf, sizeof buf);
+      p = get_reply (*pstr, &code, &buf, &size);
       if (code != 334)
 	{
 	  anubis_error (0, 0, _("GSASL handshake aborted: %d %s"), code, p);
 	  free (output);
+	  free (buf);
 	  return 1;
 	}
     }
   while (rc == GSASL_NEEDS_MORE);
 
   free (output);
-
+  
   if (rc != GSASL_OK)
     {
       anubis_error (0, 0, _("GSASL error: %s"), gsasl_strerror (rc));
       exit (1);
     }
 
-  p = get_reply (*pstr, &code, buf, sizeof buf);
+  p = get_reply (*pstr, &code, &buf, &size);
   
   if (code == 334)
     {
       /* Additional data. Do we need it? */
-      p = get_reply (*pstr, &code, buf, sizeof buf);
+      p = get_reply (*pstr, &code, &buf, &size);
     }
 
   if (code != 235)
@@ -246,6 +251,8 @@ do_gsasl_auth (NET_STREAM *pstr, Gsasl_ctx * ctx, char *mech)
   if (sess_ctx)
     install_gsasl_stream (sess_ctx, pstr);
 
+  free (buf);
+  
   return 0;
 }
 
