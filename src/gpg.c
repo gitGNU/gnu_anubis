@@ -39,7 +39,8 @@ static struct gpg_struct gpg;
 
 static int gpgme_init(void);
 static char *gpg_sign(char *);
-static char *gpg_encrypt_to_users(char *);
+static char *gpg_encrypt(char *);
+static char *gpg_sign_encrypt(char *);
 static void gpgme_debug_info(GpgmeCtx);
 
 #define EXTRA_GPG_BUF 4096
@@ -58,7 +59,6 @@ gpgme_debug_info(GpgmeCtx ctx)
 		puts(s);
 		free(s);
 	}
-	return;
 }
 
 #define GPGME_REQ_VERSION "0.3.12" /* GPGME 0.3.12 or later */
@@ -98,9 +98,8 @@ gpg_sign(char *gpg_data)
 	GpgmeError err = 0;
 	GpgmeData in, out;
 	GpgmeKey key;
-	
 	char buf[256];
-	char *signed_data;
+	char *p, *signed_data;
 	int size;
 	size_t nread;
 
@@ -121,7 +120,11 @@ gpg_sign(char *gpg_data)
 			topt |= T_ERROR;
 		}
 	}
-	gpgme_set_passphrase_cb(ctx, (GpgmePassphraseCb)passphrase_cb, 0);
+
+	p = getenv("GPG_AGENT_INFO");
+	if (!(p && strchr (p, ':')))
+		gpgme_set_passphrase_cb(ctx,
+					(GpgmePassphraseCb)passphrase_cb, 0);
 	gpgme_set_textmode(ctx, 1);
 	gpgme_set_armor(ctx, 1);
 
@@ -164,7 +167,7 @@ gpg_sign(char *gpg_data)
 }
 
 static char *
-gpg_encrypt_to_users(char *gpg_data)
+gpg_encrypt(char *gpg_data)
 {
 	GpgmeCtx ctx;
 	GpgmeError err = 0;
@@ -184,6 +187,7 @@ gpg_encrypt_to_users(char *gpg_data)
 
 	fail_if_err(gpgme_new(&ctx));
 	gpgme_set_armor(ctx, 1);
+
 	fail_if_err(gpgme_data_new_from_mem(&in, gpg_data, strlen(gpg_data), 0));
 	fail_if_err(gpgme_data_new(&out));
 	fail_if_err(gpgme_recipients_new(&rset));
@@ -238,6 +242,100 @@ gpg_encrypt_to_users(char *gpg_data)
 	return encrypted_data;
 }
 
+static char *
+gpg_sign_encrypt(char *gpg_data)
+{
+	GpgmeCtx ctx;
+	GpgmeError err = 0;
+	GpgmeData in, out;
+	GpgmeKey key;
+	GpgmeRecipients rset;
+	char current_key[100];
+	char buf[256];
+	char *p, *se_data; /* Signed-Encrypted Data */
+	int i, j = 0;
+	int len, size;
+	size_t nread;
+
+	size = strlen(gpg_data) + EXTRA_GPG_BUF;
+	se_data = (char *)xmalloc(size);
+	memset(buf, 0, sizeof(buf));
+	memset(current_key, 0, sizeof(current_key));
+
+	fail_if_err(gpgme_new(&ctx));
+
+	if (gpg.keys) {
+		err = gpgme_op_keylist_start(ctx, gpg.keys, 0);
+		if (!err) {
+			while ((err = gpgme_op_keylist_next(ctx, &key)) == 0)
+				err = gpgme_signers_add(ctx, key);
+		}
+		if (err && err != GPGME_EOF) {
+			anubis_error(HARD, _("GPGME: cannot list keys: %s"),
+				     gpgme_strerror(err));
+			topt |= T_ERROR;
+		}
+	}
+
+	p = getenv("GPG_AGENT_INFO");
+	if (!(p && strchr (p, ':')))
+		gpgme_set_passphrase_cb(ctx,
+					(GpgmePassphraseCb)passphrase_cb, 0);
+	gpgme_set_armor(ctx, 1);
+
+	fail_if_err(gpgme_data_new_from_mem(&in, gpg_data, strlen(gpg_data), 0));
+	fail_if_err(gpgme_data_new(&out));
+	fail_if_err(gpgme_recipients_new(&rset));
+
+	len = strlen(gpg.keys);
+	for (i = 0; i <= len; i++)
+	{
+		if (gpg.keys[i] == ',') { /* comma found, so add KEY-ID */
+			fail_if_err(gpgme_recipients_add_name_with_validity(rset,
+				current_key, GPGME_VALIDITY_FULL));
+			memset(current_key, 0, sizeof(current_key));
+			j = 0;
+		}
+		else /* it is not a comma, so add char to KEY_ID string */
+			current_key[j++] = gpg.keys[i];
+	}
+	fail_if_err(gpgme_op_encrypt_sign(ctx, rset, in, out));
+	fail_if_err(gpgme_data_rewind(out));
+
+	if (options.termlevel == DEBUG)
+		gpgme_debug_info(ctx);
+
+	if (topt & T_ERROR) {
+		gpgme_recipients_release(rset);
+		gpgme_release(ctx);
+		free(se_data);
+		return 0;
+	}
+
+	while (!(err = gpgme_data_read(out, buf, sizeof(buf), &nread)))
+	{
+		if (size > nread) {
+			strncat(se_data, buf, nread);
+			size -= nread;
+		}
+		else {
+			size = EXTRA_GPG_BUF;
+			se_data = (char *)xrealloc((char *)se_data,
+				strlen(se_data) + size);
+			strncat(se_data, buf, nread);
+			size -= nread;
+		}
+		memset(buf, 0, sizeof(buf));
+	}
+	if (err != GPGME_EOF)
+		fail_if_err(err);
+
+	gpgme_recipients_release(rset);
+	gpgme_data_release(in);
+	gpgme_data_release(out);
+	gpgme_release(ctx);
+	return se_data;
+}
 
 void
 gpg_proc(MESSAGE *msg, char *(*proc)(char *input))
@@ -263,8 +361,6 @@ gpg_proc(MESSAGE *msg, char *(*proc)(char *input))
 #if defined(HAVE_SETENV) || defined(HAVE_PUTENV)
 	setenv("HOME", homedir_s, 1);
 #endif /* HAVE_SETENV or HAVE_PUTENV */
-
-	return;
 }
 
 void
@@ -280,7 +376,8 @@ gpg_free(void)
 #define KW_GPG_PASSPHRASE         1
 #define KW_GPG_ENCRYPT            2
 #define KW_GPG_SIGN               3
-#define KW_GPG_HOME               4
+#define KW_GPG_SIGN_ENCRYPT       4
+#define KW_GPG_HOME               5
 
 int
 gpg_parser(int method, int key, LIST *arglist,
@@ -303,7 +400,7 @@ gpg_parser(int method, int key, LIST *arglist,
 		strcat(gpg.keys, ",");
 		if (gpg.inited == 0 && gpgme_init())
 			break;
-		gpg_proc(msg, gpg_encrypt_to_users);
+		gpg_proc(msg, gpg_encrypt);
 		break;
 		
 	case KW_GPG_SIGN:
@@ -316,7 +413,17 @@ gpg_parser(int method, int key, LIST *arglist,
 			gpg_proc(msg, gpg_sign);
 		}
 		break;
-		
+
+	case KW_GPG_SIGN_ENCRYPT:
+		xfree(gpg.keys);
+		gpg.keys = allocbuf(arg, 0);
+		gpg.keys = xrealloc(gpg.keys, strlen(gpg.keys) + 2);
+		strcat(gpg.keys, ",");
+		if (gpg.inited == 0 && gpgme_init())
+			break;
+		gpg_proc(msg, gpg_sign_encrypt);
+		break;
+
 	case KW_GPG_HOME:
 		setenv("GNUPGHOME", arg, 1);
 		break;
@@ -329,10 +436,11 @@ gpg_parser(int method, int key, LIST *arglist,
 
 
 struct rc_kwdef gpg_kw[] = {
-	{ "gpg-passphrase",  KW_GPG_PASSPHRASE },          
-	{ "gpg-encrypt",     KW_GPG_ENCRYPT },             
-	{ "gpg-sign",        KW_GPG_SIGN },                
-	{ "gpg-home",        KW_GPG_HOME },
+	{ "gpg-passphrase",    KW_GPG_PASSPHRASE },
+	{ "gpg-encrypt",       KW_GPG_ENCRYPT },
+	{ "gpg-sign",          KW_GPG_SIGN },
+	{ "gpg-sign-encrypt",  KW_GPG_SIGN_ENCRYPT },
+	{ "gpg-home",          KW_GPG_HOME },
 	{ NULL },
 };
 
