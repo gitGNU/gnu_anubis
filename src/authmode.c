@@ -422,6 +422,9 @@ anubis_smtp (ANUBIS_USER * usr)
 
   for (state = state_init; state != state_auth;)
     {
+      if (topt & T_ERROR)
+	return EXIT_FAILURE;
+      
       switch (state) {
       case state_init:
 	state = asmtp_init (state);
@@ -456,6 +459,9 @@ xdb_loop (void)
   asmtp_capa_add ("XDATABASE");
   while (recvline_ptr (SERVER, remote_client, &command, &s) > 0)
     {
+      if (topt & T_ERROR)
+	break;
+
       switch (asmtp_kw (get_command_word (command))) {
       case KW_HELP:
 	asmtp_help ();
