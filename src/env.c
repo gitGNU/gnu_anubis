@@ -72,7 +72,7 @@ static struct option gopt[] = {
   {"check-config", optional_argument, 0, 'c'},
   {"show-config-options", no_argument, 0, OPT_SHOW_CONFIG},
   {"relax-perm-check", no_argument, 0, OPT_RELAX_PERM_CHECK},
-#if defined(WITH_GSASL)
+#ifdef WITH_GSASL
   {"mode", required_argument, 0, 'm'},
 #endif
   {0, 0, 0, 0}
@@ -251,7 +251,7 @@ anubis_changeowner (char *user)
 {
 #ifdef HAVE_PAM
   int pam_retval;
-#endif /* HAVE_PAM */
+#endif
   struct passwd *pwd;
 
   if (user == 0 || check_superuser () == 0)
@@ -280,8 +280,9 @@ anubis_changeowner (char *user)
       setgid (pwd->pw_gid);
       setuid (pwd->pw_uid);
       chdir (pwd->pw_dir);
-      info (VERBOSE, _("UID:%d, GID:%d, EUID:%d, EGID:%d"), (int) getuid (),
-	    (int) getgid (), (int) geteuid (), (int) getegid ());
+      info (VERBOSE, _("UID:%d (%s), GID:%d, EUID:%d, EGID:%d"),
+	    (int) getuid (), pwd->pw_name, (int) getgid (),
+	    (int) geteuid (), (int) getegid ());
     }
   return;
 }
