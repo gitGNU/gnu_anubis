@@ -210,6 +210,11 @@
 #define HARD   2
 #define SYNTAX 3
 
+typedef enum anubis_mode {
+	anubis_transparent,
+	anubis_authenticate
+} ANUBIS_MODE;
+
 /* bit values for topt */
 #define T_ERROR             0x00000001
 #define T_SOCKS             0x00000002
@@ -313,8 +318,14 @@ int  make_remote_connection(char *, unsigned int);
 int  bind_and_listen(char *, unsigned int);
 void swrite(int, void *, char *);
 int  recvline(int, void *, void *, int);
+int  recvline_ptr(int method, void *sd, char **vptr, size_t *maxlen);
 void get_response_smtp(int, void *, char *, int);
 void close_socket(int);
+
+void *net_io_get(int method, void *stream);
+int net_io_read(void *iod, char *buf, size_t size, size_t *nbytes);
+int net_io_write(void *iod, char *buf, size_t size, size_t *nbytes);
+int net_io_close(void *iod);
 
 /* proxy.c */
 void check_all_proxies(char *, unsigned int *);
@@ -324,6 +335,8 @@ int  check_socks_proxy(int, char *, unsigned int);
 void daemonize(void);
 void loop(int);
 void stdinout(void);
+void service_unavailable(int);
+void set_unprivileged_user(void);
 
 /* auth.c */
 void auth_tunnel(void);
@@ -335,6 +348,7 @@ void translate_section_init(void);
 
 /* tunnel.c */
 void smtp_session(void);
+void smtp_session_transparent(void);
 
 /* message.c */
 void message_add_body(MESSAGE *, char *, char *);
@@ -368,6 +382,8 @@ void remline(char *, char *);
 void remcrlf(char *);
 char *substitute(char *, char **);
 void change_to_lower(char *);
+char *get_localname(void);
+char *get_localdomain(void);
 
 /* files.c */
 void message_append_text_file(MESSAGE *, char *);
@@ -423,6 +439,67 @@ void guile_rewrite_line(char *, const char *);
 void guile_postprocess_proc(char *, LIST **, char **);
 void guile_section_init(void);
 #endif /* WITH_GUILE */
+
+/* anubisdb.c */
+
+typedef struct anubis_user {
+	char *smtp_authid;         /* ESMTP authentication ID */
+	char *smtp_passwd;         /* A corresponding password */
+	char *username;            /* System user name to switch to */
+	char *rc_file_name;        /* Optional configuration file. 
+				      When NULL, defaults to
+				      ~username/.anubisrc */
+} ANUBIS_USER;
+
+enum anubis_db_mode {
+	anubis_db_rdonly,
+	anubis_db_rdwr
+};
+
+#define ANUBIS_DB_SUCCESS   0  /* Operations successful */
+#define ANUBIS_DB_FAIL      1  /* Operation failed */
+#define ANUBIS_DB_NOT_FOUND 2  /* Record not found (for db_get_record
+				  only) */
+
+typedef int (*anubis_db_open_t) (void **d, char *arg,
+				 enum anubis_db_mode mode);
+typedef int (*anubis_db_close_t) (void *d);
+typedef int (*anubis_db_io_t) (void *d, char *key, ANUBIS_USER *rec,
+			       int *ecode);
+typedef const char *(*anubis_db_strerror_t) (void *d, int rc);
+
+int anubis_db_register(char *dbid, anubis_db_open_t _db_open,
+		       anubis_db_close_t _db_close,
+		       anubis_db_io_t _db_get,
+		       anubis_db_io_t _db_put,
+		       anubis_db_strerror_t _db_strerror);
+int anubis_db_open(char *dbid, char *arg,
+		   enum anubis_db_mode mode, void **dptr);
+int anubis_db_close(void **dptr);
+int anubis_db_get_record(void *dptr, char *key, ANUBIS_USER *rec);
+int anubis_db_put_record(void *dptr, char *key, ANUBIS_USER *rec);
+const char *anubis_db_strerror(void *dptr);
+void anubis_db_free_record(ANUBIS_USER *rec);
+
+/* dbtext.c */
+void dbtext_init();
+
+/* gdbm.c */
+void gdbm_db_init();
+
+/* transmode.c */
+int anubis_transparent_mode (int sd_client, struct sockaddr_in *addr);
+
+/* authmode.c */
+int anubis_authenticate_mode (int sd_client, struct sockaddr_in *addr);
+void anubis_set_password_db (char *type, char *arg);
+void asmtp_reply(int code, char *fmt, ...);
+void asmtp_capa_add_prefix(char *prefix, char *name);
+int anubis_get_db_record(char *username, ANUBIS_USER *usr);
+
+/* gsasl.c */
+void auth_gsasl_init();
+int anubis_auth_gsasl (char *auth_type, char *arg, char **username);
 
 /* EOF */
 
