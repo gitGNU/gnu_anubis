@@ -191,7 +191,7 @@ struct rc_secdef *anubis_add_section(char *);
 struct rc_secdef *anubis_find_section(char *);
 
 void parse_error(const char *fmt, ...);
-void tracefile(RC_LOC *loc, const char *fmt, ...);
+void tracefile(RC_LOC *, const char *fmt, ...);
 
 /* EOF */
 
