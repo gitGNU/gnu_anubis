@@ -17,7 +17,7 @@
 
 :TEST parse
 :MODE EXEC
-:OPTIONS --check-config
+:OPTIONS --check-config=1
 :RCFILE std.rc
 :RETCODE 0
 :PATTERN
