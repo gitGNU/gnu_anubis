@@ -32,12 +32,7 @@ anubis_error(int method, char *format, ...)
 	char txt[LINEBUFFER+1];
 
 	va_start(arglist, format);
-#ifdef HAVE_VSNPRINTF
-	vsnprintf(txt, LINEBUFFER,
-#else
-	vsprintf(txt,
-#endif /* HAVE_VSNPRINTF */
-		format, arglist);
+	vsnprintf(txt, LINEBUFFER, format, arglist);
 	va_end(arglist);
 
 	if (method == HARD)
