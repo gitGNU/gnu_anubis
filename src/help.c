@@ -56,19 +56,12 @@ static char *config_opts[] = {
 	NULL
 };
 
-static void
-show_config_options(int delim)
-{
-	int i;
-
-	for (i = 0; config_opts[i]; i++) 
-		printf("%s%c", config_opts[i], delim);
-}
-
 void
 print_config_options(void)
 {
-	show_config_options('\n');
+	int i;
+	for (i = 0; config_opts[i]; i++) 
+		puts(config_opts[i]);
 	exit(0);
 }
 
@@ -76,12 +69,8 @@ void
 print_version(void)
 {
 	printf("\n%s\n", version);
-	printf("%s\n\n", copyright);
-
-	printf(_("Built-in support for: "));
-	show_config_options(' ');
-		
-	puts(_("\n\nGNU Anubis is free software; you can redistribute it and/or modify\n"
+	puts(copyright);
+	puts(_("\nGNU Anubis is free software; you can redistribute it and/or modify\n"
 	       "it under the terms of the GNU General Public License as published by\n"
 	       "the Free Software Foundation; either version 2 of the License, or\n"
 	       "(at your option) any later version."));
