@@ -1,5 +1,5 @@
 /*
-   GNU Anubis v3.9.92 -- an outgoing mail processor and the SMTP tunnel.
+   GNU Anubis v3.9.93 -- an outgoing mail processor and the SMTP tunnel.
    Copyright (C) 2001, 2002, 2003 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
@@ -85,6 +85,7 @@ main(int argc, char *argv[])
 	   Process the command line options.
 	*/
 
+	SETVBUF(stderr, NULL, _IOLBF, 0);
 	get_options(argc, argv);
 	anubis_getlogin(session.supervisor, sizeof(session.supervisor));
 
