@@ -17,14 +17,14 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 ---BEGIN CONTROL---
-logfile = anubis.log
-remote-mta = localhost:25
-ifdef(`WITH_SSL',`ssl = yes')
+logfile "anubis.log"
+remote-mta "localhost:25"
+ifdef(`WITH_SSL',`ssl yes')
 ---END---
 
 ---BEGIN RULE---
 
-ifdef(`WITH_GPG',`gpg-passphrase = MYSECRETPASSPHRASE')
+ifdef(`WITH_GPG',`gpg-passphrase "MYSECRETPASSPHRASE"')
 remove [Lines]
 
 if command["mail from"] = ".*<?root@localhost>?"
@@ -47,17 +47,17 @@ trigger "gpgd:(.*)"
 done
 
 if header[Subject] = "signature"
-  signature-file-append = yes
+  signature-file-append yes
 fi
 
 if header[Subject] = :scase "external"
-  external-body-processor = /usr/bin/formail
+  external-body-processor "/usr/bin/formail"
 fi
 
 ifdef(`WITH_GPG',`
 if header[Subject] = "gpg-all"
-  gpg-encrypt = USERNAME
-  gpg-sign = yes
+  gpg-encrypt "USERNAME"
+  gpg-sign default
 fi
 
 if header[Subject] = gpg-encrypt
@@ -65,7 +65,7 @@ if header[Subject] = gpg-encrypt
 fi
 
 if header[Subject] = gpg-sign
-  gpg-sign = yes
+  gpg-sign default
 fi')
 
 ifdef(`WITH_GUILE',`
@@ -83,12 +83,12 @@ if header[Subject] = "rot13-subject"
 fi')
 
 if header[Subject] = "body-append"
-  body-append = misc/notes.txt
+  body-append "misc/notes.txt"
 fi
 
 if header[Subject] = "ALL"
-  body-append = misc/notes.txt
-  ifdef(`WITH_GPG', `gpg-encrypt = USERNAME')
+  body-append "misc/notes.txt"
+  ifdef(`WITH_GPG', `gpg-encrypt "USERNAME"')
   ifdef(`WITH_GUILE', `guile-process rot-13 #:body
   guile-process rot-13 #:subject')
 fi

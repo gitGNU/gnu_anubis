@@ -1,3 +1,9 @@
+2003-09-16  Wojciech Polak
+
+	* src/rcfile.y (_print_stars): Print only three stars.
+	* testsuite/etc/std.in: Updated.
+	* testsuite/etc/std.pat: Likewise.
+
 2003-09-16  Sergey Poznyakoff
 
 	* src/rcfile.h (struct rc_kwdef.flags): New member

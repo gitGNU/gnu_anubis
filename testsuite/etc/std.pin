@@ -28,7 +28,7 @@ ifdef(`WITH_SSL',`  ASGN: ssl = yes
 ')`'dnl
 END SECTION CONTROL
 BEGIN SECTION RULE
-ifdef(`WITH_GPG',`  ASGN: gpg-passphrase = ******************
+ifdef(`WITH_GPG',`  ASGN: gpg-passphrase = ***
 ')`'dnl
   REMOVE HEADER :exact [Lines]
   COND: COMMAND[mail from] :posix [.*<?root@localhost>?]
@@ -62,7 +62,7 @@ ifdef(`WITH_GPG',`    ASGN: gpg-encrypt = \1
 ifdef(`WITH_GPG',`  COND: HEADER[Subject] :posix [gpg-all]
   IFTRUE:
     ASGN: gpg-encrypt = USERNAME
-    ASGN: gpg-sign = yes
+    ASGN: gpg-sign = default
   END COND
   COND: HEADER[Subject] :posix [gpg-encrypt]
   IFTRUE:
@@ -70,7 +70,7 @@ ifdef(`WITH_GPG',`  COND: HEADER[Subject] :posix [gpg-all]
   END COND
   COND: HEADER[Subject] :posix [gpg-sign]
   IFTRUE:
-    ASGN: gpg-sign = yes
+    ASGN: gpg-sign = default
   END COND
 ')`'dnl
 ifdef(`WITH_GUILE',`  COND: HEADER[Subject] :posix [rot13-all]
