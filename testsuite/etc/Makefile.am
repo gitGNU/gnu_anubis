@@ -1,5 +1,5 @@
 ## This file is part of GNU Anubis.
-## Copyright (C) 2003 The Anubis Team.
+## Copyright (C) 2003, 2004 The Anubis Team.
 ##
 ## GNU Anubis is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ EXTRA_DIST = \
  add3.pat\
  add-body.pat\
  add-body-file.pat\
+ cond.pat\
  del1.pat\
  del2.pat\
  del3.pat\
@@ -58,6 +59,7 @@ EXTRA_DIST = \
 
 RCFILES = \
  add.rc\
+ cond.rc\
  del.rc\
  empty.rc\
  entire.rc\
@@ -74,6 +76,7 @@ noinst_DATA = $(RCFILES) std.pat
 CLEANFILES = $(RCFILES) std.pat
 DISTCLEANFILES = *.log
 
+cond.rc: cond.in
 del.rc: del.in
 empty.rc: empty.in
 entire.rc: entire.in
