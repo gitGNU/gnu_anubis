@@ -87,13 +87,13 @@ char *tls_cert;          /* TLS sertificate */
 char *tls_key;           /* TLS key */
 char *tls_cafile;
 
-#define enable_tls() (tls_cafile != NULL || (tls_cert != NULL && tls_key != NULL))
-
 #define DH_BITS 768
+#define enable_tls() (tls_cafile != NULL || (tls_cert != NULL && tls_key != NULL))
+void tls_init(void);
 
 gnutls_dh_params dh_params;
 static gnutls_certificate_server_credentials x509_cred;
-#endif
+#endif /* HAVE_TLS */
 
 char *progname;
 
@@ -101,6 +101,7 @@ int mta_daemon(int, char **);
 int mta_stdio(int, char **);
 void error(const char *, ...);
 void smtp_reply(int, char *, ...);
+void reset_capa(char *);
 
 #define R_CONT     0x8000
 #define R_CODEMASK 0xfff
@@ -254,7 +255,7 @@ const char *(*_mta_strerror)(int) = _def_strerror;
 #ifdef HAVE_TLS
 
 static void
-_tls_cleanup_x509()
+_tls_cleanup_x509(void)
 {
 	if (x509_cred)
 		gnutls_certificate_free_credentials(x509_cred);
@@ -275,7 +276,7 @@ generate_dh_params(void)
 }
 
 void
-tls_init()
+tls_init(void)
 {
 	if (!enable_tls())
 		return;
@@ -393,7 +394,7 @@ tls_session_init(void)
 }
 
 void
-smtp_starttls()
+smtp_starttls(void)
 {
 	gnutls_session session;
 
@@ -411,7 +412,7 @@ smtp_starttls()
 		smtp_reply(530, "TLS negotiation failed");
 }
 
-#endif
+#endif /* HAVE_TLS */
 
 void
 smtp_reply(int code, char *fmt, ...)
@@ -580,13 +581,13 @@ smtp_ehlo(int extended)
 }
 
 void
-smtp_help()
+smtp_help(void)
 {
 	smtp_reply(502, "HELP not implemented");
 }
 
 void
-smtp()
+smtp(void)
 {
 	int state;
 	char buf[128];
