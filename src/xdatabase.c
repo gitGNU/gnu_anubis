@@ -93,7 +93,7 @@ make_temp_file(struct obstack *stk, char *rcname, char **name)
 	umask(save_umask);
 	if (!fp) {
 		anubis_error(SOFT,
-			     _("Can not open temporary file %s: %s"),
+			     _("Cannot open temporary file %s: %s"),
 			     p, strerror(errno));
 	}
 	return fp;
