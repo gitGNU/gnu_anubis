@@ -110,7 +110,7 @@ _perl_match(pcre *re, char *line, int *refc, char ***refv)
 
 	/* According to pcre docs: */
 	ovsize = (count + 1) * 3;
-	ovector = xmalloc(count * sizeof(*ovector));
+	ovector = xmalloc(ovsize * sizeof(*ovector));
 	
 	rc = pcre_exec(re, 0, line, strlen(line), 0, 0,
 		       ovector, ovsize);
