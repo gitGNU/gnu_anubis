@@ -1,3 +1,17 @@
+2005-01-02  Sergey Poznyakoff
+
+	* doc/anubis.texi: Documented read-entire-body and escape
+	sequences.
+	* src/rcfile.l (escape): Handle \b escape
+	* src/rcfile.y (regex production): Bail out if regex compile
+	failed.
+	* src/regex.c (anubis_regex_replace): Bugfix
+
+	* testsuite/anubis/paolo.exp: New test
+	* testsuite/etc/paolo.in: Likewise
+	* testsuite/etc/paolo.pat: Likewise
+	* testsuite/etc/Makefile.am: Updated
+
 2004-12-18  Wojciech Polak
 
 	======================
