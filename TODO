@@ -3,7 +3,10 @@
  =====
 
 * HTML processing
-* parsing configuration files with GNU Bison and Flex?
+* Rename guile-postprocess to guile-process. Introduce real postprocess
+  function.
+* Rewrite collect_body().
+* Add testsuite and more examples.
 * IPv6 support
 
  EOF

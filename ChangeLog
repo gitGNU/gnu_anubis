@@ -1,3 +1,39 @@
+2003-02-05  Sergey Poznyakoff 
+
+	Rewritten RC file support using yacc and lex.
+	
+	* configure.ac: Turn on guile support unless --without-guile
+	  has been given.
+
+	* build/ylwrap: New file. A customized wrapper for yacc/lex
+	  invocations.  
+	* build/Makefile.am: Added ylwrap
+	* m4/guile.m4: Raised Guile version requirement to 1.6
+
+	* src/rcfile.l: New file. Lexical analizer for configuration
+	  files.
+	* src/rcfile.y: New file. Syntax analizer for configuration
+	  files.
+	* src/rcfile.h: New file.
+	* src/Makefile.am: Added rcfile.[ylh]
+	* src/map.c: Rewritten.
+	* src/rc.c: Rewritten.
+	* src/regex.c (anubis_regexp_match): New function.
+	
+	* src/auth.c: Use new rc_ calls.
+	* src/daemon.c: Likewise.
+	* src/guile.c: Likewise.
+	* src/main.c: Likewise.
+	* src/quit.c: Likewise.
+	* src/tunnel.c: Likewise.
+	
+	* src/env.c: New option --check-config (-c).
+	* src/extern.h: Removed obsolete declarations.
+	* src/headers.h: Likewise.
+	* src/main.h: Likewise.
+
+	* TODO: Updated.
+	
 2003-02-02  Wojciech Polak
 
 	* README: Updated.
