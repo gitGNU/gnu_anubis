@@ -25,9 +25,15 @@
 #include "headers.h"
 #include "extern.h"
 
+enum stream_state
+  {
+    state_open,
+    state_closed
+  };
 
 struct net_stream
 {
+  enum stream_state state;
   stream_io_t read;
   stream_io_t write;
   stream_strerror_t strerror;
@@ -94,6 +100,7 @@ stream_set_io (struct net_stream *str,
 {
   if (!str)
     return EINVAL;
+  str->state = state_open;
   str->data = data;
   str->read = read ? read : _def_read;
   str->write = write ? write : _def_write;
@@ -135,6 +142,9 @@ stream_close (struct net_stream *str)
 {
   if (!str)
     return EINVAL;
+  if (str->state != state_open)
+    return 0;
+  str->state = state_closed;
   return str->close (str->data);
 }
 
