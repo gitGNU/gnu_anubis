@@ -206,8 +206,9 @@
 #define ALL   2
 
 /* error types */
-#define SOFT 0
-#define HARD 1
+#define SOFT   1
+#define HARD   2
+#define SYNTAX 3
 
 /* bit values for topt */
 #define T_ERROR             0x00000001
