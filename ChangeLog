@@ -1,3 +1,10 @@
+2003-06-11  Wojciech Polak
+
+	* configure.ac: Bump to 3.9.90 (pretest version).
+	* NEWS: Added entry for 4.0.
+	* Makefile.am (AUTOMAKE_OPTIONS): Added readme-alpha.
+	* README-alpha: New file.
+
 2003-06-07  Wojciech Polak
 
 	* examples/pam/anubis.allow: Added default unprivileged
