@@ -306,7 +306,7 @@ check_filemode(char *path)
 **************************/
 
 int
-check_filename(char *path)
+check_filename(char *path, time_t *timep)
 {
 	struct stat st;
 
@@ -321,6 +321,12 @@ check_filename(char *path)
 		anubis_error(HARD,
 			_("%s is not a regular file or a symbolic link."), path);
 		return 0; /* FALSE */
+	}
+
+	if (timep) {
+		time_t mtime = *timep;
+		*timep = st.st_mtime;
+		return st.st_mtime > mtime;
 	}
 	return 1; /* TRUE */
 }

@@ -290,7 +290,7 @@ void anubis_changeowner(char *);
 int  check_superuser(void);
 int  check_username(char *);
 int  check_filemode(char *);
-int  check_filename(char *);
+int  check_filename(char *, time_t *);
 
 /* errs.c */
 void anubis_error(int, char *, ...);
