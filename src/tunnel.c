@@ -181,11 +181,11 @@ smtp_session(void *sd_client, void *sd_server)
 				banner_ptr++;
 			} while (*banner_ptr != ' ');
 			banner_ptr++;
-			#ifdef HAVE_SNPRINTF
+#ifdef HAVE_SNPRINTF
 			snprintf(command, LINEBUFFER,
-			#else
+#else
 			sprintf(command,
-			#endif /* HAVE_SNPRINTF */
+#endif /* HAVE_SNPRINTF */
 				"220 %s (%s) %s", host, version, banner_ptr);
 		}
 	}
@@ -255,7 +255,7 @@ process_command(void *sd_client, void *sd_server, char *command, int size)
 
 	if (strncmp(buf, "starttls", 8) == 0) {
 
-		#if defined(HAVE_TLS) || defined(HAVE_SSL)
+#if defined(HAVE_TLS) || defined(HAVE_SSL)
 
 		if (topt & T_SSL_FINISHED) {
 			if (topt & T_SSL_ONEWAY)
@@ -289,16 +289,16 @@ process_command(void *sd_client, void *sd_server, char *command, int size)
 				return;
 			}
 
-			#ifdef HAVE_TLS
+#ifdef HAVE_TLS
 			secure.client = start_tls_client((int)sd_server);
-			#endif /* HAVE_TLS */
+#endif /* HAVE_TLS */
 
-			#ifdef HAVE_SSL
+#ifdef HAVE_SSL
 			secure.ctx_client = init_ssl_client();
 			if (topt & T_ERROR)
 				return;
 			secure.client = start_ssl_client((int)sd_server, secure.ctx_client);
-			#endif /* HAVE_SSL */
+#endif /* HAVE_SSL */
 
 			if (topt & T_ERROR)
 				return;
@@ -326,14 +326,12 @@ process_command(void *sd_client, void *sd_server, char *command, int size)
 		   specified a private key or a certificate.
 		*/
 
-		if (topt & T_SSL_CKCLIENT) {
-			check_filemode(secure.cert);
+		if (topt & T_SSL_CKCLIENT)
 			check_filemode(secure.key);
-		}
 
-		#ifdef HAVE_SSL
+#ifdef HAVE_SSL
 		secure.ctx_server = init_ssl_server();
-		#endif /* HAVE_SSL */
+#endif /* HAVE_SSL */
 
 		if (topt & T_ERROR) {
 			swrite(SERVER, sd_client, "454 4.3.3 TLS not available"CRLF);
@@ -341,21 +339,21 @@ process_command(void *sd_client, void *sd_server, char *command, int size)
 		}
 		swrite(SERVER, sd_client, "220 2.0.0 Ready to start TLS"CRLF);
 
-		#ifdef HAVE_TLS
+#ifdef HAVE_TLS
 		secure.server = start_tls_server((int)sd_client);
-		#endif /* HAVE_TLS */
-		#ifdef HAVE_SSL
+#endif /* HAVE_TLS */
+#ifdef HAVE_SSL
 		secure.server = start_ssl_server((int)sd_client, secure.ctx_server);
-		#endif /* HAVE_SSL */
+#endif /* HAVE_SSL */
 
 		if (topt & T_ERROR)
 			return;
 		sd_client = remote_client = (void *)secure.server;
 		topt |= T_SSL_FINISHED;
 
-		#else
+#else
 		swrite(SERVER, sd_client, "503 5.5.0 TLS not available"CRLF);
-		#endif /* HAVE_TLS or HAVE_SSL */
+#endif /* HAVE_TLS or HAVE_SSL */
 
 		strncpy(command, "", 1);
 		return;
@@ -1023,10 +1021,10 @@ add_remailer_commands(void *sd_server)
 			swrite(CLIENT, sd_server, CRLF);
 		}
 	}
-	#ifdef HAVE_GPG
+#ifdef HAVE_GPG
 	else
 		swrite(CLIENT, sd_server, "::"CRLF"Encrypted: PGP"CRLF CRLF);
-	#endif /* HAVE_GPG */
+#endif /* HAVE_GPG */
 
 	return;
 }
@@ -1047,11 +1045,11 @@ transform_body(void *sd_server)
 	if (!(topt & T_ERROR))
 		check_rot13();
 
-	#ifdef HAVE_GPG
+#ifdef HAVE_GPG
 	if (!(topt & T_ERROR) && ((mopt & M_GPG_ENCRYPT)
 	|| (mopt & M_GPG_SIGN) || (mopt & M_RMGPG)))
 		check_gpg();
-	#endif /* HAVE_GPG */
+#endif /* HAVE_GPG */
 
 	if (!(topt & T_ERROR)) {
 		if (mopt & M_RM)
