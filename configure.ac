@@ -23,7 +23,7 @@ dnl compiling, linking, and/or using OpenSSL is allowed.
 dnl
 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT([GNU Anubis], [3.9.92], [bug-anubis@gnu.org], [anubis])
+AC_INIT([GNU Anubis], [3.9.93], [bug-anubis@gnu.org], [anubis])
 AC_PREREQ([2.57])
 AC_CONFIG_AUX_DIR([build])
 AC_CONFIG_SRCDIR([src/main.c])
@@ -76,7 +76,7 @@ AC_CHECK_FUNCS(getopt_long,, [AC_LIBOBJ(getopt)
 
 dnl Checks for library functions.
 AC_CHECK_FUNCS(syslog getrlimit setrlimit socketpair strdup)
-AC_CHECK_FUNCS(regcomp daemon isatty putenv)
+AC_CHECK_FUNCS(regcomp daemon putenv)
 
 AC_REPLACE_FUNCS(snprintf setenv)
 AC_CHECK_FUNCS(_obstack_begin,
