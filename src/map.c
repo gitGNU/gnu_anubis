@@ -88,64 +88,45 @@ struct rc_kwdef translate_kw[] = {
 
 
 int
-translate_parser(int method, int key, char *arg, void *inv_data,
+translate_parser(int method, int key, struct list *arglist, void *inv_data,
 		 void *func_data, MESSAGE *msg)
 {
-	struct translate_env *env = inv_data;
+	struct translate_env *env = func_data;
 	char *p = 0;
-	char *ptr1 = 0;
-	char *ptr2 = 0;
-	char a1[65];
+	int cu = 0; /* check a user name */
+        char a1[65];
 	char a2[65];
 	char user[65];
 	char address[65];
-	int cu = 0; /* check a user name */
 	unsigned long inaddr;
 	struct sockaddr_in addr;
-
+	size_t argc;
+	
 	if (!env || env->stop)
 		return RC_KW_HANDLED;
 	
 	switch (key) {
 	case KW_TRANSLATE:
+		/* translate [=] [USER@]ADDRESS into [=] USERNAME
+		   argv[0] = [USER@]ADDRESS
+		   argv[1] = "into"
+		   argv[2] = USERNAME */
+
 		safe_strcpy(a1, env->extaddr);
 		memset(&addr, 0, sizeof(addr));
-
-		for (ptr1 = arg; *ptr1 && isspace(*ptr1); ptr1++)
-			;
-		if (!*ptr1) {
-			info(VERBOSE, _("Translation map: incorrect syntax."));
-			break;
-		}
 		
-		for (ptr2 = ptr1; *ptr2 && !isspace(*ptr2); ptr2++)
-			;
-		if (!*ptr2) {
+		argc = list_count(arglist);
+		if (argc < 3 || argc > 4
+		    || strcmp(list_item(arglist, 1), "into")) {
 			info(VERBOSE, _("Translation map: incorrect syntax."));
 			break;
 		}
 
-		*ptr2++ = 0;
-		for (; *ptr2 && isspace(*ptr2); ptr2++)
-			;
-		if (!*ptr2 || strncmp(ptr2, "into", 4)) {
-			info(VERBOSE, _("Translation map: incorrect syntax."));
-			break;
-		}
-
-		for (ptr2 += 4; *ptr2 && isspace(*ptr2); ptr2++)
-			;
-		
-		if (*ptr2 != '=') {
-			info(VERBOSE, _("Translation map: incorrect syntax."));
-			break;
-		}
-
-		for (ptr2++; *ptr2 && isspace(*ptr2); ptr2++)
-			;
-
-		safe_strcpy(env->translate, ptr1);
-		safe_strcpy(env->into, ptr2);
+		safe_strcpy(env->translate, list_item(arglist, 0));
+		p = list_item(arglist, 2);
+		if (p[0] == '=')
+			p = list_item(arglist, 3);
+		safe_strcpy(env->into, p);
 
 		if (strchr(env->translate, '@')) {
 			if (env->extuser == 0)
