@@ -47,8 +47,6 @@ struct session_struct
 {
   char anubis[65];
   char mta[65];
-  char mta_username[65];
-  char mta_password[65];
   char supervisor[65];
   char clientname[65];
   char notprivileged[65];
