@@ -56,7 +56,7 @@ static char *multiline_strip_tabs(char *);
 static int isemptystr(char *);
  
 static char *multiline_delimiter;
-static int strip_tabs; 
+static int strip_tabs;
  
 static struct string_list *str_head, *str_tail;
 int cfg_line_num;
@@ -73,9 +73,10 @@ extern int yydebug;
 %x STR LIT ML
 
 WS [ \t][ \t]*
-IDENT [a-zA-Z_][a-zA-Z0-9_-]*
+IDENT [a-zA-Z0-9_./-]+
 LDASHES ---[ \t]*
 RDASHES [ \t]*---
+PUNCT [=:()\[\]]
 %%
          /* End-of-line comments */
 #.*\n          { cfg_line_num++; return EOL; }
@@ -86,7 +87,7 @@ BEGIN          return T_BEGIN;
 	char *p = strstr(yytext, "BEGIN") + 5;
 	char *q;
 	int len;
-	
+
 	for (; *p && isspace(*p); p++)
 		;
 	for (q = yytext + yyleng - 4; q > p && isspace(*q); q--)
@@ -174,7 +175,8 @@ END |
 {WS}           ;
 \\\n           { cfg_line_num++; }
 \n             { cfg_line_num++; return EOL; }
-.              return yytext[0];
+{PUNCT}        return yytext[0];
+.              { parse_error(_("Stray character in config: \\%03o. Possibly missing quotes around the string"), yytext[0]); }
 
 %%
 
@@ -194,14 +196,20 @@ verbatim(void)
 	BEGIN(LIT);
 }
 
+void
+lex_clear_state(void)
+{
+	BEGIN(INITIAL);
+}
+
 int
 simple_string(void)
 {
-  yylval.string = xmalloc(yyleng - 1);
-  memcpy(yylval.string, yytext + 1, yyleng - 2);
-  yylval.string[yyleng - 2] = 0;
-  DBG("STRING",yylval.string); 
-  return STRING; 
+	yylval.string = xmalloc(yyleng - 1);
+	memcpy(yylval.string, yytext + 1, yyleng - 2);
+	yylval.string[yyleng - 2] = 0;
+	DBG("STRING",yylval.string); 
+	return STRING; 
 }
 
 void
@@ -376,5 +384,22 @@ rc_open(char *name)
 	cfg_file = name;
 	cfg_line_num = 1;
 	return 0;
+}
+
+void
+error_sync_begin()
+{
+        int c;
+	
+        while ((c = yylex()) > 0) {
+                if (c == T_BEGIN) {
+			yyless(0);
+			break;
+		} else if (c == D_BEGIN) {
+			xfree(yylval.string);
+			yyless(0);
+			break;
+		}
+	}
 }
 
