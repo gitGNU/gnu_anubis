@@ -28,7 +28,6 @@ const char copyright[] = "Copyright (C) 2001, 2002, 2003 The Anubis Team.";
 
 struct options_struct options;
 struct session_struct session;
-struct rm_struct rm;
 #if defined(HAVE_TLS) || defined(HAVE_SSL)
 struct secure_struct secure;
 #endif /* HAVE_TLS or HAVE_SSL */

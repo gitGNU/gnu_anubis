@@ -54,14 +54,6 @@ struct session_struct {
  unsigned int socks_port;
 };
 
-struct rm_struct {
- char *rrt;
- char *post;
- char *header;
- char *gpg_file;
- char *latent_time;
-};
-
 #ifdef HAVE_TLS
 struct secure_struct {
  gnutls_session client;
@@ -88,7 +80,6 @@ struct secure_struct {
 
 extern struct options_struct options;
 extern struct session_struct session;
-extern struct rm_struct rm;
 #if defined(HAVE_TLS) || defined(HAVE_SSL)
 extern struct secure_struct secure;
 #endif /* HAVE_TLS or HAVE_SSL */
