@@ -64,7 +64,6 @@ enum asmtp_state {
 #define KW_STARTTLS  5
 #define KW_MAIL      6
 #define KW_RCPT      7
-#define KW_RSET      8
 
 static int
 asmtp_kw (const char *name)
@@ -81,7 +80,6 @@ asmtp_kw (const char *name)
 		{ "starttls", KW_STARTTLS },
 		{ "mail",     KW_MAIL },
 		{ "rcpt",     KW_RCPT },
-		{ "rset",     KW_RSET },
 		{ NULL },
 	};
 	int i;
@@ -185,10 +183,10 @@ static void
 asmtp_capa_init()
 {
 	asmtp_capa = list_create();
-#if defined(HAVE_TLS)
+#ifdef HAVE_TLS
 	asmtp_capa_add("STARTTLS");
 #endif
-#if defined(WITH_GSASL)
+#ifdef WITH_GSASL
 	auth_gsasl_init ();
 #endif
 	asmtp_capa_add("HELP");
@@ -275,10 +273,6 @@ asmtp_init(enum asmtp_state state)
 			    "Command disabled. Proper authentication required.");
 		break;
 
-	case KW_RSET:
-		asmtp_reply(250, "OK"); /* FIXME: Fake RSET */
-		break;
-
 	default:
 		asmtp_reply(500, "Unknown command");
 	}
@@ -337,10 +331,6 @@ asmtp_ehlo (enum asmtp_state state, ANUBIS_USER *usr)
 	case KW_RCPT:
 		asmtp_reply(550,
 			    "Command disabled. Proper authentication required.");
-		break;
-
-	case KW_RSET:
-		asmtp_reply(250, "OK"); /* FIXME: Fake RSET */
 		break;
 
 	case KW_HELP:
