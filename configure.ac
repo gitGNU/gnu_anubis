@@ -49,7 +49,22 @@ dnl Checks for header files.
 AC_HEADER_STDC
 AC_TYPE_SIZE_T
 AC_TYPE_PID_T
-AC_CHECK_HEADERS(arpa/inet.h syslog.h regex.h)
+
+AC_CHECK_HEADERS(arpa/inet.h syslog.h regex.h \
+ sys/types.h sys/socket.h socket.h)
+
+AC_CHECK_TYPE(socklen_t, , AC_DEFINE(socklen_t, int, [Define to int if <sys/types.h> does not define]),
+[
+#if HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+# include <sys/socket.h>
+#endif
+#ifdef HAVE_SOCKET_H
+# include <socket.h>
+#endif
+])
 
 dnl Check for getopt_long in standard library
 AC_CHECK_FUNCS(getopt_long,, [AC_LIBOBJ(getopt)
@@ -198,6 +213,39 @@ if test "$with_pam" = "yes"; then
  AC_MSG_RESULT([Enabling PAM support...])
 fi
 
+AC_ARG_WITH([guile],
+            AC_HELP_STRING([--with-guile],
+                           [with Guile support]),
+            [
+case "${withval}" in
+  yes) useguile=yes ;;
+  no)  useguile=no ;;
+  *)   AC_MSG_ERROR(bad value ${withval} for --without-guile) ;;
+esac],[useguile=no])
+
+AC_SUBST(GUILE_INCLUDES)
+AC_SUBST(GUILE_LIBS)
+AC_SUBST(GUILE_BINDIR)
+AC_SUBST(GUILE_SNARF_VERSION)
+AC_SUBST(GUIMB)
+AC_SUBST(MU_SCM)
+AC_SUBST(LIBMU_SCM)
+AC_SUBST(GUILE_PKGDATA)
+AC_SUBST(GUILE_BUILT_SOURCES)
+
+if test x"$useguile" = x"yes"; then
+  MU_CHECK_GUILE(,[
+    AC_DEFINE(WITH_GUILE,1,[Enable Guile support])
+    GUILE_INCLUDES=`guile-config compile`
+    GUILE_LIBS=`guile-config link`
+    GUILE_BINDIR=`guile-config info bindir`
+    case "$GUILE_VERSION" in
+    16|17) GUILE_SNARF_VERSION="1.6";;
+    *) GUILE_SNARF_VERSION="1.6";;
+    esac
+   ],[useguile=no])
+fi
+
 dnl Use option --with-tcp-wrappers to compile libwrap library support.
 AC_ARG_WITH(tcp-wrappers,
 	[  --with-tcp-wrappers     with libwrap (TCP wrappers) support],
@@ -230,6 +278,7 @@ fi
 
 AC_CONFIG_FILES([Makefile
  build/Makefile
+ build/guile-1.6/Makefile
  m4/Makefile
  intl/Makefile
  po/Makefile.in
