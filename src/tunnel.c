@@ -341,8 +341,9 @@ smtp_session_transparent (void)
 	    }
 	  while (*banner_ptr != ' ');
 	  banner_ptr++;
-	  snprintf (command, sizeof command,
-		    "220 %s (%s) %s", host, version, banner_ptr);
+	  command = xmalloc (4 + strlen (host) + 2 + strlen (version) + 2
+			     + strlen (banner_ptr) + 1);
+	  sprintf (command, "220 %s (%s) %s", host, version, banner_ptr);
 	}
     }
   swrite (SERVER, remote_client, command);
@@ -376,10 +377,10 @@ smtp_begin (void)
   get_response_smtp (CLIENT, remote_server, &command, &size);
 
   /* now send the ehlo command */
-  swrite (CLIENT, remote_server, "HELO ");
+  swrite (CLIENT, remote_server, "EHLO ");
   swrite (CLIENT, remote_server, get_ehlo_domain ());
   send_eol (CLIENT, remote_server);
-  handle_ehlo (command, &reply); // FIXME: tak?
+  handle_ehlo (command, &reply);
   free (command);
   free (reply);
 }
