@@ -102,8 +102,9 @@ free_pptr(char **pptr)
 {
 	char **p = pptr;
 
-	while (*p)
-	{
+	if (!pptr)
+		return;
+	while (*p) {
 		free(*p);
 		p++;
 	}
