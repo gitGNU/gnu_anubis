@@ -23,17 +23,53 @@
 ##
 
 sbin_PROGRAMS = anubis
-anubis_LDADD = @LIBOBJS@ @LIBINTL@ $(GUILE_LIBS) @LIBGNUTLS_LIBS@ @GSASL_LIBS@
-anubis_SOURCES = main.c extern.h headers.h mem.c mem.h env.c errs.c \
-	log.c list.c list.h misc.c regex.c exec.c net.c proxy.c daemon.c \
-	auth.c map.c message.c esmtp.c tunnel.c rc.c rcfile-gram.c \
-	rcfile-lex.c rcfile-gram.h rcfile.h guile.c files.c help.c quit.c \
-	transmode.c 
+anubis_LDADD = $(top_builddir)/lib/libanubis.a @LIBINTL@ $(GUILE_LIBS) @LIBGNUTLS_LIBS@ @GSASL_LIBS@ 
+anubis_SOURCES = \
+ main.c \
+ extern.h \
+ headers.h \
+ mem.c \
+ mem.h \
+ env.c \
+ errs.c \
+ log.c \
+ misc.c \
+ exec.c \
+ net.c \
+ proxy.c \
+ daemon.c \
+ auth.c \
+ map.c \
+ message.c \
+ esmtp.c \
+ tunnel.c \
+ rc.c \
+ rcfile-gram.c \
+ rcfile-lex.c \
+ rcfile-gram.h \
+ rcfile.h \
+ guile.c \
+ files.c \
+ help.c \
+ quit.c \
+ transmode.c \
+ url.c \
+ list.h \
+ list.c \
+ regex.c \
+ authmode.c \
+ gsasl.c \
+ anubisdb.c \
+ dbtext.c \
+ gdbm.c \
+ mysql.c \
+ gpg.c \
+ tls.c \
+ ssl.c
 
 YLWRAP = $(SHELL) $(top_srcdir)/build/ylwrap
 AM_YFLAGS = -dtv
-EXTRA_DIST = rcfile.y rcfile.l authmode.c gsasl.c anubisdb.c dbtext.c \
-	gdbm.c
+EXTRA_DIST = rcfile.y rcfile.l 
 
 BUILT_SOURCES= \
   rcfile-gram.c rcfile-gram.h \
