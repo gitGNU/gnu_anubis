@@ -201,14 +201,20 @@ char *
 anubis_url_full_path(ANUBIS_URL *url)
 {
 	char *path;
-	size_t size = 1 + strlen(url->host);
+	size_t size = 1;
+	
+	if (url->host)
+		size += strlen(url->host);
 	if (url->path)
 		size += strlen(url->path) + 1;
 	path = xmalloc(size + 1);
-	strcpy(path, "/");
-	strcat(path, url->host);
+	if (url->host) {
+		strcpy(path, "/");
+		strcat(path, url->host);
+	}
 	if (url->path) {
-		strcat(path, "/");
+		if (path[0])
+			strcat(path, "/");
 		strcat(path, url->path);
 	}
 	return path;
