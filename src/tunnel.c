@@ -470,7 +470,7 @@ transfer_command(void *sd_client, void *sd_server, MESSAGE *msg, char *command)
 
 #ifdef USE_SSL
 		if ((topt & T_SSL_ONEWAY) && (topt & T_STARTTLS)
-		    && !(topt & T_SSL_FINISHED) && !(topt & T_LOCAL_MTA)) {
+		    && !(topt & T_SSL_FINISHED)) {
 
 			struct sockaddr_in rclient;
 			char ehlo[LINEBUFFER+1];
