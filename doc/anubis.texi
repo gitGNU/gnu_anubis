@@ -168,7 +168,7 @@ defines the specific wording and control flow for communications between
 two or more programs, devices, or systems.
 
 @item SMTP
-Simpe Mail Tansport Protocol is a common mechanism for exchanging
+Simple Mail Tansport Protocol is a common mechanism for exchanging
 mail across a network. This protocol is described in the RFC 821 document.
 
 @item Daemon
@@ -1887,7 +1887,7 @@ on standard input and output.
 @cindex IDENT protocol
 
 By default, GNU Anubis binds to port number 24 (private mail system),
-so there shouldn't by any conflict with your local MTA (Mail Transport
+so there shouldn't be any conflict with your local MTA (Mail Transport
 Agent). You just have to reconfigure your MUA (Mail User Agent) to make
 it talk to GNU Anubis directly on port number 24. All MUAs are normally
 set up to talk directly to the MTA, so you must change their settings
