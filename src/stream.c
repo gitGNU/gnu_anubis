@@ -155,8 +155,7 @@ stream_destroy (struct net_stream **str)
     return EINVAL;
   if ((*str)->destroy)
     (*str)->destroy ((*str)->data);
-  free (*str);
-  *str = NULL;
+  xfree (*str);
   return 0;
 }
 
