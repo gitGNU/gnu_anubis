@@ -389,7 +389,7 @@ char *exec_argv (int *, char *, char **, char *, char *, int);
 void cleanup_children (void);
 
 /* esmtp.c */
-void esmtp_auth (NET_STREAM, char *);
+int esmtp_auth (NET_STREAM *, char *);
 
 /* misc.c */
 int anubis_free_list_item (void *item, void *data);
@@ -573,6 +573,10 @@ void anubis_set_mech_list (ANUBIS_LIST * list);
 #ifdef WITH_GSASL
 void install_gsasl_stream (Gsasl_session_ctx * sess_ctx, NET_STREAM * stream);
 #endif
+
+/* gsasl_srv.c */
+int anubis_name_cmp (void *item, void *data);
+ANUBIS_LIST *auth_method_list (char *input);
 
 /* xdatabase.c */
 int xdatabase (char *command);

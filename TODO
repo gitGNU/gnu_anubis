@@ -2,9 +2,20 @@
  TO DO
  =====
 
+* Urgent: Get rid of static buffers (recvline et al.) Use dynamically
+allocated buffers instead.
+
+* Urgent: Get rid of global vs. local variable mess. Most horrible
+example are remote_client and remote_server variables that are often
+duplicated as autos/arguments. These all should be automatic variables.
+
+* Urgent: Write general-purpose (e)smtp io functions and use them throughout
+the code (take anubisusr.c as an example)
+
+* Urgent: Remove duplicated functions: place them all into a library
+ 
 * anubisusr.c: Provide (configuration file||command line||envar) options
-to hold authentication credentials. Turn off echo when asking for
-security-sensitive info.
+to hold authentication credentials.
 
 * New action commands
 ** `reject' action command

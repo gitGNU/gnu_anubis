@@ -32,7 +32,7 @@ static ANUBIS_LIST *anubis_mech_list;
 
 /* Converts the auth method list from a textual representation to
    a ANUBIS_LIST of string values */
-static ANUBIS_LIST *
+ANUBIS_LIST *
 auth_method_list (char *input)
 {
   char *p;
@@ -84,8 +84,8 @@ anubis_set_mech_list (ANUBIS_LIST * list)
 
 /* Capability list handling */
 
-static int
-name_cmp (void *item, void *data)
+int
+anubis_name_cmp (void *item, void *data)
 {
   return strcmp (item, data);
 }
@@ -107,7 +107,8 @@ auth_gsasl_capa_init ()
     {
       size_t size = strlen (listmech);
       ANUBIS_LIST *mech = auth_method_list (listmech);
-      ANUBIS_LIST *p = list_intersect (mech, anubis_mech_list, name_cmp);
+      ANUBIS_LIST *p = list_intersect (mech, anubis_mech_list,
+				       anubis_name_cmp);
       auth_list_to_string (p, listmech, size);
       list_destroy (&p, NULL, NULL);
       list_destroy (&mech, anubis_free_list_item, NULL);
@@ -236,7 +237,7 @@ cb_validate (Gsasl_session_ctx * ctx,
   if (usr->smtp_authid == NULL
       && anubis_get_db_record (authentication_id, usr) != ANUBIS_DB_SUCCESS)
     return GSASL_AUTHENTICATION_ERROR;
-
+  
   if (usr->smtp_authid == NULL
       || strcmp (usr->smtp_authid, authentication_id)
       || strcmp (usr->smtp_passwd, password))

@@ -245,6 +245,15 @@ process_rcfile (int method)
 #define KW_READ_ENTIRE_BODY    16
 #define KW_LOCAL_DOMAIN        17
 #define KW_MODE                18
+#define KW_ESMTP_ANONYMOUS_TOKEN    19 
+#define KW_ESMTP_AUTH_ID       20
+#define KW_ESMTP_AUTHZ_ID      21 
+#define KW_ESMTP_PASSWORD      22
+#define KW_ESMTP_SERVICE       23
+#define KW_ESMTP_HOSTNAME      24
+#define KW_ESMTP_GENERIC_SERVICE 25
+#define KW_ESMTP_PASSCODE      26
+#define KW_ESMTP_REALM         27
 
 char **
 list_to_argv (ANUBIS_LIST * list)
@@ -401,6 +410,42 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
     }
     break;
 
+  case KW_ESMTP_ANONYMOUS_TOKEN:
+    anon_token = strdup (arg);
+    break;
+    
+  case KW_ESMTP_AUTH_ID:
+    authentication_id = strdup (arg);
+    break;
+    
+  case KW_ESMTP_AUTHZ_ID:
+    authorization_id = strdup (arg);
+    break;
+    
+  case KW_ESMTP_PASSWORD:
+    auth_password = strdup (arg);
+    break;
+    
+  case KW_ESMTP_SERVICE:
+    auth_service = strdup (arg);
+    break;
+    
+  case KW_ESMTP_HOSTNAME:
+    auth_hostname = strdup (arg);
+    break;
+    
+  case KW_ESMTP_GENERIC_SERVICE:
+    generic_service_name = strdup (arg);
+    break;
+    
+  case KW_ESMTP_PASSCODE:
+    auth_passcode = strdup (arg);
+    break;
+    
+  case KW_ESMTP_REALM:
+    auth_realm = strdup (arg);
+    break;
+    
   case KW_LOCAL_DOMAIN:
     anubis_domain = strdup (arg);
     break;
@@ -507,6 +552,15 @@ struct rc_kwdef control_kw[] = {
   { "local-mta",    KW_LOCAL_MTA },
   { "tracefile",    KW_TRACEFILE },
   { "esmtp-auth",   KW_ESMTP_AUTH, KWF_HIDDEN },
+  { "esmtp-anonymous-token", KW_ESMTP_ANONYMOUS_TOKEN, KWF_HIDDEN },
+  { "esmtp-auth-id", KW_ESMTP_AUTH_ID, KWF_HIDDEN },
+  { "esmtp-authz-id", KW_ESMTP_AUTHZ_ID, KWF_HIDDEN },
+  { "esmtp-password", KW_ESMTP_PASSWORD, KWF_HIDDEN },
+  { "esmtp-service",  KW_ESMTP_SERVICE, KWF_HIDDEN },
+  { "esmtp-hostname", KW_ESMTP_HOSTNAME, KWF_HIDDEN },
+  { "esmtp-generic-service", KW_ESMTP_SERVICE, KWF_HIDDEN },
+  { "esmtp-passcode", KW_ESMTP_PASSCODE, KWF_HIDDEN },
+  { "esmtp-realm", KW_ESMTP_REALM, KWF_HIDDEN },
 #ifdef USE_SOCKS_PROXY
   { "socks-proxy",  KW_SOCKS_PROXY },
   { "socks-v4",     KW_SOCKS_V4 },

@@ -1,3 +1,21 @@
+2004-12-16  Sergey Poznyakoff  <gray@Mirddin.farlep.net>
+
+	* (TODO): updated
+	* configure.ac: set "M4_DEFS -DWITH_GSASL"
+	* src/esmtp.c: Completely rewritten using gsasl
+	* src/extern.h (anon_token,authorization_id,authentication_id)
+	(auth_password,auth_service,auth_hostname,generic_service_name)
+	(auth_passcode,auth_realm): New variables.
+	* src/gsasl_srv.c: Updated
+	* src/headers.h: Updated
+	* src/stream.c (stream_readline): Minor fix
+	* src/tunnel.c (collect_body): delete AUTH part.
+	* testsuite/mta.c: minor indentation fix
+	* testsuite/etc/Makefile.am: Change $(RCFILES) std.pat:
+	* Makefile.am: dependency to $(RCFILES) std.pat: Makefile.am
+	* testsuite/etc/target.in.in: Conditionally include -c and -k.
+	* testsuite/lib/anubis.exp (sanubis_pat): Fix TLS/GSASL usage
+
 2004-12-15  Sergey Poznyakoff
 
 	* configure.ac: Bail out if required SQL libraries are not
