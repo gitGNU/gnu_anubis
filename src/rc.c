@@ -235,6 +235,7 @@ process_rcfile(int method)
 #define KW_READ_ENTIRE_BODY    16
 #define KW_LOCAL_DOMAIN        17
 #define KW_SASL_PASSWORD_DB    18
+#define KW_SASL_ALLOWED_MECH   19
 
 char **
 list_to_argv(LIST *list)
@@ -414,6 +415,10 @@ control_parser(int method, int key, LIST *arglist,
 			return RC_KW_ERROR;
 		anubis_set_password_db (arg, list_item(arglist, 1));
 		break;
+
+	case KW_SASL_ALLOWED_MECH:
+		anubis_set_mech_list(arglist);
+		break;
 #endif
 	default:
 		return RC_KW_UNKNOWN;
@@ -443,6 +448,7 @@ static struct rc_kwdef init_supervisor_kw[] = {
 	{ "rule-priority", KW_RULE_PRIORITY },
 	{ "control-priority", KW_CONTROL_PRIORITY },
 	{ "sasl-password-db", KW_SASL_PASSWORD_DB },
+	{ "sasl-allowed-mech", KW_SASL_ALLOWED_MECH },
 	{ NULL }
 };
 
