@@ -1,3 +1,21 @@
+2003-06-19  Sergey Poznyakoff 
+
+	* TODO: Updated
+	* configure.ac: Add AC_PROG_YACC, AM_PROG_LEX
+	* src/guile.c: use non-destructive eval
+	* src/headers.h (anubis_regex_replace): New function
+	* src/regex.c: Likewise.
+	* src/message.c (message_modify_body): New function. Implements
+	"modify body [key] text" statement.
+	* src/rcfile.y: Minor cleanup
+	(inst_eval): Call message_modify_body().
+
+	* testsuite/anubis/base.exp: Run mod-body test
+	* testsuite/anubis/gpg.exp: Add final newline
+	* testsuite/etc/mod-body.pat: New file
+	* testsuite/etc/mod-body.in: New file
+	* testsuite/etc/Makefile.am: Added new files
+
 2003-06-17  Wojciech Polak
 
 	* doc/anubis.texi: Updated. Reorganized a bit.

@@ -12,7 +12,6 @@ semantics of the anubis language.
 ** Rewrite process_command and transfer_command to make them modular.
 
 * Parser and run-time evaluator:
-** Add support for `modify body ["pattern"] "replace"'
 ** Add more verbose diagnostics to the parser. More specifically, emit
 a warning if gpg-crypt, rot-13 and the like may be used twice over the
 same block of text. (Basically this means adding a rudimentary flow
