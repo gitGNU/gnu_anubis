@@ -75,13 +75,10 @@ AC_CHECK_FUNCS(snprintf vsnprintf syslog getrlimit setrlimit socketpair strdup)
 AC_CHECK_FUNCS(regcomp daemon isatty putenv)
 AC_CHECK_FUNCS(setenv,, [AC_LIBOBJ(setenv)])
 
+AC_CHECK_LIB(socket, socket)
+AC_CHECK_LIB(nsl, gethostbyaddr)
+
 AC_SUBST(INCLUDES)
-if test `uname` = "SunOS"; then
- AC_CHECK_LIB(nsl, main,
- [LIBS="$LIBS -lnsl";AC_MSG_RESULT([SunOS: Adding -lnsl to standard libraries...])])
- AC_CHECK_LIB(socket, main,
- [LIBS="$LIBS -lsocket";AC_MSG_RESULT([SunOS: Adding -lsocket to standard libraries...])])
-fi
 if test `uname` = "Darwin"; then
  INCLUDES="$INCLUDES -I/usr/include"
 fi
