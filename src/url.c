@@ -234,19 +234,3 @@ anubis_url_get_arg(ANUBIS_URL *url, const char *argname)
 	return NULL;
 }
 
-check_url(char *str)
-{
-	ANUBIS_URL *url;
-
-	int i, rc = anubis_url_parse(&url, str);
-	printf("METHOD: %s\n", url->method);
-	printf("HOST: %s\n", url->host);
-	printf("PATH: %s\n", url->path);
-	printf("USER: %s\n", url->user);
-	printf("PASS: %s\n", url->passwd);
-	printf("ARGC: %d\n", url->argc);
-	for (i = 0; i < url->argc; i++) {
-		printf("%s = %s\n", url->argv[i].key, url->argv[i].value);
-	}
-	return 0;
-}
