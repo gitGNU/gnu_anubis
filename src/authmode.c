@@ -335,12 +335,21 @@ anubis_get_db_record(char *username, ANUBIS_USER *usr)
 {
 	void *db;
 	int rc;
-
-	if (!anubis_dbarg
-	    || anubis_db_open(anubis_dbarg, anubis_db_rdonly,
-			      &db) != ANUBIS_DB_SUCCESS)
+	char *errtext;
+	
+	if (!anubis_dbarg) {
+		anubis_error(HARD, _("Database not specified"));
 		return ANUBIS_DB_FAIL;
-		
+	}
+
+	if (anubis_db_open(anubis_dbarg, anubis_db_rdonly,
+			   &db, &errtext) != ANUBIS_DB_SUCCESS) {
+		anubis_error(HARD,
+			     _("Cannot open database %s: %s"),
+			     anubis_dbarg, errtext);
+		return ANUBIS_DB_FAIL;
+	}
+	
 	rc = anubis_db_get_record(db, username, usr);
 	switch (rc) {
 	case ANUBIS_DB_SUCCESS:
