@@ -3,6 +3,10 @@
 # Copyright (C) 2001, 2002, 2003 The Anubis Team.
 #
 
+lib/getopt.c
+lib/obstack.c
+src/regex.c
+
 src/auth.c
 src/authmode.c
 src/daemon.c
@@ -19,13 +23,13 @@ src/main.c
 src/map.c
 src/mem.c
 src/misc.c
+src/mysql.c
 src/net.c
 src/proxy.c
 src/quit.c
 src/rc.c
 src/rcfile.l
 src/rcfile.y
-src/regex.c
 src/ssl.c
 src/tls.c
 src/transmode.c

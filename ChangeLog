@@ -1,3 +1,18 @@
+2003-11-30  Sergey Poznyakoff 
+
+	* src/headers.h (N_): Define uncoditionally.
+	(anubis_db_open_t): Extra parameter: pointer to textual error
+	description.
+	* src/anubisdb.c (anubis_db_open): Return textual error
+	description.
+	* src/mysql.c (mysql_db_open): Likewise
+	* src/dbtext.c (dbtext_open): Likewise
+	* src/gdbm.c (gdbm_db_open): Likewise
+	(gdbm_db_strerror): Implemented.
+	* src/authmode.c (anubis_get_db_record): Updated the invocation
+	of anubis_db_open().
+	* po/POTFILES.in: Updated
+	
 2003-11-30  Wojciech Polak
 
 	* src/misc.c (change_to_lower): Renamed to make_lowercase.
