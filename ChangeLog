@@ -1,3 +1,37 @@
+2003-11-21  Sergey Poznyakoff
+
+	Initial implementation of "authentication mode".
+
+	* configure.ac: Check for libgsasl and gdbm
+	* m4/gsasl.m4: New file (imported from mailutils)
+	* m4/Makefile.am: Added gsasl.m4
+
+	* src/daemon.c (anubis_child_main): New function.
+	(loop): Call anubis_child_main().
+	* src/extern.h (anubis_domain, anubis_mode): New externals
+	* src/headers.h: New declarations.
+	* src/help.c: Reflect --mode option.
+	* src/env.c: New option --mode.
+	* src/main.c (anubis_domain, anubis_mode): New externals
+	(anubis_core): Initialize various database formats.
+	* src/misc.c (get_localname, get_localdomain): New functions.
+	* src/net.c (net_io_get,net_io_read,net_io_write,net_io_close)
+	(recvline_ptr): New functions.
+	* src/rc.c: New keywords local-domain and sasl-password-db
+	* src/tunnel.c (smtp_session_transparent): New function
+	(smtp_begin): New function
+
+	* src/authmode.c: New file
+	* src/transmode.c: New file
+	* src/gsasl.c: New file
+	* src/lbuf.c: New file
+	* src/lbuf.h: New file
+	* src/anubisdb.c: New file
+	* src/dbtext.c: New file
+	* src/gdbm.c: New file
+
+	* src/Makefile.am: Added new files
+	
 2003-11-08  Wojciech Polak
 
 	* src/tls.c (verify_certificate): Removed GNUTLS_CERT_CORRUPTED
