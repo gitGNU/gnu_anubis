@@ -456,7 +456,7 @@ struct rc_kwdef control_kw[] = {
 	{ "remote-mta", KW_REMOTE_MTA },
 	{ "local-mta", KW_LOCAL_MTA },
 	{ "tracefile", KW_TRACEFILE },
-	{ "esmtp-auth", KW_ESMTP_AUTH },
+	{ "esmtp-auth", KW_ESMTP_AUTH, KWF_HIDDEN },
 	{ "socks-proxy", KW_SOCKS_PROXY },
 	{ "socks-v4", KW_SOCKS_V4 },
 	{ "socks-auth", KW_SOCKS_AUTH },
