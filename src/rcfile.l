@@ -45,6 +45,7 @@ static void string_add_char(int n);
 static void string_finish();
 static int escape(int c);
 char * trimws(char *s);
+char * trimcpy();
 
 static struct string_list *str_head, *str_tail;
 int cfg_line_num;
@@ -119,13 +120,16 @@ END |
 		     return REGEX; }
 <RX>[^!\n]*!       { string_add(yytext, yyleng); }
 <RXM>[^!\n]*/\n    { BEGIN(INITIAL); 
-		     yylval.string = strdup(yytext);
-		     trimws(yylval.string);
+		     yylval.string = trimcpy();
 		     DBG("RX3", yylval.string);
 		     return REGEX; }
-<RXM>[^!\n]*!      { BEGIN(RX);
+<RXM>[^!\n]*!      { int i;
+ 
+	             BEGIN(RX);
                      string_begin();
-	             string_add(yytext, yyleng); }
+		     for (i = 0; i < yyleng && isspace(yytext[i]); i++)
+			     ;
+	             string_add(yytext + i, yyleng - i); }
 =                 return EQ;
 !=                return NE;
 [iI][fF]          return IF;
@@ -134,17 +138,8 @@ END |
 [rR][uU][lL][eE]  return RULE;
 [dD][oO][nN][eE]  return DONE;
          /* Literal */
-<LIT>[^\n]*/\n   { int i, j, len;
-
-                   BEGIN(INITIAL);
-		   for (i = 0; i < yyleng && isspace(yytext[i]); i++)
-			   ;
-		   for (j = yyleng - 1; j > i && isspace(yytext[i]); j--)
-			   ;
-		   len = j - i + 1;
-	           yylval.string = xmalloc(len + 1);
-                   memcpy(yylval.string, yytext + i, len);
-                   yylval.string[len] = 0;
+<LIT>[^\n]*/\n   { BEGIN(INITIAL);
+	           yylval.string = trimcpy();
 		   DBG("<LIT>STRING", yylval.string);
 		   return STRING; }
          /* Identifiers */
@@ -277,6 +272,23 @@ trimws(char *s)
 	if (len > 0)
 		s[len+1] = 0;
 	return s;
+}
+
+char *
+trimcpy()
+{
+	char *string;
+	int i, j, len;
+
+	for (i = 0; i < yyleng && isspace(yytext[i]); i++)
+		;
+	for (j = yyleng - 1; j > i && isspace(yytext[i]); j--)
+		;
+	len = j - i + 1;
+	string = xmalloc(len + 1);
+	memcpy(string, yytext + i, len);
+	string[len] = 0;
+	return string;
 }
 
 int
