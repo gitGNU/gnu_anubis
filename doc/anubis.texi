@@ -509,6 +509,8 @@ Specifies UNIX name of the socket to connect to. This parameter cannot be
 used together with @var{port} (see above).
 
 @item @var{bufsize}=@var{number}
+Sets the length of the buffer used to create SQL queries. Default is
+1024 bytes.
 
 @item @var{table}=@var{string}
 Specifies the name of database table keeping where the authentication
@@ -598,7 +600,7 @@ the word}.
 @node Create, List, Administrators, Administrators
 @subsubsection Creating the Database
 
-To create the database use @kbd{anubisadm --create} (or
+To create a database use @kbd{anubisadm --create} (or
 @kbd{anubisadm -c}) command. @command{Anubisadm} will read database
 entries from the standard input and write them to the database.
 The standard input is supposed to be formatted as @code{text} database
@@ -977,7 +979,7 @@ The predefined section names are:
 
 @table @dfn
 @item AUTH
-Controls authentication mechanisms. FIXME
+Controls authentication mechanisms. 
 @item CONTROL
 This section specifies the basic GNU Anubis behavior. Its presence
 is required in the system configuration file. It may be used in
@@ -1004,22 +1006,30 @@ messages (conditional and unconditional rules).
 @node AUTH Section, CONTROL Section, Configuration, Configuration
 @section AUTH Section
 @cindex AUTH section
-FIXME
+
+@code{AUTH} session controls various aspects of authentication mode.
 
 @deffn Option smtp-greeting-message @var{text}
 @opindex smtp-greeting-message @var{text}
+Configures the greeting message issued by Anubis upon accepting the
+connection.
 @end deffn
 
 @deffn Option smtp-help-message @var{help-text}
 @opindex smtp-help-message @var{help-text}
+Sets the test of the message issued by Anubis in response to SMTP
+@code{HELP} command. @var{Help-text} is a list of strings. Each string
+from the list will be displayed at a separate response line.
 @end deffn
 
 @deffn Option sasl-password-db @var{url}
 @opindex sasl-password-db @var{url}
+Sets the user database @acronym{URL} (@pxref{User Database}).
 @end deffn
 
 @deffn Option sasl-allowed-mech @var{mech-list}
 @opindex sasl-allowed-mech @var{mech-list}
+Defines the list of allowed authentication methods.
 @end deffn
 
 @node CONTROL Section, TRANSLATION Section, AUTH Section, Configuration
@@ -1096,12 +1106,18 @@ for security reasons, can only be used both with the TLS/SSL encryption.
 @end deffn
 
 @deffn Option mode @var{mode-name}
-FIXME
 @opindex mode @var{mode-name}
+
+Selects Anubis operation mode. Allowed values for @var{mode-name}
+are:
+
 @table @asis
 @item transparent
 @item auth
 @end table
+
+@xref{Authentication}, for the detailed discussion of Anubis operation
+modes.
 
 @end deffn
 
@@ -2565,7 +2581,12 @@ Execute a local SMTP server, which works on standard input and output
 
 @item --mode @var{mode-name}
 @itemx -m @var{mode-name}
-FIXME
+Selects Anubis operation mode. Allowed values for @var{mode-name}
+are @samp{transparent} (default) and @samp{auth}. @xref{Authentication},
+for the detailed discussion of Anubis operation modes.
+
+@end table
+
 
 @item --norc
 Ignore system configuration file.
@@ -2622,7 +2643,7 @@ $ anubis -f --local-mta /usr/sbin/sendmail -- sendmail -bs
 @end smallexample
 
 @noindent
-Similar to above, but create the tunnel between localhost:24
+Similar to above, but create a tunnel between localhost:24
 and a local program (local MTA). In this example local program
 is @command{sendmail} with @samp{-bs} command line option.
 The @samp{-bs} option forces @command{sendmail} to work on standard
