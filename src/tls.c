@@ -422,18 +422,18 @@ print_x509_certificate_info (gnutls_session session)
       gnutls_x509_crt_init (&cert);
       gnutls_x509_crt_import (cert, &cert_list[0], GNUTLS_X509_FMT_PEM);
 
-      fprintf (stderr, _(" - Certificate info:\n"));
+      fprintf (stderr, _("- Certificate info:\n"));
 
       expiret = gnutls_x509_crt_get_expiration_time (cert);
       activet = gnutls_x509_crt_get_activation_time (cert);
-      fprintf (stderr, _(" - Certificate is valid since: %s"),
+      fprintf (stderr, _("- Certificate is valid since: %s"),
 	       ctime (&activet));
-      fprintf (stderr, _(" - Certificate expires: %s"), ctime (&expiret));
+      fprintf (stderr, _("- Certificate expires: %s"), ctime (&expiret));
 
       if (gnutls_x509_fingerprint (GNUTLS_DIG_MD5,
 				   &cert_list[0], digest, &digest_size) >= 0)
 	{
-	  fprintf (stderr, _(" - Certificate fingerprint: "));
+	  fprintf (stderr, _("- Certificate fingerprint: "));
 	  for (i = 0; i < digest_size; i++)
 	    {
 	      fprintf (stderr, "%.2x ", (unsigned char) digest[i]);
@@ -443,7 +443,7 @@ print_x509_certificate_info (gnutls_session session)
 
       if (gnutls_x509_crt_get_serial (cert, serial, &serial_size) >= 0)
 	{
-	  fprintf (stderr, _(" - Certificate serial number: "));
+	  fprintf (stderr, _("- Certificate serial number: "));
 	  for (i = 0; i < serial_size; i++)
 	    {
 	      fprintf (stderr, "%.2x ", (unsigned char) serial[i]);
@@ -452,30 +452,30 @@ print_x509_certificate_info (gnutls_session session)
 	}
       algo = gnutls_x509_crt_get_pk_algorithm (cert, &bits);
 
-      fprintf (stderr, _("Certificate public key: "));
+      fprintf (stderr, _("- Certificate public key: "));
       if (algo == GNUTLS_PK_RSA)
 	{
 	  fprintf (stderr, _("RSA\n"));
-	  fprintf (stderr, ngettext (" Modulus: %d bit\n",
-				     " Modulus: %d bits\n", bits), bits);
+	  fprintf (stderr, ngettext ("- Modulus: %d bit\n",
+				     "- Modulus: %d bits\n", bits), bits);
 	}
       else if (algo == GNUTLS_PK_DSA)
 	{
 	  fprintf (stderr, _("DSA\n"));
-	  fprintf (stderr, ngettext (" Exponent: %d bit\n",
-				     " Exponent: %d bits\n", bits), bits);
+	  fprintf (stderr, ngettext ("- Exponent: %d bit\n",
+				     "- Exponent: %d bits\n", bits), bits);
 	}
       else
 	fprintf (stderr, _("UNKNOWN\n"));
 
-      fprintf (stderr, _(" - Certificate version: #%d\n"),
+      fprintf (stderr, _("- Certificate version: #%d\n"),
 	       gnutls_x509_crt_get_version (cert));
 
       gnutls_x509_crt_get_dn (cert, dn, &dn_size);
       fprintf (stderr, "- DN: %s\n", dn);
 
       gnutls_x509_crt_get_issuer_dn (cert, dn, &dn_size);
-      fprintf (stderr, _(" - Certificate Issuer's DN: %s\n"), dn);
+      fprintf (stderr, _("- Certificate Issuer's DN: %s\n"), dn);
 
       gnutls_x509_crt_deinit (cert);
     }
