@@ -1,3 +1,14 @@
+2004-03-06  Sergey Poznyakoff  <gray@Noldor.runasimi.org>
+
+	* src/anubisusr.c (hostcmp): Bugfix.
+
+2004-03-06  Sergey Poznyakoff
+
+	* src/anubisusr.c: Consult .netrc file for the authentication
+	credentials.
+	Removed debugging hooks.
+	* src/xdatabase.c (xexamine): Bugfix
+
 2004-03-06  Sergey Poznyakoff
 
 	* configure.ac (ANUBISADM): Use Makefile variable dereference
