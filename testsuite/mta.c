@@ -63,6 +63,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
+#include <fcntl.h>
 
 #include <pwd.h>
 #include <sys/stat.h>
@@ -70,8 +71,29 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#if defined(HAVE_LIBGCRYPT) && defined(HAVE_LIBGNUTLS) && defined(HAVE_GNUTLS_GNUTLS_H)
+# define HAVE_GNUTLS
+#endif
+#if defined(USE_GNUTLS) && defined(HAVE_GNUTLS)
+# include <gnutls/gnutls.h>
+# define HAVE_TLS
+#endif /* USE_GNUTLS and HAVE_GNUTLS */
+
 FILE *diag = NULL;       /* diagnostic output */
 int port = 0;            /* Port number (for smtp mode) */
+
+#ifdef HAVE_TLS
+char *tls_cert;          /* TLS sertificate */
+char *tls_key;           /* TLS key */
+char *tls_cafile;
+
+#define enable_tls() (tls_cafile != NULL || (tls_cert != NULL && tls_key != NULL))
+
+#define DH_BITS 768
+
+gnutls_dh_params dh_params;
+static gnutls_certificate_server_credentials x509_cred;
+#endif
 
 char *progname;
 
@@ -79,6 +101,9 @@ int mta_daemon(int, char **);
 int mta_stdio(int, char **);
 void error(const char *, ...);
 void smtp_reply(int, char *, ...);
+
+#define R_CONT     0x8000
+#define R_CODEMASK 0xfff
 
 int
 main (int argc, char **argv)
@@ -94,7 +119,7 @@ main (int argc, char **argv)
 	else
 		progname++;
 		
-	while ((c = getopt(argc, argv, "ab:d:p:")) != EOF) {
+	while ((c = getopt(argc, argv, "ac:C:b:d:k:p:")) != EOF) {
 		switch (c) {
 		case 'a':
 			append = 1;
@@ -116,6 +141,18 @@ main (int argc, char **argv)
 			}
 			break;
 
+#ifdef HAVE_TLS
+		case 'c':
+			tls_cert = optarg;
+			break;
+		case 'C':
+			tls_cafile = optarg;
+			break;
+		case 'k':
+			tls_key = optarg;
+			break;
+#endif
+			
 		case 'd':
 			diag_name = optarg;
 			break;
@@ -149,6 +186,10 @@ main (int argc, char **argv)
 		error("use either -bs or -bd");
 		exit(1);
 	}
+
+#ifdef HAVE_TLS
+	tls_init();
+#endif
 	status = mta_mode(argc, argv);
 
 	if (diag)
@@ -169,18 +210,248 @@ error(const char *fmt, ...)
 	va_end(ap);
 }
 
-static FILE *in, *out;
+static void *in, *out;
+
+static const char *
+_def_strerror(int rc)
+{
+	return strerror(rc);
+}
+
+static int
+_def_write(void *sd, char *data, size_t size, size_t *nbytes)
+{
+	int n = write((int)sd, data, size);
+	if (n != size)
+		return errno;
+	if (nbytes)
+		*nbytes = n;
+	return 0;
+}
+
+static int
+_def_read(void *sd, char *data, size_t size, size_t *nbytes)
+{
+	int n = read((int)sd, data, size);
+	if (n != size)
+		return errno;
+	if (nbytes)
+		*nbytes = n;
+	return 0;
+}
+
+static int
+_def_close(void *sd)
+{
+	return close((int)sd);
+}
+
+int (*_mta_read)(void *, char *, size_t, size_t *) = _def_read;
+int (*_mta_write)(void *, char *, size_t, size_t *) = _def_write;
+int (*_mta_close)(void *) = _def_close;
+const char *(*_mta_strerror)(int) = _def_strerror;
+
+#ifdef HAVE_TLS
+
+static void
+_tls_cleanup_x509()
+{
+	if (x509_cred)
+		gnutls_certificate_free_credentials(x509_cred);
+}
+
+static void
+generate_dh_params(void)
+{
+	gnutls_datum prime, generator;
+
+	gnutls_dh_params_init(&dh_params);
+	gnutls_dh_params_generate(&prime, &generator, DH_BITS);
+	gnutls_dh_params_set(dh_params, prime, generator, DH_BITS);
+
+	free(prime.data);
+	free(generator.data);
+	return;
+}
+
+void
+tls_init()
+{
+	if (!enable_tls())
+		return;
+	gnutls_global_init();
+	atexit(gnutls_global_deinit);
+	gnutls_certificate_allocate_credentials(&x509_cred);
+	atexit(_tls_cleanup_x509);
+	if (tls_cafile) {
+		int rc = gnutls_certificate_set_x509_trust_file(x509_cred,
+
+								tls_cafile,
+							    GNUTLS_X509_FMT_PEM);
+		if (rc < 0) {
+			gnutls_perror(rc);
+			return;
+		}
+	}
+	if (tls_cert && tls_key)
+		gnutls_certificate_set_x509_key_file(x509_cred,
+						     tls_cert, tls_key,
+						     GNUTLS_X509_FMT_PEM);
+
+	generate_dh_params();
+	gnutls_certificate_set_dh_params(x509_cred, dh_params);
+}
+
+static ssize_t
+_tls_fd_pull(gnutls_transport_ptr fd, void *buf, size_t size)
+{
+	int rc;
+	do {
+		rc = read(fd, buf, size);
+	} while (rc == -1 && errno == EAGAIN);
+	return rc;
+}
+
+static ssize_t
+_tls_fd_push(gnutls_transport_ptr fd, const void *buf, size_t size)
+{
+	int rc;
+	do {
+		rc = write(fd, buf, size);
+	} while (rc == -1 && errno == EAGAIN);
+	return rc;
+}
+
+static const char *
+_tls_strerror(int rc)
+{
+	return gnutls_strerror(rc);
+}
+
+static int
+_tls_write(void *sd, char *data, size_t size, size_t *nbytes)
+{
+	int rc;
+	
+	do
+		rc = gnutls_record_send(sd, data, size);
+	while (rc == GNUTLS_E_INTERRUPTED || rc == GNUTLS_E_AGAIN);
+	if (rc >= 0) {
+		if (nbytes)
+			*nbytes = rc;
+		return 0;
+	} 
+	return rc;
+}
+
+static int
+_tls_read(void *sd, char *data, size_t size, size_t *nbytes)
+{
+	int rc = gnutls_record_recv(sd, data, size);
+	if (rc >= 0) {
+		if (nbytes)
+			*nbytes = rc;
+		return 0;
+	} 
+	return rc;
+}
+
+static int
+_tls_close(void *sd)
+{
+	if (sd) {
+		gnutls_bye(sd, GNUTLS_SHUT_RDWR);
+		gnutls_deinit(sd);
+	}
+	return 0;
+}
+
+static gnutls_session
+tls_session_init(void)
+{
+	gnutls_session session = 0;
+	int rc;
+	
+	gnutls_init(&session, GNUTLS_SERVER);
+	gnutls_set_default_priority(session);   
+	gnutls_credentials_set(session, GNUTLS_CRD_CERTIFICATE, x509_cred);
+	gnutls_certificate_server_set_request(session, GNUTLS_CERT_REQUEST);
+	gnutls_dh_set_prime_bits(session, DH_BITS);
+
+	gnutls_transport_set_pull_function(session, _tls_fd_pull);
+	gnutls_transport_set_push_function(session, _tls_fd_push);
+
+	gnutls_transport_set_ptr2(session, (int)in, (int)out);
+	rc = gnutls_handshake(session);
+	if (rc < 0) {
+		gnutls_deinit(session);
+		gnutls_perror(rc);
+		return 0;
+	}
+
+	return (gnutls_session)session;
+}
+
+void
+smtp_starttls()
+{
+	gnutls_session session;
+
+	smtp_reply(220, "Ready to start TLS");
+	
+	session = tls_session_init();
+	if (session) {
+		in = out = session;
+		_mta_read = _tls_read;
+		_mta_write = _tls_write;
+		_mta_close = _tls_close;
+		_mta_strerror = _tls_strerror;
+		reset_capa("STARTTLS");
+	} else
+		smtp_reply(530, "TLS negotiation failed");
+}
+
+#endif
 
 void
 smtp_reply(int code, char *fmt, ...)
 {
 	va_list ap;
-
+	int cont = code & R_CONT ? '-' : ' ';
+	static char obuf[512];
+	int n, rc;
+	
 	va_start(ap, fmt);
-	fprintf(out, "%d ", code);
-	vfprintf(out, fmt, ap);
+	n = snprintf(obuf, sizeof obuf, "%d%c", code & R_CODEMASK, cont);
+	n += vsnprintf(obuf + n, sizeof obuf - n, fmt, ap);
 	va_end(ap);
-	fprintf(out, "\r\n");
+	n += snprintf(obuf + n, sizeof obuf - n, "\r\n");
+	rc = _mta_write(out, obuf, n, NULL);
+	if (rc) {
+		fprintf(stderr, "Write failed: %s", _mta_strerror(rc));
+		abort();
+	}
+}
+
+int
+get_input_line(char *buf, size_t bufsize)
+{
+	int i, rc;
+	
+	for (i = 0; i < bufsize-1; i++) {
+		size_t n;
+		rc = _mta_read(in, buf + i, 1, &n);
+		if (rc) {
+			fprintf(stderr, "Read failed: %s", _mta_strerror(rc));
+			abort();
+		}
+		if (n == 0)
+			break;
+		if (buf[i] == '\n')
+			break;
+	}
+	buf[++i] = 0;
+	return i;
 }
 
 #define STATE_INIT   0
@@ -198,6 +469,7 @@ smtp_reply(int code, char *fmt, ...)
 #define KW_DATA      4   
 #define KW_HELP      5
 #define KW_QUIT      6
+#define KW_STARTTLS  7
 
 int
 smtp_kw (const char *name)
@@ -213,6 +485,8 @@ smtp_kw (const char *name)
 		{ "data", KW_DATA },
 		{ "help", KW_HELP },
 		{ "quit", KW_QUIT },
+		{ "help", KW_HELP },
+		{ "starttls", KW_STARTTLS },
 		{ NULL },
 	};
 	int i;
@@ -271,14 +545,51 @@ argcv_free(int argc, char **argv)
   return 1;
 }
 
+char *mta_capa[] = {
+#if defined(HAVE_TLS)
+	"STARTTLS",
+#endif
+	NULL
+};
+
+void
+reset_capa(char *name)
+{
+	int i;
+	for (i = 0; mta_capa[i]; i++)
+		if (strcmp(mta_capa[i], name) == 0) {
+			mta_capa[i] = NULL;
+			break;
+		}
+}
+
+void
+smtp_ehlo(int extended)
+{
+	int i;
+
+	if (!extended) {
+		smtp_reply(250,  "pleased to meet you");
+		return;
+	}
+	
+	smtp_reply(R_CONT|250,  "pleased to meet you");
+	for (i = 0; mta_capa[i]; i++)
+		smtp_reply(R_CONT|250, "%s", mta_capa[i]);
+	smtp_reply(250, "HELP");
+}
+
+void
+smtp_help()
+{
+	smtp_reply(502, "HELP not implemented");
+}
+
 void
 smtp()
 {
 	int state;
 	char buf[128];
-  
-	SETVBUF(in, NULL, _IOLBF, 0);
-	SETVBUF(out, NULL, _IOLBF, 0);
 		
 	smtp_reply(220, "localhost bitbucket ready");
 	for (state = STATE_INIT; state != STATE_QUIT; ) {
@@ -286,7 +597,7 @@ smtp()
 		char **argv;
 		int kw, len;
       
-		if (fgets(buf, sizeof buf, stdin) == NULL)
+		if (get_input_line(buf, sizeof buf) <= 0)
 			exit (1);
 		
 		len = strlen (buf);
@@ -305,6 +616,9 @@ smtp()
 			state = STATE_QUIT;
 			argcv_free(argc, argv);
 			continue;
+		} else if (kw == KW_HELP) {
+			smtp_help();
+			continue;
 		}
       
 		switch (state) {
@@ -313,8 +627,7 @@ smtp()
 			case KW_EHLO:
 			case KW_HELO:
 				if (argc == 2) {
-					smtp_reply(250,
-						   "pleased to meet you");
+					smtp_ehlo(kw == KW_EHLO);
 					state = STATE_EHLO;
 				} else
 					smtp_reply(501,
@@ -330,6 +643,14 @@ smtp()
 	  
 		case STATE_EHLO:
 			switch (kw) {
+			case KW_EHLO:
+				if (argc == 2) {
+					smtp_ehlo(1);
+				} else
+					smtp_reply(501,
+				    "%s requires domain address", argv[0]);
+				break;
+				
 			case KW_MAIL:
 				if (argc == 3
 				    && strcasecmp(argv[1], "from:") == 0) {
@@ -339,6 +660,11 @@ smtp()
 					smtp_reply(501, "Syntax error");
 				break;
 
+#if defined(HAVE_TLS)
+			case KW_STARTTLS:
+				smtp_starttls();
+				break;
+#endif	
 			default:
 				smtp_reply(503, "Need MAIL command");
 			}
@@ -459,8 +785,7 @@ mta_daemon(int argc, char **argv)
 			return 1;
 		}
 
-		in = fdopen(fd, "r");
-		out = fdopen (fd, "w");
+		in = out = (void *)fd;
 		smtp();
 		break;
 	}
@@ -471,8 +796,8 @@ mta_daemon(int argc, char **argv)
 int
 mta_stdio(int argc, char **argv)
 {
-	in = stdin;
-	out = stdout;
+	in = (void *) fileno(stdin);
+	out = (void *) fileno(stdout);
 	smtp();
 	return 0;
 }
