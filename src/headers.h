@@ -238,10 +238,21 @@
 #define T_RELAX_PERM_CHECK  0x00800000
 #define T_ENTIRE_BODY       0x01000000
 
-/* Tags */
-#define R_BASIC             0x00000001
-#define R_PERLRE            0x00000002
-#define R_SCASE             0x00000004
+/* Regexp modifiers */
+/* Basic types */
+#define R_EXACT             0x00000001
+#define R_POSIX             0x00000002
+#define R_PERLRE            0x00000004
+/* Other modifiers */
+#define R_BASIC             0x00000010
+#define R_SCASE             0x00000012
+
+#define R_TYPEMASK          0x0000000f
+
+#define re_set_type(m,t) ((m) = ((m) & ~R_TYPEMASK) | ((m) & R_TYPEMASK))
+#define re_typeof(m) ((m) & R_TYPEMASK)
+#define re_set_flag(m,f) ((m) |= (f))
+#define re_clear_flag(m,f) ((m) &= ~(f))
 
 /* A special header used by Anubis to implement rules. */
 #define X_ANUBIS_RULE_HEADER "\nRULE\n"
@@ -327,9 +338,9 @@ void smtp_session(void);
 /* message.c */
 void message_add_body(MESSAGE *, char *, char *);
 void message_add_header(MESSAGE *, char *, char *);
-void message_remove_headers(MESSAGE *, char *);
-void message_modify_headers(MESSAGE *, char *, char *, char *);
-void message_modify_body(MESSAGE *msg, char *key, char *value);
+void message_remove_headers(MESSAGE *, RC_REGEX *);
+void message_modify_headers(MESSAGE *, RC_REGEX *, char *, char *);
+void message_modify_body(MESSAGE *msg, RC_REGEX *key, char *value);
 void message_external_proc(MESSAGE *, char **);
 void message_init(MESSAGE *);
 void message_free(MESSAGE *);
