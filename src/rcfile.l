@@ -171,6 +171,7 @@ END |
 <LIT>\n          { BEGIN(INITIAL); cfg_line_num++; return EOL; }
          /* Other tokens */
 {WS}           ;
+\\\n           { cfg_line_num++; }
 \n             { cfg_line_num++; return EOL; }
 .              return yytext[0];
 
