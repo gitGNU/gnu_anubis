@@ -1,3 +1,11 @@
+2004-02-14  Wojciech Polak
+
+	* src/url.c (url_get_mech): Bugfix.
+	* src/anubisadm.c (print_help): Split up the messages and use puts().
+	(op_add_or_modify): Use getpass().
+	* lib/getpass.c: New file.
+	* configure.ac (AC_REPLACE_FUNCS): Added getpass.
+
 2004-02-14  Sergey Poznyakoff 
 
 	* src/mysql.c (mysql_db_put): Fixed query template
