@@ -70,7 +70,7 @@ error (const char *fmt, ...)
 static void
 adm_memory_error (const char *msg)
 {
-  error (msg);
+  error ("%s", msg);
   exit (1);
 }
 
@@ -299,7 +299,7 @@ op_add_or_modify (char *database, int code, char *errmsg)
 
   if (rc != code)
     {
-      error (errmsg);
+      error ("%s", errmsg);
       anubis_db_close (&db);
       return 1;
     }
