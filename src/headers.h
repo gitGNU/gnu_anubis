@@ -440,6 +440,23 @@ void guile_postprocess_proc(char *, LIST **, char **);
 void guile_section_init(void);
 #endif /* WITH_GUILE */
 
+/* url.c */
+   
+typedef struct anubis_url {
+	char *method;
+	char *host;
+	char *path;
+	char *user;
+	char *passwd;
+	int argc;
+	ASSOC *argv;
+} ANUBIS_URL;
+
+void anubis_url_destroy(ANUBIS_URL **url);
+int anubis_url_parse(ANUBIS_URL **url, char *str);
+char *anubis_url_full_path(ANUBIS_URL *url);
+const char *anubis_url_get_arg(ANUBIS_URL *url, const char *argname);
+
 /* anubisdb.c */
 
 typedef struct anubis_user {
@@ -461,23 +478,25 @@ enum anubis_db_mode {
 #define ANUBIS_DB_NOT_FOUND 2  /* Record not found (for db_get_record
 				  only) */
 
-typedef int (*anubis_db_open_t) (void **d, char *arg,
+typedef int (*anubis_db_open_t) (void **d, ANUBIS_URL *url,
 				 enum anubis_db_mode mode);
 typedef int (*anubis_db_close_t) (void *d);
 typedef int (*anubis_db_io_t) (void *d, char *key, ANUBIS_USER *rec,
 			       int *ecode);
 typedef const char *(*anubis_db_strerror_t) (void *d, int rc);
+typedef int (*anubis_db_delete_t) (void *d, char *key, int *ecode);
 
 int anubis_db_register(char *dbid, anubis_db_open_t _db_open,
 		       anubis_db_close_t _db_close,
 		       anubis_db_io_t _db_get,
 		       anubis_db_io_t _db_put,
+		       anubis_db_delete_t _db_delete,
 		       anubis_db_strerror_t _db_strerror);
-int anubis_db_open(char *dbid, char *arg,
-		   enum anubis_db_mode mode, void **dptr);
+int anubis_db_open(char *arg, enum anubis_db_mode mode, void **dptr);
 int anubis_db_close(void **dptr);
 int anubis_db_get_record(void *dptr, char *key, ANUBIS_USER *rec);
 int anubis_db_put_record(void *dptr, char *key, ANUBIS_USER *rec);
+int anubis_db_delete_record(void *dptr, char *key);
 const char *anubis_db_strerror(void *dptr);
 void anubis_db_free_record(ANUBIS_USER *rec);
 
@@ -492,7 +511,7 @@ int anubis_transparent_mode (int sd_client, struct sockaddr_in *addr);
 
 /* authmode.c */
 int anubis_authenticate_mode (int sd_client, struct sockaddr_in *addr);
-void anubis_set_password_db (char *type, char *arg);
+void anubis_set_password_db (char *arg);
 void asmtp_reply(int code, char *fmt, ...);
 void asmtp_capa_add_prefix(char *prefix, char *name);
 int anubis_get_db_record(char *username, ANUBIS_USER *usr);
