@@ -54,12 +54,14 @@ free_mem(void)
 	xfree(secure.key);
 #endif /* HAVE_TLS or HAVE_SSL */
 
+#ifdef HAVE_GPG
+	gpg_free();
+#endif /* HAVE_GPG */
+
 	xfree(options.slogfile);
 	xfree(options.ulogfile);
 	xfree(session.execpath);
 	xfree_pptr(session.execargs);
-
-	return;
 }
 
 void
