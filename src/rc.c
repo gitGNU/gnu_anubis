@@ -364,10 +364,10 @@ static struct rc_secdef_child control_sect_child = {
 /* FIXME: This belongs to another file */
 #if defined(HAVE_TLS) || defined(HAVE_SSL)
 #define KW_SSL                 1
-#define KW_ONEWAY_SSL          2 
-#define KW_CERT                3
-#define KW_KEY                 4
-#define KW_CAFILE              5
+#define KW_SSL_ONEWAY          2 
+#define KW_SSL_CERT            3
+#define KW_SSL_KEY             4
+#define KW_SSL_CAFILE          5
 
 int
 tls_parser(int method, int key, LIST *arglist,
@@ -379,25 +379,25 @@ tls_parser(int method, int key, LIST *arglist,
 		setbool(arg, topt, T_SSL);
 		break;
 		
-	case KW_ONEWAY_SSL:
+	case KW_SSL_ONEWAY:
 		setbool(arg, topt, T_SSL_ONEWAY);
 		break;
 		
-	case KW_CERT:
+	case KW_SSL_CERT:
 		xfree(secure.cert);
 		secure.cert = allocbuf(arg, MAXPATHLEN);
 		if (method == CF_CLIENT)
 			topt |= T_SSL_CKCLIENT;		
 		break;
 		
-	case KW_KEY:
+	case KW_SSL_KEY:
 		xfree(secure.key);
 		secure.key = allocbuf(arg, MAXPATHLEN);
 		if (method == CF_CLIENT)
 			topt |= T_SSL_CKCLIENT;
 		break;
 		
-	case KW_CAFILE:
+	case KW_SSL_CAFILE:
 		xfree(secure.cafile);
 		secure.cafile = allocbuf(arg, MAXPATHLEN);
 		break;
@@ -409,11 +409,11 @@ tls_parser(int method, int key, LIST *arglist,
 }
 
 static struct rc_kwdef tls_kw[] = {
-	{ "ssl", KW_SSL },
-	{ "oneway-ssl", KW_ONEWAY_SSL },
-	{ "cert", KW_CERT },
-	{ "key", KW_KEY },
-	{ "cafile", KW_CAFILE },
+	{ "ssl",        KW_SSL },
+	{ "ssl-oneway", KW_SSL_ONEWAY },
+	{ "ssl-cert",   KW_SSL_CERT },
+	{ "ssl-key",    KW_SSL_KEY },
+	{ "ssl-cafile", KW_SSL_CAFILE },
 	{ NULL }
 };
 
@@ -444,6 +444,7 @@ control_section_init(void)
 #define KW_BODY_APPEND              2 
 #define KW_BODY_CLEAR_APPEND        3
 #define KW_EXTERNAL_BODY_PROCESSOR  4 
+#define KW_BODY_CLEAR               5
 
 int
 rule_parser(int method, int key, LIST *arglist,
@@ -460,11 +461,13 @@ rule_parser(int method, int key, LIST *arglist,
 	case KW_BODY_APPEND:
 		message_append_text_file(msg, arg);
 		break;
+
+	case KW_BODY_CLEAR:
+		xfree(msg->body);
+		msg->body = strdup("");
+		break;
 		
 	case KW_BODY_CLEAR_APPEND:
-		/*FIXME: There should be a separate command body-clear
-		  instead!!!
-		*/
 		xfree(msg->body);
 		msg->body = strdup("");
 		message_append_text_file(msg, arg);
@@ -485,7 +488,8 @@ rule_parser(int method, int key, LIST *arglist,
 struct rc_kwdef rule_kw[] = {
 	{ "signature-file-append",   KW_SIGNATURE_FILE_APPEND },   
 	{ "body-append",	     KW_BODY_APPEND },             
-	{ "body-clear-append",	     KW_BODY_CLEAR_APPEND },       
+	{ "body-clear-append",	     KW_BODY_CLEAR_APPEND },
+	{ "body-clear",              KW_BODY_CLEAR },
 	{ "external-body-processor", KW_EXTERNAL_BODY_PROCESSOR },
         { NULL }
 };
