@@ -178,9 +178,7 @@ asmtp_capa_init (void)
 #ifdef HAVE_TLS
   asmtp_capa_add ("STARTTLS");
 #endif
-#ifdef WITH_GSASL
   auth_gsasl_init ();
-#endif
   asmtp_capa_add ("HELP");
 }
 
@@ -235,7 +233,9 @@ asmtp_ehlo_reply (char *args)
       asmtp_reply (501, "Syntax error");
       return state_init;
     }
-
+  
+  set_ehlo_domain(domain);
+  
   helo_count++;
   asmtp_reply (R_CONT | 250, "Anubis is pleased to meet you.");
   asmtp_capa_report ();
@@ -554,18 +554,11 @@ anubis_authenticate_mode (NET_STREAM *psd_client,
   if (anubis_smtp (&usr))
     return EXIT_FAILURE;
 
-  if (usr.rcfile_name)
-    session.rcfile_name = usr.rcfile_name;
-
   if (usr.username)
     {
       strncpy (session.clientname, usr.username, sizeof (session.clientname));
       if (check_username (session.clientname))
-	{
-	  anubis_changeowner (session.clientname);
-	  open_rcfile (CF_CLIENT);
-	  process_rcfile (CF_CLIENT);
-	}
+	anubis_changeowner (session.clientname);
       else
 	set_unprivileged_user ();
     }
@@ -576,6 +569,13 @@ anubis_authenticate_mode (NET_STREAM *psd_client,
       set_unprivileged_user ();
     }
 
+  if (usr.rcfile_name)
+    {
+      session.rcfile_name = usr.rcfile_name;
+      open_rcfile (CF_CLIENT);
+      process_rcfile (CF_CLIENT);
+    }
+  
   if (topt & T_XELO)
     {
       xdb_loop ();
