@@ -25,6 +25,9 @@ src/regex.c
 src/ssl.c
 src/tls.c
 src/tunnel.c
+src/guile.c
+src/rcfile.y
+src/rcfile.l
 
 # EOF
 
