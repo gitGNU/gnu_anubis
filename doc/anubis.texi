@@ -69,7 +69,7 @@ documents GNU Anubis Version @value{VERSION}.
 Appendices
 
 * Pixie-Dixie::                     Original description of the new
-                                    Anubis operation mode.
+                                    GNU Anubis operation mode.
 * GNU Free Documentation License::  This manual is under the GNU Free
                                     Documentation License.
 Indices
@@ -216,7 +216,7 @@ GNU Privacy Guard, a tool compatible with the Pretty Good Privacy.
 
 @UNREVISED{}
 
-When Anubis accepts an incoming connection, it first has to identify
+When GNU Anubis accepts an incoming connection, it first has to identify
 the remote party, i.e. determine whether it has the right to use
 Anubis resources and, if so, what configuration settings should be
 used during the session. We call this process @dfn{authentication}.
@@ -226,8 +226,8 @@ mode}. Currently there are two modes:
 @table @asis
 @item transparent
 This is the default mode. It is compatible with versions of GNU Anubis
-up to 3.6.2. In this mode, Anubis relies on AUTH service (@command{identd}) to
-authenticate users.
+up to 3.6.2. In this mode, Anubis relies on AUTH service (@command{identd})
+to authenticate users.
 
 @item auth
 This mode uses SMTP AUTH mechanism to authenticate incoming
@@ -243,9 +243,9 @@ are discussed below:
 
 Deficiences:
 @enumerate
-@item The user must have @command{identd} installed on his machine
-@item Each user must have a system account on the
-machine where GNU Anubis runs (though the system administrator may relax
+@item The user must have @command{identd} installed on his machine.
+@item Each user must have a system account on the machine where
+GNU Anubis runs (though the system administrator may relax
 this limitation using user name translation, @pxref{TRANSLATION
 Section}).
 @end enumerate
@@ -270,11 +270,11 @@ for the sole purpose of SMTP authentication, as Pixie-Dixie suggests.}
 @noindent
 Advantages:
 @enumerate
-@item Better reliability
+@item Better reliability.
 @item Users do not have to run @command{identd} on their machines.
-@item Users are not required to have accounts on the machine where Anubis
-runs.
-@item Users can remotely modify their configuration files
+@item Users are not required to have accounts on the machine where
+Anubis runs.
+@item Users can remotely modify their configuration files.
 @end enumerate
 
 @menu
@@ -287,7 +287,7 @@ runs.
 @section User Database
 @UNREVISED{}
 
-Anubis uses @dfn{User Database} for keeping @dfn{user credentials},
+GNU Anubis uses @dfn{User Database} for keeping @dfn{user credentials},
 i.e. data used to authenticate and autorize users. The exact way of
 storing these data does not matter here, it will be addressed further
 in this manual. In this section we treat user database as an
@@ -296,7 +296,7 @@ abstraction layer.
 The user database consists of @dfn{records}. Each record keeps
 information about a particular @dfn{user}. A record consists
 of four @dfn{fields}. A field may contain some value, or be
-emtpy, in which case we say that the field has @dfn{null}
+empty, in which case we say that the field has @dfn{null}
 value.
 
 The record fields are:
@@ -459,10 +459,10 @@ where @var{path} specifies absolute file name of the database file.
 @UNREVISED{}
 
 This is the most flexible database format. GNU Anubis @value{VERSION}
-supports MySQL@footnote{See @url{http://www.mysql.com}.} and PostgreSQL
-@footnote{See @url{http://www.postgres.org}.} interfaces. No matter which
-of them you use, the implementation details are hidden behind
-a single consistent Anubis interface.
+supports MySQL@footnote{See @url{http://www.mysql.com}.} and
+PostgreSQL@footnote{See @url{http://www.postgres.org}.} interfaces.
+No matter which of them you use, the implementation details are hidden
+behind a single consistent Anubis interface.
 
 GNU Anubis supposes that all user data are kept in a single database
 table. This table must have at least four columns for storing
@@ -475,7 +475,7 @@ may be specified in @acronym{URL} as discussed below.
 @subheading URL syntax
 
 @smallexample
-@var{proto}://[[@var{user}[:@var{password}]@@@var{host}/@var{dbname}[@var{params}
+@var{proto}://[[@var{user}[:@var{password}]@@@var{host}/@var{dbname}[@var{params}]
 @end smallexample
 
 @var{Proto} describes the exact database type to use. Use @samp{mysql}
@@ -818,7 +818,7 @@ commands.
 
 Users maintain their database records using @command{anubisusr}
 command. Main purpose of this command is to keep the copy of
-your configuration on Anubis server up to date.
+your configuration on GNU Anubis server up to date.
 @FIXME{anubisusr should also allow to modify user
 password. This is the only database field, apart from @code{CONFIG}
 that the user may be allowed to change}. We recommend to invoke
@@ -828,12 +828,13 @@ sure that your configuration file is up to date when you log in.
 it does not slow down your normal login sequence}.
 
 @subheading Usage
+
 @smallexample
 anubisusr [@var{options}] [@var{smtp-url}]
 @end smallexample
 
 @noindent
-where @var{smtp-url} is a @acronym{URL} of your Anubis server.
+where @var{smtp-url} is a @acronym{URL} of your GNU Anubis server.
 Notice that if it lacks user name and password, then
 @command{anubisusr} will first try to retrieve them from your
 @file{~/.netrc} file (See @cite{netrc(5)} for more info), and if not
@@ -1011,8 +1012,8 @@ messages (conditional and unconditional rules).
 
 @deffn Option smtp-greeting-message @var{text}
 @opindex smtp-greeting-message @var{text}
-Configures the greeting message issued by Anubis upon accepting the
-connection.
+Configures the greeting message issued by GNU Anubis upon accepting
+the connection.
 @end deffn
 
 @deffn Option smtp-help-message @var{help-text}
@@ -1116,9 +1117,8 @@ are:
 @item auth
 @end table
 
-@xref{Authentication}, for the detailed discussion of Anubis operation
-modes.
-
+@xref{Authentication}, for the detailed discussion of GNU Anubis
+operation modes.
 @end deffn
 
 @node Output Settings, Proxy Settings, Basic Settings, CONTROL Section
@@ -1546,8 +1546,8 @@ else
 fi
 @end group
 @end smallexample
-@noindent
 
+@noindent
 Note also, that in the examples above any of the statements
 @var{action-list} may contain conditionals, so that the conditional
 statements may be nested. This allows to create very sophisticated
@@ -2818,13 +2818,13 @@ keywords in its own user configuration file.
 @cindex smime
 @cindex openssl
 
-Anubis version @value{VERSION} does not yet provide buil-in support
+Anubis version @value{VERSION} does not yet provide built-in support
 for S/MIME encryption or signing. To encrypt or sign messages using
 S/MIME, you will have to use external programs. Usually such programs
 require the whole message as their input, so simply using
-@code{external-body-processor} will not work. Anubis distribution includes
-a special Guile program, @file{entire-msg.scm}, designed for use with
-such programs. For its detailed description, please refer to
+@code{external-body-processor} will not work. GNU Anubis distribution
+includes a special Guile program, @file{entire-msg.scm}, designed for
+use with such programs. For its detailed description, please refer to
 @ref{Entire Message Filters}. This chapter addresses a special case of
 using it with @code{openssl} to sign outgoing messages.
 

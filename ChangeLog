@@ -1,6 +1,7 @@
 2004-05-27  Wojciech Polak
 
 	* doc/anubis.texi: Updated (fixed some typos).
+	* elisp/anubis-mode.el: Added new keywords.
 
 2004-05-22  Wojciech Polak
 
