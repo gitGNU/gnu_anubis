@@ -71,13 +71,10 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#if defined(HAVE_LIBGCRYPT) && defined(HAVE_LIBGNUTLS) && defined(HAVE_GNUTLS_GNUTLS_H)
-# define HAVE_GNUTLS
-#endif
-#if defined(USE_GNUTLS) && defined(HAVE_GNUTLS)
+#if defined(USE_GNUTLS) && defined(HAVE_GNUTLS_GNUTLS_H)
 # include <gnutls/gnutls.h>
 # define HAVE_TLS
-#endif /* USE_GNUTLS and HAVE_GNUTLS */
+#endif /* USE_GNUTLS and HAVE_GNUTLS_GNUTLS_H */
 
 FILE *diag = NULL;       /* diagnostic output */
 int port = 0;            /* Port number (for smtp mode) */
@@ -308,7 +305,7 @@ _tls_fd_pull(gnutls_transport_ptr fd, void *buf, size_t size)
 {
 	int rc;
 	do {
-		rc = read(fd, buf, size);
+		rc = read((int) fd, buf, size);
 	} while (rc == -1 && errno == EAGAIN);
 	return rc;
 }
@@ -318,7 +315,7 @@ _tls_fd_push(gnutls_transport_ptr fd, const void *buf, size_t size)
 {
 	int rc;
 	do {
-		rc = write(fd, buf, size);
+		rc = write((int) fd, buf, size);
 	} while (rc == -1 && errno == EAGAIN);
 	return rc;
 }
@@ -382,7 +379,9 @@ tls_session_init(void)
 	gnutls_transport_set_pull_function(session, _tls_fd_pull);
 	gnutls_transport_set_push_function(session, _tls_fd_push);
 
-	gnutls_transport_set_ptr2(session, (int)in, (int)out);
+	gnutls_transport_set_ptr2(session,
+				  (gnutls_transport_ptr)in,
+				  (gnutls_transport_ptr)out);
 	rc = gnutls_handshake(session);
 	if (rc < 0) {
 		gnutls_deinit(session);

@@ -112,7 +112,7 @@ _tls_fd_pull(gnutls_transport_ptr fd, void *buf, size_t size)
 {
 	int rc;
 	do {
-		rc = read(fd, buf, size);
+		rc = read((int) fd, buf, size);
 	} while (rc == -1 && errno == EAGAIN);
 	return rc;
 }
@@ -122,7 +122,7 @@ _tls_fd_push(gnutls_transport_ptr fd, const void *buf, size_t size)
 {
 	int rc;
 	do {
-		rc = write(fd, buf, size);
+		rc = write((int) fd, buf, size);
 	} while (rc == -1 && errno == EAGAIN);
 	return rc;
 }
@@ -177,7 +177,7 @@ start_ssl_client(int sd_server)
 		gnutls_transport_set_pull_function(session, _tls_fd_pull);
 		gnutls_transport_set_push_function(session, _tls_fd_push);
 	}
-	gnutls_transport_set_ptr(session, sd_server);
+	gnutls_transport_set_ptr(session, (void*) sd_server);
 
 	rs = gnutls_handshake(session);
 	if (rs < 0) {
@@ -262,7 +262,7 @@ start_ssl_server(int sd_client)
 		gnutls_transport_set_pull_function(session, _tls_fd_pull);
 		gnutls_transport_set_push_function(session, _tls_fd_push);
 	}
-	gnutls_transport_set_ptr(session, sd_client);
+	gnutls_transport_set_ptr(session, (gnutls_transport_ptr) sd_client);
 	rs = gnutls_handshake(session);
 	if (rs < 0) {
 		gnutls_deinit(session);
