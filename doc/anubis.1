@@ -1,0 +1,97 @@
+.\"
+.\" anubis.1 --
+.\"
+.TH anubis 1 "Version 3.6.3" "30 Jan 2003" "GNU Anubis"
+.SH NAME
+GNU Anubis - an outgoing mail processor and the SMTP tunnel.
+.SH SYNOPSIS
+.BI "anubis"
+[options]
+.br
+
+.SH DESCRIPTION
+.B GNU Anubis
+is an outgoing mail processor. It goes between the MUA (Mail User
+Agent) and the MTA (Mail Transport Agent), and can perform on the fly various
+sorts of processing and conversion on the outgoing mail in accord with the
+sender's specified rules, based on a highly configurable regular expressions
+system. It operates as a proxy server, independently from mail user agents.
+GNU Anubis can edit outgoing mail headers, encrypt and/or sign mail with the
+GNU Privacy Guard, build secure SMTP tunnels (Simple Mail Transport Protocol)
+using the TLS/SSL encryption even if your mail user agent doesn't support it,
+or tunnel a connection through a SOCKS proxy server.
+
+.SH THE GNU ANUBIS MANUAL
+
+The full documentation for
+.B GNU Anubis
+is maintained as a Texinfo manual.  If the
+.B info
+and GNU Anubis programs are properly installed at your site,
+the command
+.IP
+.B info anubis
+.PP
+should give you access to the complete manual.
+
+.SH REPORTING BUGS
+
+Please send any bug reports, improvements, comments,
+suggestions, or questions to <bug-anubis@gnu.org>.
+
+Before reporting a bug, make sure you have actually found
+a real bug. Carefully reread the documentation and see if it
+really says you can do what you are trying to do. If it is
+not clear whether you should be able to do something or not,
+report that too; it's a bug in the documentation!
+
+.SH FILES
+.HP
+.I /etc/anubisrc
+- system configuration file
+.HP
+.I ~/.anubisrc
+- user configuration file
+
+.SH "SEE ALSO"
+
+.BR grep (1),
+.BR regex (7),
+.BR perlre (1),
+.BR pcre (3),
+.BR sendmail (8),
+.BR openssl (1),
+.BR gpg (1),
+.BR identd (1),
+.BR pam (8),
+.BR tcpd (8)
+
+.SH AUTHORS
+
+The Anubis Team (read the AUTHORS file).
+.P
+.PD 0
+GNU Anubis Home Page:
+.P
+http://www.gnu.org/software/anubis/
+.PD
+
+.SH LICENSE
+
+GNU Anubis is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+.P
+GNU Anubis is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+.P
+You should have received a copy of the GNU General Public License
+along with GNU Anubis; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+.P
+GNU Anubis is released under the GPL with the additional exemption that
+compiling, linking, and/or using OpenSSL is allowed.
+

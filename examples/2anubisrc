@@ -1,0 +1,39 @@
+#
+# A sample system configuration file. Copy this file to `/etc/anubisrc'.
+# To protect your passwords in this configuration file, use the 0600
+# (u=rw,g=,o=) permissions, otherwise GNU Anubis won't accept this file.
+# Hash-marked comments (#) and white lines are ignored.
+#
+
+#
+# The "CONTROL" section.
+# A system configuration file.
+#
+
+---BEGIN CONTROL---
+# bind = [HOST:]PORT
+# remote-mta = HOST[:PORT]
+# local-mta = FILE-NAME [ARGS]
+# termlevel = NORMAL-VERBOSE-DEBUG-SILENT
+# esmtp-auth = USERNAME:PASSWORD
+# socks-proxy = HOST[:PORT]
+# socks-v4 = YES-OR-NO
+# socks-auth = USERNAME:PASSWORD
+# ssl = YES-OR-NO
+# oneway-ssl = YES-OR-NO
+# cert = FILE-NAME
+# key = FILE-NAME
+# cafile = FILE-NAME
+# allow-local-mta = YES-OR-NO
+# user-notprivileged = USERNAME
+---END---
+
+#
+# The "TRANSLATION" section.
+# A system configuration file only.
+#
+
+#---BEGIN TRANSLATION---
+#translate = [USER@]ADDRESS into = USERNAME
+#---END---
+

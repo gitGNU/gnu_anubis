@@ -1,0 +1,15 @@
+#
+# /etc/anubis.deny (fit this file to your own needs)
+#
+# If you compile GNU Anubis with a support for the Pluggable Authentication
+# Modules (PAM), edit this file, and copy to '/etc/anubis.deny'.
+#
+
+root
+
+# user2
+# user3
+# user4
+
+# EOF
+

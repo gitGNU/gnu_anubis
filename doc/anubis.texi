@@ -1,0 +1,1270 @@
+\input texinfo @c -*-texinfo-*-
+@c %**start of header
+@setfilename anubis.info
+@settitle GNU Anubis Manual
+@setchapternewpage odd
+@finalout
+@c %**end of header
+@include version.texi
+
+@copying
+Copyright @copyright{} 2001, 2002, 2003 Wojciech Polak.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU Manual'',
+and with the Back-Cover Texts as in (a) below.  A copy of the license
+is included in the section entitled ``GNU Free Documentation License''.
+
+(a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
+this GNU Manual, like GNU software.  Copies published by the Free
+Software Foundation raise funds for GNU development.''
+@end copying
+
+@ifinfo
+@dircategory GNU Packages
+@direntry
+* Anubis: (anubis).        The GNU outgoing mail processor.
+@end direntry
+@end ifinfo
+
+@titlepage
+@title GNU Anubis
+@subtitle An outgoing mail processor and the SMTP tunnel
+@subtitle GNU Anubis Version @value{VERSION}
+@subtitle @value{UPDATED}
+@author Wojciech Polak
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@node Top, Overview, , (dir)
+@ifinfo
+@chapter GNU Anubis
+This edition of the @cite{GNU Anubis Manual}, last updated @value{UPDATED},
+documents GNU Anubis Version @value{VERSION}.
+@end ifinfo
+
+@menu
+* Overview::                        Preliminary information.
+* Configuration::                   Writing your own configuration files.
+* Invoking Anubis::                 How to invoke the GNU @command{anubis}.
+* Sample Beginning::                Here is a sample beginning.
+* TLS/SSL::                         Using the TLS/SSL Encryption.
+* Problems::                        Reporting bugs.
+
+Appendices
+
+* GNU Free Documentation License::  This manual is under the GNU Free
+                                    Documentation License.
+Indices
+
+* Concept Index::                   Index of concepts.
+@end menu
+
+
+@node Overview, Configuration, Top, Top
+@chapter Overview
+@cindex overview
+@cindex Simple Mail Transport Protocol, SMTP
+@cindex daemon
+@cindex client
+@cindex tunnel
+@cindex proxy
+@cindex server
+@cindex outgoing mail processor
+@cindex on-the-fly
+@cindex MUA, Mail User Agent
+@cindex MTA, Mail Transport Agent
+
+GNU Anubis is an outgoing mail processor. It goes between the MUA (Mail User
+Agent) and the MTA (Mail Transport Agent), and can perform on the fly various
+sorts of processing and conversion on the outgoing mail in accord with the
+sender's specified rules, based on a highly configurable regular expressions
+system. It operates as a proxy server, independently from mail user agents.
+GNU Anubis can edit outgoing mail headers, encrypt and/or sign mail with the
+GNU Privacy Guard, build secure SMTP tunnels (Simple Mail Transport Protocol)
+using the TLS/SSL encryption even if your mail user agent doesn't support it,
+or tunnel a connection through a SOCKS proxy server.
+
+@sp 1
+@example
+--------*      --------**      ------***
+|  MUA  | ---> | Anubis | ---> |  MTA  |
+---------      ----------      ---------
+
+@r{*   Mail User Agent (client)}
+@r{**  An outgoing mail processor and the SMTP tunnel.}
+@r{*** Mail Transport Agent (server)}
+@end example
+
+@sp 1
+Some quick definitions:
+
+@dfn{Protocol}---any standard for the exchange of information. A protocol
+defines the specific wording and control flow for communications between
+two or more programs, devices, or systems.
+
+@dfn{SMTP}---Simpe Mail Tansport Protocol is a common mechanism for exchanging
+mail across a network. This protocol is described in the RFC 821 document.
+
+@dfn{Daemon}---We use a term @dfn{daemon} as a process that runs in the
+background, doing automated processing.
+
+@dfn{Server}---a server provides information or other services for its
+clients. Most network protocols are client-server based. This term usually
+refers to an entire machine, but it can refer (and we're doing that) also
+to the particular program or process, on that machine, that provides the
+service.
+
+@dfn{Proxy}---We use a term @dfn{proxy} to define a program, which goes
+between the MUA and the MTA (it makes a tunnel). It can be used as a gateway
+to an outside world, while using a firewall. The firewalled host sends a data
+to the proxy server, which forwards it to the real server outside, collects
+the response, and passes it back to the internal host.
+
+
+@node Configuration, Invoking Anubis, Overview, Top
+@chapter Configuration
+@cindex configuration
+@cindex settings
+@cindex system configuration file
+@cindex user configuration file
+
+The behavior of GNU Anubis is controlled by two configuration files.
+The @dfn{system configuration file}, @file{/etc/anubisrc},
+specifies system-wide options that affect all users. This file is usually
+owned by root. The @dfn{user configuration file}, @file{~/.anubisrc},
+specifies what GNU Anubis should do for a particular user.
+To protect your passwords in the configuration files, use the 0600
+(u=rw,g=,o=) permissions, otherwise GNU Anubis won't accept them.
+Hash-marked comments (@code{#}) and white lines in the configuration
+files are ignored.
+
+@noindent
+The system configuration file may contain the following sections:
+
+@enumerate
+@item
+@dfn{The CONTROL section}.
+@*
+Required. This specifies the basic GNU Anubis behavior.
+@item
+@dfn{The TRANSLATION section}.
+@*
+Optional. This specifies a translation map for remapping
+remote or local users.
+@end enumerate
+
+@noindent
+The user configuration file may contain the following sections:
+
+@enumerate
+@item
+@dfn{The CONTROL section}.
+@*
+Optional. This specifies the basic GNU Anubis behavior.
+@item
+@dfn{The ALL section}.
+@*
+Optional. This specifies what jobs GNU Anubis does for @emph{all}
+your outgoing messages.
+
+@item
+@dfn{The Rule System}.
+@*
+Optional. Here you can define your own processing rules
+for any particular message.
+@end enumerate
+
+@menu
+* CONTROL Section::
+* TRANSLATION Section::
+* ALL Section::
+* Rule System::
+@end menu
+
+
+@node CONTROL Section, TRANSLATION Section, Configuration, Configuration
+@section The CONTROL Section
+@cindex CONTROL section, The
+
+The @samp{CONTROL} section specifies the basic GNU Anubis behavior.
+Specified in the system configuration file, it applies to all users on
+the machine, but each user can specify its own @samp{CONTROL} section,
+to customize own settings. Of course, not all options can be set
+or change by user. Some options can only be set in the system configuration
+file, and some only in user configuration file. Options specified in user
+configuration file have a @strong{higher} priority that those specified
+in system configuration file. The @samp{CONTROL} section starts with the
+@w{@code{---BEGIN CONTROL---}} line, and the @w{@code{---END---}} line
+ends it.
+
+All option names are case insensitive, so you can use
+for instance: @samp{bind} or @samp{BIND} or @samp{BiNd}, and so on.
+
+@menu
+* Basic Settings::
+* Output Settings::
+* Proxy Settings::
+* Encryption Settings::
+* Security Settings::
+
+* Option Summary::
+@end menu
+
+
+@node Basic Settings, Output Settings, CONTROL Section, CONTROL Section
+@subsection Basic Settings
+
+@table @samp
+@item bind = [@var{host}:]@var{port}
+Specify the TCP port on which GNU Anubis listens for connections.
+The default @var{host} value is @w{@samp{INADDR_ANY}}, which means
+that anyone can connect to GNU Anubis. The default @var{port} number
+is 24 (private mail system). This option is available only in the
+system configuration file. If you would like, for instance, to bind
+GNU Anubis to port 25 (SMTP) and limit its clients only to those from
+@samp{localhost}, then set the following in your system
+configuration file:
+
+@example
+bind = localhost:25
+@end example
+
+@item remote-mta = @var{host}[:@var{port}]
+Specify a remote SMTP host name or IP address, which GNU Anubis will
+connect and forward mail to (after a processing). The default @var{port}
+number is 25. This option is available in both configuration files.
+
+@item local-mta = @var{file-name} [@var{args}]
+Execute a local SMTP server, which works on standard input and output
+(inetd-type program). This option excludes the @samp{remote-mta} keyword
+(or @samp{--remote-mta} command line option). For example:
+
+@example
+local-mta = /usr/sbin/sendmail -bs
+@end example
+
+@item esmtp-auth = @var{username}:@var{password}
+This option allows you to specify a user name and a password for the
+ESMTP authentication. Use this option if your MTA requires such an
+authentication, but your MUA does not support it. A user name (@var{username})
+and a password (@var{password}) are separated with a colon (@samp{:}).
+Currently only @dfn{CRAM-MD5} and @dfn{LOGIN} authentication methods are
+supported (and @dfn{CRAM-MD5} has a priority). The @dfn{LOGIN} method,
+for security reasons, can only be used both with the TLS/SSL encryption.
+@end table
+
+
+@node Output Settings, Proxy Settings, Basic Settings, CONTROL Section
+@subsection Output Settings
+
+@table @samp
+@item termlevel = @var{normal-verbose-debug-silent}
+This is a logging level for @code{syslogd} or a terminal (if using the
+@samp{--foreground} command line option). Value @samp{normal} is the default.
+Value @samp{verbose} makes a more diagnostic output, and @samp{debug}
+raises it even more. Value @samp{silent} disables an output,
+e.g. @samp{termlevel = silent}. Only in system configuration file.
+
+@item logfile = @var{file-name}
+This option specifies an additional file, where GNU Anubis can log its
+information, but only those information available for a client. Only in
+user configuration file. For example:
+
+@example
+logfile = anubis.log
+@end example
+
+This will log to the @file{~/anubis.log} file in a client's home directory.
+
+@item loglevel = @var{none-fails-all}
+This option specifies an output level for an additional file (@samp{logfile}).
+Value @samp{fails} is the default, and it logs only all fails.
+Only in user configuration file.
+@end table
+
+
+@node Proxy Settings, Encryption Settings, Output Settings, CONTROL Section
+@subsection Proxy Settings
+@cindex SOCKS proxy
+
+@table @samp
+@item socks-proxy = @var{host}[:@var{port}]
+This option enables tunneling the connections through a SOCKS proxy server,
+specified as an argument @var{host}. The @var{port} default value is
+1080, which is a common port number for SOCKS proxies.
+
+@item socks-v4 = @var{yes-or-no}
+This specifies a SOCKS protocol version 4. By default it is turned off,
+and a default mode is SOCKS protocol version 5.
+
+@item socks-auth = @var{username}:@var{password}
+Specify a user name and a password, if a SOCKS proxy server requires them.
+A user name (@var{username}) and a password (@var{password}) are separated
+with a colon (@samp{:}).
+@end table
+
+
+@node Encryption Settings, Security Settings, Proxy Settings, CONTROL Section
+@subsection Encryption Settings
+
+@table @samp
+@item ssl = @var{yes-or-no}
+This option enables the TLS/SSL encryption between the MUA (Mail User Agent)
+and the MTA (Mail Transport Agent). Value @samp{no} is the default,
+but using the TLS/SSL encryption is recommended. You should also
+specify a private key and a certificate using the @samp{key}
+and @samp{cert} keywords (defined below). @xref{TLS/SSL}, for details.
+
+@item oneway-ssl = @var{yes-or-no}
+This option enables the @dfn{ONEWAY} encryption. Use this mode,
+when you want to use the TLS/SSL, but your MUA (Mail User Agent)
+doesn't provide a support for ESMTP TLS/SSL. Using this option
+doesn't require using the @samp{key} and @samp{cert} keywords.
+
+@item cert = @var{file-name}
+Specify a certificate for the TLS/SSL encryption.
+Value @file{anubis.pem} is the default.
+
+@item key = @var{file-name}
+Specify a private key for the TLS/SSL encryption.
+Value @file{anubis.pem} is the default.
+
+@item cafile = @var{file-name}
+Specify a CA certificate file (supported only by GnuTLS).
+@end table
+
+@node Security Settings, Option Summary, Encryption Settings, CONTROL Section
+@subsection Security Settings
+
+@table @samp
+@item allow-local-mta = @var{yes-or-no}
+For security reasons, this option is set to @samp{no}, but the @samp{yes}
+value enables the @samp{local-mta} keyword (or @samp{--local-mta}
+command line option), so if you want to use a local mail server,
+which works on standard input and output, a supervisor must set
+this option to @samp{yes}. Only in system configuration file.
+
+@item user-notprivileged = @var{username}
+For security reasons, it is recommended to create an unprivileged user,
+which the server runs as most of the time, when doing unprivileged
+operations. Only in system configuration file. For example: 
+
+@example
+user-notprivileged = anubis.unprivileged
+@end example
+
+@strong{Caution:} Create a user account named @w{@samp{anubis.unprivileged}}
+in the @file{/etc/passwd}, if necessary. Add this user name also to the
+@w{@file{/etc/anubis.allow}}, if using GNU Anubis with PAM support.
+@end table
+
+@node Option Summary, , Security Settings, CONTROL Section
+@subsection Option Summary
+
+@example
+@group
+---BEGIN CONTROL---
+bind = [@var{host}:]@var{port}  @r{(system config only)}
+remote-mta = @var{host}[:@var{port}]
+local-mta = @var{file-name} [@var{args}]
+esmtp-auth = @var{username}:@var{password}
+termlevel = @var{normal-verbose-debug-silent}  @r{(system config only)}
+logfile = @var{file-name}  @r{(user config only)}
+loglevel = @var{none-fails-all}  @r{(user config only)}
+socks-proxy = @var{host}[:@var{port}]
+socks-v4 = @var{yes-or-no}
+socks-auth = @var{username}:@var{password}
+ssl = @var{yes-or-no}
+oneway-ssl = @var{yes-or-no}
+cert = @var{file-name}
+key = @var{file-name}
+cafile = @var{file-name}
+allow-local-mta = @var{yes-or-no}  @r{(system config only)}
+user-notprivileged = @var{username}  @r{(system config only)}
+---END---
+@end group
+@end example
+
+
+@node TRANSLATION Section, ALL Section, CONTROL Section, Configuration
+@section The TRANSLATION Section
+@cindex TRANSLATION section, The
+
+The @samp{TRANSLATION} section specifies how to translate remote or local
+user names, or host names or addresses, to local user names.
+The @samp{TRANSLATION} section is available @emph{only} in the system
+configuration file. It starts with the @w{@code{---BEGIN TRANSLATION---}}
+line, and the @w{@code{---END---}} line ends it. Syntax:
+
+@example
+@group
+---BEGIN TRANSLATION---
+translate = [@var{user}@@]@var{address} into = @var{username}
+...
+---END---
+@end group
+@end example
+
+@var{address} means host name or IP address. You can also specify
+@samp{0.0.0.0}, and it means any address (@samp{INADDR_ANY}).
+
+An example:
+
+@example
+@group
+---BEGIN TRANSLATION---
+translate = jack@@somewhere.net into = john
+---END---
+@end group
+@end example
+
+@noindent
+The rule above will allow a remote user @samp{jack} at @samp{somewhere.net}
+to use the configuration file of the local user @samp{john}. Or you can write:
+@w{@samp{translate = somewhere.net into = john}},
+and this means that @emph{all} users at @samp{somewhere.net} are allowed to use
+the local john's configuration file.
+
+
+@node ALL Section, Rule System, TRANSLATION Section, Configuration
+@section The ALL Section
+@cindex ALL section, The
+
+This section specifies a behavior of an outgoing mail processor
+in the case of @emph{every} outgoing message (unconditional rules).
+This section is available @emph{only} in the user configuration file.
+The @samp{ALL} section starts with the @w{@code{---BEGIN ALL---}} line,
+and the @w{@code{---END---}} line ends it. Syntax:
+
+@example
+@group
+---BEGIN ALL---
+@var{action-list}
+---END---
+@end group
+@end example
+
+@noindent
+@xref{Action List}, for details.
+
+An example:
+
+@example
+@group
+---BEGIN ALL---
+signature-file-append = yes
+---END---
+@end group
+@end example
+
+@noindent
+The example above will add the @file{~/.signature} file to @emph{every}
+outgoing message!
+
+
+@node Rule System, , ALL Section, Configuration
+@section The Rule System (The RULE Section)
+@cindex Basic regular expressions
+@cindex Extended regular expressions
+@cindex Perl regular expressions
+@cindex rules
+@cindex rule system
+@cindex regex
+@cindex regular expressions
+
+GNU Anubis' rule system is based on @dfn{regular expressions} (@dfn{POSIX Basic},
+@dfn{POSIX Extended}, or @dfn{Perl regular expressions}). All of them can be
+used in a run time.
+
+According to the GNU's documentation, a @dfn{regular expression}
+(or @dfn{regexp}, or @dfn{pattern}) is a text string that describes some
+(mathematical) set of strings. A regexp @var{r} @dfn{matches} a string @var{s}
+if @var{s} is in the set of strings described by @var{r}. For more information
+about @dfn{regular expressions}, read the GNU regular expression library manual
+and the regex manual. In addition, you can also read the Perl regular expressions
+manual.
+
+The rule system is available only for GNU Anubis clients,
+so it can only be used in the user configuration file.
+The whole rule system starts with the @w{@code{---BEGIN RULE---}} line,
+and the @w{@code{---END---}} line ends it.
+
+@menu
+* Grammar::
+* Action List::
+* Trigger::
+@end menu
+
+
+@node Grammar, Action List, Rule System, Rule System
+@subsection Grammar (The Rule System)
+@cindex grammar
+
+General syntax:
+
+@example
+@group
+if @var{where} [: @var{options}] =@var{regex1}[ != @var{regex2}]
+   @var{action-list}
+fi
+@end group
+@end example
+
+@noindent
+Each rule starts with the @samp{if} command, and ends with the @samp{fi}
+or @samp{done} command. The first regular expression (@var{regex1}) is
+required. The second one (@var{regex2}) is optional. Here is a simple rule:
+
+@example
+@group
+if @var{where} =@var{regex1}
+   @var{action-list}
+fi
+@end group
+@end example
+
+@noindent
+The rule above is true if @var{regex1} is @emph{true}.
+Another way:
+
+@example
+@group
+if @var{where} =@var{regex1} != @var{regex2}
+   @var{action-list}
+fi
+@end group
+@end example
+
+@noindent
+The rule above is true if @var{regex1} is @emph{true} and @var{regex2}
+is @emph{false}. The control operator @code{@key{SPC}!=@key{SPC}} breaks
+regular expressions into two pieces: @var{regex1} and @var{regex2}.
+
+@strong{Caution:} The @var{where} means @samp{COMMAND} or @samp{HEADER},
+for example:
+
+@example
+@group
+---BEGIN RULE---
+if COMMAND [: @var{options}] =@var{regex1}[ != @var{regex2}]
+   @var{action-list}
+fi
+if HEADER [: @var{options}] =@var{regex1}[ != @var{regex2}]
+   @var{action-list}
+fi
+---END---
+@end group
+@end example
+
+@noindent
+@samp{COMMAND} says to match this regexp against all the SMTP/ESMTP commands,
+like @samp{helo}, @samp{ehlo}, @samp{mail from}, @samp{rcpt to}, @samp{data},
+@samp{quit}, etc.
+
+@example
+@group
+if COMMAND =^mail from:.*<?john@@localhost>?
+   @var{action-list}
+fi
+@end group
+@end example
+
+@noindent
+@samp{HEADER} says to match this regexp against all the header
+lines in the message. We often use thus with a regexp that matches
+only a particular kind of header line---for instance, the regexp
+@samp{^Subject:} will only match a @samp{Subject} header line.
+But this is not a requirement. You can use any regexp you wish,
+and it will have a chance to match every header line in the message.
+
+@example
+@group
+if HEADER [: @var{options}] =^Subject: test
+   @var{action-list}
+fi
+@end group
+@end example
+
+The @var{options} area is optional, and it allows you to specify any extra
+option for a particular regexp match. The @var{options} area must be preceded
+with a colon (@samp{:}). The following options are acceptable: @samp{basic},
+@samp{perlre}, @samp{scase}.
+
+@table @samp
+@item basic
+This option forces @dfn{POSIX Basic Regular Expression} syntax when
+interpreting regex instead of @dfn{POSIX Extended Regular Expression}
+(Extended is the default).
+
+@item perlre
+This option forces @dfn{Perl Regular Expression} syntax when interpreting
+regex instead of @dfn{POSIX Extended Regular Expression}. To enable this
+option, you must compile GNU Anubis, specifying @code{./configure --with-pcre}.
+
+@item scase
+This option makes a particular regular expression case sensitive.
+By default, all regular expressions are case insensitive.
+@end table
+
+An example:
+
+@example
+@group
+if header : perlre scase =^Subject: HeLlo
+   @var{action-list}
+fi
+@end group
+@end example
+
+@noindent
+In this case, the Perl regular expression syntax will be used instead of
+POSIX extended version, and case sensitivity will be set.
+
+@strong{Caution:} Do not mix the @samp{perlre} option with @samp{basic} option.
+If you specify the Perl regular expression, then you cannot use the POSIX
+Basic syntax, and vice versa.
+
+The whole rule system is case insensitive (even regular expressions,
+unless you specify the @samp{scase} option), so you can write for instance:
+
+@example
+@group
+IF HeAdEr =@var{regex1}[ != @var{regex2}]
+   @var{action-list}
+FI
+@end group
+@end example
+
+General example:
+
+@example
+@group
+---BEGIN RULE---
+if header =^Subject: != ^Subject: URGENT
+   signature-file-append = yes
+fi
+---END---
+@end group
+@end example
+
+@noindent
+The example above will add the @file{~/.signature} file, except an email
+with a subject @samp{urgent} (case insensitive). No extra options have
+been specified in this example.
+
+
+@node Action List, Trigger, Grammar, Rule System
+@subsection The Action List
+@cindex Action List
+
+An @dfn{action list} is a list of action commands, which control processing
+of an outgoing messages. All action command names are case insensitive, so you
+can use for instance: @samp{add} or @samp{ADD} or @samp{AdD}, and so on.
+
+@menu
+* Editing Headers::     How to edit a message header on-the-fly.
+* Inserting Files::     How to append text files to an outgoing message.
+* Mail Encryption::     How to encrypt a message on-the-fly.
+* Remailers::           How to enable the support for Remailers Type-I.
+* External Processor::  How to process a message body using an external tool.
+
+* Command Summary::     A short command summary.
+* Quick Example::       A quick example of using an action list.
+@end menu
+
+@node Editing Headers, Inserting Files, Action List, Action List
+@subsubsection Editing Headers
+@cindex message header
+
+@table @samp
+@item add = @var{header-line}
+This action command adds the @var{header-line} to an outgoing
+message. For example:
+
+@example
+add = X-Comment: GNU's Not Unix!
+@end example
+
+@item remove = @var{header-line} (a regular expression)
+This action command removes the header lines that match @var{header-line}
+from an outgoing message. This has to be a regular expression.
+For example:
+
+@example
+remove =^X-Mailer:
+@end example
+
+This will remove the @samp{X-Mailer:} line from an outgoing
+message.
+
+@item modify = @var{old-header-line} >> @var{new-header-line}
+This action command modifies a message header line (entirely or partly).
+An old header line (must be a regular expression) and a new header line
+are separated with @code{ >> }, i.e. @code{@key{SPC}>>@key{SPC}}.
+
+For example, the following code will change the @samp{Reply-To:}
+line only if you would send an email to @url{friend@@somewhere.net}.
+
+@example
+@group
+if header =^To:.*<?friend@@somewhere.net>?
+   modify =^Reply-To: >> Reply-To: private@@somewhere.net
+fi
+@end group
+@end example
+
+Another example will change the @samp{X-Mailer: PINE}
+line to @samp{X-Mailer: The Big Boss} entirely.
+
+@example
+@group
+if header =^X-Mailer: PINE
+   modify =^X-Mailer: >> X-Mailer: The Big Boss
+fi
+@end group
+@end example
+
+Using the @dfn{subexpressions} (or @dfn{substrings})
+and @dfn{back-references}, you can make a substitution, like this:
+
+@example
+@group
+if header =^X-Mailer: (.*)
+   modify =^X-Mailer: >> X-Mailer: The lousy mailer \1
+fi
+@end group
+@end example
+
+It is allowed to make up to nine substitutions (range: \1---\9).
+@end table
+
+@node Inserting Files, Mail Encryption, Editing Headers, Action List
+@subsubsection Inserting Files
+
+@table @samp
+@item signature-file-append = @var{yes-or-no}
+This action command adds at the end of a message body the
+@samp{--@key{SPC}} line, and includes a client's
+@file{~/.signature} file. Value @samp{no} is the default.
+
+@item body-append = @var{file-name}
+This action command includes at the end of a message body
+a client's @file{@var{file-name}} file (a plain text).
+
+@item body-clear-append = @var{file-name}
+Same as above, but wipes out a message (message body + any attachments)
+before including a message body from a @var{file-name} file.
+This action command is rarely useful.
+@end table
+
+
+@node Mail Encryption, Remailers, Inserting Files, Action List
+@subsubsection Mail Encryption
+@cindex GNU Privacy Guard, GnuPG
+@cindex Pretty Good Privacy, PGP
+@cindex GPG/PGP private key
+@cindex GPG/PGP public key
+@cindex ROT-13
+
+@table @samp
+@item gpg-passphrase = @var{passphrase}
+Specify your private key's pass phrase for signing an outgoing message
+using the GNU Privacy Guard (a tool compatible with the Pretty Good Privacy).
+Of course, to protect your passwords in the configuration file use the
+0600 (u=rw,g=,o=) permissions, otherwise GNU Anubis won't accept them.
+We recommend setting the @samp{gpg-passphrase} in a one place of your
+configuration file, e.g. put it in the @dfn{ALL} section.
+
+GNU Anubis supports the GNU Privacy Guard via the
+@dfn{GnuPG Made Easy} library, available at
+@w{@uref{http://www.gnupg.org/gpgme.html}}.
+
+@item gpg-encrypt = @var{gpg-keys}
+This command enables encrypting your outgoing message with the
+GNU Privacy Guard (Pretty Good Privacy) public key(s).
+Comma separated list of keys.
+
+@example
+gpg-encrypt = John's public key
+@end example
+
+@item gpg-sign = @var{passphrase} or @samp{yes} if @samp{gpg-passphrase} is specified.
+This command enables signing your outgoing message with your
+GNU Privacy Guard private key. Specify the @var{passphrase}, or set it
+to @samp{yes} if you have already specified the @samp{gpg-passphrase}.
+For example:
+
+@example
+gpg-sign = @var{passphrase}
+@end example
+
+or
+
+@example
+@group
+gpg-passphrase = @var{passphrase}
+gpg-sign = yes
+@end group
+@end example
+
+@item rot13-subject = @var{yes-or-no}
+This command enables the simple ROT-13 message subject encoding.
+Value @samp{no} is the default. The ROT-13 encoding is a simple form
+of encryption in which the letters A-M are transposed with the letters L-Z.
+It is often used in Usenet postings/mailing lists to prevent people from
+accidentally reading a disturbing message.
+
+@item rot13-body = @var{yes-or-no}
+This command enables the simple ROT-13 message body encoding.
+Value @samp{no} is the default.
+@end table
+
+
+@node Remailers, External Processor, Mail Encryption, Action List
+@subsubsection Remailers Type-I
+@cindex remailer
+
+@table @samp
+@item rm-rrt = @var{email-address}
+This enables a support for the remailers (it allows sending mail in an
+anonymous way), by adding a special lines in a message body. This command
+specifies the @dfn{Request Remailing To} (@samp{Anon-To:} line). Set this
+to a recipient's email address. GNU Anubis supports only remailers Type-I
+(aka Cypherpunks).
+
+@item rm-post = @var{news-group}
+This command adds the @samp{Anon-Post-To: @var{news-group}} line,
+and transform an email to a news-mail for sending it to the Usenet
+via a remailer. This is only possible with a remailer, which supports
+the @samp{Anon-Post-To:}. For example:
+
+@example
+rm-post = alt.unix
+@end example
+
+@item rm-gpg = @var{gpg-key}
+This makes an outgoing message encrypted with a remailer's PGP public
+key, and you must set this, if a remailer requires such an encryption.
+
+@item rm-header = @var{header-line}
+This action command adds an extra header line to a remailed message.
+
+@item rm-lt = @var{time}
+The @samp{Latent-Time:} line causes a remailer to keep your message
+for some time before forwarding it. For example (2h):
+
+@example
+rm-lt = 2:00
+@end example
+
+@item rm-rlt = @var{yes-or-no}
+This command forces the @dfn{random Latent-Time} over the @samp{Latent-Time:}
+and it is a random delay. Value @samp{no} is the default.
+@end table
+
+
+@node External Processor, Command Summary, Remailers, Action List
+@subsubsection Using an External Processor
+
+@table @samp
+@item external-body-processor = @var{file-name} [@var{args}]
+This action command enables an external message body processor,
+which works on standard input and output. It could be an additional
+crypto engine, a spell checker, some text generator, whatever.
+@end table
+
+@node Command Summary, Quick Example, External Processor, Action List
+@subsubsection Command Summary
+
+@example
+@group
+add = @var{header-line}
+remove = @var{header-line} (a regular expression)
+modify = @var{old-header-line} >> @var{new-header-line}
+signature-file-append = @var{yes-or-no}
+body-append = @var{file-name}
+body-clear-append = @var{file-name}
+gpg-passphrase = @var{passphrase}
+gpg-encrypt = @var{gpg-keys}
+gpg-sign = @var{passphrase} or @samp{yes} if @samp{gpg-passphrase} is specified.
+rot13-subject = @var{yes-or-no}
+rot13-body = @var{yes-or-no}
+rm-rrt = @var{email-address}
+rm-post = @var{news-group}
+rm-gpg = @var{gpg-key}
+rm-header = @var{header-line}
+rm-lt = @var{time}
+rm-rlt = @var{yes-or-no}
+external-body-processor = @var{file-name} [@var{args}]
+@end group
+@end example
+
+
+@node Quick Example, , Command Summary, Action List
+@subsubsection Quick Example
+
+Here is a quick example of using an action list:
+
+@example
+@group
+---BEGIN RULE---
+if header =^X-Mailer:
+   remove =^X-Mailer:
+   add = X-Comment: GNU's Not Unix!
+   gpg-sign = @var{your passphrase}
+   signature-file-append = yes
+fi
+---END---
+@end group
+@end example
+
+@noindent
+The example above will remove (on-the-fly) the @samp{X-Mailer:} line from
+an outgoing message, add an extra header line (@samp{X-Comment:}), sign your
+message with your private key, and add a simple signature file from your
+home directory.
+
+
+@node Trigger, , Action List, Rule System
+@subsection The Trigger
+@cindex Trigger, The
+
+Adding the @samp{@@@@@var{rule-name}} code to your message header line,
+e.g. to a @samp{Subject} header line, triggers a rule named @var{rule-name},
+specified in a user configuration file in the following way:
+
+@example
+@group
+rule [: @var{options}] =^@var{rule-name}
+   @var{action-list}
+done
+@end group
+@end example
+
+@noindent
+@strong{Caution:} Plase note that there is no space after the @samp{=}
+character.
+
+An example:
+
+@example
+@group
+---BEGIN RULE---
+rule =^gpg-encrypt-john
+   gpg-encrypt = john's_gpg_key
+done
+---END---
+@end group
+@end example
+
+@noindent
+Now you can simply send an email with the following subject:
+@w{@samp{hello John!@@@@gpg-encrypt-john}} to process an outgoing message
+with the rule specified above---encrypt message with a John's public key.
+Moreover, the trigger will remove the @samp{@@@@}, so John will only receive
+a message with a subject @samp{hello John!}.
+
+Another example shows even more dynamic trigger,
+while using a substitution and back-references:
+
+@example
+@group
+---BEGIN RULE---
+rule =^gpg-encrypt:(.*)
+   gpg-encrypt = \1
+   add = X-GPG-Comment: Encrypted for \1
+done
+---END---
+@end group
+@end example
+
+@noindent
+To encrypt a message to user e.g. @samp{John}, simply send an email with
+a subject @w{@samp{hello John!@@@@gpg-encrypt:john's_gpg_key}}.
+In this case, you decide in a run time which public key should be used,
+without creating a separate rules for each user; thanks to back-references,
+those 3---4 lines are enough.
+
+
+@node Invoking Anubis, Sample Beginning, Configuration, Top
+@chapter Invoking GNU Anubis
+@cindex command line
+
+The @command{anubis} executable acts like a daemon.
+The behavior of program is controlled by two configuration files,
+which have a @strong{higher} priority than command line options.
+@xref{Configuration}, for details.
+
+GNU @command{anubis} supports the following command line options:
+
+@table @samp
+@item --bind [@var{host}:]@var{port}
+@itemx -b
+Specify the TCP port on which GNU Anubis listens for connections.
+The default @var{host} value is @w{@samp{INADDR_ANY}}, and default
+@var{port} number is 24 (private mail system).
+@item --remote-mta @var{host}[:@var{port}]
+@itemx -r
+Specify a remote SMTP host name or IP address, which GNU Anubis will
+connect and forward mail to (after a processing).
+The default @var{port} number is 25.
+@item --local-mta @var{file}
+@itemx -l
+Execute a local SMTP server, which works on standard input and output
+(inetd-type program). This option excludes the @samp{--remote-mta} option.
+@item --foreground
+@itemx -f
+Foreground mode.
+@item --stdio
+@itemx -i
+Use the SMTP protocol (OMP/Tunnel) as described in RFC 821 on standard
+input and output.
+@item --silent
+@itemx -s
+Work silently.
+@item --verbose
+@itemx -v
+Work noisily.
+@item --debug
+@itemx -D
+Debug mode.
+@item --altrc @var{file}
+Specify alternate system configuration file.
+@item --norc
+Ignore system configuration file.
+@item --version
+Print version number and copyright.
+@item --help
+Print a help message.
+@end table
+
+Examples:
+
+@example
+$ anubis --remote-mta @var{smtp-host}:25
+@end example
+
+@noindent
+Run GNU Anubis on port number 24 (private mail system). Note that
+you must have root privileges to use port number lower than 1024.
+Make the tunnel between your localhost:24 and @var{smtp-host}:25.
+
+@example
+$ anubis -f --remote-mta @var{smtp-host}:25
+@end example
+
+@noindent
+Same as above, but run GNU Anubis in a foreground mode.
+
+@example
+$ anubis -f --local-mta /usr/sbin/sendmail -- sendmail -bs
+@end example
+
+@noindent
+Similar to above, but create the tunnel between localhost:24
+and a local program (local MTA). In this example local program
+is @command{sendmail} with @samp{-bs} command line option.
+The @samp{-bs} option forces @command{sendmail} to work on standard
+input and output.
+
+@example
+$ anubis --norc --remote-mta @var{smtp-host}:25
+@end example
+
+@noindent
+Do not read the system configuration file, make the tunnel between
+localhost:24 and @var{smtp-host}:25.
+
+@example
+$ anubis --bind localhost:1111 --remote-mta @var{smtp-host}:25
+@end example
+
+@noindent
+Create the tunnel between localhost:1111 and @var{smtp-host}:25.
+
+@example
+$ anubis -i
+@end example
+
+@noindent
+Use the SMTP protocol (OMP/Tunnel) as described in RFC 821
+on standard input and output.
+
+
+@node Sample Beginning, TLS/SSL, Invoking Anubis, Top
+@chapter Sample Beginning
+@cindex IDENT protocol
+
+By default, GNU Anubis binds to port number 24 (private mail system),
+so there shouldn't by any conflict with your local MTA (Mail Transport
+Agent). You just have to reconfigure your MUA (Mail User Agent) to make
+it talk to GNU Anubis directly on port number 24. All MUAs are normally
+set up to talk directly to the MTA, so you must change their settings
+and specify GNU Anubis' port number as their target. This makes GNU
+Anubis to work as an outgoing mail processor between your MUA and the
+MTA. Read your MUA's documentation for more information.
+
+Now you must choose whether you want to connect GNU Anubis with a remote
+or local SMTP host via TCP/IP or a local SMTP program, which works on
+standard input and output. In the first case, specify the following option:
+
+@example
+REMOTE-MTA = @var{smtp-host}:25
+@end example
+
+@noindent
+In the second case (local SMTP program), specify this:
+
+@example
+LOCAL-MTA = @var{/path/to/your/mta/mta-executable} -bs
+@end example
+
+Please note that the @samp{-bs} command line option is a common way
+to run MTAs on standard input and output, but it is not a rule.
+Read your local MTA's documentation, how to get it working on standard
+input and output.
+
+If you would like to run GNU Anubis on port number 25 (which is a default
+value for the SMTP) or any other port number, then you must specify the
+@samp{bind} keyword. For instance, the following code will bind GNU Anubis
+to @samp{localhost:25}:
+
+@example
+BIND = localhost:25
+@end example
+
+This can make a conflict between GNU Anubis and your local MTA, which usually
+listens on port number 25. To solve this problem, you can for instance
+disable the MTA and specify the @samp{local-mta} keyword, or run MTA on port
+number different than GNU Anubis' port number (e.g. 1111). Please read your
+local MTA's documentation about this topic. For example:
+
+@example
+@group
+BIND = localhost:25
+REMOTE-MTA = localhost:1111
+@end group
+@end example
+
+@strong{Caution:} Make sure that your local machine doesn't accept any
+incoming mail (i.e. it is @emph{not} a POP or IMAP server), otherwise
+you cannot disable your MTA or change its port number!
+
+@strong{Caution:} It is required to install the TCP/IP IDENT protocol
+server (RFC 1413). Without it, an outgoing mail processor will fail.
+Most modern GNU/Linux (or *BSD) distributions have already installed
+such a server. If not, try @samp{pidentd}, available at:
+@w{@uref{ftp://ftp.lysator.liu.se/pub/ident/servers/}}
+
+All Mutt users, who would like to set up GNU Anubis between their MUA
+and MTA, should consider using the @samp{msg2smtp.pl} Perl script
+from the @file{contrib} directory (part of the distribution).
+
+
+@node TLS/SSL, Problems, Sample Beginning, Top
+@chapter Using the TLS/SSL Encryption
+@cindex Transport Layer Security, TLS
+@cindex Secure Socket Layer, SSL
+@cindex GnuTLS
+@cindex OpenSSL
+@cindex encryption
+
+According to the RFC 2246 document, the TLS (Transport Layer Security)
+protocol provides communications privacy over the Internet. The protocol
+allows client/server applications to communicate in a way that is designed
+to prevent eavesdropping, tampering, or message forgery. The primary goal
+of the TLS Protocol is to provide privacy and data integrity between two
+communicating applications. The TLS protocol itself is based on the SSL 3.0
+(Secure Socket Layer) protocol specification.
+
+GNU Anubis supports the TLS/SSL (via the GnuTLS, a Transport Layer Security
+Library available at @w{@uref{http://www.gnutls.org/}}, or OpenSSL,
+a cryptographic package available at @w{@uref{http://www.openssl.org/}}),
+but your MTA (Mail Transport Agent) must provide the STARTTLS command first.
+This can be checked by:
+
+@example
+@group
+$ telnet @var{your-smtp-host} 25
+  ehlo @var{your-domain-name}
+@end group
+@end example
+
+@noindent
+The server will response with all its available commands.
+If you see the STARTTLS, then you can use the TLS/SSL encryption.
+If your MUA (Mail User Agent) doesn't support the TLS/SSL encryption,
+but your MTA does, then you should use the @samp{oneway-ssl} keyword in your
+configuration file. Before using the TLS/SSL encryption, you must generate
+a proper private key and a certificate. You can do it simply with:
+
+@example
+@group
+$ cd anubis-directory
+$ ./build/keygen.sh
+@end group
+@end example
+
+@noindent
+This will create the @file{anubis.pem} file.
+For example copy this file to @w{@file{/usr/share/ssl/certs/}}.
+Next, edit your configuration file by adding:
+
+@example
+@group
+ssl = yes
+key = @var{path-to-the-private-key}
+cert = @var{path-to-the-certificate}
+@end group
+@end example
+
+For example:
+
+@example
+@group
+key = /usr/share/ssl/certs/anubis.pem
+cert = /usr/share/ssl/certs/anubis.pem
+@end group
+@end example
+
+@noindent
+@strong{Caution:} Each client can specify its own private key
+and a certificate by adding the @samp{key} and @samp{cert} keywords
+in its own user configuration file.
+
+@noindent
+@xref{Encryption Settings}, for details.
+
+
+@node Problems, GNU Free Documentation License, TLS/SSL, Top
+@chapter Reporting Bugs
+@cindex bugs
+@cindex problems
+
+Please send any bug reports, improvements, comments,
+suggestions, or questions to @email{bug-anubis@@gnu.org}.
+
+Before reporting a bug, make sure you have actually found
+a real bug. Carefully reread the documentation and see if it
+really says you can do what you are trying to do. If it is
+not clear whether you should be able to do something or not,
+report that too; it's a bug in the documentation!
+
+
+@node GNU Free Documentation License, Concept Index, Problems, Top
+@include fdl.texi
+
+
+@node Concept Index, , GNU Free Documentation License, Top
+@unnumbered Concept Index
+
+@printindex cp
+@shortcontents
+@contents
+@bye
+@c anubis.texi ends here

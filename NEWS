@@ -1,0 +1,306 @@
+
+ Release Notes
+ =============
+
+ *******************
+ 3.6.2 (15 Dec 2002)
+ *******************
+
+* URGENCY: HIGH. Some serious bugs have been fixed (since 3.6.1).
+* Default daemon's port number is now 24 (private mail system).
+* The MODIFY keyword has been hugely improved. Its syntax has been
+  changed, so please read the GNU Anubis Manual before using it.
+* The DEBUG mode has been improved (now it's also built-in by default).
+* The boundary-search code has been fixed (for e.g. MS Outlook).
+  Reported by David Roberts <dtrobert@pacbell.net>.
+* Some minor changes and fixes in the documentation have been made.
+  The `anubis.1' man page will not be maintained anymore. The full
+  documentation is maintained as a Texinfo manual.
+* The Free Documentation License has been upgraded from 1.1 to 1.2.
+* The `msg2smtp.pl' Perl script (revision 1.5) has been fixed.
+* Switched to GNU Autoconf 2.57 and GNU Automake 1.7.2.
+
+ *******************
+ 3.6.1 (16 Nov 2002)
+ *******************
+
+* URGENCY: MEDIUM. A serious code optimization, changes, and bug fixes
+  have been made, but most not visible to end-users.
+* GNU Anubis requires now GPGME 0.3.12 or later (and at least GnuPG 1.2.0).
+* The Turkish NLS has been added.
+
+ *******************
+ 3.6.0 (02 Nov 2002)
+ *******************
+
+* Now this program is part of GNU! We celebrate with a new name "GNU Anubis".
+  We have moved the home page to http://www.gnu.org/software/anubis/.
+* The GnuTLS is now supported by default. To enable OpenSSL (and disable
+  GnuTLS), please compile GNU Anubis with `./configure --with-openssl; make'.
+* The ESMTP CRAM-MD5 authentication method is now supported by libgcrypt
+  if compiling with GnuTLS, or `openssl/md5.h' if compiling with OpenSSL.
+
+ *******************
+ 3.5.2 (21 Oct 2002)
+ *******************
+
+* URGENCY: MEDIUM. The GnuTLS support has been added. To enable it, please
+  compile Anubis with `./configure --with-gnutls; make' (this will disable
+  OpenSSL). There is also a new keyword CAFILE to specify a CA certificate.
+* Some build fixes have been made. Thanks to Olaf Püschel and Ayamura KIKUCHI.
+  The setenv function should now works properly under Solaris and IRIX.
+  The ESMTP CRAM-MD5 authentication method is now disabled, when compiling
+  without the OpenSSL support (CRAM-MD5 requires MD5 via `openssl/md5.h').
+* The '--stdio' command line option has been fixed.
+
+ *******************
+ 3.5.1 (16 Oct 2002)
+ *******************
+
+* URGENCY: LOW. A WinGate proxy support has been removed.
+* The SOCKS-USERNAME and SOCKS-PASSWORD keywords have been
+  replaced with the SOCKS-AUTH keyword ("socks-auth = USERNAME:PASSWORD").
+
+ *******************
+ 3.5.0 (14 Oct 2002)
+ *******************
+
+* URGENCY: MEDIUM. Support for the ESMTP authentication (CRAM-MD5
+  and LOGIN) has been added. This feature has been designed for MUAs,
+  which cannot speak the ESMTP AUTH command.
+* The "EXTERNAL" section has been replaced with a translation map
+  for remote or local users (The "TRANSLATION" section).
+  A new syntax is: "translate = [USER@]ADDRESS into = USERNAME".
+* The `msg2smtp.pl' Perl code has been added to the `contrib' directory.
+  This is a very useful script for all Mutt users, who would like
+  to use Anubis. Thanks to Michael de Beer <madebeer@apc.org>.
+* The OUTPUT keyword (a temporary alias since 3.4.7) has been removed.
+* The French NLS has been added.
+
+ *******************
+ 3.4.9 (22 Sep 2002)
+ *******************
+
+* URGENCY: LOW. An experimental NLS (Native Language Support)
+  has been added (no `po' files yet).
+* The specgen.sh file has been updated.
+* Some minor changes and bug fixes have been made.
+
+ *******************
+ 3.4.8 (20 Sep 2002)
+ *******************
+
+* URGENCY: MEDIUM. Support for substitutions
+  (RE back-references to subexpressions) has been added.
+* Anubis now recogizes a client if IDENTD server returns
+  only UID number.
+
+ *******************
+ 3.4.7 (17 Sep 2002)
+ *******************
+
+* URGENCY: HIGH. The Rule System now supports an extra regexp options,
+  and in addition you can use the following regular expression syntaxes in
+  a run time: "POSIX Basic", "POSIX Extended", "Perl regular expression".
+* The "REGEX" section has been renamed to the "RULE" section.
+  (---BEGIN RULE---). Please update your configuration files.
+* The Trigger mechanism has replaced the DCM system (a new syntax).
+* Some keywords have been renamed (again):
+  > SIGNATURE-FILE-APPEND instead of SIGNATURE-FILE-ATTACH
+  > BODY-APPEND instead of BODY-ATTACH
+  > BODY-CLEAR-APPEND instead of BODY-CLEAR-ATTACH.
+  > TERMLEVEL instead of OUTPUT (OUTPUT is now a temporary alias).
+* The documentation has been improved.
+
+ *******************
+ 3.4.6 (08 Sep 2002)
+ *******************
+
+* URGENCY: HIGH. The "TUNNEL" section has been renamed to the "CONTROL"
+  section (---BEGIN CONTROL---). Please update your configuration files.
+* An optional support for Pluggable Authentication Modules (PAM)
+  has been added. To add this feature, compile with './configure --with-pam'.
+* The AUTH-LOCAL keyword has been removed.
+  Now, local processing is a default mode.
+* Anubis doesn't set a client's EGID and EUID anymore.
+  For security reasons, the RGID and RUID are set instead.
+* A major documentation changes and improvements have been made.
+
+ *******************
+ 3.4.5 (02 Sep 2002)
+ *******************
+
+* URGENCY: HIGH. An optional support for libwrap (TCP wrappers)
+  has been added (recommended when using the "EXTERNAL" section).
+  To add this feature, compile with './configure --with-tcp-wrappers'.
+* A serious bug in the main engine has been fixed, now it is possible
+  to make a transparent authentication with an SMTP server (ESMTP AUTH).
+* A new GPG-PASSPHRASE keyword has been added (USER MODE).
+* The REMOTE-MTA is now a default keyword for a remote mail transport
+  agent. The SERVER keyword, since now, is only an alias.
+* The SIGNATURE keyword has been renamed to SIGNATURE-FILE-ATTACH
+  to prevent any likeness with GnuPG/PGP signatures.
+* The "-h,--host" command line options have been renamed to "-r,--remote-mta".
+* A big docs improvements have been made. The TUTORIAL file has been removed.
+  Read the documentation in Texinfo (anubis.info) format instead.
+* Some additional changes and security fixes have been made.
+
+ *******************
+ 3.4.2 (22 Aug 2002)
+ *******************
+
+* URGENCY: LOW. A new documentation in Texinfo format has been added.
+  Some additional documentation changes have been made.
+* The TUTORIAL and anubis.1 files have been moved to the 'doc' directory.
+* The specgen.sh file has been updated.
+
+ *******************
+ 3.4.1 (18 Aug 2002)
+ *******************
+
+* URGENCY: MEDIUM. For security reasons, a new keyword
+  USER-NOTPRIVILEGED has been added. It specifies a user which
+  the server runs as most of the time, when doing unprivileged operations.
+* Some additional changes and fixes have been made.
+* The Tips & Hints section has been added to the documentation.
+* The THANKS file has been added.
+
+ *******************
+ 3.4.0 (01 Aug 2002)
+ *******************
+
+* URGENCY: MEDIUM. A new support for an external clients has been
+  added. Now it is possible to allow an extenal user to use the local
+  configuration file, and process outgoing mail. There is a new
+  ALLOW-EXTERNAL-PROCESSING keyword and the "remapping table" with
+  the following syntax: "external = [user@]address local = username".
+  This idea has been suggested by Mikael Ringeval.
+* Some minor changes have been made.
+
+ *******************
+ 3.3.0 (23 Jul 2002)
+ *******************
+
+* URGENCY: HIGH. A new rule system style has been introduced.
+  It has been also slightly extended by adding the '!=' (FALSE)
+  control operator. Read the TUTORIAL file for more information.
+* An external message body processor support has been added
+  (there is a new EXTERNAL-BODY-PROCESSOR keyword).
+* The BODY-FILE keyword has been renamed to BODY-ATTACH.
+* A new BODY-CLEAR-ATTACH function has been added.
+* The code has been optimized a bit. Some bugs have been fixed.
+* The specgen.sh file has been updated.
+
+ *******************
+ 3.2.3 (06 Jul 2002)
+ *******************
+
+* URGENCY: LOW. The specgen.sh file has been improved.
+* The compilation with a custom CFLAGS environment variable
+  has been fixed.
+
+ *******************
+ 3.2.2 (01 Jul 2002)
+ *******************
+
+* URGENCY: LOW. The configure scripts have been modified
+  to be compatible with GNU Autoconf 2.53 or later.
+* Another build fixes (configure.ac) by Ayamura KIKUCHI.
+
+ *******************
+ 3.2.1 (26 Jun 2002)
+ *******************
+
+* URGENCY: LOW. Some minor bugs have been fixed.
+* A small OpenSSL build fix has been made.
+  Thanks to Ayamura KIKUCHI <ayamura@ayamura.org>.
+* The default install path has been changed from /usr/sbin/
+  to /usr/local/sbin/.
+
+ *******************
+ 3.2.0 (23 Jun 2002)
+ *******************
+
+* URGENCY: MEDIUM. A new Dynamic Commands Manipulation system (aka DCM)
+  has been added. Read the TUTORIAL file for more information.
+* A useful personal logger (per-user logging) has been added.
+  There are new USER MODE keywords (LOGFILE and LOGLEVEL).
+* The ROT13SUBJECT and ROT13BODY keywords have been renamed to
+  ROT13-SUBJECT and ROT13-BODY.
+* A small fix for systems without setegid(2) and seteuid(2)
+  has been made.
+
+ *******************
+ 3.1.1 (20 Jun 2002)
+ *******************
+
+* URGENCY: LOW. The MTA-ARGS keyword has been removed.
+  The LOCAL-MTA parser has been rewritten.
+* An additional check for seteuid(2) and setegid(2)
+  has been added in the configure script.
+* The specgen.sh file has been improved.
+* A small code cleanup has been done.
+
+ *******************
+ 3.1.0 (14 Jun 2002)
+ *******************
+
+* URGENCY: HIGH. A major security fixes have been made.
+  The SETREMOTEUSER keyword has been removed.
+  Now Anubis is always changing its privileges to a client's
+  EGID, EUID, and HOME directory. Moreover a new keyword
+  for a supervisor has been added: ALLOW-LOCAL-MTA, which
+  slightly increases a security level.
+* The IDENT-ONLY keyword has been removed, now the only way
+  to authenticate a user is the TCP/IP IDENT protocol server.
+* The NOFORK macro has been removed, this means that Anubis
+  will not support systems without the fork(2) function anymore.
+* The ONEWAY-SSL keyword has been added. It can be used when your
+  MUA doesn't support the TLS/SSL encryption, but your MTA does.
+* The code has been optimized a bit.
+
+ *******************
+ 3.0.2 (10 Jun 2002)
+ *******************
+
+* URGENCY: HIGH. A serious bug has been fixed:
+  While sending more than one email in a one connection,
+  the OMP had processed every message in the same way,
+  but now this has been successfully fixed.
+* Some additional security fixes have been made.
+
+ *******************
+ 3.0.1 (08 Jun 2002)
+ *******************
+
+* URGENCY: LOW. Some minor changes have been made.
+* Some bugs have been fixed.
+* The documentation has been improved.
+* The portability has been slightly improved,
+  especially under Darwin.
+
+ *******************
+ 3.0.0 (01 Jun 2002)
+ *******************
+
+* The Anubis has become only an outgoing mail processor
+  and the SMTP tunnel between the MUA and the MTA.
+  Any other functions/features have been removed.
+
+----------------------------------------------------------------------
+ Copyright information:
+
+ Copyright (C) 2001, 2002, 2003 The Anubis Team.
+
+ Permission is granted to anyone to make or distribute verbatim copies
+ of this document as received, in any medium, provided that the
+ copyright notice and this permission notice are preserved,
+ thus giving the recipient permission to redistribute in turn.
+
+ Permission is granted to distribute modified versions
+ of this document, or of portions of it,
+ under the above conditions, provided also that they
+ carry prominent notices stating who last changed them.
+
+ EOF
+

@@ -1,0 +1,18 @@
+#
+# /etc/anubis.allow (fit this file to your own needs)
+#
+# If you compile GNU Anubis with a support for the Pluggable Authentication
+# Modules (PAM), edit this file, and copy to '/etc/anubis.allow'.
+#
+
+# Make sure that a user name below is the same one
+# as specified with the 'user-notprivileged' keyword.
+
+anubis.unprivileged
+
+# user2
+# user3
+# user4
+
+# EOF
+

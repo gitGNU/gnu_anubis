@@ -1,0 +1,29 @@
+msg2smtp.pl is designed to be a 'bridge' between Mutt and GNU Anubis:
+
+ MUA (Mutt) --> msg2smtp.pl --> Anubis --> remote or local MTA
+
+msg2smtp.pl can be used whenever you want to convert a mail message on STDIN
+and talk to an SMTP server as output.
+
+If you want to use this script with Mutt, add this to Mutt configuration file:
+set sendmail="/PATHTO/msg2smtp.pl -h localhost"
+
+If you run GNU Anubis on port 4000, you would put this line in your muttrc:
+set sendmail="/PATHTO/msg2smtp.pl -h localhost -p 4000"
+
+msg2smtp.pl takes a mail message on STDIN and relays it to an SMTP server.
+
+msg2smtp.pl -h HOST [options]
+  -h HOST        (hostname of SMTP server, often 'localhost')
+
+  Options:
+
+  -p PORT        (port of the SMTP server)
+  -e HELO_DOMAIN (domain we use when to say helo to smtp server)
+  -U USERNAME    (ESMTP auth username)
+  -P PASSWORD    (ESMTP auth password)
+  -m MECHANISM   (ESMTP auth mechanism - default is PLAIN)
+  -d             (shows SMTP conversation and perl debugging)
+
+EOF
+

@@ -1,0 +1,128 @@
+#
+# A sample user configuration file. Copy this file to your HOME directory
+# as the `.anubisrc' file. To protect your passwords in this configuration
+# file, use the 0600 (u=rw,g=,o=) permissions, otherwise GNU Anubis won't
+# accept this file. Hash-marked comments (#) and white lines are ignored.
+#
+
+#
+# The "CONTROL" section.
+# User configuration file.
+#
+
+---BEGIN CONTROL---
+# logfile = FILE-NAME
+# loglevel = NONE-FAILS-ALL
+# remote-mta = HOST[:PORT]
+# local-mta = FILE-NAME [ARGS]
+# esmtp-auth = USERNAME:PASSWORD
+# socks-proxy = HOST[:PORT]
+# socks-v4 = YES-OR-NO
+# socks-auth = USERNAME:PASSWORD
+# ssl = YES-OR-NO
+# oneway-ssl = YES-OR-NO
+# cert = FILE NAME
+# key = FILE-NAME
+# cafile = FILE-NAME
+---END---
+
+#
+# The "ALL" section.
+# User configuration file only.
+#
+
+---BEGIN ALL---
+# add = HEADER-LINE
+# remove = HEADER-LINE (a regular expression)
+# modify = OLD-HEADER-LINE >> NEW-HEADER-LINE
+# signature-file-append = YES-OR-NO
+# body-append = FILE-NAME
+# body-clear-append = FILE-NAME
+# gpg-passphrase = PASSPHRASE
+# gpg-encrypt = GPG-KEY(S)
+# gpg-sign = PASSPHRASE or `yes' if `gpg-passphrase' is already specified.
+# rot13-subject = YES-OR-NO
+# rot13-body = YES-OR-NO
+# rm-rrt = EMAIL-ADDRESS
+# rm-post = NEWS-GROUP
+# rm-gpg = GPG-KEY
+# rm-header = HEADER-LINE
+# rm-lt = TIME
+# rm-rlt = YES-OR-NO
+# external-body-processor = FILE-NAME [ARGS]
+---END---
+
+#
+# The Rule System (The "RULE" section)
+# User configuration file only. Examples:
+#
+
+---BEGIN RULE---
+
+# Process the (E)SMTP commands.
+
+if command =^mail from: <?root@localhost>?
+ test
+fi
+
+# Process a message header lines.
+# The Trigger's rules:
+
+rule =^gpg-encrypt
+ gpg-encrypt = GPG-KEY(S)
+done
+
+rule =^gpg-sign
+ gpg-passphrase = PASSPHRASE
+ gpg-sign = yes
+done
+
+rule : perlre =^gpg-dynamic:(.*)
+ add = X-GPG-Comment: Encrypted for \1
+ gpg-encrypt = \1
+done
+
+#
+#
+#
+
+if header =^To:.*<?friend1@somewhere.net>?
+ modify =^Reply-To: >> Reply-To: mybox@myisp.net
+ add = X-Comment: GNU's Not Unix!
+fi
+
+if header =^To:.*<?friend2@somewhere.org>?
+ modify =^(.*)(login@)(.*) >> \1\2\3.ORG
+fi
+
+if header : perlre =^X-Mailer: (.*)
+ add = X-Comment: \1 rocks!
+ modify =^X-Mailer: >> X-Mailer: The lousy mailer \1
+fi
+
+if header : scase =^Subject: (.*) != ^Subject: URGENT
+ add = X-Comment: This message is not URGENT (\1).
+fi
+
+if header =^Subject: rot13-body
+ rot13-body = yes
+fi
+
+if header =^Subject: gpg-encrypt
+ gpg-encrypt = GPG-KEY(S)
+fi
+
+if header =^Subject: gpg-sign
+ gpg-sign = PASSPHRASE
+fi
+
+if header =^Subject: signature-file
+ signature-file-append = yes
+fi
+
+if header =^Subject: rm-rrt
+ rm-rrt = EMAIL-ADDRESS
+fi
+
+---END---
+

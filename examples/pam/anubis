@@ -1,0 +1,60 @@
+#
+# /etc/pam.d/anubis (fit this file to your own needs)
+#
+# If you compile GNU Anubis with a support for the Pluggable Authentication
+# Modules (PAM), edit this file, and copy to '/etc/pam.d/anubis'.
+#
+
+#%PAM-1.0
+
+#
+##
+### AUTH section ###
+##
+#
+
+# Because Anubis can run user's binaries, we check the /etc/nologin
+auth        required      /lib/security/pam_nologin.so
+
+# Set the environment for Authenticate
+auth        required      /lib/security/pam_env.so
+
+# Authenticate everyone
+auth        required      /lib/security/pam_permit.so
+
+# Autenticate users NOT listed in file
+#auth        required      /lib/security/pam_listfile.so \
+# onerr=succeed item=user sense=deny file=/etc/anubis.deny
+
+# Autenticate users LISTED in file
+#auth        required      /lib/security/pam_listfile.so \
+# onerr=fail item=user sense=allow file=/etc/anubis.allow
+
+#
+##
+### ACCOUNT section ###
+##
+#
+	
+# Set an account
+account     required      /lib/security/pam_unix.so
+
+# Check /etc/security/time.conf for an user
+#account     required      /lib/security/pam_time.so
+
+#
+##
+### SESSION section ###
+##
+#
+
+# Set session limitations
+session     required      /lib/security/pam_limits.so
+
+# Let's GO!
+session     required      /lib/security/pam_unix.so
+
+#
+# EOF
+#
+

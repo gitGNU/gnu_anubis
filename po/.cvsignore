@@ -1,0 +1,15 @@
+Makefile
+Makefile.in
+Makefile.in.in
+anubis.pot
+POTFILES
+Rules-quot
+boldquot.sed
+en@boldquot.header
+en@quot.header
+insert-header.sin
+quot.sed
+remove-potcdate.sin
+remove-potcdate.sed
+*.mo
+*.gmo

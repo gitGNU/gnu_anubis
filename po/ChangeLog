@@ -1,0 +1,43 @@
+2003-01-06  Wojciech Polak
+
+	* ms.po: New file (Sharuzzaman Ahmat Raslan).
+	* LINGUAS: Added 'ms'.
+
+2002-12-25  Wojciech Polak
+
+	* uk.po: New file (Igor Sachko).
+	* LINGUAS: Added 'uk'.
+
+2002-12-23  Wojciech Polak
+
+	* tr.po: Updated (Deniz Akkus Kanca).
+
+2002-12-16  Wojciech Polak
+
+	* fr.po: Updated (Michel Robitaille).
+
+2002-11-19  Wojciech Polak
+
+	* tr.po: Updated (Deniz Akkus Kanca).
+
+2002-11-18  Wojciech Polak
+
+	* fr.po: Updated (Michel Robitaille).
+
+2002-11-06  Wojciech Polak
+
+	* tr.po: New file (Deniz Akkus Kanca).
+	* LINGUAS: Added 'tr'.
+	* fr.po: Updated (Michel Robitaille).
+
+2002-10-29  Wojciech Polak
+
+	* fr.po: Updated (Michel Robitaille).
+
+2002-09-24  Wojciech Polak
+
+	* fr.po: New file (Michel Robitaille).
+	* LINGUAS: Added 'fr'.
+
+ EOF
+

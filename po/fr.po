@@ -1,0 +1,996 @@
+# Messages français pour GNU concernant anubis.
+# Copyright © 2002 The Anubis Team
+# Michel Robitaille <robitail@IRO.UMontreal.CA>, traducteur depuis/since 1996.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: GNU anubis 3.6.2\n"
+"POT-Creation-Date: 2002-12-15 13:16+0100\n"
+"PO-Revision-Date: 2002-12-16 08:00-0500\n"
+"Last-Translator: Michel Robitaille <robitail@IRO.UMontreal.CA>\n"
+"Language-Team: French <traduc@traduc.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8-bit\n"
+
+#: src/auth.c:31
+#, c-format
+msgid "Welcome user %s !"
+msgstr "Bienvenue usager %s !"
+
+#: src/auth.c:37 src/rc.c:152 src/rc.c:174 src/rc.c:209
+#, c-format
+msgid "The %s section has been found. Processing..."
+msgstr "La section %s a été repérée. En traitement..."
+
+#: src/auth.c:54
+#, c-format
+msgid "IDENT: socket() failed: %s."
+msgstr "IDENT: échec de socket() : %s."
+
+#: src/auth.c:65
+#, c-format
+msgid "IDENT: connect() failed: %s."
+msgstr "IDENT: échec de connect() : %s."
+
+#: src/auth.c:69
+#, c-format
+msgid "IDENT: connected to %s:%u"
+msgstr "IDENT: connexion établie avec %s:%u"
+
+#: src/auth.c:80
+#, c-format
+msgid "IDENT: send() failed: %s."
+msgstr "IDENT: éched de send() : %s."
+
+#: src/auth.c:85
+#, c-format
+msgid "IDENT: recvline() failed: %s."
+msgstr "IDENT: échec de recvline() : %s."
+
+#: src/auth.c:93
+msgid "IDENT: incorrect data."
+msgstr "IDENT: données incorrectes."
+
+#: src/auth.c:103
+msgid "IDENT: data probably encrypted with DES..."
+msgstr "IDENT: données probablement encryptées avec DES..."
+
+#: src/auth.c:109
+msgid "IDENT: incorrect data (DES deciphered)."
+msgstr "IDENT: données incorrectes (DES 'deciphered')."
+
+#: src/auth.c:125
+#, c-format
+msgid "IDENT: resolved remote user to %s."
+msgstr "IDENT: usager distant identifié comme étant %s."
+
+#: src/daemon.c:50
+#, c-format
+msgid "daemon() failed. %s."
+msgstr "échec de daemon() %s."
+
+#: src/daemon.c:57
+#, c-format
+msgid "Can't fork. %s."
+msgstr "Ne peut faire un fork() %s."
+
+#: src/daemon.c:65
+msgid "setsid() failed."
+msgstr "échec de setsid()."
+
+#: src/daemon.c:77
+#, c-format
+msgid "%s daemon startup succeeded."
+msgstr "Succès de démarrage du daemon %s."
+
+#: src/daemon.c:92
+#, c-format
+msgid "Child [%d] finished. Exit status: %s. %d client(s) left."
+msgstr ""
+"FIn du processus enfant [%d]. État d'exécution: %s. %d clients restants."
+
+#: src/daemon.c:93
+msgid "OK"
+msgstr "OK"
+
+#: src/daemon.c:93
+msgid "ERROR"
+msgstr "ERREUR"
+
+#: src/daemon.c:162
+msgid "GNU Anubis is running..."
+msgstr "GNU Anubis fonctionne..."
+
+#: src/daemon.c:171 src/exec.c:114
+#, c-format
+msgid "accept() failed: %s."
+msgstr "échec de accept(): %s."
+
+#: src/daemon.c:184
+#, c-format
+msgid "TCP wrappers: connection from %s:%u rejected."
+msgstr "TCP wrappers: connexion à partir de %s:%u rejetée."
+
+#: src/daemon.c:203
+#, c-format
+msgid "Too many clients. Connection from %s:%u rejected."
+msgstr "Trop de clients. Connexion à partir de %s:%u rejetée."
+
+#: src/daemon.c:209
+#, c-format
+msgid "Connection from %s:%u"
+msgstr "Connexion à partir de %s:%u"
+
+#: src/daemon.c:214
+#, c-format
+msgid "daemon: Can't fork. %s."
+msgstr "daemon: ne peut faire un fork() %s."
+
+#: src/daemon.c:263
+msgid "The MTA has not been specified. Set the REMOTE-MTA or LOCAL-MTA."
+msgstr "La MTA n'a pas été spécifiée. Initialiser la MTA locale ou distante"
+
+#: src/daemon.c:292 src/map.c:105 src/net.c:84 src/net.c:145
+#, c-format
+msgid "Illegal address length received for host %s"
+msgstr "Longeur d'adresse illégale reçu pour l'hôte %s"
+
+#: src/daemon.c:304
+msgid "Loop not allowed. Connection rejected."
+msgstr "Boucle non permise. Connexion rejetée."
+
+#: src/daemon.c:353
+msgid "Connection terminated."
+msgstr "Connexion terminée."
+
+#: src/daemon.c:355
+msgid "Connection closed successfully."
+msgstr "Succès de fermeture de connexion."
+
+#: src/daemon.c:360
+msgid "PAM: Session closed."
+msgstr "PAM: session fermée."
+
+#: src/daemon.c:363
+msgid "PAM: failed to release authenticator."
+msgstr "PAM: échec lors de la relâche de l'authentificateur."
+
+#: src/env.c:107
+#, c-format
+msgid "Try '%s --help' for more information."
+msgstr "Pour en savoir davantage, faites: « %s --help »."
+
+#: src/env.c:209
+msgid "PAM: Session opened (restrictions applied)."
+msgstr "PAM: session ouverte (des restrictions s'appliquent)."
+
+#: src/env.c:211
+msgid "PAM: Not authenticated to use GNU Anubis."
+msgstr "PAM: non authentifié pour l'utilisation de GNU Anubis."
+
+#: src/env.c:221 src/main.c:93
+#, c-format
+msgid "UID:%d, GID:%d, EUID:%d, EGID:%d"
+msgstr "UID:%d, GID:%d, EUID:%d, EGID:%d"
+
+#: src/env.c:252
+#, c-format
+msgid "Invalid user ID: %s"
+msgstr "ID invalide d'usager: %s"
+
+#: src/env.c:257
+#, c-format
+msgid "Invalid user name: %s"
+msgstr "Nom d'usager invalide: %s"
+
+#: src/env.c:279
+#, c-format
+msgid "Wrong permissions on %s. Set 0600."
+msgstr "Permissions erronées sur %s. On utilise 0600."
+
+#: src/env.c:303
+#, c-format
+msgid "%s is not a regular file or a symbolic link."
+msgstr "%s n'est pas un fichier régulier ni un lien symbolique."
+
+#: src/errs.c:75
+#, c-format
+msgid "Couldn't write on socket! %s."
+msgstr "Ne peut écrire sur le socket %s."
+
+#: src/errs.c:82
+#, c-format
+msgid "SOCKS proxy: %s"
+msgstr "Proxy SOCKS: %s"
+
+#: src/errs.c:93
+#, c-format
+msgid "Unknown host %s."
+msgstr "Hôte inconnu %s."
+
+#: src/errs.c:96
+#, c-format
+msgid "%s: host name is valid but does not have an IP address."
+msgstr "%s: nom de l'hôte est valide mais n'a pas d'adresse IP."
+
+#: src/errs.c:99
+#, c-format
+msgid "%s: unrecoverable name server error occured."
+msgstr "%s: erreur non récupérable du serveur de nom est survenue."
+
+#: src/errs.c:102
+#, c-format
+msgid "%s: a temporary name server error occured. Try again later."
+msgstr ""
+"%s: une erreur temporaire du serveur de nom est survenue. Essayer plus tard."
+
+#: src/errs.c:104
+#, c-format
+msgid "%s: unknown DNS error %d."
+msgstr "%s: erreur DNS inconnue %d."
+
+#: src/esmtp.c:57
+msgid "Using the ESMTP CRAM-MD5 authentication..."
+msgstr "Utilisation de l'authentification ESMTP CRAM-MD5..."
+
+#: src/esmtp.c:63 src/esmtp.c:111
+msgid "Server rejected the AUTH command."
+msgstr "Rejet de la commande AUTH par le serveur."
+
+#: src/esmtp.c:71 src/esmtp.c:119 src/esmtp.c:135
+#, c-format
+msgid "Challenge decoded: %s"
+msgstr "Challenge décodé: %s"
+
+#: src/esmtp.c:99 src/esmtp.c:150
+#, c-format
+msgid "ESMTP AUTH: %s."
+msgstr "ESMTP AUTH: %s."
+
+#: src/esmtp.c:105
+msgid "Using the ESMTP LOGIN authentication..."
+msgstr "Utilisation de l'authentification ESMTP LOGIN..."
+
+#: src/exec.c:81
+msgid "#1 socket() failed."
+msgstr "Échec du socket() #1."
+
+#: src/exec.c:85
+msgid "#2 socket() failed."
+msgstr "Échec du socket() #2."
+
+#: src/exec.c:94
+#, c-format
+msgid "#1 bind() failed: %s."
+msgstr "Échec de bind() #1: %s."
+
+#: src/exec.c:98
+#, c-format
+msgid "#2 bind() failed: %s."
+msgstr "Échec de bind() #2: %s."
+
+#: src/exec.c:102 src/net.c:161
+#, c-format
+msgid "listen() failed: %s."
+msgstr "échec de listen(): %s."
+
+#: src/exec.c:106
+#, c-format
+msgid "getsockname() failed: %s."
+msgstr "échec de getsockname(): %s."
+
+#: src/exec.c:110
+#, c-format
+msgid "connect() failed: %s."
+msgstr "échec de connect(): %s."
+
+#: src/exec.c:120
+#, c-format
+msgid "socketpair() failed: %s."
+msgstr "échec de socketpair(): %s."
+
+#: src/exec.c:134
+#, c-format
+msgid "Local program [%d] finished."
+msgstr "Programme local [%d] a complété."
+
+#: src/exec.c:157
+#, c-format
+msgid "Executing %s %s..."
+msgstr "Exécution de %s %s..."
+
+#: src/exec.c:165
+msgid "fork() failed."
+msgstr "échec de fork()."
+
+#: src/exec.c:175
+#, c-format
+msgid "execvp() failed: %s"
+msgstr "échec de execvp(): %s"
+
+#: src/getopt.c:681
+#, c-format
+msgid "%s: option `%s' is ambiguous\n"
+msgstr "%s: l'option « %s » est ambiguë\n"
+
+#: src/getopt.c:706
+#, c-format
+msgid "%s: option `--%s' doesn't allow an argument\n"
+msgstr "%s: l'option « --%s » ne permet pas d'argument\n"
+
+#: src/getopt.c:711
+#, c-format
+msgid "%s: option `%c%s' doesn't allow an argument\n"
+msgstr "%s: l'option « %c%s » ne permet pas d'argument\n"
+
+#: src/getopt.c:729 src/getopt.c:902
+#, c-format
+msgid "%s: option `%s' requires an argument\n"
+msgstr "%s: l'option « %s » requiert un argument\n"
+
+#: src/getopt.c:758
+#, c-format
+msgid "%s: unrecognized option `--%s'\n"
+msgstr "%s: option « --%s » non reconnue\n"
+
+#: src/getopt.c:762
+#, c-format
+msgid "%s: unrecognized option `%c%s'\n"
+msgstr "%s: option « %c%s » non reconnue\n"
+
+#: src/getopt.c:788
+#, c-format
+msgid "%s: illegal option -- %c\n"
+msgstr "%s: option -- %c illégale\n"
+
+#: src/getopt.c:791
+#, c-format
+msgid "%s: invalid option -- %c\n"
+msgstr "%s: option -- %c invalide\n"
+
+#: src/getopt.c:821 src/getopt.c:951
+#, c-format
+msgid "%s: option requires an argument -- %c\n"
+msgstr "%s: l'option -- %c requiert un argument\n"
+
+#: src/getopt.c:868
+#, c-format
+msgid "%s: option `-W %s' is ambiguous\n"
+msgstr "%s: l'option « -W %s » est ambiguë\n"
+
+#: src/getopt.c:886
+#, c-format
+msgid "%s: option `-W %s' doesn't allow an argument\n"
+msgstr "%s: l'option « -W %s » ne permet pas d'argument\n"
+
+#: src/gpg.c:40
+#, c-format
+msgid "GPGME: %s."
+msgstr "GPGME: %s."
+
+#: src/gpg.c:64
+#, c-format
+msgid "Install GPGME version %s or later."
+msgstr "Installer la version %s ou plus récente de GPGME"
+
+#: src/gpg.c:69
+#, c-format
+msgid "GPGME: failed. %s."
+msgstr "GPGME: échec %s."
+
+#: src/help.c:33
+msgid "Built-in support for: "
+msgstr "Support inclus de: "
+
+#: src/help.c:59
+msgid ""
+"\n"
+"\n"
+"GNU Anubis is free software; you can redistribute it and/or modify\n"
+"it under the terms of the GNU General Public License as published by\n"
+"the Free Software Foundation; either version 2 of the License, or\n"
+"(at your option) any later version."
+msgstr ""
+"\n"
+"\n"
+"GNU Anubis est un logiciel libre; vous pouvez le redistribuer et/ou\n"
+"le modifier sous les termes de la licence Licence Publique Générale de GNU\n"
+"tel que publiée par la Free Software Foundation; tel que la version 2\n"
+"de la licence  ou (selon votre choix) n'importe quelle version subséquente."
+
+#: src/help.c:63
+msgid ""
+"\n"
+"GNU Anubis is distributed in the hope that it will be useful,\n"
+"but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
+"GNU General Public License for more details."
+msgstr ""
+"\n"
+"GNU Anubis est distribué dans l'espoir qu'il soit utile,\n"
+"mais AUCUNE garantie n'est donnée tant pour des raisons COMMERCIALES que\n"
+"pour RÉPONDRE À UN BESOIN PARTICULIER.  Consulter la licence\n"
+"Licence Publique Générale GNU pour plus de détails."
+
+#: src/help.c:67
+msgid ""
+"\n"
+"You should have received a copy of the GNU General Public License\n"
+"along with GNU Anubis; if not, write to the Free Software\n"
+"Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA"
+msgstr ""
+"\n"
+"Vous devriez avoir reçu copie de la Licence Publique Générale de GNU\n"
+"avec GNU Anubis; sinon, écrire à la Free Software Foundation, Inc.,\n"
+"59 Temple Place - Suite 330, Boston, MA 02111-1307, USA."
+
+#: src/help.c:70
+msgid ""
+"\n"
+"GNU Anubis is released under the GPL with the additional exemption that\n"
+"compiling, linking, and/or using OpenSSL is allowed.\n"
+msgstr ""
+"\n"
+"GNU Anubis est distribué sous les termes de la GPL avec les exceptions\n"
+"additionnelles suivantes: la compilation, l'édition de liens et/ou\n"
+"l'utilisation de OpenSSL sont permis.\n"
+
+#: src/help.c:78
+msgid "Usage: anubis [options]\n"
+msgstr "Usage: anubis [options]\n"
+
+#: src/help.c:79
+msgid ""
+" -b, --bind [HOST:]PORT       Specify the TCP port on which GNU Anubis "
+"listens\n"
+"                              for connections. The default HOST is "
+"INADDR_ANY,\n"
+"                              and default PORT is 24 (private mail system)."
+msgstr ""
+" -b, --bind [HÔTE:]PORT       spécifier le numéro de PORT du daemon et le "
+"nom de l'HÔTE.\n"
+"                              La valeur par défaut de l'hôte est INADDR_ANY "
+"et le\n"
+"                              numéro de PORT par défaut est 25."
+
+#: src/help.c:82
+msgid ""
+" -r, --remote-mta HOST[:PORT] Specify a remote SMTP host name or IP "
+"address.\n"
+"                              The default PORT number is 25."
+msgstr ""
+" -r, --remote-mta HÔTE[:PORT] spécifier le nom de l'HÔTE distant SMTP ou "
+"l'adresse IP.\n"
+"                              Le numéro de port par défaut est 25."
+
+#: src/help.c:84
+msgid ""
+" -l, --local-mta FILE         Execute a local SMTP server, which works on\n"
+"                              standard input and output (inetd-type "
+"program).\n"
+"                              This option excludes the '--remote-mta' option."
+msgstr ""
+" -l, --local-mta FICHIER      lancer un serveur local SMTP, lequel travaille "
+"à l'aide\n"
+"                              de l'entrée et de la sortie standard "
+"(programme de type inetd).\n"
+"                              Cette option exclut l'option --remote-mta."
+
+#: src/help.c:87
+msgid " -f, --foreground             Foreground mode."
+msgstr " -f, --foreground             en mode avant-plan (foreground)."
+
+#: src/help.c:88
+msgid ""
+" -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as "
+"described\n"
+"                              in RFC 821 on standard input and output."
+msgstr ""
+" -i, --stdio                  utiliser le protocol SMTP (tunnel/OMP) tel que "
+"décrit\n"
+"                              dans le RFC 821 sur l'entrée et la sortie "
+"standard."
+
+#: src/help.c:90
+msgid "Output options:\n"
+msgstr "Options de sortie:\n"
+
+#: src/help.c:91
+msgid " -s, --silent     Work silently."
+msgstr " -s, --silent     travailler en silence."
+
+#: src/help.c:92
+msgid " -v, --verbose    Work noisily."
+msgstr " -v, --verbose    travailler en mode bavard."
+
+#: src/help.c:93
+msgid " -D, --debug      Debug mode."
+msgstr " -D, --debug      en mode de mise au point (debug)."
+
+#: src/help.c:94
+msgid ""
+"\n"
+"Miscellaneous options:\n"
+msgstr ""
+"\n"
+"Options diverses:\n"
+
+#: src/help.c:95
+msgid " --altrc FILE     Specify alternate system configuration file."
+msgstr ""
+" --altrc FICHIER spécifier un FICHIER alternatif de configuration système"
+
+#: src/help.c:96
+msgid " --norc           Ignore system configuration file."
+msgstr " --norc           ignorer le fichier de configuration système."
+
+#: src/help.c:97
+msgid " --version        Print version number and copyright."
+msgstr " --version        afficher la version et le copyright."
+
+#: src/help.c:98
+msgid " --help           It's obvious..."
+msgstr " --help           obtenir de l'aide..."
+
+#: src/help.c:99
+#, c-format
+msgid ""
+"\n"
+"Report bugs to <%s>.\n"
+msgstr ""
+"\n"
+"Rapport toutes anomalies à <%s>.\n"
+
+#: src/map.c:69
+msgid "Translation map: incorrect syntax."
+msgstr "Map de traduction: syntaxe incorrecte."
+
+#: src/map.c:150
+#, c-format
+msgid "%s remapped to %s@localhost."
+msgstr "%s re-mappé sur %s@localhost"
+
+#: src/mem.c:35
+msgid "malloc() failed. Cannot allocate enough memory."
+msgstr "échec de malloc(). Ne peut allouer assez de mémoire."
+
+#: src/mem.c:52
+msgid "realloc() failed. Cannot reallocate enough memory."
+msgstr "échec de realloc(). Ne peut réallouer suffisamment de mémoire."
+
+#: src/net.c:69
+msgid "Getting remote host information..."
+msgstr "Obtention des information de l'hôte distant...."
+
+#: src/net.c:98
+msgid "Initializing socket..."
+msgstr "Initialisation du socket..."
+
+#: src/net.c:100 src/net.c:131
+msgid "Can't create stream socket."
+msgstr "Ne peut créer un socket de flot (stream socket)"
+
+#: src/net.c:103
+#, c-format
+msgid "Connecting to %s:%u..."
+msgstr "Établissement de connexion avec %s:%u..."
+
+#: src/net.c:105
+#, c-format
+msgid "Couldn't connect to %s:%u. %s."
+msgstr "N'a pu établir une connexion avec %s:%u. %s."
+
+#: src/net.c:110
+#, c-format
+msgid "Connected to %s:%u"
+msgstr "Connecté à %s:%u"
+
+#: src/net.c:157
+#, c-format
+msgid "bind() failed: %s."
+msgstr "échec de bond(): %s."
+
+#: src/net.c:158
+#, c-format
+msgid "GNU Anubis bound to %s:%u"
+msgstr "GNU Anubis lié à %s:%u"
+
+#: src/net.c:211
+#, c-format
+msgid "(%ld)SERVER >>> %s"
+msgstr "(%ld)SERVEUR >>> %s"
+
+#: src/net.c:246
+#, c-format
+msgid "(%ld)CLIENT >>> %s"
+msgstr "(%ld)CLIENT >>> %s"
+
+#: src/net.c:366
+#, c-format
+msgid "(%d)SERVER <<< %s"
+msgstr "(%d)SERVEUR <<< %s"
+
+#: src/net.c:368
+#, c-format
+msgid "(%d)CLIENT <<< %s"
+msgstr "(%d)CLIENTS <<< %s"
+
+#: src/proxy.c:67
+msgid "Using SOCKS Proxy..."
+msgstr "Utilisation de proxy SOCKS..."
+
+#: src/proxy.c:177
+msgid "Address must be an IP, not a domain name."
+msgstr "Adresse doit être IP et non pas un nom de domaine."
+
+#: src/proxy.c:212 src/proxy.c:452
+msgid "SOCKS Proxy Connection: succeeded."
+msgstr "Connexion proxu SOCKS: succès."
+
+#: src/proxy.c:215
+msgid "Request rejected or failed."
+msgstr "Échec ou rejet de la requête."
+
+#: src/proxy.c:218
+msgid "Request rejected."
+msgstr "Requête rejetée."
+
+#: src/proxy.c:221
+msgid ""
+"Request rejected, because the client program and identd reported different "
+"User-IDs."
+msgstr ""
+"Requête rejetée par le programme clien et identd rapportent de ID d'usager "
+"différents"
+
+#: src/proxy.c:225 src/proxy.c:479
+msgid "Server reply is not valid."
+msgstr "Réponse du serveur n'est pas valide."
+
+#: src/proxy.c:263
+msgid "Possibly not a SOCKS proxy service."
+msgstr "Possiblement pas un servuve proxy SOCKS"
+
+#: src/proxy.c:275
+msgid "SOCKS Proxy AUTH method: NO AUTHENTICATION REQUIRED"
+msgstr "Méthode AUTH Proxy SOCKS: AUCUNE AUTHENTIFICATION REQUISE"
+
+#: src/proxy.c:279
+msgid "SOCKS Proxy AUTH method: USER NAME/PASSWORD"
+msgstr "Méthode AUTH Proxy SOCKS: NOM D'USAGER/MOT DE PASSE"
+
+#: src/proxy.c:282
+msgid "Cannot send null user name or password."
+msgstr "Ne peut transmettre un nom d'usager ou un mot de passe null."
+
+#: src/proxy.c:320
+msgid "Bad user name or password."
+msgstr "Nom d'usager ou mot de passe erroné."
+
+#: src/proxy.c:324
+msgid "SOCKS Proxy AUTH: succeeded."
+msgstr "AUTH Proxy SOCKS: succès"
+
+#: src/proxy.c:327
+msgid "Server does not accept any method."
+msgstr "Serveur n'accepte aucune méthode."
+
+#: src/proxy.c:330
+msgid "Server does not accept an AUTH method."
+msgstr "Serveur n'accepte pas une méthode AUTH."
+
+#: src/proxy.c:455
+msgid "General SOCKS server failure."
+msgstr "Échec général du serveur SOCKS."
+
+#: src/proxy.c:458
+msgid "Connection not allowed by a ruleset."
+msgstr "Connexion non permise par le jeu des règles."
+
+#: src/proxy.c:461
+msgid "Network unreachable."
+msgstr "Réseau non atteignable."
+
+#: src/proxy.c:464
+msgid "Host unreachable."
+msgstr "Hôte non atteignable."
+
+#: src/proxy.c:467
+msgid "Connection refused."
+msgstr "Connexion refusée."
+
+#: src/proxy.c:470
+msgid "TTL expired."
+msgstr "TTL expiré."
+
+#: src/proxy.c:473
+msgid "Command not supported."
+msgstr "Commande non supportée."
+
+#: src/proxy.c:476
+msgid "Address type not supported."
+msgstr "Type d'adresse non supportée."
+
+#: src/quit.c:31
+msgid "Signal Caught. Exiting Cleanly..."
+msgstr "Signal intercepté. Fin d'exécution grâcieuse..."
+
+#: src/quit.c:38
+msgid "Timeout! Exiting..."
+msgstr "Temps expiré! Fin d'exécution..."
+
+#: src/rc.c:127
+#, c-format
+msgid "Anubis RC file error: %s."
+msgstr "Anubis erreur de fichier RC: %s."
+
+#: src/rc.c:131
+#, c-format
+msgid "Reading system configuration file %s..."
+msgstr "Lecture du fichier système de configuration %s..."
+
+#: src/rc.c:133
+#, c-format
+msgid "Reading user configuration file %s..."
+msgstr "Lecture du fichier usager de configuration %s..."
+
+#: src/rc.c:233
+#, c-format
+msgid "Fatal fclose() error. %s."
+msgstr "Erreur fatale de fclose() %s."
+
+#: src/regex.c:69
+#, c-format
+msgid "regcomp() failed. %s"
+msgstr "Échec de regcomp() %s."
+
+#: src/regex.c:115
+#, c-format
+msgid "pcre_compile() failed at offset %d: %s."
+msgstr "Échec de pcre_compile() failed à l'adresse relative %d: %s."
+
+#: src/regex.c:121
+msgid "Matched, but too many substrings."
+msgstr "Concorde mais a trop de sous-chaînes."
+
+#: src/regex.c:136
+#, c-format
+msgid "Get substring %d failed (%d)."
+msgstr "Échec d'obtention de la sous-chaîne %d (%d)."
+
+#: src/ssl.c:48
+msgid "Seeding random number generator..."
+msgstr "Fourniture d'un germe au générateur de nombres aléatoires..."
+
+#: src/ssl.c:52
+msgid "Unable to seed random number generator."
+msgstr "Incapable de fournir un germe au générateur aléatoire de nombres."
+
+#: src/ssl.c:83
+msgid "SSLv23_client_method() failed."
+msgstr "Échec de SSLv23_client_method()."
+
+#: src/ssl.c:87 src/ssl.c:142
+msgid "Can't create SSL_CTX object."
+msgstr "Ne peut créer l'objet SSL_CTX"
+
+#: src/ssl.c:92 src/ssl.c:158
+msgid "SSL_CTX_set_cipher_list() failed."
+msgstr "Échec de SSL_CTX_set_cipher_list()."
+
+#: src/ssl.c:104 src/tls.c:60
+msgid "Initializing the TLS/SSL connection with MTA..."
+msgstr "Initialisaton de la connexion TLS/SSL avec MTA..."
+
+#: src/ssl.c:107 src/ssl.c:171
+msgid "Can't create a new SSL structure for a connection."
+msgstr "Ne peut créer une nouvelle structure SSL pour une connexion."
+
+#: src/ssl.c:111 src/ssl.c:175
+msgid "SSL_set_fd() failed."
+msgstr "Échec de SSL_set_fd()."
+
+#: src/ssl.c:116 src/ssl.c:180 src/tls.c:79 src/tls.c:149
+msgid "TLS/SSL handshake failed!"
+msgstr "Échec d'échange handshake TLS/SSL!"
+
+#: src/ssl.c:138
+msgid "SSLv23_server_method() failed."
+msgstr "Échec de SSLv23_server_method()."
+
+#: src/ssl.c:146
+msgid "SSL_CTX_use_certificate_file() failed."
+msgstr "Échec de SSL_CTX_use_certificate_file()."
+
+#: src/ssl.c:150
+msgid "SSL_CTX_use_PrivateKey_file() failed."
+msgstr "Échec de SSL_CTX_use_PrivateKey_file()."
+
+#: src/ssl.c:154
+msgid "Private key does not match the certificate public key."
+msgstr "Clé privée ne concorde par avec le certificat de la clé publique."
+
+#: src/ssl.c:168 src/tls.c:131
+msgid "Initializing the TLS/SSL connection with MUA..."
+msgstr "Initialisaton de la connexion TLS/SSL avec MUA..."
+
+#: src/ssl.c:206
+#, c-format
+msgid "%s connection using %s (%u bits)"
+msgstr "%s connexion utilisant %s (%u bits)"
+
+#: src/ssl.c:213
+#, c-format
+msgid "Server public key is %d bits"
+msgstr "Clé du serveur public est %d bits"
+
+#: src/ssl.c:218
+msgid "Certificate:"
+msgstr "Certificat:"
+
+#: src/ssl.c:220
+msgid "X509_NAME_oneline [subject] failed!"
+msgstr "Échec de X509_NAME_oneline [sujet]!"
+
+#: src/ssl.c:223
+#, c-format
+msgid "Subject: %s"
+msgstr "Sujet: %s"
+
+#: src/ssl.c:225
+msgid "X509_NAME_oneline [issuer] failed!"
+msgstr "Échec de X509_NAME_oneline [demandeur]!"
+
+#: src/ssl.c:228
+#, c-format
+msgid "Issuer:  %s"
+msgstr "Demandeur:  %s"
+
+#: src/tls.c:166
+msgid "No certificate was sent."
+msgstr "Aucun certificat n'a été expédié."
+
+#: src/tls.c:171
+msgid "The certificate is not trusted."
+msgstr "Le certificat n'est pas fiable."
+
+#: src/tls.c:175
+msgid "The certificate has expired."
+msgstr "Le certificat a expiré."
+
+#: src/tls.c:179
+msgid "The certificate is not yet activated."
+msgstr "Le certificat n'est pas encore activé."
+
+#: src/tls.c:187
+msgid "No certificate was found!"
+msgstr "Aucun certificat n'a été repéré!"
+
+#: src/tls.c:191
+msgid "The certificate is trusted."
+msgstr "Le certificat est fiable."
+
+#: src/tls.c:219
+#, c-format
+msgid "Anonymous DH using prime of %d bits."
+msgstr "DH anonyme utilisant des premiers de %d bits."
+
+#: src/tls.c:224
+#, c-format
+msgid "Ephemeral DH using prime of %d bits."
+msgstr "DH éphémère utilisant des premiers de %d bits."
+
+#: src/tls.c:234
+#, c-format
+msgid "- Protocol: %s\n"
+msgstr "- Protocol: %s\n"
+
+#: src/tls.c:237
+#, c-format
+msgid "- Certificate Type: %s\n"
+msgstr "- Type de certificat: %s\n"
+
+#: src/tls.c:240
+#, c-format
+msgid "- Compression: %s\n"
+msgstr "- Compression: %s\n"
+
+#: src/tls.c:243
+#, c-format
+msgid "- Cipher: %s\n"
+msgstr "- Cipher: %s\n"
+
+#: src/tls.c:246
+#, c-format
+msgid "- MAC: %s\n"
+msgstr "- MAC: %s\n"
+
+#: src/tls.c:269
+msgid " - Certificate info:\n"
+msgstr " - Infos du certificat:\n"
+
+#: src/tls.c:270
+#, c-format
+msgid " - Certificate is valid since: %s"
+msgstr " - Certificat est valide depuis: %s"
+
+#: src/tls.c:271
+#, c-format
+msgid " - Certificate expires: %s"
+msgstr " - Certificat expire: %s:"
+
+#: src/tls.c:280
+#, c-format
+msgid " - Certificate fingerprint: %s\n"
+msgstr " - Empreinte du certificat: %s\n"
+
+#: src/tls.c:290
+#, c-format
+msgid " - Certificate serial number: %s\n"
+msgstr " - Numéro de série du certificat: %s\n"
+
+#: src/tls.c:294
+msgid "Certificate public key: "
+msgstr "Clé publique du certificat: "
+
+#: src/tls.c:296
+msgid "RSA\n"
+msgstr "RSA\n"
+
+#: src/tls.c:297
+#, c-format
+msgid " Modulus: %d bits\n"
+msgstr " Modulo: %d bits\n"
+
+#: src/tls.c:300
+msgid "DSA\n"
+msgstr "DSA\n"
+
+#: src/tls.c:301
+#, c-format
+msgid " Exponent: %d bits\n"
+msgstr " Exposant: %d bits\n"
+
+#: src/tls.c:304
+msgid "UNKNOWN\n"
+msgstr "INCONNU\n"
+
+#: src/tls.c:306
+#, c-format
+msgid " - Certificate version: #%d\n"
+msgstr " - Version du certificat: #%d\n"
+
+#: src/tls.c:313
+msgid " - Certificate Issuer's info:\n"
+msgstr " - Infos du diffuseur du certificat:\n"
+
+#: src/tunnel.c:52
+msgid "Transferring message(s)..."
+msgstr "Transfert des messages..."
+
+#: src/tunnel.c:165
+msgid "Using the TLS/SSL encryption..."
+msgstr "Utilisation de l'encryption TLS/SSL..."
+
+#: src/tunnel.c:174 src/tunnel.c:296
+#, c-format
+msgid "WARNING: %s"
+msgstr "AVERTISSEMENT: %s"
+
+#: src/tunnel.c:175
+msgid "STARTTLS command failed."
+msgstr "Échec de la commande STARTTLS."
+
+#: src/tunnel.c:290
+msgid "Using the 'ONEWAY' TLS/SSL encryption..."
+msgstr "Utilisation de l'encryptage 'ONEWAY' TLS/SSL..."
+
+#: src/tunnel.c:297
+msgid "STARTTLS (ONEWAY) command failed."
+msgstr "Échec de la commande STARTTLS (ONEWAY)."
+
+#: src/tunnel.c:336
+#, c-format
+msgid "getpeername() failed: %s."
+msgstr "échec de getpeername(): %s."

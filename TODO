@@ -1,0 +1,11 @@
+
+ TO DO
+ =====
+
+* HTML processing
+* parsing configuration files with GNU Bison and Flex?
+* support for Guile
+* IPv6 support
+
+ EOF
+

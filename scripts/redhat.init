@@ -1,0 +1,64 @@
+#!/bin/sh
+#
+# chkconfig: 2345 81 45
+# description: An outgoing mail processor and the SMTP tunnel.
+# processname: anubis
+# config: /etc/anubisrc
+# author: The Anubis Team
+#
+
+# Source function library.
+. /etc/init.d/functions
+
+# Get config.
+. /etc/sysconfig/network
+
+# Check that networking is up.
+if [ "$NETWORKING" = "no" ]
+then
+	exit 0
+fi
+
+RETVAL=0
+PROGRAM="anubis"
+
+start () {
+	echo -n $"Starting $PROGRAM: "
+	daemon $PROGRAM $OPTIONS
+	RETVAL=$?
+	echo
+	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/$PROGRAM
+}
+stop () {
+	echo -n $"Stopping $PROGRAM: "
+	killproc $PROGRAM
+	RETVAL=$?
+	echo
+	[ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/$PROGRAM
+}
+
+# See how we were called.
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  status)
+	status $PROGRAM
+	;;
+  restart|reload)
+	stop
+	start
+	;;
+  condrestart)
+	[ -f /var/lock/subsys/$PROGRAM ] && restart || :
+	;;
+  *)
+	echo $"Usage: $0 {start|stop|status|restart|reload|condrestart}"
+	exit 1
+esac
+
+exit $?
+

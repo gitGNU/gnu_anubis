@@ -1,0 +1,40 @@
+#!/bin/sh
+#
+# DEBIAN:
+# To start GNU Anubis as a system service, copy this file to
+# `/etc/init.d/anubis' and run the "update-rc.d anubis defaults".
+# To remove the service, delete the `/etc/init.d/anubis' file,
+# and run the "update-rc.d anubis remove".
+#
+
+PROGRAM="anubis"
+
+case "$1" in
+  start)
+	echo -n $"Starting $PROGRAM: "
+	if start-stop-daemon --start --quiet --exec $PROGRAM
+	then
+	 echo "succeeded."
+	else
+	 echo "anubis already running."
+	fi
+	;;
+  stop)
+	echo -n $"Stopping $PROGRAM: "
+	start-stop-daemon --stop --quiet --exec $PROGRAM
+	echo "succeeded."
+	;;
+  force-reload|restart)
+	echo -n $"Restarting $PROGRAM: "
+	start-stop-daemon --stop --quiet --exec $PROGRAM
+	start-stop-daemon --start --quiet --exec $PROGRAM
+	echo "succeeded."
+	;;
+  *)
+	echo "Usage: /etc/init.d/anubis {start|stop|restart}"
+	exit 1
+	;;
+esac
+
+exit 0
+

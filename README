@@ -1,0 +1,90 @@
+
+ Introduction
+ ============
+
+ GNU Anubis is an outgoing mail processor. It goes between the MUA (Mail User
+ Agent) and the MTA (Mail Transport Agent), and can perform on the fly various
+ sorts of processing and conversion on the outgoing mail in accord with the
+ sender's specified rules, based on a highly configurable regular expressions
+ system. It operates as a proxy server, independently from mail user agents.
+ GNU Anubis can edit outgoing mail headers, encrypt and/or sign mail with the
+ GNU Privacy Guard, build secure SMTP tunnels (Simple Mail Transport Protocol)
+ using the TLS/SSL encryption even if your mail user agent doesn't support it,
+ or tunnel a connection through a SOCKS proxy server.
+
+ --------*      --------**      ------***
+ |  MUA  | ---> | Anubis | ---> |  MTA  |
+ ---------      ----------      ---------
+
+ *   Mail User Agent (client)
+ **  An outgoing mail processor and the SMTP tunnel.
+ *** Mail Transport Agent (server)
+
+ GNU Anubis is GNU software. See the home page at:
+ http://www.gnu.org/software/anubis/
+
+ License:
+ GNU Anubis is free software. Read the COPYING file.
+
+
+ SUPPORTED SOFTWARE
+ ==================
+
+ Required:
+
+ * The TCP/IP Identification Protocol (RFC 1413) server (any).
+
+ Highly recommended:
+
+ * GnuTLS -- a Transport Layer Security Library (http://www.gnutls.org/)
+   or OpenSSL -- a cryptographic package (http://www.openssl.org/).
+ * GnuPG -- The GNU Privacy Guard (http://www.gnupg.org/)
+   with GPGME -- GnuPG Made Easy (http://www.gnupg.org/gpgme.html).
+
+ Optional:
+
+ * PCRE -- Perl-Compatible Regular Expression Library
+   (ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/)
+ * PAM -- Pluggable Authentication Modules.
+ * libwrap (TCP wrappers) -- an access control library.
+
+
+ INSTALLATION
+ ============
+
+ $ ./configure
+ $ make
+ $ make install
+
+ By default, GNU Anubis will be installed in `/usr/local/sbin/anubis',
+ but this can be changed with the `--prefix' command, for instance:
+
+ $ ./configure --prefix=/usr
+ $ make
+ $ make install
+
+ For better control, use the options below.
+ Set the `./configure' script with:
+
+ `--with-pcre'         to support Perl-compatible regular expressions.
+ `--with-pam'          to support Pluggable Authentication Modules.
+ `--with-tcp-wrappers' to support libwrap (TCP wrappers).
+ `--with-openssl'      to support OpenSSL (and disable GnuTLS).
+ `--without-gnutls'    to disable GnuTLS support.
+ `--without-gpgme'     to disable GNU Privacy Guard (GPGME) support.
+
+ Next, write a proper init script for your system. See the examples
+ in the `scripts' directory (part of the distribution).
+
+ NOTE: Remember about activating GNU Anubis with `ntsysv' tool
+ or similar, and configure its system configuration file (read
+ the GNU Anubis Manual about this topic).
+
+ CAUTION: It is required to install the TCP/IP IDENT protocol
+ server (RFC 1413). Without it, an outgoing mail processor will fail.
+ Most modern GNU/Linux (or *BSD) distributions have already installed
+ such a server. If not, try `pidentd', available at:
+ ftp://ftp.lysator.liu.se/pub/ident/servers/
+
+ EOF
+

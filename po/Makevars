@@ -1,0 +1,16 @@
+#
+# Makefile variables for PO directory.
+# Copyright (C) 2001, 2002, 2003 The Anubis Team.
+#
+
+DOMAIN = $(PACKAGE)
+
+subdir = po
+top_builddir = ..
+
+XGETTEXT_OPTIONS = --no-wrap --keyword=_
+COPYRIGHT_HOLDER = The Anubis Team
+EXTRA_LOCALE_CATEGORIES =
+
+# EOF
+
