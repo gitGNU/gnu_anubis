@@ -79,7 +79,7 @@ dnl Checks for library functions.
 AC_CHECK_FUNCS(syslog getrlimit setrlimit socketpair strdup)
 AC_CHECK_FUNCS(regcomp daemon putenv)
 
-AC_REPLACE_FUNCS(snprintf setenv getline)
+AC_REPLACE_FUNCS(snprintf setenv getline getpass)
 AC_CHECK_FUNCS(_obstack_begin,
                [AC_DEFINE(HAVE_OBSTACK,1,[Define if GNU obstack is present])],
                [AC_LIBOBJ(obstack)])
