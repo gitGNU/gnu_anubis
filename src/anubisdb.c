@@ -83,7 +83,7 @@ anubis_db_register(char *dbid,
 
 
 int
-anubis_db_open(char *arg, enum anubis_db_mode mode, void **dptr)
+anubis_db_open(char *arg, enum anubis_db_mode mode, void **dptr, char **err)
 {
 	struct anubis_db_instance *inst;
 	ANUBIS_URL *url;
@@ -102,7 +102,7 @@ anubis_db_open(char *arg, enum anubis_db_mode mode, void **dptr)
 	inst->mode = mode;
 	inst->error_code = 0;
 	*dptr = inst;
-	rc = dbt->db_open(&inst->db_handle, url, mode);
+	rc = dbt->db_open(&inst->db_handle, url, mode, err);
 	anubis_url_destroy(&url);
 	return rc;
 }
