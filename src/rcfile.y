@@ -559,7 +559,7 @@ void
 rc_set_debug_level(char *arg)
 {
 	if (!arg)
-		debug_level = 1;
+		debug_level = 0;
 	else
 		debug_level = arg[0] - '0';
 	if (debug_level > 1)
