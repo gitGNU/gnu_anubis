@@ -208,11 +208,6 @@ static struct rc_secdef_child translate_secdef_child = {
 	NULL
 };
 
-struct rc_secdef translate_section = {
-	"TRANSLATE",
-	&translate_secdef_child
-};
-
 void
 translate_section_init(void)
 {
