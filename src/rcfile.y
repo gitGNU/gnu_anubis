@@ -53,11 +53,14 @@ static void rc_stmt_destroy(RC_STMT *);
 static void rc_stmt_list_destroy(RC_STMT *);
 static void rc_stmt_print(RC_STMT *, int);
 static int reg_modifier_add(int *, char *);
+static int check_kw(char *ident);
+static int is_prog_allowed();
 
 static RC_SECTION *rc_section;
 static int debug_level;
 static int error_count;
-static int def_regex_modifier = R_POSIX; 
+static int def_regex_modifier = R_POSIX;
+static struct rc_secdef *rc_secdef;
 %}
 
 %union {
@@ -139,8 +142,12 @@ section  : /* empty */ EOL
 begin    : T_BEGIN { verbatim(); } string EOL
            {
 		   $$ = $3;
+		   rc_secdef = anubis_find_section($3);
 	   }
          | D_BEGIN EOL
+           {
+		   rc_secdef = anubis_find_section($1);
+	   }		   
          ;
 
 end      : T_END EOL
@@ -176,6 +183,11 @@ stmt     : /* empty */ EOL
 
 asgn_stmt: keyword meq { verbatim(); } arglist
            {
+		   if (!check_kw($1)) {
+			   yyerror(_("unknown keyword"));
+			   YYERROR;
+		   }
+
 		   $$ = rc_stmt_create(rc_stmt_asgn);
 		   $$->v.asgn.lhs = $1;
 		   $$->v.asgn.rhs = $4;
@@ -259,7 +271,7 @@ key      : regex
 		   $$.part = HEADER;
 		   $$.key = NULL;
 		   $$.string = $2;
-	   }		   
+	   }
          ;
 
 opt_key  : /* empty */
@@ -351,6 +363,10 @@ modifier   : ':' IDENT
          ;
 
 if       : IF
+           {
+		   if (!is_prog_allowed())
+			   YYERROR;
+	   }
          ;
 
 fi       : FI
@@ -367,7 +383,7 @@ rule_stmt: rule_start EOL stmtlist DONE
 	   }
          ;
 
-rule_start: RULE opt_modlist string
+rule_start: rule opt_modlist string
            {
 		   $$ = rc_node_create(rc_node_expr);
 		   $$->v.expr.part = HEADER;
@@ -377,12 +393,21 @@ rule_start: RULE opt_modlist string
 	   }
          ;
 
+rule     : RULE
+           {
+		   if (!is_prog_allowed())
+			   YYERROR;
+	   }
+         ;
+
 string   : STRING
          | IDENT
          ;
 
 inst_stmt: STOP
            {
+		   if (!is_prog_allowed())
+			   YYERROR;
 		   $$ = rc_stmt_create(rc_stmt_inst);
 		   $$->v.inst.opcode = inst_stop;
 		   $$->v.inst.part = NIL;
@@ -392,6 +417,8 @@ inst_stmt: STOP
 	   }
          | CALL string
            {
+		   if (!is_prog_allowed())
+			   YYERROR;
 		   $$ = rc_stmt_create(rc_stmt_inst);
 		   $$->v.inst.opcode = inst_call;
 		   $$->v.inst.key = NULL;
@@ -401,6 +428,8 @@ inst_stmt: STOP
 	   }
          | ADD s_msgpart string
            {
+		   if (!is_prog_allowed())
+			   YYERROR;
 		   $$ = rc_stmt_create(rc_stmt_inst);
 		   $$->v.inst.opcode = inst_add;
 		   $$->v.inst.part = $2.part;
@@ -410,6 +439,8 @@ inst_stmt: STOP
 	   }
          | REMOVE r_msgpart
            {
+		   if (!is_prog_allowed())
+			   YYERROR;
 		   $$ = rc_stmt_create(rc_stmt_inst);
 		   $$->v.inst.opcode = inst_remove;
 		   $$->v.inst.part = $2.part;
@@ -419,6 +450,8 @@ inst_stmt: STOP
 	   }
          | MODIFY r_msgpart string_key string
            {
+		   if (!is_prog_allowed())
+			   YYERROR;
 		   $$ = rc_stmt_create(rc_stmt_inst);
 		   $$->v.inst.opcode = inst_modify;
 		   $$->v.inst.part = $2.part;
@@ -428,6 +461,8 @@ inst_stmt: STOP
 	   }
          | MODIFY r_msgpart string_key 
            {
+		   if (!is_prog_allowed())
+			   YYERROR;
 		   $$ = rc_stmt_create(rc_stmt_inst);
 		   $$->v.inst.opcode = inst_modify;
 		   $$->v.inst.part = $2.part;
@@ -442,6 +477,8 @@ inst_stmt: STOP
 
 modf_stmt: REGEX modlist
            {
+		   if (!is_prog_allowed())
+			   YYERROR;
 		   def_regex_modifier = $2;
 		   $$ = NULL;
 	   }
@@ -452,8 +489,7 @@ modf_stmt: REGEX modlist
 int
 yyerror(char *s)
 {
-	anubis_error(SOFT, "%s:%d: %s",
-		     cfg_file, cfg_line_num, s);
+	anubis_error(SOFT, "%s:%d: %s", cfg_file, cfg_line_num, s);
 	error_count++;
 	return 0;
 }
@@ -597,7 +633,7 @@ rc_node_destroy(RC_NODE *node)
 		
 	case rc_node_expr:
 		free(node->v.expr.key);
-		anubis_regex_free(node->v.expr.re);
+		anubis_regex_free(&node->v.expr.re);
 	}
 	xfree(node);
 }
@@ -682,7 +718,7 @@ rc_cond_destroy(RC_COND *cond)
 void
 rc_inst_destroy(RC_INST *inst)
 {
-	anubis_regex_free(inst->key);
+	anubis_regex_free(&inst->key);
 	free(inst->key2);
 	free(inst->arg);
 }
@@ -1198,3 +1234,25 @@ rc_run_section_list(int method, RC_SECTION *sec, struct rc_secdef *secdef)
 		rc_run_section(method, sec, secdef, NULL, NULL);
 }
 
+static int
+check_kw(char *ident)
+{
+	struct rc_secdef *p = rc_secdef;
+	int key;
+	
+	if (!p)
+		p = anubis_find_section("RULE");
+	return rc_child_lookup(p->child, ident, CF_ALL, &key) != NULL;
+}
+
+static int
+is_prog_allowed()
+{
+	struct rc_secdef *p = rc_secdef;
+	if (!p)
+		p = anubis_find_section("RULE");
+	
+	if (!p->allow_prog)
+		yyerror(_("program is not allowed in this section"));
+	return p->allow_prog;
+}
