@@ -75,6 +75,18 @@ AC_CHECK_FUNCS(syslog getrlimit setrlimit socketpair strdup)
 AC_CHECK_FUNCS(regcomp daemon isatty putenv)
 
 AC_REPLACE_FUNCS(snprintf setenv)
+AC_CHECK_FUNCS(_obstack_begin,
+               [AC_DEFINE(HAVE_OBSTACK,1,[Define if GNU obstack is present])],
+               [AC_LIBOBJ(obstack)])
+
+AC_FUNC_SETVBUF_REVERSED
+AH_BOTTOM([
+#if defined (SETVBUF_REVERSED)
+# define SETVBUF(str,buf,mode,size) setvbuf(str,mode,buf,size)
+#else
+# define SETVBUF(str,buf,mode,size) setvbuf(str,buf,mode,size)
+#endif
+])
 
 AC_CHECK_LIB(socket, socket)
 AC_CHECK_LIB(nsl, gethostbyaddr)
@@ -286,6 +298,8 @@ AC_CONFIG_FILES([Makefile
  scripts/Makefile
  examples/Makefile
  examples/pam/Makefile
+ testsuite/Makefile
+ testsuite/etc/Makefile
  contrib/Makefile
  ])
 AC_OUTPUT
