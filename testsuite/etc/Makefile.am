@@ -1,5 +1,5 @@
 ## This file is part of GNU Anubis.
-## Copyright (C) 2003, 2004 The Anubis Team.
+## Copyright (C) 2003, 2004, 2005 The Anubis Team.
 ##
 ## GNU Anubis is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -42,6 +42,8 @@ EXTRA_DIST = \
  mult.pat\
  net.rc\
  no-backref.pat\
+ paolo.in\
+ paolo.pat\
  remail.pat\
  rot-13.pat\
  std.pin\
@@ -74,6 +76,7 @@ RCFILES = \
  mod-body.rc\
  mod-header.rc\
  no-backref.rc\
+ paolo.rc\
  remail.rc\
  simple.rc\
  std.rc\
@@ -98,7 +101,7 @@ simple.rc: simple.in
 std.rc: std.in
 target.in.rc: target.in.in 
 trigger.rc: trigger.in 
-
+paolo.rc: paolo.in
 std.pat: std.pin
 
 SUFFIXES=.in .rc .pin .pat
