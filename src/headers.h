@@ -129,6 +129,8 @@
 
 #include "mem.h" /* xfree(), xfree_pptr() */
 
+#include "list.h"
+
 #ifdef ENABLE_NLS
 # include <libintl.h>
 # define _(String) gettext(String)
@@ -179,6 +181,7 @@
 #define NIL    -1
 #define COMMAND 0
 #define HEADER  1
+#define BODY    2
 
 /* Tunnel methods */
 #define CLIENT 0
@@ -236,34 +239,37 @@
 #define T_RELAX_PERM_CHECK  0x04000000
 #define T_ENTIRE_BODY       0x08000000
 
-/* bit values for mopt */
-#define M_GPG_ENCRYPT       0x00000001
-#define M_GPG_SIGN          0x00000002
-#define M_GPG_PASSPHRASE    0x00000004
-#define M_RM                0x00000008
-#define M_RMRRT             0x00000010
-#define M_RMPOST            0x00000020
-#define M_RMHEADER          0x00000040
-#define M_RMLT              0x00000080
-#define M_RMRLT             0x00000100
-#define M_RMGPG             0x00000200
-#define M_BODYAPPEND        0x00000400
-#define M_BODYCLEARAPPEND   0x00000800
-#define M_SIGNATURE         0x00001000
-#define M_ROT13S            0x00002000
-#define M_ROT13B            0x00004000
-#define M_EXTBODYPROC       0x00008000
-
-/* bit values for ropt */
+/* Regular expression flags */
 #define R_BASIC             0x00000001
 #define R_PERLRE            0x00000002
 #define R_SCASE             0x00000004
+
+/* A special header used by Anubis to implement rules. */
+#define X_ANUBIS_RULE_HEADER "\nRULE\n"
 
 #define safe_strcpy(s, ct) \
  (s[sizeof(s) - 1] = '\0', strncpy((char *)s, (char *)ct, sizeof(s) - 1))
 
 struct rc_regex; 
 typedef struct rc_regex RC_REGEX;
+
+typedef struct assoc ASSOC;
+struct assoc {
+	char *key;
+	char *value;
+};
+
+typedef struct message_struct MESSAGE;
+struct message_struct {
+	struct list *commands; /* Associative list of SMTP commands */
+	struct list *header;   /* Associative list of RFC822 headers */
+	struct list *mime_hdr; /* List of lines before the first boundary
+				  marker */
+	char *body;            /* Message body */
+	/* Additional data */
+	char *boundary;
+};
+
 
 /* main.c */
 
@@ -331,6 +337,10 @@ void translate_section_init();
 
 /* tunnel.c */
 void smtp_session(void *, void *);
+void message_add_header(MESSAGE *msg, char *hdr);
+void message_remove_headers(MESSAGE *msg, char *arg);
+void message_modify_headers(MESSAGE *msg, char *arg, char *modify);
+void message_external_proc(MESSAGE *msg, char *name);
 
 /* exec.c */
 char **gen_execargs(const char *);
@@ -341,8 +351,10 @@ char *external_program(int *, char *, char *, char *, int);
 void esmtp_auth(void *, char *);
 
 /* misc.c */
-struct list *new_element(struct list *, struct list **, char *);
-void destroy_list(struct list **);
+void assoc_free(ASSOC *asc);
+ASSOC *header_assoc(char *line);
+void destroy_assoc_list(struct list **plist);
+void destroy_string_list(struct list **plist);
 void parse_mtaport(char *, char *, unsigned int *);
 void parse_mtahost(char *, char *, unsigned int *);
 void remline(char *, char *);
@@ -365,8 +377,7 @@ int anubis_regex_refcnt(RC_REGEX *re);
 void rc_system_init();
 void open_rcfile(int);
 void process_rcfile(int method);
-void rcfile_process_section(int method, char *name, void *data);
-void rcfile_process_cond(char *name, int method, char *line);
+void rcfile_process_section(int method, char *name, void *data, MESSAGE *msg);
 
 /* help.c */
 void print_version(void);
@@ -413,6 +424,7 @@ void guile_rewrite_line(char *procname, const char *source_line);
 void guile_postprocess_proc(char *procname, struct list **hdr, char **body);
 void guile_section_init();
 #endif /* WITH_GUILE */
+
 
 /* EOF */
 
