@@ -1,390 +1,462 @@
-# Norwegian translation for GNU Anubis 3.6.2
+# Norwegian translation for GNU Anubis 3.9.96
 # Copyright (C) 2003 The Anubis Team
 # This file is distributed under the same license as the PACKAGE package.
 # Geir Helland <pjallabais@users.sourceforge.net>, 2003.
 msgid ""
 msgstr ""
-"Project-Id-Version: anubis 3.6.2\n"
+"Project-Id-Version: anubis 3.9.96\n"
 "Report-Msgid-Bugs-To: bug-anubis@gnu.org\n"
-"POT-Creation-Date: 2004-05-21 19:59+0300\n"
-"PO-Revision-Date: 2003-07-07 18:02+0200\n"
-"Last-Translator: Geir Helland <gh@marked.no>\n"
-"Language-Team: Norwegian <i18n-nb@lister.ping.uio.no>\n"
+"POT-Creation-Date: 2004-09-22 15:14+0300\n"
+"PO-Revision-Date: 2004-11-27 16:54+0100\n"
+"Last-Translator: Geir Helland <pjallabais@users.sourceforge.net>\n"
+"Language-Team: Norwegian Bokmaal <i18n-nb@lister.ping.uio.no>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=iso-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/auth.c:31
-#, c-format
-msgid "Welcome user %s !"
-msgstr "Velkommen bruker %s !"
+#: src/authmode.c:469
+msgid "Entering XDB loop..."
+msgstr "Går inn i XDB løkke..."
 
-#: src/auth.c:112
-#, c-format
-msgid "IDENT: socket() failed: %s."
-msgstr "IDENT: socket() feilet: %s."
+#: src/authmode.c:481 src/authmode.c:503
+msgid "Exiting XDB loop..."
+msgstr "Avslutter XDB løkke..."
 
-#: src/auth.c:124
-#, c-format
-msgid "IDENT: connect() failed: %s."
-msgstr "IDENT: connect() feilet: %s."
-
-#: src/auth.c:130
-#, c-format
-msgid "IDENT: connected to %s:%u"
-msgstr "IDENT: koblet til %s:%u"
-
-#: src/auth.c:138
-#, fuzzy, c-format
-msgid "IDENT: stream_write() failed: %s."
-msgstr "IDENT: recvline() feilet: %s.<"
-
-#: src/auth.c:145
-#, c-format
-msgid "IDENT: recvline() failed: %s."
-msgstr "IDENT: recvline() feilet: %s.<"
-
-#: src/auth.c:155
-msgid "IDENT: incorrect data."
-msgstr "IDENT: ugyldig data."
-
-#: src/auth.c:165
-msgid "IDENT: data probably encrypted with DES..."
-msgstr "IDENT: Data sannsynligvis kryptert med DES..."
-
-#: src/auth.c:172
-msgid "IDENT: incorrect data (DES deciphered)."
-msgstr "IDENT: ugyldig data (DES dekryptert)."
-
-#: src/auth.c:188
-#, c-format
-msgid "IDENT: resolved remote user to %s."
-msgstr "IDENT: identifiserte ekstern bruker som %s."
-
-#: src/authmode.c:396
+#: src/authmode.c:526
 msgid "Database not specified"
-msgstr ""
+msgstr "Database ikke angitt"
 
-#: src/authmode.c:403
+#: src/authmode.c:534
 #, c-format
 msgid "Cannot open database %s: %s"
-msgstr ""
+msgstr "Kan ikke åpne database %s: %s"
 
-#: src/authmode.c:412
+#: src/authmode.c:541
 #, c-format
-msgid "Found record for %s"
-msgstr ""
+msgid "Found record for `%s'."
+msgstr "Ingen treff på '%s'."
 
-#: src/authmode.c:417
+#: src/authmode.c:546
 #, c-format
 msgid "Cannot retrieve data from the SASL database: %s"
-msgstr ""
+msgstr "Kan ikke hente data fra SASL databasen: %s"
 
-#: src/authmode.c:422
+#: src/authmode.c:551
 #, c-format
-msgid "Record for %s not found"
-msgstr ""
+msgid "Record for `%s' not found."
+msgstr "Data for '%s' ikke funnet."
 
-#: src/authmode.c:465 src/daemon.c:323 src/transmode.c:66
-msgid "The MTA has not been specified. Set the REMOTE-MTA or LOCAL-MTA."
-msgstr "Ingen MTA er spesifisert. Sett REMOTE-MTA eller LOCAL-MTA."
+#: src/authmode.c:604
+msgid "MTA has not been specified. Set either REMOTE-MTA or LOCAL-MTA."
+msgstr "Ingen MTA er spesifisert. Sett enten REMOTE-MTA eller LOCAL-MTA."
 
-#: src/authmode.c:491 src/map.c:155 src/net.c:137 src/net.c:198
-#: src/transmode.c:92
+#: src/authmode.c:635 src/map.c:164 src/net.c:150 src/net.c:217
+#: src/transmode.c:98
 #, c-format
 msgid "Illegal address length received for host %s"
 msgstr "Ugyldig adresselengde mottat for vert %s"
 
-#: src/authmode.c:502 src/transmode.c:103
+#: src/authmode.c:649 src/transmode.c:112
 msgid "Loop not allowed. Connection rejected."
 msgstr "Loop er ikke tillatt. Tilkobling avvist."
 
-#: src/authmode.c:532 src/transmode.c:142
-msgid "Connection terminated."
-msgstr "Tilkobling avbrutt."
-
-#: src/authmode.c:534 src/transmode.c:144
+#: src/authmode.c:681 src/transmode.c:143
 msgid "Connection closed successfully."
 msgstr "Tilkobling normalt avsluttet."
 
-#: src/authmode.c:539 src/transmode.c:149
+#: src/authmode.c:688 src/transmode.c:149
 msgid "PAM: Session closed."
 msgstr "PAM: Sesjon lukket."
 
-#: src/authmode.c:542 src/transmode.c:152
+#: src/authmode.c:692 src/transmode.c:153
 msgid "PAM: failed to release authenticator."
 msgstr "PAM: Kunne ikke slippe authentikator."
 
-#: src/daemon.c:48
-#, c-format
-msgid "daemon() failed. %s."
-msgstr "daemon() feilet. %s"
+#: src/daemon.c:49
+msgid "daemon() failed"
+msgstr "daemon() feilet"
 
-#: src/daemon.c:55
-#, c-format
-msgid "Can't fork. %s."
-msgstr "Kan ikke forke: %s."
+#: src/daemon.c:56
+msgid "Cannot fork."
+msgstr "Kan ikke forke."
 
-#: src/daemon.c:63
-msgid "setsid() failed."
-msgstr "setsid() feilet."
+#: src/daemon.c:64
+msgid "setsid() failed"
+msgstr "setsid() feilet"
 
-#: src/daemon.c:75
+#: src/daemon.c:76
 #, c-format
 msgid "%s daemon startup succeeded."
 msgstr "%s daemon startet opp normalt."
 
-#: src/daemon.c:91
-#, fuzzy, c-format
-msgid "Child [%lu] finished. Exit status: %s. %d client left."
-msgid_plural "Child [%lu] finished. Exit status: %s. %d clients left."
-msgstr[0] "Barneprosess [%d] avsluttet. Utgangsstatus: %s. %d klient(er) dro."
-msgstr[1] "Barneprosess [%d] avsluttet. Utgangsstatus: %s. %d klient(er) dro."
+#: src/daemon.c:88
+#, c-format
+msgid "Exited successfully"
+msgstr "Tilkobling normalt avsluttet."
+
+#: src/daemon.c:90
+#, c-format
+msgid "Failed with status %d"
+msgstr "Feilet med status %d"
 
 #: src/daemon.c:95
-msgid "OK"
-msgstr "OK"
+#, c-format
+msgid "Terminated on signal %d"
+msgstr "Avbrutt med signal %d"
 
-#: src/daemon.c:95
-msgid "ERROR"
-msgstr "FEIL"
+#: src/daemon.c:98
+#, c-format
+msgid "Stopped on signal %d"
+msgstr "Stoppen på signal %d"
 
-#: src/daemon.c:137
+#: src/daemon.c:101
+#, c-format
+msgid "Dumped core"
+msgstr "Dumpet kjerne"
+
+#: src/daemon.c:104
+#, c-format
+msgid "Terminated"
+msgstr "Terminert"
+
+#: src/daemon.c:121
+#, c-format
+msgid "Child [%lu] finished. %s. %d client left."
+msgid_plural "Child [%lu] finished. %s. %d clients left."
+msgstr[0] "Barneprosess [%lu] avsluttet. %s. %d klient igjen."
+msgstr[1] "Barneprosess [%lu] avsluttet. %s. %d klienter igjen."
+
+#: src/daemon.c:169
 msgid "WARNING: An unprivileged user has not been specified!"
-msgstr ""
+msgstr "ADVARSEL: En upriviligert bruker er ikke blitt spesifisert!"
 
-#: src/daemon.c:186
+#: src/daemon.c:213
 msgid "GNU Anubis is running..."
 msgstr "GNU Anubis kjører..."
 
-#: src/daemon.c:196 src/exec.c:114
-#, c-format
-msgid "accept() failed: %s."
-msgstr "accept() feilet: %s."
+#: src/daemon.c:225 src/exec.c:122
+msgid "accept() failed"
+msgstr "accept() feilet"
 
-#: src/daemon.c:214
+#: src/daemon.c:243
 #, c-format
 msgid "TCP wrappers: connection from %s:%u rejected."
 msgstr "TCP wrappere: tilkobling fra %s:%u avvist."
 
-#: src/daemon.c:232
+#: src/daemon.c:264
 #, c-format
 msgid "Too many clients. Connection from %s:%u rejected."
 msgstr "For mange klienter. Tilkobling fra %s:%u avvist."
 
-#: src/daemon.c:238
+#: src/daemon.c:271
 #, c-format
 msgid "Connection from %s:%u"
 msgstr "Tilkobling fra %s:%u"
 
-#: src/daemon.c:244
-#, c-format
-msgid "daemon: Can't fork. %s."
-msgstr "daemon: Kan ikke forke. %s."
+#: src/daemon.c:276
+msgid "daemon: cannot fork"
+msgstr "daemon: Kan ikke forke"
 
-#: src/env.c:163
+#: src/daemon.c:357 src/transmode.c:68
+msgid "The MTA has not been specified. Set the REMOTE-MTA or LOCAL-MTA."
+msgstr "Ingen MTA er spesifisert. Sett REMOTE-MTA eller LOCAL-MTA."
+
+#: src/env.c:172
 #, c-format
 msgid "Try '%s --help' for more information."
 msgstr "Forsøk '%s --help' for mere informasjon."
 
-#: src/env.c:265
+#: src/env.c:273
+#, c-format
+msgid "setgroups(1, %lu) failed"
+msgstr "setgroups(1, %lu) feilet"
+
+#: src/env.c:283
+#, c-format
+msgid "setegid(%lu) failed"
+msgstr "setegid(%lu) feilet"
+
+#: src/env.c:286
+#, c-format
+msgid "setregid(%lu,%lu) failed"
+msgstr "setregid(%lu, %lu) feilet"
+
+#: src/env.c:290
+#, c-format
+msgid "setresgid(%lu,%lu,%lu) failed"
+msgstr "setresgid(%lu,%lu,%lu) feilet"
+
+#: src/env.c:299
+#, c-format
+msgid "setgid(%lu) failed"
+msgstr "setgid(%lu) feilet"
+
+#: src/env.c:302
+#, c-format
+msgid "cannot set effective gid to %lu"
+msgstr "kan ikke sette effektiv gid (gruppeid) til %lu"
+
+#: src/env.c:324
+#, c-format
+msgid "setreuid(%lu,-1) failed"
+msgstr "setreuid(%lu,-1) feilet"
+
+#: src/env.c:330
+#, c-format
+msgid "second setuid(%lu) failed"
+msgstr "sekundær setuid(%lu) feilet"
+
+#: src/env.c:338
+#, c-format
+msgid "setuid(%lu) failed"
+msgstr "setuid(%lu) feilet"
+
+#: src/env.c:347
+msgid "seteuid(0) succeeded when it should not"
+msgstr "seteuid(0) vellykket når de skulle feilet"
+
+#: src/env.c:352
+msgid "cannot drop non-root setuid privileges"
+msgstr "Ikke-root setuid privilegier kan ikke droppes"
+
+#: src/env.c:379
 msgid "PAM: Session opened (restrictions applied)."
 msgstr "PAM: Sesjon åpnet (restriksjoner gjelder)."
 
-#: src/env.c:267
+#: src/env.c:382
 msgid "PAM: Not authenticated to use GNU Anubis."
 msgstr "PAM: Ikke authorisert til å bruke GNU Anubis."
 
-#: src/env.c:277 src/main.c:152
+#: src/env.c:394 src/main.c:156
 #, c-format
-msgid "UID:%d, GID:%d, EUID:%d, EGID:%d"
-msgstr "UID:%d, GID:%d, EUID:%d, EGID:%d"
+msgid "UID:%d (%s), GID:%d, EUID:%d, EGID:%d"
+msgstr "UID:%d (%s), GID:%d, EUID:%d, EGID:%d"
 
-#: src/env.c:308
+#: src/env.c:429
 #, c-format
 msgid "Invalid user ID: %s"
 msgstr "Ugyldig brukerid: %s"
 
-#: src/env.c:313
+#: src/env.c:435
 #, c-format
 msgid "Invalid user name: %s"
 msgstr "Ugyldig brukernavn: %s"
 
-#: src/env.c:335
+#: src/env.c:458
 #, c-format
 msgid "Wrong permissions on %s. Set 0600."
-msgstr "Feil Tilgangsnivå på %s. Sett til 0600."
+msgstr "Feil tilgangsnivå på %s. Sett til 0600."
 
-#: src/env.c:359
+#: src/env.c:484
 #, c-format
 msgid "%s is not a regular file or a symbolic link."
 msgstr "%s er ikke en normal fil eller symbolsk lenke."
 
-#: src/env.c:380
-#, fuzzy, c-format
+#: src/env.c:507
+#, c-format
 msgid "Unknown mode: %s"
-msgstr "Ukjent vert %s."
+msgstr "Ukjent modus: %s."
 
-#: src/errs.c:82
-#, fuzzy, c-format
-msgid "Couldn't write to socket: %s."
-msgstr "Kunne ikke skrive til socket! %s."
+#: src/env.c:522
+#, c-format
+msgid "Cannot open pid file '%s'"
+msgstr "Kan ikke åpne pid fil '%s'"
 
-#: src/errs.c:93
+#: src/errs.c:88
+msgid "warning"
+msgstr "advarsel"
+
+#: src/errs.c:96
+#, c-format
+msgid "Could not write to socket: %s"
+msgstr "Kunne ikke skrive til socket: %s."
+
+#: src/errs.c:98
+msgid "Could not write to socket"
+msgstr "Kunne ikke skrive til socket"
+
+#: src/errs.c:108
 #, c-format
 msgid "Unknown host %s."
 msgstr "Ukjent vert %s."
 
-#: src/errs.c:96
+#: src/errs.c:111
 #, c-format
 msgid "%s: host name is valid but does not have an IP address."
 msgstr "%s: Vertens navn er gyldig men den har ingen IP-adresse."
 
-#: src/errs.c:99
+#: src/errs.c:115
 #, c-format
 msgid "%s: unrecoverable name server error occured."
-msgstr "%s: uopprettelig navnetjenerfeil oppsto."
+msgstr "%s: Uopprettelig navnetjenerfeil oppsto."
 
-#: src/errs.c:102
+#: src/errs.c:118
 #, c-format
 msgid "%s: a temporary name server error occured. Try again later."
 msgstr "%s: Midlertidig navnetjenerfeil oppsto. Forsøk på ny senere."
 
-#: src/errs.c:104
+#: src/errs.c:121
 #, c-format
 msgid "%s: unknown DNS error %d."
 msgstr "%s: Ukjent DNS feil %d."
 
-#: src/esmtp.c:57
-msgid "Using the ESMTP CRAM-MD5 authentication..."
-msgstr "Bruker ESMTP CRAM-MD5 authentisering..."
+#: src/esmtp.c:58
+msgid "Using ESMTP authentication mechanism CRAM-MD5..."
+msgstr "Bruker ESMTP LOGIN authentiseringsmekanismen CRAM-MD5..."
 
-#: src/esmtp.c:63 src/esmtp.c:102
+#: src/esmtp.c:65 src/esmtp.c:107
 msgid "Server rejected the AUTH command."
 msgstr "Tjener avviste AUTH kommandoen."
 
-#: src/esmtp.c:71 src/esmtp.c:110 src/esmtp.c:121
+#: src/esmtp.c:74 src/esmtp.c:116 src/esmtp.c:128
 #, c-format
-msgid "Challenge decoded: %s"
-msgstr "Utfordring dekodet: %s"
+msgid "Challenge decoded: %s\n"
+msgstr "Utfordring dekodet: %s\n"
 
-#: src/esmtp.c:90 src/esmtp.c:131
+#: src/esmtp.c:93 src/esmtp.c:139
 #, c-format
 msgid "ESMTP AUTH: %s."
 msgstr "ESMTP AUTH: %s."
 
-#: src/esmtp.c:96
-msgid "Using the ESMTP LOGIN authentication..."
-msgstr "Bruker ESMTP LOGIN authentisering..."
+#: src/esmtp.c:100
+msgid "Using ESMTP authentication mechanism LOGIN..."
+msgstr "Bruker ESMTP LOGIN authentiseringsnmekanisme LOGIN..."
 
-#: src/exec.c:81
+#: src/exec.c:82
 msgid "#1 socket() failed."
 msgstr "#1 socket() feilet."
 
-#: src/exec.c:85
+#: src/exec.c:87
 msgid "#2 socket() failed."
 msgstr "#2 socket() feilet."
 
-#: src/exec.c:94
-#, c-format
-msgid "#1 bind() failed: %s."
-msgstr "#1 bind() feilet: %s."
+#: src/exec.c:97
+msgid "#1 bind() failed"
+msgstr "#1 bind() feilet"
 
-#: src/exec.c:98
-#, c-format
-msgid "#2 bind() failed: %s."
-msgstr "#2 bind() feilet: %s."
+#: src/exec.c:102
+msgid "#2 bind() failed"
+msgstr "#2 bind() feilet"
 
-#: src/exec.c:102 src/net.c:216
-#, c-format
-msgid "listen() failed: %s."
-msgstr "listen() feilet: %s."
+#: src/exec.c:107 src/net.c:237
+msgid "listen() failed"
+msgstr "listen() feilet"
 
-#: src/exec.c:106
+#: src/exec.c:112
 #, c-format
 msgid "getsockname() failed: %s."
 msgstr "getsockname() feilet: %s."
 
-#: src/exec.c:110
-#, c-format
-msgid "connect() failed: %s."
-msgstr "connect() feilet: %s."
+#: src/exec.c:117
+msgid "connect() failed"
+msgstr "connect() feilet"
 
-#: src/exec.c:120
-#, c-format
-msgid "socketpair() failed: %s."
-msgstr "socketpair() feilet: %s."
+#: src/exec.c:129
+msgid "socketpair() failed"
+msgstr "socketpair() feilet"
 
-#: src/exec.c:134
-#, fuzzy, c-format
+#: src/exec.c:143
+#, c-format
 msgid "Local program [%lu] finished."
-msgstr "Lokalt program [%d] fullførte."
+msgstr "Lokalt program [%lu] fullførte."
 
-#: src/exec.c:170
+#: src/exec.c:179
 #, c-format
 msgid "Executing %s %s..."
 msgstr "Kjører %s %s..."
 
-#: src/exec.c:177
-msgid "fork() failed."
-msgstr "fork() feilet."
+#: src/exec.c:187
+msgid "fork() failed"
+msgstr "fork() feilet"
 
-#: src/exec.c:191
-#, c-format
-msgid "execvp() failed: %s"
-msgstr "execvp() feilet: %s"
+#: src/exec.c:201
+msgid "execvp() failed"
+msgstr "execvp() feilet"
 
-#: src/gpg.c:50
+#: src/gpg.c:54
 #, c-format
 msgid "GPGME: %s."
 msgstr "GPGME: %s."
 
-#: src/gpg.c:73
+#: src/gpg.c:100
 #, c-format
 msgid "Install GPGME version %s or later."
 msgstr "Installer GPGME versjon %s eller nyere."
 
-#: src/gpg.c:78
+#: src/gpg.c:107
 #, c-format
 msgid "GPGME: failed. %s."
 msgstr "GPGME: feilet. %s."
 
-#: src/gpg.c:122 src/gpg.c:282
+#: src/gpg.c:159 src/gpg.c:407
 #, c-format
 msgid "GPGME: Cannot list keys: %s"
-msgstr ""
+msgstr "GPGME: Kan ikke liste ut nøkler: %s"
+
+#: src/gpg.c:288 src/gpg.c:430
+#, c-format
+msgid "GPGME: Invalid recipient encountered: %s"
+msgstr "GPGME: Ugyldig mottaker funner: %s"
+
+#: src/gpg.c:333
+#, c-format
+msgid "GPGME: Invalid signer found: %s"
+msgstr "GPGME: Ugyldig signatur funner: %s"
+
+#: src/gpg.c:340
+msgid "GPGME: Unexpected number of signatures created"
+msgstr "GPGME: Uventet antall signaturer opprettet"
+
+#: src/gpg.c:347
+msgid "GPGME: Wrong type of signature created"
+msgstr "GPGME: Feil type signatur opprettet"
+
+#: src/gpg.c:352
+#, c-format
+msgid "GPGME: Wrong pubkey algorithm reported: %i"
+msgstr "GPGME: Feil pupkey algoritme raportert: %i"
+
+#: src/gpg.c:359
+#, c-format
+msgid "GPGME: Wrong hash algorithm reported: %i"
+msgstr "GPGME: feil hashalgoritme raportert: %i"
+
+#: src/gpg.c:366
+#, c-format
+msgid "GPGME: Wrong signature class reported: %u"
+msgstr "GPGME: Feil signaturklasse rapportert: %u"
 
 #: src/guile.c:79
 #, c-format
-msgid "cannot open guile output file %s: %s"
-msgstr ""
+msgid "cannot open guile output file %s"
+msgstr "kan ikke åpne guile lagringsfil %s"
 
-#: src/guile.c:258
+#: src/guile.c:266
 msgid "missing procedure name"
-msgstr ""
+msgstr "mangler prosedyrenavn"
 
-#: src/guile.c:273
+#: src/guile.c:281
 #, c-format
 msgid "%s not a procedure object"
-msgstr ""
+msgstr "%s er ikke et prosedyreobjekt"
 
-#: src/guile.c:309
+#: src/guile.c:323
 #, c-format
 msgid "Bad car type in return from %s"
-msgstr ""
+msgstr "Ugyldig car type i retur fra %s"
 
-#: src/guile.c:324
+#: src/guile.c:342
 #, c-format
 msgid "Bad cdr type in return from %s"
-msgstr ""
+msgstr "Ugyldig cdr type i retur fra %s"
 
-#: src/guile.c:328
+#: src/guile.c:345
 #, c-format
 msgid "Bad return type from %s"
-msgstr ""
+msgstr "Ugyldig returtype fra %s"
 
 #: src/help.c:82
-#, fuzzy
 msgid ""
 "\n"
 "GNU Anubis is free software; you can redistribute it and/or modify\n"
@@ -441,50 +513,41 @@ msgstr "Bruk: anubis [opsjoner]\n"
 
 #: src/help.c:102
 msgid ""
-" -b, --bind [HOST:]PORT       Specify the TCP port on which GNU Anubis "
-"listens\n"
-"                              for connections. The default HOST is "
-"INADDR_ANY,\n"
+" -b, --bind [HOST:]PORT       Specify the TCP port on which GNU Anubis listens\n"
+"                              for connections. The default HOST is INADDR_ANY,\n"
 "                              and default PORT is 24 (private mail system)."
 msgstr ""
-" -b, --bind [VERT:]PORT       Spesifiser TCP port som GNU Anubis lytter "
-"etter\n"
+" -b, --bind [VERT:]PORT       Spesifiser TCP port som GNU Anubis lytter etter\n"
 "                              tilkoblinger på. Standard forvalgt verdi VERT\n"
 "                              er INADDR_ANY og standard forvalgt PORT er 24\n"
 "                              (privat e-post system)."
 
 #: src/help.c:105
 msgid ""
-" -r, --remote-mta HOST[:PORT] Specify a remote SMTP host name or IP "
-"address.\n"
+" -r, --remote-mta HOST[:PORT] Specify a remote SMTP host name or IP address.\n"
 "                              The default PORT number is 25."
 msgstr ""
 " -r, --remove-mta VERT[:PORT] Spesifier en ekstern SMTP vert per navn eller\n"
-"                              IP-adresse. Standard forvalgt PORT-nummer er "
-"25."
+"                              IP-adresse. Standard forvalgt PORT-nummer er 25."
 
 #: src/help.c:107
 msgid ""
 " -l, --local-mta FILE         Execute a local SMTP server, which works on\n"
-"                              standard input and output (inetd-type "
-"program).\n"
+"                              standard input and output (inetd-type program).\n"
 "                              This option excludes the '--remote-mta' option."
 msgstr ""
 " -l, --local-mta FILE         Kjør en lokal SMTP-tjener, som arbeider på\n"
-"                              standard inndata og utdata (inetd-likt "
-"program).\n"
+"                              standard inndata og utdata (inetd-likt program).\n"
 "                              Denne opsjonen ekskluderer '--remote-mta'\n"
 "                              opsjonen"
 
 #: src/help.c:110
-#, fuzzy
 msgid " -m, --mode=MODE              Select operation mode."
-msgstr " -f, --foreground             Forgrunnsmodus."
+msgstr " -m, --modus=MODE             Velg operasjonsmodus."
 
 #: src/help.c:111
-msgid ""
-"                              MODE is either \"transparent\" or \"auth\""
-msgstr ""
+msgid "                              MODE is either \"transparent\" or \"auth\""
+msgstr "                              MODE er enten \"transparent\" eller \"auth\""
 
 #: src/help.c:112
 msgid " -f, --foreground             Foreground mode."
@@ -492,12 +555,10 @@ msgstr " -f, --foreground             Forgrunnsmodus."
 
 #: src/help.c:113
 msgid ""
-" -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as "
-"described\n"
+" -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as described\n"
 "                              in RFC 821 on standard input and output."
 msgstr ""
-" -i, --stdio                  Bruk SMTP protokollen (OMP/Tunnel) som "
-"beskrevet\n"
+" -i, --stdio                  Bruk SMTP protokollen (OMP/Tunnel) som beskrevet\n"
 "                              i RCP 821 på standard inndata og utdata"
 
 #: src/help.c:115
@@ -505,19 +566,16 @@ msgid "Output options:\n"
 msgstr "Utdata opsjoner:\n"
 
 #: src/help.c:116
-#, fuzzy
 msgid " -s, --silent                 Work silently."
-msgstr " -s, --silent     Arbeid stille."
+msgstr " -s, --silent                 Arbeid stille."
 
 #: src/help.c:117
-#, fuzzy
 msgid " -v, --verbose                Work noisily."
-msgstr " -v, --verbose    Arbeid høylytt."
+msgstr " -v, --verbose                Arbeid høylytt."
 
 #: src/help.c:118
-#, fuzzy
 msgid " -D, --debug                  Debug mode."
-msgstr " -D, --debug      Feilsøkemodus."
+msgstr " -D, --debug                  Feilsøkemodus."
 
 #: src/help.c:119
 msgid ""
@@ -528,42 +586,38 @@ msgstr ""
 "Blandede opsjoner:\n"
 
 #: src/help.c:120
-#, fuzzy
-msgid ""
-" -c, --check-config           Run the configuration file syntax checker."
-msgstr " --norc           Ignorer system konfigurasjonsfil."
+msgid " -c, --check-config           Run the configuration file syntax checker."
+msgstr " -c, --check-config           Kontroller syntaksen i konfigurasjonsfilen."
 
 #: src/help.c:121
 msgid ""
 " --show-config-options        Print a list of configuration options used\n"
 "                              to build GNU Anubis."
 msgstr ""
+" --show-config-options        Skriv ut en liste med konfigurasjonsopsjoner brukt\n"
+"                              da GNU Anubis ble kompilert."
 
 #: src/help.c:123
-msgid ""
-" --relax-perm-check           Do not check a user config file permissions."
+msgid " --relax-perm-check           Do not check user configuration file permissions."
 msgstr ""
+" --relax-perm-check           Kontroller ikke tilgangsinnstillinger på brukerens\n"
+"                              konfigurasjonsfil"
 
 #: src/help.c:124
-#, fuzzy
-msgid ""
-" --altrc FILE                 Specify alternate system configuration file."
-msgstr " -altrc FIL     Spesifiser alternativ system konfigurasjon fil."
+msgid " --altrc FILE                 Specify alternate system configuration file."
+msgstr " -altrc FIL                   Spesifiser alternativ system konfigurasjon fil."
 
 #: src/help.c:125
-#, fuzzy
 msgid " --norc                       Ignore system configuration file."
-msgstr " --norc           Ignorer system konfigurasjonsfil."
+msgstr " --norc                       Ignorer system konfigurasjonsfil."
 
 #: src/help.c:126
-#, fuzzy
 msgid " --version                    Print version number and copyright."
-msgstr " --versjon        Skriv ut versjonsnummer og kopirettigheter."
+msgstr " --versjon                    Skriv ut versjonsnummer og kopirettigheter."
 
 #: src/help.c:127
-#, fuzzy
 msgid " --help                       It's obvious..."
-msgstr " --help           Vis hjelpeteksten..."
+msgstr " --help                       Vis hjelpeteksten..."
 
 #: src/help.c:128
 #, c-format
@@ -574,13 +628,52 @@ msgstr ""
 "\n"
 "Rapporter feil til <%s>.\n"
 
-#: src/map.c:68
+#: src/ident.c:105
+msgid "IDENT: socket() failed"
+msgstr "IDENT: socket() feilet"
+
+#: src/ident.c:117
+msgid "IDENT: connect() failed"
+msgstr "IDENT: connect() feilet"
+
+#: src/ident.c:123
+#, c-format
+msgid "IDENT: connected to %s:%u"
+msgstr "IDENT: koblet til %s:%u"
+
+#: src/ident.c:132
+#, c-format
+msgid "IDENT: stream_write() failed: %s."
+msgstr "IDENT: stream_write() feilet: %s."
+
+#: src/ident.c:140
+#, c-format
+msgid "IDENT: recvline() failed: %s."
+msgstr "IDENT: recvline() feilet: %s."
+
+#: src/ident.c:151
+msgid "IDENT: incorrect data."
+msgstr "IDENT: ugyldig data."
+
+#: src/ident.c:162
+msgid "IDENT: data probably encrypted with DES..."
+msgstr "IDENT: Data sannsynligvis kryptert med DES..."
+
+#: src/ident.c:170
+msgid "IDENT: incorrect data (DES deciphered)."
+msgstr "IDENT: ugyldig data (DES dekryptert)."
+
+#: src/ident.c:188
+#, c-format
+msgid "IDENT: resolved remote user to %s."
+msgstr "IDENT: identifiserte ekstern bruker som %s."
+
+#: src/map.c:71
 #, c-format
 msgid "%s remapped to %s@localhost."
 msgstr "%s omskrevet til %s@localhost."
 
-#: src/map.c:121
-#, fuzzy
+#: src/map.c:123
 msgid "Translation map: incorrect syntax."
 msgstr "Oversettelse kart: ugyldig syntaks."
 
@@ -592,54 +685,52 @@ msgstr "malloc() feilet. Kan ikke allokere nok minne."
 msgid "realloc() failed. Cannot reallocate enough memory."
 msgstr "realloc() feilet. Kan ikke reallokere nok minne."
 
-#: src/misc.c:308
+#: src/misc.c:332
 msgid "Can't find out my own hostname"
-msgstr ""
+msgstr "Kan ikke finne mitt eget maskinnavn"
 
-#: src/net.c:45
+#: src/net.c:50
 msgid "SERVER"
-msgstr ""
+msgstr "TJENER"
 
-#: src/net.c:48
+#: src/net.c:53
 msgid "CLIENT"
-msgstr ""
+msgstr "KLIENT"
 
-#: src/net.c:122
+#: src/net.c:131
 msgid "Getting remote host information..."
 msgstr "Henter informasjon om ekstern vert..."
 
-#: src/net.c:152 src/net.c:184
-msgid "Can't create stream socket."
+#: src/net.c:168
+msgid "Cannot create stream socket."
 msgstr "Kan ikke opprette stream socket."
 
-#: src/net.c:155
-#, c-format
-msgid "Connecting to %s:%u..."
-msgstr "Kobler til %s:%u..."
-
-#: src/net.c:157
+#: src/net.c:173
 #, c-format
 msgid "Couldn't connect to %s:%u. %s."
 msgstr "Kunne ikke koble til %s:%u. %s."
 
-#: src/net.c:162
+#: src/net.c:178
 #, c-format
 msgid "Connected to %s:%u"
 msgstr "Koblet til %s:%u"
 
-#: src/net.c:212
-#, c-format
-msgid "bind() failed: %s."
-msgstr "bind() feilet: %s."
+#: src/net.c:200
+msgid "Cannot create stream socket"
+msgstr "Kan ikke opprette stream socket"
 
-#: src/net.c:213
+#: src/net.c:233
+msgid "bind() failed"
+msgstr "bind() feilet"
+
+#: src/net.c:234
 #, c-format
 msgid "GNU Anubis bound to %s:%u"
 msgstr "GNU Anubis er bunet til %s:%u"
 
-#: src/net.c:242
+#: src/net.c:261
 msgid "Short write"
-msgstr ""
+msgstr "Ufullstendig lagring"
 
 #: src/socks.c:53
 msgid "Using SOCKS Proxy..."
@@ -650,95 +741,91 @@ msgstr "Bruker SOCKS proxy..."
 msgid "SOCKS proxy: %s"
 msgstr "SOCKS mellomlager: %s"
 
-#: src/socks.c:136
+#: src/socks.c:141
 msgid "Address must be an IP, not a domain name."
-msgstr "Adressen må være en IP-adress, ikke et domenenavn."
+msgstr "Adressen må være en IP-adresse, ikke et domenenavn."
 
-#: src/socks.c:171 src/socks.c:379
+#: src/socks.c:178 src/socks.c:397
 msgid "SOCKS Proxy Connection: succeeded."
 msgstr "SOCKS Proxy tilkoblet: vellykket."
 
-#: src/socks.c:174
+#: src/socks.c:181
 msgid "Request rejected or failed."
 msgstr "Forespørsel avvist eller feilet."
 
-#: src/socks.c:177
+#: src/socks.c:184
 msgid "Request rejected."
 msgstr "Forespørsel avvist."
 
-#: src/socks.c:180
-msgid ""
-"Request rejected, because the client program and identd reported different "
-"User-IDs."
-msgstr ""
-"Forespørsel avvist fordi klientprogrammet og identd rapporterer forskjellige "
-"brukerID-er"
+#: src/socks.c:187
+msgid "Request rejected, because the client program and identd reported different User-IDs."
+msgstr "Forespørsel avvist fordi klientprogrammet og identd rapporterer forskjellige brukerID-er"
 
-#: src/socks.c:184 src/socks.c:406
+#: src/socks.c:191 src/socks.c:424
 msgid "Server reply is not valid."
 msgstr "Tjenerens svar er ugyldig."
 
-#: src/socks.c:222
+#: src/socks.c:232
 msgid "Possibly not a SOCKS proxy service."
 msgstr "Muligens ikke en SOCKS proxy tjeneste."
 
-#: src/socks.c:234
+#: src/socks.c:244
 msgid "SOCKS Proxy AUTH method: NO AUTHENTICATION REQUIRED"
 msgstr "SOCKS Proxy AUTH metode: NO AUTHENTICATION REQUIRED"
 
-#: src/socks.c:238
+#: src/socks.c:247
 msgid "SOCKS Proxy AUTH method: USER NAME/PASSWORD"
 msgstr "SOCKS Proxy AUTH metode: USER NAME/PASSWORD"
 
-#: src/socks.c:241
+#: src/socks.c:251
 msgid "Cannot send null user name or password."
 msgstr "Kan ikke sende tomt brukernavn eller passord."
 
-#: src/socks.c:281
+#: src/socks.c:293
 msgid "Bad user name or password."
 msgstr "Feil brukernavn eller passord."
 
-#: src/socks.c:285
+#: src/socks.c:297
 msgid "SOCKS Proxy AUTH: succeeded."
 msgstr "SOCKS proxy AUTH: vellykket."
 
-#: src/socks.c:288
+#: src/socks.c:300
 msgid "Server does not accept any method."
 msgstr "Tjener godtar ingen metoder."
 
-#: src/socks.c:291
+#: src/socks.c:303
 msgid "Server does not accept an AUTH method."
 msgstr "Tjener godtar ikke AUTH metoden."
 
-#: src/socks.c:382
+#: src/socks.c:400
 msgid "General SOCKS server failure."
 msgstr "Generell SOCKS tjener feil."
 
-#: src/socks.c:385
+#: src/socks.c:403
 msgid "Connection not allowed by a ruleset."
 msgstr "Tilkobling tillates ikke jamnfør et regelsett."
 
-#: src/socks.c:388
+#: src/socks.c:406
 msgid "Network unreachable."
 msgstr "Nettverket kan ikke nås."
 
-#: src/socks.c:391
+#: src/socks.c:409
 msgid "Host unreachable."
 msgstr "Vert kan ikke nås."
 
-#: src/socks.c:394
+#: src/socks.c:412
 msgid "Connection refused."
 msgstr "Tilkobling støttes ikke."
 
-#: src/socks.c:397
+#: src/socks.c:415
 msgid "TTL expired."
 msgstr "TTL utgått."
 
-#: src/socks.c:400
+#: src/socks.c:418
 msgid "Command not supported."
 msgstr "Kommando støttes ikke."
 
-#: src/socks.c:403
+#: src/socks.c:421
 msgid "Address type not supported."
 msgstr "Adressetype støttes ikke."
 
@@ -752,408 +839,420 @@ msgstr "Tidsavbrudd! Avslutter..."
 
 #: src/rcfile.c:121
 #, c-format
-msgid "cannot stat file `%s': %s"
-msgstr ""
+msgid "cannot stat file `%s'"
+msgstr "kan ikke lese status for filen '%s'"
 
 #: src/rcfile.c:131
 #, c-format
-msgid "File `%s' has already been read"
-msgstr ""
+msgid "File `%s' has already been read.\n"
+msgstr "Filen '%s' er allerede lest.\n"
 
-#: src/rcfile.c:177
+#: src/rcfile.c:149
+#, c-format
+msgid "Welcome user %s !"
+msgstr "Velkommen bruker %s !"
+
+#: src/rcfile.c:185
 #, c-format
 msgid "Reading system configuration file %s..."
 msgstr "Leser systemets konfigurasjonsfil %s..."
 
-#: src/rcfile.c:187
+#: src/rcfile.c:197
 #, c-format
 msgid "Reading user configuration file %s..."
 msgstr "Leser brukers konfigurasjonsfil %s..."
 
-#: src/rcfile.c:679
+#: src/rcfile.c:330
+msgid "`logfile' directive is ignored in main configuration file"
+msgstr "'logfile' direktivet ignoreres i hovedkonfigurasjonsfilen"
+
+#: src/rcfile.c:709
 #, c-format
 msgid "No such section: %s"
-msgstr ""
+msgstr "Ingen slik seksjon: %s"
 
-#: src/rcfile.l:180
+#: src/rcfile.l:181
 #, c-format
-msgid ""
-"Stray character in config: \\%03o. Possibly missing quotes around the string"
-msgstr ""
+msgid "Stray character in config: \\%03o. Possibly missing quotes around the string"
+msgstr "Tegn på avveier i konfigurasjonen: \\\\%03o. Muligens en streng uten kvoteringstegn."
 
-#: src/rcfile.l:380
-#, c-format
-msgid "Anubis RC file error: %s."
-msgstr "Anubis RC fil feil: %s."
+#: src/rcfile.l:385
+msgid "Anubis RC file error"
+msgstr "Anubis RC fil feil"
 
-#: src/rcfile.y:162 src/rcfile.y:170
+#: src/rcfile.y:170 src/rcfile.y:178
 #, c-format
 msgid "Section %s already defined"
-msgstr ""
+msgstr "Seksjonen %s allerede definert"
 
-#: src/rcfile.y:217
-#, fuzzy, c-format
+#: src/rcfile.y:230
+#, c-format
 msgid "unknown keyword: %s"
-msgstr "Ukjent vert %s."
+msgstr "Ukjent nøkkelord: %s"
 
-#: src/rcfile.y:510
+#: src/rcfile.y:532
 msgid "missing replacement value"
-msgstr ""
+msgstr "mangler erstattningsverdi"
 
-#: src/rcfile.y:1122
+#: src/rcfile.y:629
+#, c-format
+msgid "Not a valid debugging level: %s"
+msgstr "Ikke et gyldig feilsøkingsnivå: %s"
+
+#: src/rcfile.y:1179
 msgid "Unknown regexp modifier"
-msgstr ""
+msgstr "Ukjent regexp modifikator"
 
-#: src/rcfile.y:1213
+#: src/rcfile.y:1277
 msgid "STOP"
-msgstr ""
+msgstr "STOPP"
 
-#: src/rcfile.y:1218
+#: src/rcfile.y:1282
 #, c-format
 msgid "Calling %s"
-msgstr ""
+msgstr "Ringer %s"
 
-#: src/rcfile.y:1224
+#: src/rcfile.y:1288
 #, c-format
 msgid "ADD %s [%s] %s"
-msgstr ""
+msgstr "LEGG TIL %s [%s] %s"
 
-#: src/rcfile.y:1234
+#: src/rcfile.y:1298
 #, c-format
 msgid "MODIFY %s [%s] [%s] %s"
-msgstr ""
+msgstr "ENDRE %s [%s] [%s] %s"
 
-#: src/rcfile.y:1247
+#: src/rcfile.y:1311
 #, c-format
 msgid "REMOVE HEADER [%s]"
-msgstr ""
+msgstr "FJERN HODE [%s]"
 
-#: src/rcfile.y:1270
-#, fuzzy, c-format
+#: src/rcfile.y:1334
+#, c-format
 msgid "Executing %s"
-msgstr "Kjører %s %s..."
+msgstr "Kjører %s"
 
-#: src/rcfile.y:1341
+#: src/rcfile.y:1414
 #, c-format
 msgid "Matched trigger \"%s\""
-msgstr ""
+msgstr "Fant trigger \"%s\""
 
-#: src/rcfile.y:1345
+#: src/rcfile.y:1418
 #, c-format
 msgid "Matched condition %s[%s] \"%s\""
-msgstr ""
+msgstr "Treff på betingelse %s[%s] \"%s\""
 
-#: src/rcfile.y:1475
-#, fuzzy, c-format
+#: src/rcfile.y:1528
+#, c-format
+msgid "Section %s"
+msgstr "Seksjon %s"
+
+#: src/rcfile.y:1552
+#, c-format
 msgid "Unknown section: %s"
-msgstr "Ukjent vert %s."
+msgstr "Ukjent seksjon: %s"
 
-#: src/rcfile.y:1517
+#: src/rcfile.y:1599
 msgid "program is not allowed in this section"
-msgstr ""
+msgstr "program tillates ikke i denne seksjonen"
 
-#: src/regex.c:109
+#: src/regex.c:113
 #, c-format
 msgid "INTERNAL ERROR at %s:%d: missing or invalid regex"
-msgstr ""
+msgstr "INITIELL FEIL på %s:%d: manglende eller ugyldig regex"
 
-#: src/regex.c:306
-#, fuzzy, c-format
+#: src/regex.c:316
+#, c-format
 msgid "regcomp() failed at %s: %s."
-msgstr "regcomp() feilet. %s"
+msgstr "regcomp() feilet på %s: %s."
 
-#: src/regex.c:377
+#: src/regex.c:392
 #, c-format
 msgid "pcre_compile() failed at offset %d: %s."
 msgstr "pcre_compile() feilet med forskyvning %d: %s."
 
-#: src/regex.c:402
-#, fuzzy, c-format
+#: src/regex.c:417
+#, c-format
 msgid "pcre_fullinfo() failed: %d."
-msgstr "listen() feilet: %s."
+msgstr "pcre_fullinfo() feilet: %d."
 
-#: src/regex.c:414
+#: src/regex.c:429
 msgid "Matched, but too many substrings."
 msgstr "Fant samsvar, men med for mange understrenger."
 
-#: src/regex.c:425
+#: src/regex.c:442
 #, c-format
 msgid "Get substring %d failed (%d)."
 msgstr "Finn understreng %d feilet (%d)."
 
-#: src/ssl.c:57
+#: src/ssl.c:59
 msgid "Seeding random number generator..."
 msgstr "Sår tilfeldig tall generator..."
 
-#: src/ssl.c:61
+#: src/ssl.c:63
 msgid "Unable to seed random number generator."
 msgstr "Kan ikke så tilfeldig tall generator."
 
-#: src/ssl.c:76
-#, fuzzy, c-format
+#: src/ssl.c:80
+#, c-format
 msgid "Write error: %s"
-msgstr "Anubis RC fil feil: %s."
+msgstr "Skrivefeil: %s."
 
-#: src/ssl.c:93
-#, fuzzy, c-format
+#: src/ssl.c:98
+#, c-format
 msgid "Read error: %s"
-msgstr "Anubis RC fil feil: %s."
+msgstr "Lesiefeil: %s."
 
-#: src/ssl.c:275
+#: src/ssl.c:277
 msgid "SSLv23_client_method() failed."
 msgstr "SSLv23_client_method() feilet."
 
-#: src/ssl.c:279 src/ssl.c:357
+#: src/ssl.c:282 src/ssl.c:363
 msgid "Can't create SSL_CTX object."
 msgstr "Kan ikke opprette SSL_CTX objekt."
 
-#: src/ssl.c:284 src/ssl.c:373
+#: src/ssl.c:288 src/ssl.c:383
 msgid "SSL_CTX_set_cipher_list() failed."
 msgstr "SSL_CTX_set_cipher_list() feilet."
 
-#: src/ssl.c:305 src/tls.c:161
+#: src/ssl.c:309 src/tls.c:168
 msgid "Initializing the TLS/SSL connection with MTA..."
 msgstr "Initialiserer TLS/SSL tilkobling met MTA..."
 
-#: src/ssl.c:308 src/ssl.c:393
+#: src/ssl.c:313 src/ssl.c:404
 msgid "Can't create a new SSL structure for a connection."
 msgstr "Kan ikke opprette ny SSL struktur for tilkobling."
 
-#: src/ssl.c:323 src/tls.c:193
-#, fuzzy, c-format
+#: src/ssl.c:329 src/tls.c:202
+#, c-format
 msgid "TLS/SSL handshake failed: %s"
-msgstr "TLS/SSL håndhilsing feilet!"
+msgstr "TLS/SSL håndhilsing feilet: %s"
 
-#: src/ssl.c:353
+#: src/ssl.c:358
 msgid "SSLv23_server_method() failed."
 msgstr "SSLv23_server_method() feilet."
 
-#: src/ssl.c:361
+#: src/ssl.c:368
 msgid "SSL_CTX_use_certificate_file() failed."
 msgstr "SSL_CTX_use_certificate_file() feilet."
 
-#: src/ssl.c:365
+#: src/ssl.c:373
 msgid "SSL_CTX_use_PrivateKey_file() failed."
 msgstr "SSL_CTX_use_PrivateKey_file() feilet."
 
-#: src/ssl.c:369
+#: src/ssl.c:378
 msgid "Private key does not match the certificate public key."
 msgstr "Privat nøkkel stemmer ikke med sertifikatets offentlige nøkkel."
 
-#: src/ssl.c:390 src/tls.c:244
+#: src/ssl.c:400 src/tls.c:252
 msgid "Initializing the TLS/SSL connection with MUA..."
 msgstr "Initialiserer TLS/SSL tilkobling med MUA..."
 
-#: src/ssl.c:405 src/tls.c:275
+#: src/ssl.c:417 src/tls.c:284
 msgid "TLS/SSL handshake failed!"
 msgstr "TLS/SSL håndhilsing feilet!"
 
-#: src/ssl.c:439
-#, fuzzy, c-format
+#: src/ssl.c:450
+#, c-format
 msgid "%s connection using %s (%u bit)"
 msgid_plural "%s connection using %s (%u bits)"
-msgstr[0] "%s tilkobling med %s (%u bits)"
+msgstr[0] "%s tilkobling med %s (%u bit)"
 msgstr[1] "%s tilkobling med %s (%u bits)"
 
-#: src/ssl.c:451
-#, fuzzy, c-format
+#: src/ssl.c:462
+#, c-format
 msgid "Server public key is %d bit"
 msgid_plural "Server public key is %d bits"
-msgstr[0] "Tjenerens offentlige nøkkel er %d bits"
+msgstr[0] "Tjenerens offentlige nøkkel er %d bit"
 msgstr[1] "Tjenerens offentlige nøkkel er %d bits"
 
-#: src/ssl.c:457
+#: src/ssl.c:467
 msgid "Certificate:"
 msgstr "Sertifikat:"
 
-#: src/ssl.c:459
+#: src/ssl.c:472
 msgid "X509_NAME_oneline [subject] failed!"
 msgstr "X509_NAME_online [subject] feilet!"
 
-#: src/ssl.c:462
+#: src/ssl.c:475
 #, c-format
 msgid "Subject: %s"
 msgstr "Emne: %s"
 
-#: src/ssl.c:464
+#: src/ssl.c:479
 msgid "X509_NAME_oneline [issuer] failed!"
 msgstr "X509_NAME_online [issuer] feilet!"
 
-#: src/ssl.c:467
+#: src/ssl.c:482
 #, c-format
 msgid "Issuer:  %s"
 msgstr "Utsteder:  %s"
 
-#: src/tls.c:176 src/tls.c:253
+#: src/tls.c:185 src/tls.c:263
 #, c-format
-msgid "TLS Error reading `%s': %s"
-msgstr ""
+msgid "TLS error reading `%s': %s"
+msgstr "TLS lesefeil '%s': %s"
 
-#: src/tls.c:296
+#: src/tls.c:305
 msgid "No certificate was sent."
 msgstr "Intet sertifikat ble sent."
 
-#: src/tls.c:300
+#: src/tls.c:310
 msgid "The certificate is not trusted."
 msgstr "Sertifikatet stoles ikke på."
 
-#: src/tls.c:304
+#: src/tls.c:315
 msgid "The certificate has expired."
 msgstr "Sertifikatet er utgått."
 
-#: src/tls.c:308
+#: src/tls.c:320
 msgid "The certificate is not yet activated."
 msgstr "Sertifikatet er ennå ikke aktivisert."
 
-#: src/tls.c:316
+#: src/tls.c:330
 msgid "No certificate was found!"
 msgstr "Intet sertifikat funnet!"
 
-#: src/tls.c:320
+#: src/tls.c:335
 msgid "The certificate is trusted."
 msgstr "Serifikatet stoles på."
 
-#: src/tls.c:351
-#, fuzzy, c-format
-msgid "Anonymous DH using prime of %d bit."
-msgid_plural "Anonymous DH using prime of %d bits."
-msgstr[0] "Anonym DH med primtall på %d bits."
-msgstr[1] "Anonym DH med primtall på %d bits."
-
-#: src/tls.c:361
-#, fuzzy, c-format
-msgid "Ephemeral DH using prime of %d bit."
-msgid_plural "Ephemeral DH using prime of %d bits."
-msgstr[0] "Ephemeral (?) FH med primtall op %s bits."
-msgstr[1] "Ephemeral (?) FH med primtall op %s bits."
+#: src/tls.c:365
+#, c-format
+msgid "- Anonymous DH using prime of %d bit.\n"
+msgid_plural "- Anonymous DH using prime of %d bits.\n"
+msgstr[0] "Anonym DH med primtall på %d bit.\n"
+msgstr[1] "Anonym DH med primtall på %d bits.\n"
 
 #: src/tls.c:373
+#, c-format
+msgid "- Ephemeral DH using prime of %d bit.\n"
+msgid_plural "- Ephemeral DH using prime of %d bits.\n"
+msgstr[0] "Ephemeral (?) FH med primtall op %d bit.\n"
+msgstr[1] "Ephemeral (?) FH med primtall op %d bits.\n"
+
+#: src/tls.c:384
 #, c-format
 msgid "- Protocol: %s\n"
 msgstr "-Protokoll: %s\n"
 
-#: src/tls.c:376
+#: src/tls.c:388
 #, c-format
 msgid "- Certificate Type: %s\n"
 msgstr "- Sertifikattype: %s\n"
 
-#: src/tls.c:379
+#: src/tls.c:391
 #, c-format
 msgid "- Compression: %s\n"
 msgstr "- Komprimering: %s\n"
 
-#: src/tls.c:382
+#: src/tls.c:394
 #, c-format
 msgid "- Cipher: %s\n"
 msgstr "- Chiffer (Krypto): %s\n"
 
-#: src/tls.c:385
+#: src/tls.c:397
 #, c-format
 msgid "- MAC: %s\n"
 msgstr "- MAC: %s\n"
 
-#: src/tls.c:412
+#: src/tls.c:425
 #, c-format
-msgid " - Certificate info:\n"
+msgid "- Certificate info:\n"
 msgstr " - Sertifikat informasjon:\n"
 
-#: src/tls.c:416
+#: src/tls.c:429
 #, c-format
-msgid " - Certificate is valid since: %s"
+msgid "- Certificate is valid since: %s"
 msgstr " - Sertifikatet er gyldig siden: %s"
 
-#: src/tls.c:418
+#: src/tls.c:431
 #, c-format
-msgid " - Certificate expires: %s"
+msgid "- Certificate expires: %s"
 msgstr " - Sertifikatet utgår: %s"
 
-#: src/tls.c:424
-#, fuzzy, c-format
-msgid " - Certificate fingerprint: "
-msgstr " - Sertifikat fingeravtrykk: %s\n"
-
-#: src/tls.c:434
-#, fuzzy, c-format
-msgid " - Certificate serial number: "
-msgstr " - Sertifikat seriellnummer: %s\n"
-
-#: src/tls.c:443
+#: src/tls.c:436
 #, c-format
-msgid "Certificate public key: "
-msgstr "Sertifikat offentlig nøkkel: "
+msgid "- Certificate fingerprint: "
+msgstr " - Sertifikat fingeravtrykk :"
 
-#: src/tls.c:445
+#: src/tls.c:446
+#, c-format
+msgid "- Certificate serial number: "
+msgstr " - Sertifikat seriellnummer: "
+
+#: src/tls.c:455
+#, c-format
+msgid "- Certificate public key: "
+msgstr "- Sertifikat offentlig nøkkel: "
+
+#: src/tls.c:458
 #, c-format
 msgid "RSA\n"
 msgstr "RSA\n"
 
-#: src/tls.c:446
-#, fuzzy, c-format
-msgid " Modulus: %d bit\n"
-msgid_plural " Modulus: %d bits\n"
-msgstr[0] " Modulus: %d bits\n"
+#: src/tls.c:459
+#, c-format
+msgid "- Modulus: %d bit\n"
+msgid_plural "- Modulus: %d bits\n"
+msgstr[0] " Modulus: %d bit\n"
 msgstr[1] " Modulus: %d bits\n"
 
-#: src/tls.c:451
+#: src/tls.c:464
 #, c-format
 msgid "DSA\n"
 msgstr "DSA\n"
 
-#: src/tls.c:452
-#, fuzzy, c-format
-msgid " Exponent: %d bit\n"
-msgid_plural " Exponent: %d bits\n"
-msgstr[0] " Eksponent: %d bits\n"
+#: src/tls.c:465
+#, c-format
+msgid "- Exponent: %d bit\n"
+msgid_plural "- Exponent: %d bits\n"
+msgstr[0] " Eksponent: %d bit\n"
 msgstr[1] " Eksponent: %d bits\n"
 
-#: src/tls.c:457
+#: src/tls.c:469
 #, c-format
 msgid "UNKNOWN\n"
 msgstr "UKJENT\n"
 
-#: src/tls.c:459
+#: src/tls.c:471
 #, c-format
-msgid " - Certificate version: #%d\n"
+msgid "- Certificate version: #%d\n"
 msgstr " - Sertifikat versjon: #%d\n"
 
-#: src/tls.c:466
-#, fuzzy, c-format
-msgid " - Certificate Issuer's DN: %s\n"
-msgstr " - Sertifikat utsteder informasjon:\n"
+#: src/tls.c:478
+#, c-format
+msgid "- Certificate Issuer's DN: %s\n"
+msgstr " - Sertifikat utsteder sin DN: %s\n"
 
-#: src/tunnel.c:288 src/tunnel.c:351
+#: src/tunnel.c:319 src/tunnel.c:388
 msgid "Transferring message(s)..."
 msgstr "Overfører melding(er)..."
 
-#: src/tunnel.c:349
+#: src/tunnel.c:386
 msgid "Starting SMTP session..."
-msgstr ""
+msgstr "Starter SMTP sesjon..."
 
-#: src/tunnel.c:429
+#: src/tunnel.c:469
 msgid "Using the TLS/SSL encryption..."
 msgstr "Bruker TLS/SSL kryptering..."
 
-#: src/tunnel.c:441 src/tunnel.c:548
+#: src/tunnel.c:483 src/tunnel.c:627
 #, c-format
 msgid "WARNING: %s"
 msgstr "ADVARSEL: %s"
 
-#: src/tunnel.c:442
+#: src/tunnel.c:484
 msgid "STARTTLS command failed."
 msgstr "STARTTLS kommando feilet."
 
-#: src/tunnel.c:540
-msgid "Using the 'ONEWAY' TLS/SSL encryption..."
-msgstr "Bruker 'ENVEIS' TLS/SSL kryptering..."
+#: src/tunnel.c:618
+msgid "Using TLS/SSL encryption between Anubis and remote MTA only..."
+msgstr "Bruker TLS/SSL kryptering kun mellom Anubis og ekstern MTA..."
 
-#: src/tunnel.c:550
+#: src/tunnel.c:628
 msgid "STARTTLS (ONEWAY) command failed."
 msgstr "STARTTLS (ENVEIS) kommando feilet."
-
-#: src/tunnel.c:577
-#, c-format
-msgid "getpeername() failed: %s."
-msgstr "get peername() feilet: %s."
 
 #: lib/getopt.c:629 lib/getopt.c:641
 #, c-format
@@ -1212,7 +1311,7 @@ msgstr "%s: opsjon '-W %s' tillater ikke noe argument\n"
 
 #: lib/obstack.c:403 lib/obstack.c:406
 msgid "memory exhausted"
-msgstr ""
+msgstr "minne oppbrukt"
 
 #~ msgid "The %s section has been found. Processing..."
 #~ msgstr "Seksjonen %s er funnet. Prosesserer..."
@@ -1220,11 +1319,26 @@ msgstr ""
 #~ msgid "IDENT: send() failed: %s."
 #~ msgstr "IDENT: send() feilet: %s.<"
 
+#~ msgid "OK"
+#~ msgstr "OK"
+
+#~ msgid "ERROR"
+#~ msgstr "FEIL"
+
+#~ msgid "Connection terminated."
+#~ msgstr "Tilkobling avbrutt."
+
+#~ msgid "Using the ESMTP CRAM-MD5 authentication..."
+#~ msgstr "Bruker ESMTP CRAM-MD5 authentisering..."
+
 #~ msgid "Built-in support for: "
 #~ msgstr "Innebygget støtte for: "
 
 #~ msgid "Initializing socket..."
 #~ msgstr "Initialiserer socket..."
+
+#~ msgid "Connecting to %s:%u..."
+#~ msgstr "Kobler til %s:%u..."
 
 #~ msgid "(%ld)SERVER >>> %s"
 #~ msgstr "(%ld)TJENER >>> %s"
@@ -1243,3 +1357,9 @@ msgstr ""
 
 #~ msgid "SSL_set_fd() failed."
 #~ msgstr "SSL_set_fd() feilet."
+
+#~ msgid "Using the 'ONEWAY' TLS/SSL encryption..."
+#~ msgstr "Bruker 'ENVEIS' TLS/SSL kryptering..."
+
+#~ msgid "getpeername() failed: %s."
+#~ msgstr "get peername() feilet: %s."
