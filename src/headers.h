@@ -381,7 +381,7 @@ void parse_mtahost(char *, char *, unsigned int *);
 void remline(char *, char *);
 void remcrlf(char *);
 char *substitute(char *, char **);
-void change_to_lower(char *);
+void make_lowercase(char *);
 char *get_localname(void);
 char *get_localdomain(void);
 
