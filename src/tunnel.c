@@ -221,7 +221,6 @@ collect_body (MESSAGE * msg)
       len = strlen (msg->boundary);
       msg->mime_hdr = list_create ();
     }
-
   obstack_init (&stk);
   while (state != ST_DONE
 	 && (nread = recvline (SERVER, remote_client, buf, sizeof (buf) - 1)))
@@ -674,13 +673,22 @@ handle_ehlo (char *command, char *reply, size_t reply_size)
      Check whether we can use the ESMTP AUTH.
    */
 
-  if ((topt & T_ESMTP_AUTH) && strstr (reply, "AUTH "))
+  if (topt & T_ESMTP_AUTH)
     {
-      esmtp_auth (remote_server, reply);
-      memset (session.mta_username, 0, sizeof (session.mta_username));
-      memset (session.mta_password, 0, sizeof (session.mta_password));
+      char *p = strstr (reply, "AUTH ");
+      if (p && (p[-1] == '-' || p[-1] == ' ') && memcmp (p-4, "250", 3) == 0)
+	{
+	  char *q = strchr (p, '\r');
+	  if (q)
+	    *q++ = 0;
+	  esmtp_auth (&remote_server, p + 5);
+	  if (q)
+	    memmove (p - 4, q + 1, strlen (q + 1) + 1);
+	  memset (session.mta_username, 0, sizeof (session.mta_username));
+	  memset (session.mta_password, 0, sizeof (session.mta_password));
+	}
     }
-
+  
   return 0;
 }
 
@@ -760,7 +768,6 @@ raw_transfer (void)
 {
   int nread;
   char buf[LINEBUFFER + 1];
-
   while ((nread = recvline (SERVER, remote_client, buf,
 			    sizeof (buf) - 1)) > 0)
     {
