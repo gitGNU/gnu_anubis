@@ -30,6 +30,7 @@
 #include <gpgme.h>
 
 struct gpg_struct {
+	int inited;
 	char *keys;
 	char *passphrase;
 };
@@ -76,6 +77,7 @@ gpgme_init(void)
 		anubis_error(HARD, _("GPGME: failed. %s."), gpgme_strerror(err));
 		return -1;
 	}
+	gpg.inited = 1;
 	if (options.termlevel == DEBUG)
 		puts(gpgme_get_engine_info());
 	return 0;
@@ -95,6 +97,8 @@ gpg_sign(char *gpg_data)
 	GpgmeCtx ctx;
 	GpgmeError err = 0;
 	GpgmeData in, out;
+	GpgmeKey key;
+	
 	char buf[256];
 	char *signed_data;
 	int size;
@@ -104,6 +108,19 @@ gpg_sign(char *gpg_data)
 	signed_data = (char *)xmalloc(size);
 	memset(buf, 0, sizeof(buf));
 	fail_if_err(gpgme_new(&ctx));
+
+	if (gpg.keys) {
+		err = gpgme_op_keylist_start(ctx, gpg.keys, 0);
+		if (!err) {
+			while ((err = gpgme_op_keylist_next(ctx, &key)) == 0)
+				err = gpgme_signers_add(ctx, key);
+		}
+		if (err && err != GPGME_EOF) {
+			anubis_error(HARD, _("GPGME: cannot list keys: %s"),
+				     gpgme_strerror(err));
+			topt |= T_ERROR;
+		}
+	}
 	gpgme_set_passphrase_cb(ctx, (GpgmePassphraseCb)passphrase_cb, 0);
 	gpgme_set_textmode(ctx, 1);
 	gpgme_set_armor(ctx, 1);
@@ -262,9 +279,8 @@ gpg_parser(int method, int key, char *arg, void *inv_data, void *func_data,
 {
 	switch (key) {
 	case KW_GPG_PASSPHRASE:
-		gpg.passphrase = arg;
-		gpgme_init();
-		memset(gpg.passphrase, 0, strlen(gpg.passphrase));
+		free(gpg.passphrase);
+		gpg.passphrase = strdup(arg);
 		break;
 		
 	case KW_GPG_ENCRYPT:
@@ -272,12 +288,20 @@ gpg_parser(int method, int key, char *arg, void *inv_data, void *func_data,
 		gpg.keys = allocbuf(arg, 0);
 		gpg.keys = xrealloc(gpg.keys, strlen(gpg.keys) + 2);
 		strcat(gpg.keys, ",");
+		if (gpg.inited == 0 && gpgme_init())
+			break;
 		gpg_proc(msg, gpg_encrypt_to_users);
 		break;
 		
-	case KW_GPG_SIGN:              
-		if (strcmp(arg, "yes") == 0) 
+	case KW_GPG_SIGN:
+		if (strcmp(arg, "no")) {
+			xfree(gpg.keys);
+			if (strcmp(arg, "yes")) 
+				gpg.keys = strdup(arg);
+			if (gpg.inited == 0 && gpgme_init()) 
+				break;
 			gpg_proc(msg, gpg_sign);
+		}
 		break;
 		
 	case KW_GPG_HOME:
