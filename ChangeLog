@@ -1,3 +1,8 @@
+2003-02-11  Sergey Poznyakoff
+
+	* testsuite/mta.c: Prevent race condition on closing the diagnostic
+	  file.
+
 2003-02-11  Wojciech Polak
 
 	Removed ROT-13 support from main engine.
