@@ -1,3 +1,7 @@
+2003-02-08  Sergey Poznyakoff  
+
+	* src/regex.c: Rewritten using "control table" approach.
+
 2003-02-08  Wojciech Polak
 
 	* src/rc.c (gpg_parser): Fixed KW_GPG_SIGN case.
