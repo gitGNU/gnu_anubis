@@ -206,6 +206,7 @@ loop (int sd_bind)
 #ifdef USE_LIBWRAP
   struct request_info req;
 #endif /* USE_LIBWRAP */
+  sigset_t blockset;
 
   addrlen = sizeof (addr);
   signal (SIGCHLD, sig_cld);
@@ -257,7 +258,11 @@ loop (int sd_bind)
 	  process_rcfile (CF_SUPERVISOR);
 	}
 
+      sigemptyset (&blockset);
+      sigaddset (&blockset, SIGCHLD);
+      sigprocmask (SIG_BLOCK, &blockset, NULL);		
       nchild++;
+      sigprocmask (SIG_UNBLOCK, &blockset, NULL);		
       if (nchild > MAXCLIENTS)
 	{
 	  info (NORMAL,
