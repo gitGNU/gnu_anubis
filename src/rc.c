@@ -150,9 +150,7 @@ open_rcfile(int method)
 	char homedir[MAXPATHLEN+1];
 	char *rcfile = 0;
 	RC_SECTION *sec;
-	static int ctr = 0;
-	if (ctr++ > 0)
-		return;
+
 	switch (method) {
 	case CF_SUPERVISOR:
 	case CF_INIT:
