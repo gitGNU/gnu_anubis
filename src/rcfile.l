@@ -73,12 +73,12 @@ extern int yydebug;
 %x STR LIT ML
 
 WS [ \t][ \t]*
-IDENT [a-zA-Z_][a-zA-Z_0-9-]+
+IDENT [a-zA-Z_][a-zA-Z0-9_-]*
 LDASHES ---[ \t]*
 RDASHES [ \t]*---
 %%
          /* End-of-line comments */
-#.*\n          { cfg_line_num++; }
+#.*\n          { cfg_line_num++; return EOL; }
 #.*            /* end-of-file comment */;
          /* Keywords */
 BEGIN          return T_BEGIN;
@@ -116,22 +116,17 @@ END |
 [rR][eE][mM][oO][vV][eE]     return REMOVE;
 [mM][oO][dD][iI][fF][yY]     return MODIFY;
 
-         /* Literal */
-<LIT>[^\n]*/\n   { BEGIN(INITIAL);
-	           yylval.string = trimcpy();
-		   DBG("<LIT>STRING", yylval.string);
-		   return STRING; }
          /* Identifiers */
 {IDENT}          { yylval.string = strdup(yytext);
                    DBG("IDENT", yytext);
 		   return IDENT; }
          /* Quoted strings */
-\"[^\\"\n]*\"     { return simple_string(); }
-\"[^\\"\n]*\\[0-9] {BEGIN(STR);
+<INITIAL,LIT>\"[^\\"\n]*\"     { return simple_string(); }
+<INITIAL,LIT>\"[^\\"\n]*\\[0-9] {BEGIN(STR);
                    string_begin();
 		   string_add(yytext+1, yyleng-1);
                   }
-\"[^\\"\n]*\\.    { BEGIN(STR);
+<INITIAL,LIT>\"[^\\"\n]*\\.    { BEGIN(STR);
                    string_begin();
 		   string_add(yytext+1, yyleng-3);
 		   string_add_char(escape(yytext[yyleng-1])); }
@@ -143,10 +138,10 @@ END |
                    string_finish();
 		   return STRING; }
          /* "Here document" (multiline strings) */
-"<<"-?{IDENT}[ \t]*\n |
-"<<"-?{IDENT}[ \t]*#.*\n { BEGIN(ML);
-                         multiline_begin();
-	             	 cfg_line_num++; }
+<INITIAL,LIT>"<<"-?{IDENT}[ \t]*\n |
+<INITIAL,LIT>"<<"-?{IDENT}[ \t]*#.*\n { BEGIN(ML);
+                                        multiline_begin();
+	                         	cfg_line_num++; }
 <ML>.*\n { char *p = multiline_strip_tabs(yytext);
            cfg_line_num++;
 	   
@@ -156,10 +151,24 @@ END |
 		   BEGIN(INITIAL);
 		   multiline_finish();
 		   unput('\n');
+		   DBG("<ML>STRING", yylval.string);
 		   return STRING;
 	     }
 	    multiline_add(p);
          } 
+         /* Literal */
+<LIT>\\\n     { cfg_line_num++; }
+<LIT>[^ \t\n]+\\\n   { yylval.string = malloc(yyleng-1);
+                       memcpy(yylval.string, yytext, yyleng-2);
+		       yylval.string[yyleng-2] = 0;
+		       DBG("<LIT>STRING", yylval.string);
+		       cfg_line_num++;
+		       return STRING; }
+<LIT>[^ \t\n]+   { yylval.string = trimcpy();
+		   DBG("<LIT>STRING", yylval.string);
+		   return STRING; }
+<LIT>{WS}        ;
+<LIT>\n          { BEGIN(INITIAL); cfg_line_num++; return EOL; }
          /* Other tokens */
 {WS}           ;
 \n             { cfg_line_num++; return EOL; }
@@ -189,6 +198,7 @@ simple_string()
   yylval.string = xmalloc(yyleng - 1);
   memcpy(yylval.string, yytext + 1, yyleng - 2);
   yylval.string[yyleng - 2] = 0;
+  DBG("STRING",yylval.string); 
   return STRING; 
 }
 
