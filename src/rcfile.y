@@ -1,6 +1,8 @@
 %{
 /*
-   GNU Anubis -- an outgoing mail processor and the SMTP tunnel.
+   rcfile.y
+
+   This file is part of GNU Anubis.
    Copyright (C) 2003 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
