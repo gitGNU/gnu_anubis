@@ -7,10 +7,6 @@
  sorts of processing and conversion on the outgoing mail in accord with the
  sender's specified rules, based on a highly configurable regular expressions
  system. It operates as a proxy server, independently from mail user agents.
- GNU Anubis can edit outgoing mail headers, encrypt and/or sign mail with the
- GNU Privacy Guard, build secure SMTP tunnels (Simple Mail Transport Protocol)
- using the TLS/SSL encryption even if your mail user agent doesn't support it,
- or tunnel a connection through a SOCKS proxy server.
 
  --------*      --------**      ------***
  |  MUA  | ---> | Anubis | ---> |  MTA  |
@@ -30,22 +26,25 @@
  SUPPORTED SOFTWARE
  ==================
 
- Required:
-
- * The TCP/IP Identification Protocol (RFC 1413) server (any).
-
- Highly recommended:
+ Recommended:
 
  * GnuTLS -- a Transport Layer Security Library (http://www.gnutls.org/)
    or OpenSSL -- a cryptographic package (http://www.openssl.org/).
+ * GSASL -- an implementation of the SASL framework
+   (http://www.gnu.org/software/gsasl/).
  * GnuPG -- The GNU Privacy Guard (http://www.gnupg.org/)
    with GPGME -- GnuPG Made Easy (http://www.gnupg.org/gpgme.html).
  * Guile -- The GNU extension language (http://www.gnu.org/software/guile/).
+ * A database, any from the following:
+   - GDBM -- (http://www.gnu.org/software/gdbm/).
+   - MySQL -- (http://www.mysql.com/).
 
  Optional:
 
+ * The TCP/IP Identification Protocol (RFC 1413) server (any).
  * PCRE -- Perl-Compatible Regular Expression Library (http://www.pcre.org/).
- * PAM -- Pluggable Authentication Modules.
+ * PAM -- Pluggable Authentication Modules
+   (http://www.kernel.org/pub/linux/libs/pam/).
  * libwrap (TCP wrappers) -- an access control library.
 
 
@@ -66,13 +65,17 @@
  For better control, use the options below.
  Set the `./configure' script with:
 
+ `--with-gsasl'        to support SASL authentication.
+ `--with-mysql'        to support MySQL database.
  `--with-pcre'         to support Perl-compatible regular expressions.
  `--with-pam'          to support Pluggable Authentication Modules.
+ `--with-socks-proxy'  to support SOCKS v4/5 proxy support.
  `--with-tcp-wrappers' to support libwrap (TCP wrappers).
  `--with-openssl'      to support OpenSSL (and disable GnuTLS).
  `--without-gnutls'    to disable GnuTLS support.
  `--without-gpgme'     to disable GNU Privacy Guard (GPGME) support.
  `--without-guile'     to disable Guile support.
+
  `--with-unprivileged-user=USER'
                        to set an unprivileged user (default is "nobody").
 
@@ -83,10 +86,11 @@
  or similar, and configure its system configuration file (read
  the GNU Anubis Manual about this topic).
 
- CAUTION: It is required to install the TCP/IP IDENT protocol
- server (RFC 1413). Without it, an outgoing mail processor will fail.
- Most modern GNU/Linux (or *BSD) distributions have already installed
- such a server. If not, try `pidentd', available at:
+ CAUTION: It is now optional to install the TCP/IP IDENT protocol
+ server (RFC 1413). It depends on whether you are going to use
+ a "transparent" mode, or not. Please consult the documentation.
+ Most modern GNU/Linux (or *BSD) distributions have already
+ installed an IDENT server. If not, try `pidentd', available at:
  ftp://ftp.lysator.liu.se/pub/ident/servers/
 
  Editing Configuration Files with GNU Emacs
