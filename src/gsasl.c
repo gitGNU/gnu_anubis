@@ -186,7 +186,7 @@ _gsasl_destroy (void *sd)
 void
 install_gsasl_stream (Gsasl_session_ctx * sess_ctx, NET_STREAM * stream)
 {
-  struct anubis_gsasl_stream *s = malloc (sizeof *s);
+  struct anubis_gsasl_stream *s = xmalloc (sizeof *s);
 
   s->sess_ctx = sess_ctx;
   _auth_lb_create (&s->lb);
