@@ -1,3 +1,54 @@
+2003-03-06  Sergey Poznyakoff 
+
+	* guile: New subdirecory
+	* guile/Makefile.am: New file.
+	* guile/remailer.scm: New file.
+	* guile/rot-13.scm: Moved from ...
+	* examples/rot-13.scm: ... here
+	* examples/Makefile.am: Updated.
+	* Makefile.am: Added new subdir (guile)
+	* configure.ac: Likewise.
+	  Minor fix for handling --with-tls and --with-openssl options.
+	* examples/anubis.scm: Added extra arguments to interface
+	  functions.
+	* src/daemon.c: Use ngettext wherever appropriate.
+	* src/ssl.c: Likewise.
+	* src/tls.c: Likewise.
+	
+	* src/exec.c (exec_argv): new function.
+	* src/guile.c (guile_process_proc): Pass any number of additional
+	  parameters to the procedure.
+	  (guile_parser): Reflect changes to the prototype.
+	  
+	* src/gpg.c (gpg_parser): Reflect changes to the prototype.
+	* src/headers.h (message_external_proc): Changed proto
+	  (exec_argv): New function.
+	* src/list.c (list_iterate): Bugfix
+	  (list_item): New function.
+	* src/list.h: (list_item): New function.
+	* src/message.c (message_external_proc): Changed proto
+	* src/rc.c (control_parser,tls_parser,rule_parser): Reflect
+	  changes to the prototype.
+	* src/rcfile.h (struct rc_asgn): Changed type of 'rhs'
+	  (rc_kw_parser_t): Changed third argument type.
+	* src/rcfile.l: Lots of changes to make LIT state more
+	  intellectual.
+	* src/rcfile.y (asgn_stmt) production modified to collect
+	  whitespace-separated arguments at the right of the keyword,
+	  instead of just one line.
+	  
+	* testsuite/data/Makefile.am: Fixed creation gpg keyrings.
+	* testsuite/etc/remail.pat: New file
+	* testsuite/etc/remail.in: New file
+	* testsuite/etc/Makefile.am: Added new files
+	* testsuite/lib/anubis.exp (anubis_expect_list,anubis_test): Be
+	  more stringent in testing.
+	* testsuite/etc/gpgcrypt.pat: Modified to reflect recent changes
+	  to anubis.exp.
+	* testsuite/etc/gpgsign.pat: Likewise.
+	* testsuite/anubis/guile.exp: New file
+	* testsuite/anubis/DISTFILES: Updated
+	
 2003-03-03  Wojciech Polak
 
 	* examples/1anubisrc: Updated to the new syntax.
