@@ -139,6 +139,38 @@ message_modify_body(MESSAGE *msg, RC_REGEX *regex, char *value)
 	}	
 }
 
+static char *
+expand_ampersand(char *value, char *old_value)
+{
+	char *p;
+
+	p = strchr(value, '&');
+	if (!p) {
+		free(old_value);
+		p = strdup(value);
+	} else {
+		struct obstack stk;
+		int old_length = strlen(old_value);
+		
+		obstack_init(&stk);
+		for (; p; p = strchr(value, '&')) {
+			int length = p - value;
+
+			obstack_grow(&stk, value, length);
+			if (p > value && p[-1] == '\\') 
+				obstack_1grow(&stk, *p);
+			else 
+				obstack_grow(&stk, old_value, old_length);
+			value = p + 1;
+		}
+		if (value && value[0])
+			obstack_grow(&stk, value, strlen(value));
+		p = strdup(obstack_finish(&stk));
+		obstack_free(&stk, NULL);
+	}
+	return p;
+}
+
 void
 message_modify_headers(MESSAGE *msg, RC_REGEX *regex, char *key2, char *value)
 {
@@ -160,8 +192,8 @@ message_modify_headers(MESSAGE *msg, RC_REGEX *regex, char *key2, char *value)
 					asc->key = strdup(key2);
 			}
 			if (value) {
-				free(asc->value);
-				asc->value = strdup(value);
+				asc->value = expand_ampersand(value,
+							      asc->value);
 			}
 		}
 		if (rc)
