@@ -2,7 +2,7 @@ dnl
 dnl configure.ac
 dnl
 dnl This file is part of GNU Anubis.
-dnl Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
+dnl Copyright (C) 2001, 2002, 2003, 2004, 2005 The Anubis Team.
 dnl
 dnl GNU Anubis is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ AC_TYPE_SIGNAL
 AC_CHECK_TYPE(u_char, unsigned char)
 
 AC_CHECK_HEADERS(arpa/inet.h syslog.h regex.h \
- sys/types.h sys/socket.h socket.h)
+ sys/types.h sys/socket.h socket.h sysexits.h)
 
 AC_CHECK_TYPE(socklen_t, , AC_DEFINE(socklen_t, int,
 [Define to int if <sys/types.h> does not define]),
