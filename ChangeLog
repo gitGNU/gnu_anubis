@@ -1,6 +1,11 @@
 2003-06-29  Sergey Poznyakoff  
 
 	* src/rcfile.y: Force R_EXACT on r_msgpart production.
+	(rc_node_print,rc_inst_print): Use anubis_regex_print.
+	* src/headers.h: Fixed two typos.
+	(anubis_regex_print): New function.
+	* src/regex.c (anubis_regex_print): New function.
+	* testsuite/etc/std.pat: Updated
 
 2003-06-29  Sergey Poznyakoff 
 
