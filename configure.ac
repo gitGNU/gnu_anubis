@@ -149,7 +149,7 @@ AC_ARG_WITH(gpgme,
 if test "$with_gpgme" = "no"; then
  AC_DEFINE(NOGPG, 1, [Define to 1 if NOGPG is requested.])
 else
- AM_PATH_GPGME([0.9.0], with_gpgme=yes, with_gpgme=no)
+ AM_PATH_GPGME([1.0.0], with_gpgme=yes, with_gpgme=no)
  AC_CHECK_LIB(gpgme, main,, with_gpgme=no)
 fi
 if test "$with_gpgme" = "no"; then
