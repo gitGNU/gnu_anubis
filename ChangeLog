@@ -1,3 +1,8 @@
+2003-08-21  Wojciech Polak
+
+	* src/errs.c (anubis_error, socks_error): Changed prototype.
+	* src/headers.h: Likewise.
+
 2003-08-21  Sergey Poznyakoff 
 
 	* src/exec.c (exec_argv): Extra argument: full path
@@ -7,7 +12,7 @@
 	* THANKS: Added Dominique Bordereaux.
 	* src/env.c (get_options): Fixed definition of
 	'c' option (needed double-colon).
-	
+
 2003-08-21  Wojciech Polak
 
 	* src/gpg.c (gpg_sign_encrypt): New function.
