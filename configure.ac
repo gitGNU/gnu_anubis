@@ -338,6 +338,7 @@ AC_CONFIG_FILES([Makefile
  examples/pam/Makefile
  guile/Makefile
  intl/Makefile
+ lib/Makefile
  m4/Makefile
  po/Makefile.in
  scripts/Makefile
