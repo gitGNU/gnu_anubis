@@ -25,19 +25,21 @@
 #include "headers.h"
 #include "extern.h"
 
-/* String lists */
-
-static int
-_mem_free(void *item, void *data)
+/* General-purpose function for use with list_destroy when deallocating
+   simple lists */
+int
+anubis_free_list_item(void *item, void *data)
 {
 	free(item);
 	return 0;
 }
 
+/* String lists */
+
 void
 destroy_string_list(LIST **plist)
 {
-	list_destroy(plist, _mem_free, NULL);
+	list_destroy(plist, anubis_free_list_item, NULL);
 }
 
 static int
