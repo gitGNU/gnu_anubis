@@ -20,12 +20,14 @@
 ##
 
 GPGFILES = secring.gpg pubring.gpg
-noinst_DATA = @ANUBIS_GPGFILES@
+noinst_DATA = @ANUBIS_GPGFILES@ text.db
 
-EXTRA_DIST = pubring.asc secring.asc anubis.pem append.txt
-CLEANFILES = *.gpg random_seed *~
+EXTRA_DIST = pubring.asc secring.asc anubis.pem append.txt users
+CLEANFILES = *.gpg random_seed *~ text.db
 
 pubring.gpg secring.gpg: $(srcdir)/pubring.asc $(srcdir)/secring.asc
 	$(GPG) --homedir . --import < $(srcdir)/pubring.asc
 	$(GPG) --homedir . --allow-secret-key-import --import < $(srcdir)/secring.asc
 
+text.db: $(srcdir)/users
+	sed -e "`../findport -fs^USER^%u^`;s^ETCDIR^`cd ../etc;pwd`^" $(srcdir)/users > text.db

@@ -22,9 +22,9 @@ AUTOMAKE_OPTIONS = dejagnu
 DEJATOOL = anubis
 RUNTESTFLAGS = 
 CLEANFILES = *.log
-test_dirs = lib anubis
-noinst_PROGRAMS = mta
-SUBDIRS = etc data
+test_dirs = lib anubis anubis.authmode
+noinst_PROGRAMS = mta findport
+SUBDIRS = . etc data
 
 mta_LDADD = @LIBGNUTLS_LIBS@
 INCLUDES = @LIBGNUTLS_CFLAGS@

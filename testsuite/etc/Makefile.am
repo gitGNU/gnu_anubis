@@ -34,14 +34,17 @@ EXTRA_DIST = \
  gpgcrypt.pat\
  gpgsign.pat\
  gpgse.pat\
+ interface.in.in\
  mime1.pat\
  mime2.pat\
  mod-body.pat\
  mod-header.pat\
  mult.pat\
+ net.rc\
  remail.pat\
  rot-13.pat\
  std.pin\
+ target.in.in\
  tlsoneway.pat\
  trigger.pat\
  add.in\
@@ -65,27 +68,31 @@ RCFILES = \
  empty.rc\
  entire.rc\
  gpg.rc\
+ interface.in.rc\
  mod-body.rc\
  mod-header.rc\
  remail.rc\
  simple.rc\
  std.rc\
+ target.in.rc\
  tlsoneway.rc\
  trigger.rc
 
 noinst_DATA = $(RCFILES) std.pat
 CLEANFILES = $(RCFILES) std.pat
-DISTCLEANFILES = *.log
+DISTCLEANFILES = *.log target.rc interface.rc anubis.pid anubis.trace *.tmp anubis.out user.rc
 
 cond.rc: cond.in
 del.rc: del.in
 empty.rc: empty.in
 entire.rc: entire.in
+interface.in.rc: interface.in.in
 gpg.rc: gpg.in
 mod-body.rc: mod-body.in
 mod-header.rc: mod-header.in
 simple.rc: simple.in
 std.rc: std.in
+target.in.rc: target.in.in
 trigger.rc: trigger.in
 
 std.pat: std.pin
