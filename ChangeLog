@@ -1,3 +1,8 @@
+2003-08-15  Wojciech Polak
+
+	* src/log.c: A few minor changes.
+	* src/headers.h (mprintf, info): Changed prototypes.
+
 2003-08-14  Sergey Poznyakoff 
 
 	Added tracing the execution of config file sections.
