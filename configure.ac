@@ -216,33 +216,12 @@ if test "$with_openssl" = "yes"; then
  fi
 fi
 
-if test "$with_gnutls" = "yes"; then
- AC_CHECK_LIB(gcrypt, main,, with_gnutls=no)
- AC_CHECK_LIB(gnutls, main,, with_gnutls=no)
-fi
-if test "$with_gnutls" = "yes"; then
- findgnutlsdir() { :
-  if test -f "$1/include/gnutls/gnutls.h"; then
-   gnutlsdir=1
-   INCLUDES="$INCLUDES -I$1/include"
-   AC_MSG_CHECKING(for $1/include/gnutls/gnutls.h)
-   AC_MSG_RESULT([yes])
-   return 0
-  fi
-  return 1
- }
- for maindir in /usr/pkg /opt /sw; do
-  findgnutlsdir $maindir && break 2
- done
- if test $gnutlsdir; then
-  AC_DEFINE(HAVE_GNUTLS_GNUTLS_H, 1, [Define to 1 if HAVE_GNUTLS_GNUTLS_H is requested.])
- else
+if test $with_gnutls = yes; then
   AC_CHECK_HEADERS(gnutls/gnutls.h)
- fi
- AC_LIBOBJ(tls)
- AC_DEFINE(USE_GNUTLS, 1, [Define to 1 if USE_GNUTLS is requested.])
-else
- AC_MSG_RESULT([Disabling GnuTLS support...])
+  AM_PATH_LIBGNUTLS("0.9.6",
+                    [AC_LIBOBJ(tls)
+                    AC_DEFINE(USE_GNUTLS, 1, [Define to 1 if USE_GNUTLS is requested.])],
+                    [AC_MSG_RESULT([Disabling GnuTLS support...])])
 fi
 
 dnl Use option --with-pcre to compile PCRE library support.
