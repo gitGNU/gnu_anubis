@@ -32,12 +32,12 @@ if header =^Subject:
  guile-rewrite-line = rewrite-subject
 fi
 
-rule :basic =^rot13.*subj
+trigger :basic =^rot13.*subj
  guile-process = anubis-rot-13-header
  add = X-Comment: Subject encoded with ROT-13
 done
 
-rule :basic =^rot13.*body
+trigger :basic =^rot13.*body
  guile-process = anubis-rot-13-body
  add = X-Comment: Body encoded with ROT-13
 done

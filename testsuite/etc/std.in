@@ -40,7 +40,7 @@ if header[X-Mailer] = "(.*)"
  modify [X-Mailer]  "The lousy mailer \1"
 fi
 
-rule "gpgd:(.*)"
+trigger "gpgd:(.*)"
  add [X-GPG-Comment] "Encrypted for \1"
  ifdef(`WITH_GPG', `gpg-encrypt = \1')
 done

@@ -31,18 +31,18 @@ END
 
 ---BEGIN RULE---
 
-rule "remail:(.*)/(.*)"
+trigger "remail:(.*)/(.*)"
  guile-process remailer-I #:rrt gray@localhost \
                           #:post \1 \
                           #:latent \2 \
 			  #:header "X-Processed-By: GNU Anubis & Remailer-I"
 done
 
-rule "rot-13.*body"
+trigger "rot-13.*body"
  guile-process rot-13 #:body
 done
 
-rule "rot-13.*subj"
+trigger "rot-13.*subj"
  guile-process rot-13 #:subject
 done
 

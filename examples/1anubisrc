@@ -20,10 +20,10 @@
 # socks-v4 YES-OR-NO
 # socks-auth USERNAME:PASSWORD
 # ssl YES-OR-NO
-# ssl-oneway = YES-OR-NO
-# ssl-cert = FILE NAME
-# ssl-key = FILE-NAME
-# ssl-cafile = FILE-NAME
+# ssl-oneway YES-OR-NO
+# ssl-cert FILE NAME
+# ssl-key FILE-NAME
+# ssl-cafile FILE-NAME
 ---END---
 
 #
@@ -44,15 +44,15 @@ fi
 # Process a message header lines.
 # The Triggers:
 
-rule "^gpg-encrypt"
+trigger "^gpg-encrypt"
  gpg-encrypt GPG-KEY(S)
 done
 
-rule "^gpg-sign"
+trigger "^gpg-sign"
  gpg-sign yes
 done
 
-rule "^gpg-dynamic:(.*)"
+trigger "^gpg-dynamic:(.*)"
  add header[X-GPG-Comment] "Encrypted for \1"
  gpg-encrypt \1
 done

@@ -22,11 +22,11 @@ local-mta = TESTDIR/mta -bs -d TESTDIR/etc/mta.log
 
 ---BEGIN RULE---
 
-rule "^trigger1"
+trigger "^trigger1"
   add [X-Trigger-Test] "is the true path to nirvana..."
 done
 
-rule "^trigger2 (.*) (.*)"
+trigger "^trigger2 (.*) (.*)"
   add [X-Trigger-Test] "SMELLS LIKE \1 \2"
 done
 
