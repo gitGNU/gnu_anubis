@@ -399,7 +399,7 @@ static struct rc_secdef_child tls_sect_child = {
 	tls_parser,
 	NULL
 };
-#endif
+#endif /* HAVE_TLS or HAVE_SSL */
 
 void
 control_section_init()
@@ -411,7 +411,7 @@ control_section_init()
 	rc_secdef_add_child(sp, &control_sect_child);
 #if defined(HAVE_TLS) || defined(HAVE_SSL)
 	rc_secdef_add_child(sp, &tls_sect_child);
-#endif
+#endif /* HAVE_TLS or HAVE_SSL */
 }
 
 /* ********************** The ALL and RULE Sections *********************** */ 
@@ -591,8 +591,8 @@ gpg_parser(int method, int key, char *arg,
 		break;
 		
 	case KW_GPG_SIGN:              
-		if (strcmp(arg, "yes") == 0
-		    || (mopt & M_GPG_PASSPHRASE) == 0) {
+		if (strcmp(arg, "yes")
+		    || !(mopt & M_GPG_PASSPHRASE)) {
 			if (gpg.passphrase) {
 				memset(gpg.passphrase, 0,
 				       strlen(gpg.passphrase));
@@ -632,7 +632,7 @@ static struct rc_secdef_child gpg_sect_child = {
 	NULL
 };
 
-#endif
+#endif /* HAVE_GPG */
 
 void
 all_section_init()
@@ -641,7 +641,7 @@ all_section_init()
 	rc_secdef_add_child(sp, &all_sect_child);
 #ifdef HAVE_GPG
 	rc_secdef_add_child(sp, &gpg_sect_child);
-#endif
+#endif /* HAVE_GPG */
 }
 
 void
@@ -652,7 +652,7 @@ rule_section_init()
 	rc_secdef_add_child(sp, &all_sect_child);
 #ifdef HAVE_GPG
 	rc_secdef_add_child(sp, &gpg_sect_child);
-#endif
+#endif /* HAVE_GPG */
 }
 
 void
@@ -664,7 +664,7 @@ rc_system_init()
 	rule_section_init();
 #ifdef WITH_GUILE
 	guile_section_init();
-#endif
+#endif /* WITH_GUILE */
 }
 
 /* Placeholders */
