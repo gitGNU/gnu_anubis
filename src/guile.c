@@ -28,6 +28,9 @@
 
 #ifdef WITH_GUILE
 
+static struct list *process_head, *process_tail;
+static struct list *postprocess_head, *postprocess_tail;
+
 static void guile_ports_open();
 static void guile_ports_close();
 
@@ -293,7 +296,7 @@ anubis_to_guile(struct list *p)
 
 /* (define (postproc header-list body)*/
 void
-guile_postprocess_proc(char *procname, struct list **hdr, char **body)
+guile_process_proc(char *procname, struct list **hdr, char **body)
 {
 	SCM arg_hdr, arg_body;
 	SCM procsym;
@@ -369,6 +372,21 @@ guile_postprocess_proc(char *procname, struct list **hdr, char **body)
 	guile_ports_close();
 }
 
+void
+guile_process_list(struct list **hdr, char **body)
+{
+	struct list *p;
+
+	for (p = process_head; p; p = p->next)
+		guile_process_proc(p->line, hdr, body);
+}
+
+int
+guile_proclist_empty()
+{
+	return process_head == NULL;
+}
+
 /* RC file stuff */
 
 #define KW_GUILE_OUTPUT           0
@@ -420,15 +438,20 @@ guile_parser(int method, int key, char *arg,
 		guile_load_program(arg);
 		break;
 
-#if 0
 	case KW_GUILE_PROCESS:
-		xfree(options.guile_process);
-		options.guile_process = strdup(arg);
+		/* FIXME: Currently every chunk of the rc file may be
+		   processed several times. This kludge prevents
+		   the same function from being called several times. */
+		if (process_tail)
+			break;
+		process_tail = new_element(process_tail,
+					   &process_head, strdup(arg));
 		break;
-#endif
+
 	case KW_GUILE_POSTPROCESS:       
-		xfree(options.guile_postprocess);
-		options.guile_postprocess = strdup(arg);
+		postprocess_tail = new_element(postprocess_tail,
+					       &postprocess_head,
+					       strdup(arg));
 		break;
 
 	case KW_GUILE_REWRITE_LINE:
