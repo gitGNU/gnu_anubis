@@ -239,7 +239,7 @@ start_ssl_server(int sd_client)
 	gnutls_certificate_allocate_credentials(&x509_cred);
 	atexit(_tls_cleanup_x509);
 	if (secure.cafile) {
-		rs = gnutls_certificate_set_x509_trust_file(xcred,
+		rs = gnutls_certificate_set_x509_trust_file(x509_cred,
 							    secure.cafile,
 							    GNUTLS_X509_FMT_PEM);
 		if (rs < 0) {
