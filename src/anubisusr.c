@@ -51,7 +51,7 @@ struct obstack input_stk;
 
 int verbose;
 
-#define VDETAIL(n,s) do { if (verbose>=(n)) printf s; } while(0);
+#define VDETAIL(n,s) do { if (verbose>=(n)) printf s; } while(0)
 
 struct smtp_reply {
 	int code;        /* Reply code */
@@ -439,11 +439,133 @@ struct auth_args {
 	char *service_name;
 	char *passcode;
 	char *qop;
-	size_t maxbuf;
 	char *realm;
 };
 
 struct auth_args auth_args;
+
+void
+assign_string(char **pstring, const char *value)
+{
+	if (*pstring)
+		free(*pstring);
+	*pstring = strdup(value);
+}
+
+/* Compare two hostnames. Return 0 if they have the same address type,
+   address length *and* at least one of the addresses of A matches
+   B */
+int
+hostcmp(const char *a, const char *b)
+{
+	struct hostent *hpa = gethostbyname(a);
+	struct hostent *hpb = gethostbyname(b);
+	char **addr;
+	
+	if (!hpa || !hpb)
+		return 1;
+	if (hpa->h_length != hpb->h_length
+	    || hpa->h_addrtype != hpb->h_addrtype)
+		return 1;
+
+	for (addr = hpa->h_addr_list; *addr; addr++) {
+		char **p;
+
+		for (p = hpb->h_addr_list; *p; p++) {
+			if (memcmp(*addr, *p, hpa->h_length) == 0)
+				return 0;
+		}
+	}
+	return 1;
+}
+
+/* Parse traditional .netrc file. Set up auth_args fields in accordance with
+   it. */
+void
+parse_netrc(const char *filename)
+{
+	FILE *fp;
+	char *buf = NULL;
+	size_t n = 0;
+	int def_argc = 0;
+	char **def_argv;
+	char **p_argv;
+	int line = 0;
+	
+	VDETAIL(1,(_("Opening configuration file %s: "), filename));
+	fp = fopen(filename, "r");
+	if (!fp) {
+		VDETAIL(1,("%s\n", strerror(errno)));
+		if (errno != ENOENT) {
+			error(_("Cannot open configuration file %s: %s"),
+			      filename, strerror(errno));
+		}
+		return;
+	} else
+		VDETAIL(1,(_("OK\n")));
+
+	while (getline(&buf, &n, fp) > 0 && n > 0) {
+		char *p;
+		size_t len;
+		int argc;
+		char **argv;
+
+		line++;
+		len = strlen(buf);
+		if (len > 1 && buf[len-1] == '\n')
+			buf[len-1] = 0;
+		p = skipws(buf);
+		if (*p == 0 || *p == '#')
+			continue;
+		
+		argcv_split(buf, &argc, &argv);
+
+		if (strcmp(argv[0], "machine") == 0
+		    && hostcmp(argv[1], smtp_host) == 0) {
+			VDETAIL(1,(_("Found matching line %d\n"), line));
+
+			if (def_argc)
+				argcv_free(def_argc, def_argv);
+			def_argc = argc;
+			def_argv = argv;
+			p_argv = argv + 2;
+			break;
+		} else if (strcmp(argv[0], "default") == 0) {
+			VDETAIL(1,(_("Found default line %d\n"), line));
+			
+			if (def_argc)
+				argcv_free(def_argc, def_argv);
+			def_argc = argc;
+			def_argv = argv;
+			p_argv = argv + 1;
+		} else
+			argcv_free(argc, argv);
+	}
+	fclose(fp);
+	free(buf);
+	
+	if (!p_argv)
+		VDETAIL(1,(_("No matching line found\n")));
+	else {
+		while (*p_argv) {
+			if (!p_argv[1]) {
+				error(_("%s:%d: incomplete sentence"),
+				      filename, line);
+				break;
+			}
+			if (strcmp(*p_argv, "login") == 0) {
+				assign_string(&auth_args.authentication_id,
+					      p_argv[1]);
+				assign_string(&auth_args.authorization_id,
+					      p_argv[1]);
+			} else if (strcmp(*p_argv, "password") == 0) 
+				assign_string(&auth_args.password, p_argv[1]);
+			p_argv += 2;
+		}
+		argcv_free(def_argc, def_argv);
+	}
+}
+	
 
 /* FIXME: Add UTF-8 conversion */
 static int
@@ -745,23 +867,33 @@ smtp_auth()
 }
 
 
+const char *
+get_home_dir()
+{
+	static char *home;
+
+	if (!home) {
+		struct passwd *pwd = getpwuid(getuid());
+		if (pwd)
+			home = pwd->pw_dir;
+		else 
+			home = getenv("HOME");
+
+		if (!home) {
+			error(_("What is your home directory?"));
+			exit(1);
+		}
+	}
+	return home;
+}
+
 /* Auxiliary functions */
 char *
 rc_name()
 {
 	char *rc;
-	char *home;
-	struct passwd *pwd = getpwuid(getuid());
-	if (pwd)
-		home = pwd->pw_dir;
-	else 
-		home = getenv("HOME");
-
-	if (!home) {
-		error(_("What is your home directory?"));
-		exit(1);
-	}
-
+	char *home = get_home_dir();
+	
 	rc = xmalloc(strlen(home) + 1 + sizeof DEFAULT_LOCAL_RCFILE);
 	strcpy(rc, home);
 	strcat(rc, "/");
@@ -876,12 +1008,12 @@ smtp_upload(char *rcname)
 	size_t n;
 
 	fp = fopen(rcname, "r");
-	if (fp) {
+	if (!fp) {
 		error(_("Cannot open file %s: %s"), rcname, strerror(errno));
 		return;
 	}
 	
-	VDETAIL(1,(_("Uploading %s"), rcname));
+	VDETAIL(1,(_("Uploading %s\n"), rcname));
 
 	send_line("XDATABASE UPLOAD");
 	smtp_get_reply(&repl);
@@ -893,8 +1025,12 @@ smtp_upload(char *rcname)
 	}
 	smtp_free_reply(&repl);
 	
-	while (getline(&buf, &n, stdin) > 0 && n > 0)
+	while (getline(&buf, &n, fp) > 0 && n > 0) {
+		size_t len = strlen(buf);
+		if (len && buf[len-1] == '\n')
+			buf[len-1] = 0;
 		send_line(buf);
+	}
 	send_line(".");
 	
 	fclose(fp);
@@ -1034,7 +1170,20 @@ help()
 	printf(_("\nReport bugs to <%s>.\n"), PACKAGE_BUGREPORT);
 	exit(0);
 }
-	
+
+#define NETRC_NAME ".netrc"
+void
+read_netrc()
+{
+	char *home = get_home_dir();
+	char *netrc = xmalloc(strlen(home) + 1 + sizeof NETRC_NAME);
+	strcpy(netrc, home);
+	strcat(netrc, "/");
+	strcat(netrc, NETRC_NAME);
+	parse_netrc(netrc);
+	free(netrc);
+}
+
 
 int
 main (int argc, char **argv)
@@ -1105,6 +1254,7 @@ main (int argc, char **argv)
 		}
 	}
 
+	read_netrc();
 	return synch();
 }
 
