@@ -391,7 +391,6 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
     parse_mtaport (arg, session.mta, &session.mta_port);
     break;
 
-#if defined (WITH_GSASL)
   case KW_LOCAL_MTA:
     xfree (session.execpath);
     xfree_pptr (session.execargs);
@@ -400,6 +399,7 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
     topt |= T_LOCAL_MTA;
     break;
 
+#if defined (WITH_GSASL)
   case KW_ESMTP_AUTH:
     {
       char *p = strchr (arg, ':');
