@@ -36,6 +36,7 @@ EXTRA_DIST = \
  mime2.pat\
  mult.pat\
  remail.pat\
+ rot-13.pat\
  std.pat\
  add.in\
  del.in\
@@ -70,4 +71,4 @@ std.rc: std.in
 SUFFIXES=.in .rc
 
 .in.rc:
-	m4 -DTESTDIR=`cd ..; pwd` $< > $@
+	m4 -DTOP_SRCDIR=`cd $(top_srcdir); pwd` -DTESTDIR=`cd ..; pwd` $< > $@
