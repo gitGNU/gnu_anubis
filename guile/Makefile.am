@@ -22,9 +22,9 @@
 ## compiling, linking, and/or using OpenSSL is allowed.
 ##
 
-GUILE_SCM = rot-13.scm remailer.scm
+GUILE_SCM = rot-13.scm remailer.scm entire-msg.scm
 pkgdata_DATA = @GUILE_SCRIPTS@
-EXTRA_DIST = rot-13.scm remailer.scm
+EXTRA_DIST = rot-13.scm remailer.scm entire-msg.scm
 
 ## EOF
 
