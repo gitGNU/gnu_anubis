@@ -15,6 +15,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: src/auth.c:31
 #, c-format
@@ -140,8 +141,8 @@ msgstr "%s-Dämon erfolgreich gestartet."
 #, c-format
 msgid "Child [%lu] finished. Exit status: %s. %d client left."
 msgid_plural "Child [%lu] finished. Exit status: %s. %d clients left."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Kindprozess [%lu] mit Endzustand %s beendet. Noch %d Kindprozess."
+msgstr[1] "Kindprozess [%lu] mit Endzustand %s beendet. Noch %d Kindprozesse."
 
 #: src/daemon.c:95
 msgid "OK"
@@ -933,15 +934,15 @@ msgstr "TLS/SSL-Handshake fehlgeschlagen!"
 #, c-format
 msgid "%s connection using %s (%u bit)"
 msgid_plural "%s connection using %s (%u bits)"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%s-Verbindung mit %s (%u Bit)"
+msgstr[1] "%s-Verbindung mit %s (%u Bits)"
 
 #: src/ssl.c:451
-#, fuzzy, c-format
+#, c-format
 msgid "Server public key is %d bit"
 msgid_plural "Server public key is %d bits"
-msgstr[0] "Serverantwort ist ungültig."
-msgstr[1] "Serverantwort ist ungültig."
+msgstr[0] "Der öffentliche Schlüssel des Servers hat %d Bit."
+msgstr[1] "Der öffentliche Schlüssel des Servers hat %d Bits."
 
 #: src/ssl.c:457
 msgid "Certificate:"
@@ -998,15 +999,15 @@ msgstr "Das Zertifikat ist vertrauenswürdig."
 #, c-format
 msgid "Anonymous DH using prime of %d bit."
 msgid_plural "Anonymous DH using prime of %d bits."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Anonymer DH mit %d-Bit-Primzahl."
+msgstr[1] "Anonymer DH mit %d-Bit-Primzahl."
 
 #: src/tls.c:361
 #, c-format
 msgid "Ephemeral DH using prime of %d bit."
 msgid_plural "Ephemeral DH using prime of %d bits."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Kurzlebiger DH mit %d-Bit-Primzahl."
+msgstr[1] "Kurzlebiger DH mit %d-Bit-Primzahl."
 
 #: src/tls.c:373
 #, c-format
@@ -1072,8 +1073,8 @@ msgstr "RSA\n"
 #, c-format
 msgid " Modulus: %d bit\n"
 msgid_plural " Modulus: %d bits\n"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Modulus: %d Bit\n"
+msgstr[1] "Modulus: %d Bits\n"
 
 #: src/tls.c:451
 #, c-format
@@ -1084,8 +1085,8 @@ msgstr "DSA\n"
 #, c-format
 msgid " Exponent: %d bit\n"
 msgid_plural " Exponent: %d bits\n"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Exponent: %d Bit\n"
+msgstr[1] "Exponent: %d Bits\n"
 
 #: src/tls.c:457
 #, c-format
