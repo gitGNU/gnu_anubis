@@ -58,7 +58,7 @@ _debug_printer(int method, int output, unsigned long nleft, char *ptr)
 		debug_cache.output = output;
 		debug_cache.newline = 0;
 		debug_cache.count = 0;
-		fprintf(stderr, "%s %s", mode, output ? ">>>" : "<<<");
+		fprintf(stderr, "%s %s ", mode, output ? ">>>" : "<<<");
 	}
 
 	for (i = 0; i < nleft; i++, ptr++) {
@@ -71,7 +71,7 @@ _debug_printer(int method, int output, unsigned long nleft, char *ptr)
 				(unsigned long)debug_cache.count);
 			debug_cache.count = 0;
 			if (i != nleft-1) {
-				fprintf(stderr, "%s %s",
+				fprintf(stderr, "%s %s ",
 					mode, output ? ">>>" : "<<<");
 				debug_cache.newline = 0;
 			} else
