@@ -303,7 +303,16 @@ if test $with_gnutls = yes; then
                       [M4_DEFS="$M4_DEFS -DWITH_SSL"
                       AC_DEFINE(USE_GNUTLS, 1,
                                 [Define to 1 if USE_GNUTLS is requested.])],
-                                [AC_MSG_RESULT([Disabling GnuTLS support...])])
+                                [with_gnutls = no
+                                 AC_MSG_RESULT([Disabling GnuTLS support...])])
+    if test $with_gnutls = yes; then
+	# Accomodate for incompatibilities of gnults 1.0.16 (and,
+	# eventually, newer versions)
+	AC_CHECK_FUNC(gnutls_x509_fingerprint,:
+                      [AH_BOTTOM([
+#define gnutls_x509_fingerprint gnutls_fingerprint
+])])
+    fi
   fi
 fi
 
