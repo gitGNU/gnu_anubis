@@ -69,17 +69,23 @@ auth_list_to_string (ANUBIS_LIST * list, char *buf, size_t bufsize)
 /* Sets the list of allowed authentication mechanisms from its
    argument */
 void
-anubis_set_mech_list (ANUBIS_LIST * list)
+anubis_set_mech_list (ANUBIS_LIST **out, ANUBIS_LIST *list)
 {
   ITERATOR *itr = iterator_create (list);
   char *p;
 
   if (!itr)
     return;
-  anubis_mech_list = list_create ();
+  *out = list_create ();
   for (p = iterator_first (itr); p; p = iterator_next (itr))
-    list_append (anubis_mech_list, make_uppercase (strdup (p)));
+    list_append (*out, make_uppercase (strdup (p)));
   iterator_destroy (&itr);
+}
+
+void
+anubis_set_server_mech_list (ANUBIS_LIST *list)
+{
+  anubis_set_mech_list (&anubis_mech_list, list);
 }
 
 /* Capability list handling */
