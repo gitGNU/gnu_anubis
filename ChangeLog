@@ -1,3 +1,11 @@
+2005-02-07  Sergey Poznyakoff
+
+	* src/esmtp.c (get_reply): Changed declaration. All callers
+	updated
+	* src/net.c (get_response_smtp): Minor correctrion;
+	* src/tunnel.c (smtp_session_transparent): Bugfix
+	(smtp_begin): Send EHLO, not HELO.
+
 2005-02-03  Sergey Poznyakoff 
 
 	Further cleanup as per TODO:5. Removed fixed-size
