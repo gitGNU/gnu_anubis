@@ -3,7 +3,7 @@
    rcfile.l
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003 The Anubis Team.
+   Copyright (C) 2003, 2004 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -34,26 +34,27 @@
 #include "rcfile.h"
 #include "rcfile-gram.h"	
 
-struct string_list {
-	struct string_list *next;
-	char *str;
-	int length;
+struct string_list
+{
+  struct string_list *next;
+  char *str;
+  int length;
 };
 
-static int simple_string(void);
-static void string_begin(void);
-static void string_add(char *, int);
-static void string_add_char(int);
-static void string_finish(void);
-static int escape(int);
-char *trimws(char *);
-char *trimcpy(void);
+static int simple_string (void);
+static void string_begin (void);
+static void string_add (char *, int);
+static void string_add_char (int);
+static void string_finish (void);
+static int escape (int);
+char *trimws (char *);
+char *trimcpy (void);
 
-static void multiline_begin(void);
-static void multiline_add(char *);
-static void multiline_finish(void);
-static char *multiline_strip_tabs(char *);
-static int isemptystr(char *);
+static void multiline_begin (void);
+static void multiline_add (char *);
+static void multiline_finish (void);
+static char *multiline_strip_tabs (char *);
+static int isemptystr (char *);
  
 static char *multiline_delimiter;
 static int strip_tabs;
@@ -65,7 +66,7 @@ char *cfg_file;
 extern int yydebug;
 #define DBG(t,s) do {\
  if (yydebug > 1) \
-   printf("LEX %s:%d: %s %s\n", cfg_file, cfg_line_num, t, s);\
+   printf ("LEX %s:%d: %s %s\n", cfg_file, cfg_line_num, t, s);\
  } while (0)
  
 %}
@@ -84,19 +85,19 @@ PUNCT [=:()\[\]]
          /* Keywords */
 BEGIN          return T_BEGIN;
 {LDASHES}BEGIN{WS}{IDENT}{RDASHES} {
-	char *p = strstr(yytext, "BEGIN") + 5;
+	char *p = strstr (yytext, "BEGIN") + 5;
 	char *q;
 	int len;
 
-	for (; *p && isspace(*(u_char*)p); p++)
+	for (; *p && isspace (*(u_char*)p); p++)
 		;
-	for (q = yytext + yyleng - 4; q > p && isspace(*(u_char*)q); q--)
+	for (q = yytext + yyleng - 4; q > p && isspace (*(u_char*)q); q--)
 		;
 	len = q - p + 1;
-	yylval.string = xmalloc(len + 1);
-	memcpy(yylval.string, p, len);
+	yylval.string = xmalloc (len + 1);
+	memcpy (yylval.string, p, len);
 	yylval.string[len] = 0;
-	DBG("D_BEGIN", yylval.string);
+	DBG ("D_BEGIN", yylval.string);
 	return D_BEGIN; }
 END |
 {LDASHES}END{RDASHES}        return T_END;
@@ -120,288 +121,297 @@ END |
 [rR][eE][gG][eE][xX]         return REGEX;
 
          /* Identifiers */
-{IDENT}          { yylval.string = strdup(yytext);
-                   DBG("IDENT", yytext);
+{IDENT}          { yylval.string = strdup (yytext);
+                   DBG ("IDENT", yytext);
 		   return IDENT; }
          /* Quoted strings */
-<INITIAL,LIT>\"[^\\"\n]*\"     { return simple_string(); }
-<INITIAL,LIT>\"[^\\"\n]*\\[0-9] {BEGIN(STR);
-                   string_begin();
-		   string_add(yytext+1, yyleng-1);
+<INITIAL,LIT>\"[^\\"\n]*\"     { return simple_string (); }
+<INITIAL,LIT>\"[^\\"\n]*\\[0-9] {BEGIN (STR);
+                   string_begin ();
+		   string_add (yytext+1, yyleng-1);
                   }
-<INITIAL,LIT>\"[^\\"\n]*\\.    { BEGIN(STR);
-                   string_begin();
-		   string_add(yytext+1, yyleng-3);
-		   string_add_char(escape(yytext[yyleng-1])); }
-<STR>[^\\"\n]*\\[0-9] { string_add(yytext, yyleng); }
-<STR>[^\\"\n]*\\. { string_add(yytext, yyleng-2);
-                    string_add_char(escape(yytext[yyleng-1])); }
-<STR>[^\\"\n]*\" { BEGIN(INITIAL);
-                   string_add(yytext, yyleng-1); 
-                   string_finish();
+<INITIAL,LIT>\"[^\\"\n]*\\.    { BEGIN (STR);
+                   string_begin ();
+		   string_add (yytext+1, yyleng-3);
+		   string_add_char (escape (yytext[yyleng-1])); }
+<STR>[^\\"\n]*\\[0-9] { string_add (yytext, yyleng); }
+<STR>[^\\"\n]*\\. { string_add (yytext, yyleng-2);
+                    string_add_char (escape (yytext[yyleng-1])); }
+<STR>[^\\"\n]*\" { BEGIN (INITIAL);
+                   string_add (yytext, yyleng-1); 
+                   string_finish ();
 		   return STRING; }
          /* "Here document" (multiline strings) */
 <INITIAL,LIT>"<<"-?{IDENT}[ \t]*\n |
-<INITIAL,LIT>"<<"-?{IDENT}[ \t]*#.*\n { BEGIN(ML);
-                                        multiline_begin();
+<INITIAL,LIT>"<<"-?{IDENT}[ \t]*#.*\n { BEGIN (ML);
+                                        multiline_begin ();
 	                         	cfg_line_num++; }
-<ML>.*\n { char *p = multiline_strip_tabs(yytext);
+<ML>.*\n { char *p = multiline_strip_tabs (yytext);
            cfg_line_num++;
 	   
-           if (strncmp(p, multiline_delimiter, strlen(multiline_delimiter))
+           if (strncmp (p, multiline_delimiter, strlen (multiline_delimiter))
 	        == 0
-	       && isemptystr(p + strlen(multiline_delimiter))) {
-		   BEGIN(INITIAL);
-		   multiline_finish();
-		   unput('\n');
-		   DBG("<ML>STRING", yylval.string);
+	       && isemptystr (p + strlen (multiline_delimiter))) {
+		   BEGIN (INITIAL);
+		   multiline_finish ();
+		   unput ('\n');
+		   DBG ("<ML>STRING", yylval.string);
 		   return STRING;
 	     }
-	    multiline_add(p);
+	    multiline_add (p);
          } 
          /* Literal */
 <LIT>\\\n     { cfg_line_num++; }
-<LIT>[^ \t\n]+\\\n   { yylval.string = malloc(yyleng-1);
-                       memcpy(yylval.string, yytext, yyleng-2);
+<LIT>[^ \t\n]+\\\n   { yylval.string = malloc (yyleng-1);
+                       memcpy (yylval.string, yytext, yyleng-2);
 		       yylval.string[yyleng-2] = 0;
-		       DBG("<LIT>STRING", yylval.string);
+		       DBG ("<LIT>STRING", yylval.string);
 		       cfg_line_num++;
 		       return STRING; }
-<LIT>[^ \t\n]+   { yylval.string = trimcpy();
-		   DBG("<LIT>STRING", yylval.string);
+<LIT>[^ \t\n]+   { yylval.string = trimcpy ();
+		   DBG ("<LIT>STRING", yylval.string);
 		   return STRING; }
 <LIT>{WS}        ;
-<LIT>\n          { BEGIN(INITIAL); cfg_line_num++; return EOL; }
+<LIT>\n          { BEGIN (INITIAL); cfg_line_num++; return EOL; }
          /* Other tokens */
 {WS}           ;
 \\\n           { cfg_line_num++; }
 \n             { cfg_line_num++; return EOL; }
 {PUNCT}        return yytext[0];
-.              { parse_error(_("Stray character in config: \\%03o. Possibly missing quotes around the string"), yytext[0]); }
+.              { parse_error (_("Stray character in config: \\%03o. Possibly missing quotes around the string"), yytext[0]); }
 
 %%
 
 int
 yywrap ()
 {
-	if (yyin) {
-		fclose(yyin);
-		yyin = NULL;
-	}
-	return 1;
+  if (yyin)
+    {
+      fclose (yyin);
+      yyin = NULL;
+    }
+  return 1;
 }
 
 void
-verbatim(void)
+verbatim (void)
 {
-	BEGIN(LIT);
+  BEGIN (LIT);
 }
 
 void
-lex_clear_state(void)
+lex_clear_state (void)
 {
-	BEGIN(INITIAL);
+  BEGIN (INITIAL);
 }
 
 int
-simple_string(void)
+simple_string (void)
 {
-	yylval.string = xmalloc(yyleng - 1);
-	memcpy(yylval.string, yytext + 1, yyleng - 2);
-	yylval.string[yyleng - 2] = 0;
-	DBG("STRING",yylval.string); 
-	return STRING; 
+  yylval.string = xmalloc (yyleng - 1);
+  memcpy (yylval.string, yytext + 1, yyleng - 2);
+  yylval.string[yyleng - 2] = 0;
+  DBG ("STRING", yylval.string); 
+  return STRING;
 }
 
 void
-string_begin(void)
+string_begin (void)
 {
-	str_head = str_tail = NULL;
+  str_head = str_tail = NULL;
 }
 
 void
-string_add(char *str, int len)
+string_add (char *str, int len)
 {
-	struct string_list *s = xmalloc(sizeof(*s) + len);
-	s->str = (char*)(s+1);
-	memcpy(s->str, str, len);
-	s->length = len;
-	if (str_tail)
-		str_tail->next = s;
-	else
-		str_head = s;
-	str_tail = s;
+  struct string_list *s = xmalloc (sizeof (*s) + len);
+  s->str = (char*)(s+1);
+  memcpy (s->str, str, len);
+  s->length = len;
+  if (str_tail)
+    str_tail->next = s;
+  else
+    str_head = s;
+  str_tail = s;
 }
 
 void
-string_add_char(int n)
+string_add_char (int n)
 {
-	char c = n;
-	string_add(&c, 1);
+  char c = n;
+  string_add (&c, 1);
 }
 
 void
-string_finish(void)
+string_finish (void)
 {
-	struct string_list *s;
-	int len = 0;
-	char *p;
+  struct string_list *s;
+  int len = 0;
+  char *p;
 	
-	for (s = str_head; s; s = s->next) 
-		len += s->length;
-	len++;
-	yylval.string = xmalloc(len);
-	for (p = yylval.string, s = str_head; s; ) {
-		struct string_list *next = s->next;
-		memcpy(p, s->str, s->length);
-		p += s->length;
-		xfree(s);
-		s = next;
-	}
-	*p = 0;
+  for (s = str_head; s; s = s->next) 
+    len += s->length;
+  len++;
+  yylval.string = xmalloc (len);
+  for (p = yylval.string, s = str_head; s; )
+    {
+      struct string_list *next = s->next;
+      memcpy (p, s->str, s->length);
+      p += s->length;
+      xfree (s);
+      s = next;
+    }
+  *p = 0;
 }
 
 void
-multiline_begin(void)
+multiline_begin (void)
 {
-	char *endp;
-	int len;
-	char *p = yytext + 2; /* past the << marker */
+  char *endp;
+  int len;
+  char *p = yytext + 2; /* past the << marker */
 
-	if (*p == '-') {
-		strip_tabs = 1;
-		p++;
-	} else
-		strip_tabs = 0;
+  if (*p == '-')
+    {
+      strip_tabs = 1;
+      p++;
+    }
+  else
+    strip_tabs = 0;
 
-	/* Find the delimiter */
-	for (endp = p; *endp; endp++)
-		if (isspace(*(u_char*)endp))
-			break;
+  /* Find the delimiter */
+  for (endp = p; *endp; endp++)
+    if (isspace (*(u_char*)endp))
+      break;
 
-	len = endp - p;
-	multiline_delimiter = xmalloc(len + 1);
-	memcpy(multiline_delimiter, p, len);
-	multiline_delimiter[len] = 0;
-	string_begin();
+  len = endp - p;
+  multiline_delimiter = xmalloc (len + 1);
+  memcpy (multiline_delimiter, p, len);
+  multiline_delimiter[len] = 0;
+  string_begin ();
 }
 
 void
-multiline_finish(void)
+multiline_finish (void)
 {
-	free (multiline_delimiter);
-	multiline_delimiter = NULL;
-	string_finish();
+  free (multiline_delimiter);
+  multiline_delimiter = NULL;
+  string_finish ();
 }
 
 int
-isemptystr(char *text)
+isemptystr (char *text)
 {
-	for (; *text && isspace(*(u_char*)text); text++)
-		;
-	return *text == 0;
+  for (; *text && isspace (*(u_char*)text); text++)
+    ;
+  return *text == 0;
 }
 
 char *
-multiline_strip_tabs(char *text)
+multiline_strip_tabs (char *text)
 {
-	if (strip_tabs)
-		for (; *text == '\t'; text++)
-			;
-	return text;
+  if (strip_tabs)
+    for (; *text == '\t'; text++)
+      ;
+  return text;
 }
 
 void
-multiline_add(char *p)
+multiline_add (char *p)
 {
-	string_add(p, strlen(p));
+  string_add (p, strlen (p));
 }
 
 int
-escape(int c)
+escape (int c)
 {
-	switch (c) {
-	case 'a':
-		return '\a';
-	case 'f':
-		return '\f';
-	case 'e':
-		return '\e';
-	case 'n':
-		return '\n';
-	case 'r':
-		return '\t';
-	case 't':
-		return '\t';
-	case 'v':
-		return '\v';
-	default:
-		break;
-	}
-	return c;
+  switch (c) {
+  case 'a':
+    return '\a';
+  case 'f':
+    return '\f';
+  case 'e':
+    return '\e';
+  case 'n':
+    return '\n';
+  case 'r':
+    return '\t';
+  case 't':
+    return '\t';
+  case 'v':
+    return '\v';
+  default:
+    break;
+  }
+  return c;
 }
 
 char *
-trimws(char *s)
+trimws (char *s)
 {
-	int len;
+  int len;
 
-	for (len = strlen(s) - 1; len > 0 && isspace((u_char)s[len]); len--)
-		;
-	if (len > 0)
-		s[len+1] = 0;
-	return s;
+  for (len = strlen (s) - 1; len > 0 && isspace ((u_char)s[len]); len--)
+    ;
+  if (len > 0)
+    s[len+1] = 0;
+  return s;
 }
 
 char *
-trimcpy(void)
+trimcpy (void)
 {
-	char *string;
-	int i, j, len;
+  char *string;
+  int i, j, len;
 
-	for (i = 0; i < yyleng && isspace((u_char)yytext[i]); i++)
-		;
-	for (j = yyleng - 1; j > i && isspace((u_char)yytext[i]); j--)
-		;
-	len = j - i + 1;
-	string = xmalloc(len + 1);
-	memcpy(string, yytext + i, len);
-	string[len] = 0;
-	return string;
+  for (i = 0; i < yyleng && isspace ((u_char)yytext[i]); i++)
+    ;
+  for (j = yyleng - 1; j > i && isspace ((u_char)yytext[i]); j--)
+    ;
+  len = j - i + 1;
+  string = xmalloc (len + 1);
+  memcpy (string, yytext + i, len);
+  string[len] = 0;
+  return string;
 }
 
 int
-rc_open(char *name)
+rc_open (char *name)
 {
-	yyin = fopen(name, "r");
-	if (!yyin) {
-		if (options.termlevel == DEBUG)
-			anubis_error(SOFT,
-				     _("Anubis RC file error: %s."),
-				     strerror(errno));
-		return -1;
-	}
-	
-	cfg_file = name;
-	cfg_line_num = 1;
-	return 0;
+  yyin = fopen (name, "r");
+  if (!yyin)
+    {
+      if (options.termlevel == DEBUG)
+	anubis_error (SOFT,
+		      _("Anubis RC file error: %s."),
+		      strerror (errno));
+      return -1;
+    }
+  
+  cfg_file = name;
+  cfg_line_num = 1;
+  return 0;
 }
 
 int
-error_sync_begin()
+error_sync_begin ()
 {
-	int c;
-	
-	while (yyin && (c = yylex()) > 0) {
-                if (c == T_BEGIN) {
-			yyless(0);
-			break;
-		} else if (c == D_BEGIN) {
-			xfree(yylval.string);
-			yyless(0);
-			break;
-		}
+  int c;
+  
+  while (yyin && (c = yylex ()) > 0)
+    {
+      if (c == T_BEGIN)
+	{
+	  yyless (0);
+	  break;
 	}
-	return c;
+      else if (c == D_BEGIN)
+	{
+	  xfree (yylval.string);
+	  yyless (0);
+	  break;
+	}
+    }
+  return c;
 }
 
