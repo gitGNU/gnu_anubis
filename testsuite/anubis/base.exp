@@ -32,6 +32,8 @@ anubis_pat add1.pat
 anubis_pat add2.pat
 # Add a header field to one message from the several ones
 anubis_pat add3.pat
+# Append a text to the body
+anubis_pat add-body.pat
 
 # Delete headers
 anubis_pat del1.pat
