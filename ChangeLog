@@ -1,3 +1,8 @@
+2003-02-15  Wojciech Polak
+
+	* configure.ac: Check apple-darwin by config.guess, not uname.
+	  Added message info if disabling Guile support.
+
 2003-02-11  Sergey Poznyakoff
 
 	* testsuite/mta.c: Prevent race condition on closing the diagnostic
