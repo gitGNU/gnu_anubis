@@ -319,7 +319,7 @@ asmtp_ehlo (enum asmtp_state state, ANUBIS_USER *usr)
 
 		state = state_ehlo;
 		break;
-#endif
+#endif /* USE_SSL */
 		
 	case KW_AUTH:
 		mech = get_command_arg ();
@@ -444,7 +444,6 @@ anubis_get_db_record(char *username, ANUBIS_USER *usr)
 int
 anubis_authenticate_mode(NET_STREAM *psd_client, struct sockaddr_in *addr)
 {	
-	int rc;
 	ANUBIS_USER usr;
 	
 	remote_client = *psd_client;
@@ -454,34 +453,27 @@ anubis_authenticate_mode(NET_STREAM *psd_client, struct sockaddr_in *addr)
 	if (anubis_smtp (&usr))
 		return EXIT_FAILURE;
 
-	if (usr.username)
+	if (usr.username) {
 		strncpy(session.clientname, usr.username,
 			sizeof(session.clientname));
-	else
-		strncpy(session.clientname, usr.smtp_authid,
-			sizeof(session.clientname));
-
-	if (usr.rc_file_name)
-		session.rcfile_name = usr.rc_file_name;
-	
-	parse_transmap(&rc,
-		       session.clientname,
-		       inet_ntoa(addr->sin_addr),
-		       session.clientname,
-		       sizeof(session.clientname));
-				
-	if (rc == 1) {
-		anubis_changeowner(session.clientname);
-		auth_tunnel();
-	} else if (rc == -1) {
 		if (check_username(session.clientname)) {
 			anubis_changeowner(session.clientname);
 			auth_tunnel();
-		} else
-			set_unprivileged_user();
-	} else
+		}
+		else
+		  set_unprivileged_user();
+
+	}
+	else {
+		strncpy(session.clientname, usr.smtp_authid,
+			sizeof(session.clientname));
 		set_unprivileged_user();
-	
+		/* FIXME, get user's rcfile from a special path */
+	}
+
+	if (usr.rcfile_name)
+		session.rcfile_name = usr.rcfile_name;
+
 	if (!(topt & T_LOCAL_MTA)
 	    && strlen(session.mta) == 0) {
 		anubis_error(HARD, _("The MTA has not been specified. "

@@ -171,7 +171,7 @@ mysql_db_get (void *d, char *key, ANUBIS_USER *rec, int *errp)
 	if (row[2])
 		rec->username = strdup(row[2]);
 	if (row[3])
-		rec->rc_file_name = strdup(row[3]);
+		rec->rcfile_name = strdup(row[3]);
 	mysql_free_result(result);
 	return ANUBIS_DB_SUCCESS;
 }
@@ -212,7 +212,7 @@ mysql_db_list(void *d, LIST *list, int *ecode)
 		if (row[2])
 			rec->username = strdup(row[2]);
 		if (row[3])
-			rec->rc_file_name = strdup(row[3]);
+			rec->rcfile_name = strdup(row[3]);
 		list_append(list, rec);
 	}
 	
@@ -236,7 +236,7 @@ mysql_db_put (void *d, char *key, ANUBIS_USER *rec, int *errp)
 		 rec->smtp_authid,
 		 rec->smtp_passwd,
 		 MSTR(rec->username),
-		 MSTR(rec->rc_file_name));
+		 MSTR(rec->rcfile_name));
 	*errp = mysql_query(&amp->mysql, amp->buf);
 	if (*errp)
 		return ANUBIS_DB_FAIL;

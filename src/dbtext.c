@@ -2,7 +2,7 @@
    dbtext.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003 The Anubis Team.
+   Copyright (C) 2003, 2004 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 #include "headers.h"
 #include "extern.h"
 
-#if defined(WITH_GSASL)
+#ifdef WITH_GSASL
 
 /* Open the plaintext database. ARG is the full pathname to the file */
 static int
@@ -90,7 +90,7 @@ dbtext_to_record(char *p, ANUBIS_USER *rec)
 		rec->username = strdup(p);
 		p = strtok(NULL, delim);
 		if (p) 
-			rec->rc_file_name = strdup(p);
+			rec->rcfile_name = strdup(p);
 	}
 	return ANUBIS_DB_SUCCESS;
 }
@@ -126,8 +126,8 @@ dbtext_put (void *d, char *key, ANUBIS_USER *rec, int *errp)
 		rec->smtp_passwd);
 	if (rec->username) {
 		fprintf(fp, "\t%s", rec->username);
-		if (rec->rc_file_name)
-			fprintf(fp, "\t%s", rec->rc_file_name);
+		if (rec->rcfile_name)
+			fprintf(fp, "\t%s", rec->rcfile_name);
 	}
 	fprintf(fp, "\n");
 	return ferror(fp) ? ANUBIS_DB_FAIL : ANUBIS_DB_SUCCESS;
@@ -182,7 +182,7 @@ dbtext_delete(void *d, char *keystr, int *ecode)
 }
 
 void
-dbtext_init ()
+dbtext_init (void)
 {
 	anubis_db_register("text",
 			   dbtext_open,
@@ -194,4 +194,7 @@ dbtext_init ()
 			   NULL);
 }
 
-#endif
+#endif /* WITH_GSASL */
+
+/* EOF */
+

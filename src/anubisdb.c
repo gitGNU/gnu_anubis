@@ -2,7 +2,7 @@
    anubisdb.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003 The Anubis Team.
+   Copyright (C) 2003, 2004 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 
 #include "headers.h"
 
-#if defined(WITH_GSASL)
+#ifdef WITH_GSASL
 
 struct anubis_db_type {
 	char *db_id;          
@@ -190,8 +190,11 @@ anubis_db_free_record(ANUBIS_USER *rec)
 	free(rec->smtp_authid);
 	free(rec->smtp_passwd);
 	free(rec->username);
-	free(rec->rc_file_name);
+	free(rec->rcfile_name);
 	memset(rec, 0, sizeof *rec);
 }
 
-#endif
+#endif /* WITH_GSASL */
+
+/* EOF */
+

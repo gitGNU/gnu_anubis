@@ -150,7 +150,7 @@ op_create (int argc, char **argv)
 			rec.username = strdup(p);
 			p = strtok(NULL, delim);
 			if (p) 
-				rec.rc_file_name = strdup(p);
+				rec.rcfile_name = strdup(p);
 		}
 
 		rc = anubis_db_put_record(db, rec.smtp_authid, &rec);
@@ -172,8 +172,8 @@ print_record (ANUBIS_USER *rec)
 	printf("%s\t%s", rec->smtp_authid, rec->smtp_passwd);
 	if (rec->username) {
 		printf("\t%s", rec->username);
-		if (rec->rc_file_name)
-			printf("\t%s", rec->rc_file_name);
+		if (rec->rcfile_name)
+			printf("\t%s", rec->rcfile_name);
 	}
 	printf("\n");
 }
@@ -289,7 +289,7 @@ op_add_or_modify (char *database, int code, char *errmsg)
 	rec.smtp_authid = authid;
 	rec.smtp_passwd = password;
 	rec.username = username;
-	rec.rc_file_name = rcfile;
+	rec.rcfile_name = rcfile;
 
 	rc = anubis_db_put_record(db, authid, &rec);
 	if (rc != ANUBIS_DB_SUCCESS) {

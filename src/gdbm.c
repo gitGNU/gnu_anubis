@@ -2,7 +2,7 @@
    gdbm.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003 The Anubis Team.
+   Copyright (C) 2003, 2004 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -23,7 +23,8 @@
 */
 
 #include "headers.h"
-#if defined(HAVE_LIBGDBM)
+
+#ifdef HAVE_LIBGDBM
 #include <gdbm.h>
 
 /* Format of an GDBM record:
@@ -86,7 +87,7 @@ gdbm_content_to_record(char *keystr, datum content, ANUBIS_USER *rec)
 			rec->username = strdup(p);
 			p = strtok(NULL, ",");
 			if (p)
-				rec->rc_file_name = strdup(p);
+				rec->rcfile_name = strdup(p);
 		}
 		free(text);
 	} else
@@ -148,8 +149,8 @@ gdbm_db_put (void *d, char *keystr, ANUBIS_USER *rec, int *errp)
 	size = strlen(rec->smtp_passwd) + 1;
 	if (rec->username) 
 		size += strlen(rec->username) + 1;
-	if (rec->rc_file_name) {
-		size += strlen(rec->rc_file_name);
+	if (rec->rcfile_name) {
+		size += strlen(rec->rcfile_name);
 		if (!rec->username)
 			size += strlen(rec->smtp_authid) + 1;
 	}
@@ -157,10 +158,10 @@ gdbm_db_put (void *d, char *keystr, ANUBIS_USER *rec, int *errp)
 	n = sprintf(text, "%s", rec->smtp_passwd);
 	if (rec->username)
 		n += sprintf(text + n, ",%s", rec->username);
-	if (rec->rc_file_name) {
+	if (rec->rcfile_name) {
 		if (!rec->username)
 			n += sprintf(text + n, ",%s", rec->smtp_authid);
-		n += sprintf(text + n, ",%s", rec->rc_file_name);
+		n += sprintf(text + n, ",%s", rec->rcfile_name);
 	}
 
 	key.dptr = keystr;
@@ -201,7 +202,7 @@ gdbm_db_strerror(void *d, int rc)
 }
 
 void
-gdbm_db_init()
+gdbm_db_init(void)
 {
 	anubis_db_register("gdbm",
 			   gdbm_db_open,
@@ -212,4 +213,8 @@ gdbm_db_init()
 			   gdbm_db_list,
 			   gdbm_db_strerror);
 }
-#endif
+
+#endif /* HAVE_LIBGDBM */
+
+/* EOF */
+

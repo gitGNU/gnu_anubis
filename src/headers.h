@@ -485,12 +485,12 @@ const char *anubis_url_get_arg(ANUBIS_URL *url, const char *argname);
 /* anubisdb.c */
 
 typedef struct anubis_user {
-	char *smtp_authid;         /* ESMTP authentication ID */
-	char *smtp_passwd;         /* A corresponding password */
-	char *username;            /* System user name to switch to */
-	char *rc_file_name;        /* Optional configuration file. 
-				      When NULL, defaults to
-				      ~username/.anubisrc */
+  char *smtp_authid;         /* ESMTP authentication ID */
+  char *smtp_passwd;         /* A corresponding password */
+  char *username;            /* System user name to switch to */
+  char *rcfile_name;         /* Optional configuration file. 
+				When NULL, defaults to
+				~username/.anubisrc */
 } ANUBIS_USER;
 
 enum anubis_db_mode {
