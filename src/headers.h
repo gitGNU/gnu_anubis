@@ -402,7 +402,8 @@ void parse_mtahost (char *, char *, unsigned int *);
 void remline (char *, char *);
 void remcrlf (char *);
 char *substitute (char *, char **);
-void make_lowercase (char *);
+char *make_uppercase (char *);
+char *make_lowercase (char *);
 char *get_localname (void);
 char *get_localdomain (void);
 
