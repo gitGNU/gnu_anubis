@@ -78,7 +78,10 @@ libanubisdb_a_SOURCES = \
  mem.c \
  mem.h \
  mysql.c \
+ pgsql.c \
  ssl.c \
+ sql.h \
+ sql.c \
  stream.c \
  tls.c \
  url.c 
