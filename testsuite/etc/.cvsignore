@@ -2,3 +2,4 @@ Makefile
 Makefile.in
 *.rc
 *.log
+std.pat
