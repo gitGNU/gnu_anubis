@@ -627,7 +627,8 @@ rc_node_print(RC_NODE *node)
 		printf("%s", part_string(node->v.expr.part));
 		if (node->v.expr.key && node->v.expr.key[0] != '\n')
 			printf("[%s]",node->v.expr.key);
-		printf(" %s", anubis_regex_source(node->v.expr.re));
+		printf(" ");
+		anubis_regex_print(node->v.expr.re);
 		break;
 		
 	case rc_node_bool:
@@ -723,8 +724,9 @@ rc_inst_print(RC_INST *inst, int level)
 		break;
 		
 	default:
-		printf(" %s[%s]", part_string(inst->part),
-		       inst->key ? anubis_regex_source(inst->key) : "");
+		printf(" %s ", part_string(inst->part));
+		if (inst->key)
+			anubis_regex_print(inst->key);
 		if (inst->key2)
 			printf(" [%s]", inst->key2);
 		if (inst->arg)
