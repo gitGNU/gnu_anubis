@@ -1,0 +1,232 @@
+                  =================
+                  |  GNU Anubis 4 |
+                  =================
+
+Tytu³ projektu:   "Pixie & Dixie"
+Status:           Szkic
+Opracowa³:        Wojciech Polak <polak@gnu.org>, (C) 2003.
+Rewizja 1.1:      22 V 2004
+
+*** Wprowadzenie
+
+Niniejsze opracowanie przedstawia nowy schemat autoryzacji klientów
+w programie GNU Anubis, wersja 4.x.
+
+*** Problem
+
+Dotychczasowa metoda polega³a na autoryzacji u¿ytkownika za pomoc±
+us³ugi AUTH, popularnego demona o nazwie Ident, który nas³uchuje
+na porcie TCP 113. Zalet± tego rozwi±zania by³a szybko¶æ ustalenia
+z kim do czynienia ma serwer, tj. nazwy klienta (user name) lub jego
+identyfikatora (UID). Metoda ta pozwala na dokonanie w³a¶ciwej
+autoryzacji zanim klient wy¶le swój "pierwszy bajt". Ponadto pozwala
+na przetwarzanie ca³ej koperty SMTP. Wad± natomiast jest konieczno¶æ
+posiadania w systemie dzia³aj±cego demona Ident, co nie zawsze jest
+mo¿liwe (urz±dzenia mobilne), b±d¼ obni¿aj±c± nieco bezpieczeñstwo
+systemu (konieczno¶æ otwartej transmisji poprzez sieæ identyfikatora
+u¿ytkownika).
+
+*** Rozwi±zanie
+
+Podzia³ na dwa tryby pracy:
+1) tradycyjny (a.k.a. `Pixie')
+2) nowy (a.k.a. `Dixie')
+
+* Krótka charakterystyka:
+
+1) `Pixie'
+
+   - Serwer dokonuje autoryzacji na podstawie us³ugi AUTH.
+   - Mo¿liwo¶æ natychmiastowego przetwarzania ca³ej koperty SMTP.
+   - Tunelowanie w locie po³±czeñ miêdzy MUA a MTA.
+
+2) `Dixie'
+
+W tym trybie Anubis musi obs³ugiwaæ w³asn± bazê u¿ytkowników i hase³,
+dodatkowo "t³umaczyæ loginy" (o tym pó¼niej), oraz przechowywaæ pliki
+konfiguracyjne u¿ytkowników (jako dodatkowa opcja i zaleta -- o tym
+tak¿e pó¼niej).
+
+Tryb `Dixie' dokonuje autoryzacji poprzez protokó³ ESMTP AUTH.
+W tym trybie NIE MO¯NA dokonaæ wczesnego przetwarzania koperty SMTP
+(np. "if command[EHLO]"). Przetwarzanie koperty mo¿na dokonaæ dopiero
+po udanej autoryzacji u¿ytkownika. W tym trybie wystêpuje OPÓ¬NIENIE
+przy ³±czeniu siê z MTA (poniewa¿ najpierw trzeba poczekaæ na ESMTP AUTH,
+a dopiero pó¼niej, po ustaleniu to¿samo¶ci i ewentualnie szczê¶liwej
+autoryzacji, wczytaæ plik konfiguracyjny klienta i po³±czyæ siê
+z wybranym MTA). W tym trybie klient nie mo¿e tak¿e rozpocz±æ wysy³ania
+listów dopóki nie zostanie prawid³owo rozpoznany i zaakceptowany przez
+program serwera.
+
+* Szczegó³y:
+
+Istnieje ogromna ró¿nica miêdzy tymi dwoma trybami.
+Przede wszystkim tryb `Pixie' jest tunelem "w locie" (proxy),
+w sensie takim, ¿e ³±czy program pocztowy klienta z agentem
+pocztowym i nie wymaga ¿adnych specjalnych dzia³añ ze strony
+u¿ytkownika. Tymczasem tryb `Dixie' musi najpierw symulowaæ
+zachowanie agenta pocztowego (MTA), aby dokonaæ autoryzacji
+ESMTP AUTH.
+
+Przedstawiê teraz prost± sytuacjê dla `Dixie', gdzie wystêpuje
+Maszyna-A, na której pracuje "nowy" Anubis oraz Maszyna-B,
+z której ³±czy siê klient (MUA). Ustalmy tak¿e, ¿e Anubis
+przechowuje specjaln± bazê u¿ytkowników (ich loginy/has³a).
+
+A: 220 Maszyna-A (GNU Anubis vX.X [Dixie]) ESMTP time; send your identity!
+B: EHLO Maszyna-B
+A: 250-Maszyna-A Hello ID
+250-STARTTLS
+250-AUTH DIGEST-MD5 CRAM-MD5 LOGIN
+250-XDATABASE
+250 HELP
+B: STARTTLS
+A: 220 2.0.0 Ready to start TLS
+<TLS>
+B: AUTH <WYBRANA METODA>
+(przes³anie specjalnego loginu i has³a do Anubisa)
+
+W tym momencie po stronie Anubisa nast±pi³o dokonanie autoryzacji
+klienta na podstawie danych z w³asnej Bazy. Chcia³bym aby taka Baza
+zawiera³a poza w³a¶ciwym loginem i has³em tak¿e nazwê u¿ytkownika
+na Maszynie-A wraz z has³em. Zakrêcone? Powiedzmy, ¿e w Bazie
+istnieje wpis:
+
+ JohnSmith:ZAKODOWANE-HAS£O-1, John
+
+Klient poprzez ESMTP AUTH wys³a³ JohnSmith:ZAKODOWANE-HAS£O-1
+a to zgodzi³o siê z wpisem w Bazie Anubisa. Nastêpnie Anubis,
+który w tym momencie jeszcze pracuje jako superu¿ytkownik
+dokonuje translacji i dalej stosuje uprawnienia u¿ytkownika "John".
+Takie rozwi±zanie mo¿e tak¿e pozwoliæ na bardzo elastyczn± Bazê,
+której admin nie musi nawet kontrolowaæ, tzn. ¿e ka¿dy mo¿e
+dopisaæ tam SWOJE dane lub je usun±æ (oczywi¶cie ka¿dy kto bêdzie
+mia³ prawo dokonywania takich zmian w Bazie). Na przyk³ad ODBC, SQL?
+
+Ale wracaj±c do naszej sesji -- ustalmy, ¿e wszystkie dane zosta³y
+zweryfikowane i teraz Anubis pracuje ju¿ jako zwyk³y u¿ytkownik,
+po czym wczytuje plik `~/.anubisrc'. W tym momencie na podstawie
+pliku konf. u¿ytkownika Anubis ³±czy siê z MTA i dalej zachowuje siê
+ju¿ w tradycyjny sposób jako tunel/proxy i procesor poczty,
+po czym wysy³a do klienta:
+
+A: 220 OK, Welcome. Continue sending your mail!
+
+
+* Dalsze szczegó³y:
+
+Pe³ne zrozumienie nowego trybu pozwoli tak¿e uzmys³owiæ sobie,
+¿e nie jest mo¿liwa praca dwóch trybów jednocze¶nie.
+To administrator Anubisa bêdzie musia³ ustaliæ, z którego
+trybu bêdzie chcia³ skorzystaæ. Byæ mo¿e uda siê zaprogramowaæ
+przej¶cie z jednego trybu do drugiego bez konieczno¶ci restartu
+demona... Aczkolwiek nie jest to absolutna konieczno¶æ.
+Restart demona w celu zmiany trybu dzia³ania bêdzie równie¿
+w³a¶ciwym rozwi±zaniem. W tym miejscu przedstawiê dla kogo
+i jaki tryb bêdzie przeznaczony.
+
+Tradycyjny tryb `Pixie' przewidujê dla osób, które planuj±
+u¿ywaæ Anubisa w obrêbie jednej maszyny lub zamkniêtej sieci
+i pozwalaj± na u¿ycie Identd. W takim przypadku u¿ycie Ident
+jest ca³kowicie bezpieczne.
+
+Za¶ nowy tryb `Dixie' przewidujê dla osób, które uruchomi±
+GNU Anubisa na jednej maszynie, za¶ wszelkie po³±czenia
+bêd± dokonywane z innych komputerów. A wiêc wszystko zdalnie
+i zak³adamy tutaj, ¿e ¿adna maszyna zdalna nie bêdzie mia³a
+us³ugi AUTH. Jedynym tutaj ZALECENIEM (dla tego trybu) jest
+posiadania unixowego konta na maszynie, gdzie pracuje Anubis.
+Ale uwaga: nawet i to nie jest wymagane!
+
+Jeszcze tej cechy nie zd±¿y³em opisaæ :^). Mianowicie, Baza
+Anubisa drugi login potrzebuje aby przej¶æ w tryb u¿ytkownika
+i wczytaæ lokalny `~/.anubisrc'. Ja natomiast za³o¿y³em,
+ze Baza mo¿e przechowywaæ tak¿e (uwaga!) pliki konfiguracyjne
+poszczególnych klientów. A wiêc w Bazie musi siê znale¼æ dodatkowa
+flaga dla ka¿dego u¿ytkownika, która bêdzie informowa³a o tym czy
+dokonaæ translacji i wczytaæ lokalny `~/.anubisrc', czy te¿ wczytaæ
+tylko plik znajduj±cy siê w Bazie. Oczywi¶cie dla bezpieczeñstwa
+GNU Anubis mimo braku translacji nadal bêdzie musia³ przej¶æ
+w tryb u¿ytkownika, ale mo¿e to zrobiæ zwyczajnie na podstawie
+`user-notprivileged'.
+
+
+Zapewne zauwa¿y³e¶/a¶, ¿e `Dixie' po wys³aniu EHLO zwróci³
+tak¿e 250-XDATABASE... No w³a¶nie, wysy³aj±c XDATABASE
+chcia³bym aby mo¿na by³o dokonaæ operacji na Bazie
+(po wcze¶niejszym dokonaniu autoryzacji ESMTP AUTH).
+
+Dostêpne operacje to: ADD, MODIFY, REMOVE,
+gdzie odpowiednio by³oby to dodanie/zmodyfikowanie/usuniêcie
+wpisu u¿ytkownika z Bazy oraz UPLOAD -- mo¿liwo¶æ wys³ania
+w³asnego pliku `~/.anubisrc'.
+
+Dziêki takiemu rozwi±zaniu na zdalnym komputerze nie by³by potrzebny
+nawet `~/.anubisrc' i pierwszy raz zdalny klient móg³by NAPRAWDÊ
+posiadaæ w³asny plik konfiguracyjny. Obecnie (przed 4.x) wszelkie
+pliki musz± siê wcze¶niej znajdowaæ na maszynie, gdzie Anubis pracuje,
+co oczywi¶cie wymaga uwagi admina. Bo przecie¿ je¿eli zdalny
+klient chce zmieniæ co¶ w swoim pliku, to potem musi to oczywi¶cie
+zainstalowaæ na Maszynie-A (tak jest obecnie i tak bêdzie dla
+trybu `Pixie'). Nowy tryb `Dixie' rozwi±¿e ten problem i uwolni
+klienta od konieczno¶ci kontaktu z administratorem Maszyny-A.
+Oczywi¶cie wbudowany silnik obs³uguj±cy Bazê Anubisa sprawdzi
+czy przesy³any plik konf. jest prawid³owy (--check) i poinformuje
+o tym klienta, sprawdzi tak¿e MD5 tego pliku i porówna z tym,
+który jest wysy³any... Po co?
+
+* Ma³y program, który wysy³a plik konf. klienta
+
+W³a¶nie, ju¿ prawie fina³. Po stronie klienta istnieæ bêdzie
+ma³y specjalny program, napisany niemal w dowolnym jêzyku
+(C, Java, C#), którego zadaniem by³oby tylko wys³anie pliku
+konfiguracyjnego klienta do Bazy. Taki ma³y program móg³by
+pracowaæ nawet w urz±dzeniu mobilnym, ale to tylko opcjonalny
+program. Klient nie musia³by z niego korzystaæ. Wyobrazi³em
+sobie jednak sytuacjê, gdy:
+
+1) klient loguje siê na swoje konto na Maszynie-B
+2) w `~/.profile' znajdowa³by siê wpis, który wywo³a
+"specjalny-ma³y-program" i który obliczy MD5 pliku `~/.anubisrc'
+i je¿eli wpis w Bazie ró¿ni siê, to aktalny plik zostanie
+wys³any do Bazy...
+3) "specjalny-ma³y-program" oczywi¶cie po³±czy siê z Baz±
+poprzez ESMTP (TLS/AUTH) i XDATABASE.
+
+Oczywi¶cie taki program by³by dodatkowym atutem i przydatny
+jako, ¿e ¿aden obecny MUA nie potrafi³by skorzystaæ z Bazy
+Anubisa, ale byæ mo¿e w przysz³o¶ci w ramach projektu GNU,
+GNU Hydrant móg³by wspieraæ GNU Anubisa (tzn. XDATABASE)...
+
+*** Fina³
+
+A klientowi pozostanie ju¿ tylko skorzystaæ z w³asnego MUA
+i nic wiêcej... ¿adnego Identd :).
+
+W³a¶ciwie jedyny wymóg dla trybu `Dixie' to obs³uga ESMTP AUTH
+w MUA u klienta. Niestety, ale czê¶æ MUA nawet pod Unix nadal
+nie potrafi obs³ugiwaæ ESMTP AUTH. Czy¿by trzeba by³o u¿yæ
+Anubisa podwójnie (tak¿e na maszynie klienta)? ;-).
+I ostatni szczegó³ to oczywi¶cie co zrobiæ je¿eli dalszy MTA
+tak¿e wymaga ESMTP AUTH, a przecie¿ jeden ju¿ zosta³ "zu¿yty"
+na Anubisa. I tu odpowied¼ jest prosta, poniewa¿ GNU Anubis
+sam potrafi doskonale obs³ugiwaæ "esmtp-auth".
+
+* Podsumowanie dla trybu `Dixie':
+
+- nieco "wolniejszy" ni¿ `Pixie', bo po³±czenie z MTA
+  jest mo¿liwe dopiero po udanej autoryzacji klienta.
+- nie wymaga Identd!
+- pozwala na "zdalne" u¿ywanie pliku konfiguracyjnych klientów.
+- opó¼niona mo¿liwo¶æ przetwarzania koperty SMTP
+  (dopiero po udanym ESMTP AUTH).
+
+* P.S. Jeszcze odno¶nie przechowywania plików w Bazie...
+
+Mo¿na je przechowywaæ w specjalnym katalogu jako
+osobne pliki o specjalnie zakodowanych nazwach (hashed),
+za¶ w Bazie dodaæ pole, które bêdzie wi±za³o wpis
+u¿ytkownika w Bazie z danym plikiem konfiguracyjnym.
+
+  - KONIEC -
+
