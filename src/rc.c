@@ -632,7 +632,7 @@ struct rc_kwdef gpg_kw[] = {
 };
 
 static struct rc_secdef_child gpg_sect_child = {
-	NULL
+	NULL,
 	CF_CLIENT,
 	gpg_kw,
 	gpg_parser,
