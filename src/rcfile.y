@@ -78,6 +78,7 @@ static int debug_level;
 		int part;
 		char *key;
 	} msgpart;
+	struct list *list;
 };
 
 %token EOL T_BEGIN T_END AND OR 
@@ -90,13 +91,14 @@ static int debug_level;
 %left AND
 %left NOT
 
-%type <string> begin keyword string option opt_key
+%type <string> begin keyword string option opt_key arg
 %type <section> section seclist
 %type <stmtlist> stmtlist
 %type <stmt> stmt asgn_stmt cond_stmt rule_stmt inst_stmt
 %type <num> optlist
 %type <node> rule_start cond expr
 %type <msgpart> msgpart 
+%type <list> arglist
 
 %%
 
@@ -134,7 +136,7 @@ section  : /* empty */ EOL
 	   }
          ;
 
-begin    : T_BEGIN { verbatim(); } STRING EOL
+begin    : T_BEGIN { verbatim(); } string EOL
            {
 		   $$ = $3;
 	   }
@@ -171,7 +173,7 @@ stmt     : /* empty */ EOL
 	 | inst_stmt EOL
          ;
 
-asgn_stmt: keyword '=' { verbatim(); } STRING
+asgn_stmt: keyword meq { verbatim(); } arglist
            {
 		   $$ = rc_stmt_create(rc_stmt_asgn);
 		   $$->v.asgn.lhs = $1;
@@ -180,6 +182,21 @@ asgn_stmt: keyword '=' { verbatim(); } STRING
          ;
 
 keyword  : IDENT
+         ;
+
+arglist  : arg
+           {
+		   $$ = list_create();
+		   list_append($$, $1);
+	   }
+         | arglist arg
+           {
+		   list_append($1, $2);
+		   $$ = $1;
+	   }
+         ;
+
+arg      : string
          ;
 
 cond_stmt: if cond stmtlist fi
@@ -374,6 +391,7 @@ yyerror(char *s)
 {
 	anubis_error(SOFT, "%s:%d: %s",
 		     cfg_file, cfg_line_num, s);
+	return 0;
 }
 
 RC_SECTION *
@@ -467,11 +485,19 @@ rc_section_link(RC_SECTION **ap, RC_SECTION *b)
 }
 
 /* Assignment manipulations */
+
+static int
+_free_mem(void *item, void *data)
+{
+	free(item);
+	return 0;
+}
+
 void
 rc_asgn_destroy(RC_ASGN *asgn)
 {
 	xfree(asgn->lhs);
-	xfree(asgn->rhs);
+	list_destroy(&asgn->rhs, _free_mem, NULL);
 }
 
 /* Bools */
@@ -687,6 +713,13 @@ rc_level_print(int level, char *str)
 	printf("%s", str);
 }
 
+static int
+_print_str(void *item, void *data)
+{
+	printf(" %s", (char*)item);
+	return 0;
+}
+
 void
 rc_stmt_print(RC_STMT *stmt, int level)
 {
@@ -694,8 +727,8 @@ rc_stmt_print(RC_STMT *stmt, int level)
 		switch (stmt->type) {
 		case rc_stmt_asgn:
 			rc_level_print(level, "ASGN: ");
-			printf("%s = %s",
-			       stmt->v.asgn.lhs, stmt->v.asgn.rhs);
+			printf("%s =", stmt->v.asgn.lhs);
+			list_iterate(stmt->v.asgn.rhs, _print_str, NULL);
 			break;
 			
 		case rc_stmt_cond:
@@ -861,16 +894,23 @@ void
 asgn_eval(struct eval_env *env, RC_ASGN *asgn)
 {
 	int key;
-	char *str;
 	struct rc_secdef_child *p = rc_child_lookup(env->child, asgn->lhs,
 						    env->method, &key);
 	if (!p)
 		return;
-	if (env->refstr)
-		str = substitute(asgn->rhs, env->refstr);
-	else
-		str = asgn->rhs;
-	p->parser(env->method, key, str, p->data, env->data, env->msg);
+
+	if (env->refstr) {
+		char *s;
+		struct list *arg = list_create();
+		for (s = list_first(asgn->rhs); s; s = list_next(asgn->rhs)) {
+			char *str = substitute(s, env->refstr);
+			list_append(arg, str);
+		}
+		p->parser(env->method, key, arg, p->data, env->data, env->msg);
+		list_destroy(&arg, _free_mem, NULL);
+	} else
+		p->parser(env->method, key, asgn->rhs, p->data, env->data,
+			  env->msg);
 }
 
 
