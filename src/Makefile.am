@@ -22,61 +22,63 @@
 ## compiling, linking, and/or using OpenSSL is allowed.
 ##
 
+adm_programs = anubisadm anubisusr
 sbin_PROGRAMS = anubis @ANUBISADM@
-EXTRA_PROGRAMS = anubisadm
+EXTRA_PROGRAMS = $(adm_programs)
 noinst_LIBRARIES = libanubisdb.a
-
-anubis_LDADD = ./libanubisdb.a $(top_builddir)/lib/libanubis.a\
- @LIBINTL@ $(GUILE_LIBS) @LIBGNUTLS_LIBS@ @GSASL_LIBS@ 
-
+anubis_LDADD = ./libanubisdb.a $(top_builddir)/lib/libanubis.a @LIBINTL@ $(GUILE_LIBS) @LIBGNUTLS_LIBS@ @GSASL_LIBS@ 
 anubis_SOURCES = \
- main.c \
- extern.h \
- headers.h \
+ auth.c \
+ authmode.c \
+ daemon.c \
  env.c \
  errs.c \
- log.c \
- misc.c \
+ esmtp.c \
  exec.c \
- net.c \
- daemon.c \
- auth.c \
+ extern.h \
+ gpg.c \
+ gsasl_srv.c \
+ guile.c \
+ headers.h \
+ help.c \
+ log.c \
+ main.c \
  map.c \
  message.c \
  mime.c \
- esmtp.c \
- tunnel.c \
- regex.c \
+ misc.c \
+ net.c \
+ quit.c \
  rc.c \
  rcfile-gram.c \
- rcfile-lex.c \
  rcfile-gram.h \
+ rcfile-lex.c \
  rcfile.h \
- guile.c \
- help.c \
- quit.c \
- transmode.c \
- authmode.c \
- gsasl.c \
- gpg.c \
- tls.c \
- ssl.c \
+ regex.c \
  socks.c \
- xdatabase.c
+ transmode.c \
+ tunnel.c \
+ xdatabase.c 
 
 anubisadm_SOURCES = anubisadm.c
 anubisadm_LDADD = ./libanubisdb.a $(top_builddir)/lib/libanubis.a @LIBINTL@
+anubisusr_SOURCES = anubisusr.c
+anubisusr_LDADD = ./libanubisdb.a $(top_builddir)/lib/libanubis.a @LIBINTL@ @LIBGNUTLS_LIBS@ @GSASL_LIBS@ 
 
 libanubisdb_a_SOURCES = \
- list.h \
- list.c \
- mem.c \
- mem.h \
- url.c \
  anubisdb.c \
  dbtext.c \
  gdbm.c \
- mysql.c 
+ gsasl.c \
+ list.c \
+ list.h \
+ mem.c \
+ mem.h \
+ mysql.c \
+ ssl.c \
+ stream.c \
+ tls.c \
+ url.c 
 
 YLWRAP = $(SHELL) $(top_srcdir)/build/ylwrap
 AM_YFLAGS = -dtv
