@@ -22,8 +22,10 @@
 ## compiling, linking, and/or using OpenSSL is allowed.
 ##
 
-sbin_PROGRAMS = anubis
-anubis_LDADD = $(top_builddir)/lib/libanubis.a @LIBINTL@ $(GUILE_LIBS) @LIBGNUTLS_LIBS@ @GSASL_LIBS@ 
+sbin_PROGRAMS = anubis @ANUBISADM@
+EXTRA_PROGRAMS = anubisadm
+noinst_LIBRARIES = libanubisdb.a
+anubis_LDADD = ./libanubisdb.a $(top_builddir)/lib/libanubis.a @LIBINTL@ $(GUILE_LIBS) @LIBGNUTLS_LIBS@ @GSASL_LIBS@ 
 anubis_SOURCES = \
  main.c \
  extern.h \
@@ -53,19 +55,24 @@ anubis_SOURCES = \
  help.c \
  quit.c \
  transmode.c \
- url.c \
- list.h \
- list.c \
  regex.c \
  authmode.c \
  gsasl.c \
- anubisdb.c \
- dbtext.c \
- gdbm.c \
- mysql.c \
  gpg.c \
  tls.c \
  ssl.c
+
+anubisadm_SOURCES = anubisadm.c
+anubisadm_LDADD = ./libanubisdb.a $(top_builddir)/lib/libanubis.a @LIBINTL@
+
+libanubisdb_a_SOURCES = \
+ list.h \
+ list.c \
+ url.c \
+ anubisdb.c \
+ dbtext.c \
+ gdbm.c \
+ mysql.c 
 
 YLWRAP = $(SHELL) $(top_srcdir)/build/ylwrap
 AM_YFLAGS = -dtv
