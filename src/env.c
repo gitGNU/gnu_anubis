@@ -81,7 +81,7 @@ get_options(int argc, char *argv[])
 {
 	int c;
 
-	while ((c = getopt_long(argc, argv, "b:r:l:fisvDc?",
+	while ((c = getopt_long(argc, argv, "b:r:l:fisvDc::?",
 				gopt, &gindex)) != EOF) {
 		switch (c) {
 		case OPT_HELP:
