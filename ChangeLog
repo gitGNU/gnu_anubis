@@ -30,7 +30,8 @@
 	* src/help.c (show_config_options, print_config_options): New
 	  functions.
 	  (print_version): Use show_config_options.
-	* src/rc.c (open_rcfile): Open only altrc if --altrc is given.
+	* src/rc.c (open_rcfile): Open only altrc if both --norc
+	  and --altrc are given.
 	* src/tunnel.c: Started implementing new approach for collecting
 	  message header and body. Both are collected, processed and
 	  only then fed to the MTA.
