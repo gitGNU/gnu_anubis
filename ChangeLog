@@ -1,3 +1,8 @@
+2005-03-02  Sergey Poznyakoff  
+
+	* src/rcfile.c (control_parser): A couple of minor stylistic
+	fixes. Implemented ALLOW-HANG keyword.
+
 2005-02-26  Sergey Poznyakoff
 
 	* src/ident.c (auth_ident): Bugfix
