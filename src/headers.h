@@ -322,7 +322,7 @@ void parse_transmap(int *, char *, char *, char *, int);
 void translate_section_init(void);
 
 /* tunnel.c */
-void smtp_session(void *, void *);
+void smtp_session(void);
 
 /* message.c */
 void message_add_body(MESSAGE *, char *, char *);
