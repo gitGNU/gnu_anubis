@@ -1,4 +1,4 @@
-# translation of anubis-3.9.96.tr.po to Turkish
+# translation of anubis-4.0.tr.po to Turkish
 # Anubis Turkish Translation.
 # Copyright (C) 2002 The Anubis Team
 # This file is distributed under the same license as the anubis package.
@@ -6,10 +6,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: anubis 3.9.96\n"
+"Project-Id-Version: anubis 4.0\n"
 "Report-Msgid-Bugs-To: bug-anubis@gnu.org\n"
-"POT-Creation-Date: 2004-09-22 15:14+0300\n"
-"PO-Revision-Date: 2004-12-05 09:44+0200\n"
+"POT-Creation-Date: 2004-12-18 11:30+0100\n"
+"PO-Revision-Date: 2004-12-24 08:13+0200\n"
 "Last-Translator: Deniz Akkus Kanca <deniz@arayan.com>\n"
 "Language-Team: Turkish <gnu-tr-u12a@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -50,29 +50,29 @@ msgstr "SASL veritabanından veri alınamıyor: %s"
 msgid "Record for `%s' not found."
 msgstr "`%s' için kayıt bulunamadı."
 
-#: src/authmode.c:604
+#: src/authmode.c:606
 msgid "MTA has not been specified. Set either REMOTE-MTA or LOCAL-MTA."
 msgstr "MTA belirtilmemiş. REMOTE-MTA veya LOCAL-MTA'yı belirtin."
 
-#: src/authmode.c:635 src/map.c:164 src/net.c:150 src/net.c:217
+#: src/authmode.c:637 src/map.c:164 src/net.c:150 src/net.c:217
 #: src/transmode.c:98
 #, c-format
 msgid "Illegal address length received for host %s"
 msgstr "%s makinası için geçersiz adres uzunluğu alındı"
 
-#: src/authmode.c:649 src/transmode.c:112
+#: src/authmode.c:651 src/transmode.c:112
 msgid "Loop not allowed. Connection rejected."
 msgstr "Çevrime izin yok. Bağlantı reddedildi."
 
-#: src/authmode.c:681 src/transmode.c:143
+#: src/authmode.c:683 src/transmode.c:143
 msgid "Connection closed successfully."
 msgstr "Bağlantı başarıyla kapatıldı."
 
-#: src/authmode.c:688 src/transmode.c:149
+#: src/authmode.c:690 src/transmode.c:149
 msgid "PAM: Session closed."
 msgstr "PAM: Oturum kapatıldı."
 
-#: src/authmode.c:692 src/transmode.c:153
+#: src/authmode.c:694 src/transmode.c:153
 msgid "PAM: failed to release authenticator."
 msgstr "PAM: yetkilendirici boşaltılamadı."
 
@@ -134,34 +134,34 @@ msgstr[1] "Altsüreç [%lu] tamamlandı. Çıkış durumu: %s. %d istemci kaldı
 msgid "WARNING: An unprivileged user has not been specified!"
 msgstr "UYARI: Az yetkili bir kullanıcı belirtilmedi!"
 
-#: src/daemon.c:213
+#: src/daemon.c:214
 msgid "GNU Anubis is running..."
 msgstr "GNU Anubis çalışıyor..."
 
-#: src/daemon.c:225 src/exec.c:122
+#: src/daemon.c:226 src/exec.c:122
 msgid "accept() failed"
 msgstr "accept() başarısız"
 
-#: src/daemon.c:243
+#: src/daemon.c:244
 #, c-format
 msgid "TCP wrappers: connection from %s:%u rejected."
 msgstr "TCP sarımları: %s:%u bağlantısı reddedildi."
 
-#: src/daemon.c:264
+#: src/daemon.c:269
 #, c-format
 msgid "Too many clients. Connection from %s:%u rejected."
 msgstr "Çok fazla istemci. %s:%u bağlantısı reddedildi."
 
-#: src/daemon.c:271
+#: src/daemon.c:276
 #, c-format
 msgid "Connection from %s:%u"
 msgstr "%s:%u bağlantısı"
 
-#: src/daemon.c:276
+#: src/daemon.c:281
 msgid "daemon: cannot fork"
 msgstr "daemon: çatallanamadı"
 
-#: src/daemon.c:357 src/transmode.c:68
+#: src/daemon.c:362 src/transmode.c:68
 msgid "The MTA has not been specified. Set the REMOTE-MTA or LOCAL-MTA."
 msgstr "MTA belirtilmemiş. REMOTE-MTA veya LOCAL-MTA'yı belirtin."
 
@@ -304,27 +304,64 @@ msgstr "%s: geçici isim sunucusu hatası oluştu. Daha sonra tekrar deneyin."
 msgid "%s: unknown DNS error %d."
 msgstr "%s: bilinmeyen DNS hatası %d."
 
-#: src/esmtp.c:58
-msgid "Using ESMTP authentication mechanism CRAM-MD5..."
-msgstr "ESMTP CRAM-MD5 yetkilendirmesi kullanılıyor..."
+#: src/esmtp.c:165
+msgid "Malformed or unexpected reply"
+msgstr "Bozuk veya beklenmeyen yanıt"
 
-#: src/esmtp.c:65 src/esmtp.c:107
-msgid "Server rejected the AUTH command."
-msgstr "Sunucu AUTH komutunu reddetti."
-
-#: src/esmtp.c:74 src/esmtp.c:116 src/esmtp.c:128
+#: src/esmtp.c:189
 #, c-format
-msgid "Challenge decoded: %s\n"
-msgstr "Sorgulama kodu çözüldü: %s\n"
+msgid "SASL gsasl_client_start: %s"
+msgstr "SASL gsasl_client_start: %s"
 
-#: src/esmtp.c:93 src/esmtp.c:139
+#: src/esmtp.c:198 src/esmtp.c:216
 #, c-format
-msgid "ESMTP AUTH: %s."
-msgstr "ESMTP AUTH: %s."
+msgid "GSASL handshake aborted: %d %s"
+msgstr "GSASL elsıkışması durduruldu: %d %s"
 
-#: src/esmtp.c:100
-msgid "Using ESMTP authentication mechanism LOGIN..."
-msgstr "ESMTP LOGIN yetkilendirmesi kullanılıyor..."
+#: src/esmtp.c:227
+#, c-format
+msgid "GSASL error: %s"
+msgstr "GSASL hatası: %s"
+
+#: src/esmtp.c:241
+#, c-format
+msgid "Authentication failed: %d %s"
+msgstr "Kimlik denetimi başarısız: %d %s"
+
+#: src/esmtp.c:244
+msgid "Authentication successful."
+msgstr "Kimlik denetimi başarılı."
+
+#: src/esmtp.c:263
+msgid "Got empty list of authentication methods"
+msgstr "Kimlik denetim metodları için boş liste alındı"
+
+#: src/esmtp.c:288
+msgid "Server did not offer any feasible authentication mechanism"
+msgstr "Sunucu kullanılabilir bir kimlik denetim mekanizması sağlamıyor"
+
+#: src/esmtp.c:298
+msgid "INTERNAL ERROR"
+msgstr "İÇ HATA"
+
+#: src/esmtp.c:306
+#, c-format
+msgid "Selected authentication mechanism %s requires TLS encryption. Not using ESMTP authentication"
+msgstr "Seçili %s kimlik denetim mekanizması TLS şifrelemesi gerektiriyor. ESMTP kimlik denetimi kullanılmıyor."
+
+#: src/esmtp.c:313
+#, c-format
+msgid "Selected authentication mechanism %s"
+msgstr "%s kimlik denetim mekanizması seçildi"
+
+#: src/esmtp.c:319
+#, c-format
+msgid "Cannot initialize libgsasl: %s"
+msgstr "libgsasl ilklendirilemedi: %s"
+
+#: src/esmtp.c:340
+msgid "ESMTP AUTH is not supported"
+msgstr "ESMTP AUTH desteklenmiyor"
 
 #: src/exec.c:82
 msgid "#1 socket() failed."
@@ -459,7 +496,7 @@ msgstr "%s dönüşünde hatalı cdr türü"
 msgid "Bad return type from %s"
 msgstr "%s tarafından geri döndürülen hatalı dönüş türü"
 
-#: src/help.c:82
+#: src/help.c:85
 msgid ""
 "\n"
 "GNU Anubis is free software; you can redistribute it and/or modify\n"
@@ -473,7 +510,7 @@ msgstr ""
 "olarak) daha sonraki bir sürümü altında yeniden dağıtabilir ve/veya\n"
 "değiştirebilirsiniz."
 
-#: src/help.c:86
+#: src/help.c:89
 msgid ""
 "\n"
 "GNU Anubis is distributed in the hope that it will be useful,\n"
@@ -487,7 +524,7 @@ msgstr ""
 "HERHANGİ BİR AMACA UYGUNLUĞU için dahi zımni bir garanti\n"
 "içermez. Daha fazla bilgi için GNU Genel Kamu Lisansı'na bakın."
 
-#: src/help.c:90
+#: src/help.c:93
 msgid ""
 "\n"
 "You should have received a copy of the GNU General Public License\n"
@@ -499,7 +536,7 @@ msgstr ""
 "olmalıdır; eğer yok ise, lütfen Free Software Foundation, Inc., 59 Temple\n"
 "Place - Suite 330, Boston, MA 02111-1307, USA/ABD adresine yazın."
 
-#: src/help.c:93
+#: src/help.c:96
 msgid ""
 "\n"
 "GNU Anubis is released under the GPL with the additional exemption that\n"
@@ -509,11 +546,11 @@ msgstr ""
 "GNU Anubis, OpenSSL'i kullanmak, derlemek ve bağlamak özel ek izni ile\n"
 "birlikte GPL altında lisanslanmaktadır.\n"
 
-#: src/help.c:101
+#: src/help.c:104
 msgid "Usage: anubis [options]\n"
 msgstr "Kullanım: anubis [seçenekler]\n"
 
-#: src/help.c:102
+#: src/help.c:105
 msgid ""
 " -b, --bind [HOST:]PORT       Specify the TCP port on which GNU Anubis listens\n"
 "                              for connections. The default HOST is INADDR_ANY,\n"
@@ -524,7 +561,7 @@ msgstr ""
 "                              Öntanımlı MAKİNA değeri INADDR_ANY ve öntanımlı\n"
 "                              PORT numarası 24'dür (özel posta sistemi)."
 
-#: src/help.c:105
+#: src/help.c:108
 msgid ""
 " -r, --remote-mta HOST[:PORT] Specify a remote SMTP host name or IP address.\n"
 "                              The default PORT number is 25."
@@ -532,7 +569,7 @@ msgstr ""
 " -r, --remote-mta SUNUCU[:PORT] uzak SMTP sunucusunun adını veya IP adresini\n"
 "                              belirtir. Öntanımlı PORT numarası 25'dir."
 
-#: src/help.c:107
+#: src/help.c:110
 msgid ""
 " -l, --local-mta FILE         Execute a local SMTP server, which works on\n"
 "                              standard input and output (inetd-type program).\n"
@@ -543,21 +580,21 @@ msgstr ""
 "                              Bu seçenekle --remote-mta seçeneği aynı anda\n"
 "                              kullanılamaz."
 
-#: src/help.c:110
+#: src/help.c:113
 msgid " -m, --mode=MODE              Select operation mode."
 msgstr " -m, --mode=KİP               Çalışma kipini seçer."
 
-#: src/help.c:111
+#: src/help.c:114
 msgid "                              MODE is either \"transparent\" or \"auth\""
 msgstr ""
 "                              KİP ya \"transparent\" - şeffaf veya\n"
 "                              \"auth\" - yetkili olabilir"
 
-#: src/help.c:112
+#: src/help.c:115
 msgid " -f, --foreground             Foreground mode."
 msgstr " -f, --foreground             Önplanda çalışma kipi."
 
-#: src/help.c:113
+#: src/help.c:116
 msgid ""
 " -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as described\n"
 "                              in RFC 821 on standard input and output."
@@ -566,23 +603,23 @@ msgstr ""
 "                              çıktı üzerinden SMTP protokolünü (OMP/Tünel)\n"
 "                              kullanır."
 
-#: src/help.c:115
+#: src/help.c:118
 msgid "Output options:\n"
 msgstr "Çıktı seçenekleri:\n"
 
-#: src/help.c:116
+#: src/help.c:119
 msgid " -s, --silent                 Work silently."
 msgstr " -s, --silent                 Sessiz çalışır."
 
-#: src/help.c:117
+#: src/help.c:120
 msgid " -v, --verbose                Work noisily."
 msgstr " -v, --verbose                 Bilgi vererek çalışır."
 
-#: src/help.c:118
+#: src/help.c:121
 msgid " -D, --debug                  Debug mode."
 msgstr " -D, --debug                  Hata ayıklama kipi."
 
-#: src/help.c:119
+#: src/help.c:122
 msgid ""
 "\n"
 "Miscellaneous options:\n"
@@ -590,11 +627,11 @@ msgstr ""
 "\n"
 "Muhtelif seçenekler:\n"
 
-#: src/help.c:120
+#: src/help.c:123
 msgid " -c, --check-config           Run the configuration file syntax checker."
 msgstr " -c, --check-config           Ayar dosyası sözdizim kontrolünü çalıştırır."
 
-#: src/help.c:121
+#: src/help.c:124
 msgid ""
 " --show-config-options        Print a list of configuration options used\n"
 "                              to build GNU Anubis."
@@ -602,27 +639,27 @@ msgstr ""
 " --show-config-options        GNU Anubis'i derlemekte kullanılan ayarları\n"
 "                              listeler."
 
-#: src/help.c:123
+#: src/help.c:126
 msgid " --relax-perm-check           Do not check user configuration file permissions."
 msgstr " --relax-perm-check           Kullanıcı ayar dosyası izinlerini kontrol etmez."
 
-#: src/help.c:124
+#: src/help.c:127
 msgid " --altrc FILE                 Specify alternate system configuration file."
 msgstr " --altrc DOSYA                Alternatif sistem ayar dosyası belirtir."
 
-#: src/help.c:125
+#: src/help.c:128
 msgid " --norc                       Ignore system configuration file."
 msgstr " --norc                       Sistem ayar dosyasını dikkate almaz."
 
-#: src/help.c:126
+#: src/help.c:129
 msgid " --version                    Print version number and copyright."
 msgstr " --version                    Sürüm numarasını ve telif hakkını gösterir."
 
-#: src/help.c:127
+#: src/help.c:130
 msgid " --help                       It's obvious..."
 msgstr " --help                      Yardım..."
 
-#: src/help.c:128
+#: src/help.c:131
 #, c-format
 msgid ""
 "\n"
@@ -737,6 +774,10 @@ msgstr "GNU Anubis %s:%u'ya bağlandı"
 msgid "Short write"
 msgstr "Kısa yazma"
 
+#: src/net.c:339
+msgid "INTERNAL ERROR (get_response_smtp): buffer exhausted. Please report."
+msgstr "İÇ HATA (get_response_smtp): arabellek tükendi. Lütfen bildirin."
+
 #: src/socks.c:53
 msgid "Using SOCKS Proxy..."
 msgstr "SOCKS Vekili kullanılıyor..."
@@ -746,91 +787,91 @@ msgstr "SOCKS Vekili kullanılıyor..."
 msgid "SOCKS proxy: %s"
 msgstr "SOCKS vekili: %s"
 
-#: src/socks.c:141
+#: src/socks.c:143
 msgid "Address must be an IP, not a domain name."
 msgstr "Adres bir IP no'su olmalıdır, bir alan adı değil."
 
-#: src/socks.c:178 src/socks.c:397
+#: src/socks.c:180 src/socks.c:399
 msgid "SOCKS Proxy Connection: succeeded."
 msgstr "SOCKS Vekil Bağlantısı: başarılı."
 
-#: src/socks.c:181
+#: src/socks.c:183
 msgid "Request rejected or failed."
 msgstr "İstem başarısız ya da reddedildi."
 
-#: src/socks.c:184
+#: src/socks.c:186
 msgid "Request rejected."
 msgstr "İstem reddedildi."
 
-#: src/socks.c:187
+#: src/socks.c:189
 msgid "Request rejected, because the client program and identd reported different User-IDs."
 msgstr "İstem, istemci program ve identd'nin farklı kullanıcı kimlikleri belirtmesinden dolayı reddedildi."
 
-#: src/socks.c:191 src/socks.c:424
+#: src/socks.c:193 src/socks.c:426
 msgid "Server reply is not valid."
 msgstr "Sunucu cevabı geçerli değil."
 
-#: src/socks.c:232
+#: src/socks.c:234
 msgid "Possibly not a SOCKS proxy service."
 msgstr "Muhtemelen bir SOCKS vekil servisi değil."
 
-#: src/socks.c:244
+#: src/socks.c:246
 msgid "SOCKS Proxy AUTH method: NO AUTHENTICATION REQUIRED"
 msgstr "SOCKS Vekil Yetkilendirme Metodu: YETKİLENDİRMEYE GEREK YOK"
 
-#: src/socks.c:247
+#: src/socks.c:249
 msgid "SOCKS Proxy AUTH method: USER NAME/PASSWORD"
 msgstr "SOCKS Vekil Yetkilendirme Metodu: KULLANICI ADI/PAROLA"
 
-#: src/socks.c:251
+#: src/socks.c:253
 msgid "Cannot send null user name or password."
 msgstr "Boş kullanıcı adı veya parola gönderilemez."
 
-#: src/socks.c:293
+#: src/socks.c:295
 msgid "Bad user name or password."
 msgstr "Hatalı kullanıcı adı veya parolası."
 
-#: src/socks.c:297
+#: src/socks.c:299
 msgid "SOCKS Proxy AUTH: succeeded."
 msgstr "SOCKS Vekil Yetkilendirme: Başarılı."
 
-#: src/socks.c:300
+#: src/socks.c:302
 msgid "Server does not accept any method."
 msgstr "Sunucu hiç bir metodu kabul etmiyor."
 
-#: src/socks.c:303
+#: src/socks.c:305
 msgid "Server does not accept an AUTH method."
 msgstr "Sunucu bir yetkilendirme metodu kabul etmiyor."
 
-#: src/socks.c:400
+#: src/socks.c:402
 msgid "General SOCKS server failure."
 msgstr "Genel SOCKS sunucu hatası."
 
-#: src/socks.c:403
+#: src/socks.c:405
 msgid "Connection not allowed by a ruleset."
 msgstr "Bir kural kümesi bağlantıya izin vermiyor."
 
-#: src/socks.c:406
+#: src/socks.c:408
 msgid "Network unreachable."
 msgstr "Ağa erişilemiyor."
 
-#: src/socks.c:409
+#: src/socks.c:411
 msgid "Host unreachable."
 msgstr "Sunucuya erişilemiyor."
 
-#: src/socks.c:412
+#: src/socks.c:414
 msgid "Connection refused."
 msgstr "Bağlantı reddedildi."
 
-#: src/socks.c:415
+#: src/socks.c:417
 msgid "TTL expired."
 msgstr "TTL müddeti doldu."
 
-#: src/socks.c:418
+#: src/socks.c:420
 msgid "Command not supported."
 msgstr "Komut desteklenmiyor."
 
-#: src/socks.c:421
+#: src/socks.c:423
 msgid "Address type not supported."
 msgstr "Adres türü desteklenmiyor."
 
@@ -867,11 +908,11 @@ msgstr "Sistem ayar dosyası %s okunuyor..."
 msgid "Reading user configuration file %s..."
 msgstr "Kullanıcı ayar dosyası %s okunuyor..."
 
-#: src/rcfile.c:330
+#: src/rcfile.c:341
 msgid "`logfile' directive is ignored in main configuration file"
 msgstr "`logfile' yönergesi ana ayar dosyasında dikkate alınmadı"
 
-#: src/rcfile.c:709
+#: src/rcfile.c:789
 #, c-format
 msgid "No such section: %s"
 msgstr "Böyle bir bölüm yok: %s"
@@ -966,26 +1007,26 @@ msgstr "bu bölümde yazılım yer alamaz"
 msgid "INTERNAL ERROR at %s:%d: missing or invalid regex"
 msgstr "İÇ HATA %s:%d: eksik veya hatalı düzenli ifade"
 
-#: src/regex.c:316
+#: src/regex.c:332
 #, c-format
 msgid "regcomp() failed at %s: %s."
 msgstr "regcomp(), %s'de hata verdi: %s."
 
-#: src/regex.c:392
+#: src/regex.c:408
 #, c-format
 msgid "pcre_compile() failed at offset %d: %s."
 msgstr "pcre_compile() %d görecesinde hata verdi: %s."
 
-#: src/regex.c:417
+#: src/regex.c:433
 #, c-format
 msgid "pcre_fullinfo() failed: %d."
 msgstr "pcre_fullinfo() başarısız: %d."
 
-#: src/regex.c:429
+#: src/regex.c:445
 msgid "Matched, but too many substrings."
 msgstr "Eşleşti, fakat altdizge sayısı çok fazla."
 
-#: src/regex.c:442
+#: src/regex.c:458
 #, c-format
 msgid "Get substring %d failed (%d)."
 msgstr "Altdizge %d'yi alma başarısız (%d)."
@@ -1230,32 +1271,32 @@ msgstr "- Sertifika sürümü: #%d\n"
 msgid "- Certificate Issuer's DN: %s\n"
 msgstr "- Sertifika Verenin DN'i: %s\n"
 
-#: src/tunnel.c:319 src/tunnel.c:388
+#: src/tunnel.c:318 src/tunnel.c:387
 msgid "Transferring message(s)..."
 msgstr "İleti(ler) aktaralıyor..."
 
-#: src/tunnel.c:386
+#: src/tunnel.c:385
 msgid "Starting SMTP session..."
 msgstr "SMTP oturumu başlatılıyor..."
 
-#: src/tunnel.c:469
+#: src/tunnel.c:468
 msgid "Using the TLS/SSL encryption..."
 msgstr "TLS/SSL şifrelemesi kullanılıyor..."
 
-#: src/tunnel.c:483 src/tunnel.c:627
+#: src/tunnel.c:482 src/tunnel.c:626
 #, c-format
 msgid "WARNING: %s"
 msgstr "UYARI: %s"
 
-#: src/tunnel.c:484
+#: src/tunnel.c:483
 msgid "STARTTLS command failed."
 msgstr "STARTTLS komutu başarısız."
 
-#: src/tunnel.c:618
+#: src/tunnel.c:617
 msgid "Using TLS/SSL encryption between Anubis and remote MTA only..."
 msgstr "Yalnızca Anubis ve uzak MTA arasında TLS/SSL şifrelemesi kullanılıyor..."
 
-#: src/tunnel.c:628
+#: src/tunnel.c:627
 msgid "STARTTLS (ONEWAY) command failed."
 msgstr "STARTTLS (ONEWAY) komutu başarısız."
 
@@ -1314,9 +1355,21 @@ msgstr "%s: `-W %s' seçeneği belirsiz\n"
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr "%s: `-W %s' seçeneği argüman almaz\n"
 
-#: lib/obstack.c:403 lib/obstack.c:406
+#: lib/obstack.c:433 lib/obstack.c:436
 msgid "memory exhausted"
 msgstr "bellek tükendi"
+
+#~ msgid "Using ESMTP authentication mechanism CRAM-MD5..."
+#~ msgstr "ESMTP CRAM-MD5 yetkilendirmesi kullanılıyor..."
+
+#~ msgid "Server rejected the AUTH command."
+#~ msgstr "Sunucu AUTH komutunu reddetti."
+
+#~ msgid "Challenge decoded: %s\n"
+#~ msgstr "Sorgulama kodu çözüldü: %s\n"
+
+#~ msgid "ESMTP AUTH: %s."
+#~ msgstr "ESMTP AUTH: %s."
 
 #~ msgid "The %s section has been found. Processing..."
 #~ msgstr "%s bölümü bulundu. İşleniyor..."
