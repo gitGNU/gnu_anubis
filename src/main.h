@@ -44,7 +44,6 @@ unsigned long ropt;
 
 void *remote_client;
 void *remote_server;
-char **submatch;
 
 /* EOF */
 

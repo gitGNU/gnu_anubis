@@ -71,7 +71,7 @@ free_mem(void)
 	xfree(options.ulogfile);
 	xfree(session.execpath);
 	xfree_pptr(session.execargs);
-	xfree_pptr(submatch);
+
 	return;
 }
 

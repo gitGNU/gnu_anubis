@@ -135,7 +135,6 @@ extern unsigned long ropt;
 
 extern void *remote_client;
 extern void *remote_server;
-extern char **submatch;
 
 #ifdef HAVE_PAM
  extern pam_handle_t *pamh;
