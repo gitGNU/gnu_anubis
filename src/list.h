@@ -28,21 +28,21 @@ typedef struct iterator ITERATOR;
 typedef int (*list_iterator_t)(void *, void *);
 typedef int (*list_comp_t)(void *, void *);
 
-LIST *list_create();
-void list_destroy(LIST **list, list_iterator_t free, void *data);
-void list_iterate(LIST *list, list_iterator_t itr, void *data);
-void *list_item(LIST *list, size_t n);
-size_t list_count(LIST *list);
-void list_append(LIST *list, void *data);
-void list_prepend(LIST *list, void *data);
-void *list_locate(LIST *list, void *data, list_comp_t cmp);
-void *list_remove(LIST *list, void *data, list_comp_t cmp);
+LIST *list_create(void);
+void list_destroy(LIST **, list_iterator_t, void *);
+void list_iterate(LIST *, list_iterator_t, void *);
+void *list_item(LIST *, size_t);
+size_t list_count(LIST *);
+void list_append(LIST *, void *);
+void list_prepend(LIST *, void *);
+void *list_locate(LIST *, void *, list_comp_t);
+void *list_remove(LIST *, void *, list_comp_t);
 
-void *iterator_current(ITERATOR *ip);
-ITERATOR *iterator_create(LIST *list);
-void iterator_destroy(ITERATOR **ip);
-void *iterator_first(ITERATOR *ip);
-void *iterator_next(ITERATOR *ip);
+void *iterator_current(ITERATOR *);
+ITERATOR *iterator_create(LIST *);
+void iterator_destroy(ITERATOR **);
+void *iterator_first(ITERATOR *);
+void *iterator_next(ITERATOR *);
 
 /* EOF */
 

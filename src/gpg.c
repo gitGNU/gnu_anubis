@@ -329,10 +329,10 @@ gpg_parser(int method, int key, LIST *arglist,
 
 
 struct rc_kwdef gpg_kw[] = {
-	{ "gpg-passphrase", 	     KW_GPG_PASSPHRASE },          
-	{ "gpg-encrypt", 	     KW_GPG_ENCRYPT },             
-	{ "gpg-sign", 		     KW_GPG_SIGN },                
-	{ "gpg-home",                KW_GPG_HOME },
+	{ "gpg-passphrase",  KW_GPG_PASSPHRASE },          
+	{ "gpg-encrypt",     KW_GPG_ENCRYPT },             
+	{ "gpg-sign",        KW_GPG_SIGN },                
+	{ "gpg-home",        KW_GPG_HOME },
 	{ NULL },
 };
 
@@ -345,7 +345,7 @@ static struct rc_secdef_child gpg_sect_child = {
 };
 
 void
-gpg_section_init()
+gpg_section_init(void)
 {
 	struct rc_secdef *sp = anubis_add_section("RULE");
 	rc_secdef_add_child(sp, &gpg_sect_child);
