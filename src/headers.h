@@ -245,7 +245,6 @@
 /* Other modifiers */
 #define R_BASIC             0x00000010
 #define R_SCASE             0x00000020
-
 #define R_TYPEMASK          0x0000000f
 
 #define re_set_type(m,t) ((m) = ((m) & ~R_TYPEMASK) | ((t) & R_TYPEMASK))
@@ -367,7 +366,7 @@ void change_to_lower(char *);
 
 /* files.c */
 void message_append_text_file(MESSAGE *, char *);
-void message_append_signature_file(MESSAGE *, char *);
+void message_append_signature_file(MESSAGE *);
 
 /* regex.c */
 int anubis_regex_match(RC_REGEX *, char *, int *, char ***);
