@@ -36,6 +36,10 @@ struct options_struct {
  int uloglevel;
  char *slogfile;
  char *ulogfile;
+#ifdef WITH_GUILE
+ char *guile_logfile;
+ char *guile_postprocess;	
+#endif
  char *altrc;
 };
 
@@ -130,6 +134,7 @@ extern unsigned long mopt;
 extern unsigned long ropt;
 extern unsigned long rule_position;
 extern unsigned long all_position;
+extern unsigned long guile_position;
 
 extern FILE *fp_rcfile;
 extern void *remote_client;
