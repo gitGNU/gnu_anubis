@@ -31,60 +31,60 @@ BEGIN SECTION ALL
   ASGN: remove = ^Lines:
 END SECTION ALL
 BEGIN SECTION RULE
-  COND: ^To:.*<?USERNAME@localhost>?
+  COND: HEADER[To] .*<?USERNAME@localhost>?
   IFTRUE:
     ASGN: modify = ^(.*)<?(USERNAME@)(.*)>?(.*) >> \1\2\3.ORG\4
   END COND
-  COND: AND (^Subject: (.*),NOT (^Subject: URGENT))
+  COND: AND (HEADER[Subject] (.*),HEADER[Subject] URGENT)
   IFTRUE:
     ASGN: add = X-Comment: This message is not URGENT (\1).
     ASGN: add = X-Comment: GNU's Not Unix! (\1)
   END COND
-  COND: ^X-Mailer: (.*)
+  COND: HEADER[X-Mailer] (.*)
   IFTRUE:
     ASGN: add = X-Comment: My love \1
     ASGN: modify = ^X-Mailer: >> X-Mailer: The lousy mailer \1
   END COND
-  RULE: ^gpgd:(.*)
+  RULE: HEADER gpgd:(.*)
   BODY
     ASGN: add = X-GPG-Comment: Encrypted for \1
     ASGN: gpg-encrypt = \1
   END RULE
-  COND: ^Subject: signature
+  COND: HEADER[Subject] signature
   IFTRUE:
     ASGN: signature-file-append = yes
   END COND
-  COND: ^Subject: clearmsg
+  COND: HEADER[Subject] clearmsg
   IFTRUE:
     ASGN: body-clear-append = src/hi.txt
     ASGN: external-body-processor = /usr/bin/formail
   END COND
-  COND: ^Subject: external
+  COND: HEADER[Subject] external
   IFTRUE:
     ASGN: external-body-processor = /usr/bin/formail
   END COND
-  COND: ^gpg-encrypt
+  COND: HEADER ^gpg-encrypt
   IFTRUE:
     ASGN: gpg-encrypt = USERNAME
   END COND
-  COND: ^gpg-sign
+  COND: HEADER ^gpg-sign
   IFTRUE:
     ASGN: gpg-sign = yes
   END COND
-  COND: ^Subject: gpg-all
+  COND: HEADER[Subject] gpg-all
   IFTRUE:
     ASGN: gpg-encrypt = USERNAME
     ASGN: gpg-sign = yes
   END COND
-  COND: ^Subject: gpg-encrypt
+  COND: HEADER[Subject] gpg-encrypt
   IFTRUE:
     ASGN: gpg-encrypt = USERNAME-1,USERNAME-2,USERNAME-3
   END COND
-  COND: ^Subject: gpg-sign
+  COND: HEADER[Subject] gpg-sign
   IFTRUE:
     ASGN: gpg-sign = yes
   END COND
-  COND: ^ALL
+  COND: HEADER ALL
   IFTRUE:
     ASGN: body-append = misc/notatki.txt
     ASGN: gpg-encrypt = USERNAME
@@ -92,42 +92,42 @@ BEGIN SECTION RULE
     ASGN: rot13-subject = yes
     ASGN: ROT13-BODY = yes
   END COND
-  COND: ^Subject: rot13-all
+  COND: HEADER[Subject] rot13-all
   IFTRUE:
     ASGN: rot13-subject = yes
     ASGN: rot13-body = yes
   END COND
-  COND: ^Subject: rot13-body
+  COND: HEADER[Subject] rot13-body
   IFTRUE:
     ASGN: rot13-body = yes
   END COND
-  COND: ^Subject: rot13-subject
+  COND: HEADER[Subject] rot13-subject
   IFTRUE:
     ASGN: rot13-subject = yes
   END COND
-  COND: ^Subject: rm-rrt
+  COND: HEADER[Subject] rm-rrt
   IFTRUE:
     ASGN: rm-rrt = USERNAME@localhost
   END COND
-  COND: ^Subject: rm-post
+  COND: HEADER[Subject] rm-post
   IFTRUE:
     ASGN: rm-post = alt.unix
   END COND
-  COND: ^Subject: rm-gpg
+  COND: HEADER[Subject] rm-gpg
   IFTRUE:
     ASGN: rm-rrt = USERNAME@localhost
     ASGN: rm-gpg = USERNAME
   END COND
-  COND: ^Subject: rm-all
+  COND: HEADER[Subject] rm-all
   IFTRUE:
     ASGN: rm-rrt = USERNAME@tokyo.net
     ASGN: rm-header = EXTRA-Z1: TEST
   END COND
-  COND: ^Subject: body-append
+  COND: HEADER[Subject] body-append
   IFTRUE:
     ASGN: body-append = misc/notatki.txt
   END COND
-  COND: ^Subject: ALL
+  COND: HEADER[Subject] ALL
   IFTRUE:
     ASGN: body-append = misc/notatki.txt
     ASGN: gpg-encrypt = USERNAME

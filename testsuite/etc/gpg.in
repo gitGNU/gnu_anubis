@@ -20,14 +20,10 @@ logfile = TESTDIR/etc/anubis.log
 local-mta = TESTDIR/mta -bs -d TESTDIR/etc/mta.log
 ---END---
 
----BEGIN ALL---
-#gpg-passphrase = GNU's Not Unix
-#gpg-sign = PASSPHRASE or `yes' if `gpg-passphrase' is already specified.
-gpg-home = TESTDIR/data
----END---
-
 ---BEGIN RULE---
-rule =^gpgd:(.*)
+gpg-home = TESTDIR/data
+
+rule "^gpgd:(.*)"
  gpg-encrypt = \1
  add = X-GPG-Comment: Encrypted for \1
 done
