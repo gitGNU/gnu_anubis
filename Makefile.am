@@ -24,7 +24,7 @@
 
 AUTOMAKE_OPTIONS = 1.7.2
 ACLOCAL_AMFLAGS = -I m4
-SUBDIRS = build m4 intl po doc scripts examples contrib src testsuite
+SUBDIRS = build m4 intl po doc scripts examples guile contrib src testsuite
 
 ## EOF
 
