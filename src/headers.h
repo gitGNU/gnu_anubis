@@ -139,8 +139,8 @@
 # endif /* HAVE_LOCALE_H */
 #else
 # define _(String) (String)
-# define N_(String) String
 #endif /* ENABLE_NLS */
+#define N_(String) String
 
 #ifdef WITH_GUILE
 # include <libguile.h>
@@ -473,13 +473,13 @@ enum anubis_db_mode {
 	anubis_db_rdwr
 };
 
-#define ANUBIS_DB_SUCCESS   0  /* Operations successful */
-#define ANUBIS_DB_FAIL      1  /* Operation failed */
-#define ANUBIS_DB_NOT_FOUND 2  /* Record not found (for db_get_record
-				  only) */
+#define ANUBIS_DB_SUCCESS   0   /* Operations successful */
+#define ANUBIS_DB_FAIL      1   /* Operation failed */
+#define ANUBIS_DB_NOT_FOUND 2   /* Record not found (for db_get_record
+				   only) */
 
 typedef int (*anubis_db_open_t) (void **d, ANUBIS_URL *url,
-				 enum anubis_db_mode mode);
+				 enum anubis_db_mode mode, char **errp);
 typedef int (*anubis_db_close_t) (void *d);
 typedef int (*anubis_db_io_t) (void *d, char *key, ANUBIS_USER *rec,
 			       int *ecode);
@@ -492,7 +492,8 @@ int anubis_db_register(char *dbid, anubis_db_open_t _db_open,
 		       anubis_db_io_t _db_put,
 		       anubis_db_delete_t _db_delete,
 		       anubis_db_strerror_t _db_strerror);
-int anubis_db_open(char *arg, enum anubis_db_mode mode, void **dptr);
+int anubis_db_open(char *arg, enum anubis_db_mode mode, void **dptr,
+		   char **errp);
 int anubis_db_close(void **dptr);
 int anubis_db_get_record(void *dptr, char *key, ANUBIS_USER *rec);
 int anubis_db_put_record(void *dptr, char *key, ANUBIS_USER *rec);
