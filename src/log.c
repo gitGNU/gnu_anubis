@@ -27,7 +27,7 @@
 #include "rcfile.h"
 
 void
-mprintf(char *format, ...)
+mprintf(const char *fmt, ...)
 {
 	va_list arglist;
 	char txt[LINEBUFFER+1];
@@ -35,16 +35,15 @@ mprintf(char *format, ...)
 	if (options.termlevel == SILENT)
 		return;
 
-	va_start(arglist, format);
-	vsnprintf(txt, LINEBUFFER, format, arglist);
+	va_start(arglist, fmt);
+	vsnprintf(txt, LINEBUFFER, fmt, arglist);
 	va_end(arglist);
 
 	puts(txt);
-	return;
 }
 
 void
-info(int mode, char *format, ...)
+info(int mode, const char *fmt, ...)
 {
 	va_list arglist;
 	char txt[LINEBUFFER+1];
@@ -52,8 +51,8 @@ info(int mode, char *format, ...)
 	if (mode > options.termlevel)
 		return;
 
-	va_start(arglist, format);
-	vsnprintf(txt, LINEBUFFER, format, arglist);
+	va_start(arglist, fmt);
+	vsnprintf(txt, LINEBUFFER, fmt, arglist);
 	va_end(arglist);
 
 #ifdef HAVE_SYSLOG
@@ -81,7 +80,7 @@ filelog(char *logfile, char *txt)
 	FILE *fplog;
 
 	fplog = fopen(logfile, "a");
-	if (fplog == 0)
+	if (fplog == NULL)
 		return;
 	else {
 		time_t tp;
@@ -96,7 +95,6 @@ filelog(char *logfile, char *txt)
 		fprintf(fplog, "%s [%d] %s\n", timebuf, (int)getpid(), txt);
 		fclose(fplog);
 	}
-	return;
 }
 
 void
@@ -104,16 +102,16 @@ trace(RC_LOC *loc, const char *fmt, ...)
 {
 	va_list ap;
 	int n = 0;
-	char txt[LINEBUFFER];
+	char txt[LINEBUFFER+1];
 
-	if (VERBOSE > options.termlevel)
+	if (options.termlevel < VERBOSE)
 		return;
 
 	if (loc)
 		n = snprintf(txt, sizeof(txt), "%s:%lu: ",
 			     loc->file, (unsigned long)loc->line);
 	va_start(ap, fmt);
-	vsnprintf(txt + n, sizeof(txt) - n, fmt, ap);
+	vsnprintf(txt + n, LINEBUFFER - n, fmt, ap);
 	va_end(ap);
 	info(VERBOSE, "%s", txt);
 }
