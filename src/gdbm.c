@@ -70,23 +70,13 @@ gdbm_db_close (void *d)
 	return ANUBIS_DB_SUCCESS;
 }
 
-static int
-gdbm_db_get (void *d, char *keystr, ANUBIS_USER *rec, int *errp)
+static void
+gdbm_content_to_record(char *keystr, datum content, ANUBIS_USER *rec)
 {
-	datum key, content;
-	char *text, *p;
+	char *p;
+	char *text = xmalloc(content.dsize + 1);
 	
-	key.dptr = keystr;
-	key.dsize = strlen(keystr);
-	content = gdbm_fetch((GDBM_FILE)d, key);
-	if (content.dptr == NULL) 
-		return ANUBIS_DB_NOT_FOUND;
-
-	rec->smtp_authid = strdup(keystr);
-	text = xmalloc(content.dsize + 1);
 	memcpy(text, content.dptr, content.dsize);
-
-	memset(rec, 0, sizeof *rec);
 	rec->smtp_authid = strdup(keystr);
 	p = strtok(text, ",");
 	if (p) {
@@ -101,7 +91,49 @@ gdbm_db_get (void *d, char *keystr, ANUBIS_USER *rec, int *errp)
 		free(text);
 	} else
 		rec->smtp_passwd = text;
+}
+
+static int
+gdbm_db_get (void *d, char *keystr, ANUBIS_USER *rec, int *errp)
+{
+	datum key, content;
+	
+	key.dptr = keystr;
+	key.dsize = strlen(keystr);
+	content = gdbm_fetch((GDBM_FILE)d, key);
+	if (content.dptr == NULL) 
+		return ANUBIS_DB_NOT_FOUND;
+
+	memset(rec, 0, sizeof *rec);
+	gdbm_content_to_record(keystr, content, rec);
 	free(content.dptr);
+	return ANUBIS_DB_SUCCESS;
+}
+
+static int
+gdbm_db_list(void *d, LIST *list, int *ecode)
+{
+	datum key, content;
+
+	key = gdbm_firstkey((GDBM_FILE)d);
+	while (key.dptr) {
+		datum nextkey;
+
+		content = gdbm_fetch((GDBM_FILE)d, key);
+		if (content.dptr) {
+			ANUBIS_USER *rec = xmalloc(sizeof(*rec));
+			char *keyval = xmalloc(key.dsize + 1);
+			memcpy(keyval, key.dptr, key.dsize);
+			keyval[key.dsize] = 0;
+			gdbm_content_to_record(keyval, content, rec);
+			free(keyval);
+			list_append(list, rec);
+		}
+		
+		nextkey = gdbm_nextkey((GDBM_FILE)d, key);
+		free(key.dptr);
+		key = nextkey;
+	}
 	return ANUBIS_DB_SUCCESS;
 }
 
@@ -177,6 +209,7 @@ gdbm_db_init()
 			   gdbm_db_get,
 			   gdbm_db_put,
 			   gdbm_db_delete,
+			   gdbm_db_list,
 			   gdbm_db_strerror);
 }
 #endif

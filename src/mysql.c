@@ -165,13 +165,56 @@ mysql_db_get (void *d, char *key, ANUBIS_USER *rec, int *errp)
 
 	row = mysql_fetch_row(result);
 	
-	rec->smtp_authid = row[0];
-	rec->smtp_passwd = row[1];
+	rec->smtp_authid = strdup(row[0]);
+	rec->smtp_passwd = strdup(row[1]);
 	if (row[2])
-		rec->username = row[2];
+		rec->username = strdup(row[2]);
 	if (row[3])
-		rec->rc_file_name = row[3];
+		rec->rc_file_name = strdup(row[3]);
 	mysql_free_result(result);
+	return ANUBIS_DB_SUCCESS;
+}
+
+static int
+mysql_db_list(void *d, LIST *list, int *ecode)
+{
+	struct anubis_mysql_db *amp = d;
+        MYSQL_RES *result;
+	size_t nrows;
+	
+	snprintf(amp->buf, amp->bufsize,
+		 "SELECT %s,%s,%s,%s FROM %s",
+		 amp->authid,
+		 amp->passwd,
+		 amp->user,
+		 amp->rccol,
+		 amp->table);
+	
+	*ecode = mysql_query(&amp->mysql, amp->buf);
+	if (*errp)
+		return ANUBIS_DB_FAIL;
+        if (!(result = mysql_store_result(&amp->mysql)))
+		return ANUBIS_DB_FAIL;
+        if ((nrows = mysql_num_rows(result)) == 0) {
+		mysql_free_result(result);
+		return ANUBIS_DB_NOT_FOUND;
+	}
+
+	for (i = 0; i < nrows; i++) {
+		ANUBIS_USER *rec;
+		MYSQL_ROW row = mysql_fetch_row(result);
+		if (!row)
+			break;
+		rec = xmalloc(sizeof(*rec));
+		rec->smtp_authid = strdup(row[0]);
+		rec->smtp_passwd = strdup(row[1]);
+		if (row[2])
+			rec->username = strdup(row[2]);
+		if (row[3])
+			rec->rc_file_name = strdup(row[3]);
+		list_append(list, prec);
+	}
+	
 	return ANUBIS_DB_SUCCESS;
 }
 
@@ -231,6 +274,7 @@ mysql_db_init ()
 			   mysql_db_get,
 			   mysql_db_put,
 			   mysql_db_delete,
+			   mysql_db_list,
 			   mysql_db_strerror);
 }
 #endif

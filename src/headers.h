@@ -486,12 +486,14 @@ typedef int (*anubis_db_io_t) (void *d, char *key, ANUBIS_USER *rec,
 			       int *ecode);
 typedef const char *(*anubis_db_strerror_t) (void *d, int rc);
 typedef int (*anubis_db_delete_t) (void *d, char *key, int *ecode);
-
+typedef int (*anubis_db_get_list_t) (void *d, LIST *list, int *ecode);
+	     
 int anubis_db_register(char *dbid, anubis_db_open_t _db_open,
 		       anubis_db_close_t _db_close,
 		       anubis_db_io_t _db_get,
 		       anubis_db_io_t _db_put,
 		       anubis_db_delete_t _db_delete,
+		       anubis_db_get_list_t _db_list,
 		       anubis_db_strerror_t _db_strerror);
 int anubis_db_open(char *arg, enum anubis_db_mode mode, void **dptr,
 		   char **errp);
@@ -499,6 +501,7 @@ int anubis_db_close(void **dptr);
 int anubis_db_get_record(void *dptr, char *key, ANUBIS_USER *rec);
 int anubis_db_put_record(void *dptr, char *key, ANUBIS_USER *rec);
 int anubis_db_delete_record(void *dptr, char *key);
+int anubis_db_get_list(void *dptr, LIST **list);
 const char *anubis_db_strerror(void *dptr);
 void anubis_db_free_record(ANUBIS_USER *rec);
 

@@ -33,6 +33,7 @@ struct anubis_db_type {
 	anubis_db_io_t db_get_record;
 	anubis_db_io_t db_put_record;
 	anubis_db_delete_t db_delete;
+	anubis_db_get_list_t db_list;
 	anubis_db_strerror_t db_strerror;
 };
 
@@ -65,6 +66,7 @@ anubis_db_register(char *dbid,
 		   anubis_db_io_t _db_get,
 		   anubis_db_io_t _db_put,
 		   anubis_db_delete_t _db_delete,
+		   anubis_db_get_list_t _db_list,
 		   anubis_db_strerror_t _db_strerror)
 {
 	struct anubis_db_type *dbt = xmalloc(sizeof *dbt);
@@ -74,6 +76,7 @@ anubis_db_register(char *dbid,
 	dbt->db_get_record = _db_get;
 	dbt->db_put_record = _db_put;
 	dbt->db_delete = _db_delete;
+	dbt->db_list = _db_list;
 	dbt->db_strerror = _db_strerror;
 	if (!dbtab)
 		dbtab = list_create();
@@ -90,12 +93,16 @@ anubis_db_open(char *arg, enum anubis_db_mode mode, void **dptr, char **err)
 	struct anubis_db_type *dbt;
 	int rc;
 		
-	if (anubis_url_parse(&url, arg))
+	if (anubis_url_parse(&url, arg)) {
+		*err = _("Cannot parse database URL");
 		return EINVAL;
+	}
 	
 	dbt = anubis_db_locate(url->method);
-	if (!dbt)
+	if (!dbt) {
+		*err = _("Requested database URL is unknown or unsupported");
 		return ENOENT;
+	}
 	inst = xmalloc(sizeof *inst);
 	inst->db_type = dbt;
 	inst->db_handle = NULL;
@@ -153,6 +160,15 @@ anubis_db_delete_record(void *dptr, char *key)
 	}
 	return inst->db_type->db_delete(inst->db_handle, key,
 					&inst->error_code);
+}
+
+int
+anubis_db_get_list(void *dptr, LIST **list)
+{
+	struct anubis_db_instance *inst = dptr;
+	*list = list_create();
+	return inst->db_type->db_list(inst->db_handle, *list,
+				      &inst->error_code);
 }
 
 const char *
