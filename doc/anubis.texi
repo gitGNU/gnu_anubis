@@ -41,6 +41,7 @@ Software Foundation raise funds for GNU development.''
 @subtitle GNU Anubis Version @value{VERSION}
 @subtitle @value{UPDATED}
 @author Wojciech Polak and Sergey Poznyakoff
+
 @page
 @vskip 0pt plus 1filll
 @insertcopying
@@ -48,6 +49,7 @@ Software Foundation raise funds for GNU development.''
 
 
 @node Top, Overview, , (dir)
+@insertcopying
 @ifinfo
 @chapter GNU Anubis
 This edition of the @cite{GNU Anubis Manual}, last updated @value{UPDATED},
@@ -159,7 +161,7 @@ Intelligent Language for Extensions}.
 
 The message processing is controlled by system-wide and per-user
 configuration files written in a flexible and easy to use
-command scripting language, specially desgined for this
+command scripting language, specially designed for this
 purpose.
 
 
@@ -177,7 +179,7 @@ defines the specific wording and control flow for communications between
 two or more programs, devices, or systems.
 
 @item SMTP
-Simple Mail Tansport Protocol is a common mechanism for exchanging
+Simple Mail Transport Protocol is a common mechanism for exchanging
 mail across a network. This protocol is described in the RFC 821 document.
 
 @item Daemon
@@ -235,13 +237,13 @@ connections. @xref{Pixie-Dixie}, this is the first draft
 description of this mode.
 @end table
 
-Both modes have their advantages and deficiences, which you
+Both modes have their advantages and deficiencies, which you
 have to weigh carefully before choosing which one to use. These
 are discussed below:
 
 @subheading Transparent (@samp{traditional}) mode.
 
-Deficiences:
+Deficiencies:
 @enumerate
 @item The user must have @command{identd} installed on his machine.
 @item Each user must have a system account on the machine where
@@ -259,12 +261,12 @@ Advantages:
 
 @subheading Auth mode.
 
-Deficiences:
+Deficiencies:
 @enumerate
 @item You have to maintain your users database
-@item User's MUA must be able to perform ESMTP AUTH
-@FIXME{Not quite so. The user may install Anubis on his mashine
-for the sole purpose of SMTP authentication, as Pixie-Dixie suggests.}
+@item User's MUA must be able to perform ESMTP AUTH.@footnote{It is
+not a serious restriction, however. The user may install Anubis on his
+machine for the sole purpose of SMTP authentication, as Pixie-Dixie suggests.}
 @end enumerate
 
 @noindent
@@ -288,7 +290,7 @@ Anubis runs.
 @UNREVISED{}
 
 GNU Anubis uses @dfn{User Database} for keeping @dfn{user credentials},
-i.e. data used to authenticate and autorize users. The exact way of
+i.e. data used to authenticate and authorize users. The exact way of
 storing these data does not matter here, it will be addressed further
 in this manual. In this section we treat user database as an
 abstraction layer.
@@ -346,7 +348,7 @@ a file exists, loads it.
 @UNREVISED{}
 
 Anubis database is identified by its @dfn{URL}, or @dfn{Universal
-Resourse Locator}. A @code{URL} consists of following elements
+Resource Locator}. A @code{URL} consists of following elements
 (square brackets enclose optional elements):
 
 @smallexample
@@ -884,7 +886,7 @@ line introduces a single statement. A statement consists of
 non-whitespace symbols. A word may be composed of alphanumeric
 characters and any of the following punctuation symbols:
 @samp{_}, @samp{.}, @samp{/}, @samp{-}. Any arbitrary sequence
-of characters enclosed in a pair of doublequotes is also recognized
+of characters enclosed in a pair of double quotes is also recognized
 as a word.
 
 The familiar shell @dfn{here document} syntax may be used to produce
@@ -919,7 +921,7 @@ and the third one composed of the three lines between the @samp{EOT}
 markers.
 
 If a statement is very long, it may be split among several lines
-of text. To do so, preceede the newline characters with a backslash
+of text. To do so, precede the newline characters with a backslash
 @samp{\}, e.g.:
 
 @smallexample
@@ -987,7 +989,7 @@ is required in the system configuration file. It may be used in
 the user configuration file to override the system-wide settings.
 @item TRANSLATION
 This section specifies a translation map for remapping
-remote or local users. It may be used only in the syste-wide
+remote or local users. It may be used only in the system-wide
 configuration file.
 @item GUILE
 Contains the settings of the Guile interpreter. The section is
@@ -1381,7 +1383,7 @@ the local john's configuration file.
 @cindex Scheme
 
 @deffn Command guile-output @var{file}
-Specifies the name of the file to bind to the Scheme standart error
+Specifies the name of the file to bind to the Scheme standard error
 and output ports. This option has no effect if GNU Anubis is started
 with either of @option{--foreground} or @option{--stdio} command line
 options. 
@@ -1479,7 +1481,7 @@ when evaluating the condition. It is either @samp{command}, meaning
 the text of an smtp command issued while sending the message, or
 @samp{header}, meaning the value of an RFC822 header. Either of the
 two may be followed by the name of the corresponding command or
-header enclosed in square braquets. If this part is missing, all
+header enclosed in square brackets. If this part is missing, all
 command or headers will be searched. 
 
 The optional @var{pattern-match-flags} alter the pattern matching
@@ -1519,7 +1521,7 @@ fi
 
 The actions represented by @dots{} will be executed only if the
 @samp{Subject:} header of the message starts with @samp{Re:} optionally
-preceeded by any amount of whitespace.
+preceded by any amount of whitespace.
 
 The more elaborate form of a conditional allows you to choose among
 the two different action sets depending on a given condition. The
@@ -1877,7 +1879,7 @@ add [X-Comment-2] "Support FSF!"
 
 @deffn Command add body @var{text}
 Adds the @var{text} to the message body. Use of this command with
-@samp{here document} syntax allows to append multiline text to the
+@samp{here document} syntax allows to append multi-line text to the
 message, e.g.:
 
 @smallexample
@@ -2002,7 +2004,7 @@ modify body ["old"]
 @end deffn
 
 @deffn Command modify [@var{flags}] body @samp{[}@var{key}@samp{]} @var{string}
-Replaces all occurences of @var{key} with @var{string}. For example:
+Replaces all occurrences of @var{key} with @var{string}. For example:
 
 @smallexample
 modify body :extended ["the old \([[:alnum:]]+\)"] "the new \1"
@@ -2112,7 +2114,7 @@ It has the same effect as @command{gpg} command line switch
 of PGP keys to encrypt the message with. This argument is mandatory.
 The second argument is optional and is separated from the first one
 by a colon (@samp{:}). This argument specifies the signer key. In
-the absense of the second argument your default private key
+the absence of the second argument your default private key
 is used.
 
 For example:
@@ -2560,7 +2562,7 @@ Print the syntax tree after parsing the file.
 As @samp{1}, but also prints the parser traces.
 
 @item 3
-As @samp{2}, but also prints the lexical analizer traces.
+As @samp{2}, but also prints the lexical analyzer traces.
 @end table
 
 @item --debug

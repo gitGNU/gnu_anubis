@@ -1,57 +1,42 @@
+GNU Anubis NEWS -- history of user-visible changes.  2004-05-30
+Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 
- Release Notes
- =============
+See the end of file for copying conditions.
 
- ****************
- 4.0 (unreleased)
- ****************
+Please send your bug reports to <bug-anubis@gnu.org>.
+
+Version 3.9.94:
 
- Current v3.9.94 (?? ??? 2004):
-
- GNU Anubis 4.0 has been rewritten from scratch. Changed the message
- processing algorithm to process a message as a whole. Many changes,
- bugfixes, and improvements have been made.
+GNU Anubis 4.0 has been rewritten from scratch. The message processing
+algorithm has been changed. Apart from that, this release includes
+a lot of other improvements and bugfixes.
 
 ** New features:
 
 * The new authentication and authorization mode has been introduced.
-  It drops the IDENT protocol server authentication requirement...
-  [FIXME: elaborate on this]
+  In contrast to the method used previously, the new mode does not require
+  client machines to run AUTH server (identd). It uses standard
+  SMTP AUTH capability and can therefore be used with most contemporary
+  MUAs.
 
-* [FIXME: Due to above] ...support for the following databases
-  has been added:
+* User's database can be kept on the server machine in any of the following
+  formats:
 
+  - Plain text
   - GDBM
   - MySQL
   - PostgreSQL
 
-* Support for the GNU extension language has been added
-  via Guile 1.6 or newer.
+* GNU Anubis is extensible via Guile (requires Guile 1.6 or newer).
+  Several Guile extension modules are shipped with the package,
+  among them a module for signing 
 
-* Added testsuite (make check).
+* Added test suite (make check).
 
-** Grammar rewritten and improved (configuration files support
-   has been rewritten using Yacc and Lex). The new syntax is:
-
-   if header[Subject] "regexp"
-
-  Multiple conditions are allowed:
-
-   if header[Subject] "Re: .*" and body ".*found.*"
-
-  Conditional statements may be nested to any depth.
-  New syntactical entities:
-
-   add header[KEY] VALUE
-   add body VALUE
-   remove header[KEY]
-   modify header[KEY] [NEW-KEY] VALUE
-
-  [FIXME: Add more news about the grammar]
-
-  The new statement `stop' allows to abort execution of a RULE section.
-  The new statement `regex' sets the default preferences for the
-  style of the regular expressions.
+** Configuration file grammar is rewritten. It features several
+   new syntactical entities, allows nesting of conditional statements
+   to arbitrary depth, and is easily extended using Guile. Refer to
+   the documentation for the detailed information.
 
 ** Run Control File News:
 
@@ -67,8 +52,9 @@
   user-defined section using `call' statement.
 * The order of processing user CONTROL sections may be altered by
   setting `control-priority' in the system-wide CONTROL section.
-* Execution of the configuration files can be traced by setting
-  new CONTROL variable `tracefile'.
+* Execution of the configuration files can be traced using the
+  `tracefile' statement in CONTROL section of the configuration
+  file.
 
 ** Other changes:
 
@@ -78,7 +64,7 @@
   Anubis configuration files.
 * New Dutch, Malay, Polish, Romanian, Russian, and Ukrainian message
   translations.
-
+
  *******************
  3.6.2 (15 Dec 2002)
  *******************
@@ -97,6 +83,7 @@
 * The `msg2smtp.pl' Perl script (revision 1.5) has been fixed.
 * Switched to GNU Autoconf 2.57 and GNU Automake 1.7.2.
 
+
  *******************
  3.6.1 (16 Nov 2002)
  *******************
@@ -106,6 +93,7 @@
 * GNU Anubis requires now GPGME 0.3.12 or later (and at least GnuPG 1.2.0).
 * The Turkish NLS has been added.
 
+
  *******************
  3.6.0 (02 Nov 2002)
  *******************
@@ -117,6 +105,7 @@
 * The ESMTP CRAM-MD5 authentication method is now supported by libgcrypt
   if compiling with GnuTLS, or `openssl/md5.h' if compiling with OpenSSL.
 
+
  *******************
  3.5.2 (21 Oct 2002)
  *******************
@@ -130,6 +119,7 @@
   without the OpenSSL support (CRAM-MD5 requires MD5 via `openssl/md5.h').
 * The '--stdio' command line option has been fixed.
 
+
  *******************
  3.5.1 (16 Oct 2002)
  *******************
@@ -138,6 +128,7 @@
 * The SOCKS-USERNAME and SOCKS-PASSWORD keywords have been
   replaced with the SOCKS-AUTH keyword ("socks-auth = USERNAME:PASSWORD").
 
+
  *******************
  3.5.0 (14 Oct 2002)
  *******************
@@ -154,6 +145,7 @@
 * The OUTPUT keyword (a temporary alias since 3.4.7) has been removed.
 * The French NLS has been added.
 
+
  *******************
  3.4.9 (22 Sep 2002)
  *******************
@@ -163,6 +155,7 @@
 * The specgen.sh file has been updated.
 * Some minor changes and bug fixes have been made.
 
+
  *******************
  3.4.8 (20 Sep 2002)
  *******************
@@ -172,6 +165,7 @@
 * Anubis now recogizes a client if IDENTD server returns
   only UID number.
 
+
  *******************
  3.4.7 (17 Sep 2002)
  *******************
@@ -189,6 +183,7 @@
   > TERMLEVEL instead of OUTPUT (OUTPUT is now a temporary alias).
 * The documentation has been improved.
 
+
  *******************
  3.4.6 (08 Sep 2002)
  *******************
@@ -203,6 +198,7 @@
   For security reasons, the RGID and RUID are set instead.
 * A major documentation changes and improvements have been made.
 
+
  *******************
  3.4.5 (02 Sep 2002)
  *******************
@@ -222,6 +218,7 @@
   Read the documentation in Texinfo (anubis.info) format instead.
 * Some additional changes and security fixes have been made.
 
+
  *******************
  3.4.2 (22 Aug 2002)
  *******************
@@ -231,6 +228,7 @@
 * The TUTORIAL and anubis.1 files have been moved to the 'doc' directory.
 * The specgen.sh file has been updated.
 
+
  *******************
  3.4.1 (18 Aug 2002)
  *******************
@@ -242,6 +240,7 @@
 * The Tips & Hints section has been added to the documentation.
 * The THANKS file has been added.
 
+
  *******************
  3.4.0 (01 Aug 2002)
  *******************
@@ -254,6 +253,7 @@
   This idea has been suggested by Mikael Ringeval.
 * Some minor changes have been made.
 
+
  *******************
  3.3.0 (23 Jul 2002)
  *******************
@@ -268,6 +268,7 @@
 * The code has been optimized a bit. Some bugs have been fixed.
 * The specgen.sh file has been updated.
 
+
  *******************
  3.2.3 (06 Jul 2002)
  *******************
@@ -276,6 +277,7 @@
 * The compilation with a custom CFLAGS environment variable
   has been fixed.
 
+
  *******************
  3.2.2 (01 Jul 2002)
  *******************
@@ -284,6 +286,7 @@
   to be compatible with GNU Autoconf 2.53 or later.
 * Another build fixes (configure.ac) by Ayamura KIKUCHI.
 
+
  *******************
  3.2.1 (26 Jun 2002)
  *******************
@@ -294,6 +297,7 @@
 * The default install path has been changed from /usr/sbin/
   to /usr/local/sbin/.
 
+
  *******************
  3.2.0 (23 Jun 2002)
  *******************
@@ -307,6 +311,7 @@
 * A small fix for systems without setegid(2) and seteuid(2)
   has been made.
 
+
  *******************
  3.1.1 (20 Jun 2002)
  *******************
@@ -318,6 +323,7 @@
 * The specgen.sh file has been improved.
 * A small code cleanup has been done.
 
+
  *******************
  3.1.0 (14 Jun 2002)
  *******************
@@ -336,6 +342,7 @@
   MUA doesn't support the TLS/SSL encryption, but your MTA does.
 * The code has been optimized a bit.
 
+
  *******************
  3.0.2 (10 Jun 2002)
  *******************
@@ -346,6 +353,7 @@
   but now this has been successfully fixed.
 * Some additional security fixes have been made.
 
+
  *******************
  3.0.1 (08 Jun 2002)
  *******************
@@ -356,6 +364,7 @@
 * The portability has been slightly improved,
   especially under Darwin.
 
+
  *******************
  3.0.0 (01 Jun 2002)
  *******************
@@ -364,10 +373,12 @@
   and the SMTP tunnel between the MUA and the MTA.
   Any other functions/features have been removed.
 
+
 ----------------------------------------------------------------------
+
  Copyright information:
 
- Copyright (C) 2001, 2002, 2003 The Anubis Team.
+ Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 
  Permission is granted to anyone to make or distribute verbatim copies
  of this document as received, in any medium, provided that the
@@ -379,5 +390,5 @@
  under the above conditions, provided also that they
  carry prominent notices stating who last changed them.
 
- EOF
-
+
+EOF

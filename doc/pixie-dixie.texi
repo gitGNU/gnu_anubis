@@ -52,7 +52,7 @@ work. I'd put a footnote here explaining that.}
 @end itemize
 
 @item @dixie{} mode
-In this mode GNU Anubis runs its own user database, additionaly
+In this mode GNU Anubis runs its own user database, additionally
 translating logins (@pxref{login translation}). It also is able to keep
 users' configuration files (an additional option and an advantage ---
 @pxref{anubis database}).
@@ -65,21 +65,15 @@ possible only after the authentication is finished successfully. This mode
 also delays connecting to the MTA, since Anubis first has to perform
 ESMTP AUTH, and only after finishing authentication, does
 it read and process the user's configuration file and connects to the
-selected MTA. Of course, the client is not able to send @code{MAIL FROM:}
-command until he is authentified and accepted by Anubis
-@FIXME{This is according to the original manuscript. I'm not
-sure I like the way it's worded, as actually client is not able to
-issue a number of commands until he is authentified. "The client is
-not able to begin sending messages" would sound better?}.
+selected MTA. Of course, the client is not able to begin sending
+messages until he is authenticated and accepted by Anubis.
 
 @item Details
 
 There is a great difference between the two modes. To begin with,
 @pixie{} mode provides a tunnel (or proxy), in the sense that Anubis
 connects user's MUA to the remote MTA without requiring any
-special actions from the user. @FIXME{the "in the sense" part is not
-present in the original manuscript. However, my guess is that with it
-the idea becomes clearer.}
+special actions from the user. 
 
 Let's consider a simple interaction between @samp{Machine-A}, which runs
 Anubis 4, and @samp{Machine-B}, where MUA is run.
@@ -102,34 +96,27 @@ B: AUTH <METHOD>
 @end smallexample
 
 Now, the Anubis server has authenticated the client using data from
-Anubis database! @anchor{anubis database}I'd like this database to contain, besides the user
-name and password, the name and password of this user on Machine-A.
-Thus, an Anubis database must contain at least @emph{two} user name/password
-pairs. The first pair is used for SMTP authentication, while the second one is
-used to instantiate user's session on @samp{Machine-A} (this is an optional
-feature, @pxref{login translation}).
+Anubis database! @anchor{anubis database}I'd like this database to
+contain, beside the user name and password, the name and password of
+this user on Machine-A. 
 
 Confusing? Let's suppose that the database contains following record:
 
 @smallexample
 @cartouche
- JohnSmith encrypted-pass-1  John pass-2
+ JohnSmith encrypted-pass-1  John 
 @end cartouche
 @end smallexample
 
 @anchor{login translation}
 The user has authenticated himself as @samp{JohnSmith} with password
 @samp{encrypted-pass-1}, using ESMTP AUTH, and the given credentials
-matched those from the Anubis database. @FIXME{the exclamation
-mark, present in the original manuscript, is clearly out of place here}
+matched those from the Anubis database. 
 Now, Anubis, which has been running with super-user privileges,
-switches to @acronym{UID} of the user
-@samp{John} provided that @samp{pass-2} matched the password from
-@file{/etc/passwd} (shadow) @FIXME{pass-2 is not used in real life.
-Quite a while ago we have agreed that it is superfluous and removed
-it from the database. This should become a footnote}.
-This solution will allow for a very flexible database,
-taht would ease the administration tasks, since users will be able to update
+switches to @acronym{UID} of the user @samp{John}.
+
+Such solution will allow for a very flexible database,
+that would ease the administration tasks, since users will be able to update
 their corresponding records (of course, if the system administrator
 grants them such privileges). For instance, @acronym{ODBC}, @acronym{SQL}?
 
@@ -145,19 +132,6 @@ A: 220 OK, Welcome. Continue sending your mail!
 
 @item Further details
 
-One more difference which I have not mentioned yet is the amount of
-time the server operates with root privileges. In @dixie{} mode it
-is longer, since Anubis has to retain root privileges until it
-finishes ESMTP AUTH, only then is it able to switch to the user
-@acronym{UID}. Without any doubt this is a little less secure than
-@pixie{} mode, where Anubis switches to the user privileges
-immediately after accepting connection. @FIXME{I don't like
-"Without any doubt". I'd better say: "It could be argued that",
-since not any program running as root constitutes a security threat.
-There's no use to scare out people by such assertions, the @dfn{false
-security notion} is spread wide enough without that (remember
-savannah.gnu.org).}
-
 The above description shows that it is impossible to use both
 @pixie{} and @dixie{} simultaneously. It is the responsibility of
 the system administrator to decide which operation mode to use. We could
@@ -169,7 +143,7 @@ a feasible solution.
 Now, let me describe for what kind of users each mode is intended.
 
 The traditional (@pixie{}) mode is intended for those users who use
-Anubis on a single mashine or within a local network that allows
+Anubis on a single machine or within a local network that allows
 to use @command{identd}. In short, @pixie{} is useful when the use of
 @command{identd} is possible and safe.
 
@@ -182,10 +156,9 @@ account on the machine running Anubis. But then, even this is
 not required!
 
 That's a feature I haven't described yet :^) As described above, Anubis
-database must contain second login name and password @FIXME{
-again password...} so that Anubis be able to switch to the
-user's privileges and parse his @file{~/.anubisrc}. Now, I supposed
-that the database is able to keep user configuration files
+database must contain second login name in order for Anubis to be able to
+switch to the user's privileges and parse his @file{~/.anubisrc} file.
+Now, I supposed that the database is able to keep user configuration files
 as well. So, each database record must contain an additional
 flag informing Anubis whether it should read the local file
 @file{~/.anubisrc}, or read the configuration file stored in the
@@ -202,7 +175,7 @@ that command that I'd like to be used for remote management of
 the database records (after having successfully passed ESMTP AUTH).
 
 Available operations are: @code{ADD}, @code{MODIFY}, @code{REMOVE}, meaning
-addition, modiffication and removal of a user record, and
+addition, modification and removal of a user record, and
 @code{UPLOAD}, providing a way to upload the user's configuration
 file @file{~/.anubisrc}.
 
@@ -234,14 +207,19 @@ to use it. I envision a situation where:
 
 @enumerate 1
 @item A user logs in to his account on @samp{Machine-B}
-@item His @file{~/.profile}@FIXME{the original manuscript contained
-`~/.bash_login'. I've chosen to replace it and thus remove any
-bash-specific issues.} invokes @command{config-sender} program. This
+@item His @file{~/.profile} invokes @command{config-sender} program. This
 program, in turn, computes MD5 sum of the local @file{~/.anubisrc}
 file and sends it to Anubis. There it will be compared to the sum
 kept in the Anubis database, and if the two sums differ, the
 @command{config-sender} will upload the contents of
-@file{~/.anubisrc}... @FIXME{I've put a bit of clarification here}
+@file{~/.anubisrc}... @footnote{The scheme implemented currently is
+a bit different. First, the @command{config-sender} program issues
+an @code{EXAMINE} command that fetches the contents of the user
+configuration file from the server. Then, it compares it with the
+local copy kept on the client machine. If the copies differ,
+@command{config-sender} issues @code{UPLOAD} and thus updates
+the configuration on the server.}
+
 @item The @command{config-sender} program will, of course, connect to the Anubis
 database using ESMTP (TLS/AUTH) and @code{XDATABASE}.
 @end enumerate
@@ -256,8 +234,8 @@ manage Anubis database. Notice however, that
 Thus, the user will simply use his MUA, no identd, no hassle :)
 
 Actually, the only requirement for the MUA is that it support ESMTP
-AUTH. Unfortunately, some MUA on UNIX @FIXME{I'd put *even* on
-UNIX} still are not able to use ESMTP AUTH. But in this case,
+AUTH. Unfortunately, some MUA, even on UNIX-like systems, are still
+not able to use ESMTP AUTH. But in this case,
 the user can install Anubis on his machine and use it to perform
 authentication ;-))) 
 
@@ -272,10 +250,7 @@ this (@pxref{Basic Settings,esmtp-auth}).
 to the MTA is established only after successful authentication
 @item does not require @command{identd}!
 @item allows the user full control over his configuration settings
-@item a little less secure @FIXME{I'd put "probably"}, since Anubis
-runs with root privileges until authentification finishes
-successfully.
-@item delays processing of SMTP envelope until after successfull
+@item delays processing of SMTP envelope until after successful
 authentication.
 @end itemize
 
@@ -287,18 +262,3 @@ configuration file for the given user.
 @end itemize
 
        --- THE END ---
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,3 +1,10 @@
+2004-05-31  Sergey Poznyakoff  
+
+	* NEWS: Updated
+	* doc/anubis.texi: Updated
+	* doc/pixie-dixie.texi: Synchronised with the latest version
+	of Pixie-Dixie.
+
 2004-05-29  Wojciech Polak
 
 	* doc/Makefile.am: Changed date format to '%B %d, %Y'.
