@@ -40,6 +40,8 @@ AM_GNU_GETTEXT_VERSION(0.12.1)
 
 dnl Checks for programs.
 AC_PROG_CC
+AC_PROG_YACC
+AM_PROG_LEX
 AC_PATH_PROG(idecrypt_path,idecrypt,/usr/sbin/idecrypt,
 $PATH:/sbin:/usr/sbin:/usr/local/sbin)
 AC_DEFINE_UNQUOTED(IDECRYPT_PATH,"${idecrypt_path}",
