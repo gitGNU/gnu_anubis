@@ -116,3 +116,6 @@ message_free(MESSAGE *msg)
 	xfree(msg->boundary);
 	msg->boundary = NULL;
 }
+
+/* EOF */
+
