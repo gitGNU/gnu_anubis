@@ -78,7 +78,7 @@ adm_memory_error (const char *msg)
 int
 op_usage (int argc, char **argv)
 {
-	error(_("%s: operation not specified"));
+	error(_("operation not specified"));
 	return 1;
 }
 
@@ -398,6 +398,8 @@ print_help (void)
 
   puts(_("4. List only the record with authid \"test\":\n\n"
 	 "example$ anubisadm --list --authid test gdbm:/etc/anubis.db\n"));
+
+  printf(_("\nReport bugs to <%s>.\n"), PACKAGE_BUGREPORT);
 }
 
 int
