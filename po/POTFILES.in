@@ -3,7 +3,6 @@
 # Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 #
 
-src/auth.c
 src/authmode.c
 src/daemon.c
 src/env.c
@@ -14,6 +13,7 @@ src/gpg.c
 src/gsasl.c
 src/guile.c
 src/help.c
+src/ident.c
 src/main.c
 src/map.c
 src/mem.c

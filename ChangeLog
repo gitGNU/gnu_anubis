@@ -1,5 +1,8 @@
 2004-07-15  Sergey Poznyakoff 
 
+	* configure.ac: Accomodate for incompatibilities of gnults 1.0.16
+	(and eventually newer versions)
+	* po/POTFILES.in: Updated
 	* src/daemon.c (daemonize): Clear T_FOREGROUND flag.
 	* src/authmode.c (asmtp_ehlo): Return correct state if TLS
 	failed.
