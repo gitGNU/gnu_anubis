@@ -6,7 +6,8 @@
 	* src/rcfile.y: Continue parsing after encountering errors.
 	
 	* doc/anubis.texi: Updated
-
+	* doc/Makefile.am: Added DISTCLEANFILES
+	
 2003-07-10  Wojciech Polak
 
 	* doc/anubis.texi: Updated
