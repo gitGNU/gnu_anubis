@@ -211,11 +211,6 @@
 #define FAILS 1
 #define ALL   2
 
-/* error types */
-#define SOFT   1
-#define HARD   2
-#define SYNTAX 3
-
 typedef enum anubis_mode
 {
   anubis_transparent,
@@ -224,7 +219,7 @@ typedef enum anubis_mode
 ANUBIS_MODE;
 
 /* bit values for topt */
-#define T_ERROR             0x00000001
+/* 0x00000001 is free. Used to be T_ERROR */
 #define T_SOCKS             0x00000002
 #define T_SOCKS_V4          0x00000004
 #define T_SOCKS_AUTH        0x00000008
@@ -334,7 +329,9 @@ int check_filename (char *, time_t *);
 void write_pid_file (void);
 
 /* errs.c */
-void anubis_error (int, const char *, ...);
+#define EXIT_ABORT 256
+void anubis_error (int, int, const char *, ...);
+void anubis_warning (int error_code, const char *fmt, ...);
 void socket_error (const char *);
 void hostname_error (char *);
 
