@@ -32,8 +32,15 @@ typedef struct rc_node RC_NODE;
 typedef struct rc_bool RC_BOOL;
 typedef struct rc_expr RC_EXPR;
 typedef struct rc_inst RC_INST;
+typedef struct rc_loc RC_LOC;
+
+struct rc_loc {
+	char *file;
+	size_t line;
+};
 
 struct rc_section {          /* RC Section */
+	RC_LOC loc;          /* Location in the config file */
 	RC_SECTION *next;    /* Link to the next section */
 	char *name;          /* Section name */
 	RC_STMT *stmt;       /* List of parsed statements */
@@ -75,6 +82,7 @@ struct rc_expr {
 };
 
 struct rc_node {             /* Executable node */
+	RC_LOC loc;          /* Location in the config file */
 	enum rc_node_type type;  /* Node type */
 	union {
 		RC_EXPR expr;
@@ -110,6 +118,7 @@ struct rc_inst {             /* Instruction definition */
 };
 
 struct rc_stmt {             /* General statement representation */
+	RC_LOC loc;          /* Location in the config file */
 	RC_STMT *next;       /* Link to the next statement */
 	enum rc_stmt_type type;   /* Statement type */
 	union {                   /* Actual data */
@@ -182,3 +191,5 @@ struct rc_secdef *anubis_add_section(char *);
 struct rc_secdef *anubis_find_section(char *);
 
 void parse_error(const char *fmt, ...);
+
+void trace(RC_LOC *loc, const char *fmt, ...);
