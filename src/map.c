@@ -33,7 +33,7 @@
 char *
 parse_line_option(char *ptr)
 {
-	while (isspace(*ptr))
+	while (isspace(*(u_char*)ptr))
 		ptr++;
 
 	remcrlf(ptr);

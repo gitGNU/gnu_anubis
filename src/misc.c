@@ -71,7 +71,7 @@ header_assoc(char *line)
 		entry->key = xmalloc(len + 1);
 		memcpy(entry->key, line, len);
 		entry->key[len] = 0;
-		for (p++; *p && isspace(*p); p++)
+		for (p++; *p && isspace(*(u_char*)p); p++)
 			;
 		entry->value = strdup(p);
 	} else {

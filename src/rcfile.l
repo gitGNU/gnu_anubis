@@ -88,9 +88,9 @@ BEGIN          return T_BEGIN;
 	char *q;
 	int len;
 
-	for (; *p && isspace(*p); p++)
+	for (; *p && isspace(*(u_char*)p); p++)
 		;
-	for (q = yytext + yyleng - 4; q > p && isspace(*q); q--)
+	for (q = yytext + yyleng - 4; q > p && isspace(*(u_char*)q); q--)
 		;
 	len = q - p + 1;
 	yylval.string = xmalloc(len + 1);
@@ -276,7 +276,7 @@ multiline_begin(void)
 
 	/* Find the delimiter */
 	for (endp = p; *endp; endp++)
-		if (isspace(*endp))
+		if (isspace(*(u_char*)endp))
 			break;
 
 	len = endp - p;
@@ -297,7 +297,7 @@ multiline_finish(void)
 int
 isemptystr(char *text)
 {
-	for (; *text && isspace(*text); text++)
+	for (; *text && isspace(*(u_char*)text); text++)
 		;
 	return *text == 0;
 }
@@ -346,7 +346,7 @@ trimws(char *s)
 {
 	int len;
 
-	for (len = strlen(s) - 1; len > 0 && isspace(s[len]); len--)
+	for (len = strlen(s) - 1; len > 0 && isspace((u_char)s[len]); len--)
 		;
 	if (len > 0)
 		s[len+1] = 0;
@@ -359,9 +359,9 @@ trimcpy(void)
 	char *string;
 	int i, j, len;
 
-	for (i = 0; i < yyleng && isspace(yytext[i]); i++)
+	for (i = 0; i < yyleng && isspace((u_char)yytext[i]); i++)
 		;
-	for (j = yyleng - 1; j > i && isspace(yytext[i]); j--)
+	for (j = yyleng - 1; j > i && isspace((u_char)yytext[i]); j--)
 		;
 	len = j - i + 1;
 	string = xmalloc(len + 1);

@@ -500,7 +500,7 @@ smtp_kw (const char *name)
 char *
 skipws(char *str)
 {
-	while (*str && isspace(*str))
+	while (*str && isspace(*(u_char*)str))
 		str++;
 	return str;
 }
@@ -508,7 +508,7 @@ skipws(char *str)
 char *
 skipword(char *str)
 {
-	while (*str && !isspace(*str))
+	while (*str && !isspace(*(u_char*)str))
 		str++;
 	return str;
 }

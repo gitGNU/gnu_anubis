@@ -131,7 +131,8 @@ sig_local(int code)
 	int status;
 
 	while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
-		info(VERBOSE, _("Local program [%d] finished."), pid);
+		info(VERBOSE, _("Local program [%lu] finished."),
+		     (unsigned long) pid);
 	return;
 }
 

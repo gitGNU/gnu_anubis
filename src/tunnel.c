@@ -93,7 +93,7 @@ collect_headers(MESSAGE *msg)
 
 	while (recvline(SERVER, remote_client, buf, sizeof(buf) - 1)) {
 		remcrlf(buf);
-		if (isspace(buf[0])) {
+		if (isspace((u_char)buf[0])) {
 			if (!line) 
 				/* Something wrong, assume we've got no
 				   headers */
@@ -338,13 +338,13 @@ save_command(MESSAGE *msg, char *line)
 	int i;
 	ASSOC *asc = xmalloc(sizeof(*asc));
 
-	for (i = 0; line[i] && isspace(line[i]); i++)
+	for (i = 0; line[i] && isspace((u_char)line[i]); i++)
 		;
 
 	asc->key = xmalloc(i + 1);
 	memcpy(asc->key, line, i);
 	asc->key[i] = 0;
-	for (; line[i] && isspace(line[i]); i++)
+	for (; line[i] && isspace((u_char)line[i]); i++)
 		;
 	if (line[i])
 		asc->value = strdup(&line[i]);

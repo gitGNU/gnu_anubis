@@ -288,7 +288,7 @@ check_username(char *user)
 
 		for (i = len - 1; i >= 0; i--)
 		{
-			if (isdigit(user[i]))
+			if (isdigit((u_char) user[i]))
 				digits++;
 		}
 		if (digits == len) {

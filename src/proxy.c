@@ -142,7 +142,7 @@ connect_through_socks_proxy(int sd, char *host, unsigned int port)
 
 		for (i = 0; host[i] != '\0'; i++)
 		{
-			if (isdigit(host[i]) || host[i] == '.')
+			if (isdigit((u_char)host[i]) || host[i] == '.')
 				ip = 1;
 			else
 				ip = 0;
@@ -343,7 +343,7 @@ connect_through_socks_proxy(int sd, char *host, unsigned int port)
 
 		for (i = 0; host[i] != '\0'; i++)
 		{
-			if (isdigit(host[i]) || host[i] == '.') {
+			if (isdigit((u_char)host[i]) || host[i] == '.') {
 				ip = 1; /* IPv4 */
 			}
 			else
