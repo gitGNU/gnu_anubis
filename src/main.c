@@ -154,8 +154,9 @@ main (int argc, char *argv[])
     }
 #endif /* HAVE_GETRLIMIT and HAVE_SETRLIMIT */
 
-  info (VERBOSE, _("UID:%d, GID:%d, EUID:%d, EGID:%d"), (int) getuid (),
-	(int) getgid (), (int) geteuid (), (int) getegid ());
+  info (VERBOSE, _("UID:%d (%s), GID:%d, EUID:%d, EGID:%d"),
+	(int) getuid (), session.supervisor, (int) getgid (),
+	(int) geteuid (), (int) getegid ());
 
   /*
      Initialize GnuTLS or OpenSSL library and the PRNG.
