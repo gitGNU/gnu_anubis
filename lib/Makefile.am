@@ -24,7 +24,7 @@
 
 noinst_LIBRARIES = libanubis.a
 
-libanubis_a_SOURCES = 
+libanubis_a_SOURCES = argcv.c argcv.h
 
 EXTRA_DIST = \
  getline.h \
