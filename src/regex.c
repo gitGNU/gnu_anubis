@@ -103,6 +103,14 @@ regex_vtab_lookup(int flags)
 
 
 /* ************************** Interface Functions ************************** */
+#define ASSERT_RE(re,vp) \
+ if (!(re) || (vp = regex_vtab_lookup((re)->flags)) == NULL) {\
+	anubis_error(HARD,\
+		    _("INTERNAL ERROR at %s:%d: missing or invalid regex"),\
+                    __FILE__, __LINE__);\
+		abort();\
+ }
+
 void
 regex_print_flags(int flags)
 {
@@ -133,11 +141,7 @@ anubis_regex_match(RC_REGEX *re, char *line, int *refc, char ***refv)
 	int so, eo;
 	struct regex_vtab *vp;
 
-	if (!re)
-		return -1;
-	vp = regex_vtab_lookup(re->flags);
-	if (!vp)
-		return -1;
+	ASSERT_RE(re, vp);
 	return vp->match(re, line, refc, refv, &so, &eo) == 0;
 }
 
@@ -154,11 +158,7 @@ anubis_regex_replace(RC_REGEX *re, char *line, char *repl)
 	int alloc = 0;
 	struct regex_vtab *vp;
 
-	if (!re)
-		return NULL;
-	vp = regex_vtab_lookup(re->flags);
-	if (!vp)
-		return NULL;
+	ASSERT_RE(re, vp);
 	while (vp->match(re, line + off, &refc, &refv, &so, &eo) == 0) {
 		char *p;
 		int plen;
@@ -202,11 +202,7 @@ anubis_regex_refcnt(RC_REGEX *re)
 {
 	struct regex_vtab *vp;
 
-	if (!re)
-		return 0;
-	vp = regex_vtab_lookup(re->flags);
-	if (!vp)
-		return 0;
+	ASSERT_RE(re, vp);
 	return vp->refcnt(re);
 }
 
@@ -215,6 +211,7 @@ anubis_regex_compile(char *line, int opt)
 {
 	struct regex_vtab *vp = regex_vtab_lookup(opt);
 	RC_REGEX *p;
+	
 	if (!vp)
 		return 0;
 	p = xmalloc(sizeof(*p));
@@ -228,17 +225,14 @@ anubis_regex_compile(char *line, int opt)
 }
 
 void
-anubis_regex_free(RC_REGEX *re)
+anubis_regex_free(RC_REGEX **pre)
 {
 	struct regex_vtab *vp;
 
-	if (!re)
-		return;
-	vp = regex_vtab_lookup(re->flags);
-	free(re->src);
-	if (vp)
-		vp->free(re);
-	xfree(re);
+	ASSERT_RE(*pre, vp);
+	free((*pre)->src);
+	vp->free(*pre);
+	xfree(*pre);
 }
 
 char *
