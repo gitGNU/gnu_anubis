@@ -53,6 +53,9 @@ $0 -h HOST [options]
 # 
 #  msg2smtp.pl code: Michael de Beer <michael@debeer.org>
 #    ext_auth() mainly taken from the Net::SMTP module
+#
+#  http://www.gnu.org/software/anubis/
+#
 #------------------------------------------
 # 1. Module Dependencies
 
