@@ -328,6 +328,8 @@ escape (int c)
   switch (c) {
   case 'a':
     return '\a';
+  case 'b':
+    return '\b';
   case 'f':
     return '\f';
   case 'e':
