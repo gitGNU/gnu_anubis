@@ -154,15 +154,8 @@ get_options(int argc, char *argv[])
 			break;
 
 		case 'm':
-			if (strcmp (optarg, "transparent") == 0)
-				anubis_mode = anubis_transparent;
-			else if (strcmp (optarg, "auth") == 0)
-				anubis_mode = anubis_authenticate;
-			else {
-				mprintf(_("%s: Unknown mode: %s"),
-					argv[0], optarg);
+			if (anubis_set_mode(optarg))
 				exit (1);
-			}
 			break;
 			
 		case '?':
@@ -373,6 +366,21 @@ check_filename(char *path, time_t *timep)
 		return st.st_mtime > mtime;
 	}
 	return 1; /* TRUE */
+}
+
+/* Select working mode */
+int
+anubis_set_mode(char *modename)
+{
+	if (strcmp (modename, "transparent") == 0)
+		anubis_mode = anubis_transparent;
+	else if (strcmp (modename, "auth") == 0)
+		anubis_mode = anubis_authenticate;
+	else {
+		mprintf(_("Unknown mode: %s"), modename);
+		return 1;
+	}
+	return 0;
 }
 
 /* EOF */
