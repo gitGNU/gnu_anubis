@@ -1,3 +1,8 @@
+2003-11-21  Wojciech Polak
+
+	* src/env.c (get_options): Added missing "m:" to getopt_long().
+	* src/authmode.c: Removed broken #include <anubisdb.h>.
+
 2003-11-21  Sergey Poznyakoff
 
 	Initial implementation of "authentication mode".
