@@ -1,18 +1,19 @@
 # Messages français pour GNU concernant anubis.
-# Copyright © 2002 The Anubis Team
+# Copyright © 2004 Free Software Foundation, Inc.
 # Michel Robitaille <robitail@IRO.UMontreal.CA>, traducteur depuis/since 1996.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: GNU anubis 3.6.2\n"
+"Project-Id-Version: GNU anubis 3.9.94\n"
 "Report-Msgid-Bugs-To: bug-anubis@gnu.org\n"
-"POT-Creation-Date: 2004-05-21 19:59+0300\n"
-"PO-Revision-Date: 2002-12-16 08:00-0500\n"
+"POT-Creation-Date: 2004-05-27 22:30+0200\n"
+"PO-Revision-Date: 2004-06-03 08:00-0500\n"
 "Last-Translator: Michel Robitaille <robitail@IRO.UMontreal.CA>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8-bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: src/auth.c:31
 #, c-format
@@ -35,9 +36,9 @@ msgid "IDENT: connected to %s:%u"
 msgstr "IDENT: connexion établie avec %s:%u"
 
 #: src/auth.c:138
-#, fuzzy, c-format
+#, c-format
 msgid "IDENT: stream_write() failed: %s."
-msgstr "IDENT: échec de recvline() : %s."
+msgstr "IDENT: stream_write() a échoué: %s."
 
 #: src/auth.c:145
 #, c-format
@@ -63,27 +64,27 @@ msgstr "IDENT: usager distant identifié comme étant %s."
 
 #: src/authmode.c:396
 msgid "Database not specified"
-msgstr ""
+msgstr "Base de données non spécifiée"
 
 #: src/authmode.c:403
 #, c-format
 msgid "Cannot open database %s: %s"
-msgstr ""
+msgstr "Ne peut ouvrir la base de données %s: %s"
 
 #: src/authmode.c:412
 #, c-format
 msgid "Found record for %s"
-msgstr ""
+msgstr "Enregristrement repérée pour %s"
 
 #: src/authmode.c:417
 #, c-format
 msgid "Cannot retrieve data from the SASL database: %s"
-msgstr ""
+msgstr "Ne peut recupérer les données à partir de la base de données SASL: %s"
 
 #: src/authmode.c:422
 #, c-format
 msgid "Record for %s not found"
-msgstr ""
+msgstr "Enregistrement pour %s n'a pas été repéré"
 
 #: src/authmode.c:465 src/daemon.c:323 src/transmode.c:66
 msgid "The MTA has not been specified. Set the REMOTE-MTA or LOCAL-MTA."
@@ -135,13 +136,11 @@ msgid "%s daemon startup succeeded."
 msgstr "Succès de démarrage du daemon %s."
 
 #: src/daemon.c:91
-#, fuzzy, c-format
+#, c-format
 msgid "Child [%lu] finished. Exit status: %s. %d client left."
 msgid_plural "Child [%lu] finished. Exit status: %s. %d clients left."
-msgstr[0] ""
-"FIn du processus enfant [%d]. État d'exécution: %s. %d clients restants."
-msgstr[1] ""
-"FIn du processus enfant [%d]. État d'exécution: %s. %d clients restants."
+msgstr[0] "Fin du processus enfant [%lu]. État d'exécution: %s. %d client restant."
+msgstr[1] "Fin du processus enfant [%lu]. État d'exécution: %s. %d clients restants."
 
 #: src/daemon.c:95
 msgid "OK"
@@ -153,7 +152,7 @@ msgstr "ERREUR"
 
 #: src/daemon.c:137
 msgid "WARNING: An unprivileged user has not been specified!"
-msgstr ""
+msgstr "AVERTISSEMENT: un utilisateur sans privilège a été spécifié!"
 
 #: src/daemon.c:186
 msgid "GNU Anubis is running..."
@@ -223,14 +222,14 @@ msgid "%s is not a regular file or a symbolic link."
 msgstr "%s n'est pas un fichier régulier ni un lien symbolique."
 
 #: src/env.c:380
-#, fuzzy, c-format
+#, c-format
 msgid "Unknown mode: %s"
-msgstr "Hôte inconnu %s."
+msgstr "Mode inconnu: %s"
 
 #: src/errs.c:82
-#, fuzzy, c-format
+#, c-format
 msgid "Couldn't write to socket: %s."
-msgstr "Ne peut écrire sur le socket %s."
+msgstr "Ne peut écrire sur le socket: %s."
 
 #: src/errs.c:93
 #, c-format
@@ -250,8 +249,7 @@ msgstr "%s: erreur non récupérable du serveur de nom est survenue."
 #: src/errs.c:102
 #, c-format
 msgid "%s: a temporary name server error occured. Try again later."
-msgstr ""
-"%s: une erreur temporaire du serveur de nom est survenue. Essayer plus tard."
+msgstr "%s: une erreur temporaire du serveur de nom est survenue. Essayer plus tard."
 
 #: src/errs.c:104
 #, c-format
@@ -319,9 +317,9 @@ msgid "socketpair() failed: %s."
 msgstr "échec de socketpair(): %s."
 
 #: src/exec.c:134
-#, fuzzy, c-format
+#, c-format
 msgid "Local program [%lu] finished."
-msgstr "Programme local [%d] a complété."
+msgstr "Programme local [%lu] a terminé."
 
 #: src/exec.c:170
 #, c-format
@@ -355,39 +353,38 @@ msgstr "GPGME: échec %s."
 #: src/gpg.c:122 src/gpg.c:282
 #, c-format
 msgid "GPGME: Cannot list keys: %s"
-msgstr ""
+msgstr "GPGME: ne peut liste les clés: %s"
 
 #: src/guile.c:79
 #, c-format
 msgid "cannot open guile output file %s: %s"
-msgstr ""
+msgstr "ne peut ouvrier le fichier de sortie guile %s: %s"
 
 #: src/guile.c:258
 msgid "missing procedure name"
-msgstr ""
+msgstr "nom de la procédure est manquant"
 
 #: src/guile.c:273
 #, c-format
 msgid "%s not a procedure object"
-msgstr ""
+msgstr "%s n'est pas un objet procédural"
 
 #: src/guile.c:309
 #, c-format
 msgid "Bad car type in return from %s"
-msgstr ""
+msgstr "Type de car erronée dans ce qui a été retourné à partir de %s"
 
 #: src/guile.c:324
 #, c-format
 msgid "Bad cdr type in return from %s"
-msgstr ""
+msgstr "Type de cdr erroné dans ce qui a été retourné à partir de %s"
 
 #: src/guile.c:328
 #, c-format
 msgid "Bad return type from %s"
-msgstr ""
+msgstr "Type retourné erronée à partir de %s"
 
 #: src/help.c:82
-#, fuzzy
 msgid ""
 "\n"
 "GNU Anubis is free software; you can redistribute it and/or modify\n"
@@ -396,10 +393,9 @@ msgid ""
 "(at your option) any later version."
 msgstr ""
 "\n"
-"\n"
 "GNU Anubis est un logiciel libre; vous pouvez le redistribuer et/ou\n"
 "le modifier sous les termes de la licence Licence Publique Générale de GNU\n"
-"tel que publiée par la Free Software Foundation; tel que la version 2\n"
+"tel que publiée par la Free Software Foundation; soit selon la version 2\n"
 "de la licence  ou (selon votre choix) n'importe quelle version subséquente."
 
 #: src/help.c:86
@@ -445,50 +441,39 @@ msgstr "Usage: anubis [options]\n"
 
 #: src/help.c:102
 msgid ""
-" -b, --bind [HOST:]PORT       Specify the TCP port on which GNU Anubis "
-"listens\n"
-"                              for connections. The default HOST is "
-"INADDR_ANY,\n"
+" -b, --bind [HOST:]PORT       Specify the TCP port on which GNU Anubis listens\n"
+"                              for connections. The default HOST is INADDR_ANY,\n"
 "                              and default PORT is 24 (private mail system)."
 msgstr ""
-" -b, --bind [HÔTE:]PORT       spécifier le numéro de PORT du daemon et le "
-"nom de l'HÔTE.\n"
-"                              La valeur par défaut de l'hôte est INADDR_ANY "
-"et le\n"
+" -b, --bind [HÔTE:]PORT       spécifier le numéro de PORT du daemon et le nom de l'HÔTE.\n"
+"                              La valeur par défaut de l'hôte est INADDR_ANY et le\n"
 "                              numéro de PORT par défaut est 25."
 
 #: src/help.c:105
 msgid ""
-" -r, --remote-mta HOST[:PORT] Specify a remote SMTP host name or IP "
-"address.\n"
+" -r, --remote-mta HOST[:PORT] Specify a remote SMTP host name or IP address.\n"
 "                              The default PORT number is 25."
 msgstr ""
-" -r, --remote-mta HÔTE[:PORT] spécifier le nom de l'HÔTE distant SMTP ou "
-"l'adresse IP.\n"
+" -r, --remote-mta HÔTE[:PORT] spécifier le nom de l'HÔTE distant SMTP ou l'adresse IP.\n"
 "                              Le numéro de port par défaut est 25."
 
 #: src/help.c:107
 msgid ""
 " -l, --local-mta FILE         Execute a local SMTP server, which works on\n"
-"                              standard input and output (inetd-type "
-"program).\n"
+"                              standard input and output (inetd-type program).\n"
 "                              This option excludes the '--remote-mta' option."
 msgstr ""
-" -l, --local-mta FICHIER      lancer un serveur local SMTP, lequel travaille "
-"à l'aide\n"
-"                              de l'entrée et de la sortie standard "
-"(programme de type inetd).\n"
+" -l, --local-mta FICHIER      lancer un serveur local SMTP, lequel travaille à l'aide\n"
+"                              de l'entrée et de la sortie standard (programme de type inetd).\n"
 "                              Cette option exclut l'option --remote-mta."
 
 #: src/help.c:110
-#, fuzzy
 msgid " -m, --mode=MODE              Select operation mode."
-msgstr " -f, --foreground             en mode avant-plan (foreground)."
+msgstr " -m, --mode=MODE              sélectionner le mode d'opération."
 
 #: src/help.c:111
-msgid ""
-"                              MODE is either \"transparent\" or \"auth\""
-msgstr ""
+msgid "                              MODE is either \"transparent\" or \"auth\""
+msgstr "                              MODE étant soit \"transparent\" ou \"auth\""
 
 #: src/help.c:112
 msgid " -f, --foreground             Foreground mode."
@@ -496,33 +481,27 @@ msgstr " -f, --foreground             en mode avant-plan (foreground)."
 
 #: src/help.c:113
 msgid ""
-" -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as "
-"described\n"
+" -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as described\n"
 "                              in RFC 821 on standard input and output."
 msgstr ""
-" -i, --stdio                  utiliser le protocol SMTP (tunnel/OMP) tel que "
-"décrit\n"
-"                              dans le RFC 821 sur l'entrée et la sortie "
-"standard."
+" -i, --stdio                  utiliser le protocol SMTP (tunnel/OMP) tel que décrit\n"
+"                              dans le RFC 821 sur l'entrée et la sortie standard."
 
 #: src/help.c:115
 msgid "Output options:\n"
 msgstr "Options de sortie:\n"
 
 #: src/help.c:116
-#, fuzzy
 msgid " -s, --silent                 Work silently."
-msgstr " -s, --silent     travailler en silence."
+msgstr " -s, --silent                 travailler en silence."
 
 #: src/help.c:117
-#, fuzzy
 msgid " -v, --verbose                Work noisily."
-msgstr " -v, --verbose    travailler en mode bavard."
+msgstr " -v, --verbose                travailler en mode bavard."
 
 #: src/help.c:118
-#, fuzzy
 msgid " -D, --debug                  Debug mode."
-msgstr " -D, --debug      en mode de mise au point (debug)."
+msgstr " -D, --debug                   travailler en mode de mise au point (debug)."
 
 #: src/help.c:119
 msgid ""
@@ -533,43 +512,36 @@ msgstr ""
 "Options diverses:\n"
 
 #: src/help.c:120
-#, fuzzy
-msgid ""
-" -c, --check-config           Run the configuration file syntax checker."
-msgstr " --norc           ignorer le fichier de configuration système."
+msgid " -c, --check-config           Run the configuration file syntax checker."
+msgstr " -c, --check-config           activer le vérificateur de la configuration de la syntaxe du fichier."
 
 #: src/help.c:121
 msgid ""
 " --show-config-options        Print a list of configuration options used\n"
 "                              to build GNU Anubis."
 msgstr ""
+" --show-config-options        afficher la liste des options de configuraiton des\n"
+"                              options pour construire GNU Anubis."
 
 #: src/help.c:123
-msgid ""
-" --relax-perm-check           Do not check a user config file permissions."
-msgstr ""
+msgid " --relax-perm-check           Do not check a user config file permissions."
+msgstr " --relax-perm-check           ne pas vérifier les permissions du fichier de configuration de l'usager"
 
 #: src/help.c:124
-#, fuzzy
-msgid ""
-" --altrc FILE                 Specify alternate system configuration file."
-msgstr ""
-" --altrc FICHIER spécifier un FICHIER alternatif de configuration système"
+msgid " --altrc FILE                 Specify alternate system configuration file."
+msgstr " --altrc FICHIER              spécifier un FICHIER alternatif de configuration système"
 
 #: src/help.c:125
-#, fuzzy
 msgid " --norc                       Ignore system configuration file."
-msgstr " --norc           ignorer le fichier de configuration système."
+msgstr " --norc                       ignorer le fichier de configuration système."
 
 #: src/help.c:126
-#, fuzzy
 msgid " --version                    Print version number and copyright."
-msgstr " --version        afficher la version et le copyright."
+msgstr " --version                    afficher la version et le copyright."
 
 #: src/help.c:127
-#, fuzzy
 msgid " --help                       It's obvious..."
-msgstr " --help           obtenir de l'aide..."
+msgstr " --help                       obtenir l'aide-mémoire"
 
 #: src/help.c:128
 #, c-format
@@ -599,15 +571,15 @@ msgstr "échec de realloc(). Ne peut réallouer suffisamment de mémoire."
 
 #: src/misc.c:308
 msgid "Can't find out my own hostname"
-msgstr ""
+msgstr "Ne peut repérer mon propre nom d'hôte"
 
 #: src/net.c:45
 msgid "SERVER"
-msgstr ""
+msgstr "SERVEUR"
 
 #: src/net.c:48
 msgid "CLIENT"
-msgstr ""
+msgstr "CLIENT"
 
 #: src/net.c:122
 msgid "Getting remote host information..."
@@ -644,7 +616,7 @@ msgstr "GNU Anubis lié à %s:%u"
 
 #: src/net.c:242
 msgid "Short write"
-msgstr ""
+msgstr "Écriture courte"
 
 #: src/socks.c:53
 msgid "Using SOCKS Proxy..."
@@ -672,12 +644,8 @@ msgid "Request rejected."
 msgstr "Requête rejetée."
 
 #: src/socks.c:180
-msgid ""
-"Request rejected, because the client program and identd reported different "
-"User-IDs."
-msgstr ""
-"Requête rejetée par le programme clien et identd rapportent de ID d'usager "
-"différents"
+msgid "Request rejected, because the client program and identd reported different User-IDs."
+msgstr "Requête rejetée par le programme clien et identd rapportent de ID d'usager différents"
 
 #: src/socks.c:184 src/socks.c:406
 msgid "Server reply is not valid."
@@ -758,12 +726,12 @@ msgstr "Temps expiré! Fin d'exécution..."
 #: src/rcfile.c:121
 #, c-format
 msgid "cannot stat file `%s': %s"
-msgstr ""
+msgstr "ne peut évaluer le fichier par stat() « %s »: %s"
 
 #: src/rcfile.c:131
 #, c-format
 msgid "File `%s' has already been read"
-msgstr ""
+msgstr "Le fichier « %s » a déjà été lu"
 
 #: src/rcfile.c:177
 #, c-format
@@ -778,13 +746,12 @@ msgstr "Lecture du fichier usager de configuration %s..."
 #: src/rcfile.c:679
 #, c-format
 msgid "No such section: %s"
-msgstr ""
+msgstr "Section inexistente: %s"
 
 #: src/rcfile.l:180
 #, c-format
-msgid ""
-"Stray character in config: \\%03o. Possibly missing quotes around the string"
-msgstr ""
+msgid "Stray character in config: \\%03o. Possibly missing quotes around the string"
+msgstr "caractère errant repéré dans la config: \\%03o. Possiblement un caractère de mise en commentaire est manquant autour de la chaîne"
 
 #: src/rcfile.l:380
 #, c-format
@@ -794,88 +761,88 @@ msgstr "Anubis erreur de fichier RC: %s."
 #: src/rcfile.y:162 src/rcfile.y:170
 #, c-format
 msgid "Section %s already defined"
-msgstr ""
+msgstr "Section %s est déjà définie"
 
 #: src/rcfile.y:217
-#, fuzzy, c-format
+#, c-format
 msgid "unknown keyword: %s"
-msgstr "Hôte inconnu %s."
+msgstr "mot clé inconnu: %s"
 
 #: src/rcfile.y:510
 msgid "missing replacement value"
-msgstr ""
+msgstr "valeur de remplacement manquante"
 
 #: src/rcfile.y:1122
 msgid "Unknown regexp modifier"
-msgstr ""
+msgstr "Modificateur d'expression régulière inconnu"
 
 #: src/rcfile.y:1213
 msgid "STOP"
-msgstr ""
+msgstr "STOP"
 
 #: src/rcfile.y:1218
 #, c-format
 msgid "Calling %s"
-msgstr ""
+msgstr "Appel de %s"
 
 #: src/rcfile.y:1224
 #, c-format
 msgid "ADD %s [%s] %s"
-msgstr ""
+msgstr "ADD %s [%s] %s"
 
 #: src/rcfile.y:1234
 #, c-format
 msgid "MODIFY %s [%s] [%s] %s"
-msgstr ""
+msgstr "MODIFY %s [%s] [%s] %s"
 
 #: src/rcfile.y:1247
 #, c-format
 msgid "REMOVE HEADER [%s]"
-msgstr ""
+msgstr "REMOVE HEADER [%s]"
 
 #: src/rcfile.y:1270
-#, fuzzy, c-format
+#, c-format
 msgid "Executing %s"
-msgstr "Exécution de %s %s..."
+msgstr "Exécution de %s"
 
 #: src/rcfile.y:1341
 #, c-format
 msgid "Matched trigger \"%s\""
-msgstr ""
+msgstr "Concordance sur le déclencheur \"%s\""
 
 #: src/rcfile.y:1345
 #, c-format
 msgid "Matched condition %s[%s] \"%s\""
-msgstr ""
+msgstr "Condition concordante %s[%s] \"%s\""
 
 #: src/rcfile.y:1475
-#, fuzzy, c-format
+#, c-format
 msgid "Unknown section: %s"
-msgstr "Hôte inconnu %s."
+msgstr "Section inconnue: %s"
 
 #: src/rcfile.y:1517
 msgid "program is not allowed in this section"
-msgstr ""
+msgstr "le programme n'est pas autorisé dans cette section"
 
 #: src/regex.c:109
 #, c-format
 msgid "INTERNAL ERROR at %s:%d: missing or invalid regex"
-msgstr ""
+msgstr "ERREUR INTERNE à %s:%d: expression régulière manquante ou invalide"
 
 #: src/regex.c:306
-#, fuzzy, c-format
+#, c-format
 msgid "regcomp() failed at %s: %s."
-msgstr "Échec de regcomp() %s."
+msgstr "regcomp() a échoué à %s: %s"
 
 #: src/regex.c:377
 #, c-format
 msgid "pcre_compile() failed at offset %d: %s."
-msgstr "Échec de pcre_compile() failed à l'adresse relative %d: %s."
+msgstr "Échec de pcre_compile() à l'adresse relative %d: %s."
 
 #: src/regex.c:402
-#, fuzzy, c-format
+#, c-format
 msgid "pcre_fullinfo() failed: %d."
-msgstr "échec de listen(): %s."
+msgstr "pcre_fullinfo() a échoué: %d."
 
 #: src/regex.c:414
 msgid "Matched, but too many substrings."
@@ -895,14 +862,14 @@ msgid "Unable to seed random number generator."
 msgstr "Incapable de fournir un germe au générateur aléatoire de nombres."
 
 #: src/ssl.c:76
-#, fuzzy, c-format
+#, c-format
 msgid "Write error: %s"
-msgstr "Anubis erreur de fichier RC: %s."
+msgstr "Erreur d'écriture: %s"
 
 #: src/ssl.c:93
-#, fuzzy, c-format
+#, c-format
 msgid "Read error: %s"
-msgstr "Anubis erreur de fichier RC: %s."
+msgstr "Erreur de lecture: %s"
 
 #: src/ssl.c:275
 msgid "SSLv23_client_method() failed."
@@ -925,9 +892,9 @@ msgid "Can't create a new SSL structure for a connection."
 msgstr "Ne peut créer une nouvelle structure SSL pour une connexion."
 
 #: src/ssl.c:323 src/tls.c:193
-#, fuzzy, c-format
+#, c-format
 msgid "TLS/SSL handshake failed: %s"
-msgstr "Échec d'échange handshake TLS/SSL!"
+msgstr "Échec d'échange handshake TLS/SSL: %s"
 
 #: src/ssl.c:353
 msgid "SSLv23_server_method() failed."
@@ -954,17 +921,17 @@ msgid "TLS/SSL handshake failed!"
 msgstr "Échec d'échange handshake TLS/SSL!"
 
 #: src/ssl.c:439
-#, fuzzy, c-format
+#, c-format
 msgid "%s connection using %s (%u bit)"
 msgid_plural "%s connection using %s (%u bits)"
-msgstr[0] "%s connexion utilisant %s (%u bits)"
+msgstr[0] "%s connexion utilisant %s (%u bit)"
 msgstr[1] "%s connexion utilisant %s (%u bits)"
 
 #: src/ssl.c:451
-#, fuzzy, c-format
+#, c-format
 msgid "Server public key is %d bit"
 msgid_plural "Server public key is %d bits"
-msgstr[0] "Clé du serveur public est %d bits"
+msgstr[0] "Clé du serveur public est %d bit"
 msgstr[1] "Clé du serveur public est %d bits"
 
 #: src/ssl.c:457
@@ -992,7 +959,7 @@ msgstr "Demandeur:  %s"
 #: src/tls.c:176 src/tls.c:253
 #, c-format
 msgid "TLS Error reading `%s': %s"
-msgstr ""
+msgstr "Erreur de lecture TLS « %s »: %s"
 
 #: src/tls.c:296
 msgid "No certificate was sent."
@@ -1019,17 +986,17 @@ msgid "The certificate is trusted."
 msgstr "Le certificat est fiable."
 
 #: src/tls.c:351
-#, fuzzy, c-format
+#, c-format
 msgid "Anonymous DH using prime of %d bit."
 msgid_plural "Anonymous DH using prime of %d bits."
-msgstr[0] "DH anonyme utilisant des premiers de %d bits."
+msgstr[0] "DH anonyme utilisant des premiers de %d bit."
 msgstr[1] "DH anonyme utilisant des premiers de %d bits."
 
 #: src/tls.c:361
-#, fuzzy, c-format
+#, c-format
 msgid "Ephemeral DH using prime of %d bit."
 msgid_plural "Ephemeral DH using prime of %d bits."
-msgstr[0] "DH éphémère utilisant des premiers de %d bits."
+msgstr[0] "DH éphémère utilisant des premiers de %d bit."
 msgstr[1] "DH éphémère utilisant des premiers de %d bits."
 
 #: src/tls.c:373
@@ -1073,14 +1040,14 @@ msgid " - Certificate expires: %s"
 msgstr " - Certificat expire: %s:"
 
 #: src/tls.c:424
-#, fuzzy, c-format
+#, c-format
 msgid " - Certificate fingerprint: "
-msgstr " - Empreinte du certificat: %s\n"
+msgstr " - Empreinte du certificat: "
 
 #: src/tls.c:434
-#, fuzzy, c-format
+#, c-format
 msgid " - Certificate serial number: "
-msgstr " - Numéro de série du certificat: %s\n"
+msgstr " - Numéro de série du certificat: "
 
 #: src/tls.c:443
 #, c-format
@@ -1093,10 +1060,10 @@ msgid "RSA\n"
 msgstr "RSA\n"
 
 #: src/tls.c:446
-#, fuzzy, c-format
+#, c-format
 msgid " Modulus: %d bit\n"
 msgid_plural " Modulus: %d bits\n"
-msgstr[0] " Modulo: %d bits\n"
+msgstr[0] " Modulo: %d bit\n"
 msgstr[1] " Modulo: %d bits\n"
 
 #: src/tls.c:451
@@ -1105,10 +1072,10 @@ msgid "DSA\n"
 msgstr "DSA\n"
 
 #: src/tls.c:452
-#, fuzzy, c-format
+#, c-format
 msgid " Exponent: %d bit\n"
 msgid_plural " Exponent: %d bits\n"
-msgstr[0] " Exposant: %d bits\n"
+msgstr[0] " Exposant: %d bit\n"
 msgstr[1] " Exposant: %d bits\n"
 
 #: src/tls.c:457
@@ -1122,9 +1089,9 @@ msgid " - Certificate version: #%d\n"
 msgstr " - Version du certificat: #%d\n"
 
 #: src/tls.c:466
-#, fuzzy, c-format
+#, c-format
 msgid " - Certificate Issuer's DN: %s\n"
-msgstr " - Infos du diffuseur du certificat:\n"
+msgstr " - Infos du diffuseur du certificat DN: %s\n"
 
 #: src/tunnel.c:288 src/tunnel.c:351
 msgid "Transferring message(s)..."
@@ -1132,7 +1099,7 @@ msgstr "Transfert des messages..."
 
 #: src/tunnel.c:349
 msgid "Starting SMTP session..."
-msgstr ""
+msgstr "Démarrage de la session SMTP..."
 
 #: src/tunnel.c:429
 msgid "Using the TLS/SSL encryption..."
@@ -1217,7 +1184,7 @@ msgstr "%s: l'option « -W %s » ne permet pas d'argument\n"
 
 #: lib/obstack.c:403 lib/obstack.c:406
 msgid "memory exhausted"
-msgstr ""
+msgstr "mémoire épuiseé"
 
 #~ msgid "The %s section has been found. Processing..."
 #~ msgstr "La section %s a été repérée. En traitement..."
@@ -1248,3 +1215,18 @@ msgstr ""
 
 #~ msgid "SSL_set_fd() failed."
 #~ msgstr "Échec de SSL_set_fd()."
+
+#~ msgid "Using WinGate(s)..."
+#~ msgstr "Utilisation de WinGate(s)..."
+
+#~ msgid "Waiting for response..."
+#~ msgstr "En attente d'une réponse..."
+
+#~ msgid "WinGate: ...connected"
+#~ msgstr "WinGate: ...connecté"
+
+#~ msgid "WinGate: ...failed"
+#~ msgstr "WinGate: ...échec"
+
+#~ msgid "Initializing the TLS/SSL connection with a client..."
+#~ msgstr "Initialisation de la connexion TLS/SSL avec un client..."
