@@ -9,10 +9,6 @@ semantics of the anubis language.
 ** HTML processing (also removing HTML part)
 ** IPv6 support
 
-* New features
-** OpenPGP/MIME support
-** S/MIME support
-
 ** Store the message body as a list of "line instructions" instead of one
 text blurb. A "line instruction" is one of the following:
 *** Simple text.
@@ -31,6 +27,11 @@ Carries a name of the file that must be inserted in this point
 a warning if gpg-crypt, rot-13 and the like may be used twice over the
 same block of text. (Basically this means adding a rudimentary flow
 control analyzer).
+
+* New features
+** OpenPGP/MIME support
+** S/MIME support
+** `reject' action command
 
 
 Local variables:
