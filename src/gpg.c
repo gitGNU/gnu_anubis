@@ -24,6 +24,7 @@
 
 #include "headers.h"
 #include "extern.h"
+#include "rcfile.h"
 
 #ifdef HAVE_GPG
 #include <gpgme.h>
@@ -353,6 +354,92 @@ check_gpg(void)
 	}
 	return;
 }
+
+#define KW_GPG_PASSPHRASE         1
+#define KW_GPG_ENCRYPT            2
+#define KW_GPG_SIGN               3
+#define KW_RM_GPG                 4
+#define KW_GPG_HOME               5
+
+int
+gpg_parser(int method, int key, char *arg,
+	   void *inv_data, void *func_data, char *line)
+{
+	switch (key) {
+	case KW_GPG_PASSPHRASE:
+		if (gpg.passphrase) {
+			memset(gpg.passphrase, 0, strlen(gpg.passphrase));
+			xfree(gpg.passphrase);
+		}
+		gpg.passphrase = allocbuf(arg, 0);
+		mopt |= M_GPG_PASSPHRASE;
+		break;
+		
+	case KW_GPG_ENCRYPT:
+		xfree(gpg.keys);
+		gpg.keys = allocbuf(arg, 0);
+		gpg.keys = xrealloc(gpg.keys, strlen(gpg.keys) + 2);
+		strcat(gpg.keys, ",");
+		mopt |= M_GPG_ENCRYPT;
+		break;
+		
+	case KW_GPG_SIGN:              
+		if (strcmp(arg, "yes")
+		    || !(mopt & M_GPG_PASSPHRASE)) {
+			if (gpg.passphrase) {
+				memset(gpg.passphrase, 0,
+				       strlen(gpg.passphrase));
+				xfree(gpg.passphrase);
+			}
+			gpg.passphrase = allocbuf(arg, 0);
+		}
+		mopt |= M_GPG_SIGN;
+		break;
+		
+	case KW_RM_GPG:
+		xfree(gpg.rm_key);
+		gpg.rm_key = allocbuf(arg, 0);
+		mopt |= M_RMGPG;
+		break;
+
+	case KW_GPG_HOME:
+		setenv("GNUPGHOME", arg, 1);
+		break;
+		
+	default:
+		return RC_KW_UNKNOWN;
+	}
+	return RC_KW_HANDLED;
+}
+
+
+struct rc_kwdef gpg_kw[] = {
+	{ "gpg-passphrase", 	     KW_GPG_PASSPHRASE },          
+	{ "gpg-encrypt", 	     KW_GPG_ENCRYPT },             
+	{ "gpg-sign", 		     KW_GPG_SIGN },                
+	{ "rm-gpg", 		     KW_RM_GPG },
+	{ "gpg-home",                KW_GPG_HOME },
+	{ NULL },
+};
+
+static struct rc_secdef_child gpg_sect_child = {
+	NULL,
+	CF_CLIENT,
+	gpg_kw,
+	gpg_parser,
+	NULL
+};
+
+void
+gpg_section_init()
+{
+	struct rc_secdef *sp = anubis_add_section("ALL");
+
+	rc_secdef_add_child(sp, &gpg_sect_child);
+
+	sp = anubis_add_section("RULE");
+	rc_secdef_add_child(sp, &gpg_sect_child);
+}	
 
 #endif /* HAVE_GPG */
 
