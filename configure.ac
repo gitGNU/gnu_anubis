@@ -278,9 +278,9 @@ AC_ARG_ENABLE(gcc-debug,
 	[enable_gcc_debug=no])
 if test "$enable_gcc_debug" = "yes" && (test "$GCC" = "yes"); then
  if test -z "$CFLAGS_CUSTOM"; then
-  CFLAGS="-Wall -g"
+  CFLAGS="-Wall -ggdb"
  else
-  CFLAGS="$CFLAGS -g"
+  CFLAGS="$CFLAGS -ggdb"
  fi
  AC_MSG_RESULT([Enabling GCC DEBUG support...])
 else
