@@ -68,6 +68,7 @@ daemonize (void)
 #endif /* HAVE_DAEMON */
 
   signal (SIGHUP, SIG_IGN);
+  topt &= ~T_FOREGROUND;
   topt |= T_DAEMON;
 
 #ifdef HAVE_SYSLOG
@@ -145,8 +146,6 @@ int
 anubis_child_main (NET_STREAM * sd_client, struct sockaddr_in *addr)
 {
   int rc;
-
-  topt &= ~T_FOREGROUND;
 
 #ifdef WITH_GSASL
   switch (anubis_mode)
