@@ -56,7 +56,8 @@ info (int mode, const char *fmt, ...)
 #ifdef HAVE_SYSLOG
   if ((topt & T_DAEMON) && !(topt & T_FOREGROUND))
     {
-      syslog (LOG_INFO | LOG_MAIL, "%s", msg);
+      if (!(topt & T_DISABLE_SYSLOG))
+	syslog (LOG_INFO | LOG_MAIL, "%s", msg);
       if (options.ulogfile && options.uloglevel >= ALL)
 	filelog (options.ulogfile, msg);
     }
