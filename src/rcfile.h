@@ -172,6 +172,10 @@ struct rc_secdef {
 	struct rc_secdef_child *child;
 };
 	
+typedef void (*RC_ERROR_PRINTER) (void *data, 
+				  const char *filename, int line,
+				  const char *fmt, va_list ap);
+
 /* Global data */
 extern int cfg_line_num;
 extern char *cfg_file; 
@@ -186,6 +190,7 @@ RC_SECTION *rc_section_lookup(RC_SECTION *, char *);
 void rc_section_link(RC_SECTION **, RC_SECTION *);
 void rc_secdef_add_child(struct rc_secdef *, struct rc_secdef_child *);
 RC_SECTION *rc_parse(char *);
+RC_SECTION *rc_parse_ep(char *name, RC_ERROR_PRINTER errprn, void *data);
 void rc_section_list_destroy(RC_SECTION **);
 int rc_run_cond(char *, int, char *);
 void rc_run_section_list(int, RC_SECTION *, struct rc_secdef *);
