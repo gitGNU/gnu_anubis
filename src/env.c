@@ -25,6 +25,7 @@
 #include "headers.h"
 #include <getopt.h>
 #include "extern.h"
+#include "rcfile.h"
 
 #ifdef HAVE_PAM
 pam_handle_t *pamh;
@@ -35,20 +36,27 @@ static struct pam_conv conv = {
 #endif /* HAVE_PAM */
 
 static int gindex = 0;
+
+#define OPT_VERSION  257
+#define OPT_HELP     258
+#define OPT_ALTRC    259
+#define OPT_NORC     260
+
 static struct option gopt[] =
 {
-	{"bind",        1, 0, 'b'},
-	{"remote-mta",  1, 0, 'r'},
-	{"local-mta",   1, 0, 'l'},
-	{"foreground",  0, 0, 'f'},
-	{"stdio",       0, 0, 'i'},
-	{"silent",      0, 0, 's'},
-	{"verbose",     0, 0, 'v'},
-	{"debug",       0, 0, 'D'},
-	{"version",     0, 0, 0},
-	{"help",        0, 0, 0},
-	{"altrc",       1, 0, 0},
-	{"norc",        0, 0, 0},
+	{"bind",        required_argument, 0, 'b'},
+	{"remote-mta",  required_argument, 0, 'r'},
+	{"local-mta",   required_argument, 0, 'l'},
+	{"foreground",  no_argument,       0, 'f'},
+	{"stdio",       no_argument,       0, 'i'},
+	{"silent",      no_argument,       0, 's'},
+	{"verbose",     no_argument,       0, 'v'},
+	{"debug",       no_argument,       0, 'D'},
+	{"version",     no_argument,       0, OPT_VERSION},
+	{"help",        no_argument,       0, OPT_HELP},
+	{"altrc",       required_argument, 0, OPT_ALTRC},
+	{"norc",        no_argument,       0, OPT_NORC},
+	{"check-config",optional_argument, 0, 'c'},
 	{0, 0, 0, 0}
 };
 
@@ -58,28 +66,39 @@ get_options(int argc, char *argv[])
 	int c;
 
 	while ((c = getopt_long(argc, argv, "b:r:l:fisvD?",
-	gopt, &gindex)) != EOF)
+				gopt, &gindex)) != EOF)
 	{
 		switch (c)
 		{
-			case 0:
-				if (strcmp(gopt[gindex].name, "help") == 0)
-					print_usage();
-				if (strcmp(gopt[gindex].name, "version") == 0)
-					print_version();
-				if (strcmp(gopt[gindex].name, "norc") == 0)
-					topt |= T_NORC;
-				if (strcmp(gopt[gindex].name, "altrc") == 0) {
-					options.altrc = optarg;
-					topt |= T_ALTRC;
-				}
+		        case OPT_HELP:
+				print_usage();
 				break;
+			       
+		        case OPT_VERSION:
+				print_version();
+				break;
+
+		        case OPT_NORC:
+				topt |= T_NORC;
+				break;
+
+		        case OPT_ALTRC:
+				options.altrc = optarg;
+				topt |= T_ALTRC;
+				break;
+			       
+		        case 'c':
+				rc_set_debug_level(optarg);
+				topt |= T_CHECK_CONFIG;
+				break;
+				
 			case 'b': /* daemon's port number, host name */
 				parse_mtahost(optarg, session.tunnel,
 					&session.tunnel_port);
 				if (strlen(session.tunnel) != 0)
 					topt |= T_NAMES;
 				break;
+
 			case 'r': /* a remote SMTP host name or IP address */
 				parse_mtaport(optarg, session.mta, &session.mta_port);
 				break;
