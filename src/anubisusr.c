@@ -109,13 +109,15 @@ info (int mode, const char *fmt, ...)
 }
 
 void
-anubis_error (int ignored_method, const char *fmt, ...)
+anubis_error (int exit_code, int error_code, const char *fmt, ...)
 {
   va_list ap;
 
   va_start (ap, fmt);
   fprintf (stderr, "%s: ", progname);
   vfprintf (stderr, fmt, ap);
+  if (error_code)
+    fprintf (stderr, ": %s", strerror (error_code));
   fprintf (stderr, "\n");
   va_end (ap);
 }
@@ -137,6 +139,7 @@ starttls (void)
   if (!iostream)
     {
       error (_("TLS negotiation failed"));
+      smtp_quit ();
       exit (1);
     }
 }
@@ -902,6 +905,7 @@ do_gsasl_auth (Gsasl_ctx * ctx, char *mech)
     {
       error (_("Authentication failed"));
       smtp_print_reply (stderr, &repl);
+      smtp_quit ();
       exit (1);
     }
 
@@ -1124,7 +1128,6 @@ synch (void)
 #endif
 
   smtp_auth ();
-
   /* Get the capabilities */
   smtp_ehlo (0);
 
@@ -1319,3 +1322,4 @@ main (int argc, char **argv)
 }
 
 /* EOF */
+
