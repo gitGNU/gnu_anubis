@@ -38,7 +38,7 @@ void *remote_server;
 
 #ifdef WITH_GUILE
 void
-anubis_core()
+anubis_core(void)
 {
 	char *argv[] = { "anubis", NULL };
 	scm_boot_guile (1, argv, anubis_boot, NULL);

@@ -34,32 +34,24 @@
 #include "extern.h"
 #include "rcfile.h"
 
-static RC_SECTION *rc_section_create(char *name, RC_STMT *stmt);
-static void rc_section_destroy(RC_SECTION *s);
-static void rc_section_print(RC_SECTION *sect);
- 
-static void rc_asgn_destroy(RC_ASGN *asgn);
- 
-static void rc_bool_destroy(RC_BOOL *bool);
-
-static void rc_level_print(int level, char *str);
- 
-static RC_NODE *rc_node_create(enum rc_node_type t);
-static void rc_node_destroy(RC_NODE *node);
-static void rc_node_print(RC_NODE *node);
- 
-static void rc_rule_destroy(RC_RULE *rule);
- 
-static void rc_cond_destroy(RC_COND *cond);
- 
-static RC_STMT *rc_stmt_create(enum rc_stmt_type type);
-static void rc_stmt_destroy(RC_STMT *stmt);
-static void rc_stmt_list_destroy(RC_STMT *stmt);
-static void rc_stmt_print(RC_STMT *stmt, int level);
-static int reg_option_add(int *flag, char *opt);
+static RC_SECTION *rc_section_create(char *, RC_STMT *);
+static void rc_section_destroy(RC_SECTION *);
+static void rc_section_print(RC_SECTION *);
+static void rc_asgn_destroy(RC_ASGN *);
+static void rc_bool_destroy(RC_BOOL *);
+static void rc_level_print(int, char *);
+static RC_NODE *rc_node_create(enum rc_node_type);
+static void rc_node_destroy(RC_NODE *);
+static void rc_node_print(RC_NODE *);
+static void rc_rule_destroy(RC_RULE *);
+static void rc_cond_destroy(RC_COND *);
+static RC_STMT *rc_stmt_create(enum rc_stmt_type);
+static void rc_stmt_destroy(RC_STMT *);
+static void rc_stmt_list_destroy(RC_STMT *);
+static void rc_stmt_print(RC_STMT *, int);
+static int reg_option_add(int *, char *);
 
 static RC_SECTION *rc_section;
-
 static int debug_level;
  
 %}
@@ -1099,5 +1091,4 @@ rc_run_section_list(int method, RC_SECTION *sec, struct rc_secdef *secdef)
 	for (; sec; sec = sec->next)
 		rc_run_section(method, sec, secdef, NULL, NULL);
 }
-
 

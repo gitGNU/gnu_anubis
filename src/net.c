@@ -244,8 +244,7 @@ struct io_data io_data[2] = {
 
 void
 net_set_io(int method, net_io_t read, net_io_t write,
-	   net_close_t close,
-	   strerror_t strerror)
+	   net_close_t close, strerror_t strerror)
 {
 	io_data[method].read = read ? read : _def_read;
 	io_data[method].write = write ? write : _def_write;

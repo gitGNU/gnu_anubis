@@ -33,35 +33,35 @@
 # elif defined (HAVE_PCRE_PCRE_H)
 #  include <pcre/pcre.h>
 # endif
-#endif
+#endif /* HAVE_PCRE */
 
 /****************************
  Regular Expressions support
 *****************************/
 
-typedef int (*_match_fp) (RC_REGEX *re, char *line, int *refc, char ***refv);
-typedef int (*_refcnt_fp) (RC_REGEX *re);
-typedef int (*_compile_fp) (RC_REGEX *re, char *line, int opt);
-typedef void (*_free_fp) (RC_REGEX *regex);
+typedef int (*_match_fp) (RC_REGEX *, char *, int *, char ***);
+typedef int (*_refcnt_fp) (RC_REGEX *);
+typedef int (*_compile_fp) (RC_REGEX *, char *, int);
+typedef void (*_free_fp) (RC_REGEX *);
 
 struct regex_vtab {
-	int mask;
-	_match_fp  match;
-	_refcnt_fp refcnt;
-	_compile_fp compile;
-	_free_fp free;
+ int mask;
+ _match_fp  match;
+ _refcnt_fp refcnt;
+ _compile_fp compile;
+ _free_fp free;
 };
 
-static int posix_compile(RC_REGEX *regex, char *line, int opt);
-static void posix_free(RC_REGEX *regex);
-static int posix_match(RC_REGEX *regex, char *line, int *refc, char ***refv);
-static int posix_refcnt(RC_REGEX *regex);
+static int posix_compile(RC_REGEX *, char *, int);
+static void posix_free(RC_REGEX *);
+static int posix_match(RC_REGEX *, char *, int *, char ***);
+static int posix_refcnt(RC_REGEX *);
 #ifdef HAVE_PCRE
-static int perl_compile(RC_REGEX *regex, char *line, int opt);
-static void perl_free(RC_REGEX *regex);
-static int perl_match(RC_REGEX *regex, char *line, int *refc, char ***refv);
-static int perl_refcnt(RC_REGEX *regex);
-#endif
+static int perl_compile(RC_REGEX *, char *, int);
+static void perl_free(RC_REGEX *);
+static int perl_match(RC_REGEX *, char *, int *, char ***);
+static int perl_refcnt(RC_REGEX *);
+#endif /* HAVE_PCRE */
 
 static struct regex_vtab vtab[] = {
 #ifdef HAVE_PCRE
@@ -70,15 +70,15 @@ static struct regex_vtab vtab[] = {
 	{ 0, posix_match, posix_refcnt, posix_compile, posix_free },
 };
 		
-struct rc_regex {            /* Regular expression */
-	char *src;           /* Raw-text representation */
-	int flags;           /* Compilation flags */
-	union {
-		regex_t re;  /* POSIX regex */
+struct rc_regex {     /* Regular expression */
+ char *src;           /* Raw-text representation */
+ int flags;           /* Compilation flags */
+ union {
+  regex_t re;         /* POSIX regex */
 #ifdef HAVE_PCRE
-		pcre *pre;   /* Perl */
+  pcre *pre;          /* Perl */
 #endif
-	} v;
+  } v;
 };
 
 static struct regex_vtab *
@@ -297,5 +297,7 @@ perl_refcnt(RC_REGEX *regex)
 	pcre_fullinfo(regex->v.pre, NULL, PCRE_INFO_CAPTURECOUNT, &count);
 	return count;
 }
-#endif
+#endif /* HAVE_PCRE */
+
+/* EOF */
 

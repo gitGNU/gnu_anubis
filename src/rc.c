@@ -407,7 +407,7 @@ static struct rc_secdef_child tls_sect_child = {
 #endif /* HAVE_TLS or HAVE_SSL */
 
 void
-control_section_init()
+control_section_init(void)
 {
 	struct rc_secdef *sp = anubis_add_section("CONTROL");
 	rc_secdef_add_child(sp, &init_sect_child);
@@ -479,7 +479,7 @@ static struct rc_secdef_child rule_sect_child = {
 };
 
 void
-rule_section_init()
+rule_section_init(void)
 {
 	struct rc_secdef *sp = anubis_add_section("RULE");
 	
@@ -487,7 +487,7 @@ rule_section_init()
 }
 
 void
-rc_system_init()
+rc_system_init(void)
 {
 	control_section_init();
 	translate_section_init();
@@ -519,4 +519,5 @@ rcfile_call_section(int method, char *name, void *data, MESSAGE *msg)
 	rc_call_section(method, sec, anubis_rc_sections, data, msg);
 }
 
+/* EOF */
 

@@ -40,20 +40,20 @@ struct string_list {
 	int length;
 };
 
-static int simple_string();
-static void string_begin();
-static void string_add(char *s, int len);
-static void string_add_char(int n);
-static void string_finish();
-static int escape(int c);
-char * trimws(char *s);
-char * trimcpy();
+static int simple_string(void);
+static void string_begin(void);
+static void string_add(char *, int);
+static void string_add_char(int);
+static void string_finish(void);
+static int escape(int);
+char *trimws(char *);
+char *trimcpy(void);
 
 static void multiline_begin(void);
 static void multiline_add(char *);
 static void multiline_finish(void);
-static char *multiline_strip_tabs(char *text);
-static int isemptystr(char *text);
+static char *multiline_strip_tabs(char *);
+static int isemptystr(char *);
  
 static char *multiline_delimiter;
 static int strip_tabs; 
@@ -187,13 +187,13 @@ yywrap ()
 }
 
 void
-verbatim()
+verbatim(void)
 {
 	BEGIN(LIT);
 }
 
 int
-simple_string()
+simple_string(void)
 {
   yylval.string = xmalloc(yyleng - 1);
   memcpy(yylval.string, yytext + 1, yyleng - 2);
@@ -203,7 +203,7 @@ simple_string()
 }
 
 void
-string_begin()
+string_begin(void)
 {
 	str_head = str_tail = NULL;
 }
@@ -230,7 +230,7 @@ string_add_char(int n)
 }
 
 void
-string_finish()
+string_finish(void)
 {
 	struct string_list *s;
 	int len = 0;
@@ -251,7 +251,7 @@ string_finish()
 }
 
 void
-multiline_begin()
+multiline_begin(void)
 {
 	char *endp;
 	int len;
@@ -276,7 +276,7 @@ multiline_begin()
 }
 
 void
-multiline_finish()
+multiline_finish(void)
 {
 	free (multiline_delimiter);
 	multiline_delimiter = NULL;
@@ -343,7 +343,7 @@ trimws(char *s)
 }
 
 char *
-trimcpy()
+trimcpy(void)
 {
 	char *string;
 	int i, j, len;
@@ -375,5 +375,4 @@ rc_open(char *name)
 	cfg_line_num = 1;
 	return 0;
 }
-
 

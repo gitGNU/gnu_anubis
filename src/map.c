@@ -214,12 +214,11 @@ struct rc_secdef translate_section = {
 };
 
 void
-translate_section_init()
+translate_section_init(void)
 {
 	struct rc_secdef *sp = anubis_add_section("TRANSLATION");
 	rc_secdef_add_child(sp, &translate_secdef_child);
 }
-
 
 /* EOF */
 

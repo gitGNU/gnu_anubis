@@ -151,27 +151,17 @@ extern int cfg_line_num;
 extern char *cfg_file; 
 
 /* Function declarations */
-void verbatim();
-
-RC_SECTION *rc_section_lookup(RC_SECTION *sec, char *name);
-void rc_section_link(RC_SECTION **ap, RC_SECTION *b);
-
-void rc_secdef_add_child(struct rc_secdef *def, struct rc_secdef_child *child);
-
-RC_SECTION *rc_parse(char *name);
-void rc_section_list_destroy(RC_SECTION *s);
-
-int rc_run_cond(char *section, int method, char *str);
-
-void rc_run_section_list(int method, RC_SECTION *sec,
-			 struct rc_secdef *secdef);
-void rc_run_section(int method, RC_SECTION *sec, struct rc_secdef *secdef,
-		    void *data, MESSAGE *msg);
-void rc_call_section(int method, RC_SECTION *sec, struct rc_secdef *secdef,
-		     void *data, MESSAGE *msg);
+void verbatim(void);
+RC_SECTION *rc_section_lookup(RC_SECTION *, char *);
+void rc_section_link(RC_SECTION **, RC_SECTION *);
+void rc_secdef_add_child(struct rc_secdef *, struct rc_secdef_child *);
+RC_SECTION *rc_parse(char *);
+void rc_section_list_destroy(RC_SECTION *);
+int rc_run_cond(char *, int, char *);
+void rc_run_section_list(int, RC_SECTION *, struct rc_secdef *);
+void rc_run_section(int, RC_SECTION *, struct rc_secdef *, void *, MESSAGE *);
+void rc_call_section(int, RC_SECTION *, struct rc_secdef *, void *, MESSAGE *);
 void rc_set_debug_level(char *);
-
-int rc_open(char *name);
-
-struct rc_secdef *anubis_add_section(char *name);
+int rc_open(char *);
+struct rc_secdef *anubis_add_section(char *);
 
