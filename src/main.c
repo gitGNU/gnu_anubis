@@ -39,7 +39,9 @@ unsigned long topt;
 NET_STREAM remote_client;
 NET_STREAM remote_server;
 
-char *anubis_domain;		/* Local domain for EHLO in authentication mode */
+char *anubis_domain;      /* Local domain for EHLO in authentication mode */
+char *incoming_mail_rule; /* Name of section for incoming mail processing */
+char *outgoing_mail_rule; /* Name of section for outgoing mail processing */
 
 #ifdef WITH_GUILE
 void
@@ -103,7 +105,9 @@ main (int argc, char *argv[])
   SETVBUF (stderr, NULL, _IOLBF, 0);
   get_options (argc, argv);
   anubis_getlogin (&session.supervisor);
-
+  assign_string (&incoming_mail_rule, "INCOMING");
+  assign_string (&outgoing_mail_rule, "RULE");
+  
   /*
      Initialize various database formats
    */
