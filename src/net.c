@@ -252,8 +252,9 @@ _def_read(void *sd, char *data, size_t size, size_t *nbytes)
 }
 
 static int
-_def_close(void *sd_unused)
+_def_close(void *sd)
 {
+	close ((int) sd);
 	return 0;
 }
 
@@ -292,6 +293,51 @@ net_close(int method, void *sd)
 		io_data[method].close(sd);
 		net_set_io(method, NULL, NULL, NULL, NULL);
 	}
+}
+
+
+
+struct io_descr {
+	void *stream;
+	
+	net_io_t read;
+	net_io_t write;
+	strerror_t strerror;
+	net_close_t close;
+};
+
+void *
+net_io_get(int method, void *stream)
+{
+	struct io_descr *s = malloc(sizeof *s);
+	s->stream = stream;
+	s->read = io_data[method].read;
+	s->write = io_data[method].write;
+	s->close = io_data[method].close;
+	return s;
+}
+
+int
+net_io_read(void *iod, char *buf, size_t size, size_t *nbytes)
+{
+	struct io_descr *s = iod;
+	return s->read(s->stream, buf, size, nbytes);
+}
+
+int
+net_io_write(void *iod, char *buf, size_t size, size_t *nbytes)
+{
+	struct io_descr *s = iod;
+	return s->write(s->stream, buf, size, nbytes);
+}
+
+int
+net_io_close(void *iod)
+{
+	struct io_descr *s = iod;
+	int rc = s->close(s->stream);
+	free(iod);
+	return rc;
 }
 
 /**************
@@ -371,6 +417,49 @@ recvline(int method, void *sd, void *vptr, int maxlen)
 	*ptr = 0;
 	DPRINTF(method, 0, n + addc, (char *)vptr);
 	return n;
+}
+
+#define INIT_RECVLINE_SIZE 81
+
+int
+recvline_ptr(int method, void *sd, char **vptr, size_t *maxlen)
+{
+	int rc;
+	char c;
+	size_t i;
+
+#define ADDC(i,c) do {\
+ if (i >= *maxlen) {\
+   *maxlen *= 2;\
+   *vptr = realloc(*vptr, *maxlen);\
+   if (!*vptr) \
+       anubis_error(HARD, _("Not enough memory"));\
+ }\
+ (*vptr)[i++] = c;\
+} while (0)
+		     
+	if (!*vptr || *maxlen == 0) {
+		*vptr = xmalloc(INIT_RECVLINE_SIZE);
+		*maxlen = INIT_RECVLINE_SIZE;
+	}
+	for (i = 0;;) {
+		if ((rc = mread(method, sd, &c)) == 1) {
+			if (c == '\n' && i > 1 && (*vptr)[i-1] != '\r') 
+				ADDC(i, '\r');
+			ADDC(i, c);
+			if (c == '\n') 
+				break;
+		} else if (rc == 0) {
+			if (i == 1)
+				return 0;
+			else
+				break;
+		} else
+			return -1;
+	}
+	(*vptr)[i] = 0;
+	DPRINTF(method, 0, i, *vptr);
+	return i;
 }
 
 /*****************
