@@ -68,19 +68,11 @@ error(const char *fmt, ...)
 	fprintf(stderr, "\n");
 }
 
-/*FIXME*/
-void *
-xmalloc(int n)
+static void
+adm_memory_error(const char *msg)
 {
-	void *p;
-
-	p = malloc(n);
-	if (p == NULL) {
-		error(_("malloc() failed. Cannot allocate enough memory."));
-		exit(1);
-	}
-	memset(p, 0, n);
-	return p;
+	error(msg);
+	exit(1);
 }
 
 int
@@ -88,6 +80,28 @@ op_usage(int argc, char **argv)
 {
 	error(_("%s: operation not specified"));
 	return 1;
+}
+
+int
+opendb(void **dptr, int argc, char **argv, enum anubis_db_mode mode)
+{
+	int rc;
+	char *err;
+
+	if (argc == 0) {
+		error(_("Database URL is not specified"));
+		return 1;
+	}
+	if (argc > 1) {
+		error(_("Too many arguments"));
+		return 1;
+	}
+
+	rc = anubis_db_open(argv[0], mode, dptr, &err);
+
+	if (rc != ANUBIS_DB_SUCCESS) 
+		error("%s", err);
+	return rc;
 }
 
 static const char delim[] = " \t\r\n";
@@ -100,13 +114,10 @@ op_create(int argc, char **argv)
 	size_t n = 0;
 	size_t line = 0;
 	void *db;
-	char *err;
-	int rc = anubis_db_open(argv[0], anubis_db_rdwr, &db, &err);
+	int rc;
 
-	if (rc != ANUBIS_DB_SUCCESS) {
-		error(err);
+	if (opendb(&db, argc, argv, anubis_db_rdwr))
 		return 1;
-	}
 
 	while (getline (&buf, &n, stdin) > 0 && n > 0) {
 		char *p;
@@ -166,6 +177,12 @@ print_record(ANUBIS_USER *rec)
 	printf("\n");
 }
 
+void
+print_list_header()
+{
+	printf("# %s\n", _("AuthID\tPassword\tUserName\tRCfile"));
+}
+
 int
 record_printer(void *item, void *data)
 {
@@ -186,18 +203,16 @@ op_list(int argc, char **argv)
 {
 	ANUBIS_USER rec;
 	void *db;
-	char *err;
-	int rc = anubis_db_open(argv[0], anubis_db_rdonly, &db, &err);
+	int rc;
 
-	if (rc != ANUBIS_DB_SUCCESS) {
-		error(err);
+	if (opendb(&db, argc, argv, anubis_db_rdonly))
 		return 1;
-	}
 
 	if (authid) {
 		rc = anubis_db_get_record(db, authid, &rec);
 		switch (rc) {
 		case ANUBIS_DB_SUCCESS:
+			print_list_header();
 			print_record(&rec);
 			anubis_db_free_record(&rec);
 			rc = 0;
@@ -222,6 +237,7 @@ op_list(int argc, char **argv)
 			      anubis_db_strerror(db));
 			rc = 1;
 		}
+		print_list_header();
 		list_iterate(reclist, record_printer, NULL);
 		list_destroy(&reclist, record_free, NULL);
 	}
@@ -293,19 +309,15 @@ int
 op_remove(int argc, char **argv)
 {
 	void *db;
-	char *err;
 	int rc;
 
 	if (!authid) {
 		error(_("authid not specified"));
 		return 1;
 	}
-	rc = anubis_db_open(argv[0], anubis_db_rdwr, &db, &err);
 
-	if (rc != ANUBIS_DB_SUCCESS) {
-		error("%s", err);
+	if (opendb(&db, argc, argv, anubis_db_rdwr))
 		return 1;
-	}
 
 	switch (anubis_db_delete_record(db, authid)) {
 	case ANUBIS_DB_NOT_FOUND:
@@ -329,7 +341,7 @@ int
 op_modify(int argc, char **argv)
 {
 	return op_add_or_modify(argv[0], ANUBIS_DB_SUCCESS,
-				_("Record not found. Use --add to create it."));
+			       _("Record not found. Use --add to create it."));
 }
 
 void
@@ -388,9 +400,17 @@ main(int argc, char **argv)
 	int c;
 	operation_fp operation = op_usage;
 
-	progname = argv[0];
+	/* save the program name */
+	progname = strrchr(argv[0], '/');
+	if (progname)
+		progname++;
+	else
+		progname = argv[0];
+	
+	/* Register memory error printer */
+	memory_error = adm_memory_error;
+	
 	/* Initialize various database formats */
-
 	dbtext_init();
 # if defined(HAVE_LIBGDBM)
 	gdbm_db_init();
