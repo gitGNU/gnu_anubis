@@ -368,6 +368,7 @@ void filelog (char *, char *);
 NET_STREAM make_remote_connection (char *, unsigned int);
 int bind_and_listen (char *, unsigned int);
 void swrite (int, NET_STREAM, char *);
+void send_eol (int method, NET_STREAM sd);
 int recvline (int, NET_STREAM, void *, size_t);
 int recvline_ptr (int method, NET_STREAM sd, char **vptr, size_t * maxlen);
 void get_response_smtp (int, NET_STREAM, char *, int);
@@ -397,7 +398,7 @@ void smtp_session_transparent (void);
 void set_ehlo_domain (char *domain);
 void transfer_header (ANUBIS_LIST *);
 void transfer_body (MESSAGE *);
-void collect_headers (MESSAGE * msg);
+void collect_headers (MESSAGE * msg, char *init_line);
 void collect_body (MESSAGE * msg);
 
 
@@ -415,7 +416,6 @@ void message_copy (MESSAGE *dst, MESSAGE *src);
 /* exec.c */
 char **gen_execargs (const char *);
 NET_STREAM make_local_connection (char *, char **);
-NET_STREAM make_local_connection_arg (char *exec_path, char **exec_args, char *arg);
 char *external_program (int *, char *, char *, char *, int);
 char *exec_argv (int *, char *, char **, char *, char *, int);
 void cleanup_children (void);
@@ -423,11 +423,13 @@ void cleanup_children (void);
 /* esmtp.c */
 int esmtp_auth (NET_STREAM *, char *);
 void anubis_set_client_mech_list (ANUBIS_LIST *list);
+void anubis_set_encryption_mech_list (ANUBIS_LIST *list);
 
 /* misc.c */
 int anubis_free_list_item (void *item, void *data);
 void assoc_free (ASSOC *);
 ASSOC *header_assoc (char *);
+int anubis_assoc_cmp (void *item, void *data);
 void destroy_assoc_list (ANUBIS_LIST **);
 void destroy_string_list (ANUBIS_LIST **);
 void parse_mtaport (char *, char **, unsigned int *);
@@ -625,5 +627,8 @@ void string_bin_to_hex (unsigned char *output, unsigned char *input, int inlen);
 int string_hex_to_bin (unsigned char *output, unsigned char *input, int inlen);
 
 #define MD5_DIGEST_BYTES 16
+
+/* mda.c */
+void mda (void);
 
 /* EOF */
