@@ -25,7 +25,6 @@
 man_MANS = anubis.1
 EXTRA_DIST = $(man_MANS)
 
-TEXINFO_TEX = ../build/texinfo.tex
 info_TEXINFOS = anubis.texi
 anubis_TEXINFOS = fdl.texi
 
