@@ -234,6 +234,7 @@
 #define T_NORC              0x01000000
 #define T_ALTRC             0x02000000
 #define T_CHECK_CONFIG      0x04000000
+#define T_RELAX_PERM_CHECK  0x08000000
 
 /* bit values for mopt */
 #define M_GPG_ENCRYPT       0x00000001
@@ -372,6 +373,7 @@ void rcfile_process_cond(char *name, int method, char *line);
 /* help.c */
 void print_version(void);
 void print_usage(void);
+void print_config_options(void);
 
 /* quit.c */
 void sig_exit(int);
