@@ -1,0 +1,30 @@
+# -*- tcl -*-
+# This file is part of GNU Anubis testsuite.
+# Copyright (C) 2003, 2004 The Anubis Team.
+#
+# GNU Anubis is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# GNU Anubis is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Anubis; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+# Use of regular expressions without reference groups used to cause
+# segmentation fault unless the reference itself was a simple string
+# (without any macro-characters).
+# Reported by: Paolo <oopla@users.sourceforge.net>
+# References: <20041018203449.GA26021@pp>,<20041027225812.GA19951@pp>
+# http://lists.gnu.org/archive/html/bug-anubis/2004-10/msg00001.html
+
+anubis_init 
+
+anubis_pat no-backref.pat
+
+# End of no-backref.exp
