@@ -6,6 +6,7 @@
 @finalout
 @c %**end of header
 @include version.texi
+@smallbook
 
 @defcodeindex op
 @defcodeindex cm
@@ -54,6 +55,7 @@ documents GNU Anubis Version @value{VERSION}.
 
 @menu
 * Overview::                        Preliminary information.
+* Glossary::                        Frequently Used Terms Explained.
 * Configuration::                   Writing your own configuration files.
 * Rule System::                     How to use the Rule System.
 * Invoking Anubis::                 How to invoke the GNU @command{anubis}.
@@ -71,7 +73,7 @@ Indices
 @end menu
 
 
-@node Overview, Configuration, Top, Top
+@node Overview, Glossary, Top, Top
 @chapter Overview
 @cindex overview
 @cindex Simple Mail Transport Protocol, SMTP
@@ -85,54 +87,120 @@ Indices
 @cindex MUA, Mail User Agent
 @cindex MTA, Mail Transport Agent
 
-GNU Anubis is an outgoing mail processor. It goes between the MUA (Mail User
-Agent) and the MTA (Mail Transport Agent), and can perform on the fly various
-sorts of processing and conversion on the outgoing mail in accord with the
-sender's specified rules, based on a highly configurable regular expressions
-system. It operates as a proxy server, independently from mail user agents.
-GNU Anubis can edit outgoing mail headers, encrypt and/or sign mail with the
-GNU Privacy Guard, build secure SMTP tunnels (Simple Mail Transport Protocol)
-using the TLS/SSL encryption even if your mail user agent doesn't support it,
-or tunnel a connection through a SOCKS proxy server.
+GNU Anubis is an outgoing mail processor. Its purpose is to receive
+the outgoing message, perform some manipulations over its contents,
+and to forward the altered message to the mail transport agent.
 
-@sp 1
+The usual mail sending scheme looks as follows: the user composes
+his message using @dfn{mail user agent} (@dfn{MUA} for short). Once
+the message is composed, the user sends it. When the MUA receives
+the send command it connects to the @dfn{mail transport agent}
+(@dfn{MTA} for short) and passes it the message for delivery. The
+figure below illustrates this interaction:
+
 @smallexample
---------*      --------**      ------***
-|  MUA  | ---> | Anubis | ---> |  MTA  |
----------      ----------      ---------
-
-@r{*   Mail User Agent (client)}
-@r{**  An outgoing mail processor and the SMTP tunnel.}
-@r{*** Mail Transport Agent (server)}
++-------+                 +-------+               
+|  MUA  | ---[outmsg]---> |  MTA  | ... [outmsg]
++-------+                 +-------+         |     
+                                            |
+                                            V
+                                     +--------------+
+                                     |  Recipient's |
+                                     |   Mailbox    |  
+                                     +--------------+
+                                                        
 @end smallexample
 
-@sp 1
-Some quick definitions:
+As shown in this figure, the outgoing message (@dfn{outmsg}), reaches
+the recipient's mailbox unaltered.
 
-@dfn{Protocol}---any standard for the exchange of information. A protocol
+However, there are situations where it may be necessary to modify
+the outgoing message before it reaches MTA. As the simplest example,
+the user might wish to sign the outgoing messages with his PGP
+key, but his MUA does not support this operation or supports it
+unconditionally.
+
+In such cases, installing GNU Anubis between the MUA and MTA
+allows the user to perform any additional processing on the
+sent message. The figure below illustrates this concept:
+
+@smallexample
++-------+                 +--------+                 +-------+               
+|  MUA  | ---[outmsg]---> | Anubis | ---[modmsg]---> |  MTA  | 
++-------+                 +--------+                 +-------+     
+                                                         |
+                                                      [modmsg]
+                                                         .
+                                                         .
+                                                         V
+                                                  +--------------+
+                                                  |  Recipient's |
+                                                  |   Mailbox    |  
+                                                  +--------------+
+@end smallexample
+
+The outgoing message is processed by GNU Anubis, and it is
+the resulting message (@dfn{modmsg}) that reaches the MTA.
+
+GNU Anubis is able to perform on messages a wide set of operations,
+such as modifying message headers or body, encrypting or signing
+messages with GPG (GNU Privacy Guard) keys, installing secure tunnels
+to MTA using TLS/SSL encryption, tunneling messages through
+SOCKS proxies, etc.
+
+When the set of built-in operations is not enough, the user can
+define his own operations using Guile, a @dfn{GNU's Ubiquitous
+Intelligent Language for Extensions}.
+
+The message processing is controlled by system-wide and per-user
+configuration files written in a flexible and easy to use
+command scripting language, specially desgined for this
+purpose.
+
+@node Glossary, Configuration, Overview, Top
+@chapter Glossary of Frequently Used Terms
+
+@table @dfn
+@item Protocol
+Any standard for the exchange of information. A protocol
 defines the specific wording and control flow for communications between
 two or more programs, devices, or systems.
 
-@dfn{SMTP}---Simpe Mail Tansport Protocol is a common mechanism for exchanging
+@item SMTP
+Simpe Mail Tansport Protocol is a common mechanism for exchanging
 mail across a network. This protocol is described in the RFC 821 document.
 
-@dfn{Daemon}---We use a term @dfn{daemon} as a process that runs in the
+@item Daemon
+We use a term @dfn{daemon} to define a process that runs in the
 background, doing automated processing.
 
-@dfn{Server}---a server provides information or other services for its
-clients. Most network protocols are client-server based. This term usually
+@item Server
+A server provides information or other services for its
+clients. Most network protocols are client--server based. This term usually
 refers to an entire machine, but it can refer (and we're doing that) also
 to the particular program or process, on that machine, that provides the
 service.
 
-@dfn{Proxy}---We use a term @dfn{proxy} to define a program, which goes
+@item Proxy
+We use a term @dfn{proxy} to define a program, which goes
 between the MUA and the MTA (it makes a tunnel). It can be used as a gateway
-to an outside world, while using a firewall. The firewalled host sends a data
-to the proxy server, which forwards it to the real server outside, collects
+to the outside world, while using a firewall. In this case the host
+under the firewall sends data to the proxy server, which in turn
+forwards it to the real server outside, receives 
 the response, and passes it back to the internal host.
 
+@item Guile
+GNU's Ubiquitous Intelligent Language for Extensions. It provides a
+Scheme interpreter conforming to the R4RS language specification. GNU
+Anubis uses Guile as its extension language.
+For more information about Guile,
+@xref{Top,,Overview,guile,The Guile Reference Manual}.
 
-@node Configuration, Rule System, Overview, Top
+@item GPG
+GNU Privacy Guard, a tool compatible with the Pretty Good Privacy.
+@end table
+
+@node Configuration, Rule System, Glossary, Top
 @chapter Configuration
 @cindex configuration
 @cindex settings
@@ -146,43 +214,126 @@ owned by root. The @dfn{user configuration file}, @file{~/.anubisrc},
 specifies what GNU Anubis should do for a particular user.
 To protect your passwords in the configuration files, use the 0600
 (u=rw,g=,o=) permissions, otherwise GNU Anubis won't accept them.
-Hash-marked comments (@samp{#}) and white lines in the configuration
-files are ignored.
+
+@subheading Lexical Structure
+
+Both configuration files use simple line-oriented syntax. Each
+line introduces a single statement. A statement consists of
+@dfn{words}, each word being defined as a contiguous sequence of
+non-whitespace symbols. A word may be composed of alphanumeric
+characters and any of the following punctuation symbols:
+@samp{_}, @samp{.}, @samp{/}, @samp{-}. Any arbitrary sequence
+of characters enclosed in a pair of doublequotes is also recognized
+as a word.
+
+The familiar shell @dfn{here document} syntax may be used to produce
+a word containing several lines of text. The syntax is:
+
+@smallexample
+<<[-]delimiter
+    text
+delimiter
+@end smallexample                                                  
+
+If ``here document'' starts with @samp{<<-}, then all leading tab
+characters are stripped from input lines and the line containing
+@dfn{delimiter}. This allows to indent here-document in a natural
+fashion.
+
+To summarize all the above, let's consider the example:
+
+@smallexample
+@group
+first-word "second word" <<-EOT
+                            Third word
+                            containing several
+                            lines of text
+                            EOT
+@end group
+@end smallexample
 
 @noindent
-The system configuration file may contain the following sections:
+This line contains three words: @samp{first-word}, @samp{second word}
+and the third one composed of the three lines between the @samp{EOT}
+markers.
 
-@enumerate
-@item
-@dfn{The CONTROL section}.
-@*
-Required. This specifies the basic GNU Anubis behavior.
-@item
-@dfn{The TRANSLATION section}.
-@*
-Optional. This specifies a translation map for remapping
-remote or local users.
-@end enumerate
+If a statement is very long, it may be split among several lines
+of text. To do so, preceede the newline characters with a backslash
+@samp{\}, e.g.:
+
+@smallexample
+@group
+a very long statement\
+  occupying several lines\
+  of text
+@end group  
+@end smallexample
+
+A @samp{#} in a line starts a @dfn{comment}. It and the rest of
+the line are ignored. Comments may appear on any of the lines in
+the configuration file, except on a commands and within a
+``here-document'' construction.
+A line containing just a comment (with perhaps spaces before it) is
+effectively blank, and is ignored. For example:
+
+@smallexample
+@group
+# This is a comment
+if header[Subject] :re "No.*"  # This is also a comment
+  guile-process action-name This # is not a comment!!!
+fi
+@end group
+@end smallexample
+
+@subheading Logical Structure
+
+The statements within a configuration file are grouped into
+@dfn{sections}. Each section has its name. A section begins with
+one of the following constructs:
+
+@smallexample
+BEGIN @var{name}
+---BEGIN @var{name}---
+@end smallexample
 
 @noindent
-The user configuration file may contain the following sections:
 
-@enumerate
-@item
-@dfn{CONTROL section}.
-@*
-Optional. This specifies the basic GNU Anubis behavior.
-@item
-@dfn{GUILE section}.
-@*
-Optional.
-@item
-@dfn{The Rule System}.
-@*
-Optional. Here you can define your own processing rules
-for any particular message (conditional or unconditional
-rules).
-@end enumerate
+and ends with one of the following constructs:
+
+@smallexample
+END
+---END---
+@end smallexample
+
+Notice, that both @samp{BEGIN} and @samp{END} must be uppercase.
+When using the second form, any amount of whitespace is allowed
+between the three dashes and the word.
+
+The sections cannot be nested.
+
+There are three predefined sections, whose names are uppercase.
+The user may define his own sections, which may then be referred
+to from the @code{RULE} section as subroutines (@pxref{Call Action}).
+
+The predefined section names are:
+
+@table @dfn
+@item CONTROL
+This section specifies the basic GNU Anubis behavior. Its presence
+is required in the system configuration file. It may be used in
+the user configuration file to override the system-wide settings.
+@item TRANSLATION
+This section specifies a translation map for remapping
+remote or local users. It may be used only in the syste-wide
+configuration file.
+@item GUILE
+Contains the settings of the Guile interpreter. The section is
+allowed in both configuration files.
+@item RULE
+Defines the rules that are used to alter the contents of the
+messages. This is the core part of the user configuration file.
+It is not allowed in the system configuration file.
+@end table
 
 @menu
 * CONTROL Section::
@@ -192,8 +343,8 @@ rules).
 
 
 @node CONTROL Section, TRANSLATION Section, Configuration, Configuration
-@section The CONTROL Section
-@cindex CONTROL section, The
+@section CONTROL Section
+@cindex CONTROL section
 
 The @samp{CONTROL} section specifies the basic GNU Anubis behavior.
 Specified in the system configuration file, it applies to all users on
@@ -412,8 +563,8 @@ in the @file{/etc/passwd}, if necessary. Add this user name also to the
 
 
 @node TRANSLATION Section, GUILE Section, CONTROL Section, Configuration
-@section The TRANSLATION Section
-@cindex TRANSLATION section, The
+@section TRANSLATION Section
+@cindex TRANSLATION section
 
 The @samp{TRANSLATION} section specifies how to translate remote or local
 user names, or host names or addresses, to local user names.
@@ -452,21 +603,11 @@ the local john's configuration file.
 
 
 @node GUILE Section, , TRANSLATION Section, Configuration
-@section The GUILE Section
-@cindex GUILE section, The
+@section GUILE Section
+@cindex GUILE section
 @cindex Guile
 @cindex extension language
 @cindex Scheme
-
-The name Guile stands for @dfn{GNU's Ubiquitous Intelligent Language for
-Extensions}. It provides a Scheme interpreter conforming to the R4RS
-language specification. GNU Anubis uses Guile as its extension language.
-
-This section assumes that the reader is sufficiently familiar with the
-Scheme language. For information about the language, refer to
-@ref{Top,,,r4rs,Revised(4) Report on the Algorithmic Language Scheme}.
-For more information about Guile,
-@xref{Top,,Overview,guile,The Guile Reference Manual}.
 
 @deffn Command guile-output @var{file}
 Specifies the name of the file to bind to the Scheme standart error
@@ -496,19 +637,21 @@ Reads the given Scheme program.
 The rule system is a core part of GNU Anubis. It can be regarded
 as a program that is executed for every outgoing message. 
 
-Throughout this section, when showing syntax definitions, the
+Throughout this chapter, when showing syntax definitions, the
 optional parts of these will be enclosed in a pair of square
 brackets, e.g.:
 
-@deffn Syntax keyword [@var{optional-part}] @var{mandatory-part} 
-@end deffn
+@smallexample
+keyword [@var{optional-part}] @var{mandatory-part}
+@end smallexample
 
+@noindent
 When the square braces are required symbols, they will be marked
 as such, e.g.:
 
-@deffn Syntax
+@smallexample
 remove @samp{[}@var{key}@samp{]}
-@end deffn
+@end smallexample
 
 The rule system is defined in @dfn{RULE} section, which begins with a
 @w{@code{---BEGIN RULE---}} and ends with an @w{@code{---END---}}
@@ -518,22 +661,48 @@ The statements within this section are executed sequentially.
 Each statement is either an @dfn{action} or a @dfn{conditional
 statement}.
 
+@menu
+* Actions::
+* Conditional Statements::
+* Triggers::
+* Boolean Operators::
+* Regular Expressions::
+* Action List::
+* Using Guile Actions::
+@end menu
+
+@node Actions, Conditional Statements, Rule System, Rule System
+@section Actions
+@cindex actions defined
+
 An @dfn{action} is a statement defining an operation to be performed
 over the message. Syntactically, each action is
 
-@deffn Syntax @var{command} [=] @var{right-hand-side}
+@smallexample
+@var{command} [=] @var{right-hand-side}
+@end smallexample
+
+@noindent
 Where @var{command} specifies a particular operation and
 @var{right-hand-side} specifies the arguments for it. The equal sign
 is optional.
-@end deffn
+
+@node Conditional Statements, Triggers, Actions, Rule System
+@section Conditional Statements
+@cindex Conditional statements
+@cindex @code{if}, conditional statements
+@cindex @code{else}, conditional statements
+@cindex @code{fi}, conditional statements
 
 A @dfn{conditional statement} defines the control flow in the section.
 It allows to execute arbitrary actions depending on whether a certain
 condition is met. A conditional statement in its simplest form is:
 
-@deffn Syntax if @var{part} [@var{pattern-match-flags}] @var{cond-expr}
-@deffnx Syntax @var{action-list-1}
-@deffnx Syntax fi
+@smallexample
+if @var{part} [@var{pattern-match-flags}] @var{cond-expr}
+  @var{action-list-1}
+fi
+@end smallexample
     
 The @var{part} specifies which part of the input should be considered
 when evaluating the condition. It is either @samp{command}, meaning
@@ -581,19 +750,20 @@ fi
 The actions represented by @dots{} will be executed only if the
 @samp{Subject:} header of the message starts with @samp{Re:} optionally
 preceeded by any amount of whitespace.
-@end deffn
 
 The more elaborate form of a conditional allows you to choose among
 the two different action sets depending on a given condition. The
 syntax is:
 
-@deffn Syntax if @var{part} [@var{flags}] @var{cond-expr}
-@deffnx Syntax @var{action-list-1}
-@deffnx Syntax else
-@deffnx Syntax @var{action-list-2}  
-@deffnx Syntax fi
+@smallexample
+if @var{part} [@var{flags}] @var{cond-expr}
+  @var{action-list-1}
+else
+  @var{action-list-2}
+fi
+@end smallexample
 
-Here, The @var{action-list-1} is executed if the condition
+Here, the @var{action-list-1} is executed if the condition
 @var{cond-expr} is met. Otherwise, @var{action-list-2} is
 executed.
 
@@ -609,22 +779,93 @@ fi
 @noindent
 
 Note also, that in the examples above any of the statements
-@var{action-list} may contain conditionals, so that conditinal
+@var{action-list} may contain conditionals, so that the conditional
 statements may be nested. This allows to create very sophisticated
 rule sets. 
 
 [FIXME: elaborate on this. Provide an example]
-@end deffn
 
-@menu
-* Boolean Operators::
-* Regular Expressions::
-* Action List::
-* Triggers::
-@end menu
+@node Triggers, Boolean Operators, Conditional Statements, Rule System
+@section Triggers
+@cindex Triggers
 
+Triggers are conditional statements that use the value of the
+@samp{Subject} header to alter the control flow. Syntactically, a
+trigger is:
 
-@node Boolean Operators, Regular Expressions, Rule System, Rule System
+@smallexample
+@group
+rule [@var{flags}] @var{pattern}
+  @var{action-list}
+done
+@end group
+@end smallexample
+
+@noindent
+Here, @var{pattern} is the pattern against which the @samp{Subject}
+header is checked, @var{flags} are optional flags controlling the
+type of regular expression used (@pxref{Regular Expressions}).
+
+The triggers act as follows: First, the value of the @samp{Subject} header is
+matched against the pattern @samp{@@@@}@var{pattern}. If it matches,
+then the matched part is removed from the @samp{Subject}, and the
+@var{action-list} is executed.
+
+Basically, putting aside the possibility to use different flavors of
+regular expressions, a trigger is equivalent to the following statement:
+
+@smallexample
+@group
+if header[Subject] :posix "(.*)@@@@@var{pattern}"
+  modify header [Subject] "\1"
+  @var{action-list}
+fi
+@end group
+@end smallexample
+
+Thus, adding the @samp{@@@@@var{rule-name}} code to the @samp{Subject}
+header of your message, triggers a rule named @var{rule-name},
+specified in a user configuration file. For example:
+
+@smallexample
+@group
+---BEGIN RULE---
+rule :basic "^gpg-encrypt-john"
+   gpg-encrypt "john's_gpg_key"
+done
+---END---
+@end group
+@end smallexample
+
+@noindent
+Now you can simply send an email with the following subject:
+@w{@samp{hello John!@@@@gpg-encrypt-john}} to process an outgoing message
+with the rule specified above---encrypt message with a John's public key.
+Moreover, the trigger will remove the @samp{@@@@}, so John will only receive
+a message with a subject @samp{hello John!}.
+
+Another example shows an even more dynamic trigger, that is using
+a substitution and back-references:
+
+@smallexample
+@group
+---BEGIN RULE---
+rule :extended "^gpg-encrypt:(.*)"
+   gpg-encrypt "\1"
+   add [X-GPG-Comment] "Encrypted for \1"
+done
+---END---
+@end group
+@end smallexample
+
+@noindent
+To encrypt a message to user e.g. @samp{John}, simply send an email with
+a subject @w{@samp{hello John!@@@@gpg-encrypt:john's_gpg_key}}.
+This way, you decide at a run time which public key should be used,
+without creating separate rules for each user; thanks to back-references,
+those 3---4 lines are enough.
+
+@node Boolean Operators, Regular Expressions, Triggers, Rule System
 @section Boolean Operators
 
 The following table lists the three boolean operators that can be used
@@ -661,10 +902,12 @@ header does not begin with the string @samp{multipart/mixed}, we would
 write the following:
 
 @smallexample
+@group
 if (header[X-Mailer] "mutt" or header[X-Mailer] "mail") \
    and not header[Content-Type] "^multipart/mixed;.*"
    @var{action}
 fi
+@end group
 @end smallexample
 @noindent
 
@@ -767,7 +1010,7 @@ For information about Perl-style regular expressions, refer to the
 Perl documentation.
 
 
-@node Action List, Triggers, Regular Expressions, Rule System
+@node Action List, Using Guile Actions, Regular Expressions, Rule System
 @section Action List
 @cindex Action List
 
@@ -775,34 +1018,65 @@ An @dfn{action list} is a list of action commands, which control processing
 of an outgoing messages. All action command names are case insensitive, so you
 can use for instance: @samp{add} or @samp{ADD} or @samp{AdD}, and so on.
 
-@c [FIXME]
-@strong{Caution:} Some action commands below might not be compatible
-with GNU Anubis > 3.6.2, because this Manual has not been updated for
-a long time.
-
 @menu
+* Stop Action::            Stopping the Processing
+* Call Action::            Invoking Another Section
 * Adding Headers or Text:: How to add a new header or body line(s).
 * Removing Headers::       How to remove a message header line(s).
 * Modifying Messages::     How to modify a message contents on-the-fly.
 * Inserting Files::        How to append text files to an outgoing message.
 * Mail Encryption::        How to encrypt a message on-the-fly.
-* Remailers::              How to enable the support for Remailers Type-I.
-* Rot-13::                 How to use rot-13 transformation.
 * External Processor::     How to process a message body using an external tool.
 * Quick Example::          A quick example of using an action list.
 @end menu
 
+@node Stop Action, Call Action, Action List, Action List
+@subsection Stop Action
+@cindex @code{stop}
 
-@node Adding Headers or Text, Removing Headers, Action List, Action List
+The @code{stop} command stops immediately the processing of the
+section. It may be used in the main @code{RULE} section as well as
+in any user-defined section. For example:
+
+@smallexample
+if not header[Content-Type] "text/plain; .*"
+  stop;
+fi
+@end smallexample
+
+@node Call Action, Adding Headers or Text, Stop Action, Action List
+@subsection Call Action
+@cindex @code{call}
+
+The @code{call} command allows to invoke a user-defined section much
+in the same manner as a subroutine in a programming language. The
+invoked section continues to execute until its end or the @code{stop}
+statement is encountered, whichever the first.
+
+@smallexample
+BEGIN myproc
+if header[Subject] "Re: .*"
+  stop;
+fi
+rule "pgp"
+  gpg-encrypt "my_gpg_key"
+done
+END
+
+BEGIN RULE
+call myproc
+END
+@end smallexample
+
+@node Adding Headers or Text, Removing Headers, Call Action, Action List
 @subsection Adding Headers or Text
 @cindex @code{add}
 
 The @code{add} command allows you to add arbitrary headers or text
 to the message. To add a header, use the following syntax:
 
-@deffn Syntax add header @samp{[}@var{name}@samp{]} @var{string}
-@deffnx Syntax add @samp{[}@var{name}@samp{]} @var{string}
-
+@deffn Command add header @samp{[}@var{name}@samp{]} @var{string}
+@deffnx Command add @samp{[}@var{name}@samp{]} @var{string}
 For example:
 
 @smallexample
@@ -811,13 +1085,10 @@ add [X-Comment-2] "Support FSF!"
 @end smallexample
 @end deffn
 
-To add some text, use the following syntax:
-
-@deffn Syntax add body @var{text}
-@end deffn
-
-Use of this command with @samp{here document} syntax allows
-to append multiline text to the message, e.g.:
+@deffn Command add body @var{text}
+Adds the @var{text} to the message body. Use of this command with
+@samp{here document} syntax allows to append multiline text to the
+message, e.g.:
 
 @smallexample
 @group
@@ -827,7 +1098,7 @@ add body <<-EOT
     EOT
 @end group
 @end smallexample
-
+@end deffn
 
 @node Removing Headers, Modifying Messages, Adding Headers or Text, Action List
 @subsection Removing Headers
@@ -836,14 +1107,13 @@ add body <<-EOT
 The command @code{remove} removes the specified header from the
 message. The syntax is:
 
-@deffn Syntax remove [@var{flags}] header @samp{[}@var{string}@samp{]}
-@deffnx Syntax remove [@var{flags}] @samp{[}@var{string}@samp{]}
+@deffn Command remove [@var{flags}] header @samp{[}@var{string}@samp{]}
+@deffnx Command remove [@var{flags}] @samp{[}@var{string}@samp{]}
 
 The name of the header to delete is given by @var{string} parameter.
 By default only those headers are removed whose names match it exactly.
 Optional @var{flags} allow to change this behavior. @xref{Regular Expressions},
 for the detailed description of these.
-@end deffn
 
 An example:
 
@@ -855,7 +1125,7 @@ remove :regex ["^X-.*"]
 The first example will remove the @samp{X-Mailer:} header from
 an outgoing message, and the second one will remove all "X-*"
 headers.
-
+@end deffn
 
 @node Modifying Messages, Inserting Files, Removing Headers, Action List
 @subsection Modifying Messages
@@ -864,8 +1134,8 @@ headers.
 The action command @code{modify} allows to alter the headers
 or the body of the message. 
 
-@deffn Syntax modify [@var{flags}] header @samp{[}@var{key}@samp{]} @samp{[}@var{new-key}@samp{]}
-@deffnx Syntax modify [@var{flags}] @samp{[}@var{key}@samp{]} @samp{[}@var{new-key}@samp{]}
+@deffn Command modify [@var{flags}] header @samp{[}@var{key}@samp{]} @samp{[}@var{new-key}@samp{]}
+@deffnx Command modify [@var{flags}] @samp{[}@var{key}@samp{]} @samp{[}@var{new-key}@samp{]}
 
 For each header whose name matches @var{key}, replaces its name
 with @var{new-key}. If @var{key} is a regular expressions, @var{new-key}
@@ -878,8 +1148,8 @@ modify header :re ["X-\(.*\)"] ["X-Old-\1"]
 @end smallexample
 @end deffn
 
-@deffn Syntax modify [@var{flags}] header @samp{[}@var{key}@samp{]} @var{value}
-@deffnx Syntax modify [@var{flags}] @samp{[}@var{key}@samp{]} @var{value}
+@deffn Command modify [@var{flags}] header @samp{[}@var{key}@samp{]} @var{value}
+@deffnx Command modify [@var{flags}] @samp{[}@var{key}@samp{]} @var{value}
 
 For each header whose name matches @var{key}, changes its value to
 @var{value}. For example:
@@ -892,8 +1162,8 @@ modify [Subject] "New subject"
 This statement sets the new value to the @code{Subject} header.
 @end deffn
 
-@deffn Syntax modify [@var{flags}] header @samp{[}@var{key}@samp{]} @samp{[}@var{new-key}@samp{]} @var{value}
-@deffnx Syntax modify [@var{flags}] @samp{[}@var{key}@samp{]} @samp{[}@var{new-key}@samp{]} @var{value}
+@deffn Command modify [@var{flags}] header @samp{[}@var{key}@samp{]} @samp{[}@var{new-key}@samp{]} @var{value}
+@deffnx Command modify [@var{flags}] @samp{[}@var{key}@samp{]} @samp{[}@var{new-key}@samp{]} @var{value}
 
 Combines the previous two cases, i.e. changes both the header
 name and its value, as shown in the following example:
@@ -903,8 +1173,7 @@ modify header [X-Mailer] [X-X-Mailer] "GNU Anubis"
 @end smallexample
 @end deffn
 
-@deffn Syntax modify [@var{flags}] body @samp{[}@var{key}@samp{]}
-
+@deffn Command modify [@var{flags}] body @samp{[}@var{key}@samp{]}
 Removes all occurrences of @var{key} from the message body.
 For example, this statement will remove every occurrence of
 the word @samp{old}:
@@ -914,15 +1183,13 @@ modify body ["old"]
 @end smallexample
 @end deffn
 
-@deffn Syntax modify [@var{flags}] body @samp{[}@var{key}@samp{]} @var{string}
-
+@deffn Command modify [@var{flags}] body @samp{[}@var{key}@samp{]} @var{string}
 Replaces all occurences of @var{key} with @var{string}. For example:
 
 @smallexample
 modify body :extended ["the old \([[:alnum:]]+\)"] "the new \1"
 @end smallexample
 @end deffn
-
 
 @node Inserting Files, Mail Encryption, Modifying Messages, Action List
 @subsection Inserting Files
@@ -959,7 +1226,7 @@ body-append @var{file-name}
 @end deffn
 
 
-@node Mail Encryption, Remailers, Inserting Files, Action List
+@node Mail Encryption, External Processor, Inserting Files, Action List
 @subsection Mail Encryption
 @cindex GNU Privacy Guard, GnuPG
 @cindex Pretty Good Privacy, PGP
@@ -1016,116 +1283,7 @@ gpg-sign yes
 @end deffn
 
 
-@node Remailers, Rot-13, Mail Encryption, Action List
-@subsection Remailers Type-I
-@cindex remailer
-
-GNU Anubis supports remailers of type I. The support is written
-entirely in Scheme. To enable it you need to specify the following
-in the @code{GUILE} section of your configuration file:
-
-@smallexample
-@group
-guile-load-program remailer.scm
-@end group
-@end smallexample
-
-To send the message via a remailer, use the following command
-in the @code{RULE} section:
-
-@deffn Command guile-process remailer-I @var{keyword-arguments}
-@fnindex remailer-I, Guile function
-@cmindex guile-process remailer-I @var{keyword-arguments}
-The @var{keyword-arguments} specify the various parameters for
-the remailer. These are:
-
-@table @asis
-@item #:rrt @var{string}
-This is the only required keyword argument. It sets the value for the
-@dfn{Request Remailing To} line. @var{string} should be your actual
-recipient's email address.
-
-@item #:post @var{news-group}
-Adds the @samp{Anon-Post-To: @var{news-group}} line,
-and prepares the message for sending it to the Usenet
-via a remailer. Note, that this is only possible with remailers
-that support @samp{Anon-Post-To:} header.
-
-@item #:latent @var{time}
-Adds the @samp{Latent-Time:} line, that causes a remailer to keep
-your message for specified @var{time} before forwarding it. 
-
-@item #:random
-Adds random suffix to the latent time.
-
-@item #:header @var{string}
-Adds an extra header line to the remailed message.
-@end table
-
-Example:
-
-@smallexample
-@group
-rule "remail:(.*)/(.*)"
- guile-process remailer-I #:rrt antonius_block@@helsingor.net \
-                          #:post \1 \
-                          #:latent \2 \
-                          #:header "X-Processed-By: GNU Anubis & Remailer-I"
-done
-@end group
-@end smallexample
-
-@end deffn
-
-
-@node Rot-13
-@subsection Support for ROT-13
-@cindex rot-13
-
-The ROT-13 transformation is a simple form of encryption where the
-letters A-M are transposed with the letters L-Z. It is often used in
-Usenet postings/mailing lists to prevent people from accidentally
-reading a disturbing message.
-
-GNU Anubis supports ROT-13 via a loadable Guile function. To enable
-this support, you will have to add the following to your @code{GUILE}
-section:
-
-@smallexample
-guile-load-program rot-13.scm
-@end smallexample
-
-Then, in your @code{RULE} section use:
-
-@deffn Command guile-process rot-13 @var{keyword-arguments}
-@fnindex rot-13, Guile function
-The command accepts the following @var{keyword-arguments}:
-
-@table @asis
-@item #:body
-Encrypt the entire body of the message
-
-@item #:subject
-Encrypt the @samp{Subject} header.
-@end table
-
-For example:
-
-@smallexample
-@group
-rule "rot-13.*body"
- guile-process rot-13 #:body
-done
-
-rule "rot-13.*subj"
- guile-process rot-13 #:subject
-done
-@end group
-@end smallexample  
-@end deffn
-
-
-@node External Processor, Quick Example, Rot-13, Action List
+@node External Processor, Quick Example, Mail Encryption, Action List
 @subsection Using an External Processor
 
 @deffn Command external-body-processor @var{program} [@var{args}]
@@ -1162,64 +1320,271 @@ an outgoing message, add an extra header line (@samp{X-Comment:}), sign your
 message with your private key, and add a simple signature file from your
 home directory.
 
+@node Using Guile Actions, , Action List, Rule System
+@section Using Guile Actions
+@cindex Guile
 
-@node Triggers, , Action List, Rule System
-@section Triggers
-@cindex Triggers
-Adding the @samp{@@@@@var{rule-name}} code to your message header line,
-e.g. to a @samp{Subject} header line, triggers a rule named @var{rule-name},
-specified in a user configuration file in the following way:
+The name Guile stands for @dfn{GNU's Ubiquitous Intelligent Language for
+Extensions}. It provides a Scheme interpreter conforming to the R4RS
+language specification. GNU Anubis uses Guile as its extension language.
+
+This section describes how to write GNU Anubis actions in Scheme.
+It assumes that the reader is sufficiently familiar with the
+Scheme language. For information about the language, refer to
+@ref{Top,,,r4rs,Revised(4) Report on the Algorithmic Language Scheme}.
+For more information about Guile,
+@xref{Top,,Overview,guile,The Guile Reference Manual}.
+
+@menu
+* Defining Guile Actions::
+* Invoking Guile Actions::
+
+Predefined Guile Actions
+* Rot-13::
+* Remailers::
+@end menu
+
+@node Defining Guile Actions, Invoking Guile Actions, Using Guile Actions, Using Guile Actions
+@subsection Defining Guile Actions
+@cindex Guile Actions, defining
+
+A Guile action is defined as follows:
+
+@smalllisp
+(define (@var{function-name} @var{header} @var{body} . @var{rest})
+ ...)
+@end smalllisp
+
+@noindent
+Its arguments are:
+
+@table @var
+@item header
+List of message headers. Each list element is a cons
 
 @smallexample
-@group
-rule [@var{flags}] @var{pattern}
-   @var{action-list}
-done
-@end group
+(@var{name} . @var{value})
 @end smallexample
 
 @noindent
+where @var{name} is the name of the header field, and @var{value} is
+its value with final CRLF stripped off. Both @var{name} and
+@var{value} are strings.
 
-An example:
+@item body
+A string containing the message body.
+
+@item rest
+Any additional arguments passed to the function from the configuration
+file (@pxref{Invoking Guile Actions}). This argument may be absent if
+the function is not expected to take optional arguments.
+@end table
+
+The function must return a cons whose car contains the new message
+headers, and cdr contains the new message body. If the car is
+@code{#t}, it means that no headers are changed. If the cdr is
+@code{#t}, it means that the body has not changed. If the cdr is
+@code{#f}, Anubis will delete the entire message body.
+
+As the first example, let's consider a @dfn{no-operation} action,
+i.e. an action that does not alter the message in any way. It can
+be written in two ways:
+
+@smalllisp
+(define (noop-1 header body)
+  (cons header body))
+  
+(define (noop-2 header body)
+  (cons #t #t))
+@end smalllisp
+
+The following example is a function that deletes the message body
+and adds an additional header:
+
+@smalllisp
+(define (proc header body)
+  (cons (append header
+                (cons "X-Body-Deleted" "yes"))
+        #f))
+@end smalllisp        
+
+Let's consider a more constructive example. The following function
+checks if the @code{Subject} header starts with string @samp{ODP:}
+(a Polish equivalent to @samp{Re:}), and if it does, the function
+replaces it with @samp{Re:}. It always adds to the message the header
 
 @smallexample
-@group
----BEGIN RULE---
-rule :basic "^gpg-encrypt-john"
-   gpg-encrypt "john's_gpg_key"
-done
----END---
-@end group
+X-Processed-By: GNU Anubis
 @end smallexample
 
 @noindent
-Now you can simply send an email with the following subject:
-@w{@samp{hello John!@@@@gpg-encrypt-john}} to process an outgoing message
-with the rule specified above---encrypt message with a John's public key.
-Moreover, the trigger will remove the @samp{@@@@}, so John will only receive
-a message with a subject @samp{hello John!}.
+Additionally, if the optional argument is given, it is appended to
+the body of the message.
 
-Another example shows even more dynamic trigger,
-while using a substitution and back-references:
+@smalllisp
+(define (fix-subject hdr body . rest)
+  "If the Subject: field starts with characters \"ODP:\", replace
+them with \"Re:\".
+If REST is not empty, append its car to BODY"
+  (cons (append
+	 (map (lambda (x)
+		(if (and (string-ci=? (car x) "subject")
+			 (string-ci=? (substring (cdr x) 0 4) "ODP:"))
+		    (cons (car x)
+			  (string-append "Re:"
+					 (substring (cdr x) 4)))
+		    x))
+	      hdr)
+	 (list (cons "X-Processed-By" "GNU Anubis")))
+	(if (null? rest)
+	    #t
+	    (string-append body "\n" (car rest)))))
+@end smalllisp
+
+@node Invoking Guile Actions, Rot-13, Defining Guile Actions, Using Guile Actions
+@subsection Invoking Guile Actions
+@cindex @code{guile-process}
+
+The Guile actions are invoked from the @code{RULE} section using the
+@code{guile-process} command. Its syntax is:
+
+@deffn Command guile-process @var{function} @var{args}
+Arguments:
+
+@table @var
+@item function
+The name of the Guile function to be invoked.
+
+@item args
+Additional arguments. These are passed to the @var{function} as
+its third argument (@var{rest}).
+@end table
+@end deffn
+
+To pass keyword arguments to the function, use the usual Scheme
+notation: @samp{#:key}.
+
+As an example, let's consider the invocation of the @code{fix-subject}
+function, defined in the previous subsection:
 
 @smallexample
-@group
----BEGIN RULE---
-rule :extended "^gpg-encrypt:(.*)"
-   gpg-encrypt "\1"
-   add [X-GPG-Comment] "Encrypted for \1"
-done
----END---
-@end group
+guile-process fix-subject <<-EOT
+                                ----------
+                                Kind regards,
+                                Antonius Block
+                          EOT
 @end smallexample
 
 @noindent
-To encrypt a message to user e.g. @samp{John}, simply send an email with
-a subject @w{@samp{hello John!@@@@gpg-encrypt:john's_gpg_key}}.
-In this case, you decide in a run time which public key should be used,
-without creating a separate rules for each user; thanks to back-references,
-those 3---4 lines are enough.
+In this example, the additional argument (a string of three lines) is
+passed to the function, which will add it to the message of the body.
 
+@node Rot-13, Remailers, Invoking Guile Actions, Using Guile Actions
+@subsection Support for @sc{rot-13}
+@cindex rot-13
+
+The @sc{rot-13} transformation is a simple form of encryption where the
+letters A-M are transposed with the letters L-Z. It is often used in
+Usenet postings/mailing lists to prevent people from accidentally
+reading a disturbing message.
+
+GNU Anubis supports @sc{rot}-13 via a loadable Guile function. To enable
+this support, you will have to add the following to your @code{GUILE}
+section:
+
+@smallexample
+guile-load-program rot-13.scm
+@end smallexample
+
+Then, in your @code{RULE} section use:
+
+@deffn Command guile-process rot-13 @var{keyword-arguments}
+@fnindex rot-13, Guile function
+The command accepts the following @var{keyword-arguments}:
+
+@table @code
+@item #:body
+Encrypt the entire body of the message
+
+@item #:subject
+Encrypt the @samp{Subject} header.
+@end table
+
+For example:
+
+@smallexample
+@group
+rule "rot-13.*body"
+ guile-process rot-13 #:body
+done
+
+rule "rot-13.*subj"
+ guile-process rot-13 #:subject
+done
+@end group
+@end smallexample  
+@end deffn
+
+@node Remailers, , Rot-13, Using Guile Actions
+@subsection Remailers Type-I
+@cindex remailer
+
+GNU Anubis supports remailers of type I. The support is written
+entirely in Scheme. To enable it you need to specify the following
+in the @code{GUILE} section of your configuration file:
+
+@smallexample
+@group
+guile-load-program remailer.scm
+@end group
+@end smallexample
+
+To send the message via a remailer, use the following command
+in the @code{RULE} section:
+
+@deffn Command guile-process remailer-I @var{keyword-arguments}
+@fnindex remailer-I, Guile function
+@cmindex guile-process remailer-I @var{keyword-arguments}
+The @var{keyword-arguments} specify the various parameters for
+the remailer. These are:
+
+@table @code
+@item #:rrt @var{string}
+This is the only required keyword argument. It sets the value for the
+@dfn{Request Remailing To} line. @var{string} should be your actual
+recipient's email address.
+
+@item #:post @var{news-group}
+Adds the @samp{Anon-Post-To: @var{news-group}} line,
+and prepares the message for sending it to the Usenet
+via a remailer. Note, that this is only possible with remailers
+that support @samp{Anon-Post-To:} header.
+
+@item #:latent @var{time}
+Adds the @samp{Latent-Time:} line, that causes a remailer to keep
+your message for specified @var{time} before forwarding it. 
+
+@item #:random
+Adds random suffix to the latent time.
+
+@item #:header @var{string}
+Adds an extra header line to the remailed message.
+@end table
+
+Example:
+
+@smallexample
+@group
+rule "remail:(.*)/(.*)"
+ guile-process remailer-I \
+             #:rrt antonius_block@@helsingor.net \
+             #:post \1 \
+             #:latent \2 \
+             #:header "X-Processed-By: GNU Anubis & Remailer-I"
+done
+@end group
+@end smallexample
+@end deffn
 
 @node Invoking Anubis, Sample Beginning, Rule System, Top
 @chapter Invoking GNU Anubis
