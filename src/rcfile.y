@@ -37,7 +37,7 @@
 extern int yylex(void);
 int yyerror(char *s);
 
-static RC_SECTION *rc_section_create(char *, RC_STMT *);
+static RC_SECTION *rc_section_create(char *, size_t, RC_STMT *);
 static void rc_section_destroy(RC_SECTION **);
 static void rc_section_print(RC_SECTION *);
 static void rc_asgn_destroy(RC_ASGN *);
@@ -78,6 +78,11 @@ static struct rc_secdef *rc_secdef;
 		RC_REGEX *key;
 		char *string;
 	} msgpart;
+	RC_LOC loc;
+	struct {
+		size_t line;
+		char *name;
+	} begin_sec;
 	LIST *list;
 };
 
@@ -91,7 +96,7 @@ static struct rc_secdef *rc_secdef;
 %left AND
 %left NOT
 
-%type <string> begin keyword string modifier arg string_key
+%type <string> keyword string modifier arg string_key
 %type <section> section seclist
 %type <stmtlist> stmtlist
 %type <stmt> stmt asgn_stmt cond_stmt rule_stmt inst_stmt modf_stmt
@@ -99,7 +104,8 @@ static struct rc_secdef *rc_secdef;
 %type <node> rule_start cond expr
 %type <msgpart> msgpart s_msgpart r_msgpart key opt_key
 %type <list> arglist
-%type <regex> regex 
+%type <regex> regex
+%type <begin_sec> begin
 
 %%
 
@@ -138,7 +144,7 @@ section  : /* empty */ EOL
 	   }
          | begin stmtlist end
            {
-		   $$ = rc_section_create($1, $2.head);
+		   $$ = rc_section_create($1.name, $1.line, $2.head);
 	   }
          | begin end
            {
@@ -148,13 +154,16 @@ section  : /* empty */ EOL
 
 begin    : T_BEGIN { verbatim(); } string EOL
            {
-		   $$ = $3;
+		   $$.line = cfg_line_num - 1;
+		   $$.name = $3;
 		   if (rc_section_lookup(rc_section, $3)) 
 			   parse_error(_("Section %s already defined"), $3);
 		   rc_secdef = anubis_find_section($3);
 	   }
          | D_BEGIN EOL
            {
+		   $$.line = cfg_line_num - 1;
+		   $$.name = $1;
 		   if (rc_section_lookup(rc_section, $1)) 
 			   parse_error(_("Section %s already defined"), $1);
 		   rc_secdef = anubis_find_section($1);
@@ -566,11 +575,92 @@ rc_set_debug_level(char *arg)
 		yydebug = debug_level;
 }
 
+
+/* Locations */
+
+/* To save space, each filename is allocated only once. Each filename
+   has a reference count associated with it. It is incremented
+   with each new allocation of the same string. It is decremented
+   with each attempt to free the string. Only when the reference count
+   drops to zero is the storage actually reclaimed */
+
+struct strobj {
+	char *value;          /* String value */
+	size_t refcnt;        /* Reference count */
+};
+
+/* A list of string objects */
+static LIST /* of struct strobj */ *string_list;
+
+static int
+string_comparator(void *item, void *data)
+{
+	struct strobj *s = item;
+	return strcmp (s->value, (char*) data);
+}
+
+static int
+value_comparator(void *item, void *data)
+{
+	struct strobj *s = item;
+	return s->value != data;
+}
+
+/* Looks up a string object with the given value. If not found, a
+   new object is created and added to the list. In any case the
+   reference count of the objet is incremented.
+   The return value is the string value associated with the object. */
+char *
+string_create(char *str)
+{
+	struct strobj *s = list_locate(string_list, str, string_comparator);
+	if (!s) {
+		s = xmalloc(sizeof(*s));
+		s->value = strdup(str);
+		s->refcnt = 0;
+		list_prepend(string_list, s);
+	}
+	s->refcnt++;
+	return s->value;
+}
+
+/* Destroys the object with the given string value */
+void
+string_destroy(char *str)
+{
+	struct strobj *s = list_locate(string_list, str, value_comparator);
+	if (s) {
+		if (--s->refcnt == 0) {
+			free(s->value);
+			list_remove(string_list, str, value_comparator);
+		}
+	}
+}
+
+/* Initializes LOC with the current location. If the second argument
+   is not zero, it overrides the current line number. */
+void
+rc_mark_loc(RC_LOC *loc, size_t line)
+{
+	loc->file = string_create(cfg_file);
+	loc->line = line ? line : cfg_line_num;
+}
+
+/* Reclaims the memory associated with the LOC */
+void
+rc_destroy_loc(RC_LOC *loc)
+{
+	string_destroy(loc->file);
+}
+
+
 /* Section manipulation */
+
 RC_SECTION *
-rc_section_create(char *name, RC_STMT *stmt)
+rc_section_create(char *name, size_t line, RC_STMT *stmt)
 {
 	RC_SECTION *p = xmalloc(sizeof(*p));
+	rc_mark_loc(&p->loc, line);
 	p->next = NULL;
 	p->name = name;
 	p->stmt = stmt;
@@ -581,6 +671,7 @@ void
 rc_section_destroy(RC_SECTION **s)
 {
 	rc_stmt_list_destroy((*s)->stmt);
+	rc_destroy_loc(&(*s)->loc);
 	xfree((*s)->name);
 	xfree(*s);
 }
@@ -618,7 +709,7 @@ void
 rc_section_link(RC_SECTION **ap, RC_SECTION *b)
 {
 	RC_SECTION *a, *prev;
-	
+
 	/* Remove all sections with prio == override (the default) */
 	a = *ap;
 	prev = NULL;
@@ -706,6 +797,7 @@ rc_node_create(enum rc_node_type t)
 {
 	RC_NODE *p = xmalloc(sizeof(*p));
 	memset(p, 0, sizeof(*p));
+	rc_mark_loc(&p->loc, 0);
 	p->type = t;
 	return p;
 }
@@ -724,6 +816,7 @@ rc_node_destroy(RC_NODE *node)
 		free(node->v.expr.key);
 		anubis_regex_free(&node->v.expr.re);
 	}
+	rc_destroy_loc(&node->loc);
 	xfree(node);
 }
 
@@ -865,6 +958,7 @@ rc_stmt_create(enum rc_stmt_type type)
 {
 	RC_STMT *p = xmalloc(sizeof(*p));
 	memset(p, 0, sizeof(*p));
+	rc_mark_loc(&p->loc, 0);
 	p->type = type;
 	return p;
 }
@@ -888,6 +982,7 @@ rc_stmt_destroy(RC_STMT *stmt)
 	case rc_stmt_inst:
 		rc_inst_destroy(&stmt->v.inst);
 	}
+	rc_destroy_loc(&stmt->loc);
 	xfree(stmt);
 }
 
@@ -1047,6 +1142,7 @@ struct eval_env {
 	int refcnt;
 	char **refstr;
 	jmp_buf jmp;
+	RC_LOC loc;
 };
 
 static void asgn_eval(struct eval_env *env, RC_ASGN *asgn);
@@ -1056,6 +1152,8 @@ static void cond_eval(struct eval_env *env, RC_COND *cond);
 static void rule_eval(struct eval_env *env, RC_RULE *rule);
 static void stmt_list_eval(struct eval_env *env, RC_STMT *stmt);
 static void inst_eval(struct eval_env *env, RC_INST *inst);
+
+#define VALID_STR(s) ((s)?(s):"NULL")
 
 void
 inst_eval(struct eval_env *env, RC_INST *inst)
@@ -1074,22 +1172,32 @@ inst_eval(struct eval_env *env, RC_INST *inst)
 	
 	switch (inst->opcode) {
 	case inst_stop:
+		trace(&env->loc, _("STOP"));
 		longjmp(env->jmp, 1);
 		break;
 
 	case inst_call:
+		trace(&env->loc, _("Calling %s"), inst->arg);
 		rcfile_call_section(env->method, inst->arg,
 				    env->data, env->msg);
 		break;
 		
 	case inst_add:
-		if (inst->part == BODY)
+		trace(&env->loc, _("ADD %s [%s] %s"),
+		      (inst->part == BODY) ? "BODY" : "HEADER",
+		      VALID_STR(inst->key2), arg);
+		if (inst->part == BODY) 
 			message_add_body(env->msg, inst->key2, arg);
 		else
 			message_add_header(env->msg, inst->key2, arg);
 		break;
 		
 	case inst_modify:
+		trace(&env->loc, _("MODIFY %s [%s] [%s] %s"),
+		      (inst->part == BODY) ? "BODY" : "HEADER",
+		      anubis_regex_source(inst->key), 
+		      VALID_STR(inst->key2), arg);
+		
 		if (inst->part == BODY)
 			message_modify_body(env->msg, inst->key, arg);
 		else
@@ -1098,6 +1206,8 @@ inst_eval(struct eval_env *env, RC_INST *inst)
 		break;
 		
 	case inst_remove:
+		trace(&env->loc, _("REMOVE HEADER [%s]"),
+		      anubis_regex_source(inst->key));
 		message_remove_headers(env->msg, inst->key);
 		break;
 		
@@ -1118,6 +1228,7 @@ asgn_eval(struct eval_env *env, RC_ASGN *asgn)
 	if (!p)
 		return;
 
+	trace(&env->loc, _("executing %s"), asgn->lhs);
 	if (env->refstr) {
 		char *s;
 		LIST *arg = list_create();
@@ -1186,6 +1297,11 @@ expr_eval(struct eval_env *env, RC_EXPR *expr)
 	default:
 		abort();
 	}
+	if (rc)
+		trace(&env->loc, _("Matched condition %s[%s] \"%s\""),
+		      part_string(expr->part),
+		      VALID_STR(expr->key),
+		      anubis_regex_source(expr->re));
 	return rc;
 }
 
@@ -1194,11 +1310,13 @@ node_eval(struct eval_env *env, RC_NODE *node)
 {
 	int rc; /* It won't be used uninitialized despite what cc says.
 		   Note default: branch below */
-	
+
+	env->loc = node->loc;
 	switch (node->type) {
 	case rc_node_bool:
 		rc = bool_eval(env, &node->v.bool);
 		break;
+		
 	case rc_node_expr:
 		rc = expr_eval(env, &node->v.expr);
 		break;
@@ -1206,6 +1324,7 @@ node_eval(struct eval_env *env, RC_NODE *node)
 	default:
 		abort();
 	}
+
 	return rc;
 }
 
@@ -1250,7 +1369,9 @@ rule_eval(struct eval_env *env, RC_RULE *rule)
 void
 stmt_list_eval(struct eval_env *env, RC_STMT *stmt)
 {
-	for (; stmt; stmt = stmt->next)
+	for (; stmt; stmt = stmt->next) {
+		env->loc = stmt->loc;
+
 		switch (stmt->type) {
 		case rc_stmt_asgn:
 			asgn_eval(env, &stmt->v.asgn);
@@ -1267,6 +1388,7 @@ stmt_list_eval(struct eval_env *env, RC_STMT *stmt)
 		case rc_stmt_inst:
 			inst_eval(env, &stmt->v.inst);
 		}
+	}
 }
 
 void
@@ -1280,6 +1402,9 @@ eval_section(int method, RC_SECTION *sec, struct rc_secdef *secdef,
 	env.refstr = NULL;
 	env.msg = msg;
 	env.data = data;
+	env.loc = sec->loc;
+	
+	trace(&sec->loc, "section %s", sec->name);
 	
 	if (setjmp(env.jmp) == 0)
 		stmt_list_eval(&env, sec->stmt);
@@ -1345,3 +1470,4 @@ is_prog_allowed()
 		parse_error(_("program is not allowed in this section"));
 	return p->allow_prog;
 }
+
