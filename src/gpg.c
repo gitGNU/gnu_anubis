@@ -31,7 +31,8 @@
 
 struct gpg_struct {
 	int inited;
-	char *keys;
+	char *sign_keys;
+	char *encryption_keys;
 	char *passphrase;
 };
 
@@ -108,14 +109,14 @@ gpg_sign(char *gpg_data)
 	memset(buf, 0, sizeof(buf));
 	fail_if_err(gpgme_new(&ctx));
 
-	if (gpg.keys) {
-		err = gpgme_op_keylist_start(ctx, gpg.keys, 0);
+	if (gpg.sign_keys) {
+		err = gpgme_op_keylist_start(ctx, gpg.sign_keys, 0);
 		if (!err) {
 			while ((err = gpgme_op_keylist_next(ctx, &key)) == 0)
 				err = gpgme_signers_add(ctx, key);
 		}
 		if (err && err != GPGME_EOF) {
-			anubis_error(HARD, _("GPGME: cannot list keys: %s"),
+			anubis_error(HARD, _("GPGME: Cannot list keys: %s"),
 				     gpgme_strerror(err));
 			topt |= T_ERROR;
 		}
@@ -192,17 +193,18 @@ gpg_encrypt(char *gpg_data)
 	fail_if_err(gpgme_data_new(&out));
 	fail_if_err(gpgme_recipients_new(&rset));
 
-	len = strlen(gpg.keys);
+	len = strlen(gpg.encryption_keys);
 	for (i = 0; i <= len; i++)
 	{
-		if (gpg.keys[i] == ',') { /* comma found, so add KEY-ID */
+		if (gpg.encryption_keys[i] == ','
+		    || gpg.encryption_keys[i] == '\0') {
 			fail_if_err(gpgme_recipients_add_name_with_validity(rset,
 				current_key, GPGME_VALIDITY_FULL));
 			memset(current_key, 0, sizeof(current_key));
 			j = 0;
 		}
-		else /* it is not a comma, so add char to KEY_ID string */
-			current_key[j++] = gpg.keys[i];
+		else
+			current_key[j++] = gpg.encryption_keys[i];
 	}
 	fail_if_err(gpgme_op_encrypt(ctx, rset, in, out));
 	fail_if_err(gpgme_data_rewind(out));
@@ -264,14 +266,14 @@ gpg_sign_encrypt(char *gpg_data)
 
 	fail_if_err(gpgme_new(&ctx));
 
-	if (gpg.keys) {
-		err = gpgme_op_keylist_start(ctx, gpg.keys, 0);
+	if (gpg.sign_keys) {
+		err = gpgme_op_keylist_start(ctx, gpg.sign_keys, 0);
 		if (!err) {
 			while ((err = gpgme_op_keylist_next(ctx, &key)) == 0)
 				err = gpgme_signers_add(ctx, key);
 		}
 		if (err && err != GPGME_EOF) {
-			anubis_error(HARD, _("GPGME: cannot list keys: %s"),
+			anubis_error(HARD, _("GPGME: Cannot list keys: %s"),
 				     gpgme_strerror(err));
 			topt |= T_ERROR;
 		}
@@ -287,17 +289,18 @@ gpg_sign_encrypt(char *gpg_data)
 	fail_if_err(gpgme_data_new(&out));
 	fail_if_err(gpgme_recipients_new(&rset));
 
-	len = strlen(gpg.keys);
+	len = strlen(gpg.encryption_keys);
 	for (i = 0; i <= len; i++)
 	{
-		if (gpg.keys[i] == ',') { /* comma found, so add KEY-ID */
+		if (gpg.encryption_keys[i] == ','
+		    || gpg.encryption_keys[i] == '\0') {
 			fail_if_err(gpgme_recipients_add_name_with_validity(rset,
 				current_key, GPGME_VALIDITY_FULL));
 			memset(current_key, 0, sizeof(current_key));
 			j = 0;
 		}
-		else /* it is not a comma, so add char to KEY_ID string */
-			current_key[j++] = gpg.keys[i];
+		else
+			current_key[j++] = gpg.encryption_keys[i];
 	}
 	fail_if_err(gpgme_op_encrypt_sign(ctx, rset, in, out));
 	fail_if_err(gpgme_data_rewind(out));
@@ -370,7 +373,8 @@ gpg_free(void)
 		memset(gpg.passphrase, 0, strlen(gpg.passphrase));
 		xfree(gpg.passphrase);
 	}
-	xfree(gpg.keys);
+	xfree(gpg.sign_keys);
+	xfree(gpg.encryption_keys);
 }
 
 #define KW_GPG_PASSPHRASE         1
@@ -391,13 +395,12 @@ gpg_parser(int method, int key, LIST *arglist,
 			xfree(gpg.passphrase);
 		}
 		gpg.passphrase = strdup(arg);
+		arg = NULL;
 		break;
 		
 	case KW_GPG_ENCRYPT:
-		xfree(gpg.keys);
-		gpg.keys = allocbuf(arg, 0);
-		gpg.keys = xrealloc(gpg.keys, strlen(gpg.keys) + 2);
-		strcat(gpg.keys, ",");
+		xfree(gpg.encryption_keys);
+		gpg.encryption_keys = allocbuf(arg, 0);
 		if (gpg.inited == 0 && gpgme_init())
 			break;
 		gpg_proc(msg, gpg_encrypt);
@@ -405,23 +408,34 @@ gpg_parser(int method, int key, LIST *arglist,
 		
 	case KW_GPG_SIGN:
 		if (strcasecmp(arg, "no")) {
-			xfree(gpg.keys);
-			if (strcasecmp(arg, "yes")) 
-				gpg.keys = strdup(arg);
-			if (gpg.inited == 0 && gpgme_init()) 
+			xfree(gpg.sign_keys);
+			if (strcasecmp(arg, "default") && strcasecmp(arg, "yes"))
+				gpg.sign_keys = strdup(arg);
+			if (gpg.inited == 0 && gpgme_init())
 				break;
 			gpg_proc(msg, gpg_sign);
 		}
 		break;
 
-	case KW_GPG_SIGN_ENCRYPT:
-		xfree(gpg.keys);
-		gpg.keys = allocbuf(arg, 0);
-		gpg.keys = xrealloc(gpg.keys, strlen(gpg.keys) + 2);
-		strcat(gpg.keys, ",");
+	case KW_GPG_SIGN_ENCRYPT: {
+		char *p = strchr(arg, ':');
+		xfree(gpg.encryption_keys);
+		if (p) {
+			p++;
+			if (strcasecmp(p, "default") && strcasecmp(p, "yes")) {
+				xfree(gpg.sign_keys);
+				gpg.sign_keys = allocbuf(p, 0);
+			}
+			*--p = '\0';
+			gpg.encryption_keys = allocbuf(arg, 0);
+		}
+		else
+			gpg.encryption_keys = allocbuf(arg, 0);
+
 		if (gpg.inited == 0 && gpgme_init())
 			break;
 		gpg_proc(msg, gpg_sign_encrypt);
+	}
 		break;
 
 	case KW_GPG_HOME:
@@ -440,6 +454,7 @@ struct rc_kwdef gpg_kw[] = {
 	{ "gpg-encrypt",       KW_GPG_ENCRYPT },
 	{ "gpg-sign",          KW_GPG_SIGN },
 	{ "gpg-sign-encrypt",  KW_GPG_SIGN_ENCRYPT },
+	{ "gpg-se",            KW_GPG_SIGN_ENCRYPT },
 	{ "gpg-home",          KW_GPG_HOME },
 	{ NULL },
 };
