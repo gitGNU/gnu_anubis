@@ -208,10 +208,10 @@ static gpgme_key_t *
 create_key_array(gpgme_ctx_t ctx, struct obstack *stk)
 {
   gpgme_key_t tmpkey;
-  char current_key[100];
+  char *current_key;
   int i, j, len = strlen (gpg.encryption_keys);
 
-  memset (current_key, 0, sizeof (current_key));
+  current_key = xmalloc (len+1);
   for (i = j = 0; i <= len; i++)
     {
       if (gpg.encryption_keys[i] == ',' || gpg.encryption_keys[i] == '\0')
@@ -249,7 +249,7 @@ create_key_array(gpgme_ctx_t ctx, struct obstack *stk)
       else
 	current_key[j++] = gpg.encryption_keys[i];
     }
-
+  xfree (current_key);
   tmpkey = NULL;
   obstack_grow (stk, &tmpkey, sizeof (tmpkey));
   return obstack_finish (stk);
