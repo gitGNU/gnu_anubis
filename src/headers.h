@@ -132,6 +132,10 @@
 # include <security/pam_misc.h>
 #endif /* HAVE_PAM */
 
+#if defined(WITH_GSASL)
+# include <gsasl.h>
+#endif
+
 #include "gettext.h"
 #ifdef ENABLE_NLS
 # define _(String) gettext(String)
@@ -345,7 +349,8 @@ void swrite(int, NET_STREAM, char *);
 int  recvline(int, NET_STREAM, void *, size_t);
 int  recvline_ptr(int method, NET_STREAM sd, char **vptr, size_t *maxlen);
 void get_response_smtp(int, NET_STREAM, char *, int);
-
+void close_socket(int sd);
+	
 void net_create_stream(NET_STREAM *str, int fd);
 void net_close_stream(NET_STREAM *sd);
 
@@ -506,13 +511,14 @@ enum anubis_db_mode {
 typedef int (*anubis_db_open_t) (void **d, ANUBIS_URL *url,
 				 enum anubis_db_mode mode, char **errp);
 typedef int (*anubis_db_close_t) (void *d);
-typedef int (*anubis_db_io_t) (void *d, char *key, ANUBIS_USER *rec,
+typedef int (*anubis_db_io_t) (void *d, const char *key, ANUBIS_USER *rec,
 			       int *ecode);
 typedef const char *(*anubis_db_strerror_t) (void *d, int rc);
-typedef int (*anubis_db_delete_t) (void *d, char *key, int *ecode);
+typedef int (*anubis_db_delete_t) (void *d, const char *key, int *ecode);
 typedef int (*anubis_db_get_list_t) (void *d, LIST *list, int *ecode);
 	     
-int anubis_db_register(char *dbid, anubis_db_open_t _db_open,
+int anubis_db_register(const char *dbid, 
+		       anubis_db_open_t _db_open,
 		       anubis_db_close_t _db_close,
 		       anubis_db_io_t _db_get,
 		       anubis_db_io_t _db_put,
@@ -522,9 +528,9 @@ int anubis_db_register(char *dbid, anubis_db_open_t _db_open,
 int anubis_db_open(char *arg, enum anubis_db_mode mode, void **dptr,
 		   char **errp);
 int anubis_db_close(void **dptr);
-int anubis_db_get_record(void *dptr, char *key, ANUBIS_USER *rec);
-int anubis_db_put_record(void *dptr, char *key, ANUBIS_USER *rec);
-int anubis_db_delete_record(void *dptr, char *key);
+int anubis_db_get_record(void *dptr, const char *key, ANUBIS_USER *rec);
+int anubis_db_put_record(void *dptr, const char *key, ANUBIS_USER *rec);
+int anubis_db_delete_record(void *dptr, const char *key);
 int anubis_db_get_list(void *dptr, LIST **list);
 const char *anubis_db_strerror(void *dptr);
 void anubis_db_free_record(ANUBIS_USER *rec);
@@ -535,6 +541,12 @@ void dbtext_init();
 /* gdbm.c */
 void gdbm_db_init();
 
+/* mysql.c */
+void mysql_db_init();
+
+/* pgsql.c */
+void pgsql_db_init();
+
 /* transmode.c */
 int anubis_transparent_mode(NET_STREAM *sd_client, struct sockaddr_in *addr);
 
@@ -543,13 +555,16 @@ int anubis_authenticate_mode(NET_STREAM *sd_client, struct sockaddr_in *addr);
 void anubis_set_password_db(char *arg);
 void asmtp_reply(int code, char *fmt, ...);
 void asmtp_capa_add_prefix(char *prefix, char *name);
-int anubis_get_db_record(char *username, ANUBIS_USER *usr);
+int anubis_get_db_record(const char *username, ANUBIS_USER *usr);
 void authmode_section_init(void);
 
 /* gsasl.c */
 void auth_gsasl_init();
 int anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER *usr, NET_STREAM *stream);
 void anubis_set_mech_list(LIST *list);
+#if defined(WITH_GSASL)
+void install_gsasl_stream (Gsasl_session_ctx *sess_ctx, NET_STREAM *stream);
+#endif
 
 /* xdatabase.c */
 int xdatabase(char *command);
