@@ -223,6 +223,11 @@ loop(int sd_bind)
 						session.client,
 						sizeof(session.client));
 
+				if ((topt & T_DROP_UNKNOWN_USER) && !rs) {
+				  service_unavailable(sd_client);
+				  quit(0);
+				}
+
 				parse_transmap(&cs,
 					       rs ? session.client : 0,
 					       inet_ntoa(addr.sin_addr),
@@ -230,7 +235,6 @@ loop(int sd_bind)
 					       sizeof(session.client));
 				
 				if (cs == 1) {
-					topt |= T_SUPERCLIENT;
 					anubis_changeowner(session.client);
 					auth_tunnel();
 				}
@@ -239,7 +243,6 @@ loop(int sd_bind)
 					 && ntohl(addr.sin_addr.s_addr)
 					 == INADDR_LOOPBACK) {
 					if (check_username(session.client)) {
-						topt |= T_SUPERCLIENT;
 						anubis_changeowner(session.client);
 						auth_tunnel();
 					}
