@@ -19,8 +19,6 @@ Carries a name of the file that must be inserted in this point
 
 ** Rewrite transfer_body to make use of the above.
 
-** Add back the support for remailers.
-
 ** Rewrite process_command and transfer_command to make them modular.
 
 * Parser and run-time evaluator:

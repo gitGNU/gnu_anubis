@@ -1,3 +1,18 @@
+2003-03-07  Sergey Poznyakoff
+
+	* TODO: Updated
+	* examples/anubis.scm: Major changes.
+	* guile/rot-13.scm (rot-13): A universal function for rotating
+	  the message body, its subject, or both.
+	* src/gpg.c: Removed obsolete kewords.
+	* src/rc.c: Likewise.
+	* testsuite/anubis/guile.exp: Added rot-13 test
+	* testsuite/etc/rot-13.pat: New file.
+	* testsuite/etc/Makefile.am: Added rot-13.pat
+	* testsuite/etc/remail.in: Modified to support rot-13 test as
+	  well.
+	* testsuite/etc/remail.pat: Fixed remailer header.
+	
 2003-03-06  Sergey Poznyakoff 
 
 	* guile: New subdirecory
