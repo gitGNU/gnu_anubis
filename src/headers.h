@@ -26,11 +26,9 @@
 
 #include <config.h>
 
-# if defined(HAVE_LIBGCRYPT) && defined(HAVE_LIBGNUTLS)
-#  if defined(HAVE_GNUTLS_GNUTLS_H)
-#   define HAVE_GNUTLS
-#  endif /* HAVE_GNUTLS_GNUTLS_H */
-# endif /* HAVE_LIBGCRYPT and HAVE_LIBGNUTLS */
+# if defined(HAVE_GNUTLS_GNUTLS_H)
+#  define HAVE_GNUTLS
+# endif /* HAVE_GNUTLS_GNUTLS_H */
 # if defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 #  if defined(HAVE_OPENSSL_SSL_H)
 #   define HAVE_OPENSSL
