@@ -50,12 +50,15 @@ argv_dup (int argc, char **argv)
 
 static int gindex = 0;
 
+static char *pidfile;
+
 #define OPT_VERSION          257
 #define OPT_HELP             258
 #define OPT_ALTRC            259
 #define OPT_NORC             260
 #define OPT_SHOW_CONFIG      261
 #define OPT_RELAX_PERM_CHECK 262
+#define OPT_PIDFILE          263
 
 static struct option gopt[] = {
   {"bind", required_argument, 0, 'b'},
@@ -73,6 +76,7 @@ static struct option gopt[] = {
   {"check-config", optional_argument, 0, 'c'},
   {"show-config-options", no_argument, 0, OPT_SHOW_CONFIG},
   {"relax-perm-check", no_argument, 0, OPT_RELAX_PERM_CHECK},
+  {"pid-file", required_argument, 0, OPT_PIDFILE},
 #ifdef WITH_GSASL
   {"mode", required_argument, 0, 'm'},
 #endif
@@ -114,6 +118,10 @@ get_options (int argc, char *argv[])
 	  topt |= T_RELAX_PERM_CHECK;
 	  break;
 
+	case OPT_PIDFILE:
+	  pidfile = optarg;
+	  break;
+	    
 	case 'c':
 	  rc_set_debug_level (optarg);
 	  topt |= T_CHECK_CONFIG;
@@ -502,4 +510,18 @@ anubis_set_mode (char *modename)
   return 0;
 }
 
+void
+write_pid_file (void)
+{
+  FILE *fp;
+  
+  if (!pidfile)
+    pidfile = "/var/run/" DEFAULT_PIDFILE;
+  fp = fopen (pidfile, "w");
+  if (!fp)
+    anubis_error (SOFT, _("Cannot open pid file '%s': %s"),
+		  pidfile, strerror (errno));
+  fprintf (fp, "%ld\n", (unsigned long) getpid ());
+  fclose (fp);
+}
 /* EOF */
