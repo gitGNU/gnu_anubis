@@ -275,37 +275,36 @@ asmtp_init (enum asmtp_state state)
 
   recvline_ptr (SERVER, remote_client, &command, &s);
 
-  switch (asmtp_kw (get_command_word (command)))
-    {
-    case KW_EHLO:
-      state = asmtp_ehlo_reply (command);
-      break;
-
-    case KW_HELO:
-      state = asmtp_helo_reply (command);
-      break;
-
-    case KW_HELP:
-      asmtp_help ();
-      break;
-
-    case KW_AUTH:
-    case KW_STARTTLS:
-      asmtp_reply (503, "Polite people say EHLO first");
-      break;
-
-    case KW_QUIT:
-      state = state_quit;
-      break;
-
-    case KW_MAIL:
-    case KW_RCPT:
-      asmtp_reply (550, "Command disabled. Proper authentication required.");
-      break;
-
-    default:
-      asmtp_reply (500, "Unknown command");
-    }
+  switch (asmtp_kw (get_command_word (command))) {
+  case KW_EHLO:
+    state = asmtp_ehlo_reply (command);
+    break;
+    
+  case KW_HELO:
+    state = asmtp_helo_reply (command);
+    break;
+    
+  case KW_HELP:
+    asmtp_help ();
+    break;
+    
+  case KW_AUTH:
+  case KW_STARTTLS:
+    asmtp_reply (503, "Polite people say EHLO first");
+    break;
+    
+  case KW_QUIT:
+    state = state_quit;
+    break;
+    
+  case KW_MAIL:
+  case KW_RCPT:
+    asmtp_reply (550, "Command disabled. Proper authentication required.");
+    break;
+    
+  default:
+    asmtp_reply (500, "Unknown command");
+  }
   free (command);
   return state;
 }
@@ -321,57 +320,56 @@ asmtp_ehlo (enum asmtp_state state, ANUBIS_USER * usr)
   if (recvline_ptr (SERVER, remote_client, &command, &s) <= 0)
     exit (1);
 
-  switch (asmtp_kw (get_command_word (command)))
-    {
-    case KW_EHLO:
-      state = asmtp_ehlo_reply (command);
-      break;
-
+  switch (asmtp_kw (get_command_word (command))) {
+  case KW_EHLO:
+    state = asmtp_ehlo_reply (command);
+    break;
+    
 #ifdef USE_SSL
-    case KW_STARTTLS:
-      asmtp_reply (220, "Ready to start TLS");
-      secure.server = start_ssl_server (remote_client,
-					secure.cafile,
-					secure.cert,
-					secure.key,
-					options.termlevel > NORMAL);
-      if (!secure.server || (topt & T_ERROR))
-	{
-	  asmtp_reply (454, "TLS not available" CRLF);
-	  return 0;
-	}
-      remote_client = secure.server;
-      topt |= T_SSL_FINISHED;
-
-      state = state_ehlo;
-      break;
+  case KW_STARTTLS:
+    asmtp_reply (220, "Ready to start TLS");
+    secure.server = start_ssl_server (remote_client,
+				      secure.cafile,
+				      secure.cert,
+				      secure.key,
+				      options.termlevel > NORMAL);
+    if (!secure.server || (topt & T_ERROR))
+      {
+	asmtp_reply (454, "TLS not available" CRLF);
+	return 0;
+      }
+    remote_client = secure.server;
+    topt |= T_SSL_FINISHED;
+    
+    state = state_ehlo;
+    break;
 #endif /* USE_SSL */
+    
+  case KW_AUTH:
+    mech = get_command_arg ();
+    init_input = get_command_arg ();
+    if (anubis_auth_gsasl (mech, init_input, usr, &remote_client) == 0)
+      state = state_auth;
+    break;
+    
+  case KW_QUIT:
+    state = state_quit;
+    break;
+    
+  case KW_MAIL:
+  case KW_RCPT:
+    asmtp_reply (550, "Command disabled. Proper authentication required.");
+    break;
+    
+  case KW_HELP:
+    asmtp_help ();
+    break;
+    
+  default:
+    asmtp_reply (500, "Unknown command");
+  }
 
-    case KW_AUTH:
-      mech = get_command_arg ();
-      init_input = get_command_arg ();
-      if (anubis_auth_gsasl (mech, init_input, usr, &remote_client) == 0)
-	state = state_auth;
-      break;
-
-    case KW_QUIT:
-      state = state_quit;
-      break;
-
-    case KW_MAIL:
-    case KW_RCPT:
-      asmtp_reply (550, "Command disabled. Proper authentication required.");
-      break;
-
-    case KW_HELP:
-      asmtp_help ();
-      break;
-
-    default:
-      asmtp_reply (500, "Unknown command");
-    }
   free (command);
-
   return state;
 }
 
@@ -384,26 +382,24 @@ anubis_smtp (ANUBIS_USER * usr)
   asmtp_greet ();
   for (state = state_init; state != state_auth;)
     {
-      switch (state)
-	{
-	case state_init:
-	  state = asmtp_init (state);
-	  break;
-
-	case state_ehlo:
-	  state = asmtp_ehlo (state, usr);
-	  break;
-
-	case state_quit:
-	  return EXIT_FAILURE;
-
-	case state_auth:
-	  break;
-	}
+      switch (state) {
+      case state_init:
+	state = asmtp_init (state);
+	break;
+	
+      case state_ehlo:
+	state = asmtp_ehlo (state, usr);
+	break;
+	
+      case state_quit:
+	return EXIT_FAILURE;
+	
+      case state_auth:
+	break;
+      }
     }
 
   xdatabase_enable ();
-
   return 0;
 }
 
@@ -439,32 +435,30 @@ anubis_get_db_record (const char *username, ANUBIS_USER * usr)
     }
 
   rc = anubis_db_get_record (db, username, usr);
-  switch (rc)
-    {
-    case ANUBIS_DB_SUCCESS:
-      info (VERBOSE, _("Found record for %s"), username);
-      break;
-
-    case ANUBIS_DB_FAIL:
-      anubis_error (SOFT,
-		    _("Cannot retrieve data from the SASL database: %s"),
-		    anubis_db_strerror (db));
-      break;
-
-    case ANUBIS_DB_NOT_FOUND:
-      info (VERBOSE, _("Record for %s not found"), username);
-      break;
-    }
+  switch (rc) {
+  case ANUBIS_DB_SUCCESS:
+    info (VERBOSE, _("Found record for %s"), username);
+    break;
+    
+  case ANUBIS_DB_FAIL:
+    anubis_error (SOFT,
+		  _("Cannot retrieve data from the SASL database: %s"),
+		  anubis_db_strerror (db));
+    break;
+    
+  case ANUBIS_DB_NOT_FOUND:
+    info (VERBOSE, _("Record for %s not found"), username);
+    break;
+  }
 
   anubis_db_close (&db);
   return rc;
 }
 
 
-
-
 int
-anubis_authenticate_mode (NET_STREAM * psd_client, struct sockaddr_in *addr)
+anubis_authenticate_mode (NET_STREAM *psd_client,
+			  struct sockaddr_in *addr)
 {
   ANUBIS_USER usr;
 
@@ -475,13 +469,17 @@ anubis_authenticate_mode (NET_STREAM * psd_client, struct sockaddr_in *addr)
   if (anubis_smtp (&usr))
     return EXIT_FAILURE;
 
+  if (usr.rcfile_name)
+    session.rcfile_name = usr.rcfile_name;
+
   if (usr.username)
     {
       strncpy (session.clientname, usr.username, sizeof (session.clientname));
       if (check_username (session.clientname))
 	{
 	  anubis_changeowner (session.clientname);
-	  auth_tunnel ();
+	  open_rcfile (CF_CLIENT);
+	  process_rcfile (CF_CLIENT);
 	}
       else
 	set_unprivileged_user ();
@@ -492,9 +490,6 @@ anubis_authenticate_mode (NET_STREAM * psd_client, struct sockaddr_in *addr)
 	       sizeof (session.clientname));
       set_unprivileged_user ();
     }
-
-  if (usr.rcfile_name)
-    session.rcfile_name = usr.rcfile_name;
 
   if (!(topt & T_LOCAL_MTA) && strlen (session.mta) == 0)
     {
@@ -608,34 +603,33 @@ rc_parser (int method, int key, ANUBIS_LIST * arglist,
 {
   char *arg = list_item (arglist, 0);
 
-  switch (key)
-    {
-    case KW_SMTP_GREETING_MESSAGE:
-      if (list_count (arglist) != 1)
-	return RC_KW_ERROR;
-      xfree (smtp_greeting_message);
-      smtp_greeting_message = strdup (arg);
-      break;
-
-    case KW_SMTP_HELP_MESSAGE:
-      if (list_count (arglist) != 1)
-	return RC_KW_ERROR;
-      make_help_message (arg);
-      break;
-
-    case KW_SASL_PASSWORD_DB:
-      if (list_count (arglist) != 1)
-	return RC_KW_ERROR;
-      anubis_set_password_db (arg);
-      break;
-
-    case KW_SASL_ALLOWED_MECH:
-      anubis_set_mech_list (arglist);
-      break;
-
-    default:
-      return RC_KW_UNKNOWN;
-    }
+  switch (key) {
+  case KW_SMTP_GREETING_MESSAGE:
+    if (list_count (arglist) != 1)
+      return RC_KW_ERROR;
+    xfree (smtp_greeting_message);
+    smtp_greeting_message = strdup (arg);
+    break;
+    
+  case KW_SMTP_HELP_MESSAGE:
+    if (list_count (arglist) != 1)
+      return RC_KW_ERROR;
+    make_help_message (arg);
+    break;
+    
+  case KW_SASL_PASSWORD_DB:
+    if (list_count (arglist) != 1)
+      return RC_KW_ERROR;
+    anubis_set_password_db (arg);
+    break;
+    
+  case KW_SASL_ALLOWED_MECH:
+    anubis_set_mech_list (arglist);
+    break;
+    
+  default:
+    return RC_KW_UNKNOWN;
+  }
   return RC_KW_HANDLED;
 }
 
