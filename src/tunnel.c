@@ -29,11 +29,11 @@
 #define obstack_chunk_free free
 #include <obstack.h>
 
-static int  transfer_command(void *, void *, MESSAGE *, char *);
-static void process_command(void *, void *, MESSAGE *, char *, int);
-static void transfer_header(void *, void *, LIST *);
-static void transfer_body(void *, void *, MESSAGE *);
-static void process_data(void *, void *, MESSAGE *);
+static int  transfer_command(MESSAGE *, char *);
+static int  process_command(MESSAGE *, char *);
+static void transfer_header(LIST *);
+static void transfer_body(MESSAGE *);
+static void process_data(MESSAGE *);
 
 
 /* Collect and send headers */
@@ -86,12 +86,12 @@ add_header(LIST *list, char *line)
 }
 
 static void
-collect_headers(void *sd_client, MESSAGE *msg)
+collect_headers(MESSAGE *msg)
 {
 	char buf[LINEBUFFER+1];
 	char *line = NULL;
 
-	while (recvline(SERVER, sd_client, buf, LINEBUFFER)) {
+	while (recvline(SERVER, remote_client, buf, sizeof(buf) - 1)) {
 		remcrlf(buf);
 		if (isspace(buf[0])) {
 			if (!line) 
@@ -182,7 +182,7 @@ send_string_list(void *sd_server, LIST *list)
 #define ST_DONE  3
 
 static void
-collect_body(void *sd_client, MESSAGE *msg)
+collect_body(MESSAGE *msg)
 {
 	int nread;
 	char buf[LINEBUFFER+1];
@@ -197,7 +197,8 @@ collect_body(void *sd_client, MESSAGE *msg)
 			
 	obstack_init (&stk);
 	while (state != ST_DONE
-	       && (nread = recvline(SERVER, sd_client, buf, LINEBUFFER))) {
+	       && (nread = recvline(SERVER, remote_client,
+				    buf, sizeof(buf) - 1))) {
 		if (strncmp(buf, "."CRLF, 3) == 0) /* EOM */
 			break;
 		
@@ -272,7 +273,7 @@ send_body(MESSAGE *msg, void *sd_server)
 *******************/
 
 void
-smtp_session(void *sd_client, void *sd_server)
+smtp_session()
 {
 	char command[LINEBUFFER+1];
 	MESSAGE msg;
@@ -282,7 +283,7 @@ smtp_session(void *sd_client, void *sd_server)
 	*/
 
 	info(VERBOSE, _("Transferring message(s)..."));
-	get_response_smtp(CLIENT, sd_server, command, LINEBUFFER);
+	get_response_smtp(CLIENT, remote_server, command, sizeof(command) - 1);
 
 	if (strncmp(command, "220 ", 4) == 0
 	    && strstr(command, version) == 0) {
@@ -290,6 +291,7 @@ smtp_session(void *sd_client, void *sd_server)
 		char *banner_ptr = 0;
 		char host[65];
 		char banner_backup[LINEBUFFER+1];
+		
 		safe_strcpy(banner_backup, command);
 
 		if ((banner_ptr = strchr(banner_backup, ' '))) {
@@ -301,30 +303,25 @@ smtp_session(void *sd_client, void *sd_server)
 				banner_ptr++;
 			} while (*banner_ptr != ' ');
 			banner_ptr++;
-			snprintf(command, LINEBUFFER,
-				"220 %s (%s) %s", host, version, banner_ptr);
+			snprintf(command, sizeof command,
+				 "220 %s (%s) %s", host, version, banner_ptr);
 		}
 	}
-	swrite(SERVER, sd_client, command);
+	swrite(SERVER, remote_client, command);
 
 	/*
 	   Then process the commands...
 	*/
 
 	message_init(&msg);
-	while (recvline(SERVER, sd_client, command, LINEBUFFER)) {
-		process_command(sd_client, sd_server, &msg,
-				command, LINEBUFFER);
-
-		sd_client = remote_client;
-		sd_server = remote_server;
-		
-		if (topt & T_ERROR)
-			break;
-		if (strlen(command) == 0)
+	while (recvline(SERVER, remote_client, command, sizeof(command) - 1)) {
+		if (process_command(&msg, command))
 			continue;
 
-		if (transfer_command(sd_client, sd_server, &msg, command) == 0)
+		if (topt & T_ERROR)
+			break;
+		
+		if (transfer_command(&msg, command) == 0)
 			break;
 	}
 
@@ -357,206 +354,224 @@ save_command(MESSAGE *msg, char *line)
 	list_append(msg->commands, asc);
 }
 
-static void
-process_command(void *sd_client, void *sd_server, MESSAGE *msg,
-		char *command, int size)
+static int
+handle_starttls(char *command)
+{
+#ifdef USE_SSL
+	if (topt & T_SSL_FINISHED) {
+		if (topt & T_SSL_ONEWAY)
+			swrite(SERVER, remote_client,
+			       "503 5.0.0 TLS (ONEWAY) already started"CRLF);
+		else
+			swrite(SERVER, remote_client,
+			       "503 5.0.0 TLS already started"CRLF);
+		return 1;
+	} else if (!(topt & T_STARTTLS) || !(topt & T_SSL)) {
+		swrite(SERVER, remote_client, "503 5.5.0 TLS not available"CRLF);
+		return 1;
+	} 
+
+        /*
+	  Make the TLS/SSL connection with ESMTP server.
+	*/
+
+	info(NORMAL, _("Using the TLS/SSL encryption..."));
+
+	if (!(topt & T_LOCAL_MTA)) {
+		char reply[LINEBUFFER+1];
+		swrite(CLIENT, remote_server, "STARTTLS"CRLF);
+		
+		get_response_smtp(CLIENT, remote_server, reply,
+				  sizeof(reply) - 1);
+
+		if (!isdigit((unsigned char)reply[0])
+		    || (unsigned char)reply[0] > '3') {
+			remcrlf(reply);
+			info(VERBOSE, _("WARNING: %s"), reply);
+			anubis_error(HARD, _("STARTTLS command failed."));
+			return 0;
+		}
+
+		secure.client = start_ssl_client((int)remote_server);
+		if (!secure.client || (topt & T_ERROR))
+			return 0;
+		remote_server = (void *)secure.client;
+	}
+
+	/*
+	  Make the TLS/SSL connection with SMTP client
+	  (client connected with the Tunnel).
+	*/
+
+	if (secure.cert == 0)
+		secure.cert = allocbuf(DEFAULT_SSL_PEM, MAXPATHLEN);
+	if (check_filename(secure.cert, NULL) == 0)
+		return 0;
+	if (secure.key == 0)
+		secure.key = allocbuf(secure.cert, MAXPATHLEN);
+	else if (check_filename(secure.key, NULL) == 0)
+		return 0;
+
+	/*
+	  Check file permissions. Ignore if a client hasn't
+	  specified a private key or a certificate.
+	*/
+
+	if (topt & T_SSL_CKCLIENT)
+		check_filemode(secure.key);
+
+	swrite(SERVER, remote_client, "220 2.0.0 Ready to start TLS"CRLF);
+	secure.server = start_ssl_server((int)remote_client);
+	if (!secure.server || (topt & T_ERROR)) {
+		swrite(SERVER, remote_client,
+		       "454 4.3.3 TLS not available"CRLF);
+		return 0;
+	}
+	remote_client = (void *)secure.server;
+	topt |= T_SSL_FINISHED;
+#else
+	swrite(SERVER, remote_client, "503 5.5.0 TLS not available"CRLF);
+#endif /* USE_SSL */
+
+	return 1;
+}
+
+static int
+process_command(MESSAGE *msg, char *command)
 {
 	char buf[LINEBUFFER+1];
+	
 	safe_strcpy(buf, command); /* make a back-up */
 	save_command(msg, buf);
 
 	change_to_lower(buf);
 	
-	if (strncmp(buf, "starttls", 8) == 0) {
-
-#ifdef USE_SSL
-		if (topt & T_SSL_FINISHED) {
-			if (topt & T_SSL_ONEWAY)
-				swrite(SERVER, sd_client, "503 5.0.0 TLS (ONEWAY) already started"CRLF);
-			else
-				swrite(SERVER, sd_client, "503 5.0.0 TLS already started"CRLF);
-			strncpy(command, "", 1);
-			return;
-		} else if (!(topt & T_STARTTLS) || !(topt & T_SSL)) {
-			swrite(SERVER, sd_client, "503 5.5.0 TLS not available"CRLF);
-			strncpy(command, "", 1);
-			return;
-		}
-
-		/*
-		   Make the TLS/SSL connection with ESMTP server.
-		*/
-
-		info(NORMAL, _("Using the TLS/SSL encryption..."));
-
-		if (!(topt & T_LOCAL_MTA)) {
-			char reply[LINEBUFFER+1];
-			swrite(CLIENT, sd_server, "STARTTLS"CRLF);
-			get_response_smtp(CLIENT, sd_server,
-					  reply, LINEBUFFER);
-
-			if (!isdigit((unsigned char)reply[0])
-			    || (unsigned char)reply[0] > '3') {
-				remcrlf(reply);
-				info(VERBOSE, _("WARNING: %s"), reply);
-				anubis_error(HARD, _("STARTTLS command failed."));
-				return;
-			}
-
-			secure.client = start_ssl_client((int)sd_server);
-			if (!secure.client || (topt & T_ERROR))
-				return;
-			sd_server = remote_server = (void *)secure.client;
-		}
-
-		/*
-		   Make the TLS/SSL connection with SMTP client
-		   (client connected with the Tunnel).
-		*/
-
-		if (secure.cert == 0)
-			secure.cert = allocbuf(DEFAULT_SSL_PEM, MAXPATHLEN);
-		if (check_filename(secure.cert, NULL) == 0)
-			return;
-		if (secure.key == 0)
-			secure.key = allocbuf(secure.cert, MAXPATHLEN);
-		else {
-			if (check_filename(secure.key, NULL) == 0)
-				return;
-		}
-
-		/*
-		   Check file permissions. Ignore if a client hasn't
-		   specified a private key or a certificate.
-		*/
-
-		if (topt & T_SSL_CKCLIENT)
-			check_filemode(secure.key);
-
-		swrite(SERVER, sd_client, "220 2.0.0 Ready to start TLS"CRLF);
-		secure.server = start_ssl_server((int)sd_client);
-		if (!secure.server || (topt & T_ERROR)) {
-			swrite(SERVER, sd_client,
-			       "454 4.3.3 TLS not available"CRLF);
-			return;
-		}
-		sd_client = remote_client = (void *)secure.server;
-		topt |= T_SSL_FINISHED;
-#else
-		swrite(SERVER, sd_client, "503 5.5.0 TLS not available"CRLF);
-#endif /* USE_SSL */
-
-		strncpy(command, "", 1);
-		return;
-	}
-	return;
+	if (strncmp(buf, "starttls", 8) == 0) 
+		return handle_starttls(command);
+	return 0;
 }
 
 static int
-transfer_command(void *sd_client, void *sd_server, MESSAGE *msg, char *command)
+handle_ehlo(char *command, char *reply, size_t reply_size)
+{
+	get_response_smtp(CLIENT, remote_server, reply, reply_size - 1);
+
+	if (strstr(reply, "STARTTLS"))
+		topt |= T_STARTTLS; /* Yes, we can use the TLS/SSL encryption. */
+
+#ifdef USE_SSL
+	if ((topt & T_SSL_ONEWAY)
+	    && (topt & T_STARTTLS)
+	    && !(topt & T_SSL_FINISHED)) {
+
+		struct sockaddr_in rclient;
+		char ehlo[LINEBUFFER+1];
+		socklen_t addrlen;
+
+		/*
+		  The 'ONEWAY' method is used when your MUA doesn't
+		  support the TLS/SSL, but your MTA does.
+		  Make the TLS/SSL connection with ESMTP server.
+		*/
+
+		char newreply[LINEBUFFER+1];
+		info(NORMAL, _("Using the 'ONEWAY' TLS/SSL encryption..."));
+		swrite(CLIENT, remote_server, "STARTTLS"CRLF);
+		get_response_smtp(CLIENT, remote_server, newreply,
+				  sizeof(newreply) - 1);
+
+		if (!isdigit((unsigned char)newreply[0])
+		    || (unsigned char)newreply[0] > '3') {
+			remcrlf(newreply);
+			info(VERBOSE, _("WARNING: %s"), newreply);
+			anubis_error(SOFT,
+				     _("STARTTLS (ONEWAY) command failed."));
+			topt &= ~T_SSL_ONEWAY;
+			swrite(SERVER, remote_client, reply);
+			return 1;
+		}
+
+		secure.client = start_ssl_client((int)remote_server);
+		if (!secure.client || (topt & T_ERROR)) {
+			topt &= ~T_ERROR;
+			topt &= ~T_SSL_ONEWAY;
+			swrite(SERVER, remote_client, reply);
+			return 1;
+		}
+
+		remote_server = (void *)secure.client;
+		topt |= T_SSL_FINISHED;
+
+		/*
+		  Send the EHLO command (after the TLS/SSL negotiation).
+		*/
+
+		addrlen = sizeof(rclient);
+		if (getpeername((int)remote_client,
+				(struct sockaddr *)&rclient, &addrlen) == -1)
+			anubis_error(HARD,
+				     _("getpeername() failed: %s."),
+				     strerror(errno));
+
+		snprintf(ehlo, sizeof ehlo,
+			 "EHLO %s"CRLF,
+			 (topt & T_ERROR) ? "localhost" :
+			                inet_ntoa(rclient.sin_addr));
+
+		topt &= ~T_ERROR;
+		swrite(CLIENT, remote_server, ehlo);
+		get_response_smtp(CLIENT, remote_server, reply, reply_size);
+	}
+#endif /* USE_SSL */
+
+	/*
+	  Remove the STARTTLS command from the EHLO list
+	  if no SSL is specified, the SSL is not available,
+	  or we're using the 'ONEWAY' TLS/SSL encryption.
+	*/
+
+	if ((topt & T_STARTTLS)
+	    && (!(topt & T_SSL) || (topt & T_SSL_ONEWAY))) {
+		char *starttls1 = "250-STARTTLS";
+		char *starttls2 = "STARTTLS";
+		if (strstr(reply, starttls1))
+			remline(reply, starttls1);
+		else if (strstr(reply, starttls2))
+			remline(reply, starttls2);
+	}
+
+	/*
+	  Check whether we can use the ESMTP AUTH.
+	*/
+	
+	if ((topt & T_ESMTP_AUTH) && strstr(reply, "AUTH ")) {
+		esmtp_auth(remote_server, reply);
+		memset(session.mta_username, 0, sizeof(session.mta_username));
+		memset(session.mta_password, 0, sizeof(session.mta_password));
+	}
+
+	return 0;
+}
+
+static int
+transfer_command(MESSAGE *msg, char *command)
 {
 	char reply[2 * LINEBUFFER+1];
 	char buf[LINEBUFFER+1];
 
 	safe_strcpy(buf, command);
 	change_to_lower(buf);
-	swrite(CLIENT, sd_server, command);
+	swrite(CLIENT, remote_server, command);
 	if (topt & T_ERROR)
 		return 0;
 
 	if (strncmp(buf, "ehlo", 4) == 0) {
-		get_response_smtp(CLIENT, sd_server, reply, 2 * LINEBUFFER);
+		if (handle_ehlo(command, reply, sizeof reply))
+			return 1;
+	} else
+		get_response_smtp(CLIENT, remote_server, reply, sizeof reply);
 
-		if (strstr(reply, "STARTTLS"))
-			topt |= T_STARTTLS; /* Yes, we can use the TLS/SSL encryption. */
-
-#ifdef USE_SSL
-		if ((topt & T_SSL_ONEWAY) && (topt & T_STARTTLS)
-		    && !(topt & T_SSL_FINISHED)) {
-
-			struct sockaddr_in rclient;
-			char ehlo[LINEBUFFER+1];
-			socklen_t addrlen;
-
-			/*
-			   The 'ONEWAY' method is used when your MUA doesn't
-			   support the TLS/SSL, but your MTA does.
-			   Make the TLS/SSL connection with ESMTP server.
-			*/
-
-			char newreply[LINEBUFFER+1];
-			info(NORMAL, _("Using the 'ONEWAY' TLS/SSL encryption..."));
-			swrite(CLIENT, sd_server, "STARTTLS"CRLF);
-			get_response_smtp(CLIENT, sd_server, newreply, LINEBUFFER);
-
-			if (!isdigit((unsigned char)newreply[0]) || (unsigned char)newreply[0] > '3') {
-				remcrlf(newreply);
-				info(VERBOSE, _("WARNING: %s"), newreply);
-				anubis_error(SOFT, _("STARTTLS (ONEWAY) command failed."));
-				topt &= ~T_SSL_ONEWAY;
-				swrite(SERVER, sd_client, reply);
-				return 1;
-			}
-
-			secure.client = start_ssl_client((int)sd_server);
-			if (!secure.client || (topt & T_ERROR)) {
-				topt &= ~T_ERROR;
-				topt &= ~T_SSL_ONEWAY;
-				swrite(SERVER, sd_client, reply);
-				return 1;
-			}
-
-			sd_server = remote_server = (void *)secure.client;
-			topt |= T_SSL_FINISHED;
-
-			/*
-			   Send the EHLO command (after the TLS/SSL negotiation).
-			*/
-
-			addrlen = sizeof(rclient);
-			if (getpeername((int)sd_client, (struct sockaddr *)&rclient, &addrlen) == -1)
-				anubis_error(HARD, _("getpeername() failed: %s."), strerror(errno));
-
-			snprintf(ehlo, LINEBUFFER,
-				"EHLO %s"CRLF,
-				(topt & T_ERROR) ? "localhost" : inet_ntoa(rclient.sin_addr));
-
-			topt &= ~T_ERROR;
-			swrite(CLIENT, sd_server, ehlo);
-			get_response_smtp(CLIENT, sd_server, reply, 2 * LINEBUFFER);
-		}
-#endif /* USE_SSL */
-
-		/*
-		   Remove the STARTTLS command from the EHLO list
-		   if no SSL is specified, the SSL is not available,
-		   or we're using the 'ONEWAY' TLS/SSL encryption.
-		*/
-
-		if ((topt & T_STARTTLS)
-		    && (!(topt & T_SSL) || (topt & T_SSL_ONEWAY))) {
-			char *starttls1 = "250-STARTTLS";
-			char *starttls2 = "STARTTLS";
-			if (strstr(reply, starttls1))
-				remline(reply, starttls1);
-			else if (strstr(reply, starttls2))
-				remline(reply, starttls2);
-		}
-
-		/*
-		   Check whether we can use the ESMTP AUTH.
-		*/
-
-		if ((topt & T_ESMTP_AUTH) && strstr(reply, "AUTH ")) {
-			esmtp_auth(sd_server, reply);
-			memset(session.mta_username, 0, sizeof(session.mta_username));
-			memset(session.mta_password, 0, sizeof(session.mta_password));
-		}
-	}
-	else
-		get_response_smtp(CLIENT, sd_server, reply, 2 * LINEBUFFER);
-
-	swrite(SERVER, sd_client, reply);
+	swrite(SERVER, remote_client, reply);
 	if (topt & T_ERROR)
 		return 0;
 
@@ -570,7 +585,7 @@ transfer_command(void *sd_client, void *sd_server, MESSAGE *msg, char *command)
 			topt &= ~T_ERROR;
 		}
 		else if (strncmp(buf, "data", 4) == 0) {
-			process_data(sd_client, sd_server, msg);
+			process_data(msg);
 			topt &= ~T_ERROR;
 		}
 	}
@@ -578,22 +593,22 @@ transfer_command(void *sd_client, void *sd_server, MESSAGE *msg, char *command)
 }
 
 void
-process_data(void *sd_client, void *sd_server, MESSAGE *msg)
+process_data(MESSAGE *msg)
 {
 	char buf[LINEBUFFER+1];
 
 	alarm(1800);
 
-	collect_headers(sd_client, msg);
-	collect_body(sd_client, msg);
+	collect_headers(msg);
+	collect_body(msg);
 	
 	rcfile_process_section(CF_CLIENT, "RULE", NULL, msg);
 	
-	transfer_header(sd_client, sd_server, msg->header);
-	transfer_body(sd_client, sd_server, msg);
+	transfer_header(msg->header);
+	transfer_body(msg);
 
-	recvline(CLIENT, sd_server, buf, LINEBUFFER);
-	swrite(SERVER, sd_client, buf);
+	recvline(CLIENT, remote_server, buf, sizeof(buf) - 1);
+	swrite(SERVER, remote_client, buf);
 
 	message_free(msg);
 	message_init(msg);
@@ -601,10 +616,10 @@ process_data(void *sd_client, void *sd_server, MESSAGE *msg)
 }
 	
 static void
-transfer_header(void *sd_client, void *sd_server, LIST *header_buf)
+transfer_header(LIST *header_buf)
 {
-	send_header(sd_server, header_buf);
-	swrite(CLIENT, sd_server, CRLF);
+	send_header(remote_server, header_buf);
+	swrite(CLIENT, remote_server, CRLF);
 }
 
 
@@ -613,29 +628,30 @@ transfer_header(void *sd_client, void *sd_server, LIST *header_buf)
 ****************/
 
 static void
-raw_transfer(void *sd_client, void *sd_server)
+raw_transfer()
 {
 	int nread;
 	char buf[LINEBUFFER+1];
 	
-	while ((nread = recvline(SERVER, sd_client, buf, LINEBUFFER)) > 0) {
+	while ((nread = recvline(SERVER, remote_client, buf,
+				 sizeof(buf) - 1)) > 0) {
 		if (strncmp(buf, "."CRLF, 3) == 0) /* EOM */
 			break;
-		swrite(CLIENT, sd_server, buf);
+		swrite(CLIENT, remote_server, buf);
 	}
 }
 
 void
-transfer_body(void *sd_client, void *sd_server, MESSAGE *msg)
+transfer_body(MESSAGE *msg)
 {
 	if (msg->boundary) {
-		send_body(msg, sd_server);
+		send_body(msg, remote_server);
 		
 		/* Transfer everything else */
-		raw_transfer(sd_client, sd_server);
+		raw_transfer();
 	} else
-		send_body(msg, sd_server);
-	swrite(CLIENT, sd_server, "."CRLF);
+		send_body(msg, remote_server);
+	swrite(CLIENT, remote_server, "."CRLF);
 }
 
 
