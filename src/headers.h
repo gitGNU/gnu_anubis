@@ -499,7 +499,7 @@ int anubis_get_db_record(char *username, ANUBIS_USER *usr);
 
 /* gsasl.c */
 void auth_gsasl_init();
-int anubis_auth_gsasl (char *auth_type, char *arg, char **username);
+int anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER *usr);
 void anubis_set_mech_list(LIST *list);
 
 /* EOF */
