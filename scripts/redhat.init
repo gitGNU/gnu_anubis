@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # chkconfig: 2345 81 45
-# description: An outgoing mail processor and the SMTP tunnel.
+# description: An SMTP message submission daemon.
 # processname: anubis
 # config: /etc/anubisrc
 # author: The Anubis Team

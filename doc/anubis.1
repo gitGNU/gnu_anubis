@@ -3,7 +3,7 @@
 .\"
 .TH anubis 1 "" "" "GNU Anubis"
 .SH NAME
-GNU Anubis - an outgoing mail processor and the SMTP tunnel.
+GNU Anubis -- an SMTP message submission daemon.
 .SH SYNOPSIS
 .BI "anubis"
 [options]
@@ -11,11 +11,13 @@ GNU Anubis - an outgoing mail processor and the SMTP tunnel.
 
 .SH DESCRIPTION
 .B GNU Anubis
-is an outgoing mail processor. It goes between the MUA (Mail User
-Agent) and the MTA (Mail Transport Agent), and can perform on the fly various
-sorts of processing and conversion on the outgoing mail in accord with the
-sender's specified rules, based on a highly configurable regular expressions
-system. It operates as a proxy server, independently from mail user agents.
+is an SMTP message submission daemon. It represents an intermediate
+layer between mail user agent (MUA) and mail transport agent (MTA), receiving
+messages from MUA, applying to them a set of predefined changes and finally
+inserting modified messages into MTA routing network. The set of changes
+applied to a message is configurable on a system-wide and per-user basis. The
+built-in configuration language used for defining sets of changes allows for
+considerable flexibility and is easily extensible.
 
 .SH THE GNU ANUBIS MANUAL
 

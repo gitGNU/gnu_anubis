@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # This file is part of GNU Anubis.
-# Copyright (C) 2001, 2002, 2003 The Anubis Team.
+# Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 #
 # GNU Anubis is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #
 
 cat <<EOF
-Summary: An outgoing mail processor and the SMTP tunnel.
+Summary: An SMTP message submission daemon.
 Name: anubis
 Version: $1
 Release: 1
@@ -36,15 +36,13 @@ Requires: openssl pidentd
 Prereq: /sbin/chkconfig /sbin/install-info /usr/sbin/useradd /usr/sbin/userdel
 
 %description
-GNU Anubis is an outgoing mail processor. It goes between the MUA (Mail User
-Agent) and the MTA (Mail Transport Agent), and can perform on the fly various
-sorts of processing and conversion on the outgoing mail in accord with the
-sender's specified rules, based on a highly configurable regular expressions
-system. It operates as a proxy server, independently from mail user agents.
-GNU Anubis can edit outgoing mail headers, encrypt and/or sign mail with the
-GNU Privacy Guard, build secure SMTP tunnels (Simple Mail Transport Protocol)
-using the TLS/SSL encryption even if your mail user agent doesn't support it,
-or tunnel a connection through a SOCKS proxy server.
+GNU Anubis is an SMTP message submission daemon. It represents an intermediate
+layer between mail user agent (MUA) and mail transport agent (MTA), receiving
+messages from MUA, applying to them a set of predefined changes and finally
+inserting modified messages into MTA routing network. The set of changes
+applied to a message is configurable on a system-wide and per-user basis. The
+built-in configuration language used for defining sets of changes allows for
+considerable flexibility and is easily extensible.
 
 %define _initdir /etc/init.d
 %define _unprivileged anubis.unprivileged
@@ -99,10 +97,10 @@ rm -f /usr/man/man1/anubis.1*
 %attr(0644,root,root) /usr/share/locale/*/*/anubis.mo
 
 %changelog
-* Tue Dec 03 2002  Wojciech Polak <polak@gnu.org>
+* Tue Dec 03 2002  Wojciech Polak
 - removed default system configuration file.
 
-* Fri Nov 01 2002  Wojciech Polak <polak@gnu.org>
+* Fri Nov 01 2002  Wojciech Polak
 - updated to GNU. Now it's GNU Anubis!
 
 # EOF
