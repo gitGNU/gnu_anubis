@@ -100,4 +100,14 @@ extern int pam_retval;
 
 extern ANUBIS_MODE anubis_mode;
 
+extern char *anon_token;
+extern char *authorization_id;
+extern char *authentication_id;
+extern char *auth_password;
+extern char *auth_service;
+extern char *auth_hostname;
+extern char *generic_service_name;
+extern char *auth_passcode;
+extern char *auth_realm;
+
 /* EOF */
