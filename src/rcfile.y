@@ -52,7 +52,7 @@ static void rc_cond_destroy(RC_COND *cond);
 static RC_STMT *rc_stmt_create(enum rc_stmt_type type);
 static void rc_stmt_destroy(RC_STMT *stmt);
 static void rc_stmt_list_destroy(RC_STMT *stmt);
-static void rc_stmt_print(RC_STMT *stmt);
+static void rc_stmt_print(RC_STMT *stmt, int level);
 static void reg_option_init();
 static int reg_option_add(char *opt);
 
@@ -406,9 +406,9 @@ void
 rc_section_print(RC_SECTION *sect)
 {
 	for (; sect; sect = sect->next) {
-		printf("BEGIN %s\n", sect->name);
-		rc_stmt_print(sect->stmt);
-		printf("END %s\n", sect->name);
+		printf("BEGIN SECTION %s\n", sect->name);
+		rc_stmt_print(sect->stmt, 1);
+		printf("END SECTION %s\n", sect->name);
 	}
 }
 
@@ -572,33 +572,46 @@ rc_stmt_list_destroy(RC_STMT *stmt)
 }
 
 void
-rc_stmt_print(RC_STMT *stmt)
+rc_level_print(int level, char *str)
+{
+	int i;
+
+	for (i = 0; i < level*2; i++)
+		putchar(' ');
+	printf("%s", str);
+}
+
+void
+rc_stmt_print(RC_STMT *stmt, int level)
 {
 	for (; stmt; stmt = stmt->next) {
 		switch (stmt->type) {
 		case rc_stmt_asgn:
-			printf("ASGN: %s = %s",
+			rc_level_print(level, "ASGN: ");
+			printf("%s = %s",
 			       stmt->v.asgn.lhs, stmt->v.asgn.rhs);
 			break;
 			
 		case rc_stmt_cond:
-			printf("COND: ");
+			rc_level_print(level, "COND: ");
 			rc_node_print(stmt->v.cond.node);
-			printf("\nIFTRUE:\n");
-			rc_stmt_print(stmt->v.cond.iftrue);
+			printf("\n");
+			rc_level_print(level, "IFTRUE:\n");
+			rc_stmt_print(stmt->v.cond.iftrue, level+1);
 			if (stmt->v.cond.iffalse) {
-				printf("IFFALSE:\n");
-				rc_stmt_print(stmt->v.cond.iffalse);
+				rc_level_print(level, "IFFALSE:\n");
+				rc_stmt_print(stmt->v.cond.iffalse, level+1);
 			}
-			printf("END COND");
+			rc_level_print(level, "END COND");
 			break;
 			
 		case rc_stmt_rule:
-			printf("RULE: ");
+			rc_level_print(level, "RULE: ");
 			rc_node_print(stmt->v.rule.node);
-			printf("\nBODY\n");
-			rc_stmt_print(stmt->v.rule.stmt);
-			printf("END RULE");
+			printf("\n");
+			rc_level_print(level, "BODY\n");
+			rc_stmt_print(stmt->v.rule.stmt, level+1);
+			rc_level_print(level, "END RULE");
 			break;
 			
 		default:
