@@ -2,3 +2,4 @@ base.exp
 gpg.exp
 guile.exp
 mime.exp
+tls.exp

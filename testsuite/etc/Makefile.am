@@ -37,6 +37,7 @@ EXTRA_DIST = \
  remail.pat\
  rot-13.pat\
  std.pat\
+ tlsoneway.pat\
  trigger.pat\
  add.in\
  del.in\
@@ -46,6 +47,7 @@ EXTRA_DIST = \
  remail.in\
  std.in\
  simple.in\
+ tlsoneway.in\
  trigger.in
 
 RCFILES = \
@@ -57,6 +59,7 @@ RCFILES = \
  remail.rc\
  simple.rc\
  std.rc\
+ tlsoneway.rc\
  trigger.rc
 
 noinst_DATA = $(RCFILES) 
