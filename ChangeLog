@@ -1,3 +1,13 @@
+2004-09-24  Sergey Poznyakoff 
+
+	Released version 3.9.96
+	
+	* Makefile.am: Use gnits
+	* NEWS: Updated
+	* doc/Makefile.am ($(PROJECT).text): Explicitely pass info file
+	from cwd (breaks builds from a separate directory but we never use
+	them when making docs, anyway).
+
 2004-09-22  Sergey Poznyakoff
 
 	* src/anubisusr.c: Got read of secure.client and secure.server

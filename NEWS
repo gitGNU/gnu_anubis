@@ -1,11 +1,11 @@
-GNU Anubis NEWS -- history of user-visible changes.  2004-07-31
+GNU Anubis NEWS -- history of user-visible changes.  2004-09-24
 Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
 
 See the end of file for copying conditions.
 
 Please send your bug reports to <bug-anubis@gnu.org>.
 
-Version 3.9.95:
+Version 3.9.96:
 
 GNU Anubis 4.0 has been rewritten from scratch. The message processing
 algorithm has been changed. Apart from that, this release includes
