@@ -1,3 +1,9 @@
+2004-02-21  Wojciech Polak
+
+	* configure.ac: Added new option `--with-socks-proxy'.
+	* src/files.c: Renamed to mime.c (for further MIME support).
+	* src/proxy.c: Renamed to socks.c.
+
 2004-02-19  Sergey Poznyakoff
 
 	Initial implementation of "XDATABASE" command
