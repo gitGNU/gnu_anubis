@@ -104,7 +104,7 @@ enum rc_inst_opcode {        /* Operation code */
 struct rc_inst {             /* Instruction definition */
 	enum rc_inst_opcode opcode;
 	int part;            /* Message part to operate upon */ 
-	char *key;           /* Key */
+	RC_REGEX *key;       /* Key */
 	char *key2;          /* New key value (for modify) */
 	char *arg;           /* Argument */
 };
@@ -145,7 +145,7 @@ struct rc_secdef {
 	char *name;
 	struct rc_secdef_child *child;
 };
-
+	
 /* Global data */
 extern int cfg_line_num;
 extern char *cfg_file; 
@@ -164,4 +164,3 @@ void rc_call_section(int, RC_SECTION *, struct rc_secdef *, void *, MESSAGE *);
 void rc_set_debug_level(char *);
 int rc_open(char *);
 struct rc_secdef *anubis_add_section(char *);
-
