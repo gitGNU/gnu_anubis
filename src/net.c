@@ -293,7 +293,7 @@ recvline_ptr (int method, NET_STREAM sd, char **vptr, size_t * maxlen)
     {
       size_t nbytes;
 
-      if (off == *maxlen)
+      if (*maxlen - off <= 1)
 	{
 	  *maxlen += INIT_RECVLINE_SIZE;
 	  *vptr = xrealloc (*vptr, *maxlen);
