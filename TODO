@@ -7,7 +7,6 @@ semantics of the anubis language.
 
 * New settings (system configuration file)
 ** `settings-priority = system | user'
-** `drop-unknown-client = yes | no'
 ** `forbid-user-settings = yes | no'
 
 * New action commands

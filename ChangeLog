@@ -1,3 +1,10 @@
+2003-06-29  Wojciech Polak
+
+	* src/daemon.c (loop): Added support for DROP-UNKNOWN-USER.
+	* src/rc.c (control_parser): Likewise.
+	* src/headers.h: Added T_DROP_UNKNOWN_USER.
+	* TODO: Updated.
+
 2003-06-29  Sergey Poznyakoff  
 
 	* src/rcfile.y: Force R_EXACT on r_msgpart production.
@@ -939,6 +946,3 @@ Local Variables:
 mode: change-log
 version-control: never
 End:
-
-EOF
-
