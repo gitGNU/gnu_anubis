@@ -58,7 +58,7 @@ _debug_printer(int method, int output, unsigned long nleft, char *ptr)
 		debug_cache.output = output;
 		debug_cache.newline = 0;
 		debug_cache.count = 0;
-		fprintf(stderr, "%s %s ", mode, output ? ">>>" : "<<<");
+		fprintf(stderr, "%s %s ", mode, output ? "<<<" : ">>>");
 	}
 
 	for (i = 0; i < nleft; i++, ptr++) {
@@ -72,7 +72,7 @@ _debug_printer(int method, int output, unsigned long nleft, char *ptr)
 			debug_cache.count = 0;
 			if (i != nleft-1) {
 				fprintf(stderr, "%s %s ",
-					mode, output ? ">>>" : "<<<");
+					mode, output ? "<<<" : ">>>");
 				debug_cache.newline = 0;
 			} else
 				debug_cache.newline = 1;
@@ -153,7 +153,6 @@ connect_directly_to(char *host, unsigned int port)
 	   Create socket, and connect.
 	*/
 
-	info(DEBUG, _("Initializing socket..."));
 	if ((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 		anubis_error(HARD, _("Can't create stream socket."));
 		return -1;
