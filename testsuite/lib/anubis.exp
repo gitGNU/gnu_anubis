@@ -93,6 +93,7 @@ proc update_config {name} {
     global ANUBIS_DATA_DIR
     global ANUBIS_RC_DIR
     global ANUBIS_ETC_DIR
+    global verbose
     
     set rcname $ANUBIS_RC_DIR/$name
     set chan [open $rcname r]
@@ -107,10 +108,19 @@ proc update_config {name} {
     }
     close $outchan
     close $chan
+
+    if {$verbose > 2} {
+	set vopt "-vvv"
+    } else {
+	set vopt ""
+    }
     set res [remote_exec host "$ANUBIS_USR" \
-	      "--netrc $ANUBIS_ETC_DIR/net.rc \
-               --file $rcname.tmp -vvv localhost:$ANUBIS_PORT"]
-    verbose "RESULT $res"
+	      "$vopt --netrc $ANUBIS_ETC_DIR/net.rc \
+               --file $rcname.tmp localhost:$ANUBIS_PORT"]
+    verbose -log "ANUBISUSR RESULT: $res"
+    if {[llength $res] < 1} {
+	return -1
+    }
     return [lindex $res 0]
 }
 
@@ -123,6 +133,8 @@ proc run_in_authmode {name} {
         start_daemon
         source $name
         kill_daemon
+    } else {
+	unsupported "$name in authmode"
     }
 }
 
@@ -203,7 +215,7 @@ proc default_anubis_start {args} {
     global ANUBIS_TOOL
     global ANUBIS_TOOL_FLAGS
     global expect_out
-    global anubis_iface_pid
+    global anubis_spawn_id
     
     if [info exists ANUBIS_TOOL_FLAGS] {
 	set sw $ANUBIS_TOOL_FLAGS
@@ -220,8 +232,8 @@ proc default_anubis_start {args} {
     set cmd "$ANUBIS_TOOL $sw"
     verbose "Spawning $cmd"
 
-    set anubis_iface_pid [remote_spawn host $cmd]
-    if { $anubis_iface_pid < 0 || $anubis_iface_pid == "" } {
+    set anubis_spawn_id [remote_spawn host $cmd]
+    if { $anubis_spawn_id < 0 || $anubis_spawn_id == "" } {
 	perror "Spawning $cmd failed."
 	return 1;
     }
@@ -442,14 +454,17 @@ proc anubis_command { cmd } {
     return $res
 }
 
-proc anubis_close {} {
-    global anubis_iface_pid
-    if [info exist anubis_iface_pid] {
-	if [is_remote host] {
-	    remote_close host
-	}
-	unset anubis_iface_pid
+proc default_anubis_stop {} {
+    global anubis_spawn_id
+    verbose -log "STOPPING ANUBIS"
+    if {[info exists anubis_spawn_id] && $anubis_spawn_id > 0} {
+	remote_close host
+	unset anubis_spawn_id
     }
+}
+
+proc anubis_exit {} {
+	default_anubis_stop
 }
 
 proc anubis_expect { args } {
@@ -774,6 +789,7 @@ proc anubis_test_file {args} {
     } else {
 	fail "$message"
     }
+    remote_close host
     return $result
 }
 
@@ -894,9 +910,10 @@ proc anubis_pat {patname} {
 				anubis_command "$line"
 				lappend file_pattern $line
 			    }
-			    anubis_close
 			}
 
+			default_anubis_stop
+			
 			set inv anubis_test_file
 			if {$testname != ""} {
 			    lappend inv -message $testname
