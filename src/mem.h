@@ -26,17 +26,19 @@
    Free unused memory. Global pointers.
 */
 
-#define xfree(p) \
+#define xfree(p) do\
 	if (p) { \
 		free(p); \
 		p = 0; \
-	}
+	}\
+     while (0)
 
-#define xfree_pptr(p) \
+#define xfree_pptr(p) do\
 	if (p) { \
 		free_pptr(p); \
 		p = 0; \
-	}
+	}\
+     while (0)
 
 /* EOF */
 
