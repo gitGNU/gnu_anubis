@@ -566,10 +566,10 @@ The following table lists the three boolean operators that can be used
 in Anubis conditional expressions in the order of increasing binding
 strength:
 
-@itemize @samp
-@item OR
-@item AND
-@item NOT
+@itemize @bullet
+@item @samp{OR}
+@item @samp{AND}
+@item @samp{NOT}
 @end itemize
 
 As an example, let's consider the following statement:
