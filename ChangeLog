@@ -1,3 +1,16 @@
+2004-07-11  Wojciech Polak
+
+	* src/authmode.c (anubis_authenticate_mode): Fixed the bug,
+	where a specified config file was ignored.
+	* THANKS: Added Jim Cheetham.
+
+	* src/*.[chly]: Indent all files using the GNU coding style.
+	* src/tls.c: Improved diagnostics.
+	* src/rcfile.c: Likewise.
+	* src/esmtp.c: Likewise.
+	* src/gsasl_srv.c: Likewise.
+	* src/main.c: Likewise.
+
 2004-06-19  Sergey Poznyakoff
 
 	* lib/lbuf.c (_auth_lb_writelines): Bugfix. 
