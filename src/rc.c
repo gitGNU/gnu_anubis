@@ -157,10 +157,26 @@ process_rcfile(int method)
 #define KW_SOCKS_AUTH         11
 #define KW_READ_ENTIRE_BODY   12
 
-int
-control_parser(int method, int key, char *arg, void *inv_data, void *func_data,
-	       MESSAGE *msg)
+char **
+list_to_argv(struct list *list)
 {
+	int i, argc;
+	char **argv, *p;
+
+	argc = list_count(list);
+	argv = xmalloc((argc + 1) * sizeof(argv[0]));
+	for (i = 0, p = list_first(list); p; i++, p = list_next(list))
+		argv[i] = strdup(p);
+	argv[i] = NULL;
+	return argv;
+}
+
+int
+control_parser(int method, int key, struct list *arglist,
+	       void *inv_data, void *func_data, MESSAGE *msg)
+{
+	char *arg = list_item(arglist, 0);
+	
 	switch (key) {
 	case KW_BIND:                
 		parse_mtahost(arg, session.tunnel, &session.tunnel_port);
@@ -214,37 +230,13 @@ control_parser(int method, int key, char *arg, void *inv_data, void *func_data,
 		parse_mtaport(arg, session.mta, &session.mta_port);
 		break;
 		
-	case KW_LOCAL_MTA: {
-		char *a = 0;
-		char *p = 0;
-		char tmp[LINEBUFFER+1];
-
-		a = strchr(arg, ' '); /* an extra arguments */
-		if (a) {
-			*a++ = '\0';
-			p = strrchr(arg, '/');
-			if (p)
-				p++;
-			else
-				p = arg;
-			snprintf(tmp, sizeof(tmp), "%s %s", p, a);
-			p = arg;
-			a = tmp;
-		} else { /* no arguments */
-			p = arg;
-			a = strrchr(arg, '/');
-			if (a)
-				a++;
-			else
-				a = arg;
-		}
+	case KW_LOCAL_MTA:
 		xfree(session.execpath);
-		session.execpath = allocbuf(p, MAXPATHLEN);
-		topt |= T_LOCAL_MTA;
 		xfree_pptr(session.execargs);
-		session.execargs = gen_execargs(a);
-	}
-	break;
+		session.execpath = strdup(arg);
+		session.execargs = list_to_argv(arglist);
+		topt |= T_LOCAL_MTA;
+		break;
 		
 	case KW_ESMTP_AUTH: {
 		char *p = strchr(arg, ':');
@@ -358,9 +350,10 @@ static struct rc_secdef_child control_sect_child = {
 #define KW_CAFILE              5
 
 int
-tls_parser(int method, int key, char *arg, void *inv_data, void *func_data,
-	   MESSAGE *msg)
+tls_parser(int method, int key, struct list *arglist,
+	   void *inv_data, void *func_data, MESSAGE *msg)
 {
+	char *arg = list_item(arglist, 0);
 	switch (key) {
 	case KW_SSL:
 		setbool(arg, topt, T_SSL);
@@ -440,9 +433,12 @@ control_section_init()
 #define KW_EXTERNAL_BODY_PROCESSOR 11 
 
 int
-rule_parser(int method, int key, char *arg, void *inv_data, void *func_data,
-	    MESSAGE *msg)
+rule_parser(int method, int key, struct list *arglist,
+	    void *inv_data, void *func_data, MESSAGE *msg)
 {
+	char *arg = list_item(arglist, 0);
+	char **argv;
+	
 	switch (key) {
 	case KW_SIGNATURE_FILE_APPEND:
 		message_append_signature_file(msg, arg);
@@ -478,7 +474,9 @@ rule_parser(int method, int key, char *arg, void *inv_data, void *func_data,
 		break;
 		
 	case KW_EXTERNAL_BODY_PROCESSOR:
-		message_external_proc(msg, arg);
+		session.execargs = list_to_argv(arglist);
+		message_external_proc(msg, argv);
+		xfree_pptr(argv);
 		break;
 		
 	default:
