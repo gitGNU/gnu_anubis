@@ -14,7 +14,7 @@
 @syncodeindex fn cp
 
 @copying
-Copyright @copyright{} 2001, 2002, 2003 Wojciech Polak and Sergey Poznyakoff.
+Copyright @copyright{} 2001, 2002, 2003, 2004 Wojciech Polak and Sergey Poznyakoff.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.2 or
