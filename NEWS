@@ -41,13 +41,15 @@
 * The order of processing user CONTROL sections may be altered by
   setting `control-priority' in the system-wide CONTROL section.
 * Execution of the configuration files can be traced by setting
-  termlevel to `verbose'.
+  new CONTROL variable `tracefile'.
 * Support for the GNU extension language has been added
   (via Guile 1.6 or newer).
 * Remailers and ROT-13 support has been removed from
   the main engine (moved to Guile layer).
 * Added testsuite (make check).
 * Added new security option `drop-unknown-user'.
+* New option 'gpg-sign-encrypt' allows to encrypt and sign messages
+  simultaneously.
 * New file anubis-mode.el provides an Emacs major mode for editing
   Anubis configuration files.
 * New Ukrainian, Malay, and Romanian message translations.

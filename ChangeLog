@@ -1,3 +1,7 @@
+2003-09-02  Sergey Poznyakoff
+
+	* NEWS: Updated
+
 2003-08-28  Wojciech Polak
 
 	* configure.ac: Added AM_PATH_GPGME.
