@@ -1,3 +1,10 @@
+2003-11-30  Wojciech Polak
+
+	* src/misc.c (change_to_lower): Renamed to make_lowercase.
+	* src/headers.h (change_to_lower): Changed prototype.
+	* src/tunnel.c: Use make_lowercase().
+	* src/help.c (config_opts): Added MYSQL.
+
 2003-11-30  Sergey Poznyakoff 
 
 	* TODO: Updated
