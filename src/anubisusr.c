@@ -164,41 +164,6 @@ skipword (char *str)
   return str;
 }
 
-int
-argcv_split (char *buf, int *pargc, char ***pargv)
-{
-  char *t;
-  int i, argc = 0;
-  char **argv;
-
-  t = buf;
-  do
-    {
-      argc++;
-      t = skipws (t);
-    }
-  while (*t && (t = skipword (t)));
-
-  argv = calloc (argc, sizeof (*argv));
-  for (i = 0, t = strtok (buf, " \t"); t; i++, t = strtok (NULL, " \t"))
-    argv[i] = strdup (t);
-  argv[i] = NULL;
-  *pargc = argc - 1;
-  *pargv = argv;
-  return 0;
-}
-
-void
-argcv_free (int argc, char **argv)
-{
-  if (argc == 0 || argv == NULL)
-    return;
-  while (--argc >= 0)
-    if (argv[argc])
-      free (argv[argc]);
-  free (argv);
-}
-
 /* FIXME: Move to the library and unify with hostname_error() */
 const char *
 h_error_string (int ec)
@@ -276,9 +241,14 @@ find_capa (struct smtp_reply *repl, const char *name, const char *value)
 	    {
 	      int j, argc;
 	      char **argv;
-	      int rc = 1;
+	      int rc = 0;
 
-	      argcv_split (repl->argv[i], &argc, &argv);
+	      if ((rc = argcv_get (repl->argv[i], "", NULL, &argc, &argv)))
+		{
+		  error (_("argcv_get failed: %s"), strerror (rc));
+		  return 1;
+		}
+	      rc = 1;
 	      for (j = 0; rc == 1 && j < argc; j++)
 		if (strcmp (argv[j], value) == 0)
 		  rc = 0;
@@ -306,11 +276,16 @@ find_capa_v (struct smtp_reply *repl, const char *name, ANUBIS_LIST * list)
       char *p = skipword (repl->argv[i]);
       if (strncmp (name, repl->argv[i], p - repl->argv[i]) == 0)
 	{
-	  int j, argc;
+	  int rc, j, argc;
 	  char **argv;
 	  char *rv = NULL;
 
-	  argcv_split (repl->argv[i], &argc, &argv);
+	  if ((rc = argcv_get (repl->argv[i], "", NULL, &argc, &argv)))
+	    {
+	      error (_("argcv_get failed: %s"), strerror (rc));
+	      return NULL;
+	    }
+
 	  if (!list)
 	    {
 	      if (argv[1])
@@ -568,6 +543,7 @@ parse_netrc (const char *filename)
 
   while (getline (&buf, &n, fp) > 0 && n > 0)
     {
+      int rc;
       char *p;
       size_t len;
       int argc;
@@ -581,8 +557,12 @@ parse_netrc (const char *filename)
       if (*p == 0 || *p == '#')
 	continue;
 
-      argcv_split (buf, &argc, &argv);
-
+      if ((rc = argcv_get (buf, "", "#", &argc, &argv)))
+	{
+	  error (_("argcv_get failed: %s"), strerror (rc));
+	  return;
+	}
+      
       if (strcmp (argv[0], "machine") == 0)
 	{
 	  if (hostcmp (argv[1], smtp_host) == 0)

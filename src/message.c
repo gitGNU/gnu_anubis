@@ -71,7 +71,7 @@ message_remove_headers (MESSAGE * msg, RC_REGEX * regex)
 	  assoc_free (asc);
 	}
       if (rc)
-	free_pptr (rv);
+	argcv_free (-1, rv);
     }
   iterator_destroy (&itr);
 }
@@ -225,7 +225,7 @@ message_modify_headers (MESSAGE * msg, RC_REGEX * regex, char *key2,
 	    }
 	}
       if (rc)
-	free_pptr (rv);
+	argcv_free (-1, rv);
     }
   iterator_destroy (&itr);
 }

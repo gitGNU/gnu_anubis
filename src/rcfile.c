@@ -399,7 +399,7 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
 				  line options should */
       { 
 	xfree (session.execpath);
-	xfree_pptr (session.execargs);
+	argcv_free (-1, session.execargs);
 	session.execpath = strdup (arg);
 	session.execargs = list_to_argv (arglist);
 	topt |= T_LOCAL_MTA;
@@ -740,7 +740,7 @@ rule_parser (int method, int key, ANUBIS_LIST * arglist,
   case KW_EXTERNAL_BODY_PROCESSOR:
     argv = list_to_argv (arglist);
     message_external_proc (msg, argv);
-    xfree_pptr (argv);
+    argcv_free (-1, argv);
     break;
 
   default:

@@ -1391,8 +1391,9 @@ expr_eval (struct eval_env *env, RC_EXPR *expr)
 
   if (env->refstr && anubis_regex_refcnt (expr->re))
     {
-      xfree_pptr (env->refstr);
+      argcv_free (-1, env->refstr);
       env->refcnt = 0;
+      env->refstr = NULL;
     }
   
   switch (expr->part) {
@@ -1528,7 +1529,7 @@ eval_section (int method, RC_SECTION *sec, struct rc_secdef *secdef,
   env.data = data;
   env.loc = sec->loc;
   env.traceable = secdef->allow_prog;
-  
+
   if (env.traceable)
     tracefile (&sec->loc, _("Section %s"), sec->name);
   
@@ -1536,7 +1537,7 @@ eval_section (int method, RC_SECTION *sec, struct rc_secdef *secdef,
     stmt_list_eval (&env, sec->stmt);
   
   if (env.refstr)
-    xfree_pptr (env.refstr);
+    argcv_free (-1, env.refstr);
 }	
 
 void
