@@ -55,7 +55,7 @@ enum asmtp_state
   state_init,
   state_ehlo,
   state_auth,
-  state_quit
+  state_quit,
 };
 
 #define KW_HELO      0
@@ -67,6 +67,7 @@ enum asmtp_state
 #define KW_STARTTLS  6
 #define KW_MAIL      7
 #define KW_RCPT      8
+#define KW_XDATABASE 9
 
 static int
 asmtp_kw (const char *name)
@@ -76,8 +77,7 @@ asmtp_kw (const char *name)
     char *name;
     int code;
   }
-  kw[] =
-  {
+  kw[] = {
     { "helo", KW_HELO },
     { "ehlo", KW_EHLO },
     { "xelo", KW_XELO },
@@ -87,6 +87,7 @@ asmtp_kw (const char *name)
     { "starttls", KW_STARTTLS },
     { "mail", KW_MAIL },
     { "rcpt", KW_RCPT },
+    { "xdatabase", KW_XDATABASE },
     { NULL },
   };
   int i;
@@ -440,8 +441,52 @@ anubis_smtp (ANUBIS_USER * usr)
 
   topt &= ~T_SSL_FINISHED;
   xdatabase_enable ();
+  
   return 0;
 }
+
+static void
+xdb_loop (void)
+{
+  char *command = NULL;
+  size_t s = 0;
+
+  info (VERBOSE, _("Entering XDB loop..."));
+
+  asmtp_capa_add ("XDATABASE");
+  while (recvline_ptr (SERVER, remote_client, &command, &s) > 0)
+    {
+      switch (asmtp_kw (get_command_word (command))) {
+      case KW_HELP:
+	asmtp_help ();
+	break;
+    
+      case KW_QUIT:
+	info (VERBOSE, _("Exiting XDB loop..."));
+	return;
+
+      case KW_XDATABASE:
+	xdatabase (make_lowercase (get_command_arg ()));
+	return;
+
+      case KW_EHLO:
+	asmtp_ehlo_reply (command);
+	break;
+	
+      case KW_AUTH:      
+      case KW_STARTTLS:  
+      case KW_MAIL:
+      case KW_RCPT:
+	asmtp_reply (550, "Command disabled.");
+	break;
+    
+      default:
+	asmtp_reply (500, "Unknown command");
+      }
+    }
+  info (VERBOSE, _("Exiting XDB loop..."));
+}
+
 
 
 static char *anubis_dbarg;
@@ -531,85 +576,94 @@ anubis_authenticate_mode (NET_STREAM *psd_client,
       set_unprivileged_user ();
     }
 
-  if (!(topt & T_LOCAL_MTA) && strlen (session.mta) == 0)
+  if (topt & T_XELO)
     {
-      anubis_error (HARD, _("MTA has not been specified. "
-			    "Set either REMOTE-MTA or LOCAL-MTA."));
-      return EXIT_FAILURE;
+      xdb_loop ();
     }
-
-  /*
-     Protection against a loop connection.
-   */
-
-  if (!(topt & T_LOCAL_MTA))
+  else
     {
-      unsigned long inaddr;
-      struct sockaddr_in ad;
-
-      memset (&ad, 0, sizeof (ad));
-      inaddr = inet_addr (session.mta);
-      if (inaddr != INADDR_NONE)
-	memcpy (&ad.sin_addr, &inaddr, sizeof (inaddr));
-      else
+      if (!(topt & T_LOCAL_MTA) && strlen (session.mta) == 0)
 	{
-	  struct hostent *hp = 0;
-	  hp = gethostbyname (session.mta);
-	  if (hp == 0)
-	    {
-	      hostname_error (session.mta);
-	      return EXIT_FAILURE;
-	    }
+	  anubis_error (HARD, _("MTA has not been specified. "
+				"Set either REMOTE-MTA or LOCAL-MTA."));
+	  return EXIT_FAILURE;
+	}
+
+      /*
+	Protection against a loop connection.
+      */
+      
+      if (!(topt & T_LOCAL_MTA))
+	{
+	  unsigned long inaddr;
+	  struct sockaddr_in ad;
+	  
+	  memset (&ad, 0, sizeof (ad));
+	  inaddr = inet_addr (session.mta);
+	  if (inaddr != INADDR_NONE)
+	    memcpy (&ad.sin_addr, &inaddr, sizeof (inaddr));
 	  else
 	    {
-	      if (hp->h_length != 4 && hp->h_length != 8)
+	      struct hostent *hp = 0;
+	      hp = gethostbyname (session.mta);
+	      if (hp == 0)
 		{
-		  anubis_error (HARD,
-				_
-				("Illegal address length received for host %s"),
-				session.mta);
+		  hostname_error (session.mta);
 		  return EXIT_FAILURE;
 		}
 	      else
 		{
-		  memcpy ((char *) &ad.sin_addr.s_addr,
-			  hp->h_addr, hp->h_length);
+		  if (hp->h_length != 4 && hp->h_length != 8)
+		    {
+		      anubis_error (HARD,
+				    _
+				    ("Illegal address length received for host %s"),
+				    session.mta);
+		      return EXIT_FAILURE;
+		    }
+		  else
+		    {
+		      memcpy ((char *) &ad.sin_addr.s_addr,
+			      hp->h_addr, hp->h_length);
+		    }
 		}
 	    }
+	  if (ntohl (ad.sin_addr.s_addr) == INADDR_LOOPBACK
+	      && session.anubis_port == session.mta_port)
+	    {
+	      anubis_error (SOFT, _("Loop not allowed. Connection rejected."));
+	      return EXIT_FAILURE;
+	    }
 	}
-      if (ntohl (ad.sin_addr.s_addr) == INADDR_LOOPBACK
-	  && session.anubis_port == session.mta_port)
+      
+      alarm (300);
+      if (topt & T_LOCAL_MTA)
 	{
-	  anubis_error (SOFT, _("Loop not allowed. Connection rejected."));
-	  return EXIT_FAILURE;
+	  remote_server = make_local_connection (session.execpath,
+						 session.execargs);
+	  if (!remote_server)
+	    {
+	      service_unavailable (&remote_client);
+	      return EXIT_FAILURE;
+	    }
 	}
-    }
-
-  alarm (300);
-  if (topt & T_LOCAL_MTA)
-    {
-      remote_server = make_local_connection (session.execpath,
-					     session.execargs);
-      if (!remote_server)
+      else
 	{
-	  service_unavailable (&remote_client);
-	  return EXIT_FAILURE;
+	  remote_server = make_remote_connection (session.mta,
+						  session.mta_port);
+	  if (!remote_server)
+	    service_unavailable (&remote_client);
 	}
-    }
-  else
-    {
-      remote_server = make_remote_connection (session.mta, session.mta_port);
-      if (!remote_server)
-	service_unavailable (&remote_client);
-    }
-  alarm (0);
-
-  if (!(topt & T_ERROR))
-    {
-      alarm (900);
-      smtp_session ();
       alarm (0);
+
+      if (!(topt & T_ERROR))
+	{
+	  alarm (900);
+	  smtp_session ();
+	  alarm (0);
+	}
     }
+  
   net_close_stream (&remote_client);
   net_close_stream (&remote_server);
 
