@@ -322,6 +322,7 @@ void get_options(int, char *[]);
 void get_homedir(char *, char *, int);
 void anubis_getlogin(char *, int);
 void anubis_changeowner(char *);
+int anubis_set_mode(char *modename);
 int  check_superuser(void);
 int  check_username(char *);
 int  check_filemode(char *);
@@ -543,6 +544,7 @@ void anubis_set_password_db(char *arg);
 void asmtp_reply(int code, char *fmt, ...);
 void asmtp_capa_add_prefix(char *prefix, char *name);
 int anubis_get_db_record(char *username, ANUBIS_USER *usr);
+void authmode_section_init(void);
 
 /* gsasl.c */
 void auth_gsasl_init();
@@ -552,6 +554,7 @@ void anubis_set_mech_list(LIST *list);
 /* xdatabase.c */
 int xdatabase(char *command);
 void xdatabase_capability(char *reply, size_t reply_size);
+void xdatabase_enable(void);
 
 /* EOF */
 
