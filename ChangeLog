@@ -1,3 +1,10 @@
+2004-05-20  Wojciech Polak
+
+	* testsuite/etc/cond.pat: New test.
+	* testsuite/etc/cond.in: Added rules for cond.pat.
+	* testsuite/etc/Makefile.am: Updated.
+	* testsuite/anubis/base.exp: Added cond.pat.
+
 2004-05-19  Sergey Poznyakoff
 
 	* src/tunnel.c (save_command): Fixed parsing of commands
