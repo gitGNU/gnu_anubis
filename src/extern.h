@@ -54,35 +54,25 @@ struct session_struct {
  unsigned int socks_port;
 };
 
-#ifdef HAVE_TLS
-struct secure_struct {
- gnutls_session client;
- gnutls_session server;
- gnutls_certificate_client_credentials xcred;
- gnutls_certificate_server_credentials x509_cred;
- char *cafile;
- char *cert;
- char *key;
-};
-#endif /* HAVE_TLS */
+#if defined(HAVE_TLS) || defined(HAVE_SSL)
+# define USE_SSL
+#else
+# undef USE_SSL
+#endif
 
-#ifdef HAVE_SSL
+#ifdef USE_SSL
 struct secure_struct {
- SSL *client;
- SSL *server;
- SSL_CTX *ctx_client;
- SSL_CTX *ctx_server;
+ void *client;
+ void *server;
  char *cafile;
  char *cert;
  char *key;
 };
-#endif /* HAVE_SSL */
+extern struct secure_struct secure;
+#endif
 
 extern struct options_struct options;
 extern struct session_struct session;
-#if defined(HAVE_TLS) || defined(HAVE_SSL)
-extern struct secure_struct secure;
-#endif /* HAVE_TLS or HAVE_SSL */
 
 extern unsigned long topt;
 extern void *remote_client;
