@@ -284,9 +284,10 @@ gpg_free(void)
 #define KW_GPG_HOME               5
 
 int
-gpg_parser(int method, int key, char *arg, void *inv_data, void *func_data,
-	   MESSAGE *msg)
+gpg_parser(int method, int key, struct list *arglist,
+	   void *inv_data, void *func_data, MESSAGE *msg)
 {
+	char *arg = list_item(arglist, 0);
 	switch (key) {
 	case KW_GPG_PASSPHRASE:
 		if (gpg.passphrase) {
