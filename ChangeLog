@@ -1,5 +1,6 @@
 2003-08-25  Sergey Poznyakoff
 
+	* configure.ac: Raised version patchlevel
 	* doc/anubis.texi: Updated
 
 2003-08-24  Wojciech Polak

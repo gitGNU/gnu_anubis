@@ -470,9 +470,25 @@ This option specifies an output level for an additional file
 @end table
 @end deffn
 
-@deffn Option tracefile @var{file-name}
+@deffn Option tracefile @var{yes-or-no}
+@deffnx Option tracefile @var{file-name}
+@opindex tracefile @var{yes-or-no}
 @opindex tracefile @var{file-name}
+This option instructs @command{anubis} to log the execution of
+tests and actions from the RULE sections. This is useful
+for debugging the configuration files.
+
+When this option is used in the system-wide configuration file,
+only its first form is allowed. Using @samp{tracefile yes} enables
+logging of the actions and tests to the default syslog channel.
+Using @samp{tracefile no} disables it.
+
+When used in the user configuration file, a filename is allowed
+as an argument to this option. This allows you to explicitly
+specify to which file the tracing output should go.
+
 @end deffn
+
 
 
 @node Proxy Settings, Encryption Settings, Output Settings, CONTROL Section
@@ -1386,12 +1402,14 @@ gpg-sign office@@example.key
 @deffn Command gpg-sign-encrypt @var{gpg-keys}[:@var{gpg-signer-key}]
 @deffnx Command gpg-se @var{gpg-keys}[:@var{gpg-signer-key}]
 @cmindex gpg-sign-encrypt @var{gpg-keys}[:@var{gpg-signer-key}]
-This command signs and encrypts (both at same time) your outgoing message.
-It has the same effect as @command{gpg -se}. The first argument is
-required and is exactly the same as for @samp{gpg-encrypt}. The second
-argument is optional and must be preceded with a colon (@samp{:}).
-It specifies an optional signer key, which by default is set to your
-default private key (exactly the same as for @samp{gpg-sign}).
+This command simultaneously signs and encrypts your outgoing message.
+It has the same effect as @command{gpg} command line switch
+@option{-se}. The argument before the colon is a comma-separated list
+of PGP keys to encrypt the message with. This argument is mandatory.
+The second argument is optional and is separated from the first one
+by a colon (@samp{:}). This argument specifies the signer key. In
+the absense of the second argument your default private key
+is used.
 
 For example:
 
