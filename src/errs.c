@@ -59,8 +59,7 @@ anubis_verror (int error_code, const char *pfx, const char *fmt, va_list ap)
       else
 #endif /* HAVE_SYSLOG */
       if (topt & T_FOREGROUND)
-	mprintf ("[%lu] %s",
-		 (unsigned long) getpid (), msg);
+	mprintf ("[%lu] %s", (unsigned long) getpid (), msg);
       else
 	mprintf ("%s", msg);
     }

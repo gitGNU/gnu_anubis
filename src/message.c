@@ -49,7 +49,8 @@ message_add_body (MESSAGE * msg, char *key, char *value)
     }
   else
     {
-     /*FIXME*/}
+     /*FIXME*/
+    }
 }
 
 void
