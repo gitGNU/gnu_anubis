@@ -61,7 +61,7 @@ parse_transmap(int *cs, char *extuser, char *extaddr, char *dst, int size)
 	env.extaddr = extaddr;
 	env.size = size;
 
-	rcfile_process_section(CF_SUPERVISOR, "TRANSLATE", &env);
+	rcfile_process_section(CF_SUPERVISOR, "TRANSLATION", &env);
 	*cs = env.cs;
 	if (*cs == 1) { /* success */
 		if (check_username(env.into)) {
@@ -141,7 +141,7 @@ translate_parser(int method, int key, char *arg,
 		safe_strcpy(env->translate, ptr1);
 		safe_strcpy(env->into, ptr2);
 
-		if (strstr(env->translate, "@")) {
+		if (strchr(env->translate, '@')) {
 			if (env->extuser == 0)
 				break; /* failed */
 			safe_strcpy(user, env->translate);
@@ -229,7 +229,7 @@ struct rc_secdef translate_section = {
 void
 translate_section_init()
 {
-	struct rc_secdef *sp = anubis_add_section("TRANSLATE");
+	struct rc_secdef *sp = anubis_add_section("TRANSLATION");
 	rc_secdef_add_child(sp, &translate_secdef_child);
 }
 
