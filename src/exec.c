@@ -124,8 +124,8 @@ make_sockets(int fd[2])
 	return 0;
 }
 
-static void
-sig_local(int code)
+void
+cleanup_children()
 {
 	pid_t pid;
 	int status;
@@ -133,7 +133,20 @@ sig_local(int code)
 	while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
 		info(VERBOSE, _("Local program [%lu] finished."),
 		     (unsigned long) pid);
-	return;
+}
+
+static RETSIGTYPE
+sig_local(int code)
+{
+	/* EMPTY FUNCTION */
+	/* Notice: This signal handler is installed only by
+	   make_local_connection, that is used to launch the local
+	   mailer. After the mailer exits, the main code will read
+	   the return code from the mailer's outgoing pipe. If
+	   waitpid() is called before this happens, the pipe will be
+	   broken and the read will fail. Therefore, do not call waitpid()
+	   from the handler. This should be done after smtp_session()
+	   by calling cleanup_children() */
 }
 
 int
