@@ -26,7 +26,6 @@
 #include "extern.h"
 
 #if defined(WITH_GSASL)
-#include <gsasl.h>
 
 static Gsasl_ctx *ctx;   
 static LIST *anubis_mech_list;

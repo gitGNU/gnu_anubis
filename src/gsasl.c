@@ -28,7 +28,6 @@
 #if defined(WITH_GSASL)
 
 #include "lbuf.h"
-#include <gsasl.h>
 
 
 /* Basic I/O Functions */
