@@ -37,6 +37,13 @@ static void cipher_info(SSL *);
 static int  rand_int(int);
 static char *rand_md5(void);
 
+struct ssl_session {
+	SSL *ssl;
+	SSL_CTX *ctx;
+};
+
+typedef struct ssl_session SESS;
+
 void
 init_ssl_libs(void)
 {
@@ -54,12 +61,66 @@ init_ssl_libs(void)
 	return;
 }
 
+static char *
+_ssl_strerror(int rc)
+{
+	return ERR_error_string(rc, NULL);
+}
+
+static int
+_ssl_write(void *sd, char *data, size_t size, size_t *nbytes)
+{
+	SESS *sess = sd;
+	int rc, ec;
+
+	do {
+		rc = SSL_write(sess->ssl, data, size);
+	} while (rc <= 0
+		 && (ec = SSL_get_error(sess->ssl, rc))
+		                     == SSL_ERROR_WANT_WRITE);
+	if (rc > 0) {
+		*nbytes = rc;
+		return 0;
+	}
+	return ec;
+}
+
+static int
+_ssl_read(void *sd, char *data, size_t size, size_t *nbytes)
+{
+	SESS *sess = sd;
+	int rc, ec;
+
+	do {
+		rc = SSL_read(sess->ssl, data, size);
+	} while (rc <= 0
+		 && (ec = SSL_get_error(sess->ssl, rc))
+		                     == SSL_ERROR_WANT_READ);
+	if (rc > 0) {
+		*nbytes = rc;
+		return 0;
+	}
+	return ec;
+}
+
+static int
+_ssl_close(void *sd)
+{
+	SESS *sess = sd;
+	if (sess && sess->ssl) {
+		SSL_shutdown(sess->ssl);
+		SSL_free(sess->ssl);
+	}
+	if (sess->ctx)
+		SSL_CTX_free(sess->ctx);
+	free(sd);
+	return 0;
+}
+
 static void
 ssl_error(char *txt)
 {
-	char string_error[256];
-	memset(string_error, 0, sizeof(string_error));
-	ERR_error_string(ERR_get_error(), string_error);
+	char *string_error = ERR_error_string(ERR_get_error(), NULL);
 
 	if (options.termlevel != SILENT) {
 #ifdef HAVE_SYSLOG
@@ -97,31 +158,37 @@ init_ssl_client(void)
 	return (SSL_CTX *)ctx_local;
 }
 
-SSL *
-start_ssl_client(int sd_server, SSL_CTX *ctx_ptr)
+void *
+start_ssl_client(int sd_server)
 {
-	SSL *ssl_local = 0;
+	SESS *sd;
+	SSL *ssl = 0;
+	SSL_CTX *ctx = init_ssl_client();
+		
 	info(VERBOSE, _("Initializing the TLS/SSL connection with MTA..."));
 
-	if (!(ssl_local = SSL_new(ctx_ptr))) {
+	if (!(ssl = SSL_new(ctx))) {
 		ssl_error(_("Can't create a new SSL structure for a connection."));
 		return 0;
 	}
-	if (!(SSL_set_fd(ssl_local, sd_server))) {
+	if (!(SSL_set_fd(ssl, sd_server))) {
 		ssl_error(_("SSL_set_fd() failed."));
 		return 0;
 	}
-	SSL_set_connect_state(ssl_local);
-	if (SSL_connect(ssl_local) <= 0) {
+	SSL_set_connect_state(ssl);
+	if (SSL_connect(ssl) <= 0) {
 		ssl_error(_("TLS/SSL handshake failed!"));
 		return 0;
 	}
-	topt |= T_SSL_CLIENT;
 
 	if (options.termlevel > NORMAL)
-		cipher_info(ssl_local);
+		cipher_info(ssl);
 
-	return (SSL *)ssl_local;
+	sd = xmalloc(sizeof(*sd));
+	sd->ssl = ssl;
+	sd->ctx = ctx;
+	net_set_io(CLIENT, _ssl_read, _ssl_write, _ssl_close, _ssl_strerror);
+	return sd;
 }
 
 /***********************
@@ -161,31 +228,36 @@ init_ssl_server(void)
 	return (SSL_CTX *)ctx_local;
 }
 
-SSL *
-start_ssl_server(int sd_client, SSL_CTX *ctx_ptr)
+void *
+start_ssl_server(int sd_client)
 {
-	SSL *ssl_local = 0;
+	SSL *ssl = 0;
+	SSL_CTX *ctx = init_ssl_server();
+	
 	info(VERBOSE, _("Initializing the TLS/SSL connection with MUA..."));
 
-	if (!(ssl_local = SSL_new(ctx_ptr))) {
+	if (!(ssl = SSL_new(ctx))) {
 		ssl_error(_("Can't create a new SSL structure for a connection."));
 		return 0;
 	}
-	if (!(SSL_set_fd(ssl_local, sd_client))) {
+	if (!(SSL_set_fd(ssl, sd_client))) {
 		ssl_error(_("SSL_set_fd() failed."));
 		return 0;
 	}
-	SSL_set_accept_state(ssl_local);
-	if (SSL_accept(ssl_local) <= 0) {
+	SSL_set_accept_state(ssl);
+	if (SSL_accept(ssl) <= 0) {
 		ssl_error(_("TLS/SSL handshake failed!"));
 		return 0;
 	}
-	topt |= T_SSL_SERVER;
 
 	if (options.termlevel > NORMAL)
-		cipher_info(ssl_local);
+		cipher_info(ssl);
 
-	return (SSL *)ssl_local;
+	sd = xmalloc(sizeof(*sd));
+	sd->ssl = ssl;
+	sd->ctx = ctx;
+	net_set_io(SERVER, _ssl_read, _ssl_write, _ssl_close, _ssl_strerror);
+	return sd;
 }
 
 /*****************
@@ -240,25 +312,6 @@ cipher_info(SSL *ssl_local)
 
 	free(x509buf);
 	X509_free(cert);
-	return;
-}
-
-void
-end_ssl(int method, SSL *ssl_ptr, SSL_CTX *ctx_ptr)
-{
-	if ((topt & T_SSL_CLIENT) || (topt & T_SSL_SERVER)) {
-		if (ssl_ptr) {
-			SSL_shutdown(ssl_ptr);
-			SSL_free(ssl_ptr);
-		}
-		if (ctx_ptr)
-			SSL_CTX_free(ctx_ptr);
-
-		if (method == CLIENT)
-			topt &= ~T_SSL_CLIENT;
-		else if (method == SERVER)
-			topt &= ~T_SSL_SERVER;
-	}
 	return;
 }
 

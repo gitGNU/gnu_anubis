@@ -38,16 +38,84 @@ static int cipher_info(gnutls_session);
 
 #define DH_BITS 768
 gnutls_dh_params dh_params;
+/* FIXME: should they belong to struct secure_struct? */
+static gnutls_certificate_client_credentials xcred;
+static gnutls_certificate_server_credentials x509_cred;
+
+static const char *
+_tls_strerror(int rc)
+{
+	return gnutls_strerror(rc);
+}
+
+static int
+_tls_write(void *sd, char *data, size_t size, size_t *nbytes)
+{
+	int rc;
+	
+	/* gnutls_record_send() docs say:
+	   If the EINTR is returned by the internal push function (write())
+	   then GNUTLS_E_INTERRUPTED, will be returned. If
+	   GNUTLS_E_INTERRUPTED or GNUTLS_E_AGAIN is returned you must call
+	   this function again, with the same parameters. Otherwise the write
+	   operation will be corrupted and the connection will be
+	   terminated. */
+	
+	do
+		rc = gnutls_record_send(sd, data, size);
+	while (rc == GNUTLS_E_INTERRUPTED || rc == GNUTLS_E_AGAIN);
+	if (rc >= 0) {
+		*nbytes = rc;
+		return 0;
+	} 
+	return rc;
+}
+
+static int
+_tls_read(void *sd, char *data, size_t size, size_t *nbytes)
+{
+	int rc = gnutls_record_recv(sd, data, size);
+	if (rc >= 0) {
+		*nbytes = rc;
+		return 0;
+	} 
+	return rc;
+}
+
+static int
+_tls_close(void *sd)
+{
+	if (sd) {
+		gnutls_bye(sd, GNUTLS_SHUT_RDWR);
+		gnutls_deinit(sd);
+	}
+	return 0;
+}
+
+static void
+_tls_cleanup_xcred()
+{
+	if (xcred)
+		gnutls_certificate_free_credentials(xcred);
+}
+
+static void
+_tls_cleanup_x509()
+{
+	if (x509_cred)
+		gnutls_certificate_free_credentials(x509_cred);
+}
 
 void
-init_tls_libs(void)
+init_ssl_libs(void)
 {
 	gnutls_global_init();
+	atexit(gnutls_global_deinit);
 	return;
 }
 
-gnutls_session
-start_tls_client(int sd_server)
+void *
+start_ssl_client(int sd_server)
 {
 	int rs;
 	gnutls_session session = 0;
@@ -66,11 +134,13 @@ start_tls_client(int sd_server)
 	gnutls_kx_set_priority(session, kx_priority);
 	gnutls_mac_set_priority(session, mac_priority);
 
-	gnutls_certificate_allocate_credentials(&secure.xcred);
+	gnutls_certificate_allocate_credentials(&xcred);
 	if (secure.cafile)
-		gnutls_certificate_set_x509_trust_file(secure.xcred,
-			secure.cafile, GNUTLS_X509_FMT_PEM);
-	gnutls_credentials_set(session, GNUTLS_CRD_CERTIFICATE, secure.xcred);
+		gnutls_certificate_set_x509_trust_file(xcred,
+						       secure.cafile,
+						       GNUTLS_X509_FMT_PEM);
+	gnutls_credentials_set(session, GNUTLS_CRD_CERTIFICATE, xcred);
+	atexit(_tls_cleanup_xcred);
 	gnutls_transport_set_ptr(session, sd_server);
 
 	rs = gnutls_handshake(session);
@@ -80,14 +150,14 @@ start_tls_client(int sd_server)
 		gnutls_perror(rs);
 		return 0;
 	}
-	topt |= T_SSL_CLIENT;
 
 	if (secure.cafile)
 		verify_certificate(session);
 	if (options.termlevel > NORMAL)
 		cipher_info(session);
 
-	return (gnutls_session)session;
+	net_set_io(CLIENT, _tls_read, _tls_write, _tls_close, _tls_strerror);
+	return session;
 }
 
 /***********************
@@ -115,31 +185,34 @@ initialize_tls_session(void)
 
 	gnutls_init(&session, GNUTLS_SERVER);
 	gnutls_set_default_priority(session);   
-	gnutls_credentials_set(session, GNUTLS_CRD_CERTIFICATE, secure.x509_cred);
+	gnutls_credentials_set(session, GNUTLS_CRD_CERTIFICATE, x509_cred);
 	gnutls_certificate_server_set_request(session, GNUTLS_CERT_REQUEST);
 	gnutls_dh_set_prime_bits(session, DH_BITS);
 
 	return (gnutls_session)session;
 }
 
-gnutls_session
-start_tls_server(int sd_client)
+void *
+start_ssl_server(int sd_client)
 {
 	int rs;
 	gnutls_session session = 0;
 
 	info(VERBOSE, _("Initializing the TLS/SSL connection with MUA..."));
 
-	gnutls_certificate_allocate_credentials(&secure.x509_cred);
+	gnutls_certificate_allocate_credentials(&x509_cred);
+	atexit(_tls_cleanup_x509);
 	if (secure.cafile) {
-		gnutls_certificate_set_x509_trust_file(secure.x509_cred,
-			secure.cafile, GNUTLS_X509_FMT_PEM);
+		gnutls_certificate_set_x509_trust_file(x509_cred,
+						       secure.cafile,
+						       GNUTLS_X509_FMT_PEM);
 	}
-	gnutls_certificate_set_x509_key_file(secure.x509_cred,
-		secure.cert, secure.key, GNUTLS_X509_FMT_PEM);
+	gnutls_certificate_set_x509_key_file(x509_cred,
+					     secure.cert, secure.key,
+					     GNUTLS_X509_FMT_PEM);
 
 	generate_dh_params();
-	gnutls_certificate_set_dh_params(secure.x509_cred, dh_params);
+	gnutls_certificate_set_dh_params(x509_cred, dh_params);
 
 	session = initialize_tls_session();
 	gnutls_transport_set_ptr(session, sd_client);
@@ -150,11 +223,11 @@ start_tls_server(int sd_client)
 		gnutls_perror(rs);
 		return 0;
 	}
-	topt |= T_SSL_SERVER;
 	if (options.termlevel > NORMAL)
 		cipher_info(session);
 
-	return (gnutls_session)session;
+	net_set_io(SERVER, _tls_read, _tls_write, _tls_close, _tls_strerror);
+	return session;
 }
 
 static void
@@ -192,7 +265,7 @@ verify_certificate(gnutls_session session)
 	return;
 }
 
-#define PRINTX(x,y) if (y[0]!=0) printf(" -   %s %s\n", x, y)
+#define PRINTX(x,y) if (y[0]!=0) fprintf(stderr, " -   %s %s\n", x, y); 
 #define PRINT_DN(X) PRINTX( "CN:", X.common_name); \
 	PRINTX( "OU:", X.organizational_unit_name); \
 	PRINTX( "O:", X.organization); \
@@ -211,7 +284,7 @@ cipher_info(gnutls_session session)
 
 	kx = gnutls_kx_get(session);
 	tmp = gnutls_kx_get_name(kx);
-	printf("- Key Exchange: %s\n", tmp);
+	fprintf(stderr, "- Key Exchange: %s\n", tmp);
 
 	cred = gnutls_auth_get_type(session);
 	switch (cred)
@@ -241,19 +314,19 @@ cipher_info(gnutls_session session)
 	}
 
 	tmp = gnutls_protocol_get_name(gnutls_protocol_get_version(session));
-	printf(_("- Protocol: %s\n"), tmp);
+	fprintf(stderr, _("- Protocol: %s\n"), tmp);
 
 	tmp = gnutls_certificate_type_get_name(gnutls_certificate_type_get(session));
-	printf(_("- Certificate Type: %s\n"), tmp);
+	fprintf(stderr, _("- Certificate Type: %s\n"), tmp);
 
 	tmp = gnutls_compression_get_name( gnutls_compression_get(session));
-	printf(_("- Compression: %s\n"), tmp);
+	fprintf(stderr, _("- Compression: %s\n"), tmp);
 
 	tmp = gnutls_cipher_get_name(gnutls_cipher_get(session));
-	printf(_("- Cipher: %s\n"), tmp);
+	fprintf(stderr, _("- Cipher: %s\n"), tmp);
 
 	tmp = gnutls_mac_get_name(gnutls_mac_get(session));
-	printf(_("- MAC: %s\n"), tmp);
+	fprintf(stderr, _("- MAC: %s\n"), tmp);
 	return 0;
 }
 
@@ -264,8 +337,6 @@ print_x509_certificate_info(gnutls_session session)
 	char serial[40];
 	size_t digest_size = sizeof(digest);
 	int serial_size = sizeof(serial);
-	char printable[120];
-	char *print;
 	time_t expiret = gnutls_certificate_expiration_time_peers(session);
 	time_t activet = gnutls_certificate_activation_time_peers(session);
 	const gnutls_datum *cert_list;
@@ -274,73 +345,64 @@ print_x509_certificate_info(gnutls_session session)
 	gnutls_x509_dn dn;
 
 	cert_list = gnutls_certificate_get_peers(session, &cert_list_size);
-	if (cert_list_size > 0 && gnutls_certificate_type_get(session)
-	== GNUTLS_CRT_X509) {
-		printf(_(" - Certificate info:\n"));
-		printf(_(" - Certificate is valid since: %s"), ctime(&activet));
-		printf(_(" - Certificate expires: %s"), ctime(&expiret));
+	if (cert_list_size > 0
+	    && gnutls_certificate_type_get(session) == GNUTLS_CRT_X509) {
+		fprintf(stderr, _(" - Certificate info:\n"));
+		fprintf(stderr, _(" - Certificate is valid since: %s"),
+			ctime(&activet));
+		fprintf(stderr, _(" - Certificate expires: %s"),
+			ctime(&expiret));
 
 		if (gnutls_x509_fingerprint(GNUTLS_DIG_MD5,
-		&cert_list[0], digest, &digest_size) >= 0) {
-			print = printable;
+					    &cert_list[0], digest,
+					    &digest_size) >= 0) {
+			fprintf(stderr, _(" - Certificate fingerprint: "));
 			for (i = 0; i < digest_size; i++) {
-				sprintf(print, "%.2x ", (unsigned char) digest[i]);
-				print += 3;
+				fprintf(stderr, "%.2x ",
+					(unsigned char) digest[i]);
 			}
-			printf(_(" - Certificate fingerprint: %s\n"), printable);
+			fprintf(stderr, "\n");
 		}
 
 		if (gnutls_x509_extract_certificate_serial(&cert_list[0],
-		serial, &serial_size) >= 0) {
-			print = printable;
+							   serial,
+							   &serial_size) >= 0) {
+			fprintf(stderr,
+				_(" - Certificate serial number: "));
 			for (i = 0; i < serial_size; i++) {
-				sprintf(print, "%.2x ", (unsigned char) serial[i]);
-				print += 3;
+				fprintf(stderr, "%.2x ",
+					(unsigned char) serial[i]);
 			}
-			printf(_(" - Certificate serial number: %s\n"), printable);
+			fprintf(stderr, "\n");
 		}
 		algo = gnutls_x509_extract_certificate_pk_algorithm(&cert_list[0], &bits);
 
-		printf(_("Certificate public key: "));
+		fprintf(stderr, _("Certificate public key: "));
 		if (algo == GNUTLS_PK_RSA) {
-			printf(_("RSA\n"));
-			printf(ngettext(" Modulus: %d bit\n",
-					" Modulus: %d bits\n", bits), bits);
+			fprintf(stderr, _("RSA\n"));
+			fprintf(stderr, ngettext(" Modulus: %d bit\n",
+						 " Modulus: %d bits\n", bits),
+				bits);
 		}
 		else if (algo == GNUTLS_PK_DSA) {
-			printf(_("DSA\n"));
-			printf(ngettext(" Exponent: %d bit\n",
-					" Exponent: %d bits\n", bits), bits);
+			fprintf(stderr, _("DSA\n"));
+			fprintf(stderr, ngettext(" Exponent: %d bit\n",
+						 " Exponent: %d bits\n", bits),
+				bits);
 		}
 		else
-			printf(_("UNKNOWN\n"));
+			fprintf(stderr, _("UNKNOWN\n"));
 
-		printf(_(" - Certificate version: #%d\n"),
+		fprintf(stderr, _(" - Certificate version: #%d\n"),
 			gnutls_x509_extract_certificate_version(&cert_list[0]));
 
 		gnutls_x509_extract_certificate_dn(&cert_list[0], &dn);
 		PRINT_DN(dn);
 
 		gnutls_x509_extract_certificate_issuer_dn(&cert_list[0], &dn);
-		printf(_(" - Certificate Issuer's info:\n"));
+		fprintf(stderr, _(" - Certificate Issuer's info:\n"));
 		PRINT_DN(dn);
 	}
-}
-
-void
-end_tls(int method, gnutls_session session)
-{
-	if ((topt & T_SSL_CLIENT) || (topt & T_SSL_SERVER)) {
-		if (session) {
-			gnutls_bye(session, GNUTLS_SHUT_RDWR);
-			gnutls_deinit(session);
-		}
-		if (method == CLIENT)
-			topt &= ~T_SSL_CLIENT;
-		else if (method == SERVER)
-			topt &= ~T_SSL_SERVER;
-	}
-	return;
 }
 
 #endif /* HAVE_TLS */
