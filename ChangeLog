@@ -1,3 +1,9 @@
+2003-03-03  Wojciech Polak
+
+	* examples/1anubisrc: Updated to the new syntax.
+	* testsuite/etc/std.in: Updated.
+	* testsuite/etc/std.pat: Likewise.
+
 2003-03-03  Sergey Poznyakoff
 
 	* TODO: Updated

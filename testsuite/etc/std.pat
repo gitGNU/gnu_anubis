@@ -26,16 +26,14 @@ BEGIN SECTION CONTROL
   ASGN: remote-mta = localhost:25
   ASGN: ssl = yes
 END SECTION CONTROL
-BEGIN SECTION ALL
-  ASGN: gpg-passphrase = PASSWORD
-  REMOVE HEADER[Lines]
-END SECTION ALL
 BEGIN SECTION RULE
-  COND: HEADER[To] ^(.*)<?(USERNAME@)(.*)>?(.*)
+  ASGN: gpg-passphrase = MYSECRETPASSPHRASE
+  REMOVE HEADER[Lines]
+  COND: COMMAND[mail from] .*<?root@localhost>?
   IFTRUE:
-    MODIFY HEADER[To] "\1\2\3.ORG\4"
+    STOP
   END COND
-  COND: AND (HEADER[Subject] (.*),HEADER[Subject] URGENT)
+  COND: AND (HEADER[Subject] (.*),NOT (HEADER[Subject] URGENT))
   IFTRUE:
     ADD HEADER[X-Comment] "This message is not URGENT (\1)."
     ADD HEADER[X-Comment] "GNU's Not Unix! (\1)"
@@ -54,22 +52,9 @@ BEGIN SECTION RULE
   IFTRUE:
     ASGN: signature-file-append = yes
   END COND
-  COND: HEADER[Subject] clearmsg
-  IFTRUE:
-    ASGN: body-clear-append = src/hi.txt
-    ASGN: external-body-processor = /usr/bin/formail
-  END COND
   COND: HEADER[Subject] external
   IFTRUE:
     ASGN: external-body-processor = /usr/bin/formail
-  END COND
-  COND: HEADER ^gpg-encrypt
-  IFTRUE:
-    ASGN: gpg-encrypt = USERNAME
-  END COND
-  COND: HEADER ^gpg-sign
-  IFTRUE:
-    ASGN: gpg-sign = yes
   END COND
   COND: HEADER[Subject] gpg-all
   IFTRUE:
@@ -84,14 +69,6 @@ BEGIN SECTION RULE
   IFTRUE:
     ASGN: gpg-sign = yes
   END COND
-  COND: HEADER ALL
-  IFTRUE:
-    ASGN: body-append = misc/notatki.txt
-    ASGN: gpg-encrypt = USERNAME
-    ASGN: gpg-sign = PASSWORD
-    ASGN: rot13-subject = yes
-    ASGN: ROT13-BODY = yes
-  END COND
   COND: HEADER[Subject] rot13-all
   IFTRUE:
     ASGN: rot13-subject = yes
@@ -105,33 +82,14 @@ BEGIN SECTION RULE
   IFTRUE:
     ASGN: rot13-subject = yes
   END COND
-  COND: HEADER[Subject] rm-rrt
-  IFTRUE:
-    ASGN: rm-rrt = USERNAME@localhost
-  END COND
-  COND: HEADER[Subject] rm-post
-  IFTRUE:
-    ASGN: rm-post = alt.unix
-  END COND
-  COND: HEADER[Subject] rm-gpg
-  IFTRUE:
-    ASGN: rm-rrt = USERNAME@localhost
-    ASGN: rm-gpg = USERNAME
-  END COND
-  COND: HEADER[Subject] rm-all
-  IFTRUE:
-    ASGN: rm-rrt = USERNAME@tokyo.net
-    ASGN: rm-header = EXTRA-Z1: TEST
-  END COND
   COND: HEADER[Subject] body-append
   IFTRUE:
-    ASGN: body-append = misc/notatki.txt
+    ASGN: body-append = misc/notes.txt
   END COND
   COND: HEADER[Subject] ALL
   IFTRUE:
-    ASGN: body-append = misc/notatki.txt
+    ASGN: body-append = misc/notes.txt
     ASGN: gpg-encrypt = USERNAME
-    ASGN: gpg-sign = PASSWORD
     ASGN: rot13-subject = yes
     ASGN: rot13-body = yes
   END COND
