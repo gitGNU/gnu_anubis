@@ -434,11 +434,11 @@ smtp_print_reply (FILE * fp, struct smtp_reply *repl)
 
 
 void
-smtp_ehlo (void)
+smtp_ehlo (int xelo)
 {
   struct smtp_reply repl;
 
-  send_line ("EHLO localhost");
+  send_line (xelo ? "XELO localhost" : "EHLO localhost");
   smtp_get_reply (&repl);
   if (repl.code != 250)
     {
@@ -1181,20 +1181,20 @@ synch (void)
     }
   smtp_free_reply (&repl);
 
-  smtp_ehlo ();
+  smtp_ehlo (1);
 
 #ifdef HAVE_TLS
   if (enable_tls && find_capa (&smtp_capa, "STARTTLS", NULL) == 0)
     {
       starttls ();
-      smtp_ehlo ();
+      smtp_ehlo (0);
     }
 #endif
 
   smtp_auth ();
 
   /* Get the capabilities */
-  smtp_ehlo ();
+  smtp_ehlo (0);
 
   if (find_capa (&smtp_capa, "XDATABASE", NULL))
     {
