@@ -1,4 +1,18 @@
-2003-02-28  Sergey Poznyakoff 
+2003-02-28  Wojciech Polak
+
+	* configure.ac: Bumped to 3.9.0 (unreleased, internal version).
+	* src/main.h: Moved all the stuff to main.c. Removed main.h.
+	* src/files.c (message_append_signature_file): Fixed prefix.
+	* src/main.c: Removed unused ropt variable.
+	* src/extern.h: Likewise.
+	* src/list.h: Added missing copyright.
+	* src/errs.c: Fixed preprocessor directives.
+	* src/log.c: Likewise.
+	* src/headers.h (message_append_text_file): Added prototype.
+	  (message_append_signature_file): Likewise.
+	* src/Makefile.am: Removed main.h.
+
+2003-02-28  Sergey Poznyakoff
 
 	User-visible changes:
 	  New syntactical entities:
@@ -63,7 +77,7 @@
 	  
 	* TODO: Updated
 	
-2003-02-26  Sergey Poznyakoff 
+2003-02-26  Sergey Poznyakoff
 
 	Changed the message processing algorithm to process a
 	message as a whole. The rcfile grammar is changed
