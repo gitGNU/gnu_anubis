@@ -35,12 +35,7 @@ mprintf(char *format, ...)
 		return;
 
 	va_start(arglist, format);
-#ifdef HAVE_VSNPRINTF
-	vsnprintf(txt, LINEBUFFER,
-#else
-	vsprintf(txt,
-#endif /* HAVE_VSNPRINTF */
-		format, arglist);
+	vsnprintf(txt, LINEBUFFER, format, arglist);
 	va_end(arglist);
 
 	puts(txt);
