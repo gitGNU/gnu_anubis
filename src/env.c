@@ -59,12 +59,14 @@ static char *pidfile;
 #define OPT_SHOW_CONFIG      261
 #define OPT_RELAX_PERM_CHECK 262
 #define OPT_PIDFILE          263
+#define OPT_FROM             264
 
 static struct option gopt[] = {
   {"bind", required_argument, 0, 'b'},
   {"remote-mta", required_argument, 0, 'r'},
   {"local-mta", required_argument, 0, 'l'},
   {"foreground", no_argument, 0, 'f'},
+  {"from", required_argument, 0, OPT_FROM},
   {"stdio", no_argument, 0, 'i'},
   {"silent", no_argument, 0, 's'},
   {"verbose", no_argument, 0, 'v'},
@@ -169,6 +171,10 @@ get_options (int argc, char *argv[])
 	    exit (1);
 	  break;
 
+	case OPT_FROM:
+	  assign_string (&from_address, optarg);
+	  break;
+	  
 	case '?':
 	default:
 	  mprintf (_("Try '%s --help' for more information."), argv[0]);
@@ -178,8 +184,17 @@ get_options (int argc, char *argv[])
 
   x_argc = argc - optind;
   x_argv = argv + optind;
-  
-  return;
+
+  if (from_address)  /* Force MDA mode */
+    anubis_mode = anubis_mda;
+
+  if (anubis_mode == anubis_mda)
+    {
+      if (!(topt & T_LOCAL_MTA))
+	anubis_error (EX_USAGE, 0, _("--mode=mda requires --local-mta"));
+      if (x_argc == 0)
+	anubis_error (EX_USAGE, 0, _("Missing recipient addresses"));
+    }
 }
 
 /*********************
