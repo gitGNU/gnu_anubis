@@ -1,3 +1,8 @@
+2003-07-30  Sergey Poznyakoff
+
+	* doc/anubis.texi (Remailers): Document the ways of
+	GPG signing/encrypting the messages being remailed.
+
 2003-07-26  Sergey Poznyakoff  
 
 	* src/tunnel.c (get_boundary): Bugfix. Operate on the unaltered
