@@ -307,7 +307,6 @@ guile_process_proc(char *procname, struct list **hdr, char **body)
 
 	/* Prepare the arguments */
 	arg_hdr = anubis_to_guile(*hdr);
-	remcrlf(*body);
 	arg_body = scm_makfrom0str(*body);
 
 	/* Evaluate the procedure */
@@ -383,6 +382,15 @@ guile_process_list(struct list **hdr, char **body)
 		guile_process_proc(p->line, hdr, body);
 }
 
+void
+guile_postprocess_list(struct list **hdr, char **body)
+{
+	struct list *p;
+
+	for (p = postprocess_head; p; p = p->next)
+		guile_process_proc(p->line, hdr, body);
+}
+
 int
 guile_proclist_empty()
 {
@@ -415,6 +423,8 @@ static struct rc_kwdef guile_rule_kw[] = {
 	{ "guile-load-path-append", KW_GUILE_LOAD_PATH_APPEND }, 
 	{ "guile-load-program",     KW_GUILE_LOAD_PROGRAM },
 	{ "guile-rewrite-line",     KW_GUILE_REWRITE_LINE },
+	{ "guile-process",          KW_GUILE_PROCESS },
+	{ "guile-postprocess",      KW_GUILE_POSTPROCESS },
 	{ NULL }
 };
 
@@ -442,7 +452,8 @@ guile_parser(int method, int key, char *arg,
 
 	case KW_GUILE_PROCESS:
 		process_tail = new_element(process_tail,
-					   &process_head, strdup(arg));
+					   &process_head,
+					   strdup(arg));
 		break;
 
 	case KW_GUILE_POSTPROCESS:       
