@@ -42,12 +42,6 @@ sig_timeout(int code)
 void
 free_mem(void)
 {
-	destroy_assoc_list(&message.commands);
-	destroy_assoc_list(&message.header);
-	destroy_string_list(&message.mime_hdr);
-	
-	xfree(message.body);
-	xfree(message.boundary);
 	xfree(rm.rrt);
 	xfree(rm.post);
 	xfree(rm.header);
