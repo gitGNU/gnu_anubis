@@ -1,3 +1,7 @@
+2003-07-21  Sergey Poznyakoff 
+
+	* testsuite/etc/add.in (body-append): Use TOP_SRCDIR.
+
 2003-07-21  Wojciech Polak
 
 	* testsuite/etc/add-body-file.pat: New test.
