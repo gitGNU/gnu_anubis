@@ -28,9 +28,6 @@
 
 #ifdef WITH_GUILE
 
-static struct list *process_head, *process_tail;
-static struct list *postprocess_head, *postprocess_tail;
-
 static void guile_ports_open();
 static void guile_ports_close();
 
@@ -143,144 +140,43 @@ eval_catch_handler(void *data, SCM tag, SCM throw_args)
 	longjmp(*(jmp_buf*)data, 1);
 }
 
-void
-guile_rewrite_line(char *procname, const char *source_line)
-{
-	SCM arg;
-	SCM procsym;
-	jmp_buf jmp_env;
-	SCM res;
-	char str[LINEBUFFER+1];
-
-	/* Prepare the argument */
-	if (source_line) {
-		strncpy(str, source_line, LINEBUFFER);
-		remcrlf(str);
-		arg = scm_makfrom0str(str);
-	} else
-		arg = SCM_BOOL_F;
-
-	/* Evaluate the procedure */
-	procsym = SCM_VARIABLE_REF(scm_c_lookup(procname));
-	if (scm_procedure_p(procsym) != SCM_BOOL_T) {
-		anubis_error(SOFT,
-			     _("%s not a procedure object"), procname);
-		return;
-	}
-
-	guile_ports_open();
-	if (setjmp(jmp_env)) {
-		guile_ports_close();
-		return;
-	}
-
-	res = scm_internal_lazy_catch(
-		SCM_BOOL_T,
-		eval_catch_body,
-		(void*) SCM_LIST2(procsym,
-				  scm_listify(scm_copy_tree(SCM_IM_QUOTE),
-					      arg,
-					      SCM_UNDEFINED)),
-		eval_catch_handler, &jmp_env);
-	
-	if (SCM_IMP(res) && SCM_BOOLP(res)) {
-		if (res == SCM_BOOL_F) {
-			message.remlist_tail = new_element(
-				message.remlist_tail,
-				&message.remlist, str);
-		}
-	} else if (SCM_NIMP(res) && SCM_STRINGP(res)) {
-		char *new_str = strdup (SCM_STRING_CHARS(res));
-		message.modlist_tail = new_element(message.modlist_tail,
-						   &message.modlist,
-						   str);
-		message.modlist_tail->modify = new_str;
-	} else if (SCM_NIMP(res) && SCM_CONSP(res)) {
-		SCM car = SCM_CAR(res);
-		SCM cdr = SCM_CDR(res);
-		int n;
-		
-		if (car == SCM_BOOL_F) {
-			message.remlist_tail =
-				new_element(message.remlist_tail,
-					    &message.remlist, str);
-		} else {
-			char *new_str = strdup (SCM_STRING_CHARS(car));
-			message.modlist_tail =
-				new_element(message.modlist_tail,
-					    &message.modlist,
-					    str);
-			message.modlist_tail->modify = new_str;
-		}
-
-
-		for (n = 2; cdr != SCM_EOL; cdr = SCM_CDR(cdr), n++) {
-			SCM cell = SCM_CAR(cdr);
-			if (!(SCM_NIMP(cell) && SCM_STRINGP(cell))) {
-				anubis_error(SOFT,
-					     _("Bad return type in element %d from %s."),
-					     n, procname);
-			} else {
-				char *new_str = strdup(SCM_STRING_CHARS(cell));
-				message.addlist_tail =
-					new_element(message.addlist_tail,
-						    &message.addlist,
-						    new_str);
-			}
-		}
-	} else 
-		anubis_error(SOFT,
-			     _("Bad return type from %s"),
-			     procname);
-	guile_ports_close();
-}
 
 static struct list *
 guile_to_anubis(SCM cell)
 {
-	static struct list *head = NULL, *tail = NULL;
+	static struct list *list;
 
+	list = list_create();
 	for (; cell != SCM_EOL; cell = SCM_CDR(cell)) {
 		SCM car = SCM_CAR(cell);
 		if (SCM_NIMP(car) && SCM_CONSP(car)) {
-			char *name;
-			char *value;
-			char *line;
+			ASSOC *asc = xmalloc(sizeof(*asc));
 			
-			name = SCM_STRING_CHARS(SCM_CAR(car));
-			value = SCM_STRING_CHARS(SCM_CDR(car));
-			line = xmalloc(strlen(name) + 2 + strlen(value) + 3);
-			sprintf(line, "%s: %s\r\n", name, value);
-			tail = new_element(tail, &head, line);
-			xfree(line);
+			asc->key   = SCM_STRING_CHARS(SCM_CAR(car));
+			asc->value = SCM_STRING_CHARS(SCM_CDR(car));
+			list_append(list, asc);
 		}
 	}
-	return head;
+	return list;
 }
 
 static SCM
-anubis_to_guile(struct list *p)
+anubis_to_guile(struct list *list)
 {
+	ASSOC *asc;
 	SCM head = SCM_EOL, 
-	    tail; /* Don't let gcc fool you: tail cannot be used 
-	             uninitialized */
+		tail; /* Don't let gcc fool you: tail cannot be used 
+			 uninitialized */
 
-	for (; p; p = p->next) {
+	for (asc = list_first(list); asc; asc = list_next(list)) {
 		SCM cell, car, cdr;
-		char *cp;
 
-		cp = strchr(p->line, ':');
-		if (!cp)
-			continue;
-		*cp = 0;
-		car = scm_makfrom0str(p->line);
-		*cp = ':';
-
-		for (cp++; *cp && isspace(*cp); cp++)
-			;
-		remcrlf(cp);
-		cdr = scm_makfrom0str(cp);
-		strcat(cp, CRLF);
+		if (asc->key)
+			car = scm_makfrom0str(asc->key);
+		else
+			car = SCM_BOOL_F;
+		
+		cdr = scm_makfrom0str(asc->value);
 		
 		SCM_NEWCELL(cell);
 		
@@ -298,7 +194,7 @@ anubis_to_guile(struct list *p)
 
 /* (define (postproc header-list body)*/
 void
-guile_process_proc(char *procname, struct list **hdr, char **body)
+guile_process_proc(char *procname, MESSAGE *msg)
 {
 	SCM arg_hdr, arg_body;
 	SCM procsym;
@@ -306,8 +202,8 @@ guile_process_proc(char *procname, struct list **hdr, char **body)
 	SCM res;
 
 	/* Prepare the arguments */
-	arg_hdr = anubis_to_guile(*hdr);
-	arg_body = scm_makfrom0str(*body);
+	arg_hdr = anubis_to_guile(msg->header);
+	arg_body = scm_makfrom0str(msg->body);
 
 	/* Evaluate the procedure */
 	procsym = SCM_VARIABLE_REF(scm_c_lookup(procname));
@@ -345,8 +241,8 @@ guile_process_proc(char *procname, struct list **hdr, char **body)
 			/* Preserve the headers */;
 		} else if (SCM_NIMP(ret_hdr) && SCM_CONSP(ret_hdr)) {
 			/* Replace them */
-			destroy_list(hdr);
-			*hdr = guile_to_anubis(ret_hdr);
+			destroy_assoc_list(msg->header);
+			msg->header = guile_to_anubis(ret_hdr);
 		} else
 			anubis_error(SOFT,
 				     _("Bad car type in return from %s"),
@@ -356,12 +252,12 @@ guile_process_proc(char *procname, struct list **hdr, char **body)
 			/* Preserve the body as is */;
 		} else if (ret_body == SCM_BOOL_F) {
 			/* Delete it */
-			free(*body);
-			*body = strdup("");
+			free(msg->body);
+			msg->body = strdup("");
 		} else if (SCM_NIMP(ret_body) && SCM_STRINGP(ret_body)) {
 			/* Replace with the given string */
-			xfree(*body);
-			*body = strdup(SCM_STRING_CHARS(ret_body));
+			xfree(msg->body);
+			msg->body = strdup(SCM_STRING_CHARS(ret_body));
 		} else
 			anubis_error(SOFT,
 				     _("Bad cdr type in return from %s"),
@@ -371,30 +267,6 @@ guile_process_proc(char *procname, struct list **hdr, char **body)
 			     _("Bad return type from %s"),
 			     procname);
 	guile_ports_close();
-}
-
-void
-guile_process_list(struct list **hdr, char **body)
-{
-	struct list *p;
-
-	for (p = process_head; p; p = p->next)
-		guile_process_proc(p->line, hdr, body);
-}
-
-void
-guile_postprocess_list(struct list **hdr, char **body)
-{
-	struct list *p;
-
-	for (p = postprocess_head; p; p = p->next)
-		guile_process_proc(p->line, hdr, body);
-}
-
-int
-guile_proclist_empty()
-{
-	return process_head == NULL;
 }
 
 /* RC file stuff */
@@ -413,8 +285,6 @@ static struct rc_kwdef guile_kw[] = {
 	{ "guile-debug",            KW_GUILE_DEBUG },
 	{ "guile-load-path-append", KW_GUILE_LOAD_PATH_APPEND }, 
 	{ "guile-load-program",     KW_GUILE_LOAD_PROGRAM },
-	{ "guile-process",          KW_GUILE_PROCESS },
-	{ "guile-postprocess",      KW_GUILE_POSTPROCESS },
 	{ NULL }
 };
 
@@ -424,13 +294,12 @@ static struct rc_kwdef guile_rule_kw[] = {
 	{ "guile-load-program",     KW_GUILE_LOAD_PROGRAM },
 	{ "guile-rewrite-line",     KW_GUILE_REWRITE_LINE },
 	{ "guile-process",          KW_GUILE_PROCESS },
-	{ "guile-postprocess",      KW_GUILE_POSTPROCESS },
 	{ NULL }
 };
 
 int
-guile_parser(int method, int key, char *arg,
-	     void *inv_data, void *func_data, char *line)
+guile_parser(int method, int key, char *arg, void *inv_data, void *func_data,
+	     MESSAGE *msg)
 {
 	switch (key) {
 	case KW_GUILE_OUTPUT:
@@ -451,19 +320,12 @@ guile_parser(int method, int key, char *arg,
 		break;
 
 	case KW_GUILE_PROCESS:
-		process_tail = new_element(process_tail,
-					   &process_head,
-					   strdup(arg));
-		break;
-
-	case KW_GUILE_POSTPROCESS:       
-		postprocess_tail = new_element(postprocess_tail,
-					       &postprocess_head,
-					       strdup(arg));
+		guile_process_proc(arg, msg);
 		break;
 
 	case KW_GUILE_REWRITE_LINE:
-		guile_rewrite_line(arg, line);
+		/*FIXME*/
+		/*guile_rewrite_line(arg, line);*/
 		break;
 		
 	default:
