@@ -1747,9 +1747,25 @@ Work noisily.
 @item --debug
 @itemx -D
 Debug mode.
-@item --check-config
-@itemx -c
-Run the configuration file syntax checker.
+@item --check-config[=@var{level}]
+@itemx -c[@var{level}]
+Run the configuration file syntax checker. Optional @var{level}
+specifies the verbosity level. The following levels are allowed:
+
+@table @asis
+@item 0
+Display only errors. This is the default.
+
+@item 1
+Print the syntax tree after parsing the file.
+
+@item 2
+As @samp{1}, but also prints the parser traces.
+
+@item 3
+As @samp{2}, but also prints the lexical analizer traces.
+@end table
+
 @item --show-config-options
 Print a list of configuration options used to build GNU Anubis.
 @item --relax-perm-check
