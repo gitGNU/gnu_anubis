@@ -29,5 +29,11 @@ TEXINFO_TEX = ../build/texinfo.tex
 info_TEXINFOS = anubis.texi
 anubis_TEXINFOS = fdl.texi
 
+DISTCLEANFILES = \
+ anubis.op\
+ anubis.cm\
+ anubis.cms\
+ anubis.ops
+
 ## EOF
 
