@@ -34,6 +34,7 @@ static int process_command (MESSAGE *, char *);
 static void transfer_header (ANUBIS_LIST *);
 static void transfer_body (MESSAGE *);
 static void process_data (MESSAGE *);
+static int handle_ehlo (char *, char *, size_t);
 
 
 /* Collect and send headers */
@@ -56,6 +57,7 @@ get_boundary (MESSAGE * msg, char *line)
   p = strstr (boundary_buf, "boundary=");
   if (!p)
     return;
+
   /* Now use the unaltered string. P still points past the
      `boundary=' */
   safe_strcpy (boundary_buf, line);
@@ -350,7 +352,6 @@ smtp_session_transparent (void)
     }
 
   message_free (&msg);
-  return;
 }
 
 void
@@ -358,7 +359,13 @@ smtp_begin (void)
 {
   char command[LINEBUFFER + 1];
 
+  /* first get an mta banner */
   get_response_smtp (CLIENT, remote_server, command, sizeof (command) - 1);
+
+  /* now send the ehlo command */
+  snprintf (command, sizeof (command), "EHLO %s" CRLF, get_localname ());
+  swrite (CLIENT, remote_server, command);
+  handle_ehlo (command, command, sizeof (command) - 1);
 }
 
 void
@@ -385,7 +392,6 @@ smtp_session (void)
     }
 
   message_free (&msg);
-  return;
 }
 
 /********************
@@ -529,10 +535,11 @@ process_command (MESSAGE * msg, char *command)
   make_lowercase (buf);
   save_command (msg, buf);
 
-  if (strncmp (buf, "starttls", 8) == 0)
-    return handle_starttls (command);
-  else if (strncmp (buf, "xdatabase", 8) == 0)
+  if (!strncmp (buf, "starttls", 8))
+    return handle_starttls (buf);
+  else if (!strncmp (buf, "xdatabase", 9))
     return xdatabase (buf);
+
   return 0;
 }
 
@@ -551,10 +558,8 @@ handle_ehlo (char *command, char *reply, size_t reply_size)
   if ((topt & T_SSL_ONEWAY)
       && (topt & T_STARTTLS) && !(topt & T_SSL_FINISHED))
     {
-
-      struct sockaddr_in rclient;
-      char ehlo[LINEBUFFER + 1];
-      socklen_t addrlen;
+      char ehlo[128];
+      char newreply[LINEBUFFER + 1];
 
       /*
          The 'ONEWAY' method is used when your MUA doesn't
@@ -562,10 +567,8 @@ handle_ehlo (char *command, char *reply, size_t reply_size)
          Make the TLS/SSL connection with ESMTP server.
        */
 
-      char newreply[LINEBUFFER + 1];
       info (NORMAL,
-	    _
-	    ("Using TLS/SSL encryption between Anubis and remote MTA only..."));
+	    _("Using TLS/SSL encryption between Anubis and remote MTA only..."));
       swrite (CLIENT, remote_server, "STARTTLS" CRLF);
       get_response_smtp (CLIENT, remote_server, newreply,
 			 sizeof (newreply) - 1);
@@ -599,17 +602,7 @@ handle_ehlo (char *command, char *reply, size_t reply_size)
          Send the EHLO command (after the TLS/SSL negotiation).
        */
 
-      addrlen = sizeof (rclient);
-      if (getpeername ((int) remote_client,
-		       (struct sockaddr *) &rclient, &addrlen) == -1)
-	anubis_error (HARD, _("getpeername() failed: %s."), strerror (errno));
-
-      snprintf (ehlo, sizeof ehlo,
-		"EHLO %s" CRLF,
-		(topt & T_ERROR) ? "localhost" :
-		inet_ntoa (rclient.sin_addr));
-
-      topt &= ~T_ERROR;
+      snprintf (ehlo, sizeof (ehlo), "EHLO %s" CRLF, get_localname ());
       swrite (CLIENT, remote_server, ehlo);
       get_response_smtp (CLIENT, remote_server, reply, reply_size);
     }
@@ -657,13 +650,13 @@ transfer_command (MESSAGE * msg, char *command)
   if (topt & T_ERROR)
     return 0;
 
-  if (strncmp (buf, "ehlo", 4) == 0)
+  if (!strncmp (buf, "ehlo", 4))
     {
-      if (handle_ehlo (command, reply, sizeof reply))
+      if (handle_ehlo (command, reply, sizeof (reply)))
 	return 0;
     }
   else
-    get_response_smtp (CLIENT, remote_server, reply, sizeof reply);
+    get_response_smtp (CLIENT, remote_server, reply, sizeof (reply));
 
   swrite (SERVER, remote_client, reply);
   if (topt & T_ERROR)
