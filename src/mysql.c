@@ -180,7 +180,7 @@ mysql_db_list(void *d, LIST *list, int *ecode)
 {
 	struct anubis_mysql_db *amp = d;
         MYSQL_RES *result;
-	size_t nrows;
+	size_t nrows, i;
 	
 	snprintf(amp->buf, amp->bufsize,
 		 "SELECT %s,%s,%s,%s FROM %s",
@@ -191,7 +191,7 @@ mysql_db_list(void *d, LIST *list, int *ecode)
 		 amp->table);
 	
 	*ecode = mysql_query(&amp->mysql, amp->buf);
-	if (*errp)
+	if (*ecode)
 		return ANUBIS_DB_FAIL;
         if (!(result = mysql_store_result(&amp->mysql)))
 		return ANUBIS_DB_FAIL;
@@ -212,7 +212,7 @@ mysql_db_list(void *d, LIST *list, int *ecode)
 			rec->username = strdup(row[2]);
 		if (row[3])
 			rec->rc_file_name = strdup(row[3]);
-		list_append(list, prec);
+		list_append(list, rec);
 	}
 	
 	return ANUBIS_DB_SUCCESS;
