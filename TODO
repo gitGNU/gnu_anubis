@@ -15,18 +15,22 @@ a warning if gpg-crypt, rot-13 and the like may be used twice over the
 same block of text. (Basically this means adding a rudimentary flow
 control analyzer).
 
+* The Core
+** Change the plain text database format and use `:' as the field separator.
+** Dixie: allow to omit the `account' field, but use the `config' field.
+** RFC 3463 compatible.
+** Error notification system (via email)
+** HTML processing (also removing HTML part)
+** IPv6 support
+
 * New features
-** OpenPGP/MIME support
-** S/MIME support
+** OpenPGP/MIME support (high priority)
+** S/MIME support (via new GnuPG 2.x and GPGME)
 ** MIME handling: adding, removing, etc.
 ** RFC 2017 support (requires above)
 
-* Tunnel core
-** HTML processing (also removing HTML part)
-** IPv6 support
-** Error notification system (via email)
-
 * Other stuff
+** Dixie's testsuite.
 ** An external performance test.
 
 * Minor issues
