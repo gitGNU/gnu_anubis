@@ -178,6 +178,23 @@ else
  M4_DEFS="$M4_DEFS -DWITH_GPG"
 fi
 
+AC_SUBST(GSASL_LIBS)
+AC_CHECK_LIB(resolv, res_query)
+
+AC_SUBST(ANUBIS_DEFINES)
+
+MU_CHECK_GSASL(0.0.2, [
+    AC_DEFINE(WITH_GSASL,1,[Define if Anubis is using GNU SASL])
+    AC_LIBOBJ(anubisdb)
+    AC_LIBOBJ(dbtext)
+    AC_CHECK_LIB(gdbm, gdbm_open,
+                 [LIBS="$LIBS -lgdbm"
+                  AC_LIBOBJ(gdbm)
+                  AC_DEFINE(HAVE_LIBGDBM,1,[Define if you have libgdbm])])
+    AC_LIBOBJ(lbuf)
+    AC_LIBOBJ(gsasl)
+    AC_LIBOBJ(authmode)])
+
 dnl Use option --without-gnutls to NOT compile GnuTLS library support.
 AC_ARG_WITH(gnutls,
 	AC_HELP_STRING([--without-gnutls],
