@@ -32,9 +32,8 @@ anubis_SOURCES = main.c extern.h headers.h mem.c mem.h env.c errs.c \
 
 YLWRAP = $(SHELL) $(top_srcdir)/build/ylwrap
 AM_YFLAGS = -dtv
-EXTRA_DIST = rcfile.y rcfile.l snprintf.c obstack.c obstack.h \
-	getopt.h gettext.h authmode.c gsasl.c anubisdb.c dbtext.c \
-        gdbm.c lbuf.c lbuf.h
+EXTRA_DIST = rcfile.y rcfile.l authmode.c gsasl.c anubisdb.c dbtext.c \
+	gdbm.c
 
 BUILT_SOURCES= \
   rcfile-gram.c rcfile-gram.h \
@@ -53,7 +52,8 @@ rcfile-gram.c rcfile-gram.h: $(srcdir)/rcfile.y
 
 localedir = $(datadir)/locale
 DEFS = @DEFS@ -DLOCALEDIR=\"$(localedir)\"
-INCLUDES = @INCLUDES@ @LIBGNUTLS_CFLAGS@ -I$(top_srcdir)/intl 
+INCLUDES = @INCLUDES@ @LIBGNUTLS_CFLAGS@ -I$(top_srcdir)/lib \
+	-I$(top_srcdir)/intl 
 
 ## EOF
 
