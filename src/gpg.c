@@ -29,10 +29,16 @@
 #ifdef HAVE_GPG
 #include <gpgme.h>
 
+struct gpg_struct {
+	char *keys;
+	char *passphrase;
+};
+
+static struct gpg_struct gpg;
+
 static int gpgme_init(void);
 static char *gpg_sign(char *);
 static char *gpg_encrypt_to_users(char *);
-static char *gpg_encrypt_to_remailer(char *);
 static void gpgme_debug_info(GpgmeCtx);
 
 #define EXTRA_GPG_BUF 4096
@@ -215,143 +221,32 @@ gpg_encrypt_to_users(char *gpg_data)
 	return encrypted_data;
 }
 
-static char *
-gpg_encrypt_to_remailer(char *gpg_data)
-{
-	GpgmeCtx ctx;
-	GpgmeError err = 0;
-	GpgmeData in, out;
-	GpgmeRecipients rset;
-	char buf[256];
-	char *data_to_encrypt;
-	int size;
-	size_t nread;
-
-	size = strlen(gpg_data) + EXTRA_GPG_BUF;
-	data_to_encrypt = (char *)xmalloc(size);
-	memset(buf, 0, sizeof(buf));
-	fail_if_err(gpgme_new(&ctx));
-	gpgme_set_armor(ctx, 1);
-
-	/*
-	   Remailer Type-I support (with GPG encryption).
-	*/
-
-	if (mopt & M_RMRRT)
-		sprintf(data_to_encrypt, CRLF"::"CRLF"Anon-To: %s"CRLF, rm.rrt);
-	else if (mopt & M_RMPOST)
-		sprintf(data_to_encrypt, CRLF"::"CRLF"Anon-Post-To: %s"CRLF, rm.post);
-	if ((mopt & M_RMLT) || (mopt & M_RMRLT)) {
-		char mailbuf[LINEBUFFER];
-		sprintf(mailbuf, "Latent-Time: +%s%s"CRLF,
-			rm.latent_time, (mopt & M_RMRLT) ? "r" : "");
-		strcat(data_to_encrypt, mailbuf);
-	}
-	strcat(data_to_encrypt, CRLF);
-	if (mopt & M_RMHEADER) {
-		remcrlf(rm.header);
-		strcat(data_to_encrypt, "##"CRLF);
-		strcat(data_to_encrypt, rm.header);
-		strcat(data_to_encrypt, CRLF);
-	}
-	strcat(data_to_encrypt, gpg_data);
-	memset(buf, 0, sizeof(buf));
-
-	fail_if_err(gpgme_data_new_from_mem(&in, data_to_encrypt,
-		strlen(data_to_encrypt), 0));
-	fail_if_err(gpgme_data_new(&out));
-	fail_if_err(gpgme_recipients_new(&rset));
-	fail_if_err(gpgme_recipients_add_name_with_validity(rset, gpg.rm_key,
-		GPGME_VALIDITY_FULL));
-	fail_if_err(gpgme_op_encrypt(ctx, rset, in, out));
-	fail_if_err(gpgme_data_rewind(out));
-
-	if (options.termlevel == DEBUG)
-		gpgme_debug_info(ctx);
-
-	if (topt & T_ERROR) {
-		gpgme_recipients_release(rset);
-		gpgme_release(ctx);
-		free(data_to_encrypt);
-		return 0;
-	}
-
-	memset(data_to_encrypt, 0, size);
-	while (!(err = gpgme_data_read(out, buf, sizeof(buf), &nread)))
-	{
-		if (size > nread) {
-			strncat(data_to_encrypt, buf, nread);
-			size -= nread;
-		}
-		else {
-			size = EXTRA_GPG_BUF;
-			data_to_encrypt = (char *)xrealloc((char *)data_to_encrypt,
-				strlen(data_to_encrypt) + size);
-			strncat(data_to_encrypt, buf, nread);
-			size -= nread;
-		}
-		memset(buf, 0, sizeof(buf));
-	}
-	if (err != GPGME_EOF)
-		fail_if_err(err);
-
-	gpgme_recipients_release(rset);
-	gpgme_data_release(in);
-	gpgme_data_release(out);
-	gpgme_release(ctx);
-	return data_to_encrypt;
-}
 
 void
-check_gpg(void)
+gpg_proc(MESSAGE *msg, char *(*proc)(char *input))
 {
-	#if defined(HAVE_SETENV) || defined(HAVE_PUTENV)
+	char *buf;
+#if defined(HAVE_SETENV) || defined(HAVE_PUTENV)
 	char homedir_s[MAXPATHLEN+1]; /* SUPERVISOR */
 	char homedir_c[MAXPATHLEN+1]; /* CLIENT */
 
 	get_homedir(session.supervisor, homedir_s, sizeof(homedir_s));
 	get_homedir(session.client, homedir_c, sizeof(homedir_c));
 	setenv("HOME", homedir_c, 1);
-	#endif /* HAVE_SETENV or HAVE_PUTENV */
+#endif /* HAVE_SETENV or HAVE_PUTENV */
 
-	if (gpgme_init() == -1) {
-		if (gpg.passphrase) {
-			memset(gpg.passphrase, 0, strlen(gpg.passphrase));
-			xfree(gpg.passphrase);
-		}
+	buf = proc (msg->body);
+
+	if (topt & T_ERROR)
 		return;
-	}
 
-	if (mopt & M_GPG_SIGN) { /* Sign a message */
-		char *buf = gpg_sign(message.body);
-		if (topt & T_ERROR)
-			return;
-		xfree(message.body);
-		message.body = buf;
-	}
-	if (mopt & M_GPG_ENCRYPT) { /* Encrypt a message body */
-		char *buf = gpg_encrypt_to_users(message.body);
-		if (topt & T_ERROR)
-			return;
-		xfree(message.body);
-		message.body = buf;
-	}
-	if (mopt & M_RMGPG) { /* Remailer Type-I */
-		char *buf = gpg_encrypt_to_remailer(message.body);
-		if (topt & T_ERROR)
-			return;
-		xfree(message.body);
-		message.body = buf;
-	}
-
-	#if defined(HAVE_SETENV) || defined(HAVE_PUTENV)
+	xfree(msg->body);
+	msg->body = buf;
+	
+#if defined(HAVE_SETENV) || defined(HAVE_PUTENV)
 	setenv("HOME", homedir_s, 1);
-	#endif /* HAVE_SETENV or HAVE_PUTENV */
+#endif /* HAVE_SETENV or HAVE_PUTENV */
 
-	if (gpg.passphrase) {
-		memset(gpg.passphrase, 0, strlen(gpg.passphrase));
-		xfree(gpg.passphrase);
-	}
 	return;
 }
 
@@ -362,17 +257,14 @@ check_gpg(void)
 #define KW_GPG_HOME               5
 
 int
-gpg_parser(int method, int key, char *arg,
-	   void *inv_data, void *func_data, char *line)
+gpg_parser(int method, int key, char *arg, void *inv_data, void *func_data,
+	   MESSAGE *msg)
 {
 	switch (key) {
 	case KW_GPG_PASSPHRASE:
-		if (gpg.passphrase) {
-			memset(gpg.passphrase, 0, strlen(gpg.passphrase));
-			xfree(gpg.passphrase);
-		}
-		gpg.passphrase = allocbuf(arg, 0);
-		mopt |= M_GPG_PASSPHRASE;
+		gpg.passphrase = arg;
+		gpgme_init();
+		memset(gpg.passphrase, 0, strlen(gpg.passphrase));
 		break;
 		
 	case KW_GPG_ENCRYPT:
@@ -380,28 +272,14 @@ gpg_parser(int method, int key, char *arg,
 		gpg.keys = allocbuf(arg, 0);
 		gpg.keys = xrealloc(gpg.keys, strlen(gpg.keys) + 2);
 		strcat(gpg.keys, ",");
-		mopt |= M_GPG_ENCRYPT;
+		gpg_proc(msg, gpg_encrypt_to_users);
 		break;
 		
 	case KW_GPG_SIGN:              
-		if (strcmp(arg, "yes")
-		    || !(mopt & M_GPG_PASSPHRASE)) {
-			if (gpg.passphrase) {
-				memset(gpg.passphrase, 0,
-				       strlen(gpg.passphrase));
-				xfree(gpg.passphrase);
-			}
-			gpg.passphrase = allocbuf(arg, 0);
-		}
-		mopt |= M_GPG_SIGN;
+		if (strcmp(arg, "yes") == 0) 
+			gpg_proc(msg, gpg_sign);
 		break;
 		
-	case KW_RM_GPG:
-		xfree(gpg.rm_key);
-		gpg.rm_key = allocbuf(arg, 0);
-		mopt |= M_RMGPG;
-		break;
-
 	case KW_GPG_HOME:
 		setenv("GNUPGHOME", arg, 1);
 		break;
@@ -433,11 +311,7 @@ static struct rc_secdef_child gpg_sect_child = {
 void
 gpg_section_init()
 {
-	struct rc_secdef *sp = anubis_add_section("ALL");
-
-	rc_secdef_add_child(sp, &gpg_sect_child);
-
-	sp = anubis_add_section("RULE");
+	struct rc_secdef *sp = anubis_add_section("RULE");
 	rc_secdef_add_child(sp, &gpg_sect_child);
 }	
 
