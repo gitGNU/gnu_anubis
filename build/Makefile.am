@@ -22,6 +22,7 @@
 ## compiling, linking, and/or using OpenSSL is allowed.
 ##
 
+SUBDIRS = guile-1.6
 EXTRA_DIST = keygen.sh specgen.sh
 
 ## EOF
