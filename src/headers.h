@@ -24,39 +24,39 @@
 
 #ifdef HAVE_CONFIG_H
 
- #include <config.h>
+#include <config.h>
 
- #if defined(HAVE_LIBGCRYPT) && defined(HAVE_LIBGNUTLS)
-  #if defined(HAVE_GNUTLS_GNUTLS_H)
-   #define HAVE_GNUTLS
-  #endif /* HAVE_GNUTLS_GNUTLS_H */
- #endif /* HAVE_LIBGCRYPT and HAVE_LIBGNUTLS */
- #if defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
-  #if defined(HAVE_OPENSSL_SSL_H)
-   #define HAVE_OPENSSL
-  #endif /* HAVE_OPENSSL_SSL_H */
- #endif /* HAVE_LIBSSL and HAVE_LIBCRYPTO */
- #if defined(HAVE_LIBGPGME) && defined(HAVE_GPGME_H) && !defined(NOGPG)
-  #define HAVE_GPG
- #endif /* HAVE_LIBGPGME and HAVE_GPGME_H and not NOGPG */
- #if defined(HAVE_LIBPCRE)
-  #if defined(HAVE_PCRE_H) || defined(HAVE_PCRE_PCRE_H)
-   #define HAVE_PCRE
-  #endif /* HAVE_PCRE_H or HAVE_PCRE_PCRE_H */
- #endif /* HAVE_LIBPCRE */
- #if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
-  #define HAVE_REGEX
- #else
-  #error POSIX Regular Expressions are required!
- #endif /* HAVE_REGEX_H and HAVE_REGCOMP */
- #if defined(HAVE_LIBPAM) && defined(HAVE_LIBPAM_MISC)
-  #if defined(HAVE_SECURITY_PAM_APPL_H) && defined(HAVE_SECURITY_PAM_MISC_H)
-   #define HAVE_PAM
-  #endif /* HAVE_SECURITY_PAM_APPL_H and HAVE_SECURITY_PAM_MISC_H */
- #endif /* HAVE_LIBPAM and HAVE_LIBPAM_MISC */
- #if defined(HAVE_LIBWRAP) && defined(HAVE_TCPD_H)
-  #define USE_LIBWRAP
- #endif /* HAVE_LIBWRAP and HAVE_TCPD_H */
+# if defined(HAVE_LIBGCRYPT) && defined(HAVE_LIBGNUTLS)
+#  if defined(HAVE_GNUTLS_GNUTLS_H)
+#   define HAVE_GNUTLS
+#  endif /* HAVE_GNUTLS_GNUTLS_H */
+# endif /* HAVE_LIBGCRYPT and HAVE_LIBGNUTLS */
+# if defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
+#  if defined(HAVE_OPENSSL_SSL_H)
+#   define HAVE_OPENSSL
+#  endif /* HAVE_OPENSSL_SSL_H */
+# endif /* HAVE_LIBSSL and HAVE_LIBCRYPTO */
+# if defined(HAVE_LIBGPGME) && defined(HAVE_GPGME_H) && !defined(NOGPG)
+#  define HAVE_GPG
+# endif /* HAVE_LIBGPGME and HAVE_GPGME_H and not NOGPG */
+# if defined(HAVE_LIBPCRE)
+#  if defined(HAVE_PCRE_H) || defined(HAVE_PCRE_PCRE_H)
+#   define HAVE_PCRE
+#  endif /* HAVE_PCRE_H or HAVE_PCRE_PCRE_H */
+# endif /* HAVE_LIBPCRE */
+# if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
+#  define HAVE_REGEX
+# else
+#  error POSIX Regular Expressions are required!
+# endif /* HAVE_REGEX_H and HAVE_REGCOMP */
+# if defined(HAVE_LIBPAM) && defined(HAVE_LIBPAM_MISC)
+#  if defined(HAVE_SECURITY_PAM_APPL_H) && defined(HAVE_SECURITY_PAM_MISC_H)
+#   define HAVE_PAM
+#  endif /* HAVE_SECURITY_PAM_APPL_H and HAVE_SECURITY_PAM_MISC_H */
+# endif /* HAVE_LIBPAM and HAVE_LIBPAM_MISC */
+# if defined(HAVE_LIBWRAP) && defined(HAVE_TCPD_H)
+#  define USE_LIBWRAP
+# endif /* HAVE_LIBWRAP and HAVE_TCPD_H */
 
 #endif /* HAVE_CONFIG_H */
 
@@ -96,72 +96,72 @@
 #include <netinet/in.h>
 
 #if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
- #include <sys/resource.h>
+# include <sys/resource.h>
 #endif /* HAVE_GETRLIMIT and HAVE_SETRLIMIT */
 #ifdef HAVE_ARPA_INET_H
- #include <arpa/inet.h>
+# include <arpa/inet.h>
 #endif /* HAVE_ARPA_INET_H */
 #if defined(HAVE_SYSLOG) && defined(HAVE_SYSLOG_H)
- #include <syslog.h>
+# include <syslog.h>
 #endif /* HAVE_SYSLOG and HAVE_SYSLOG_H */
 
 #if defined(USE_GNUTLS) && defined(HAVE_GNUTLS)
- #include <gnutls/gnutls.h>
- #define HAVE_TLS
- #undef USE_OPENSSL
+# include <gnutls/gnutls.h>
+# define HAVE_TLS
+# undef USE_OPENSSL
 #endif /* USE_GNUTLS and HAVE_GNUTLS */
 
 #if defined(USE_OPENSSL) && defined(HAVE_OPENSSL)
- #include <openssl/crypto.h>
- #include <openssl/x509.h>
- #include <openssl/pem.h>
- #include <openssl/ssl.h>
- #include <openssl/err.h>
- #include <openssl/rand.h>
- #include <openssl/md5.h>
- #define HAVE_SSL
+# include <openssl/crypto.h>
+# include <openssl/x509.h>
+# include <openssl/pem.h>
+# include <openssl/ssl.h>
+# include <openssl/err.h>
+# include <openssl/rand.h>
+# include <openssl/md5.h>
+# define HAVE_SSL
 #endif /* USE_OPENSSL and HAVE_OPENSSL */
 
 #ifdef HAVE_PAM
- #include <security/pam_appl.h>
- #include <security/pam_misc.h>
+# include <security/pam_appl.h>
+# include <security/pam_misc.h>
 #endif /* HAVE_PAM */
 
 #include "mem.h" /* xfree(), xfree_pptr() */
 
 #ifdef ENABLE_NLS
- #include <libintl.h>
- #define _(String) gettext(String)
- #ifdef HAVE_LOCALE_H
-  #include <locale.h>
- #endif /* HAVE_LOCALE_H */
+# include <libintl.h>
+# define _(String) gettext(String)
+# ifdef HAVE_LOCALE_H
+#  include <locale.h>
+# endif /* HAVE_LOCALE_H */
 #else
- #define _(String) (String)
- #define N_(String) String
- #define textdomain(Domain)
- #define bindtextdomain(Package, Directory);
+# define _(String) (String)
+# define N_(String) String
+# define textdomain(Domain)
+# define bindtextdomain(Package, Directory);
 #endif /* ENABLE_NLS */
 
 #ifdef WITH_GUILE
 # include <libguile.h>
-#endif
+#endif /* WITH_GUILE */
 
 #ifndef INADDR_NONE
- #define INADDR_NONE (unsigned long)0xffffffff
+# define INADDR_NONE (unsigned long)0xffffffff
 #endif /* not INADDR_NONE */
 #ifndef INADDR_ANY
- #define INADDR_ANY (unsigned long)0x00000000
+# define INADDR_ANY (unsigned long)0x00000000
 #endif /* not INADDR_ANY */
 #ifndef INADDR_LOOPBACK
- #define INADDR_LOOPBACK (unsigned long)0x7f000001
+# define INADDR_LOOPBACK (unsigned long)0x7f000001
 #endif /* not INADDR_LOOPBACK */
 
 #ifndef MAXPATHLEN
- #ifdef PATH_MAX
-  #define MAXPATHLEN PATH_MAX
- #else
-  #define MAXPATHLEN 1024
- #endif /* PATH_MAX */
+# ifdef PATH_MAX
+#  define MAXPATHLEN PATH_MAX
+# else
+#  define MAXPATHLEN 1024
+# endif /* PATH_MAX */
 #endif /* not MAXPATHLEN */
 
 #define MAXCLIENTS 50
@@ -350,7 +350,6 @@ void remcrlf(char *);
 char *substitute(char *, char **);
 char *insert(char *, char *, char *);
 void change_to_lower(char *);
-void check_rot13(void);
 
 /* file.c */
 void check_all_files(char *);
@@ -413,7 +412,7 @@ void guile_load_program(char *name);
 void guile_rewrite_line(char *procname, const char *source_line);
 void guile_postprocess_proc(char *procname, struct list **hdr, char **body);
 void guile_section_init();
-#endif
+#endif /* WITH_GUILE */
 
 /* EOF */
 
