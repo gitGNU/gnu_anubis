@@ -38,8 +38,10 @@ static void clear_body_transfer(void *, void *);
 static void add_remailer_commands(void *);
 static void transform_body(void *sd_server);
 static void postprocess(void *sd_client, void *sd_server);
+#ifdef WITH_GUILE
 static void collect_body(void *sd_client, char **retptr);
 static void collect_headers(void *sd_client, struct list **listp);
+#endif /* WITH_GUILE */
 
 int
 socket_reader(void *sd_client, char *buf, size_t size)
@@ -74,7 +76,7 @@ int
 memory_reader(void *closure, char *buf, size_t size)
 {
 	struct mem_buf *mb = closure;
-	int i;
+	int i = 0;
 	int crlf;
 	
 	switch (mb->state) {
