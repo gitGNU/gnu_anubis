@@ -167,22 +167,21 @@ The user configuration file may contain the following sections:
 @*
 Optional. This specifies the basic GNU Anubis behavior.
 @item
-@dfn{The ALL section}.
+@dfn{The GUILE section}.
 @*
-Optional. This specifies what jobs GNU Anubis does for @emph{all}
-your outgoing messages.
-
+Optional.
 @item
 @dfn{The Rule System}.
 @*
 Optional. Here you can define your own processing rules
-for any particular message.
+for any particular message (conditional or unconditional
+rules).
 @end enumerate
 
 @menu
 * CONTROL Section::
 * TRANSLATION Section::
-* ALL Section::
+* GUILE section::
 * Rule System::
 @end menu
 
@@ -391,7 +390,7 @@ user-notprivileged = @var{username}  @r{(system config only)}
 @end example
 
 
-@node TRANSLATION Section, ALL Section, CONTROL Section, Configuration
+@node TRANSLATION Section, GUILE section, CONTROL Section, Configuration
 @section The TRANSLATION Section
 @cindex TRANSLATION section, The
 
@@ -431,43 +430,16 @@ and this means that @emph{all} users at @samp{somewhere.net} are allowed to use
 the local john's configuration file.
 
 
-@node ALL Section, Rule System, TRANSLATION Section, Configuration
-@section The ALL Section
-@cindex ALL section, The
+@node GUILE section, Rule System, TRANSLATION Section, Configuration
+@section The GUILE section
+@cindex GUILE section, The
+@cindex Guile
+@cindex Scheme
 
-This section specifies a behavior of an outgoing mail processor
-in the case of @emph{every} outgoing message (unconditional rules).
-This section is available @emph{only} in the user configuration file.
-The @samp{ALL} section starts with the @w{@code{---BEGIN ALL---}} line,
-and the @w{@code{---END---}} line ends it. Syntax:
-
-@example
-@group
----BEGIN ALL---
-@var{action-list}
----END---
-@end group
-@end example
-
-@noindent
-@xref{Action List}, for details.
-
-An example:
-
-@example
-@group
----BEGIN ALL---
-signature-file-append = yes
----END---
-@end group
-@end example
-
-@noindent
-The example above will add the @file{~/.signature} file to @emph{every}
-outgoing message!
+[This section is missing :-P]
 
 
-@node Rule System, , ALL Section, Configuration
+@node Rule System, , GUILE section, Configuration
 @section The Rule System (The RULE Section)
 @cindex Basic regular expressions
 @cindex Extended regular expressions
@@ -505,157 +477,7 @@ and the @w{@code{---END---}} line ends it.
 @subsection Grammar (The Rule System)
 @cindex grammar
 
-General syntax:
-
-@example
-@group
-if @var{where} [: @var{options}] =@var{regex1}[ != @var{regex2}]
-   @var{action-list}
-fi
-@end group
-@end example
-
-@noindent
-Each rule starts with the @samp{if} command, and ends with the @samp{fi}
-or @samp{done} command. The first regular expression (@var{regex1}) is
-required. The second one (@var{regex2}) is optional. Here is a simple rule:
-
-@example
-@group
-if @var{where} =@var{regex1}
-   @var{action-list}
-fi
-@end group
-@end example
-
-@noindent
-The rule above is true if @var{regex1} is @emph{true}.
-Another way:
-
-@example
-@group
-if @var{where} =@var{regex1} != @var{regex2}
-   @var{action-list}
-fi
-@end group
-@end example
-
-@noindent
-The rule above is true if @var{regex1} is @emph{true} and @var{regex2}
-is @emph{false}. The control operator @code{@key{SPC}!=@key{SPC}} breaks
-regular expressions into two pieces: @var{regex1} and @var{regex2}.
-
-@strong{Caution:} The @var{where} means @samp{COMMAND} or @samp{HEADER},
-for example:
-
-@example
-@group
----BEGIN RULE---
-if COMMAND [: @var{options}] =@var{regex1}[ != @var{regex2}]
-   @var{action-list}
-fi
-if HEADER [: @var{options}] =@var{regex1}[ != @var{regex2}]
-   @var{action-list}
-fi
----END---
-@end group
-@end example
-
-@noindent
-@samp{COMMAND} says to match this regexp against all the SMTP/ESMTP commands,
-like @samp{helo}, @samp{ehlo}, @samp{mail from}, @samp{rcpt to}, @samp{data},
-@samp{quit}, etc.
-
-@example
-@group
-if COMMAND =^mail from:.*<?john@@localhost>?
-   @var{action-list}
-fi
-@end group
-@end example
-
-@noindent
-@samp{HEADER} says to match this regexp against all the header
-lines in the message. We often use thus with a regexp that matches
-only a particular kind of header line---for instance, the regexp
-@samp{^Subject:} will only match a @samp{Subject} header line.
-But this is not a requirement. You can use any regexp you wish,
-and it will have a chance to match every header line in the message.
-
-@example
-@group
-if HEADER [: @var{options}] =^Subject: test
-   @var{action-list}
-fi
-@end group
-@end example
-
-The @var{options} area is optional, and it allows you to specify any extra
-option for a particular regexp match. The @var{options} area must be preceded
-with a colon (@samp{:}). The following options are acceptable: @samp{basic},
-@samp{perlre}, @samp{scase}.
-
-@table @samp
-@item basic
-This option forces @dfn{POSIX Basic Regular Expression} syntax when
-interpreting regex instead of @dfn{POSIX Extended Regular Expression}
-(Extended is the default).
-
-@item perlre
-This option forces @dfn{Perl Regular Expression} syntax when interpreting
-regex instead of @dfn{POSIX Extended Regular Expression}. To enable this
-option, you must compile GNU Anubis, specifying @code{./configure --with-pcre}.
-
-@item scase
-This option makes a particular regular expression case sensitive.
-By default, all regular expressions are case insensitive.
-@end table
-
-An example:
-
-@example
-@group
-if header : perlre scase =^Subject: HeLlo
-   @var{action-list}
-fi
-@end group
-@end example
-
-@noindent
-In this case, the Perl regular expression syntax will be used instead of
-POSIX extended version, and case sensitivity will be set.
-
-@strong{Caution:} Do not mix the @samp{perlre} option with @samp{basic} option.
-If you specify the Perl regular expression, then you cannot use the POSIX
-Basic syntax, and vice versa.
-
-The whole rule system is case insensitive (even regular expressions,
-unless you specify the @samp{scase} option), so you can write for instance:
-
-@example
-@group
-IF HeAdEr =@var{regex1}[ != @var{regex2}]
-   @var{action-list}
-FI
-@end group
-@end example
-
-General example:
-
-@example
-@group
----BEGIN RULE---
-if header =^Subject: != ^Subject: URGENT
-   signature-file-append = yes
-fi
----END---
-@end group
-@end example
-
-@noindent
-The example above will add the @file{~/.signature} file, except an email
-with a subject @samp{urgent} (case insensitive). No extra options have
-been specified in this example.
+[This section is missing :-P]
 
 
 @node Action List, Trigger, Grammar, Rule System
@@ -665,6 +487,10 @@ been specified in this example.
 An @dfn{action list} is a list of action commands, which control processing
 of an outgoing messages. All action command names are case insensitive, so you
 can use for instance: @samp{add} or @samp{ADD} or @samp{AdD}, and so on.
+
+@strong{Caution:} Some action commands below might not be compatible
+with GNU Anubis > 3.6.2, because this Manual has not been updated for
+a long time.
 
 @menu
 * Editing Headers::     How to edit a message header on-the-fly.
@@ -908,26 +734,7 @@ external-body-processor = @var{file-name} [@var{args}]
 @node Quick Example, , Command Summary, Action List
 @subsubsection Quick Example
 
-Here is a quick example of using an action list:
-
-@example
-@group
----BEGIN RULE---
-if header =^X-Mailer:
-   remove =^X-Mailer:
-   add = X-Comment: GNU's Not Unix!
-   gpg-sign = @var{your passphrase}
-   signature-file-append = yes
-fi
----END---
-@end group
-@end example
-
-@noindent
-The example above will remove (on-the-fly) the @samp{X-Mailer:} line from
-an outgoing message, add an extra header line (@samp{X-Comment:}), sign your
-message with your private key, and add a simple signature file from your
-home directory.
+[This section is missing :-P]
 
 
 @node Trigger, , Action List, Rule System
@@ -940,22 +747,18 @@ specified in a user configuration file in the following way:
 
 @example
 @group
-rule [: @var{options}] =^@var{rule-name}
+rule [:@var{tags}] "@var{rule-name}"
    @var{action-list}
 done
 @end group
 @end example
-
-@noindent
-@strong{Caution:} Plase note that there is no space after the @samp{=}
-character.
 
 An example:
 
 @example
 @group
 ---BEGIN RULE---
-rule =^gpg-encrypt-john
+rule "gpg-encrypt-john"
    gpg-encrypt = john's_gpg_key
 done
 ---END---
@@ -975,7 +778,7 @@ while using a substitution and back-references:
 @example
 @group
 ---BEGIN RULE---
-rule =^gpg-encrypt:(.*)
+rule "gpg-encrypt:(.*)"
    gpg-encrypt = \1
    add = X-GPG-Comment: Encrypted for \1
 done
