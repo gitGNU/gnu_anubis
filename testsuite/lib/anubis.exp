@@ -414,12 +414,12 @@ proc anubis_expect_list {args} {
        } else {
 	   anubis_expect $tmt {
 	       -ex "$pat" {
-#		   if { $expect_out(buffer) != $expect_out(0,string) } {
-#		       verbose "Got \"$expect_out(buffer)\"" 2
-#		       verbose "instead of expected \"$pat\\r\\n\"" 2
-#		       set result 1
-#		       break
-#		   }
+		   if { $expect_out(buffer) != $expect_out(0,string) } {
+		       verbose "Got \"$expect_out(buffer)\"" 2
+		       verbose "instead of expected \"$pat\\r\\n\"" 2
+		       set result 1
+		       break
+		   }
 	       }
  	       default {
 		   set result 1
@@ -510,7 +510,6 @@ proc anubis_test { args } {
 	verbose "i=$i, pat=$pat, regexp=$regexp" 2
 
 	if {$regexp} {
-	   verbose "REGEX for $pat / [llength $pat] " 3
 	   anubis_expect $tmt {
 	       -re "$pat\[ \r\t\]*\r\n" { }
 	       default {
@@ -529,12 +528,12 @@ proc anubis_test { args } {
        } else {
 	   anubis_expect $tmt {
 	       -ex "$pat" {
-#		   if { $expect_out(buffer) != $expect_out(0,string) } {
-#		       verbose "Got \"$expect_out(buffer)\"" 2
-#		       verbose "instead of expected \"$pat\\r\\n\"" 2
-#		       set result 1
-#		       break
-#		   }
+		   if { $expect_out(buffer) != $expect_out(0,string) } {
+		       verbose "Got \"$expect_out(buffer)\"" 2
+		       verbose "instead of expected \"$pat\\r\\n\"" 2
+		       set result 1
+		       break
+		   }
 	       }
  	       default {
 		   set result 1
