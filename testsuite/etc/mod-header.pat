@@ -34,6 +34,8 @@ From: <polak@gnu.org>
 To: <gray@gnu.org>
 :DEL Subject: Hybrid Theory
 :ADD Subject: Meteora
+:DEL X-Mailer: Fake MTA
+:ADD X-Old-Mailer: Fake MTA
 :DEL X-LP-InTheEnd: rocks
 :ADD X-LP-Faint: rules!
 
