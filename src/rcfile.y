@@ -767,18 +767,11 @@ rc_section_link(RC_SECTION **ap, RC_SECTION *b)
 
 /* Assignment manipulations */
 
-static int
-_free_mem(void *item, void *data)
-{
-	free(item);
-	return 0;
-}
-
 void
 rc_asgn_destroy(RC_ASGN *asgn)
 {
 	xfree(asgn->lhs);
-	list_destroy(&asgn->rhs, _free_mem, NULL);
+	list_destroy(&asgn->rhs, anubis_free_list_item, NULL);
 }
 
 /* Bools */
@@ -1239,7 +1232,7 @@ asgn_eval(struct eval_env *env, RC_ASGN *asgn)
 		}
 		iterator_destroy(&itr);
 		p->parser(env->method, key, arg, p->data, env->data, env->msg);
-		list_destroy(&arg, _free_mem, NULL);
+		list_destroy(&arg, anubis_free_list_item, NULL);
 	} else
 		p->parser(env->method, key, asgn->rhs, p->data, env->data,
 			  env->msg);
