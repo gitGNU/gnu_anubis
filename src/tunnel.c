@@ -29,11 +29,11 @@
 #define obstack_chunk_free free
 #include <obstack.h>
 
-static int  transfer_command(void *, void *, char *);
-static void process_command(void *, void *, char *, int);
+static int  transfer_command(void *, void *, MESSAGE *msg, char *);
+static void process_command(void *, void *, MESSAGE *msg, char *, int);
 static void transfer_header(void *, void *, struct list *list);
-static void transfer_body(void *, void *);
-static void process_data(void *sd_client, void *sd_server);
+static void transfer_body(void *, void *, MESSAGE *msg);
+static void process_data(void *sd_client, void *sd_server, MESSAGE *msg);
 
 
 /* Collect and send headers */
@@ -43,7 +43,7 @@ static void process_data(void *sd_client, void *sd_server);
    snd sent in multiline lines. */
    
 static void
-get_boundary(char *line)
+get_boundary(MESSAGE *msg, char *line)
 {
 	char boundary_buf[LINEBUFFER+1], *p;
 
@@ -61,9 +61,8 @@ get_boundary(char *line)
 		if (*q)
 			*q = 0;
 	}
-	message.boundary = xmalloc(strlen(p) + 3);
-	sprintf(message.boundary, "--%s", p);
-	topt |= T_BOUNDARY;
+	msg->boundary = xmalloc(strlen(p) + 3);
+	sprintf(msg->boundary, "--%s", p);
 }
 
 static void
@@ -87,12 +86,12 @@ add_header(struct list *list, char *line)
 }
 
 static void
-collect_headers(void *sd_client, struct list **listp)
+collect_headers(void *sd_client, MESSAGE *msg)
 {
 	char buf[LINEBUFFER+1];
 	char *line = NULL;
 
-	*listp = list_create();
+	msg->header = list_create();
 	while (recvline(SERVER, sd_client, buf, LINEBUFFER)) {
 		remcrlf(buf);
 		if (isspace(buf[0])) {
@@ -106,9 +105,10 @@ collect_headers(void *sd_client, struct list **listp)
 			strcat(line, buf);
 		} else {
 			if (line) {
-				if (!(topt & (T_BOUNDARY|T_ENTIRE_BODY)))
-					get_boundary(line);
-				add_header(*listp, line);
+				if (!(topt & T_ENTIRE_BODY)
+				    && msg->boundary == NULL)
+					get_boundary(msg, line);
+				add_header(msg->header, line);
 				line = NULL;
 			} 
 			if (buf[0] == 0)
@@ -137,7 +137,7 @@ write_assoc(void *sd_server, ASSOC *entry)
 		if (strcmp(entry->key, X_ANUBIS_RULE_HEADER) == 0)
 			return;
 		swrite(CLIENT, sd_server, entry->key);
-		swrite(CLIENT, sd_server, ":");
+		swrite(CLIENT, sd_server, ": ");
 	}
 	write_header_line(sd_server, entry->value);
 }
@@ -178,7 +178,7 @@ send_string_list(void *sd_server, struct list *list)
 #define ST_DONE  3
 
 static void
-collect_body(void *sd_client, char **retptr)
+collect_body(void *sd_client, MESSAGE *msg)
 {
 	int nread;
 	char buf[LINEBUFFER+1];
@@ -186,9 +186,9 @@ collect_body(void *sd_client, char **retptr)
 	int state = 0;
 	int len;
 
-	if (topt & T_BOUNDARY) {
-		len = strlen(message.boundary);
-		message.mime_hdr = list_create();
+	if (msg->boundary) {
+		len = strlen(msg->boundary);
+		msg->mime_hdr = list_create();
 	}
 			
 	obstack_init (&stk);
@@ -199,10 +199,10 @@ collect_body(void *sd_client, char **retptr)
 		
 		remcrlf(buf);
 		
-		if (topt & T_BOUNDARY) {
+		if (msg->boundary) {
 			switch (state) {
 			case ST_INIT:
-				if (strcmp(buf, message.boundary) == 0) 
+				if (strcmp(buf, msg->boundary) == 0) 
 					state = ST_HDR;
 				break;
 
@@ -210,12 +210,12 @@ collect_body(void *sd_client, char **retptr)
 				if (buf[0] == 0) 
 					state = ST_BODY;
 				else
-					list_append(message.mime_hdr,
+					list_append(msg->mime_hdr,
 						    strdup(buf));
 				break;
 
 			case ST_BODY:
-				if (strncmp(buf, message.boundary, len) == 0)
+				if (strncmp(buf, msg->boundary, len) == 0)
 					state = ST_DONE;
 				else {
 					obstack_grow(&stk, buf, strlen(buf));
@@ -228,23 +228,23 @@ collect_body(void *sd_client, char **retptr)
 		}
 	}
 	obstack_1grow(&stk, 0);
-	*retptr = strdup(obstack_finish(&stk));
+	msg->body = strdup(obstack_finish(&stk));
 	obstack_free(&stk, NULL);
 }
 
 void
-send_body(void *sd_server)
+send_body(MESSAGE *msg, void *sd_server)
 {
 	char *p;
 
-	if (topt & T_BOUNDARY) {
-		swrite(CLIENT, sd_server, message.boundary);
+	if (msg->boundary) {
+		swrite(CLIENT, sd_server, msg->boundary);
 		swrite(CLIENT, sd_server, CRLF);
-		send_string_list(sd_server, message.mime_hdr);
+		send_string_list(sd_server, msg->mime_hdr);
 		swrite(CLIENT, sd_server, CRLF);
 	}
 
-	for (p = message.body; *p; ) {
+	for (p = msg->body; *p; ) {
 		char *q = strchr(p, '\n');
 		if (q)
 			*q++ = 0;
@@ -256,8 +256,8 @@ send_body(void *sd_server)
 		p = q;
 	}
 
-	if (topt & T_BOUNDARY) {
-		swrite(CLIENT, sd_server, message.boundary);
+	if (msg->boundary) {
+		swrite(CLIENT, sd_server, msg->boundary);
 		swrite(CLIENT, sd_server, CRLF);
 	}
 }
@@ -271,6 +271,7 @@ void
 smtp_session(void *sd_client, void *sd_server)
 {
 	char command[LINEBUFFER+1];
+	MESSAGE msg;
 
 	/*
 	   First of all, transfer a welcome message.
@@ -306,9 +307,11 @@ smtp_session(void *sd_client, void *sd_server)
 	   Then process the commands...
 	*/
 
+	message_init(&msg);
 	while (recvline(SERVER, sd_client, command, LINEBUFFER))
 	{
-		process_command(sd_client, sd_server, command, LINEBUFFER);
+		process_command(sd_client, sd_server, &msg,
+				command, LINEBUFFER);
 		sd_client = remote_client;
 		sd_server = remote_server;
 
@@ -317,7 +320,7 @@ smtp_session(void *sd_client, void *sd_server)
 		if (strlen(command) == 0)
 			continue;
 
-		if (transfer_command(sd_client, sd_server, command) == 0)
+		if (transfer_command(sd_client, sd_server, &msg, command) == 0)
 			break;
 	}
 	return;
@@ -328,7 +331,7 @@ smtp_session(void *sd_client, void *sd_server)
 *********************/
 
 static void
-save_command(char *line)
+save_command(MESSAGE *msg, char *line)
 {
 	int i;
 	ASSOC *asc = xmalloc(sizeof(*asc));
@@ -345,15 +348,16 @@ save_command(char *line)
 		asc->value = strdup(&line[i]);
 	else
 		asc->value = NULL;
-	list_append(message.commands, asc);
+	list_append(msg->commands, asc);
 }
 
 static void
-process_command(void *sd_client, void *sd_server, char *command, int size)
+process_command(void *sd_client, void *sd_server, MESSAGE *msg,
+		char *command, int size)
 {
 	char buf[LINEBUFFER+1];
 	safe_strcpy(buf, command); /* make a back-up */
-	save_command(buf);
+	save_command(msg, buf);
 
 	change_to_lower(buf);
 	
@@ -468,7 +472,7 @@ process_command(void *sd_client, void *sd_server, char *command, int size)
 }
 
 static int
-transfer_command(void *sd_client, void *sd_server, char *command)
+transfer_command(void *sd_client, void *sd_server, MESSAGE *msg, char *command)
 {
 	char reply[2 * LINEBUFFER+1];
 	char buf[LINEBUFFER+1];
@@ -590,23 +594,16 @@ transfer_command(void *sd_client, void *sd_server, char *command)
 	if (topt & T_ERROR)
 		return 0;
 
-	if (isdigit((unsigned char)reply[0]) && (unsigned char)reply[0] < '4') {
+	if (isdigit((unsigned char)reply[0])
+	    && (unsigned char)reply[0] < '4') {
 		if (strncmp(buf, "quit", 4) == 0)
 			return 0; /* The QUIT command */
 		else if (strncmp(buf, "rset", 4) == 0) {
-			destroy_assoc_list(&message.commands);
-			destroy_assoc_list(&message.header);
-			destroy_string_list(&message.mime_hdr);
-			xfree(message.body);
-			xfree(message.boundary);
-			topt &= ~T_BOUNDARY;
+			message_free(msg);
 			topt &= ~T_ERROR;
 		}
 		else if (strncmp(buf, "data", 4) == 0) {
-			process_data(sd_client, sd_server);
-			xfree(message.body);
-			xfree(message.boundary);
-			topt &= ~T_BOUNDARY;
+			process_data(sd_client, sd_server, msg);
 			topt &= ~T_ERROR;
 		}
 	}
@@ -614,24 +611,24 @@ transfer_command(void *sd_client, void *sd_server, char *command)
 }
 
 void
-process_data(void *sd_client, void *sd_server)
+process_data(void *sd_client, void *sd_server, MESSAGE *msg)
 {
 	char buf[LINEBUFFER+1];
 
 	alarm(1800);
 
-	collect_headers(sd_client, &message.header);
-	collect_body(sd_client, &message.body);
+	collect_headers(sd_client, msg);
+	collect_body(sd_client, msg);
 
-	rcfile_process_section(CF_CLIENT, "RULE", NULL, &message);
+	rcfile_process_section(CF_CLIENT, "RULE", NULL, msg);
 	
-	transfer_header(sd_client, sd_server, message.header);
-	transfer_body(sd_client, sd_server);
+	transfer_header(sd_client, sd_server, msg->header);
+	transfer_body(sd_client, sd_server, msg);
 
 	recvline(CLIENT, sd_server, buf, LINEBUFFER);
 	swrite(SERVER, sd_client, buf);
 
-	/* FIXME: xfree(message_body); */
+	message_free(msg);
 
 	alarm(0);
 }
@@ -662,82 +659,18 @@ raw_transfer(void *sd_client, void *sd_server)
 }
 
 void
-transfer_body(void *sd_client, void *sd_server)
+transfer_body(void *sd_client, void *sd_server, MESSAGE *msg)
 {
-	if (topt & T_BOUNDARY) {
-		send_body(sd_server);
+	if (msg->boundary) {
+		send_body(msg, sd_server);
 		
 		/* Transfer everything else */
 		raw_transfer(sd_client, sd_server);
 	} else
-		send_body(sd_server);
+		send_body(msg, sd_server);
 	swrite(CLIENT, sd_server, "."CRLF);
 }
 
-void
-message_add_header(MESSAGE *msg, char *hdr)
-{
-	list_append(msg->header, header_assoc(hdr));
-}
-
-void
-message_remove_headers(MESSAGE *msg, char *arg)
-{
-	ASSOC *asc;
-	RC_REGEX *regex = anubis_regex_compile(arg, 0);
-	
-	for (asc = list_first(msg->header); asc;
-	     asc = list_next(msg->header)) {
-		char **rv;
-		int rc;
-		char *h = assoc_to_header(asc);
-		
-		if (anubis_regex_match(regex, h, &rc, &rv)) {
-			list_remove_current(msg->header);
-			assoc_free(asc);
-		}
-		free(h);
-		if (rc)
-			free_pptr(rv);
-	}
-	anubis_regex_free(regex);
-}
-
-void
-message_modify_headers(MESSAGE *msg, char *arg, char *modify)
-{
-	ASSOC *asc;
-	RC_REGEX *regex = anubis_regex_compile(arg, 0);
-	
-	for (asc = list_first(msg->header); asc;
-	     asc = list_next(msg->header)) {
-		char **rv;
-		int rc;
-		char *h = assoc_to_header(asc);
-		
-		if (anubis_regex_match(regex, h, &rc, &rv)) {
-			free(asc->value);
-			asc->value = substitute(modify, rv);
-			if (!asc->value)
-				asc->value = strdup(modify);
-		}
-		free(h);
-		free_pptr(rv);
-	}
-	anubis_regex_free(regex);
-}
-
-void
-message_external_proc(MESSAGE *msg, char *name)
-{
-	int rc = 0;
-	char *extbuf = 0;
-	extbuf = external_program(&rc, name, message.body, 0, 0);
-	if (rc != -1 && extbuf) {
-		xfree(message.body);
-		message.body = extbuf;
-	}
-}
 
 /* EOF */
 
