@@ -417,7 +417,11 @@ smtp_get_reply (struct smtp_reply *repl)
 
   repl->argv = xmalloc ((repl->argc + 1) * sizeof (repl->argv[0]));
   for (i = 0, p = repl->base; p[0]; p += strlen (p) + 1, i++)
-    repl->argv[i] = p[0] == '\r' ? "" : p;
+    {
+      if (p[0] == '\r')
+	p[0] = 0;
+      repl->argv[i] = p;
+    }
   repl->argv[i] = NULL;
   return 0;
 }
@@ -755,7 +759,7 @@ cb_service (Gsasl_session_ctx * ctx, char *srv, size_t * srvlen,
     auth_args.hostname = get_input (_("Hostname of server: "));
 
   if (srvnamelen && auth_args.service_name == NULL)
-    auth_args.service_name = get_input (_("Generic server name: "));
+    auth_args.service_name = get_input (_("Generic service name: "));
 
   if (auth_args.service == NULL)
     return GSASL_AUTHENTICATION_ERROR;
