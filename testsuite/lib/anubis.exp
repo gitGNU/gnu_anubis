@@ -945,6 +945,8 @@ proc anubis_pat {patname} {
 			if [anubis_authmode] {
 			    verbose "REST $rest"
 			    lappend pattern "EHLO $rest"
+			    lappend pattern ":ADD STARTTLS"
+			    lappend pattern ":ADD EHLO $rest"
 			    verbose "PATTERN $pattern"
 			}
 		    } else {
