@@ -72,7 +72,7 @@ gen_execargs(const char *commandline)
 static int
 make_sockets(int fd[2])
 {
-	#ifndef HAVE_SOCKETPAIR
+#ifndef HAVE_SOCKETPAIR
 	struct sockaddr_in addr;
 	int addrlen;
 	int sd;
@@ -115,12 +115,12 @@ make_sockets(int fd[2])
 		return -1;
 	}
 	close_socket(sd);
-	#else
+#else
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, fd)) {
 		anubis_error(HARD, _("socketpair() failed: %s."), strerror(errno));
 		return -1;
 	}
-	#endif /* not HAVE_SOCKETPAIR */
+#endif /* not HAVE_SOCKETPAIR */
 	return 0;
 }
 
@@ -176,9 +176,9 @@ make_local_connection(char *exec_path, char **exec_args)
 			return -1;
 	}
 	close(fd[1]);
-	#ifdef FD_CLOEXEC
+#ifdef FD_CLOEXEC
 	fcntl(fd[0], F_SETFD, FD_CLOEXEC);
-	#endif /* FD_CLOEXEC */
+#endif /* FD_CLOEXEC */
 	return fd[0];
 }
 

@@ -212,7 +212,7 @@ swrite(int method, void *sd, char *ptr)
 	{
 		if (method == CLIENT) {
 
-			#ifdef HAVE_TLS
+#ifdef HAVE_TLS
 			if (topt & T_SSL_CLIENT) {
 				if ((nwritten = (unsigned long)gnutls_record_send(
 						(gnutls_session)sd, ptr, nleft)) <= 0) {
@@ -220,9 +220,9 @@ swrite(int method, void *sd, char *ptr)
 					return;
 				}
 			} else
-			#endif /* HAVE_TLS */
+#endif /* HAVE_TLS */
 
-			#ifdef HAVE_SSL
+#ifdef HAVE_SSL
 			if (topt & T_SSL_CLIENT) {
 				if ((nwritten = (unsigned long)SSL_write((SSL *)sd,
 						ptr, nleft)) <= 0) {
@@ -230,7 +230,7 @@ swrite(int method, void *sd, char *ptr)
 					return;
 				}
 			} else
-			#endif /* HAVE_SSL */
+#endif /* HAVE_SSL */
 
 			if (!(topt & T_SSL_CLIENT)) {
 				if ((nwritten = (unsigned long)send((int)sd,
@@ -242,7 +242,7 @@ swrite(int method, void *sd, char *ptr)
 		}
 		else if (method == SERVER) {
 
-			#ifdef HAVE_TLS
+#ifdef HAVE_TLS
 			if (topt & T_SSL_SERVER) {
 				if ((nwritten = (unsigned long)gnutls_record_send(
 						(gnutls_session)sd, ptr, nleft)) <= 0) {
@@ -250,9 +250,9 @@ swrite(int method, void *sd, char *ptr)
 					return;
 				}
 			} else
-			#endif /* HAVE_TLS */
+#endif /* HAVE_TLS */
 
-			#ifdef HAVE_SSL
+#ifdef HAVE_SSL
 			if (topt & T_SSL_SERVER) {
 				if ((nwritten = (unsigned long)SSL_write((SSL *)sd,
 						ptr, nleft)) <= 0) {
@@ -260,7 +260,7 @@ swrite(int method, void *sd, char *ptr)
 					return;
 				}
 			} else
-			#endif /* HAVE_SSL */
+#endif /* HAVE_SSL */
 
 			if ((int)sd == -1) { /* standard output */
 				nwritten = (unsigned long)write(1, ptr, nleft);
@@ -298,34 +298,34 @@ mread(int method, void *sd, char *ptr)
 	again:
 		if (method == CLIENT) {
 
-			#ifdef HAVE_TLS
+#ifdef HAVE_TLS
 			if (topt & T_SSL_CLIENT)
 				nread = gnutls_record_recv((gnutls_session)sd, buf, LINEBUFFER);
 			else
-			#endif /* HAVE_TLS */
+#endif /* HAVE_TLS */
 
-			#ifdef HAVE_SSL
+#ifdef HAVE_SSL
 			if (topt & T_SSL_CLIENT)
 				nread = SSL_read((SSL *)sd, buf, LINEBUFFER);
 			else
-			#endif /* HAVE_SSL */
+#endif /* HAVE_SSL */
 
 			if (!(topt & T_SSL_CLIENT))
 				nread = recv((int)sd, buf, LINEBUFFER, 0);
 		}
 		else if (method == SERVER) {
 
-			#ifdef HAVE_TLS
+#ifdef HAVE_TLS
 			if (topt & T_SSL_SERVER)
 				nread = gnutls_record_recv((gnutls_session)sd, buf, LINEBUFFER);
 			else
-			#endif /* HAVE_TLS */
+#endif /* HAVE_TLS */
 
-			#ifdef HAVE_SSL
+#ifdef HAVE_SSL
 			if (topt & T_SSL_SERVER)
 				nread = SSL_read((SSL *)sd, buf, LINEBUFFER);
 			else
-			#endif /* HAVE_SSL */
+#endif /* HAVE_SSL */
 
 			if (!(topt & T_SSL_SERVER))
 				nread = recv((int)sd, buf, LINEBUFFER, 0);
@@ -352,7 +352,7 @@ recvline(int method, void *sd, void *vptr, int maxlen)
 
 	if ((int)sd == -1 && method == SERVER) { /* standard input */
 		memset(vptr, 0, maxlen);
-		#ifdef HAVE_ISATTY
+#ifdef HAVE_ISATTY
 		if (!isatty(fileno(stdin))) {
 			fgets((char *)vptr, maxlen, stdin);
 			remcrlf((char *)vptr);
@@ -363,7 +363,7 @@ recvline(int method, void *sd, void *vptr, int maxlen)
 				n = 0;
 		}
 		else
-		#endif /* HAVE_ISATTY */
+#endif /* HAVE_ISATTY */
 		{
 			n = read(0, (char *)vptr, maxlen - 1);
 			remcrlf((char *)vptr);

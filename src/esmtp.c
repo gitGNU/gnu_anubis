@@ -26,7 +26,7 @@
 #include "extern.h"
 
 #ifdef HAVE_TLS
- #include <gcrypt.h>
+# include <gcrypt.h>
 #endif /* HAVE_TLS */
 
 static char *b64encode(char *);
@@ -47,7 +47,7 @@ esmtp_auth(void *sd_server, char *reply)
 	char tmp[LINEBUFFER+1];
 	memset(tmp, 0, LINEBUFFER + 1);
 
-	#if defined(HAVE_TLS) || defined(HAVE_SSL)
+#if defined(HAVE_TLS) || defined(HAVE_SSL)
 	if (strstr(reply, "CRAM-MD5")) {
 		int i;
 		unsigned char digest[16];
@@ -91,7 +91,7 @@ esmtp_auth(void *sd_server, char *reply)
 		}
 	}
 	else
-	#endif /* HAVE_TLS or HAVE_SSL */
+#endif /* HAVE_TLS or HAVE_SSL */
 	if (strstr(reply, "LOGIN") && (topt & T_SSL_FINISHED)) {
 		info(VERBOSE, _("Using the ESMTP LOGIN authentication..."));
 		swrite(CLIENT, sd_server, "AUTH LOGIN"CRLF);

@@ -62,11 +62,11 @@ ssl_error(char *txt)
 	ERR_error_string(ERR_get_error(), string_error);
 
 	if (options.termlevel != SILENT) {
-		#ifdef HAVE_SYSLOG
+#ifdef HAVE_SYSLOG
 		if ((topt & T_DAEMON) && !(topt & T_FOREGROUND))
 			syslog(LOG_ERR | LOG_MAIL, string_error);
 		else
-		#endif /* HAVE_SYSLOG */
+#endif /* HAVE_SYSLOG */
 			mprintf(">>%s", string_error);
 	}
 	anubis_error(HARD, txt);

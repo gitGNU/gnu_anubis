@@ -39,7 +39,7 @@
 #define ATYP_IPv4           0x01  /* IPv4 */
 #define ATYP_DOMAINNAME     0x03  /* DOMAIN NAME */
 #ifdef IPV6
- #define ATYP_IPv6          0x04  /* IPv6 */
+# define ATYP_IPv6          0x04  /* IPv6 */
 #endif /* IPV6 */
 
 static int connect_through_socks_proxy(int, char *, unsigned int);
@@ -349,12 +349,12 @@ connect_through_socks_proxy(int sd, char *host, unsigned int port)
 			else
 				ip = 0; /* a domain name */
 
-			#ifdef IPV6
+#ifdef IPV6
 			if (host[i] == ':') {
 				ip = 2;
 				break;
 			}
-			#endif /* IPV6 */
+#endif /* IPV6 */
 		}
 
 		if (ip == 1) { /* IPv4 */
@@ -383,7 +383,7 @@ connect_through_socks_proxy(int sd, char *host, unsigned int port)
 			for (i = 0; i < 4; i++)
 				request[offset++] = ip[z++];
 
-		#ifdef IPV6
+#ifdef IPV6
 		}
 		else if (ip == 2) { /* IPv6 */
 			char tmp[5];
@@ -407,7 +407,7 @@ connect_through_socks_proxy(int sd, char *host, unsigned int port)
 					strncpy(tmp, "0000", 4);
 				}
 			}
-		#endif /* IPV6 */
+#endif /* IPV6 */
 
 		}
 		else { /* a domain name */
@@ -500,7 +500,7 @@ connect_through_socks_proxy(int sd, char *host, unsigned int port)
 				}
 				break;
 
-			#ifdef IPV6
+#ifdef IPV6
 			case ATYP_IPv6:
 				memset(reply, 0, sizeof(reply));
 				/*
@@ -508,7 +508,7 @@ connect_through_socks_proxy(int sd, char *host, unsigned int port)
 				*/
 				recv(sd, reply, 18, 0);
 				break;
-			#endif /* IPV6 */
+#endif /* IPV6 */
 		}
 	}
 	return 0;
