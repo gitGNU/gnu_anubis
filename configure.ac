@@ -77,6 +77,7 @@ AC_CHECK_FUNCS(getopt_long,, [AC_LIBOBJ(getopt)
 
 dnl Checks for library functions.
 AC_CHECK_FUNCS(syslog getrlimit setrlimit socketpair strdup)
+AC_CHECK_FUNCS(setegid setregid setresgid seteuid setreuid)
 AC_CHECK_FUNCS(regcomp daemon putenv)
 
 AC_REPLACE_FUNCS(snprintf setenv getline getpass)

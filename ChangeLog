@@ -1,3 +1,10 @@
+2004-08-09  Sergey Poznyakoff
+
+	* configure.ac: Updated
+	* src/env.c (change_privs): New function.
+	(anubis_changeowner): Use change_privs to correctly switch
+	privileges.
+
 2004-08-07  Sergey Poznyakoff  <gray@Noldor.runasimi.org>
 
 	* configure.ac: Raised version number to 3.9.96
