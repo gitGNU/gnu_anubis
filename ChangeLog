@@ -2,9 +2,12 @@
 
 	* src/anubisusr.c (smtp_auth): Use error() instead of info()
 	(main): Minor fix
+	(argcv_free): Correctly handle argc==0. Changed return type to
+	void.
+	(parse_netrc): Initialize p_argv.
 	* src/authmode.c: Provide special section AUTH for configuring
 	auth mode. Move sasl-password-db and sasl-allowed-mech
-	to AUTH. New keywords smtp-greeting-message and stmp-help-message
+	to AUTH. New keywords smtp-greeting-message and smtp-help-message
 	allow to set the corresponding SMTP messages.
 	* src/env.c (get_options): Use anubis_set_mode().
 	(anubis_set_mode): New function.
