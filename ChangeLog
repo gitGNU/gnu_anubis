@@ -1,3 +1,13 @@
+2004-11-22  Wojciech Polak
+
+	Potential security fixes by Ulf Härnhammar:
+
+	* src/anubisadm.c (adm_memory_error): Fixed wrong format strings.
+	(op_add_or_modify): Likewise.
+	* src/main.c (anubis_memory_error): Likewise.
+	* src/authmode.c (anubis_authenticate_mode): Set the last element
+	of `session.clientname' to '\0'.
+
 2004-10-29  Sergey Poznyakoff
 
 	* src/regex.c (anubis_regex_replace): Fixed coredump
