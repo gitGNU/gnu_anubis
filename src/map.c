@@ -24,69 +24,133 @@
 
 #include "headers.h"
 #include "extern.h"
+#include "rcfile.h"
 
 /***************************
  The translation map parser
 ****************************/
 
+char *
+parse_line_option(char *ptr)
+{
+	while (isspace(*ptr))
+		ptr++;
+
+	remcrlf(ptr);
+	return ptr;
+}
+
+struct translate_env {
+	int stop;
+	int cs;
+	char *extuser;
+	char *extaddr;
+	char translate[65];
+	char into[65];
+	int size;
+};
+
 void
 parse_transmap(int *cs, char *extuser, char *extaddr, char *dst, int size)
 {
+	struct translate_env env;
+	
+	env.stop = 0;
+	env.cs = -1; /* failed by default: unmatched */
+	env.extuser = extuser;
+	env.extaddr = extaddr;
+	env.size = size;
+
+	rcfile_process_section(CF_SUPERVISOR, "TRANSLATE", &env);
+	*cs = env.cs;
+	if (*cs == 1) { /* success */
+		if (check_username(env.into)) {
+			info(NORMAL, _("%s remapped to %s@localhost."),
+			     env.translate, env.into);
+			memset(dst, 0, size);
+			strncpy(dst, env.into, size - 1);
+		}
+		else
+			*cs = 0; /* failed: invalid user name */
+	}
+	topt &= ~T_ERROR;
+	return;
+}
+
+
+/* ******************** Configuration file settings ********************** */
+#define KW_TRANSLATE           1
+
+struct rc_kwdef translate_kw[] = {
+	{ "translate", KW_TRANSLATE },
+	{ NULL }
+};
+
+
+int
+translate_parser(int method, int key, char *arg,
+		 void *inv_data, void *func_data, char *line)
+{
+	struct translate_env *env = inv_data;
 	char *p = 0;
 	char *ptr1 = 0;
 	char *ptr2 = 0;
 	char a1[65];
 	char a2[65];
-	char translate[65];
-	char into[65];
 	char user[65];
 	char address[65];
-	char oneline[LINEBUFFER+1];
 	int cu = 0; /* check a user name */
 	unsigned long inaddr;
 	struct sockaddr_in addr;
-	struct list *p1;
-	struct list *p2;
 
-	memset(&addr, 0, sizeof(addr));
-	*cs = -1; /* failed by default: unmatched */
+	if (!env || env->stop)
+		return RC_KW_HANDLED;
+	
+	switch (key) {
+	case KW_TRANSLATE:
+		safe_strcpy(a1, env->extaddr);
+		memset(&addr, 0, sizeof(addr));
 
-	if (session.transmap == NULL)
-		return;
-	else
-		p1 = session.transmap;
-
-	safe_strcpy(a1, extaddr);
-	do
-	{
-		p2 = p1->next;
-		strncpy(oneline, p1->line, LINEBUFFER);
-		free(p1->line);
-		free(p1);
-
-		if (regex_match("^[^ ]+[ \t]*=[ \t]*[^ ]+[ \t]+[^ ]+[ \t]*=[ \t]*[^ ]+",
-				oneline) == 0) {
+		for (ptr1 = arg; *ptr1 && isspace(*ptr1); ptr1++)
+			;
+		if (!*ptr1) {
 			info(VERBOSE, _("Translation map: incorrect syntax."));
-			continue; /* failed */
+			break;
 		}
-		ptr1 = parse_line_option(oneline);
-		ptr2 = parse_line_option(ptr1);
-		p = strchr(ptr1, ' ');
-		*p = '\0';
-		safe_strcpy(translate, ptr1);
-		safe_strcpy(into, ptr2);
+		
+		for (ptr2 = ptr1; *ptr2 && !isspace(*ptr2); ptr2++)
+			;
 
-		if (strstr(translate, "@")) {
-			if (extuser == 0)
-				continue; /* failed */
-			safe_strcpy(user, translate);
+		if (!*ptr2) {
+			info(VERBOSE, _("Translation map: incorrect syntax."));
+			break;
+		}
+
+		*ptr2++ = 0;
+		for (; *ptr2 && isspace(*ptr2); ptr2++)
+			;
+		
+		if (!*ptr2 || strncmp(ptr2, "into", 4)) {
+			info(VERBOSE, _("Translation map: incorrect syntax."));
+			break;
+		}
+
+		for (ptr2 += 4; *ptr2 && isspace(*ptr2); ptr2++)
+			;
+
+		safe_strcpy(env->translate, ptr1);
+		safe_strcpy(env->into, ptr2);
+
+		if (strstr(env->translate, "@")) {
+			if (env->extuser == 0)
+				break; /* failed */
+			safe_strcpy(user, env->translate);
 			p = strchr(user, '@');
 			*p++ = '\0';
 			safe_strcpy(address, p);
 			cu = 1;
-		}
-		else
-			safe_strcpy(address, translate);
+		} else
+			safe_strcpy(address, env->translate);
 
 		inaddr = inet_addr(address);
 		if (inaddr != INADDR_NONE)
@@ -97,66 +161,78 @@ parse_transmap(int *cs, char *extuser, char *extaddr, char *dst, int size)
 			if (hp == 0) {
 				cu = 0;
 				hostname_error(address);
-				continue; /* failed */
-			}
-			else {
+				break; /* failed */
+			} else {
 				if (hp->h_length != 4 && hp->h_length != 8) {
 					anubis_error(HARD,
 					_("Illegal address length received for host %s"), address);
 					cu = 0;
-					continue; /* failed */
-				}
-				else {
-					memcpy((char *)&addr.sin_addr.s_addr, hp->h_addr,
-						hp->h_length);
+					break; /* failed */
+				} else {
+					memcpy(&addr.sin_addr.s_addr,
+					       hp->h_addr,
+					       hp->h_length);
 				}
 			}
 		}
 
 		safe_strcpy(a2, inet_ntoa(addr.sin_addr));
 		if (cu && !(topt & T_ERROR)) {
-			if (strcmp(extuser, user) == 0) {
+			if (strcmp(env->extuser, user) == 0) {
 				/* a temporary solution */
 				if (strcmp(a2, "0.0.0.0") == 0) {
-					*cs = 1; /* success */
+					env->cs = 1; /* success */
+					env->stop = 1;
 					break;
 				}
 				if (strcmp(a1, a2) == 0) {
-					*cs = 1; /* success */
+					env->cs = 1; /* success */
+					env->stop = 1;
 					break;
 				}
 			}
-		}
-		else if (cu == 0 && !(topt & T_ERROR)) {
+		} else if (cu == 0 && !(topt & T_ERROR)) {
 			/* a temporary solution */
 			if (strcmp(a2, "0.0.0.0") == 0) {
-				*cs = 1; /* success */
+				env->cs = 1; /* success */
+				env->stop = 1;
 				break;
 			}
 			if (strcmp(a1, a2) == 0) {
-				*cs = 1; /* success */
+				env->cs = 1; /* success */
+				env->stop = 1;
 				break;
 			}
 		}
 		topt &= ~T_ERROR;
-
-		if (p2)
-			p1 = p2;
-	} while (p2 != NULL);
-	session.transmap = NULL;
-
-	if (*cs == 1) { /* success */
-		if (check_username(into)) {
-			info(NORMAL, _("%s remapped to %s@localhost."), translate, into);
-			memset(dst, 0, size);
-			strncpy(dst, into, size - 1);
-		}
-		else
-			*cs = 0; /* failed: invalid user name */
+		break;
+		
+	default:
+		return RC_KW_UNKNOWN;
 	}
-	topt &= ~T_ERROR;
-	return;
+	return RC_KW_HANDLED;
 }
+
+static struct rc_secdef_child translate_secdef_child = {
+	NULL,
+	CF_SUPERVISOR,
+	translate_kw,
+	translate_parser,
+	NULL
+};
+
+struct rc_secdef translate_section = {
+	"TRANSLATE",
+	&translate_secdef_child
+};
+
+void
+translate_section_init()
+{
+	struct rc_secdef *sp = anubis_add_section("TRANSLATE");
+	rc_secdef_add_child(sp, &translate_secdef_child);
+}
+
 
 /* EOF */
 

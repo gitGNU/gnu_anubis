@@ -24,440 +24,215 @@
 
 #include "headers.h"
 #include "extern.h"
+#include "rcfile.h"
 
-static int  optlength(char *);
-static void match_options_common(int, char *);
-static int  get_regex(int, char *, char *, int);
-static char *parse_line_regex(char *);
-static void get_action_line(char *);
-static void match_action(char *, const char *);
-
-static time_t global_mtime;
-
-#define set(a, b, c) \
-	if ((optlen = strlen((char *)a)) == 0) \
-		return; \
-	if (strncmp("yes", (char *)a, optlen) == 0) \
-		b |= c; \
-	else if (strncmp("no", (char *)a, optlen) == 0) \
-		b &= ~c; \
-	return;
-
-#define if_empty_quit(a) \
-	if (strlen((char *)a) == 0) \
-		return;
+#define setbool(a, b, c) \
+   do {\
+        if (strcmp("yes", a) == 0) \
+		(b) |= (c); \
+	else if (strcmp("no", a) == 0) \
+		(b) &= ~(c); \
+        else \
+                return RC_KW_ERROR; \
+   } while (0)
 
 #define if_empty_set(a, b, c) \
-	if (strlen((char *)a) == 0) { \
-		b &= ~c; \
-		return; \
-	} \
-	else if (strlen((char *)a) != 0) { \
-		b |= c; \
-		return; \
-	}
+   do {\
+	if (strlen(a) == 0) { \
+		(b) &= ~(c); \
+	} else { \
+		(b) |= (c); \
+	}\
+   } while (0)		 
 
-void
-open_rcfile(int method)
+#define MAX_SECTIONS 10
+
+static RC_SECTION *parse_tree;
+static int parse_tree_method;
+static struct rc_secdef anubis_rc_sections[MAX_SECTIONS];
+static int anubis_rc_numsections;
+
+struct rc_secdef *
+anubis_add_section(char *name)
 {
-	int n;
+	int i;
+	
+	if (anubis_rc_numsections >= MAX_SECTIONS)
+		abort(); /*FIXME*/
+	
+	for (i = 0; i < anubis_rc_numsections; i++)
+		if (strcmp(anubis_rc_sections[i].name, name) == 0)
+			return &anubis_rc_sections[i];
+	
+	anubis_rc_sections[anubis_rc_numsections].name = name;
+	anubis_rc_sections[anubis_rc_numsections].child = NULL;
+	return &anubis_rc_sections[anubis_rc_numsections++];
+}
+
+RC_SECTION *
+_open_rcfile(int method)
+{
 	char homedir[MAXPATHLEN+1];
-	char local_rcfile[] = DEFAULT_LOCAL_RCFILE;
 	char *rcfile = 0;
-	char *user = 0;
+	RC_SECTION *sec;
 
-	if (method == SUPERVISOR)
-		user = session.supervisor;
-	else if (method == CLIENT)
-		user = session.client;
-
-	get_homedir(user, homedir, sizeof(homedir));
-	n = strlen(homedir) + strlen(local_rcfile) + 2;
-	n = n > MAXPATHLEN ? MAXPATHLEN + 1 : n + 1;
-
-	if (method == SUPERVISOR) {
+	switch (method) {
+	case CF_SUPERVISOR:
+	case CF_INIT:
 		if (topt & T_ALTRC) {
 			if (check_filename(options.altrc) == 0)
-				return;
-			rcfile = allocbuf(options.altrc, MAXPATHLEN);
-		}
+				return NULL;
+			rcfile = strdup(options.altrc);
+		} else if (check_superuser())
+			rcfile = strdup(DEFAULT_GLOBAL_RCFILE);
 		else {
-			if (check_superuser())
-				rcfile = allocbuf(DEFAULT_GLOBAL_RCFILE, MAXPATHLEN);
-			else {
-				rcfile = (char *)xmalloc(n);
-#ifdef HAVE_SNPRINTF
-				snprintf(rcfile, n - 1,
-#else
-				sprintf(rcfile,
-#endif /* HAVE_SNPRINTF */
-					"%s/%s", homedir, local_rcfile);
-			}
+			get_homedir(session.supervisor,
+				    homedir, sizeof(homedir));
+			rcfile = xmalloc(strlen(homedir) +
+					 strlen(DEFAULT_LOCAL_RCFILE) + 2);
+			sprintf(rcfile,	"%s/%s", homedir,
+				DEFAULT_LOCAL_RCFILE);
 		}
-	}
-	else if (method == CLIENT) {
-		rcfile = (char *)xmalloc(n);
-#ifdef HAVE_SNPRINTF
-		snprintf(rcfile, n - 1,
-#else
-		sprintf(rcfile,
-#endif /* HAVE_SNPRINTF */
-			"%s/%s", homedir, local_rcfile);
+		info(DEBUG,
+		     _("Reading system configuration file %s..."), rcfile);
+		break;
+
+	case CF_CLIENT:
+		get_homedir(session.client,
+			    homedir, sizeof(homedir));
+		rcfile = xmalloc(strlen(homedir) +
+				 strlen(DEFAULT_LOCAL_RCFILE) + 2);
+		sprintf(rcfile,	"%s/%s", homedir, DEFAULT_LOCAL_RCFILE);
+		info(DEBUG,
+		     _("Reading user configuration file %s..."), rcfile);
 	}
 
 	if (check_filemode(rcfile) == 0) { /* Wrong permissions... */
 		free(rcfile);
-		return;
+		return NULL;
 	}
 
-	if (method == SUPERVISOR) {
-		struct stat st;
-		if (stat(rcfile, &st) == 0) {
-			if (global_mtime != st.st_mtime)
-				global_mtime = st.st_mtime;
-			else {
-				free(rcfile);
-				return;
-			}
-		}
-	}
-	fp_rcfile = fopen(rcfile, "r");
-	if (fp_rcfile == 0) {
-		if (options.termlevel == DEBUG)
-			anubis_error(SOFT, _("Anubis RC file error: %s."), strerror(errno));
-	}
-	else {
-		if (method == SUPERVISOR)
-			info(DEBUG, _("Reading system configuration file %s..."), rcfile);
-		else if (method == CLIENT)
-			info(DEBUG, _("Reading user configuration file %s..."), rcfile);
-	}
+	sec = rc_parse(rcfile);
+	/* FIXME:
+	   1) check 'sec' against anubis_rc_sections and remove the
+	   erroneous statements 
+	   2) rc_section_link(&rc_section, sec); */
 	free(rcfile);
-	return;
+	return sec;
 }
 
 void
-read_rcfile(int method)
+open_rcfile(int method)
 {
-	char rcline[LINEBUFFER+1];
-	unsigned long rcfile_position = 0;
-
-	if (fp_rcfile == 0)
-		return;
-
-	rcfile_position = get_position(BEGIN_CONTROL);
-	if (rcfile_position == 0)
-		return;
-	else
-		info(DEBUG, _("The %s section has been found. Processing..."), "CONTROL");
-
-	fseek(fp_rcfile, rcfile_position, SEEK_SET);
-	while (fgets(rcline, LINEBUFFER, fp_rcfile) != 0)
-	{
-		if (strncmp(rcline, "#", 1) == 0 || strncmp(rcline, LF, 1) == 0)
-			continue; /* skip: an empty line, comment (#) */
-		else if (strncmp(rcline, END_SECTION, endsection_len) == 0)
-			break; /* THE END */
-		else
-			match_options_common(method, rcline);
-	}
-	if (!(topt & T_ALLOW_LOCAL_MTA))
-		topt &= ~T_LOCAL_MTA;
-
-	if (method >= SUPERVISOR) {
-		rcfile_position = get_position(BEGIN_TRANSLATION);
-		if (rcfile_position == 0) {
-			topt &= ~T_TRANSLATION_MAP;
-			return;
-		}
-		else
-			info(DEBUG, _("The %s section has been found. Processing..."), "TRANSLATION");
-
-		destroy_list(&session.transmap);
-		topt |= T_TRANSLATION_MAP;
-
-		fseek(fp_rcfile, rcfile_position, SEEK_SET);
-		while (fgets(rcline, LINEBUFFER, fp_rcfile) != 0)
-		{
-			if (strncmp(rcline, "#", 1) == 0 || strncmp(rcline, LF, 1) == 0)
-				continue; /* skip: an empty line, comment (#) */
-			else if (strncmp(rcline, END_SECTION, endsection_len) == 0)
-				break; /* THE END */
-			else {
-				remcrlf(rcline);
-				session.transmap_tail = new_element(session.transmap_tail,
-					&session.transmap, rcline);
-			}
-		}
-	}
-	return;
-}
-
-void
-read_rcfile_allsection(void)
-{
-	char rcline[LINEBUFFER+1];
-
-	if (fp_rcfile == 0)
-		return;
-
-	if (all_position == 0) {
-		all_position = get_position(BEGIN_ALL);
-		if (all_position == 0)
-			return;
-		else
-			info(DEBUG, _("The %s section has been found. Processing..."), "ALL");
-	}
-
-	fseek(fp_rcfile, all_position, SEEK_SET);
-	while (fgets(rcline, LINEBUFFER, fp_rcfile) != 0)
-	{
-		if (strncmp(rcline, "#", 1) == 0 || strncmp(rcline, LF, 1) == 0)
-			continue; /* skip: an empty line, comment (#) */
-		else if (strncmp(rcline, END_SECTION, endsection_len) == 0)
-			break; /* THE END */
-		else {
-			get_action_line(rcline);
-			match_action(rcline, NULL);
-		}
-	}
-	return;
-}
-
-#ifdef WITH_GUILE
-static void
-match_action_guile(char *buf)
-{
-	char *ptr = 0;
-	int optlen;
-	
-	optlen = optlength(buf);
-	if (optlen == 0)
-		return;
-
-	/*
-	    Guile
-	*/
-
-	if (strncmp("guile-output", buf, optlen) == 0) {
-		ptr = parse_line_option(buf);
-		if_empty_quit(ptr);
-		xfree(options.guile_logfile);
-		options.guile_logfile = allocbuf(ptr, MAXPATHLEN);
-		return;
-	}
-	if (strncmp("guile-debug", buf, optlen) == 0) {
-		ptr = parse_line_option(buf);
-		if_empty_quit(ptr);
-		guile_debug(strncmp("yes", ptr, 3) == 0);
-		return;
-	}	
-	if (strncmp("guile-load-path-append", buf, optlen) == 0) {
-		ptr = parse_line_option(buf);
-		if_empty_quit(ptr);
-		guile_load_path_append(ptr);
-		return;
-	}
-	if (strncmp("guile-load-program", buf, optlen) == 0) {
-		ptr = parse_line_option(buf);
-		if_empty_quit(ptr);
-		guile_load_program(ptr);
-		return;
-	}
-	if (strncmp("guile-postprocess", buf, optlen) == 0) {
-		ptr = parse_line_option(buf);
-		if_empty_quit(ptr);
-		xfree(options.guile_postprocess);
-		options.guile_postprocess = allocbuf(ptr, MAXPATHLEN);
-		return;
+	if (!parse_tree || parse_tree_method != method) {
+		RC_SECTION *sec;
+		parse_tree_method = method;
+		sec = _open_rcfile(method);
+		if (sec)
+			rc_section_link(&parse_tree, sec);
 	}
 }
 
 void
-read_rcfile_guile(void)
+process_rcfile(int method)
 {
-	char rcline[LINEBUFFER+1];
+	rc_run_section_list(method, parse_tree, anubis_rc_sections);
+}
 
-	if (fp_rcfile == 0)
-		return;
+/* ************************** The CONTROL Section ************************* */ 
+#define KW_BIND                0
+#define KW_TERMLEVEL           1
+#define KW_ALLOW_LOCAL_MTA     2
+#define KW_ALLOW_NOTPRIVILEGED 3 
+#define KW_LOGLEVEL            4
+#define KW_LOGFILE             5
+#define KW_REMOTE_MTA          6 
+#define KW_LOCAL_MTA           7
+#define KW_ESMTP_AUTH          8
+#define KW_SOCKS_PROXY         9
+#define KW_SOCKS_V4           10
+#define KW_SOCKS_AUTH         11
 
-	if (guile_position == 0) {
-		guile_position = get_position(BEGIN_GUILE);
-		if (guile_position == 0)
-			return;
+int
+control_parser(int method, int key, char *arg,
+	       void *inv_data, void *func_data, char *line)
+{
+	switch (key) {
+	case KW_BIND:                
+		parse_mtahost(arg, session.tunnel, &session.tunnel_port);
+		if (strlen(session.tunnel) != 0)
+			topt |= T_NAMES;
+		break;
+		
+	case KW_TERMLEVEL:           
+		if (strcmp("silent", arg) == 0)
+			options.termlevel = SILENT;
+		else if (strcmp("normal", arg) == 0)
+			options.termlevel = NORMAL;
+		else if (strcmp("verbose", arg) == 0)
+			options.termlevel = VERBOSE;
+		else if (strcmp("debug", arg) == 0)
+			options.termlevel = DEBUG;
 		else
-			info(DEBUG, _("The %s section has been found. Processing..."), "GUILE");
-	}
+			return RC_KW_ERROR;
+		break;
+		
+	case KW_ALLOW_LOCAL_MTA:
+		setbool(arg, topt, T_ALLOW_LOCAL_MTA);
+		break;
+		
+	case KW_ALLOW_NOTPRIVILEGED:
+		safe_strcpy(session.notprivileged, arg);
+		break;
 
-	fseek(fp_rcfile, guile_position, SEEK_SET);
-	while (fgets(rcline, LINEBUFFER, fp_rcfile) != 0)
-	{
-		if (strncmp(rcline, "#", 1) == 0
-		    || strncmp(rcline, LF, 1) == 0)
-			continue; /* skip: an empty line, comment (#) */
-		else if (strncmp(rcline, END_SECTION, endsection_len) == 0)
-			break; /* THE END */
-		else {
-			get_action_line(rcline);
-			match_action_guile(rcline);
-		}
-	}
-	return;
-}
-#endif /* WITH_GUILE */
-
-void
-close_rcfile(void)
-{
-	if (fp_rcfile == 0)
-		return;
-	if (fclose(fp_rcfile) != 0)
-		anubis_error(SOFT, _("Fatal fclose() error. %s."), strerror(errno));
-	fp_rcfile = 0;
-	return;
-}
-
-char *
-parse_line_option(char *line)
-{
-	char *ptr = 0;
-	ptr = strchr(line, '=');
-
-	if (ptr == 0)
-		return line;
-	do {
-		ptr++;
-	} while (*ptr == ' ' || *ptr == '\t');
-
-	remcrlf(ptr);
-	return ptr;
-}
-
-static int
-optlength(char *p)
-{
-	register int n = 0;
-	while (*p != ' ' && *p != '\t' && *p != '=')
-	{
-		n++;
-		p++;
-	}
-	return n;
-}
-
-static void
-match_options_common(int method, char *rcline)
-{
-	char *ptr = 0;
-	char buf[LINEBUFFER+1];
-	int optlen;
-
-	safe_strcpy(buf, rcline);
-	change_to_lower(buf);
-	optlen = optlength(buf);
-	if (optlen == 0)
-		return;
-
-	if (method == INIT) {
-		if (strncmp("bind", buf, optlen) == 0) {
-			ptr = parse_line_option(rcline);
-			if_empty_quit(ptr);
-			parse_mtahost(ptr, session.tunnel, &session.tunnel_port);
-			if (strlen(session.tunnel) != 0)
-				topt |= T_NAMES;
-			return;
-		}
-	}
-	if (method >= SUPERVISOR) {
-		if (strncmp("termlevel", buf, optlen) == 0) {
-			ptr = parse_line_option(buf);
-			if ((optlen = strlen(ptr)) == 0)
-				return;
-			if (strncmp("silent", ptr, optlen) == 0)
-				options.termlevel = SILENT;
-			else if (strncmp("normal", ptr, optlen) == 0)
-				options.termlevel = NORMAL;
-			else if (strncmp("verbose", ptr, optlen) == 0)
-				options.termlevel = VERBOSE;
-			else if (strncmp("debug", ptr, optlen) == 0)
-				options.termlevel = DEBUG;
-			return;
-		}
-		if (strncmp("allow-local-mta", buf, optlen) == 0) {
-			set(parse_line_option(buf), topt, T_ALLOW_LOCAL_MTA);
-		}
-		if (strncmp("user-notprivileged", buf, optlen) == 0) {
-			safe_strcpy(session.notprivileged, parse_line_option(rcline));
-			if_empty_set(session.notprivileged, topt, T_USER_NOTPRIVIL);
-		}
-	}
-	if (strncmp("logfile", buf, optlen) == 0) {
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
-
-		if (method >= SUPERVISOR) {
+	case KW_LOGFILE:
+		if (method & (CF_SUPERVISOR|CF_INIT)) {
 			xfree(options.slogfile);
-			options.slogfile = allocbuf(ptr, MAXPATHLEN);
-			return;
-		}
-		if (method == CLIENT) {
+			options.slogfile = allocbuf(arg, MAXPATHLEN);
+		} else if (method == CF_CLIENT) {
 			xfree(options.ulogfile);
-			options.ulogfile = allocbuf(ptr, MAXPATHLEN);
-			return;
+			options.ulogfile = allocbuf(arg, MAXPATHLEN);
 		}
-		return;
-	}
-	if (method == CLIENT) {
-		if (strncmp("loglevel", buf, optlen) == 0) {
-			ptr = parse_line_option(buf);
-			if ((optlen = strlen(ptr)) == 0)
-				return;
-			if (strncmp("none", ptr, optlen) == 0)
-				options.uloglevel = NONE;
-			else if (strncmp("all", ptr, optlen) == 0)
-				options.uloglevel = ALL;
-			else if (strncmp("fails", ptr, optlen) == 0)
-				options.uloglevel = FAILS;
-			return;
-		}
-	}
-	if (strncmp("remote-mta", buf, optlen) == 0) {
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
-		parse_mtaport(ptr, session.mta, &session.mta_port);
-		return;
-	}
-	if (strncmp("local-mta", buf, optlen) == 0) {
+		break;
+		
+	case KW_LOGLEVEL:
+		if (strcmp("none", arg) == 0)
+			options.uloglevel = NONE;
+		else if (strcmp("all", arg) == 0)
+			options.uloglevel = ALL;
+		else if (strcmp("fails", arg) == 0)
+			options.uloglevel = FAILS;
+		else
+			return RC_KW_ERROR;
+		break;
+		
+	case KW_REMOTE_MTA:
+		parse_mtaport(arg, session.mta, &session.mta_port);
+		break;
+		
+	case KW_LOCAL_MTA: {
 		char *a = 0;
 		char *p = 0;
 		char tmp[LINEBUFFER+1];
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
 
-		a = strchr(ptr, ' '); /* an extra arguments */
+		a = strchr(arg, ' '); /* an extra arguments */
 		if (a) {
 			*a++ = '\0';
-			p = strrchr(ptr, '/');
+			p = strrchr(arg, '/');
 			if (p)
 				p++;
 			else
-				p = ptr;
-#ifdef HAVE_SNPRINTF
-			snprintf(tmp, LINEBUFFER,
-#else
-			sprintf(tmp,
-#endif /* HAVE_SNPRINTF */
-				"%s %s", p, a);
-			p = ptr;
+				p = arg;
+			snprintf(tmp, sizeof(tmp), "%s %s", p, a);
+			p = arg;
 			a = tmp;
-		}
-		else { /* no arguments */
-			p = ptr;
-			a = strrchr(ptr, '/');
+		} else { /* no arguments */
+			p = arg;
+			a = strrchr(arg, '/');
 			if (a)
 				a++;
 			else
-				a = ptr;
+				a = arg;
 		}
 		xfree(session.execpath);
 		session.execpath = allocbuf(p, MAXPATHLEN);
@@ -468,431 +243,448 @@ match_options_common(int method, char *rcline)
 		}
 		session.execargs = gen_execargs(a);
 		topt |= T_RCEXECARGS;
-		return;
 	}
-	if (strncmp("esmtp-auth", buf, optlen) == 0) {
-		char *p = 0;
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
-		p = strchr(ptr, ':');
+	break;
+		
+	case KW_ESMTP_AUTH: {
+		char *p = strchr(arg, ':');
 		if (p) {
 			safe_strcpy(session.mta_password, ++p);
 			*--p = '\0';
-			safe_strcpy(session.mta_username, ptr);
+			safe_strcpy(session.mta_username, arg);
 			topt |= T_ESMTP_AUTH;
 		}
-		return;
-	}
-
-	/*
-	   Proxies.
-	*/
-
-	if (strncmp("socks-proxy", buf, optlen) == 0) {
-		parse_mtaport(parse_line_option(rcline), session.socks,
-		&session.socks_port);
+	}		
+	break;
+		
+	case KW_SOCKS_PROXY:
+		parse_mtaport(arg, session.socks, &session.socks_port);
 		if_empty_set(session.socks, topt, T_SOCKS);
-	}
-	if (strncmp("socks-v4", buf, optlen) == 0) {
-		set(parse_line_option(buf), topt, T_SOCKS_V4);
-	}
-	if (strncmp("socks-auth", buf, optlen) == 0) {
+		break;
+		
+	case KW_SOCKS_V4:
+		setbool(arg, topt, T_SOCKS_V4);
+		break;
+		
+	case KW_SOCKS_AUTH: { 
 		char *p = 0;
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
-		p = strchr(ptr, ':');
+		p = strchr(arg, ':');
 		if (p) {
 			safe_strcpy(session.socks_password, ++p);
 			*--p = '\0';
-			safe_strcpy(session.socks_username, ptr);
+			safe_strcpy(session.socks_username, arg);
 			topt |= T_SOCKS_AUTH;
 		}
-		return;
+		break;
 	}
+	
+	default:
+		return RC_KW_UNKNOWN;
+	}
+	return RC_KW_HANDLED;
+}
 
-	/*
-	   TLS/SSL.
-	*/
+static struct rc_kwdef init_kw[] = {
+	{ "bind", KW_BIND },
+	{ NULL },
+};
 
+static struct rc_secdef_child init_sect_child = {
+	NULL,
+	CF_INIT,
+	init_kw,
+	control_parser,
+	NULL
+};
+
+static struct rc_kwdef init_supervisor_kw[] = {
+	{ "termlevel", KW_TERMLEVEL },
+	{ "allow-local-mta", KW_ALLOW_LOCAL_MTA },
+	{ "user-notprivileged", KW_ALLOW_NOTPRIVILEGED },
+	{ NULL }
+};
+
+static struct rc_secdef_child init_supervisor_sect_child = {
+	NULL,
+	CF_INIT|CF_SUPERVISOR,
+	init_supervisor_kw,
+	control_parser,
+	NULL
+};
+
+struct rc_kwdef client_kw[] = {
+	{ "loglevel", KW_LOGLEVEL },
+	{ NULL },
+};
+
+static struct rc_secdef_child client_sect_child = {
+	NULL,
+	CF_CLIENT,
+	client_kw,
+	control_parser,
+	NULL
+};
+
+struct rc_kwdef control_kw[] = {
+	{ "logfile", KW_LOGFILE },
+	{ "remote-mta", KW_REMOTE_MTA },
+	{ "local-mta", KW_LOCAL_MTA },
+	{ "esmtp-auth", KW_ESMTP_AUTH },
+	{ "socks-proxy", KW_SOCKS_PROXY },
+	{ "socks-v4", KW_SOCKS_V4 },
+	{ "socks-auth", KW_SOCKS_AUTH },
+	{ NULL },
+};
+
+static struct rc_secdef_child control_sect_child = {
+	NULL,
+	CF_ALL,
+	control_kw,
+	control_parser,
+	NULL
+};
+
+/* FIXME: This belongs to another file */
 #if defined(HAVE_TLS) || defined(HAVE_SSL)
-	if (strncmp("ssl", buf, optlen) == 0) {
-		set(parse_line_option(buf), topt, T_SSL);
-	}
-	if (strncmp("oneway-ssl", buf, optlen) == 0) {
-		set(parse_line_option(buf), topt, T_SSL_ONEWAY);
-	}
-	if (strncmp("cert", buf, optlen) == 0) {
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
+#define KW_SSL                 1
+#define KW_ONEWAY_SSL          2 
+#define KW_CERT                3
+#define KW_KEY                 4
+#define KW_CAFILE              5
+
+int
+tls_parser(int method, int key, char *arg, 
+	   void *inv_data, void *func_data, char *line)
+{
+	switch (key) {
+	case KW_SSL:
+		setbool(arg, topt, T_SSL);
+		break;
+		
+	case KW_ONEWAY_SSL:
+		setbool(arg, topt, T_SSL_ONEWAY);
+		break;
+		
+	case KW_CERT:
 		xfree(secure.cert);
-		secure.cert = allocbuf(ptr, MAXPATHLEN);
-		if (method == CLIENT)
-			topt |= T_SSL_CKCLIENT;
-		return;
-	}
-	if (strncmp("key", buf, optlen) == 0) {
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
+		secure.cert = allocbuf(arg, MAXPATHLEN);
+		if (method == CF_CLIENT)
+			topt |= T_SSL_CKCLIENT;		
+		break;
+		
+	case KW_KEY:
 		xfree(secure.key);
-		secure.key = allocbuf(ptr, MAXPATHLEN);
-		if (method == CLIENT)
+		secure.key = allocbuf(arg, MAXPATHLEN);
+		if (method == CF_CLIENT)
 			topt |= T_SSL_CKCLIENT;
-		return;
-	}
-	if (strncmp("cafile", buf, optlen) == 0) {
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
+		break;
+		
+	case KW_CAFILE:
 		xfree(secure.cafile);
-		secure.cafile = allocbuf(ptr, MAXPATHLEN);
-		return;
+		secure.cafile = allocbuf(arg, MAXPATHLEN);
+		break;
+		
+	default:
+		return RC_KW_UNKNOWN;
 	}
-#endif /* HAVE_TLS or HAVE_SSL */
-
-	return;
+	return RC_KW_HANDLED;
 }
+
+static struct rc_kwdef tls_kw[] = {
+	{ "ssl", KW_SSL },
+	{ "oneway-ssl", KW_ONEWAY_SSL },
+	{ "cert", KW_CERT },
+	{ "key", KW_KEY },
+	{ "cafile", KW_CAFILE },
+	{ NULL }
+};
+
+static struct rc_secdef_child tls_sect_child = {
+	NULL,
+	CF_ALL,
+	tls_kw,
+	tls_parser,
+	NULL
+};
+#endif
+
+void
+control_section_init()
+{
+	struct rc_secdef *sp = anubis_add_section("CONTROL");
+	rc_secdef_add_child(sp, &init_sect_child);
+	rc_secdef_add_child(sp, &init_supervisor_sect_child);
+	rc_secdef_add_child(sp, &client_sect_child);
+	rc_secdef_add_child(sp, &control_sect_child);
+#if defined(HAVE_TLS) || defined(HAVE_SSL)
+	rc_secdef_add_child(sp, &tls_sect_child);
+#endif
+}
+
+/* ********************** The ALL and RULE Sections *********************** */ 
+#define KW_ADD                      1
+#define KW_REMOVE                   2                
+#define KW_MODIFY                   3
+#define KW_SIGNATURE_FILE_APPEND    4
+#define KW_BODY_APPEND              5
+#define KW_BODY_CLEAR_APPEND        6
+#define KW_ROT13_SUBJECT            7
+#define KW_ROT13_BODY               8 
+#define KW_RM_RRT                   9 
+#define KW_RM_POST                 10  
+#define KW_RM_HEADER               11
+#define KW_RM_LT                   12
+#define KW_RM_RLT                  13
+#define KW_EXTERNAL_BODY_PROCESSOR 14 
 
 int
-read_regex_block(int method, char *regex, int size)
+all_parser(int method, int key, char *arg,
+	   void *inv_data, void *func_data, char *line)
 {
-	char rcline[LINEBUFFER+1];
-
-	if (fp_rcfile == 0)
-		return 0;
-
-	while (fgets(rcline, LINEBUFFER, fp_rcfile) != 0)
-	{
-		if (strncmp(rcline, "#", 1) == 0 || strncmp(rcline, LF, 1) == 0)
-			continue; /* skip: an empty line, comment (#) */
-		else if (strncmp(rcline, END_SECTION, endsection_len) == 0)
-			break; /* END OF REGEX BLOCK */
-		else {
-			if (get_regex(method, rcline, regex, size) == 0)
-				continue;
-			else
-				return 1;
-		}
-	}
-	return 0;
-}
-
-static int
-get_regex(int method, char *rcline, char *regex, int size)
-{
-	char *ptr = 0;
-	int rs = 0;
-
-	if (method == HEADER) { /* "IF HEADER =..." */
-		rs = regex_match("[ \t]*if[ \t]+header.*=", rcline);
-		if (rs == 0)
-			rs = regex_match("[ \t]*rule.*=", rcline);
-	}
-	else if (method == COMMAND) { /* "IF COMMAND =..." */
-		rs = regex_match("[ \t]*if[ \t]+command.*=", rcline);
-	}
-	if (rs == 0)
-		return 0;
-	ptr = parse_line_regex(rcline);
-	if (strlen(ptr) == 0)
-		return 0;
-	strncpy(regex, ptr, size);
-	return 1;
-}
-
-static char *
-parse_line_regex(char *rcline)
-{
-	char *ptr = 0;
-	char *optptr = 0;
-	int len;
-	char optbuf[LINEBUFFER+1];
-	memset(optbuf, 0, LINEBUFFER + 1);
-
-	ptr = strchr(rcline, '=');
-	if (ptr == 0)
-		return rcline;
-
-	len = strlen(rcline);
-	len -= strlen(ptr);
-	strncpy(optbuf, rcline, len);
-
-	optptr = strchr(optbuf, ':'); /* additional options */
-	if (optptr) {
-		optptr++;
-		change_to_lower(optptr);
-		if (strstr(optptr, "basic"))
-			ropt |= R_BASIC;
-		if (strstr(optptr, "scase"))
-			ropt |= R_SCASE;
-#ifdef HAVE_PCRE
-		if (strstr(optptr, "perlre"))
-			ropt |= R_PERLRE;
-#endif /* HAVE_PCRE */
-	}
-	else
-		ropt = 0;
-	ptr++;
-	remcrlf(ptr);
-	return ptr;
-}
-
-/*********************
- Read an ACTION-BLOCK
-**********************/
-
-int
-read_action_block(const char *source_line)
-{
-	char rcline[LINEBUFFER+1];
-
-	if (fp_rcfile == 0)
-		return 0;
-
-	while (fgets(rcline, LINEBUFFER, fp_rcfile) != 0)
-	{
-		if (strncmp(rcline, "#", 1) == 0 || strncmp(rcline, LF, 1) == 0)
-			continue; /* skip: an empty line, comment (#) */
-		else if (regex_match("[ \t]*(done|fi)[^0-9A-Za-z][ \t]*", rcline))
-			break; /* 'fi' - END OF REGEX BLOCK ACTION */
-		else {
-			get_action_line(rcline);
-			match_action(rcline, source_line);
-			return 1;
-		}
-	}
-	return 0;
-}
-
-static void
-get_action_line(char *rcline)
-{
-	char *ptr = 0;
-	char buf[LINEBUFFER+1];
-
-	safe_strcpy(buf, rcline);
-	ptr = buf;
-	while (*ptr == ' ' || *ptr == '\t')
-		ptr++;
-
-	remcrlf(ptr);
-	strncpy(rcline, ptr, LINEBUFFER);
-	return;
-}
-
-static void
-match_action(char *rcline, const char *source_line)
-{
-	char *ptr = 0;
-	char *outbuf = 0;
-	char buf[LINEBUFFER+1];
-	int optlen;
-
-	outbuf = substitute(rcline, submatch);
-	if (outbuf) {
-		strncpy(rcline, outbuf, LINEBUFFER);
-		free(outbuf);
-	}
-	safe_strcpy(buf, rcline);
-	change_to_lower(buf);
-	optlen = optlength(buf);
-	if (optlen == 0)
-		return;
-
-	if (strncmp("add", buf, optlen) == 0) {
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
+	switch (key) {
+	case KW_ADD:
 		message.addlist_tail = new_element(message.addlist_tail,
-			&message.addlist, ptr);
-		return;
-	}
-	if (strncmp("remove", buf, optlen) == 0) {
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
+						   &message.addlist, arg);
+		break;
+		
+	case KW_REMOVE:                                
 		message.remlist_tail = new_element(message.remlist_tail,
-			&message.remlist, ptr);
-		return;
-	}
-	if (strncmp("modify", buf, optlen) == 0) {
+						   &message.remlist, arg);
+		break;
+		
+	case KW_MODIFY: {
 		char *p = 0;
 		char modify[LINEBUFFER+1];
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
-		p = strstr(ptr, " >> "); /* "SPC>>SPC" is a separator */
+
+		p = strstr(arg, " >> "); /* "SPC>>SPC" is a separator */
 		if (p) {
 			p += 4;
 			strncpy(modify, p, LINEBUFFER-2);
 			strcat(modify, CRLF);
 			p -= 4;
 			*p = '\0';
-			message.modlist_tail = new_element(message.modlist_tail,
-				&message.modlist, ptr);
+			message.modlist_tail =
+				new_element(message.modlist_tail,
+					    &message.modlist, arg);
 			message.modlist_tail->modify = strdup(modify);
 		}
-		return;
 	}
-	if (strncmp("rot13-subject", buf, optlen) == 0) {
-		set(parse_line_option(buf), mopt, M_ROT13S);
-	}
-	if (strncmp("rot13-body", buf, optlen) == 0) {
-		set(parse_line_option(buf), mopt, M_ROT13B);
-	}
-	if (strncmp("signature-file-append", buf, optlen) == 0) {
-		set(parse_line_option(buf), mopt, M_SIGNATURE);
-	}
-	if (strncmp("body-clear-append", buf, optlen) == 0) {
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
+	break;
+		
+	case KW_SIGNATURE_FILE_APPEND:
+		setbool(arg, mopt, M_SIGNATURE);
+		break;
+		
+	case KW_BODY_APPEND:
 		xfree(message.body_append);
-		message.body_append = allocbuf(ptr, MAXPATHLEN);
-		mopt |= M_BODYAPPEND;
-		mopt |= M_BODYCLEARAPPEND;
-		return;
-	}
-	if (strncmp("body-append", buf, optlen) == 0) {
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
-		xfree(message.body_append);
-		message.body_append = allocbuf(ptr, MAXPATHLEN);
+		message.body_append = allocbuf(arg, MAXPATHLEN);
 		mopt |= M_BODYAPPEND;
 		mopt &= ~M_BODYCLEARAPPEND;
-		return;
-	}
-	if (strncmp("external-body-processor", buf, optlen) == 0) {
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
+		break;
+		
+	case KW_BODY_CLEAR_APPEND:     
+		xfree(message.body_append);
+		message.body_append = allocbuf(arg, MAXPATHLEN);
+		mopt |= M_BODYAPPEND;
+		mopt |= M_BODYCLEARAPPEND;
+		break;
+		
+	case KW_ROT13_SUBJECT:         
+		setbool(arg, mopt, M_ROT13S);
+		break;
+		
+	case KW_ROT13_BODY:
+		setbool(arg, mopt, M_ROT13B);
+		break;
+		
+	case KW_RM_RRT:                 
+		xfree(rm.rrt);
+		rm.rrt = allocbuf(arg, 0);
+		mopt |= M_RM;
+		mopt |= M_RMRRT;
+		break;
+		
+	case KW_RM_POST:                
+		xfree(rm.post);
+		rm.post = allocbuf(arg, 0);
+		mopt |= M_RM;
+		mopt |= M_RMPOST;
+		break;
+		
+	case KW_RM_HEADER:             
+		xfree(rm.header);
+		rm.header = allocbuf(arg, LINEBUFFER + 1);
+		mopt |= M_RMHEADER;
+		break;
+		
+	case KW_RM_LT:                  
+		xfree(rm.latent_time);
+		rm.latent_time = allocbuf(arg, 16);
+		mopt |= M_RMLT;
+		break;
+		
+	case KW_RM_RLT:                
+		xfree(rm.latent_time);
+		rm.latent_time = allocbuf(arg, 16);
+		mopt |= M_RMLT;
+		break;
+		
+	case KW_EXTERNAL_BODY_PROCESSOR:
 		xfree(message.exteditor);
-		message.exteditor = allocbuf(ptr, MAXPATHLEN);
+		message.exteditor = allocbuf(arg, MAXPATHLEN);
 		mopt |= M_EXTBODYPROC;
-		return;
+		break;
+		
+	default:
+		return RC_KW_UNKNOWN;
 	}
+	return RC_KW_HANDLED;
+}
 
-	/*
-	   GnuPG support.
-	*/
+struct rc_kwdef all_kw[] = {
+	{ "add",                     KW_ADD },                     
+	{ "remove", 		     KW_REMOVE },                  
+	{ "modify",		     KW_MODIFY },                  
+	{ "signature-file-append",   KW_SIGNATURE_FILE_APPEND },   
+	{ "body-append",	     KW_BODY_APPEND },             
+	{ "body-clear-append",	     KW_BODY_CLEAR_APPEND },       
+	{ "rot13-subject", 	     KW_ROT13_SUBJECT },           
+	{ "rot13-body", 	     KW_ROT13_BODY },              
+	{ "rm-rrt", 		     KW_RM_RRT },                  
+	{ "rm-post", 		     KW_RM_POST },                 
+	{ "rm-header", 		     KW_RM_HEADER },               
+	{ "rm-lt", 		     KW_RM_LT },                   
+	{ "rm-rlt", 		     KW_RM_RLT },                  
+	{ "external-body-processor", KW_EXTERNAL_BODY_PROCESSOR },
+        { NULL }
+};
+
+static struct rc_secdef_child all_sect_child = {
+	NULL,
+	CF_CLIENT,
+	all_kw,
+	all_parser,
+	NULL
+};
+
+
 
 #ifdef HAVE_GPG
-	if (strncmp("gpg-passphrase", buf, optlen) == 0) {
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
+#define KW_GPG_PASSPHRASE         1
+#define KW_GPG_ENCRYPT            2
+#define KW_GPG_SIGN               3
+#define KW_RM_GPG                 4
+
+int
+gpg_parser(int method, int key, char *arg,
+	   void *inv_data, void *func_data, char *line)
+{
+	switch (key) {
+	case KW_GPG_PASSPHRASE:
 		if (gpg.passphrase) {
 			memset(gpg.passphrase, 0, strlen(gpg.passphrase));
 			xfree(gpg.passphrase);
 		}
-		gpg.passphrase = allocbuf(ptr, 0);
+		gpg.passphrase = allocbuf(arg, 0);
 		mopt |= M_GPG_PASSPHRASE;
-		return;
-	}
-	if (strncmp("gpg-encrypt", buf, optlen) == 0) {
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
+		break;
+		
+	case KW_GPG_ENCRYPT:
 		xfree(gpg.keys);
-		gpg.keys = allocbuf(ptr, 0);
-		gpg.keys = (char *)xrealloc((char *)gpg.keys, strlen(gpg.keys) + 2);
+		gpg.keys = allocbuf(arg, 0);
+		gpg.keys = xrealloc(gpg.keys, strlen(gpg.keys) + 2);
 		strcat(gpg.keys, ",");
 		mopt |= M_GPG_ENCRYPT;
-		return;
-	}
-	if (strncmp("gpg-sign", buf, optlen) == 0) {
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
-		if (regex_match("yes", ptr) == 0
-		|| (mopt & M_GPG_PASSPHRASE) == 0) {
+		break;
+		
+	case KW_GPG_SIGN:              
+		if (strcmp(arg, "yes") == 0
+		    || (mopt & M_GPG_PASSPHRASE) == 0) {
 			if (gpg.passphrase) {
-				memset(gpg.passphrase, 0, strlen(gpg.passphrase));
+				memset(gpg.passphrase, 0,
+				       strlen(gpg.passphrase));
 				xfree(gpg.passphrase);
 			}
-			gpg.passphrase = allocbuf(ptr, 0);
+			gpg.passphrase = allocbuf(arg, 0);
 		}
 		mopt |= M_GPG_SIGN;
-		return;
-	}
-#endif /* HAVE_GPG */
-
-	/*
-	   Guile support
-	*/
-#ifdef WITH_GUILE
-	if (strncmp("guile-rewrite-line", buf, optlen) == 0) {
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
-		guile_rewrite_line(ptr, source_line);
-		return;
-	}
-#endif /* WITH_GUILE */
-	
-	/*
-	   Remailer Type-I support.
-	*/
-
-	if (strncmp("rm-rrt", buf, optlen) == 0) {
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
-		xfree(rm.rrt);
-		rm.rrt = allocbuf(ptr, 0);
-		mopt |= M_RM;
-		mopt |= M_RMRRT;
-		return;
-	}
-	if (strncmp("rm-post", buf, optlen) == 0) {
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
-		xfree(rm.post);
-		rm.post = allocbuf(ptr, 0);
-		mopt |= M_RM;
-		mopt |= M_RMPOST;
-		return;
-	}
-#ifdef HAVE_GPG
-	if (strncmp("rm-gpg", buf, optlen) == 0) {
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
+		break;
+		
+	case KW_RM_GPG:
 		xfree(gpg.rm_key);
-		gpg.rm_key = allocbuf(ptr, 0);
+		gpg.rm_key = allocbuf(arg, 0);
 		mopt |= M_RMGPG;
-		return;
+		break;
+		
+	default:
+		return RC_KW_UNKNOWN;
 	}
-#endif /* HAVE_GPG */
-	if (strncmp("rm-header", buf, optlen) == 0) {
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
-		xfree(rm.header);
-		rm.header = allocbuf(ptr, LINEBUFFER + 1);
-		mopt |= M_RMHEADER;
-		return;
-	}
-	if (strncmp("rm-lt", buf, optlen) == 0) {
-		ptr = parse_line_option(rcline);
-		if_empty_quit(ptr);
-		xfree(rm.latent_time);
-		rm.latent_time = allocbuf(ptr, 16);
-		mopt |= M_RMLT;
-		return;
-	}
-	if (strncmp("rm-rlt", buf, optlen) == 0) {
-		set(parse_line_option(buf), mopt, M_RMRLT);
-	}
-	return;
+	return RC_KW_HANDLED;
 }
 
-/**************************
- Find the 'LINE' position.
-***************************/
 
-unsigned long
-get_position(char *line)
+struct rc_kwdef gpg_kw[] = {
+	{ "gpg-passphrase", 	     KW_GPG_PASSPHRASE },          
+	{ "gpg-encrypt", 	     KW_GPG_ENCRYPT },             
+	{ "gpg-sign", 		     KW_GPG_SIGN },                
+	{ "rm-gpg", 		     KW_RM_GPG },                  
+	{ NULL },
+};
+
+static struct rc_secdef_child gpg_sect_child = {
+	NULL
+	CF_CLIENT,
+	gpg_kw,
+	gpg_parser,
+	NULL
+};
+
+#endif
+
+void
+all_section_init()
 {
-	char buf[LINEBUFFER+1];
-
-	if (fp_rcfile == 0 || line == 0)
-		return 0;
-
-	rewind(fp_rcfile);
-	while (fgets(buf, LINEBUFFER, fp_rcfile) != 0)
-	{
-		if (strncmp(buf, line, strlen(line)) == 0)
-			return (unsigned long)ftell(fp_rcfile);
-	}
-	return 0;
+	struct rc_secdef *sp = anubis_add_section("ALL");
+	rc_secdef_add_child(sp, &all_sect_child);
+#ifdef HAVE_GPG
+	rc_secdef_add_child(sp, &gpg_sect_child);
+#endif
 }
 
-/* EOF */
+void
+rule_section_init()
+{
+	struct rc_secdef *sp = anubis_add_section("RULE");
+	
+	rc_secdef_add_child(sp, &all_sect_child);
+#ifdef HAVE_GPG
+	rc_secdef_add_child(sp, &gpg_sect_child);
+#endif
+}
 
+void
+rc_system_init()
+{
+	control_section_init();
+	all_section_init();
+	translate_section_init();
+	rule_section_init();
+#ifdef WITH_GUILE
+	guile_section_init();
+#endif
+}
+
+/* Placeholders */
+void
+rcfile_process_cond(char *name, int method, char *line)
+{
+	RC_SECTION *sec = rc_section_lookup(parse_tree, name);
+	rc_run_section(CF_CLIENT, sec, anubis_rc_sections, method, line, NULL);
+}
+
+void
+rcfile_process_section(int method, char *name, void *data)
+{
+	RC_SECTION *sec = rc_section_lookup(parse_tree, name);
+	rc_run_section(method, sec, anubis_rc_sections, 0, NULL, data);
+}
