@@ -51,13 +51,22 @@ anubis_core(void)
 # define anubis_core() anubis(NULL)
 #endif /* WITH_GUILE */
 
+static void
+anubis_memory_error(const char *msg)
+{
+	anubis_error(HARD, msg);
+	quit(EXIT_FAILURE); /* force exit */
+}
+
 int
 main(int argc, char *argv[])
 {
+	/* Register memory error printer */
+	memory_error = anubis_memory_error;
+	
 	/*
 	   Signal handling.
 	*/
-
 	signal(SIGILL,  sig_exit);
 	signal(SIGINT,  sig_exit);
 	signal(SIGTERM, sig_exit);
