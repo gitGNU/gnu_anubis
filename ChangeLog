@@ -1,4 +1,8 @@
-2004-03-06  Sergey Poznyakoff  <gray@Noldor.runasimi.org>
+2004-03-08  Sergey Poznyakoff
+
+	* src/main.c: Fixed improper #ifdef'ing
+
+2004-03-06  Sergey Poznyakoff
 
 	* src/anubisusr.c (hostcmp): Bugfix.
 
