@@ -216,8 +216,15 @@ xexamine ()
   int fd = open (rcname, O_RDONLY);
   if (fd == -1)
     {
-      anubis_error (SOFT, _("Cannot open %s: %s"), rcname, strerror (errno));
-      swrite (SERVER, remote_client, "450 Cannot open file" CRLF);
+      if (errno == ENOENT)
+	swrite (SERVER, remote_client,
+		"300 Configuration file does not exist" CRLF);
+      else
+	{
+	  anubis_error (SOFT,
+			_("Cannot open %s: %s"), rcname, strerror (errno));
+	  swrite (SERVER, remote_client, "450 Cannot open file" CRLF);
+	}
     }
   else
     {
