@@ -103,7 +103,7 @@ open_rcfile(int method)
 		break;
 
 	case CF_CLIENT:
-		if (topt & T_ALTRC) {
+		if ((topt & (T_ALTRC|T_NORC)) == (T_ALTRC|T_NORC)) {
 			rcfile = strdup(options.altrc);
 		} else {
 			get_homedir(session.client,
