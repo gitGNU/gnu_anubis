@@ -1,5 +1,5 @@
 /*
-   GNU Anubis v3.6.3 -- an outgoing mail processor and the SMTP tunnel.
+   GNU Anubis v3.9.0 -- an outgoing mail processor and the SMTP tunnel.
    Copyright (C) 2001, 2002, 2003 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
@@ -22,7 +22,20 @@
 
 #include "headers.h"
 #include "extern.h"
-#include "main.h"
+
+const char version[] = "GNU Anubis v"VERSION;
+const char copyright[] = "Copyright (C) 2001, 2002, 2003 The Anubis Team.";
+
+struct options_struct options;
+struct session_struct session;
+struct rm_struct rm;
+#if defined(HAVE_TLS) || defined(HAVE_SSL)
+struct secure_struct secure;
+#endif /* HAVE_TLS or HAVE_SSL */
+
+unsigned long topt;
+void *remote_client;
+void *remote_server;
 
 #ifdef WITH_GUILE
 void
@@ -33,7 +46,7 @@ anubis_core()
 }
 #else
 # define anubis_core() anubis(NULL)
-#endif
+#endif /* WITH_GUILE */
 
 int
 main(int argc, char *argv[])
@@ -54,9 +67,9 @@ main(int argc, char *argv[])
 
 #ifdef ENABLE_NLS
 	 /* Set locale via LC_ALL.  */
-# ifdef HAVE_SETLOCALE
+#ifdef HAVE_SETLOCALE
 	  setlocale(LC_ALL, "");
-# endif /* HAVE_SETLOCALE */
+#endif /* HAVE_SETLOCALE */
 	 bindtextdomain(PACKAGE, LOCALEDIR);
 	 textdomain(PACKAGE);
 #endif /* ENABLE_NLS */
@@ -77,27 +90,22 @@ main(int argc, char *argv[])
 	anubis_getlogin(session.supervisor, sizeof(session.supervisor));
 
 	/*
-	   Initialize the rc parsing subsystem
+	   Initialize the rc parsing subsystem.
+	   Read the system configuration file (SUPERVISOR).
 	*/
+
 	rc_system_init();
-	
-	/*
-	  Read the system configuration file (SUPERVISOR).
-	*/
 
 	if (topt & T_CHECK_CONFIG) {
 		open_rcfile(CF_SUPERVISOR);
 		exit(0);
 	}
-	
 	if (!(topt & T_NORC)) {
 		open_rcfile(CF_SUPERVISOR);
 		process_rcfile(CF_INIT);
 	}
 
-	/*
-	   DEBUG
-	*/
+	/* DEBUG */
 
 #if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
 	if (options.termlevel != DEBUG) {
@@ -113,7 +121,7 @@ main(int argc, char *argv[])
 		(int)getgid(), (int)geteuid(), (int)getegid());
 
 	/*
-	   Initialize the GnuTLS or OpenSSL library and the PRNG.
+	   Initialize GnuTLS or OpenSSL library and the PRNG.
 	*/
 
 #ifdef HAVE_TLS
@@ -127,6 +135,7 @@ main(int argc, char *argv[])
 	/*
 	   Enter the main core...
 	*/
+
 	anubis_core();
 	return 0;
 }
