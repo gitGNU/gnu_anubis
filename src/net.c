@@ -330,8 +330,17 @@ get_response_smtp (int method, NET_STREAM sd, char **pbuf, size_t *psize)
 	}
     }
   while (line[3] == '-');
-  *pbuf = buf;
-  *psize = strlen (buf) + 1;
+
+  if (buf)
+    {
+      *pbuf = buf;
+      *psize = strlen (buf) + 1;
+    }
+  else
+    {
+      assign_string (&buf, "");
+      *psize = 0;
+    }
 }
 
 /**************************
