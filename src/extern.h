@@ -111,4 +111,9 @@ extern char *auth_realm;
 extern int x_argc;
 extern char **x_argv;
 
+extern char *incoming_mail_rule;
+extern char *outgoing_mail_rule;
+
+extern char *from_address;
+
 /* EOF */
