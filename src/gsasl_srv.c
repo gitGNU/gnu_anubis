@@ -122,6 +122,8 @@ auth_gsasl_capa_init ()
 
 /* GSASL Authentication */
 
+#define SP(x) ((x)?(x):"NULL")
+
 int
 anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER * usr,
 		   NET_STREAM * stream)
@@ -133,7 +135,7 @@ anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER * usr,
   Gsasl_session_ctx *sess_ctx = NULL;
 
   if (options.termlevel == DEBUG)
-    fprintf (stderr, "SASL mech=%s, inp=%s\n", auth_type, arg);
+    fprintf (stderr, "SASL mech=%s, inp=%s\n", SP(auth_type), SP(arg));
 
   memset (usr, 0, sizeof (*usr));
   rc = gsasl_server_start (ctx, auth_type, &sess_ctx);
