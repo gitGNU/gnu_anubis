@@ -1,3 +1,9 @@
+2003-06-22  Sergey Poznyakoff
+
+	* src/message.c (message_init): Create header and command
+	lists.
+	* src/tunnel.c: Fixed memory leaks.
+
 2003-06-21  Sergey Poznyakoff 
 
 	* src/daemon.c (_stdio_read): Minor fix.
