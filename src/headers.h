@@ -414,7 +414,7 @@ void quit(int);
 
 /* guile.c */
 void anubis_boot(void *closure, int argc, char **argv);
-void guile_load_path(char *filename);
+void guile_load_path_append(char *filename);
 void guile_debug(int enable);
 void guile_load_program(char *name);
 void guile_rewrite_line(char *procname, const char *source_line);
