@@ -262,7 +262,7 @@ xdatabase (char *command)
     return 0;
 
   remcrlf (command);
-  for (p = command + sizeof ("xdatabase ") - 1; *p && isspace (*p); p++)
+  for (p = command; *p && isspace (*p); p++)
     ;
 
   if (strcmp (p, "upload") == 0)
