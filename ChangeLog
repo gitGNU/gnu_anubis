@@ -1,3 +1,10 @@
+2003-05-30  Wojciech Polak
+
+	* configure.ac: Added new option --with-unprivileged-user.
+	  Use the AC_HELP_STRING where appropriate.
+	* src/daemon.c (set_unprivileged_user): Support the new
+	  DEFAULT_UNPRIVILEGED_USER.
+
 2003-05-29  Wojciech Polak
 
 	* configure.ac: Set AM_GNU_GETTEXT_VERSION(0.12.1).
