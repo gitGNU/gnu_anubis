@@ -38,7 +38,7 @@ extern int yylex(void);
 int yyerror(char *s);
 
 static RC_SECTION *rc_section_create(char *, RC_STMT *);
-static void rc_section_destroy(RC_SECTION *);
+static void rc_section_destroy(RC_SECTION **);
 static void rc_section_print(RC_SECTION *);
 static void rc_asgn_destroy(RC_ASGN *);
 static void rc_bool_destroy(RC_BOOL *);
@@ -149,10 +149,14 @@ section  : /* empty */ EOL
 begin    : T_BEGIN { verbatim(); } string EOL
            {
 		   $$ = $3;
+		   if (rc_section_lookup(rc_section, $3)) 
+			   parse_error(_("Section %s already defined"), $3);
 		   rc_secdef = anubis_find_section($3);
 	   }
          | D_BEGIN EOL
            {
+		   if (rc_section_lookup(rc_section, $1)) 
+			   parse_error(_("Section %s already defined"), $1);
 		   rc_secdef = anubis_find_section($1);
 	   }		   
          ;
@@ -544,10 +548,8 @@ rc_parse(char *name)
 	rc_section = NULL;
 	error_count = 0;
 	status = yyparse();
-	if (status || error_count) {
-		rc_section_list_destroy(rc_section);
-		rc_section = NULL;
-	}
+	if (status || error_count) 
+		rc_section_list_destroy(&rc_section);
 	if (debug_level)
 		rc_section_print(rc_section);
 	return rc_section;
@@ -576,20 +578,20 @@ rc_section_create(char *name, RC_STMT *stmt)
 }
 
 void
-rc_section_destroy(RC_SECTION *s)
+rc_section_destroy(RC_SECTION **s)
 {
-	rc_stmt_list_destroy(s->stmt);
-	xfree(s->name);
-	xfree(s);
+	rc_stmt_list_destroy((*s)->stmt);
+	xfree((*s)->name);
+	xfree(*s);
 }
 
 void
-rc_section_list_destroy(RC_SECTION *s)
+rc_section_list_destroy(RC_SECTION **s)
 {
-	while (s) {
-		RC_SECTION *next = s->next;
+	while (*s) {
+		RC_SECTION *next = (*s)->next;
 		rc_section_destroy(s);
-		s = next;
+		*s = next;
 	}
 }
 
@@ -615,15 +617,61 @@ rc_section_lookup(RC_SECTION *sec, char *name)
 void
 rc_section_link(RC_SECTION **ap, RC_SECTION *b)
 {
-	RC_SECTION *a;
+	RC_SECTION *a, *prev;
 	
+	/* Remove all sections with prio == override (the default) */
+	a = *ap;
+	prev = NULL;
+	while (a) {
+		RC_SECTION *next = a->next;
+		struct rc_secdef *sd = anubis_find_section(a->name);
+		if (sd && sd->prio == prio_user_only) {
+			if (prev)
+				prev->next = next;
+			else
+				*ap = next;
+			rc_section_destroy(&a);
+		} else
+			prev = a;
+		a = next;
+	}
+		
 	if (!*ap) {
 		*ap = b;
 		return;
 	}
+
 	for (a = *ap; a->next; a = a->next)
 		;
-	a->next = b;
+
+	while (b) {
+		struct rc_secdef *sd;
+		RC_SECTION *nxtptr = b->next;
+
+		sd = anubis_find_section(b->name);
+		if (sd) {
+			switch (sd->prio) {
+			case prio_user:
+				b->next = *ap;
+				*ap = b;
+				break;
+				
+			case prio_system_only:
+				rc_section_destroy(&b);
+				break;
+
+			default:
+				b->next = NULL;
+				a->next = b;
+				a = b;
+			}
+		} else {
+			b->next = NULL;
+			a->next = b;
+			a = b;
+		}
+		b = nxtptr;
+	}
 }
 
 /* Assignment manipulations */
