@@ -30,8 +30,8 @@
 
 static char *smtp_greeting_message;
 static ANUBIS_LIST *smtp_help_message;
-
 
+
 
 void
 make_help_message (char *text)
@@ -76,33 +76,16 @@ asmtp_kw (const char *name)
   }
   kw[] =
   {
-    {
-    "ehlo", KW_EHLO}
-    ,
-    {
-    "helo", KW_HELO}
-    ,
-    {
-    "auth", KW_AUTH}
-    ,
-    {
-    "help", KW_HELP}
-    ,
-    {
-    "quit", KW_QUIT}
-    ,
-    {
-    "starttls", KW_STARTTLS}
-    ,
-    {
-    "mail", KW_MAIL}
-    ,
-    {
-    "rcpt", KW_RCPT}
-    ,
-    {
-    NULL}
-  ,};
+    {"ehlo", KW_EHLO},
+    {"helo", KW_HELO},
+    {"auth", KW_AUTH},
+    {"help", KW_HELP},
+    {"quit", KW_QUIT},
+    {"starttls", KW_STARTTLS},
+    {"mail", KW_MAIL},
+    {"rcpt", KW_RCPT},
+    {NULL},
+  };
   int i;
 
   if (name)
@@ -327,21 +310,27 @@ asmtp_ehlo (enum asmtp_state state, ANUBIS_USER * usr)
     
 #ifdef USE_SSL
   case KW_STARTTLS:
-    asmtp_reply (220, "Ready to start TLS");
-    secure.server = start_ssl_server (remote_client,
-				      secure.cafile,
-				      secure.cert,
-				      secure.key,
-				      options.termlevel > NORMAL);
-    if (!secure.server || (topt & T_ERROR))
+    if (topt & T_SSL_FINISHED)
+      asmtp_reply(503, "TLS already started");
+    else
       {
-	asmtp_reply (454, "TLS not available" CRLF);
-	return 0;
-      }
-    remote_client = secure.server;
-    topt |= T_SSL_FINISHED;
+	asmtp_reply (220, "Ready to start TLS");
+	secure.server = start_ssl_server (remote_client,
+					  secure.cafile,
+					  secure.cert,
+					  secure.key,
+					  options.termlevel > NORMAL);
+	if (!secure.server || (topt & T_ERROR))
+	  {
+	    asmtp_reply (454, "TLS not available" CRLF);
+	    return 0;
+	  }
+	remote_client = secure.server;
+	asmtp_capa_remove ("STARTTLS");
+	topt |= T_SSL_FINISHED;
     
-    state = state_ehlo;
+	state = state_ehlo;
+      }
     break;
 #endif /* USE_SSL */
     
@@ -395,6 +384,7 @@ anubis_smtp (ANUBIS_USER * usr)
 	return EXIT_FAILURE;
 	
       case state_auth:
+	topt &= ~T_SSL_FINISHED;
 	break;
       }
     }
@@ -626,7 +616,7 @@ rc_parser (int method, int key, ANUBIS_LIST * arglist,
   case KW_SASL_ALLOWED_MECH:
     anubis_set_mech_list (arglist);
     break;
-    
+
   default:
     return RC_KW_UNKNOWN;
   }
