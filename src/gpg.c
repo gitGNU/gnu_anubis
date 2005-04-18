@@ -49,7 +49,8 @@ static char *gpg_sign_encrypt (char *);
 static void gpgme_debug_info (gpgme_ctx_t);
 
 #define EXTRA_GPG_BUF 4096
-#define fail_if_err(a) do { \
+#define fail_if_err(code) do { \
+		int a = code;\
 		if (a) { \
 			anubis_error(EXIT_FAILURE, 0, _("GPGME: %s."), \
 			             gpgme_strerror(a)); \
@@ -118,12 +119,20 @@ gpgme_init (void)
   return 0;
 }
 
-static const char *
-passphrase_cb (void *hook, const char *desc, void **r_hd)
+gpgme_error_t
+passphrase_cb (void *hook, const char *uid_hint, const char *passphrase_info, 
+	       int prev_was_bad, int fd)
 {
-  if (!desc)
+  if (!passphrase_info)
     return 0;
-  return gpg.passphrase;
+  
+  size_t len = strlen(gpg.passphrase);
+  if (write (fd, gpg.passphrase, len) != len)
+    return gpg_error(GPG_ERR_CANCELED);
+  if (write (fd, "\n", 1) != 1)
+    return gpg_error(GPG_ERR_CANCELED);
+        
+  return 0;
 }
 
 static char *
@@ -166,7 +175,7 @@ gpg_sign (char *gpg_data)
 
   p = getenv ("GPG_AGENT_INFO");
   if (!(p && strchr (p, ':')))
-    gpgme_set_passphrase_cb (ctx, (gpgme_passphrase_cb_t) passphrase_cb, 0);
+    gpgme_set_passphrase_cb (ctx, passphrase_cb, 0);
   gpgme_set_textmode (ctx, 1);
   gpgme_set_armor (ctx, 1);
 
