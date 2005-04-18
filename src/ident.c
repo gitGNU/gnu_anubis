@@ -53,7 +53,8 @@ ident_extract_username (char *reply, char **pusername)
   p = strchr (p, ':');
   if (!p)
     return 1;
-  p++;
+  while(*p == ' ')
+    p++;
   assign_string (pusername, p);
   return 0;
 }
