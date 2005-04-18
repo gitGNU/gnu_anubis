@@ -1,3 +1,13 @@
+2005-04-18  Sergey Poznyakoff
+
+	* src/gpg.c (fail_if_err): Rewritten to avoid evaluating the
+	argument twice.
+	(passphrase_cb): Rewritten to work with GPGME 1.0.2. Patch
+	courtesy of Brian Dessent <brian@dessent.net>.
+	* src/ident.c (ident_extract_username): Skip any whitespace
+	after ':'. Patch courtesy of Brian Dessent <brian@dessent.net>.
+	* THANKS: Updated
+	
 2005-03-02  Sergey Poznyakoff  
 
 	* src/rcfile.c (control_parser): A couple of minor stylistic
