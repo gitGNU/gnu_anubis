@@ -1,392 +1,463 @@
 # Anubis Bahasa Melayu (Malay) (ms).
 # Copyright (C) 2002 The Anubis Team
 # This file is distributed under the same license as the Anubis package.
-# Sharuzzaman Ahmat Raslan <sharuzzaman@myrealbox.com>, 2003.
+# Sharuzzaman Ahmat Raslan <sharuzzaman@myrealbox.com>, 2003, 2004, 2005.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: anubis 3.6.2\n"
+"Project-Id-Version: anubis 3.9.96\n"
 "Report-Msgid-Bugs-To: bug-anubis@gnu.org\n"
-"POT-Creation-Date: 2004-05-21 19:59+0300\n"
-"PO-Revision-Date: 2003-01-03 01:26GMT+8\n"
+"POT-Creation-Date: 2004-09-22 15:14+0300\n"
+"PO-Revision-Date: 2005-04-06 15:07+0800\n"
 "Last-Translator: Sharuzzaman Ahmat Raslan <sharuzzaman@myrealbox.com>\n"
 "Language-Team: Malay <translation-team-ms@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 0.9.5\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
-#: src/auth.c:31
-#, c-format
-msgid "Welcome user %s !"
-msgstr "Selamat Datang pengguna %s !"
+#: src/authmode.c:469
+msgid "Entering XDB loop..."
+msgstr "Memasuki gelungan XDB..."
 
-#: src/auth.c:112
-#, c-format
-msgid "IDENT: socket() failed: %s."
-msgstr "IDENT: socket() gagal: %s."
+#: src/authmode.c:481 src/authmode.c:503
+msgid "Exiting XDB loop..."
+msgstr "Keluar dari gelungan XDB..."
 
-#: src/auth.c:124
-#, c-format
-msgid "IDENT: connect() failed: %s."
-msgstr "IDENT: connect() gagal: %s."
-
-#: src/auth.c:130
-#, c-format
-msgid "IDENT: connected to %s:%u"
-msgstr "IDENT: disambungkan kepada %s:%u"
-
-#: src/auth.c:138
-#, fuzzy, c-format
-msgid "IDENT: stream_write() failed: %s."
-msgstr "IDENT: recvline() gagal: %s."
-
-#: src/auth.c:145
-#, c-format
-msgid "IDENT: recvline() failed: %s."
-msgstr "IDENT: recvline() gagal: %s."
-
-#: src/auth.c:155
-msgid "IDENT: incorrect data."
-msgstr "IDENT: data tidak betul."
-
-#: src/auth.c:165
-msgid "IDENT: data probably encrypted with DES..."
-msgstr "IDENT: data berkemungkinan dienkrip dengan DES..."
-
-#: src/auth.c:172
-msgid "IDENT: incorrect data (DES deciphered)."
-msgstr "IDENT: data tidak betul (decipher DES)."
-
-#: src/auth.c:188
-#, c-format
-msgid "IDENT: resolved remote user to %s."
-msgstr "IDENT: resolved pengguna jarak jauh kepada %s."
-
-#: src/authmode.c:396
+#: src/authmode.c:526
 msgid "Database not specified"
-msgstr ""
+msgstr "Pengkalan data tidak dinyatakan"
 
-#: src/authmode.c:403
+#: src/authmode.c:534
 #, c-format
 msgid "Cannot open database %s: %s"
-msgstr ""
+msgstr "Tidak dapat membuka pengkalan data %s: %s"
 
-#: src/authmode.c:412
+#: src/authmode.c:541
 #, c-format
-msgid "Found record for %s"
-msgstr ""
+msgid "Found record for `%s'."
+msgstr "Rekod dijumpai untuk `%s'."
 
-#: src/authmode.c:417
+#: src/authmode.c:546
 #, c-format
 msgid "Cannot retrieve data from the SASL database: %s"
-msgstr ""
+msgstr "Tidak dapat mengambil data dari pengkalan data SASL: %s"
 
-#: src/authmode.c:422
+#: src/authmode.c:551
 #, c-format
-msgid "Record for %s not found"
-msgstr ""
+msgid "Record for `%s' not found."
+msgstr "Rekod untuk `%s' tidak dijumpai."
 
-#: src/authmode.c:465 src/daemon.c:323 src/transmode.c:66
-msgid "The MTA has not been specified. Set the REMOTE-MTA or LOCAL-MTA."
-msgstr "MTA telah tidak dinyatakan. Tetapkan REMOTE-MTA atau LOCAL-MTA."
+#: src/authmode.c:604
+msgid "MTA has not been specified. Set either REMOTE-MTA or LOCAL-MTA."
+msgstr "MTA tidak dinyatakan. Tetapkan sama ada REMOTE-MTA atau LOCAL-MTA."
 
-#: src/authmode.c:491 src/map.c:155 src/net.c:137 src/net.c:198
-#: src/transmode.c:92
+#: src/authmode.c:635 src/map.c:164 src/net.c:150 src/net.c:217
+#: src/transmode.c:98
 #, c-format
 msgid "Illegal address length received for host %s"
 msgstr "Panjang alamat tidak sah diterima untuk hos %s"
 
-#: src/authmode.c:502 src/transmode.c:103
+#: src/authmode.c:649 src/transmode.c:112
 msgid "Loop not allowed. Connection rejected."
 msgstr "Gelung tidak dibenarkan. Sambungan ditolak."
 
-#: src/authmode.c:532 src/transmode.c:142
-msgid "Connection terminated."
-msgstr "Sambungan ditamatkan."
-
-#: src/authmode.c:534 src/transmode.c:144
+#: src/authmode.c:681 src/transmode.c:143
 msgid "Connection closed successfully."
 msgstr "Sambungan berjaya ditutup."
 
-#: src/authmode.c:539 src/transmode.c:149
+#: src/authmode.c:688 src/transmode.c:149
 msgid "PAM: Session closed."
 msgstr "PAM: Sessi ditutup."
 
-#: src/authmode.c:542 src/transmode.c:152
+#: src/authmode.c:692 src/transmode.c:153
 msgid "PAM: failed to release authenticator."
 msgstr "PAM: gagal untuk melepaskan pengesah."
 
-#: src/daemon.c:48
-#, c-format
-msgid "daemon() failed. %s."
-msgstr "daemon() gagal. %s."
+#: src/daemon.c:49
+msgid "daemon() failed"
+msgstr "daemon() gagal"
 
-#: src/daemon.c:55
-#, c-format
-msgid "Can't fork. %s."
-msgstr "Tidak dapat mencabang. %s."
+#: src/daemon.c:56
+msgid "Cannot fork."
+msgstr "Tidak dapat mencabang."
 
-#: src/daemon.c:63
-msgid "setsid() failed."
-msgstr "setsid() gagal."
+#: src/daemon.c:64
+msgid "setsid() failed"
+msgstr "setsid() gagal"
 
-#: src/daemon.c:75
+#: src/daemon.c:76
 #, c-format
 msgid "%s daemon startup succeeded."
 msgstr "memulakan daemon %s berjaya."
 
-#: src/daemon.c:91
-#, fuzzy, c-format
-msgid "Child [%lu] finished. Exit status: %s. %d client left."
-msgid_plural "Child [%lu] finished. Exit status: %s. %d clients left."
-msgstr[0] "Child [%d] selesai. Status keluar: %s. %d klien yang tinggal."
-msgstr[1] "Child [%d] selesai. Status keluar: %s. %d klien yang tinggal."
+#: src/daemon.c:88
+#, c-format
+msgid "Exited successfully"
+msgstr "Berjaya keluar"
+
+#: src/daemon.c:90
+#, c-format
+msgid "Failed with status %d"
+msgstr "Gagal dengan status %d"
 
 #: src/daemon.c:95
-msgid "OK"
-msgstr "OK"
+#, c-format
+msgid "Terminated on signal %d"
+msgstr "Dimatikan pada isyarat %d"
 
-#: src/daemon.c:95
-msgid "ERROR"
-msgstr "RALAT"
+#: src/daemon.c:98
+#, c-format
+msgid "Stopped on signal %d"
+msgstr "Dihentikan pada isyarat %d"
 
-#: src/daemon.c:137
+#: src/daemon.c:101
+#, c-format
+msgid "Dumped core"
+msgstr "Teras dilonggok"
+
+#: src/daemon.c:104
+#, c-format
+msgid "Terminated"
+msgstr "Ditamatkan"
+
+#: src/daemon.c:121
+#, c-format
+msgid "Child [%lu] finished. %s. %d client left."
+msgid_plural "Child [%lu] finished. %s. %d clients left."
+msgstr[0] "Child [%lu] selesai. %s. %d klien yang tinggal."
+
+#: src/daemon.c:169
 msgid "WARNING: An unprivileged user has not been specified!"
-msgstr ""
+msgstr "AMARAN: Pengguna tanpa kelebihan tidak dinyatakan!"
 
-#: src/daemon.c:186
+#: src/daemon.c:213
 msgid "GNU Anubis is running..."
 msgstr "GNU Anubis sedang berjalan..."
 
-#: src/daemon.c:196 src/exec.c:114
-#, c-format
-msgid "accept() failed: %s."
-msgstr "accept() gagal: %s."
+#: src/daemon.c:225 src/exec.c:122
+msgid "accept() failed"
+msgstr "accept() gagal"
 
-#: src/daemon.c:214
+#: src/daemon.c:243
 #, c-format
 msgid "TCP wrappers: connection from %s:%u rejected."
 msgstr "Pembalut TCP: sambungann dari %s:%u ditolak."
 
-#: src/daemon.c:232
+#: src/daemon.c:264
 #, c-format
 msgid "Too many clients. Connection from %s:%u rejected."
 msgstr "Terlalu banyak klien. Sambungan daripada %s:%u ditolak."
 
-#: src/daemon.c:238
+#: src/daemon.c:271
 #, c-format
 msgid "Connection from %s:%u"
 msgstr "Sambungan daripada %s:%u"
 
-#: src/daemon.c:244
-#, c-format
-msgid "daemon: Can't fork. %s."
-msgstr "daemon: Tidak dapat mencabang. %s."
+#: src/daemon.c:276
+msgid "daemon: cannot fork"
+msgstr "daemon: tidak dapat mencabang"
 
-#: src/env.c:163
+#: src/daemon.c:357 src/transmode.c:68
+msgid "The MTA has not been specified. Set the REMOTE-MTA or LOCAL-MTA."
+msgstr "MTA telah tidak dinyatakan. Tetapkan REMOTE-MTA atau LOCAL-MTA."
+
+#: src/env.c:172
 #, c-format
 msgid "Try '%s --help' for more information."
 msgstr "Cuba '%s --help' untuk maklumat lanjut."
 
-#: src/env.c:265
+#: src/env.c:273
+#, c-format
+msgid "setgroups(1, %lu) failed"
+msgstr "setgroups(1, %lu) gagal"
+
+#: src/env.c:283
+#, c-format
+msgid "setegid(%lu) failed"
+msgstr "setegid(%lu) gagal"
+
+#: src/env.c:286
+#, c-format
+msgid "setregid(%lu,%lu) failed"
+msgstr "setregid(%lu,%lu) gagal"
+
+#: src/env.c:290
+#, c-format
+msgid "setresgid(%lu,%lu,%lu) failed"
+msgstr "setresgid(%lu,%lu,%lu) gagal"
+
+#: src/env.c:299
+#, c-format
+msgid "setgid(%lu) failed"
+msgstr "setgid(%lu) gagal"
+
+#: src/env.c:302
+#, c-format
+msgid "cannot set effective gid to %lu"
+msgstr "tidak dapat menetapkan gid efektif kepada %lu"
+
+#: src/env.c:324
+#, c-format
+msgid "setreuid(%lu,-1) failed"
+msgstr "setreuid(%lu,-1) gagal"
+
+#: src/env.c:330
+#, c-format
+msgid "second setuid(%lu) failed"
+msgstr "setuid(%lu) kedua gagal"
+
+#: src/env.c:338
+#, c-format
+msgid "setuid(%lu) failed"
+msgstr "setuid(%lu) gagal"
+
+#: src/env.c:347
+msgid "seteuid(0) succeeded when it should not"
+msgstr "seteuid(0) berjaya apabila tidak sepatutnya"
+
+#: src/env.c:352
+msgid "cannot drop non-root setuid privileges"
+msgstr "tidak dapat membuang kelebihan setuid bukan root"
+
+#: src/env.c:379
 msgid "PAM: Session opened (restrictions applied)."
 msgstr "PAM: Sessi dibuka (sekatan digunakan)."
 
-#: src/env.c:267
+#: src/env.c:382
 msgid "PAM: Not authenticated to use GNU Anubis."
 msgstr "PAM: Tidak disahkan untuk menggunakan GNU Anubis."
 
-#: src/env.c:277 src/main.c:152
+#: src/env.c:394 src/main.c:156
 #, c-format
-msgid "UID:%d, GID:%d, EUID:%d, EGID:%d"
-msgstr "UID:%d, GID:%d, EUID:%d, EGID:%d"
+msgid "UID:%d (%s), GID:%d, EUID:%d, EGID:%d"
+msgstr "UID:%d (%s), GID:%d, EUID:%d, EGID:%d"
 
-#: src/env.c:308
+#: src/env.c:429
 #, c-format
 msgid "Invalid user ID: %s"
 msgstr "ID pengguna tidak sah: %s"
 
-#: src/env.c:313
+#: src/env.c:435
 #, c-format
 msgid "Invalid user name: %s"
 msgstr "Nama pengguna tidak sah: %s"
 
-#: src/env.c:335
+#: src/env.c:458
 #, c-format
 msgid "Wrong permissions on %s. Set 0600."
 msgstr "Keizinan salah pada %s. Tetapkan 0600."
 
-#: src/env.c:359
+#: src/env.c:484
 #, c-format
 msgid "%s is not a regular file or a symbolic link."
 msgstr "%s bukan fail biasa atau pautan simbolik."
 
-#: src/env.c:380
-#, fuzzy, c-format
+#: src/env.c:507
+#, c-format
 msgid "Unknown mode: %s"
-msgstr "Hos tidak diketahui %s."
+msgstr "Mod tidak diketahui: %s"
 
-#: src/errs.c:82
-#, fuzzy, c-format
-msgid "Couldn't write to socket: %s."
-msgstr "Tidak dapat menulis pada soket! %s."
+#: src/env.c:522
+#, c-format
+msgid "Cannot open pid file '%s'"
+msgstr "Tidak dapat membuka fail pid '%s'"
 
-#: src/errs.c:93
+#: src/errs.c:88
+msgid "warning"
+msgstr "amaran"
+
+#: src/errs.c:96
+#, c-format
+msgid "Could not write to socket: %s"
+msgstr "Tidak dapat menulis pada soket: %s"
+
+#: src/errs.c:98
+msgid "Could not write to socket"
+msgstr "Tidak dapat menulis pada soket"
+
+#: src/errs.c:108
 #, c-format
 msgid "Unknown host %s."
 msgstr "Hos tidak diketahui %s."
 
-#: src/errs.c:96
+#: src/errs.c:111
 #, c-format
 msgid "%s: host name is valid but does not have an IP address."
-msgstr "%s: nama hos adalah sah tetatpi tidak mempunyai alamat IP."
+msgstr "%s: nama hos adalah sah tetapi tidak mempunyai alamat IP."
 
-#: src/errs.c:99
+#: src/errs.c:115
 #, c-format
 msgid "%s: unrecoverable name server error occured."
 msgstr "%s: ralat pelayan nama tidak dapat dipulihkan berlaku."
 
-#: src/errs.c:102
+#: src/errs.c:118
 #, c-format
 msgid "%s: a temporary name server error occured. Try again later."
 msgstr "%s: ralat sementara pelayan nama berlaku. Cuba lagi kemudian."
 
-#: src/errs.c:104
+#: src/errs.c:121
 #, c-format
 msgid "%s: unknown DNS error %d."
 msgstr "%s: ralat DNS tidak diketahui %d."
 
-#: src/esmtp.c:57
-msgid "Using the ESMTP CRAM-MD5 authentication..."
-msgstr "Menggunakan pengesahan ESMTP CRAM-MD5..."
+#: src/esmtp.c:58
+msgid "Using ESMTP authentication mechanism CRAM-MD5..."
+msgstr "Menggunakan mekanisma pengesahan ESMTP CRAM-MD5..."
 
-#: src/esmtp.c:63 src/esmtp.c:102
+#: src/esmtp.c:65 src/esmtp.c:107
 msgid "Server rejected the AUTH command."
 msgstr "Pelayan menolak arahan AUTH."
 
-#: src/esmtp.c:71 src/esmtp.c:110 src/esmtp.c:121
+#: src/esmtp.c:74 src/esmtp.c:116 src/esmtp.c:128
 #, c-format
-msgid "Challenge decoded: %s"
-msgstr "Cabaran dinyahkod: %s"
+msgid "Challenge decoded: %s\n"
+msgstr "Cabaran dinyahkod: %s\n"
 
-#: src/esmtp.c:90 src/esmtp.c:131
+#: src/esmtp.c:93 src/esmtp.c:139
 #, c-format
 msgid "ESMTP AUTH: %s."
 msgstr "ESMTP AUTH: %s."
 
-#: src/esmtp.c:96
-msgid "Using the ESMTP LOGIN authentication..."
-msgstr "Menggunakan pengesahan ESMTP LOGIN..."
+#: src/esmtp.c:100
+msgid "Using ESMTP authentication mechanism LOGIN..."
+msgstr "Menggunakan mekanisma pengesahan ESMTP LOGIN..."
 
-#: src/exec.c:81
+#: src/exec.c:82
 msgid "#1 socket() failed."
 msgstr "#1 socket() gagal."
 
-#: src/exec.c:85
+#: src/exec.c:87
 msgid "#2 socket() failed."
 msgstr "#2 socket() gagal."
 
-#: src/exec.c:94
-#, c-format
-msgid "#1 bind() failed: %s."
-msgstr "#1 bind() gagal: %s."
+#: src/exec.c:97
+msgid "#1 bind() failed"
+msgstr "#1 bind() gagal"
 
-#: src/exec.c:98
-#, c-format
-msgid "#2 bind() failed: %s."
-msgstr "#2 bind() gagal: %s."
+#: src/exec.c:102
+msgid "#2 bind() failed"
+msgstr "#2 bind() gagal"
 
-#: src/exec.c:102 src/net.c:216
-#, c-format
-msgid "listen() failed: %s."
-msgstr "listen() gagal: %s."
+#: src/exec.c:107 src/net.c:237
+msgid "listen() failed"
+msgstr "listen() gagal"
 
-#: src/exec.c:106
+#: src/exec.c:112
 #, c-format
 msgid "getsockname() failed: %s."
 msgstr "getsockname() gagal: %s."
 
-#: src/exec.c:110
-#, c-format
-msgid "connect() failed: %s."
-msgstr "connect() gagal: %s."
+#: src/exec.c:117
+msgid "connect() failed"
+msgstr "connect() gagal"
 
-#: src/exec.c:120
-#, c-format
-msgid "socketpair() failed: %s."
-msgstr "socketpair() gagal: %s."
+#: src/exec.c:129
+msgid "socketpair() failed"
+msgstr "socketpair() gagal"
 
-#: src/exec.c:134
-#, fuzzy, c-format
+#: src/exec.c:143
+#, c-format
 msgid "Local program [%lu] finished."
-msgstr "Program tempatan [%d] selesai."
+msgstr "Program tempatan [%lu] selesai."
 
-#: src/exec.c:170
+#: src/exec.c:179
 #, c-format
 msgid "Executing %s %s..."
 msgstr "Melaksanakan %s %s..."
 
-#: src/exec.c:177
-msgid "fork() failed."
-msgstr "fork() gagal."
+#: src/exec.c:187
+msgid "fork() failed"
+msgstr "fork() gagal"
 
-#: src/exec.c:191
-#, c-format
-msgid "execvp() failed: %s"
-msgstr "execvp() gagal: %s"
+#: src/exec.c:201
+msgid "execvp() failed"
+msgstr "execvp() gagal"
 
-#: src/gpg.c:50
+#: src/gpg.c:54
 #, c-format
 msgid "GPGME: %s."
 msgstr "GPGME: %s."
 
-#: src/gpg.c:73
+#: src/gpg.c:100
 #, c-format
 msgid "Install GPGME version %s or later."
 msgstr "Pasang GPGME versi %s atau terkini."
 
-#: src/gpg.c:78
+#: src/gpg.c:107
 #, c-format
 msgid "GPGME: failed. %s."
 msgstr "GPGME: gagal. %s."
 
-#: src/gpg.c:122 src/gpg.c:282
+#: src/gpg.c:159 src/gpg.c:407
 #, c-format
 msgid "GPGME: Cannot list keys: %s"
-msgstr ""
+msgstr "GPGME: Tidak dapat menyenaraikan kekunci: %s"
+
+#: src/gpg.c:288 src/gpg.c:430
+#, c-format
+msgid "GPGME: Invalid recipient encountered: %s"
+msgstr "GPGME: Penerima tidak sah dijumpai: %s"
+
+#: src/gpg.c:333
+#, c-format
+msgid "GPGME: Invalid signer found: %s"
+msgstr "GPGME: Penandatangan tidak sah dijumpai: %s"
+
+#: src/gpg.c:340
+msgid "GPGME: Unexpected number of signatures created"
+msgstr "GPGME: Jumlah tandatangan tidak dijangka dicipta"
+
+#: src/gpg.c:347
+msgid "GPGME: Wrong type of signature created"
+msgstr "GPGME: Tandatangan jenis yang salah dicipta"
+
+#: src/gpg.c:352
+#, c-format
+msgid "GPGME: Wrong pubkey algorithm reported: %i"
+msgstr "GPGME: Algoritma pubkey salah dilaporkan: %i"
+
+#: src/gpg.c:359
+#, c-format
+msgid "GPGME: Wrong hash algorithm reported: %i"
+msgstr "GPGME: Algoritma hash salah dilaporkan: %i"
+
+#: src/gpg.c:366
+#, c-format
+msgid "GPGME: Wrong signature class reported: %u"
+msgstr "GPGME: Kelas tandatangan salah dilaporkan: %u"
 
 #: src/guile.c:79
 #, c-format
-msgid "cannot open guile output file %s: %s"
-msgstr ""
+msgid "cannot open guile output file %s"
+msgstr "tidak dapat membuka file keluaran guile %s"
 
-#: src/guile.c:258
+#: src/guile.c:266
 msgid "missing procedure name"
-msgstr ""
+msgstr "nama prosedur tiada"
 
-#: src/guile.c:273
+#: src/guile.c:281
 #, c-format
 msgid "%s not a procedure object"
-msgstr ""
+msgstr "%s bukan objek prosedur"
 
-#: src/guile.c:309
+#: src/guile.c:323
 #, c-format
 msgid "Bad car type in return from %s"
-msgstr ""
+msgstr "Jenis car tidak sah dalam pulangan dari %s"
 
-#: src/guile.c:324
+#: src/guile.c:342
 #, c-format
 msgid "Bad cdr type in return from %s"
-msgstr ""
+msgstr "Jenis cdr tidak sah dalam pulangan dari %s"
 
-#: src/guile.c:328
+#: src/guile.c:345
 #, c-format
 msgid "Bad return type from %s"
-msgstr ""
+msgstr "Jenis pulangan tidak sah dari %s"
 
 #: src/help.c:82
-#, fuzzy
 msgid ""
 "\n"
 "GNU Anubis is free software; you can redistribute it and/or modify\n"
@@ -395,11 +466,9 @@ msgid ""
 "(at your option) any later version."
 msgstr ""
 "\n"
-"\n"
-"GNU Anubis adalah perisian bebas; anda boleh menyebarkannya dan/atau "
-"mengubahsuainya\n"
+"GNU Anubis adalah perisian bebas; anda boleh menyebarkannya dan/atau mengubahsuainya\n"
 "dibawah syarat-syarat GNU General Public License seperti diterbitkan oleh\n"
-"Free Software Foundation; samaada versi 2 Lesen tersebut, atau\n"
+"Free Software Foundation; sama ada versi ke-2 Lesen tersebut, atau\n"
 "(atas pilihan anda) sebarang versi selepasnya."
 
 #: src/help.c:86
@@ -444,22 +513,17 @@ msgstr "Penggunaan: anubis [pilihan]\n"
 
 #: src/help.c:102
 msgid ""
-" -b, --bind [HOST:]PORT       Specify the TCP port on which GNU Anubis "
-"listens\n"
-"                              for connections. The default HOST is "
-"INADDR_ANY,\n"
+" -b, --bind [HOST:]PORT       Specify the TCP port on which GNU Anubis listens\n"
+"                              for connections. The default HOST is INADDR_ANY,\n"
 "                              and default PORT is 24 (private mail system)."
 msgstr ""
 " -b, --bind [HOS:]PORT        Nyatakan port TCP dimana GNU Anubis mendengar\n"
-"                              untuk sambungan. HOS default adalah "
-"INADDR_ANY,\n"
-"                              dan PORT default ialah 24 (sistem mel "
-"persendirian)."
+"                              untuk sambungan. HOS default adalah INADDR_ANY,\n"
+"                              dan PORT default ialah 24 (sistem mel persendirian)."
 
 #: src/help.c:105
 msgid ""
-" -r, --remote-mta HOST[:PORT] Specify a remote SMTP host name or IP "
-"address.\n"
+" -r, --remote-mta HOST[:PORT] Specify a remote SMTP host name or IP address.\n"
 "                              The default PORT number is 25."
 msgstr ""
 " -r, --remote-mta HOS[:PORT]  Nyatakan nama hos jauh SMTP atau alamatIP.\n"
@@ -468,26 +532,20 @@ msgstr ""
 #: src/help.c:107
 msgid ""
 " -l, --local-mta FILE         Execute a local SMTP server, which works on\n"
-"                              standard input and output (inetd-type "
-"program).\n"
+"                              standard input and output (inetd-type program).\n"
 "                              This option excludes the '--remote-mta' option."
 msgstr ""
-" -l, --local-mta FAIL         Laksanakan pelayan SMTP tempatan, yang "
-"berkerja pada\n"
-"                              masukan dan keluaran piawai (program jenis-"
-"inetd).\n"
-"                              Pilihan ini tidak termasuk pilihan '--remote-"
-"mta'."
+" -l, --local-mta FAIL         Laksanakan pelayan SMTP tempatan, yang berkerja pada\n"
+"                              masukan dan keluaran piawai (program jenis-inetd).\n"
+"                              Pilihan ini tidak termasuk pilihan '--remote-mta'."
 
 #: src/help.c:110
-#, fuzzy
 msgid " -m, --mode=MODE              Select operation mode."
-msgstr " -f, --foreground             Mod latardepan."
+msgstr " -m, --mode=MOD               Pilih mod operasi."
 
 #: src/help.c:111
-msgid ""
-"                              MODE is either \"transparent\" or \"auth\""
-msgstr ""
+msgid "                              MODE is either \"transparent\" or \"auth\""
+msgstr "                              MOD adalah sama ada \"transparent\" atau \"auth\""
 
 #: src/help.c:112
 msgid " -f, --foreground             Foreground mode."
@@ -495,33 +553,27 @@ msgstr " -f, --foreground             Mod latardepan."
 
 #: src/help.c:113
 msgid ""
-" -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as "
-"described\n"
+" -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as described\n"
 "                              in RFC 821 on standard input and output."
 msgstr ""
-" -i, --stdio                  Guna protokol SMTP (OMP/Tunnel) seperti "
-"diterangkan\n"
-"                              didalam RFC 821 pada masukan dan keluaran "
-"piawai."
+" -i, --stdio                  Guna protokol SMTP (OMP/Tunnel) seperti diterangkan\n"
+"                              didalam RFC 821 pada masukan dan keluaran piawai."
 
 #: src/help.c:115
 msgid "Output options:\n"
 msgstr "Pilihan keluaran:\n"
 
 #: src/help.c:116
-#, fuzzy
 msgid " -s, --silent                 Work silently."
-msgstr " -s, --silent     Berkerja dengan senyap."
+msgstr " -s, --silent                 Berkerja dengan senyap."
 
 #: src/help.c:117
-#, fuzzy
 msgid " -v, --verbose                Work noisily."
-msgstr " -v, --verbose    Berkerja dengan riuh."
+msgstr " -v, --verbose                Berkerja dengan riuh."
 
 #: src/help.c:118
-#, fuzzy
 msgid " -D, --debug                  Debug mode."
-msgstr " -D, --debug      Mod nyahpepijat."
+msgstr " -D, --debug                  Mod nyahpepijat."
 
 #: src/help.c:119
 msgid ""
@@ -532,42 +584,36 @@ msgstr ""
 "Pilihan lain:\n"
 
 #: src/help.c:120
-#, fuzzy
-msgid ""
-" -c, --check-config           Run the configuration file syntax checker."
-msgstr " --norc           Abai fail konfigurasi sistem."
+msgid " -c, --check-config           Run the configuration file syntax checker."
+msgstr " -c, --check-config           Laksana penyemak sintaks fail tetapan.file syntax checker."
 
 #: src/help.c:121
 msgid ""
 " --show-config-options        Print a list of configuration options used\n"
 "                              to build GNU Anubis."
 msgstr ""
+" --show-config-options        Papar senarai pilihan tetapan yang digunakan\n"
+"                              untuk membina GNU Anubis."
 
 #: src/help.c:123
-msgid ""
-" --relax-perm-check           Do not check a user config file permissions."
-msgstr ""
+msgid " --relax-perm-check           Do not check user configuration file permissions."
+msgstr " --relax-perm-check           Jangan periksa kebenaran fail tetapan pengguna."
 
 #: src/help.c:124
-#, fuzzy
-msgid ""
-" --altrc FILE                 Specify alternate system configuration file."
-msgstr " --altrc FAIL     Nyatakan fail konfigurasi sistem gantian."
+msgid " --altrc FILE                 Specify alternate system configuration file."
+msgstr " --altrc FAIL                 Nyatakan fail konfigurasi sistem gantian."
 
 #: src/help.c:125
-#, fuzzy
 msgid " --norc                       Ignore system configuration file."
-msgstr " --norc           Abai fail konfigurasi sistem."
+msgstr " --norc                       Abai fail konfigurasi sistem."
 
 #: src/help.c:126
-#, fuzzy
 msgid " --version                    Print version number and copyright."
-msgstr " --version        Cetak nombor versi dan hakcipta."
+msgstr " --version                    Cetak nombor versi dan hakcipta."
 
 #: src/help.c:127
-#, fuzzy
 msgid " --help                       It's obvious..."
-msgstr " --help           Sangat jelas..."
+msgstr " --help                       Sangat jelas..."
 
 #: src/help.c:128
 #, c-format
@@ -578,12 +624,52 @@ msgstr ""
 "\n"
 "Lapor pepijat kepada <%s>.\n"
 
-#: src/map.c:68
+#: src/ident.c:105
+msgid "IDENT: socket() failed"
+msgstr "IDENT: socket() gagal"
+
+#: src/ident.c:117
+msgid "IDENT: connect() failed"
+msgstr "IDENT: connect() gagal"
+
+#: src/ident.c:123
+#, c-format
+msgid "IDENT: connected to %s:%u"
+msgstr "IDENT: disambungkan kepada %s:%u"
+
+#: src/ident.c:132
+#, c-format
+msgid "IDENT: stream_write() failed: %s."
+msgstr "IDENT: stream_write() gagal: %s."
+
+#: src/ident.c:140
+#, c-format
+msgid "IDENT: recvline() failed: %s."
+msgstr "IDENT: recvline() gagal: %s."
+
+#: src/ident.c:151
+msgid "IDENT: incorrect data."
+msgstr "IDENT: data tidak betul."
+
+#: src/ident.c:162
+msgid "IDENT: data probably encrypted with DES..."
+msgstr "IDENT: data berkemungkinan dienkrip dengan DES..."
+
+#: src/ident.c:170
+msgid "IDENT: incorrect data (DES deciphered)."
+msgstr "IDENT: data tidak betul (decipher DES)."
+
+#: src/ident.c:188
+#, c-format
+msgid "IDENT: resolved remote user to %s."
+msgstr "IDENT: resolved pengguna jarak jauh kepada %s."
+
+#: src/map.c:71
 #, c-format
 msgid "%s remapped to %s@localhost."
 msgstr "%s dipetakan kepada %s@localhost."
 
-#: src/map.c:121
+#: src/map.c:123
 msgid "Translation map: incorrect syntax."
 msgstr "Peta terjemahan: sintaks tidak betul"
 
@@ -595,54 +681,52 @@ msgstr "malloc() gagal. Tidak dapat memperuntukkan memori yang cukup."
 msgid "realloc() failed. Cannot reallocate enough memory."
 msgstr "realloc() gagal. Tidak dapat memperuntukkan semula memori yang cukup."
 
-#: src/misc.c:308
+#: src/misc.c:332
 msgid "Can't find out my own hostname"
-msgstr ""
+msgstr "Tidak dapat mencari nama hos sendiri"
 
-#: src/net.c:45
+#: src/net.c:50
 msgid "SERVER"
-msgstr ""
+msgstr "PELAYAN"
 
-#: src/net.c:48
+#: src/net.c:53
 msgid "CLIENT"
-msgstr ""
+msgstr "PELANGGAN"
 
-#: src/net.c:122
+#: src/net.c:131
 msgid "Getting remote host information..."
 msgstr "Mendapatkan maklumat hos jauh..."
 
-#: src/net.c:152 src/net.c:184
-msgid "Can't create stream socket."
+#: src/net.c:168
+msgid "Cannot create stream socket."
 msgstr "Tidak dapat mencipta soket aliran."
 
-#: src/net.c:155
-#, c-format
-msgid "Connecting to %s:%u..."
-msgstr "Menyambung ke %s:%u..."
-
-#: src/net.c:157
+#: src/net.c:173
 #, c-format
 msgid "Couldn't connect to %s:%u. %s."
 msgstr "Tidak dapat menyambung ke %s:%u. %s."
 
-#: src/net.c:162
+#: src/net.c:178
 #, c-format
 msgid "Connected to %s:%u"
 msgstr "Tersambung ke %s:%u"
 
-#: src/net.c:212
-#, c-format
-msgid "bind() failed: %s."
-msgstr "bind() gagal: %s."
+#: src/net.c:200
+msgid "Cannot create stream socket"
+msgstr "Tidak dapat mencipta soket aliran"
 
-#: src/net.c:213
+#: src/net.c:233
+msgid "bind() failed"
+msgstr "bind() gagal"
+
+#: src/net.c:234
 #, c-format
 msgid "GNU Anubis bound to %s:%u"
 msgstr "GNU Anubis terhad kepada %s:%u"
 
-#: src/net.c:242
+#: src/net.c:261
 msgid "Short write"
-msgstr ""
+msgstr "Menulis pendek"
 
 #: src/socks.c:53
 msgid "Using SOCKS Proxy..."
@@ -653,95 +737,91 @@ msgstr "Menggunakan Proksi SOCKS..."
 msgid "SOCKS proxy: %s"
 msgstr "Proksi SOCKS: %s"
 
-#: src/socks.c:136
+#: src/socks.c:141
 msgid "Address must be an IP, not a domain name."
 msgstr "Alamat mestilah IP, bukan nama domain."
 
-#: src/socks.c:171 src/socks.c:379
+#: src/socks.c:178 src/socks.c:397
 msgid "SOCKS Proxy Connection: succeeded."
 msgstr "Sambungan Proksi SOCKS: berjaya."
 
-#: src/socks.c:174
+#: src/socks.c:181
 msgid "Request rejected or failed."
 msgstr "Permintaan ditolak atau gagal."
 
-#: src/socks.c:177
+#: src/socks.c:184
 msgid "Request rejected."
 msgstr "Permintaan ditolak."
 
-#: src/socks.c:180
-msgid ""
-"Request rejected, because the client program and identd reported different "
-"User-IDs."
-msgstr ""
-"Permintaan ditolak, kerana program pelanggan dan identd melaporkan perbezaan "
-"ID-Pengguna."
+#: src/socks.c:187
+msgid "Request rejected, because the client program and identd reported different User-IDs."
+msgstr "Permintaan ditolak, kerana program pelanggan dan identd melaporkan perbezaan ID-Pengguna."
 
-#: src/socks.c:184 src/socks.c:406
+#: src/socks.c:191 src/socks.c:424
 msgid "Server reply is not valid."
 msgstr "Jawapan pelayan tidak sah."
 
-#: src/socks.c:222
+#: src/socks.c:232
 msgid "Possibly not a SOCKS proxy service."
 msgstr "Mungkin bukan khidmat proksi SOCKS."
 
-#: src/socks.c:234
+#: src/socks.c:244
 msgid "SOCKS Proxy AUTH method: NO AUTHENTICATION REQUIRED"
 msgstr "Cara AUTH Proksi SOCKS: TIADA PENGESAHAN DIPERLUKAN"
 
-#: src/socks.c:238
+#: src/socks.c:247
 msgid "SOCKS Proxy AUTH method: USER NAME/PASSWORD"
 msgstr "Cara AUTH Proksi SOCKS: NAMA PENGGUNA/KATA LALUAN"
 
-#: src/socks.c:241
+#: src/socks.c:251
 msgid "Cannot send null user name or password."
 msgstr "Tidak boleh menghantar nama pengguna atau kata laluan kosong."
 
-#: src/socks.c:281
+#: src/socks.c:293
 msgid "Bad user name or password."
 msgstr "Nama pengguna atau kata laluan tidak sah."
 
-#: src/socks.c:285
+#: src/socks.c:297
 msgid "SOCKS Proxy AUTH: succeeded."
 msgstr "AUTH Proksi SOCKS: berjaya."
 
-#: src/socks.c:288
+#: src/socks.c:300
 msgid "Server does not accept any method."
 msgstr "Pelayan tidak menerima sebarang cara."
 
-#: src/socks.c:291
+#: src/socks.c:303
 msgid "Server does not accept an AUTH method."
 msgstr "Pelayan tidak menerima cara AUTH."
 
-#: src/socks.c:382
+#: src/socks.c:400
 msgid "General SOCKS server failure."
 msgstr "Kegagalan umum pelayan SOCKS."
 
-#: src/socks.c:385
+#: src/socks.c:403
 msgid "Connection not allowed by a ruleset."
 msgstr "Sambungan tidak dibenarkan oleh set peraturan."
 
-#: src/socks.c:388
+#: src/socks.c:406
 msgid "Network unreachable."
 msgstr "Rangkaian tidak dapat dicapai."
 
-#: src/socks.c:391
+#: src/socks.c:409
 msgid "Host unreachable."
 msgstr "Hos tidak dapat dicapai."
 
-#: src/socks.c:394
+#: src/socks.c:412
 msgid "Connection refused."
 msgstr "Sambungan ditolak."
 
-#: src/socks.c:397
+#: src/socks.c:415
 msgid "TTL expired."
 msgstr "TTL tamat tempoh."
 
-#: src/socks.c:400
+#: src/socks.c:418
 msgid "Command not supported."
 msgstr "Arahan tidak disokong."
 
-#: src/socks.c:403
+#: src/socks.c:421
 msgid "Address type not supported."
 msgstr "Jenis alamat tidak disokong."
 
@@ -755,408 +835,414 @@ msgstr "Hadmasa Tamat! Keluar..."
 
 #: src/rcfile.c:121
 #, c-format
-msgid "cannot stat file `%s': %s"
-msgstr ""
+msgid "cannot stat file `%s'"
+msgstr "Tidak dapat stat fail `%s'"
 
 #: src/rcfile.c:131
 #, c-format
-msgid "File `%s' has already been read"
-msgstr ""
+msgid "File `%s' has already been read.\n"
+msgstr "Fail `%s' telah pun dibaca.\n"
 
-#: src/rcfile.c:177
+#: src/rcfile.c:149
+#, c-format
+msgid "Welcome user %s !"
+msgstr "Selamat Datang pengguna %s !"
+
+#: src/rcfile.c:185
 #, c-format
 msgid "Reading system configuration file %s..."
 msgstr "Membaca fail konfigurasi sistem %s..."
 
-#: src/rcfile.c:187
+#: src/rcfile.c:197
 #, c-format
 msgid "Reading user configuration file %s..."
 msgstr "Membaca fail konfigurasi pengguna %s..."
 
-#: src/rcfile.c:679
+#: src/rcfile.c:330
+msgid "`logfile' directive is ignored in main configuration file"
+msgstr "arahan `logfile' diabaikan dalam fail tetapan utama"
+
+#: src/rcfile.c:709
 #, c-format
 msgid "No such section: %s"
-msgstr ""
+msgstr "Tiada seksyen sebegitu: %s"
 
-#: src/rcfile.l:180
+#: src/rcfile.l:181
 #, c-format
-msgid ""
-"Stray character in config: \\%03o. Possibly missing quotes around the string"
-msgstr ""
+msgid "Stray character in config: \\%03o. Possibly missing quotes around the string"
+msgstr "Aksara tidak sah dalam tetapan: \\%03o. Kemungkinan hilang tanda pembuka kata pada keliling perkataan"
 
-#: src/rcfile.l:380
-#, c-format
-msgid "Anubis RC file error: %s."
-msgstr "Ralat fail RC Anubis: %s."
+#: src/rcfile.l:385
+msgid "Anubis RC file error"
+msgstr "Ralat fail RC Anubis"
 
-#: src/rcfile.y:162 src/rcfile.y:170
+#: src/rcfile.y:170 src/rcfile.y:178
 #, c-format
 msgid "Section %s already defined"
-msgstr ""
+msgstr "Seksyen %s telah ditakrif"
 
-#: src/rcfile.y:217
-#, fuzzy, c-format
+#: src/rcfile.y:230
+#, c-format
 msgid "unknown keyword: %s"
-msgstr "Hos tidak diketahui %s."
+msgstr "katakunci tidak diketahui: %s"
 
-#: src/rcfile.y:510
+#: src/rcfile.y:532
 msgid "missing replacement value"
-msgstr ""
+msgstr "nilai penggantian hilang"
 
-#: src/rcfile.y:1122
+#: src/rcfile.y:629
+#, c-format
+msgid "Not a valid debugging level: %s"
+msgstr "Bukan tahap nyahpepijat yang sah: %s"
+
+#: src/rcfile.y:1179
 msgid "Unknown regexp modifier"
-msgstr ""
+msgstr "Pengubah regexp tidak diketahui"
 
-#: src/rcfile.y:1213
+#: src/rcfile.y:1277
 msgid "STOP"
-msgstr ""
+msgstr "BERHENTI"
 
-#: src/rcfile.y:1218
+#: src/rcfile.y:1282
 #, c-format
 msgid "Calling %s"
-msgstr ""
+msgstr "Memanggil %s"
 
-#: src/rcfile.y:1224
+#: src/rcfile.y:1288
 #, c-format
 msgid "ADD %s [%s] %s"
-msgstr ""
+msgstr "TAMBAH %s [%s] %s"
 
-#: src/rcfile.y:1234
+#: src/rcfile.y:1298
 #, c-format
 msgid "MODIFY %s [%s] [%s] %s"
-msgstr ""
+msgstr "UBAHSUAI %s [%s] [%s] %s"
 
-#: src/rcfile.y:1247
+#: src/rcfile.y:1311
 #, c-format
 msgid "REMOVE HEADER [%s]"
-msgstr ""
+msgstr "BUANG HEADER [%s]"
 
-#: src/rcfile.y:1270
-#, fuzzy, c-format
+#: src/rcfile.y:1334
+#, c-format
 msgid "Executing %s"
-msgstr "Melaksanakan %s %s..."
+msgstr "Melaksanakan %s"
 
-#: src/rcfile.y:1341
+#: src/rcfile.y:1414
 #, c-format
 msgid "Matched trigger \"%s\""
-msgstr ""
+msgstr "Trigger sepadan \"%s\""
 
-#: src/rcfile.y:1345
+#: src/rcfile.y:1418
 #, c-format
 msgid "Matched condition %s[%s] \"%s\""
-msgstr ""
+msgstr "Syarat dipenuhi %s[%s] \"%s\""
 
-#: src/rcfile.y:1475
-#, fuzzy, c-format
+#: src/rcfile.y:1528
+#, c-format
+msgid "Section %s"
+msgstr "Seksyen %s"
+
+#: src/rcfile.y:1552
+#, c-format
 msgid "Unknown section: %s"
-msgstr "Hos tidak diketahui %s."
+msgstr "Seksyen tidak diketahui: %s"
 
-#: src/rcfile.y:1517
+#: src/rcfile.y:1599
 msgid "program is not allowed in this section"
-msgstr ""
+msgstr "program tidak dibenarkan dalam seksyen ini"
 
-#: src/regex.c:109
+#: src/regex.c:113
 #, c-format
 msgid "INTERNAL ERROR at %s:%d: missing or invalid regex"
-msgstr ""
+msgstr "RALAT DALAMAN pada %s:%d: regex hilang atau tidak sah"
 
-#: src/regex.c:306
-#, fuzzy, c-format
+#: src/regex.c:316
+#, c-format
 msgid "regcomp() failed at %s: %s."
-msgstr "regcomp() gagal. %s"
+msgstr "regcomp() gagal pada %s: %s."
 
-#: src/regex.c:377
+#: src/regex.c:392
 #, c-format
 msgid "pcre_compile() failed at offset %d: %s."
 msgstr "pcre_compile() gagal pada offset %d: %s."
 
-#: src/regex.c:402
-#, fuzzy, c-format
+#: src/regex.c:417
+#, c-format
 msgid "pcre_fullinfo() failed: %d."
-msgstr "listen() gagal: %s."
+msgstr "pcre_fullinfo() gagal: %d."
 
-#: src/regex.c:414
+#: src/regex.c:429
 msgid "Matched, but too many substrings."
 msgstr "Sepadan, tetapi terlalu banyak subrentetan."
 
-#: src/regex.c:425
+#: src/regex.c:442
 #, c-format
 msgid "Get substring %d failed (%d)."
 msgstr "Mendapatkan subrentetan %d gagal (%d)."
 
-#: src/ssl.c:57
+#: src/ssl.c:59
 msgid "Seeding random number generator..."
 msgstr "Menyemai penjana nombor rawak..."
 
-#: src/ssl.c:61
+#: src/ssl.c:63
 msgid "Unable to seed random number generator."
 msgstr "Tidak dapat menyemai penjana nombor rawak."
 
-#: src/ssl.c:76
-#, fuzzy, c-format
+#: src/ssl.c:80
+#, c-format
 msgid "Write error: %s"
-msgstr "Ralat fail RC Anubis: %s."
+msgstr "Ralat menulis: %s"
 
-#: src/ssl.c:93
-#, fuzzy, c-format
+#: src/ssl.c:98
+#, c-format
 msgid "Read error: %s"
-msgstr "Ralat fail RC Anubis: %s."
+msgstr "Ralat membaca: %s"
 
-#: src/ssl.c:275
+#: src/ssl.c:277
 msgid "SSLv23_client_method() failed."
 msgstr "SSLv23_client_method() gagal."
 
-#: src/ssl.c:279 src/ssl.c:357
+#: src/ssl.c:282 src/ssl.c:363
 msgid "Can't create SSL_CTX object."
 msgstr "Tidak dapat mencipta objek SSL_CTX."
 
-#: src/ssl.c:284 src/ssl.c:373
+#: src/ssl.c:288 src/ssl.c:383
 msgid "SSL_CTX_set_cipher_list() failed."
 msgstr "SSL_CTX_set_cipher_list() gagal."
 
-#: src/ssl.c:305 src/tls.c:161
+#: src/ssl.c:309 src/tls.c:168
 msgid "Initializing the TLS/SSL connection with MTA..."
 msgstr "Memulakan sambungan TLS/SSL dengan MTA..."
 
-#: src/ssl.c:308 src/ssl.c:393
+#: src/ssl.c:313 src/ssl.c:404
 msgid "Can't create a new SSL structure for a connection."
 msgstr "Tidak dapat mencipta struktur SSL baru untuk sambungan."
 
-#: src/ssl.c:323 src/tls.c:193
-#, fuzzy, c-format
+#: src/ssl.c:329 src/tls.c:202
+#, c-format
 msgid "TLS/SSL handshake failed: %s"
-msgstr "Salaman TLS/SSL gagal!"
+msgstr "Salaman TLS/SSL gagal: %s"
 
-#: src/ssl.c:353
+#: src/ssl.c:358
 msgid "SSLv23_server_method() failed."
 msgstr "SSLv23_server_method() gagal."
 
-#: src/ssl.c:361
+#: src/ssl.c:368
 msgid "SSL_CTX_use_certificate_file() failed."
 msgstr "SSL_CTX_use_certificate_file() gagal."
 
-#: src/ssl.c:365
+#: src/ssl.c:373
 msgid "SSL_CTX_use_PrivateKey_file() failed."
 msgstr "SSL_CTX_use_PrivateKey_file() gagal."
 
-#: src/ssl.c:369
+#: src/ssl.c:378
 msgid "Private key does not match the certificate public key."
 msgstr "Kunci persendirian tidak sepadan dengan sijil kunci awam."
 
-#: src/ssl.c:390 src/tls.c:244
+#: src/ssl.c:400 src/tls.c:252
 msgid "Initializing the TLS/SSL connection with MUA..."
 msgstr "Memulakan sambungan TLS/SSL dengan MUA..."
 
-#: src/ssl.c:405 src/tls.c:275
+#: src/ssl.c:417 src/tls.c:284
 msgid "TLS/SSL handshake failed!"
 msgstr "Salaman TLS/SSL gagal!"
 
-#: src/ssl.c:439
-#, fuzzy, c-format
+#: src/ssl.c:450
+#, c-format
 msgid "%s connection using %s (%u bit)"
 msgid_plural "%s connection using %s (%u bits)"
 msgstr[0] "sambugan %s menggunakan %s (%u bit)"
-msgstr[1] "sambugan %s menggunakan %s (%u bit)"
 
-#: src/ssl.c:451
-#, fuzzy, c-format
+#: src/ssl.c:462
+#, c-format
 msgid "Server public key is %d bit"
 msgid_plural "Server public key is %d bits"
 msgstr[0] "Kunci awam pelayan adalah %d bit"
-msgstr[1] "Kunci awam pelayan adalah %d bit"
 
-#: src/ssl.c:457
+#: src/ssl.c:467
 msgid "Certificate:"
 msgstr "Sijil:"
 
-#: src/ssl.c:459
+#: src/ssl.c:472
 msgid "X509_NAME_oneline [subject] failed!"
 msgstr "X509_NAME_oneline [subject] gagal!"
 
-#: src/ssl.c:462
+#: src/ssl.c:475
 #, c-format
 msgid "Subject: %s"
 msgstr "Tajuk: %s"
 
-#: src/ssl.c:464
+#: src/ssl.c:479
 msgid "X509_NAME_oneline [issuer] failed!"
 msgstr "X509_NAME_oneline [issuer] gagal!"
 
-#: src/ssl.c:467
+#: src/ssl.c:482
 #, c-format
 msgid "Issuer:  %s"
 msgstr "Pengeluar:  %s"
 
-#: src/tls.c:176 src/tls.c:253
+#: src/tls.c:185 src/tls.c:263
 #, c-format
-msgid "TLS Error reading `%s': %s"
-msgstr ""
+msgid "TLS error reading `%s': %s"
+msgstr "Ralat membaca TLS `%s': %s"
 
-#: src/tls.c:296
+#: src/tls.c:305
 msgid "No certificate was sent."
 msgstr "Tiada sijil dihantar."
 
-#: src/tls.c:300
+#: src/tls.c:310
 msgid "The certificate is not trusted."
 msgstr "Sijil tidak dipercayai."
 
-#: src/tls.c:304
+#: src/tls.c:315
 msgid "The certificate has expired."
 msgstr "Sijil telah tamat tempoh."
 
-#: src/tls.c:308
+#: src/tls.c:320
 msgid "The certificate is not yet activated."
 msgstr "Sijil belum lagi diaktifkan."
 
-#: src/tls.c:316
+#: src/tls.c:330
 msgid "No certificate was found!"
 msgstr "Tiada sijil dijumpai!"
 
-#: src/tls.c:320
+#: src/tls.c:335
 msgid "The certificate is trusted."
 msgstr "Sijil dipercayai."
 
-#: src/tls.c:351
-#, fuzzy, c-format
-msgid "Anonymous DH using prime of %d bit."
-msgid_plural "Anonymous DH using prime of %d bits."
-msgstr[0] "DH anonymous menggunakan asas %d bit."
-msgstr[1] "DH anonymous menggunakan asas %d bit."
-
-#: src/tls.c:361
-#, fuzzy, c-format
-msgid "Ephemeral DH using prime of %d bit."
-msgid_plural "Ephemeral DH using prime of %d bits."
-msgstr[0] "DH tidak kenal menggunakan asas %d bit."
-msgstr[1] "DH tidak kenal menggunakan asas %d bit."
+#: src/tls.c:365
+#, c-format
+msgid "- Anonymous DH using prime of %d bit.\n"
+msgid_plural "- Anonymous DH using prime of %d bits.\n"
+msgstr[0] "- DH anonymous menggunakan asas %d bit.\n"
 
 #: src/tls.c:373
+#, c-format
+msgid "- Ephemeral DH using prime of %d bit.\n"
+msgid_plural "- Ephemeral DH using prime of %d bits.\n"
+msgstr[0] "- Ephemeral DH menggunakan asas %d bit.\n"
+
+#: src/tls.c:384
 #, c-format
 msgid "- Protocol: %s\n"
 msgstr "- Protokol: %s\n"
 
-#: src/tls.c:376
+#: src/tls.c:388
 #, c-format
 msgid "- Certificate Type: %s\n"
 msgstr "- Jenis Sijil: %s\n"
 
-#: src/tls.c:379
+#: src/tls.c:391
 #, c-format
 msgid "- Compression: %s\n"
 msgstr "- Mampatan: %s\n"
 
-#: src/tls.c:382
+#: src/tls.c:394
 #, c-format
 msgid "- Cipher: %s\n"
 msgstr "- Cipher: %s\n"
 
-#: src/tls.c:385
+#: src/tls.c:397
 #, c-format
 msgid "- MAC: %s\n"
 msgstr "- MAC: %s\n"
 
-#: src/tls.c:412
+#: src/tls.c:425
 #, c-format
-msgid " - Certificate info:\n"
-msgstr " - Maklumat sijil:\n"
+msgid "- Certificate info:\n"
+msgstr "- Maklumat sijil:\n"
 
-#: src/tls.c:416
+#: src/tls.c:429
 #, c-format
-msgid " - Certificate is valid since: %s"
-msgstr " - Sijil sah semenjak: %s"
+msgid "- Certificate is valid since: %s"
+msgstr "- Sijil sah semenjak: %s"
 
-#: src/tls.c:418
+#: src/tls.c:431
 #, c-format
-msgid " - Certificate expires: %s"
-msgstr " - Sijil tamat tempoh: %s"
+msgid "- Certificate expires: %s"
+msgstr "- Sijil tamat tempoh: %s"
 
-#: src/tls.c:424
-#, fuzzy, c-format
-msgid " - Certificate fingerprint: "
-msgstr " - Cap jari sijil: %s\n"
-
-#: src/tls.c:434
-#, fuzzy, c-format
-msgid " - Certificate serial number: "
-msgstr " - Nombbor siri sijil: %s\n"
-
-#: src/tls.c:443
+#: src/tls.c:436
 #, c-format
-msgid "Certificate public key: "
-msgstr "Kunci awam sijil: "
+msgid "- Certificate fingerprint: "
+msgstr "- Cap jari sijil:"
 
-#: src/tls.c:445
+#: src/tls.c:446
+#, c-format
+msgid "- Certificate serial number: "
+msgstr "- Nombor siri sijil:"
+
+#: src/tls.c:455
+#, c-format
+msgid "- Certificate public key: "
+msgstr "- Kunci awam sijil: "
+
+#: src/tls.c:458
 #, c-format
 msgid "RSA\n"
 msgstr "RSA\n"
 
-#: src/tls.c:446
-#, fuzzy, c-format
-msgid " Modulus: %d bit\n"
-msgid_plural " Modulus: %d bits\n"
-msgstr[0] " Modulus: %d bit\n"
-msgstr[1] " Modulus: %d bit\n"
+#: src/tls.c:459
+#, c-format
+msgid "- Modulus: %d bit\n"
+msgid_plural "- Modulus: %d bits\n"
+msgstr[0] "- Modulus: %d bit\n"
 
-#: src/tls.c:451
+#: src/tls.c:464
 #, c-format
 msgid "DSA\n"
 msgstr "DSA\n"
 
-#: src/tls.c:452
-#, fuzzy, c-format
-msgid " Exponent: %d bit\n"
-msgid_plural " Exponent: %d bits\n"
-msgstr[0] " Eksponen: %d bit\n"
-msgstr[1] " Eksponen: %d bit\n"
+#: src/tls.c:465
+#, c-format
+msgid "- Exponent: %d bit\n"
+msgid_plural "- Exponent: %d bits\n"
+msgstr[0] "- Eksponen: %d bit\n"
 
-#: src/tls.c:457
+#: src/tls.c:469
 #, c-format
 msgid "UNKNOWN\n"
-msgstr "TDAK DIKETAHUI\n"
+msgstr "TIDAK DIKETAHUI\n"
 
-#: src/tls.c:459
+#: src/tls.c:471
 #, c-format
-msgid " - Certificate version: #%d\n"
-msgstr " - Versi sijil: #%d\n"
+msgid "- Certificate version: #%d\n"
+msgstr "- Versi sijil: #%d\n"
 
-#: src/tls.c:466
-#, fuzzy, c-format
-msgid " - Certificate Issuer's DN: %s\n"
-msgstr " - Maklumat Pengeluar sijil:\n"
+#: src/tls.c:478
+#, c-format
+msgid "- Certificate Issuer's DN: %s\n"
+msgstr "- DN Pengeluar Sijil: %s\n"
 
-#: src/tunnel.c:288 src/tunnel.c:351
+#: src/tunnel.c:319 src/tunnel.c:388
 msgid "Transferring message(s)..."
 msgstr "Memindahkan mesej..."
 
-#: src/tunnel.c:349
+#: src/tunnel.c:386
 msgid "Starting SMTP session..."
-msgstr ""
+msgstr "Memulakan sessi SMTP..."
 
-#: src/tunnel.c:429
+#: src/tunnel.c:469
 msgid "Using the TLS/SSL encryption..."
 msgstr "Menggunakan enkripsi TLS/SSL..."
 
-#: src/tunnel.c:441 src/tunnel.c:548
+#: src/tunnel.c:483 src/tunnel.c:627
 #, c-format
 msgid "WARNING: %s"
 msgstr "AMARAN: %s"
 
-#: src/tunnel.c:442
+#: src/tunnel.c:484
 msgid "STARTTLS command failed."
 msgstr "Arahan STARTTLS gagal."
 
-#: src/tunnel.c:540
-msgid "Using the 'ONEWAY' TLS/SSL encryption..."
-msgstr "Menggunakan enkripsi 'ONEWAY' TLS/SSL..."
+#: src/tunnel.c:618
+msgid "Using TLS/SSL encryption between Anubis and remote MTA only..."
+msgstr "Menggunakan enkripsi TLS/SSL antara Anubis dan MTA jauh sahaja..."
 
-#: src/tunnel.c:550
+#: src/tunnel.c:628
 msgid "STARTTLS (ONEWAY) command failed."
 msgstr "Arahan STARTTLS (ONEWAY) gagal."
-
-#: src/tunnel.c:577
-#, c-format
-msgid "getpeername() failed: %s."
-msgstr "getpeername() gagal: %s."
 
 #: lib/getopt.c:629 lib/getopt.c:641
 #, c-format
@@ -1215,34 +1301,4 @@ msgstr "%s: pilihan `-W %s' tidak mengizinkan hujah\n"
 
 #: lib/obstack.c:403 lib/obstack.c:406
 msgid "memory exhausted"
-msgstr ""
-
-#~ msgid "The %s section has been found. Processing..."
-#~ msgstr "Seksyen %s telah dijumpai. Memproses..."
-
-#~ msgid "IDENT: send() failed: %s."
-#~ msgstr "IDENT: send() gagal: %s."
-
-#~ msgid "Built-in support for: "
-#~ msgstr "Sokongan dalaman untuk: "
-
-#~ msgid "Initializing socket..."
-#~ msgstr "Memulakan soket..."
-
-#~ msgid "(%ld)SERVER >>> %s"
-#~ msgstr "(%ld)PELAYAN >>> %s"
-
-#~ msgid "(%ld)CLIENT >>> %s"
-#~ msgstr "(%ld)PELANGGAN >>> %s"
-
-#~ msgid "(%d)SERVER <<< %s"
-#~ msgstr "(%d)PELAYAN <<< %s"
-
-#~ msgid "(%d)CLIENT <<< %s"
-#~ msgstr "(%d)PELANGGAN <<< %s"
-
-#~ msgid "Fatal fclose() error. %s."
-#~ msgstr "Ralat maut fclose(). %s."
-
-#~ msgid "SSL_set_fd() failed."
-#~ msgstr "SSL_set_fd() gagal."
+msgstr "kehabisan memori"
