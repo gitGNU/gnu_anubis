@@ -1,3 +1,11 @@
+2005-04-19  Sergey Poznyakoff 
+
+	* src/guile.c (guile_ports_open): Make sure port name always
+	reflects actual file name.
+	(guile_parser): Bugfix. guile_ports_open() was called too early,
+	which led to coredump when processing guile-output statement.
+	Besides guile_ports_close() was not called before return.
+
 2005-04-18  Sergey Poznyakoff
 
 	* src/gpg.c (fail_if_err): Rewritten to avoid evaluating the
