@@ -84,8 +84,11 @@ guile_ports_open (void)
     name = "/dev/null";
 
   if (fd == -1)
-    fd = open ("/dev/null", O_WRONLY);
-
+    {
+      name = "/dev/null";
+      fd = open (name, O_WRONLY|O_APPEND);
+    }
+  
   port = scm_fdes_to_port (fd, "a", scm_makfrom0str (name));
   guile_ports_close ();
   scm_set_current_error_port (port);
@@ -375,19 +378,13 @@ int
 guile_parser (int method, int key, ANUBIS_LIST * arglist,
 	      void *inv_data, void *func_data, MESSAGE * msg)
 {
+  int rc;
   char *arg = list_item (arglist, 0);
   struct inner_closure closure;
   jmp_buf jmp_env;
   
   closure.arglist = arglist;
   closure.msg = msg;
-
-  guile_ports_open ();
-  if (setjmp (jmp_env))
-    {
-      guile_ports_close ();
-      return RC_KW_ERROR;
-    }
 
   switch (key)
     {
@@ -421,11 +418,18 @@ guile_parser (int method, int key, ANUBIS_LIST * arglist,
       return RC_KW_UNKNOWN;
     }
 
-  scm_internal_lazy_catch (SCM_BOOL_T,
-			   inner_catch_body,
-			   &closure,
-			   eval_catch_handler, &jmp_env);
-  return RC_KW_HANDLED;
+  guile_ports_open ();
+  if (setjmp (jmp_env) == 0)
+    scm_internal_lazy_catch (SCM_BOOL_T,
+			     inner_catch_body,
+			     &closure,
+			     eval_catch_handler, &jmp_env);
+  else
+    rc = RC_KW_ERROR;
+
+  guile_ports_close ();
+
+  return rc;
 }
 
 static struct rc_secdef_child guile_secdef_child = {
