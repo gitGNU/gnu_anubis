@@ -1,8 +1,28 @@
-GNU Anubis NEWS -- history of user-visible changes.  2004-12-18
-Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
+GNU Anubis NEWS -- history of user-visible changes.  2005-04-20
+Copyright (C) 2001, 2002, 2003, 2004, 2005 The Anubis Team.
 
 See the end of file for copying conditions.
 Please send your bug reports to <bug-anubis@gnu.org>.
+
+
+ *******************
+  4.0.90 (Unreleased)
+ *******************
+
+** New features:
+* New working mode: MDA
+
+** Bug fixes
+* Fixed handling of regular expressions
+* Got rid of arbitrary-sized buffers. All memory is being allocated on
+request.
+* Process main configuration file no matter was the client recognized or
+not.
+* Errors in Guile scripts are catched and displayed early. In previous
+versions they could cause aborting the subprocess.
+* Support for GPGME 1.0.2
+* Fixed minor bug in handling identd responses.
+* Fixed SIGCHLD handling.
 
 
  *******************

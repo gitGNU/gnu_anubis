@@ -7,14 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: anubis 4.0\n"
 "Report-Msgid-Bugs-To: bug-anubis@gnu.org\n"
-"POT-Creation-Date: 2004-12-18 11:30+0100\n"
+"POT-Creation-Date: 2005-04-20 13:04+0300\n"
 "PO-Revision-Date: 2005-04-15 11:23+0300\n"
 "Last-Translator: Sergey Poznyakoff <gray@gnu.org>\n"
 "Language-Team: Ukrainian <translation-team-uk@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%"
+"10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #: src/authmode.c:469
 msgid "Entering XDB loop..."
@@ -48,81 +49,81 @@ msgstr "Неможливо відібрати дані з бази даних д
 msgid "Record for `%s' not found."
 msgstr "Не знайдено запису для `%s'."
 
-#: src/authmode.c:606
+#: src/authmode.c:603
 msgid "MTA has not been specified. Set either REMOTE-MTA or LOCAL-MTA."
 msgstr "MTA не вказаний. Встановіть REMOTE-MTA або LOCAL-MTA."
 
-#: src/authmode.c:637 src/map.c:164 src/net.c:150 src/net.c:217
-#: src/transmode.c:98
+#: src/authmode.c:634 src/map.c:161 src/net.c:150 src/net.c:217
+#: src/transmode.c:94
 #, c-format
 msgid "Illegal address length received for host %s"
 msgstr "Отримано адресу невірної довжини для машини %s"
 
-#: src/authmode.c:651 src/transmode.c:112
+#: src/authmode.c:648 src/transmode.c:108
 msgid "Loop not allowed. Connection rejected."
 msgstr "Петлі не дозволені. З'єднання відкинуто."
 
-#: src/authmode.c:683 src/transmode.c:143
+#: src/authmode.c:680 src/transmode.c:139
 msgid "Connection closed successfully."
 msgstr "З'єднання успішно закрите."
 
-#: src/authmode.c:690 src/transmode.c:149
+#: src/authmode.c:687 src/transmode.c:145
 msgid "PAM: Session closed."
 msgstr "PAM: Сеанс закінчений."
 
 # FIXME:  authenticator?
-#: src/authmode.c:694 src/transmode.c:153
+#: src/authmode.c:691 src/transmode.c:149
 msgid "PAM: failed to release authenticator."
 msgstr "Не вдалося звільнити дані ідентифікації"
 
-#: src/daemon.c:49
+#: src/daemon.c:45
 msgid "daemon() failed"
 msgstr "daemon() не вдалася"
 
-#: src/daemon.c:56
+#: src/daemon.c:52
 msgid "Cannot fork."
 msgstr "Не вдається створити процес."
 
-#: src/daemon.c:64
+#: src/daemon.c:60
 msgid "setsid() failed"
 msgstr "setsid() не вдалася"
 
-#: src/daemon.c:76
+#: src/daemon.c:72
 #, c-format
 msgid "%s daemon startup succeeded."
 msgstr "%s демон успішно запущений."
 
-#: src/daemon.c:88
+#: src/daemon.c:84
 #, c-format
 msgid "Exited successfully"
 msgstr "Успішне завершення"
 
-#: src/daemon.c:90
+#: src/daemon.c:86
 #, c-format
 msgid "Failed with status %d"
 msgstr "Невдале закінчення зі станом %d"
 
-#: src/daemon.c:95
+#: src/daemon.c:91
 #, c-format
 msgid "Terminated on signal %d"
 msgstr "Завершення по сигналу %d"
 
-#: src/daemon.c:98
+#: src/daemon.c:94
 #, c-format
 msgid "Stopped on signal %d"
 msgstr "Зупинено сигналом %d"
 
-#: src/daemon.c:101
+#: src/daemon.c:97
 #, c-format
 msgid "Dumped core"
 msgstr "Скинуто образ пам'яті"
 
-#: src/daemon.c:104
+#: src/daemon.c:100
 #, c-format
 msgid "Terminated"
 msgstr "Завершено"
 
-#: src/daemon.c:121
+#: src/daemon.c:111
 #, c-format
 msgid "Child [%lu] finished. %s. %d client left."
 msgid_plural "Child [%lu] finished. %s. %d clients left."
@@ -130,138 +131,155 @@ msgstr[0] "Процес-нащадок [%lu] закінчився. %s. Зали�
 msgstr[1] "Процес-нащадок [%lu] закінчився. %s. Залишилося %d клієнти."
 msgstr[2] "Процес-нащадок [%lu] закінчився. %s. Залишилося %d клієнтів."
 
-#: src/daemon.c:169
+#: src/daemon.c:123
+#, fuzzy, c-format
+msgid "Local program [%lu] finished. %s"
+msgstr "Локальна програма [%lu] закінчена."
+
+#: src/daemon.c:167
 msgid "WARNING: An unprivileged user has not been specified!"
 msgstr "ПОПЕРЕДЖЕННЯ: Не вказано ім'я непривілейованого користувача!"
 
-#: src/daemon.c:214
+#: src/daemon.c:217
 msgid "GNU Anubis is running..."
 msgstr "GNU Anubis запущено..."
 
-#: src/daemon.c:226 src/exec.c:122
+#: src/daemon.c:234 src/exec.c:85
 msgid "accept() failed"
 msgstr "accept() не вдалася"
 
-#: src/daemon.c:244
+#: src/daemon.c:252
 #, c-format
 msgid "TCP wrappers: connection from %s:%u rejected."
 msgstr "TCP wrappers: відкинуто з'єднання від %s:%u."
 
-#: src/daemon.c:269
+#: src/daemon.c:272
 #, c-format
 msgid "Too many clients. Connection from %s:%u rejected."
 msgstr "Забагато клієнтів. Відкинуто з'єднання від %s:%u."
 
-#: src/daemon.c:276
+#: src/daemon.c:278
 #, c-format
 msgid "Connection from %s:%u"
 msgstr "З'єднання від %s:%u"
 
-#: src/daemon.c:281
+#: src/daemon.c:283
 msgid "daemon: cannot fork"
 msgstr "daemon: не вдається створити процес"
 
-#: src/daemon.c:362 src/transmode.c:68
+#: src/daemon.c:376 src/transmode.c:64
 msgid "The MTA has not been specified. Set the REMOTE-MTA or LOCAL-MTA."
 msgstr "MTA не вказаний. Встановіть REMOTE-MTA або LOCAL-MTA."
 
-#: src/env.c:172
+#: src/env.c:136 src/exec.c:177
+msgid "argcv_get failed"
+msgstr "argcv_get() не вдалася"
+
+#: src/env.c:173
 #, c-format
 msgid "Try '%s --help' for more information."
 msgstr "Спробуй '%s --help' щоб отримати більш інформації."
 
-#: src/env.c:273
+#: src/env.c:187
+msgid "--mode=mda requires --local-mta"
+msgstr "--mode=mda вимагає --local-mta"
+
+#: src/env.c:189
+msgid "Missing recipient addresses"
+msgstr "Відсутні адреси одержувачів"
+
+#: src/env.c:264
 #, c-format
 msgid "setgroups(1, %lu) failed"
 msgstr "setgroups(1, %lu) не вдалася"
 
-#: src/env.c:283
+#: src/env.c:274
 #, c-format
 msgid "setegid(%lu) failed"
 msgstr "setegid(%lu) не вдалася"
 
-#: src/env.c:286
+#: src/env.c:277
 #, c-format
 msgid "setregid(%lu,%lu) failed"
 msgstr "setregid(%lu,%lu) не вдалася"
 
-#: src/env.c:290
+#: src/env.c:281
 #, c-format
 msgid "setresgid(%lu,%lu,%lu) failed"
 msgstr "setresgid(%lu,%lu,%lu) не вдалася"
 
-#: src/env.c:299
+#: src/env.c:290
 #, c-format
 msgid "setgid(%lu) failed"
 msgstr "setgid(%lu) не вдалася"
 
-#: src/env.c:302
+#: src/env.c:293
 #, c-format
 msgid "cannot set effective gid to %lu"
 msgstr "не можу встановити ефективний gid %lu"
 
-#: src/env.c:324
+#: src/env.c:315
 #, c-format
 msgid "setreuid(%lu,-1) failed"
 msgstr "setreuid(%lu,-1) не вдалася"
 
-#: src/env.c:330
+#: src/env.c:321
 #, c-format
 msgid "second setuid(%lu) failed"
 msgstr "другий виклик setuid(%lu) не вдався"
 
-#: src/env.c:338
+#: src/env.c:329
 #, c-format
 msgid "setuid(%lu) failed"
 msgstr "setuid(%lu) не вдалася"
 
-#: src/env.c:347
+#: src/env.c:338
 msgid "seteuid(0) succeeded when it should not"
 msgstr "seteuid(0) вдалася, хоча не повинна була"
 
-#: src/env.c:352
+#: src/env.c:343
 msgid "cannot drop non-root setuid privileges"
 msgstr "неможливо позбавитися прав setuid"
 
-#: src/env.c:379
+#: src/env.c:370
 msgid "PAM: Session opened (restrictions applied)."
 msgstr "PAM: Сеанс розпочатий (обмеження застосовані)."
 
-#: src/env.c:382
+#: src/env.c:373
 msgid "PAM: Not authenticated to use GNU Anubis."
 msgstr "PAM: Не авторизовано для використання GNU Anubis."
 
-#: src/env.c:394 src/main.c:156
+#: src/env.c:385 src/main.c:160
 #, c-format
 msgid "UID:%d (%s), GID:%d, EUID:%d, EGID:%d"
 msgstr "UID:%d (%s), GID:%d, EUID:%d, EGID:%d"
 
-#: src/env.c:429
+#: src/env.c:420
 #, c-format
 msgid "Invalid user ID: %s"
 msgstr "Невірний ID користувача: %s"
 
-#: src/env.c:435
+#: src/env.c:426
 #, c-format
 msgid "Invalid user name: %s"
 msgstr "Невірне ім'я користувача: %s"
 
-#: src/env.c:458
+#: src/env.c:449
 #, c-format
 msgid "Wrong permissions on %s. Set 0600."
 msgstr "Невірний дозвіл на %s. Встановіть 0600."
 
-#: src/env.c:484
+#: src/env.c:475
 #, c-format
 msgid "%s is not a regular file or a symbolic link."
 msgstr "%s це не звичайний файл або символічне посилання."
 
-#: src/env.c:507
+#: src/env.c:500
 #, c-format
 msgid "Unknown mode: %s"
 msgstr "Невідомий режим: %s"
 
-#: src/env.c:522
+#: src/env.c:515
 #, c-format
 msgid "Cannot open pid file '%s'"
 msgstr "Не вдається відкрити файл PID `%s'"
@@ -297,172 +315,172 @@ msgstr "%s: сталася фатальна помилка серверу дом
 #: src/errs.c:118
 #, c-format
 msgid "%s: a temporary name server error occured. Try again later."
-msgstr "%s: сталась тимчасова помилка серверу доменних імен. Спробуйте пізніше."
+msgstr ""
+"%s: сталась тимчасова помилка серверу доменних імен. Спробуйте пізніше."
 
 #: src/errs.c:121
 #, c-format
 msgid "%s: unknown DNS error %d."
 msgstr "%s: невідома помилка DNS %d."
 
-#: src/esmtp.c:165
+#: src/esmtp.c:166
 msgid "Malformed or unexpected reply"
 msgstr "Недійсна або неочікувана відповідь"
 
-#: src/esmtp.c:189
+#: src/esmtp.c:192
 #, c-format
 msgid "SASL gsasl_client_start: %s"
 msgstr "SASL gsasl_client_start: %s"
 
-#: src/esmtp.c:198 src/esmtp.c:216
+#: src/esmtp.c:201 src/esmtp.c:220
 #, c-format
 msgid "GSASL handshake aborted: %d %s"
 msgstr "Рукостискання GSASL перервано: %d %s"
 
-#: src/esmtp.c:227
+#: src/esmtp.c:232
 #, c-format
 msgid "GSASL error: %s"
 msgstr "помилка GSASL: %s"
 
-#: src/esmtp.c:241
+#: src/esmtp.c:246
 #, c-format
 msgid "Authentication failed: %d %s"
 msgstr "Ідентифікація не вдалася: %d %s"
 
-#: src/esmtp.c:244
+#: src/esmtp.c:249
 msgid "Authentication successful."
 msgstr "Ідентифікація вдалася."
 
-#: src/esmtp.c:263
+#: src/esmtp.c:270
 msgid "Got empty list of authentication methods"
 msgstr "Отримано пустий список методів ідентифікації"
 
-#: src/esmtp.c:288
+#: src/esmtp.c:295
 msgid "Server did not offer any feasible authentication mechanism"
 msgstr "Сервер не запропонував жодного придатного механізму ідентифікації"
 
-#: src/esmtp.c:298
+#: src/esmtp.c:305
 msgid "INTERNAL ERROR"
 msgstr "ВНУТРІШНЯ ПОМИЛКА"
 
-#: src/esmtp.c:306
-#, c-format
-msgid "Selected authentication mechanism %s requires TLS encryption. Not using ESMTP authentication"
-msgstr "Обраний механізм ідентифікації %s вимагає кодування TLS. Ідентифікація ESMTP не використовується"
-
 #: src/esmtp.c:313
+#, c-format
+msgid ""
+"Selected authentication mechanism %s requires TLS encryption. Not using "
+"ESMTP authentication"
+msgstr ""
+"Обраний механізм ідентифікації %s вимагає кодування TLS. Ідентифікація ESMTP "
+"не використовується"
+
+#: src/esmtp.c:320
 #, c-format
 msgid "Selected authentication mechanism %s"
 msgstr "Обраний механізм ідентифікації %s"
 
-#: src/esmtp.c:319
+#: src/esmtp.c:326
 #, c-format
 msgid "Cannot initialize libgsasl: %s"
 msgstr "Не вдається ініціалізувати бібліотеку libgsasl: %s"
 
-#: src/esmtp.c:340
+#: src/esmtp.c:347
 msgid "ESMTP AUTH is not supported"
 msgstr "ESMTP AUTH не підтримується"
 
-#: src/exec.c:82
+#: src/exec.c:45
 msgid "#1 socket() failed."
 msgstr "перший виклик socket() не вдався."
 
-#: src/exec.c:87
+#: src/exec.c:50
 msgid "#2 socket() failed."
 msgstr "другий виклик socket() не вдався."
 
-#: src/exec.c:97
+#: src/exec.c:60
 msgid "#1 bind() failed"
 msgstr "Першій виклик bind() не вдався"
 
-#: src/exec.c:102
+#: src/exec.c:65
 msgid "#2 bind() failed"
 msgstr "Другий виклик bind() не вдався: %s."
 
-#: src/exec.c:107 src/net.c:237
+#: src/exec.c:70 src/net.c:237
 msgid "listen() failed"
 msgstr "listen() не вдалася"
 
-#: src/exec.c:112
+#: src/exec.c:75
 #, c-format
 msgid "getsockname() failed: %s."
 msgstr "getsockname() не вдалося: %s."
 
-#: src/exec.c:117
+#: src/exec.c:80
 msgid "connect() failed"
 msgstr "connect() не вдалася"
 
-#: src/exec.c:129
+#: src/exec.c:92
 msgid "socketpair() failed"
 msgstr "socketpair() не вдалася"
 
-#: src/exec.c:143
-#, c-format
-msgid "Local program [%lu] finished."
-msgstr "Локальна програма [%lu] закінчена."
-
-#: src/exec.c:179
-#, c-format
-msgid "Executing %s %s..."
+#: src/exec.c:113
+#, fuzzy, c-format
+msgid "Executing %s..."
 msgstr "Виконується %s %s..."
 
-#: src/exec.c:187
+#: src/exec.c:123
 msgid "fork() failed"
 msgstr "fork() не вдалася"
 
-#: src/exec.c:201
+#: src/exec.c:137
 msgid "execvp() failed"
 msgstr "execvp() не вдалася"
 
-#: src/gpg.c:54
+#: src/gpg.c:55
 #, c-format
 msgid "GPGME: %s."
 msgstr "GPGME: %s."
 
-#: src/gpg.c:100
+#: src/gpg.c:101
 #, c-format
 msgid "Install GPGME version %s or later."
 msgstr "Встановіть GPGME версії %s або пізнішу."
 
-#: src/gpg.c:107
+#: src/gpg.c:108
 #, c-format
 msgid "GPGME: failed. %s."
 msgstr "помилка GPGME. %s."
 
-#: src/gpg.c:159 src/gpg.c:407
+#: src/gpg.c:168 src/gpg.c:416
 #, c-format
 msgid "GPGME: Cannot list keys: %s"
 msgstr "GPGME: Не вдається створити перелік ключів: %s"
 
-#: src/gpg.c:288 src/gpg.c:430
+#: src/gpg.c:297 src/gpg.c:439
 #, c-format
 msgid "GPGME: Invalid recipient encountered: %s"
 msgstr "GPGME: недійсна адреса одержувача: %s"
 
-#: src/gpg.c:333
+#: src/gpg.c:342
 #, c-format
 msgid "GPGME: Invalid signer found: %s"
 msgstr "GPGME: Недійсне ім'я підписувача: %s"
 
-#: src/gpg.c:340
+#: src/gpg.c:349
 msgid "GPGME: Unexpected number of signatures created"
 msgstr "GPGME: Створено неочікувану кількість підписів"
 
-#: src/gpg.c:347
+#: src/gpg.c:356
 msgid "GPGME: Wrong type of signature created"
 msgstr "GPGME: Створено невірний тип підпису"
 
-#: src/gpg.c:352
+#: src/gpg.c:361
 #, c-format
 msgid "GPGME: Wrong pubkey algorithm reported: %i"
 msgstr "GPGME: Повернуто невірний алгоритм публічного ключа: %i"
 
-#: src/gpg.c:359
+#: src/gpg.c:368
 #, c-format
 msgid "GPGME: Wrong hash algorithm reported: %i"
 msgstr "GPGME: Повернуто невірний алгоритм хешування: %i"
 
-#: src/gpg.c:366
+#: src/gpg.c:375
 #, c-format
 msgid "GPGME: Wrong signature class reported: %u"
 msgstr "GPGME: Повернуто недійсний клас підпису: %u"
@@ -472,26 +490,26 @@ msgstr "GPGME: Повернуто недійсний клас підпису: %u
 msgid "cannot open guile output file %s"
 msgstr "не вдається відкрити файл виводу Guile %s"
 
-#: src/guile.c:266
+#: src/guile.c:261
 msgid "missing procedure name"
 msgstr "назва процедури відсутня"
 
-#: src/guile.c:281
+#: src/guile.c:276
 #, c-format
 msgid "%s not a procedure object"
 msgstr "%s не є об'єктом-процедурою"
 
-#: src/guile.c:323
+#: src/guile.c:309
 #, c-format
 msgid "Bad car type in return from %s"
 msgstr "%s повернула невірний тип car"
 
-#: src/guile.c:342
+#: src/guile.c:328
 #, c-format
 msgid "Bad cdr type in return from %s"
 msgstr "%s повернула невірний тип cdr"
 
-#: src/guile.c:345
+#: src/guile.c:331
 #, c-format
 msgid "Bad return type from %s"
 msgstr "Невірний тип повернення з %s"
@@ -505,7 +523,8 @@ msgid ""
 "(at your option) any later version."
 msgstr ""
 "\n"
-"GNU Anubis є вільною програмою; ви можете розповсюджувати чи/та змінювати його\n"
+"GNU Anubis є вільною програмою; ви можете розповсюджувати чи/та змінювати "
+"його\n"
 "на умовах ліцензії GNU General Public License опублікованої Free\n"
 "Software Foundation; версії 2 цієї ліцензії, або (за вашим бажанням)\n"
 "будь-якої пізнішої версії."
@@ -552,17 +571,21 @@ msgstr "Використання: anubis [параметри]\n"
 
 #: src/help.c:105
 msgid ""
-" -b, --bind [HOST:]PORT       Specify the TCP port on which GNU Anubis listens\n"
-"                              for connections. The default HOST is INADDR_ANY,\n"
+" -b, --bind [HOST:]PORT       Specify the TCP port on which GNU Anubis "
+"listens\n"
+"                              for connections. The default HOST is "
+"INADDR_ANY,\n"
 "                              and default PORT is 24 (private mail system)."
 msgstr ""
-" -b, --bind [МАШИНА:]ПОРТ     Вкажіть TCP порт на якому GNU Anubis очікуватиме\n"
+" -b, --bind [МАШИНА:]ПОРТ     Вкажіть TCP порт на якому GNU Anubis "
+"очікуватиме\n"
 "                              з'єднання. Типово МАШИНА це INADDR_ANY,\n"
 "                              та ПОРТ це 24 (приватна поштова система)."
 
 #: src/help.c:108
 msgid ""
-" -r, --remote-mta HOST[:PORT] Specify a remote SMTP host name or IP address.\n"
+" -r, --remote-mta HOST[:PORT] Specify a remote SMTP host name or IP "
+"address.\n"
 "                              The default PORT number is 25."
 msgstr ""
 " -r, --remote-mta МАШИНА[:ПОРТ] Вкажіть ім'я віддаленої SMTP машини або її\n"
@@ -571,7 +594,8 @@ msgstr ""
 #: src/help.c:110
 msgid ""
 " -l, --local-mta FILE         Execute a local SMTP server, which works on\n"
-"                              standard input and output (inetd-type program).\n"
+"                              standard input and output (inetd-type "
+"program).\n"
 "                              This option excludes the '--remote-mta' option."
 msgstr ""
 " -l, --local-mta ФАЙЛ         Виконати локальну програму SMTP, яка працює з\n"
@@ -584,7 +608,10 @@ msgid " -m, --mode=MODE              Select operation mode."
 msgstr " -m, --mode=РЕЖИМ             Вибір режиму роботи."
 
 #: src/help.c:114
-msgid "                              MODE is either \"transparent\" or \"auth\""
+#, fuzzy
+msgid ""
+"                              MODE is one of \"transparent\", \"auth\" or "
+"\"mda\"."
 msgstr "                              РЕЖИМ є \"transparent\" або \"auth\"."
 
 #: src/help.c:115
@@ -592,31 +619,37 @@ msgid " -f, --foreground             Foreground mode."
 msgstr " -f, --foreground             Робота на тлі."
 
 #: src/help.c:116
+msgid " --from=EMAIL                 Specify sender address (implies MDA mode)"
+msgstr ""
+" --from=АДРЕС                 Вказує адресу відправника (вмикає режим MDA)"
+
+#: src/help.c:117
 msgid ""
-" -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as described\n"
+" -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as "
+"described\n"
 "                              in RFC 821 on standard input and output."
 msgstr ""
 " -i, --stdio                  Використовувати SMTP протокол (OMP/Tunnel),\n"
 "                              описаний в RFC 821, на стандартному вводі\n"
 "                              і виводі."
 
-#: src/help.c:118
+#: src/help.c:119
 msgid "Output options:\n"
 msgstr "Параметри виводу:\n"
 
-#: src/help.c:119
+#: src/help.c:120
 msgid " -s, --silent                 Work silently."
 msgstr " -s, --silent                 Працювати тихо."
 
-#: src/help.c:120
+#: src/help.c:121
 msgid " -v, --verbose                Work noisily."
 msgstr " -v, --verbose                Працювати шумно."
 
-#: src/help.c:121
+#: src/help.c:122
 msgid " -D, --debug                  Debug mode."
 msgstr " -D, --debug                  Режим налагодження."
 
-#: src/help.c:122
+#: src/help.c:123
 msgid ""
 "\n"
 "Miscellaneous options:\n"
@@ -624,11 +657,14 @@ msgstr ""
 "\n"
 "Різноманітні параметри:\n"
 
-#: src/help.c:123
-msgid " -c, --check-config           Run the configuration file syntax checker."
-msgstr " -c, --check-config           Виконати перевірку синтаксису файлу налаштувань."
-
 #: src/help.c:124
+msgid ""
+" -c, --check-config           Run the configuration file syntax checker."
+msgstr ""
+" -c, --check-config           Виконати перевірку синтаксису файлу "
+"налаштувань."
+
+#: src/help.c:125
 msgid ""
 " --show-config-options        Print a list of configuration options used\n"
 "                              to build GNU Anubis."
@@ -636,32 +672,35 @@ msgstr ""
 " --show-config-options        Вивести перелік конфігураційних опцій,\n"
 "                              використаних під час компіляції GNU Anubis."
 
-#: src/help.c:126
-msgid " --relax-perm-check           Do not check user configuration file permissions."
+#: src/help.c:127
+msgid ""
+" --relax-perm-check           Do not check user configuration file "
+"permissions."
 msgstr ""
 " --relax-perm-check           Вимикає перевірку прав доступу до файлу\n"
 "                              налаштувань."
 
-#: src/help.c:127
-msgid " --altrc FILE                 Specify alternate system configuration file."
+#: src/help.c:128
+msgid ""
+" --altrc FILE                 Specify alternate system configuration file."
 msgstr ""
 " --altrc ФАЙЛ                 Використовувати альтернативний системний файл\n"
 "                              налаштувань."
 
-#: src/help.c:128
+#: src/help.c:129
 msgid " --norc                       Ignore system configuration file."
 msgstr " --norc                       Ігнорувати системний файл налаштувань."
 
 # FIXME: переклад copiright
-#: src/help.c:129
+#: src/help.c:130
 msgid " --version                    Print version number and copyright."
 msgstr " --version                    Вивести номер версії та авторські права."
 
-#: src/help.c:130
+#: src/help.c:131
 msgid " --help                       It's obvious..."
 msgstr " --help                       Це очевидно..."
 
-#: src/help.c:131
+#: src/help.c:132
 #, c-format
 msgid ""
 "\n"
@@ -670,30 +709,30 @@ msgstr ""
 "\n"
 "Про помилки звітуйте до <%s>.\n"
 
-#: src/ident.c:105
+#: src/ident.c:104
 msgid "IDENT: socket() failed"
 msgstr "IDENT: socket() не вдалася"
 
-#: src/ident.c:117
+#: src/ident.c:116
 msgid "IDENT: connect() failed"
 msgstr "IDENT: connect() не вдалася"
 
-#: src/ident.c:123
+#: src/ident.c:122
 #, c-format
 msgid "IDENT: connected to %s:%u"
 msgstr "IDENT: з'єднаний з %s:%u"
 
-#: src/ident.c:132
+#: src/ident.c:131
 #, c-format
 msgid "IDENT: stream_write() failed: %s."
 msgstr "IDENT: stream_write() не вдалася: %s."
 
-#: src/ident.c:140
+#: src/ident.c:139
 #, c-format
 msgid "IDENT: recvline() failed: %s."
 msgstr "IDENT: recvline() не вдалося: %s."
 
-#: src/ident.c:151
+#: src/ident.c:149
 msgid "IDENT: incorrect data."
 msgstr "IDENT: невірні дані."
 
@@ -710,12 +749,12 @@ msgstr "IDENT: невірні дані (дешифрування DES)."
 msgid "IDENT: resolved remote user to %s."
 msgstr "IDENT: віддаленого користувача ідентифіковано як %s."
 
-#: src/map.c:71
+#: src/map.c:69
 #, c-format
 msgid "%s remapped to %s@localhost."
 msgstr "%s перенесено до %s@localhost."
 
-#: src/map.c:123
+#: src/map.c:120
 msgid "Translation map: incorrect syntax."
 msgstr "Карта перенесення: невірний синтаксис."
 
@@ -727,7 +766,12 @@ msgstr "malloc() не вдалася. Неможливо виділити дос
 msgid "realloc() failed. Cannot reallocate enough memory."
 msgstr "realloc() не вдалася. Неможливо перевиділити достатньо пам'яті."
 
-#: src/misc.c:332
+#: src/misc.c:124
+#, c-format
+msgid "Invalid port number: %s"
+msgstr "Недійсний номер порту: %s"
+
+#: src/misc.c:352
 msgid "Can't find out my own hostname"
 msgstr "Не вдається визначити власну назву машини"
 
@@ -774,10 +818,6 @@ msgstr "GNU Anubis зв'язаний з %s:%u"
 msgid "Short write"
 msgstr "Помилка запису: записано недостатню кількість байтів"
 
-#: src/net.c:339
-msgid "INTERNAL ERROR (get_response_smtp): buffer exhausted. Please report."
-msgstr "ВНУТРІШНЯ ПОМИЛКА (get_response_smtp): вичерпано ємність буфера. Будь ласка звітуйте."
-
 #: src/socks.c:53
 msgid "Using SOCKS Proxy..."
 msgstr "Використовується проксі SOCKS..."
@@ -804,8 +844,12 @@ msgid "Request rejected."
 msgstr "Запит відкинуто."
 
 #: src/socks.c:189
-msgid "Request rejected, because the client program and identd reported different User-IDs."
-msgstr "Запит відкинуто, тому що клієнтська програма та identd видають різні ID користувача."
+msgid ""
+"Request rejected, because the client program and identd reported different "
+"User-IDs."
+msgstr ""
+"Запит відкинуто, тому що клієнтська програма та identd видають різні ID "
+"користувача."
 
 #: src/socks.c:193 src/socks.c:426
 msgid "Server reply is not valid."
@@ -908,21 +952,37 @@ msgstr "Зчитування системного файлу налаштува�
 msgid "Reading user configuration file %s..."
 msgstr "Зчитування файлу налаштувань користувача %s..."
 
-#: src/rcfile.c:341
+#: src/rcfile.c:354
 msgid "`logfile' directive is ignored in main configuration file"
 msgstr "Директива `logfile' ігнорується у головному файлу налаштувань"
 
-#: src/rcfile.c:789
+#: src/rcfile.c:567
+#, c-format
+msgid "Child process suspended for %lu second"
+msgid_plural "Child process suspended for %lu seconds"
+msgstr[0] "Процес-нащадок призупинено на %lu секунду"
+msgstr[1] "Процес-нащадок призупинено на %lu секунди"
+msgstr[2] "Процес-нащадок призупинено на %lu секунд"
+
+#: src/rcfile.c:578
+#, c-format
+msgid "Command HANG is not allowed for user `%s'"
+msgstr "Команда HANG не є дозволена для користувача `%s'"
+
+#: src/rcfile.c:856
 #, c-format
 msgid "No such section: %s"
 msgstr "Немає такої секції: %s"
 
 #: src/rcfile.l:181
 #, c-format
-msgid "Stray character in config: \\%03o. Possibly missing quotes around the string"
-msgstr "Цей символ не є дійсним у файлі налаштувань: \\%03o. Можливо, відсутні лапки навколо рядку"
+msgid ""
+"Stray character in config: \\%03o. Possibly missing quotes around the string"
+msgstr ""
+"Цей символ не є дійсним у файлі налаштувань: \\%03o. Можливо, відсутні лапки "
+"навколо рядку"
 
-#: src/rcfile.l:385
+#: src/rcfile.l:387
 msgid "Anubis RC file error"
 msgstr "Помилка файлу налаштувань Anubis"
 
@@ -936,69 +996,73 @@ msgstr "Секція %s вже була визначена"
 msgid "unknown keyword: %s"
 msgstr "невідоме ключове слово: %s"
 
-#: src/rcfile.y:532
+#: src/rcfile.y:371
+msgid "Invalid regular expression (see the above message)"
+msgstr "Недійсний регулярний вираз (див. повижче повідомлення)"
+
+#: src/rcfile.y:537
 msgid "missing replacement value"
 msgstr "відсутнє значення заміщення"
 
-#: src/rcfile.y:629
+#: src/rcfile.y:634
 #, c-format
 msgid "Not a valid debugging level: %s"
 msgstr "Недійсний рівень налагоджування: %s"
 
-#: src/rcfile.y:1179
+#: src/rcfile.y:1184
 msgid "Unknown regexp modifier"
 msgstr "Невідомий модифікатор регулярного виразу"
 
-#: src/rcfile.y:1277
+#: src/rcfile.y:1282
 msgid "STOP"
 msgstr "STOP"
 
-#: src/rcfile.y:1282
+#: src/rcfile.y:1287
 #, c-format
 msgid "Calling %s"
 msgstr "Виклик %s"
 
-#: src/rcfile.y:1288
+#: src/rcfile.y:1293
 #, c-format
 msgid "ADD %s [%s] %s"
 msgstr "ADD %s [%s] %s"
 
-#: src/rcfile.y:1298
+#: src/rcfile.y:1303
 #, c-format
 msgid "MODIFY %s [%s] [%s] %s"
 msgstr "MODIFY %s [%s] [%s] %s"
 
-#: src/rcfile.y:1311
+#: src/rcfile.y:1316
 #, c-format
 msgid "REMOVE HEADER [%s]"
 msgstr "REMOVE HEADER [%s]"
 
-#: src/rcfile.y:1334
+#: src/rcfile.y:1339
 #, c-format
 msgid "Executing %s"
 msgstr "Виконується %s..."
 
-#: src/rcfile.y:1414
+#: src/rcfile.y:1420
 #, c-format
 msgid "Matched trigger \"%s\""
 msgstr "Відповідає правилу \"%s\""
 
-#: src/rcfile.y:1418
+#: src/rcfile.y:1424
 #, c-format
 msgid "Matched condition %s[%s] \"%s\""
 msgstr "Відповідає умові %s[%s] \"%s\""
 
-#: src/rcfile.y:1528
+#: src/rcfile.y:1534
 #, c-format
 msgid "Section %s"
 msgstr "Секція %s"
 
-#: src/rcfile.y:1552
+#: src/rcfile.y:1558
 #, c-format
 msgid "Unknown section: %s"
 msgstr "Невідома секція: %s"
 
-#: src/rcfile.y:1599
+#: src/rcfile.y:1605
 msgid "program is not allowed in this section"
 msgstr "використання програми в цій секції не дозволяється"
 
@@ -1026,7 +1090,7 @@ msgstr "pcre_fullinfo() не вдалася: %d."
 msgid "Matched, but too many substrings."
 msgstr "Співпадає, але забагато підрядків."
 
-#: src/regex.c:458
+#: src/regex.c:460
 #, c-format
 msgid "Get substring %d failed (%d)."
 msgstr "Не вдалося отримання підрядка %d (%d)."
@@ -1277,32 +1341,33 @@ msgstr " - Версія сертифікату: #%d\n"
 msgid "- Certificate Issuer's DN: %s\n"
 msgstr " - Інформація видавця сертифікату: %s\n"
 
-#: src/tunnel.c:318 src/tunnel.c:387
+#: src/tunnel.c:319 src/tunnel.c:397
 msgid "Transferring message(s)..."
 msgstr "Передача повідомлень..."
 
-#: src/tunnel.c:385
+#: src/tunnel.c:395
 msgid "Starting SMTP session..."
 msgstr "Початок сесії SMTP..."
 
-#: src/tunnel.c:468
+#: src/tunnel.c:478
 msgid "Using the TLS/SSL encryption..."
 msgstr "Використовується шифрування TLS/SSL..."
 
-#: src/tunnel.c:482 src/tunnel.c:626
+#: src/tunnel.c:492 src/tunnel.c:639
 #, c-format
 msgid "WARNING: %s"
 msgstr "УВАГА: %s"
 
-#: src/tunnel.c:483
+#: src/tunnel.c:493
 msgid "STARTTLS command failed."
 msgstr "Команда STARTTLS не вдалася."
 
-#: src/tunnel.c:617
+#: src/tunnel.c:631
 msgid "Using TLS/SSL encryption between Anubis and remote MTA only..."
-msgstr "Шифрування TLS/SSL використовується лише між Анубісом та віддаленим MTA..."
+msgstr ""
+"Шифрування TLS/SSL використовується лише між Анубісом та віддаленим MTA..."
 
-#: src/tunnel.c:627
+#: src/tunnel.c:641
 msgid "STARTTLS (ONEWAY) command failed."
 msgstr "Команда STARTTLS (одностороння) не вдалася."
 
@@ -1365,32 +1430,10 @@ msgstr "%s: параметр `-W %s' не дозволяє аргумент\n"
 msgid "memory exhausted"
 msgstr "пам'ять вичерпано"
 
-#~ msgid "argcv_get failed"
-#~ msgstr "argcv_get() не вдалася"
-
-#~ msgid "--mode=mda requires --local-mta"
-#~ msgstr "--mode=mda вимагає --local-mta"
-
-#~ msgid "Missing recipient addresses"
-#~ msgstr "Відсутні адреси одержувачів"
-
-#~ msgid " --from=EMAIL                 Specify sender address (implies MDA mode)"
-#~ msgstr " --from=АДРЕС                 Вказує адресу відправника (вмикає режим MDA)"
-
-#~ msgid "Invalid port number: %s"
-#~ msgstr "Недійсний номер порту: %s"
-
-#~ msgid "Child process suspended for %lu second"
-#~ msgid_plural "Child process suspended for %lu seconds"
-#~ msgstr[0] "Процес-нащадок призупинено на %lu секунду"
-#~ msgstr[1] "Процес-нащадок призупинено на %lu секунди"
-#~ msgstr[2] "Процес-нащадок призупинено на %lu секунд"
-
-#~ msgid "Command HANG is not allowed for user `%s'"
-#~ msgstr "Команда HANG не є дозволена для користувача `%s'"
-
-#~ msgid "Invalid regular expression (see the above message)"
-#~ msgstr "Недійсний регулярний вираз (див. повижче повідомлення)"
+#~ msgid "INTERNAL ERROR (get_response_smtp): buffer exhausted. Please report."
+#~ msgstr ""
+#~ "ВНУТРІШНЯ ПОМИЛКА (get_response_smtp): вичерпано ємність буфера. Будь "
+#~ "ласка звітуйте."
 
 #~ msgid "Connection terminated."
 #~ msgstr "З'єднання перерване."

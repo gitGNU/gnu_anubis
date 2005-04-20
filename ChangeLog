@@ -1,3 +1,25 @@
+2005-04-20  Sergey Poznyakoff
+
+	* configure.ac: Changed version number to 4.0.90.
+	* NEWS: Updated.
+	* src/proclist.c: New file. Subprocess database for Anubis.
+	* src/Makefile.am (anubis_SOURCES): Add proclist.c
+	* src/daemon.c: Rewritten using functions from proclist.c
+	* src/exec.c: Likewise
+	* src/gsasl_srv.c (anubis_name_cmp): Move to misc.c
+	* src/misc.c (anubis_name_cmp):" Moved from gsasl_srv.c
+	* src/headers.h (proclist_register,proclist_cleanup)
+	(proclist_init,proclist_count): New functions.
+	* src/list.c (_iterator_attach,_iterator_detach): New functions.
+	(iterator_create,iterator_destroy): Rewritten using the above
+	functions.
+	(list_remove): make sure to return actual data, an application
+	may well supply data==NULL.
+	(list_iterate): Do not use memory allocation functions. The
+	function is safe to be called from signal handlers.
+	* src/transmode.c (anubis_transparent_mode): Do not close pam
+	session if it was not open.
+	
 2005-04-19  Sergey Poznyakoff 
 
 	* src/guile.c (guile_ports_open): Make sure port name always
