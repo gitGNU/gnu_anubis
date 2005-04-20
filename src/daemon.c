@@ -105,7 +105,8 @@ static void
 report_process_status (size_t count, pid_t pid, int status)
 {
   char buffer[LINEBUFFER];
-  
+
+  count--;
   info (VERBOSE,
 	ngettext
 	("Child [%lu] finished. %s. %d client left.",
