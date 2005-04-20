@@ -401,6 +401,11 @@ void transfer_body (MESSAGE *);
 void collect_headers (MESSAGE * msg, char *init_line);
 void collect_body (MESSAGE * msg);
 
+/* proclist.c */
+void proclist_register (pid_t pid);
+size_t proclist_cleanup (void (*fun) (size_t, pid_t, int));
+void proclist_init (void);
+size_t proclist_count (void);
 
 /* message.c */
 void message_add_body (MESSAGE *, char *, char *);
