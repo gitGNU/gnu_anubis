@@ -75,38 +75,32 @@ list_destroy (struct list **plist, list_iterator_t user_free, void *data)
 }
 
 void *
-iterator_current (ITERATOR * ip)
+iterator_current (ITERATOR *ip)
 {
   if (!ip)
     return NULL;
   return ip->cur ? ip->cur->data : NULL;
 }
 
-ITERATOR *
-iterator_create (ANUBIS_LIST * list)
+static void
+_iterator_attach (ANUBIS_LIST *list, ITERATOR *itr)
 {
-  ITERATOR *itr;
-
-  if (!list)
-    return NULL;
-  itr = xmalloc (sizeof (*itr));
   itr->list = list;
   itr->cur = NULL;
   itr->next = list->itr;
   itr->advanced = 0;
   list->itr = itr;
-  return itr;
 }
 
-void
-iterator_destroy (ITERATOR ** ip)
+static int
+_iterator_detach (ITERATOR *ip)
 {
   ITERATOR *itr, *prev;
 
-  if (!ip || !*ip)
-    return;
-  for (itr = (*ip)->list->itr, prev = NULL; itr; prev = itr, itr = itr->next)
-    if (*ip == itr)
+  if (!ip)
+    return 1;
+  for (itr = ip->list->itr, prev = NULL; itr; prev = itr, itr = itr->next)
+    if (ip == itr)
       break;
   if (itr)
     {
@@ -114,14 +108,38 @@ iterator_destroy (ITERATOR ** ip)
 	prev->next = itr->next;
       else
 	itr->list->itr = itr->next;
-      xfree (itr);
+      return 0;
+    }
+  return 1;
+}
+     
+
+ITERATOR *
+iterator_create (ANUBIS_LIST *list)
+{
+  ITERATOR *itr;
+
+  if (!list)
+    return NULL;
+  itr = xmalloc (sizeof (*itr));
+  _iterator_attach (list, itr);
+  return itr;
+}
+
+void
+iterator_destroy (ITERATOR **ip)
+{
+  if (!ip || !*ip)
+    return;
+  if (_iterator_detach (*ip) == 0)
+    {
+      xfree (*ip);
       *ip = NULL;
     }
-
 }
 
 void *
-iterator_first (ITERATOR * ip)
+iterator_first (ITERATOR *ip)
 {
   if (!ip)
     return NULL;
@@ -131,7 +149,7 @@ iterator_first (ITERATOR * ip)
 }
 
 void *
-iterator_next (ITERATOR * ip)
+iterator_next (ITERATOR *ip)
 {
   if (!ip || !ip->cur)
     return NULL;
@@ -142,7 +160,7 @@ iterator_next (ITERATOR * ip)
 }
 
 static void
-_iterator_advance (ITERATOR * ip, struct list_entry *e)
+_iterator_advance (ITERATOR *ip, struct list_entry *e)
 {
   for (; ip; ip = ip->next)
     {
@@ -243,6 +261,8 @@ list_remove (struct list *list, void *data, list_comp_t cmp)
   if (p == list->tail)
     list->tail = prev;
 
+  data = p->data; /* make sure we return actual data, not the one supplied
+		     at the invocation */
   xfree (p);
   list->count--;
 
@@ -252,20 +272,18 @@ list_remove (struct list *list, void *data, list_comp_t cmp)
 void
 list_iterate (struct list *list, list_iterator_t func, void *data)
 {
-  ITERATOR *itr;
+  ITERATOR itr;
   void *p;
 
   if (!list)
     return;
-  itr = iterator_create (list);
-  if (!itr)
-    return;
-  for (p = iterator_first (itr); p; p = iterator_next (itr))
+  _iterator_attach (list, &itr);
+  for (p = iterator_first (&itr); p; p = iterator_next (&itr))
     {
       if (func (p, data))
 	break;
     }
-  iterator_destroy (&itr);
+  _iterator_detach (&itr);
 }
 
 void *
@@ -286,7 +304,7 @@ list_locate (struct list *list, void *data, list_comp_t cmp)
    contains elements from the list A that are also encountered
    in the list B. Elements are compared using function CMP. */
 ANUBIS_LIST *
-list_intersect (ANUBIS_LIST * a, ANUBIS_LIST * b, list_comp_t cmp)
+list_intersect (ANUBIS_LIST *a, ANUBIS_LIST *b, list_comp_t cmp)
 {
   ANUBIS_LIST *res;
   ITERATOR *itr = iterator_create (a);
