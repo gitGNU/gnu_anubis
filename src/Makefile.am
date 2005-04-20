@@ -54,6 +54,7 @@ anubis_SOURCES = \
  mime.c \
  misc.c \
  net.c \
+ proclist.c \
  quit.c \
  rcfile.c \
  rcfile.h \
