@@ -32,10 +32,6 @@ int deny_severity = LOG_INFO;
 int allow_severity = LOG_INFO;
 #endif /* USE_LIBWRAP */
 
-static RETSIGTYPE sig_cld (int);
-
-static int nchild;
-
 /************
   DAEMONIZE
 *************/
@@ -105,26 +101,28 @@ format_exit_status (char *buffer, size_t buflen, int status)
   return buffer;
 }
 
-
-static RETSIGTYPE
-sig_cld (int code)
+static void
+report_process_status (size_t count, pid_t pid, int status)
 {
-  pid_t pid;
-  int status;
   char buffer[LINEBUFFER];
   
-  while ((pid = waitpid (-1, &status, WNOHANG)) > 0)
-    {
-      nchild--;
-      info (VERBOSE,
-	    ngettext
-	    ("Child [%lu] finished. %s. %d client left.",
-	     "Child [%lu] finished. %s. %d clients left.",
-	     nchild), (unsigned long) pid,
-	    format_exit_status (buffer, sizeof buffer, status), nchild);
-    }
-  signal (code, sig_cld);
-  return;
+  info (VERBOSE,
+	ngettext
+	("Child [%lu] finished. %s. %d client left.",
+	 "Child [%lu] finished. %s. %d clients left.",
+	 count),
+	(unsigned long) pid,
+	format_exit_status (buffer, sizeof buffer, status), count);
+}
+
+static void
+subprocess_report_status (size_t count, pid_t pid, int status)
+{
+  char buffer[LINEBUFFER];
+
+  info (VERBOSE, _("Local program [%lu] finished. %s"),
+	(unsigned long) pid,
+	format_exit_status (buffer, sizeof buffer, status));
 }
 
 /************************************
@@ -176,6 +174,7 @@ anubis_child_main (NET_STREAM *sd_client, struct sockaddr_in *addr)
 {
   int rc;
 
+  proclist_init ();
 #ifdef WITH_GSASL
   switch (anubis_mode)
     {
@@ -192,6 +191,7 @@ anubis_child_main (NET_STREAM *sd_client, struct sockaddr_in *addr)
 #else
   rc = anubis_transparent_mode (sd_client, addr);
 #endif /* WITH_GSASL */
+  proclist_cleanup (subprocess_report_status);
   net_close_stream (sd_client);
   return rc;
 }
@@ -209,17 +209,22 @@ loop (int sd_bind)
 #ifdef USE_LIBWRAP
   struct request_info req;
 #endif /* USE_LIBWRAP */
-  sigset_t blockset;
 
   addrlen = sizeof (addr);
-  signal (SIGCHLD, sig_cld);
+
+  proclist_init ();
 
   info (VERBOSE, _("GNU Anubis is running..."));
 
   for (;;)
     {
       NET_STREAM sd_client = NULL;
-      int fd = accept (sd_bind, (struct sockaddr *) &addr, &addrlen);
+      int fd;
+      size_t count;
+      
+      fd = accept (sd_bind, (struct sockaddr *) &addr, &addrlen);
+      count = proclist_cleanup (report_process_status);
+      
       if (fd < 0)
 	{
 	  if (errno == EINTR)
@@ -261,18 +266,12 @@ loop (int sd_bind)
 	  process_rcfile (CF_SUPERVISOR);
 	}
 
-      sigemptyset (&blockset);
-      sigaddset (&blockset, SIGCHLD);
-      sigprocmask (SIG_BLOCK, &blockset, NULL);		
-      nchild++;
-      sigprocmask (SIG_UNBLOCK, &blockset, NULL);		
-      if (nchild > MAXCLIENTS)
+      if (count >= MAXCLIENTS)
 	{
 	  info (NORMAL,
 		_("Too many clients. Connection from %s:%u rejected."),
 		inet_ntoa (addr.sin_addr), ntohs (addr.sin_port));
 	  service_unavailable (&sd_client);
-	  nchild--;
 	}
       else
 	{
@@ -288,10 +287,11 @@ loop (int sd_bind)
 	      signal (SIGCHLD, SIG_IGN);
 	      quit (anubis_child_main (&sd_client, &addr));
 	    }
-
+	  else /* master process */
+	    proclist_register (childpid);
+	  
 	  net_close_stream (&sd_client);
 	}
-      cleanup_children ();
     }
   return;
 }
@@ -365,6 +365,8 @@ stdinout (void)
   topt |= T_FOREGROUND;
   topt |= T_SMTP_ERROR_CODES;
 
+  proclist_init ();
+  
   anubis_getlogin (&session.clientname);
   auth_tunnel ();		/* session.clientname = session.supervisor */
 
@@ -398,8 +400,8 @@ stdinout (void)
   remote_server = sd_server;
 
   smtp_session_transparent ();
-  cleanup_children ();
-
+  proclist_cleanup (subprocess_report_status);
+  
   net_close_stream (&sd_server);
   free_mem ();
   return;
