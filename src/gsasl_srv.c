@@ -90,12 +90,6 @@ anubis_set_server_mech_list (ANUBIS_LIST *list)
 
 /* Capability list handling */
 
-int
-anubis_name_cmp (void *item, void *data)
-{
-  return strcmp (item, data);
-}
-
 static void
 auth_gsasl_capa_init ()
 {

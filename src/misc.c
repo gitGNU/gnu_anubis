@@ -34,6 +34,12 @@ anubis_free_list_item (void *item, void *data)
   return 0;
 }
 
+int
+anubis_name_cmp (void *item, void *data)
+{
+  return strcmp (item, data);
+}
+
 /* String lists */
 
 void
