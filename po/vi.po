@@ -1,0 +1,1350 @@
+# Vietnamese Translation for anubis-4.0..
+# Copyright © 2005 The Anubis Team.
+# Clytie Siddall <clytie@riverland.net.au>, 2005.
+# 
+msgid ""
+msgstr ""
+"Project-Id-Version: anubis 4.0\n"
+"Report-Msgid-Bugs-To: bug-anubis@gnu.org\n"
+"POT-Creation-Date: 2004-12-18 11:30+0100\n"
+"PO-Revision-Date: 2005-05-10 21:54+0930\n"
+"Last-Translator: Clytie Siddall <clytie@riverland.net.au>\n"
+"Language-Team: Vietnamese <gnomevi-list@lists.sourceforge.net>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+
+#: src/authmode.c:469
+msgid "Entering XDB loop..."
+msgstr "Vào vòng lặp XDB..."
+
+#: src/authmode.c:481 src/authmode.c:503
+msgid "Exiting XDB loop..."
+msgstr "Xuất vòng lặp XDB..."
+
+#: src/authmode.c:526
+msgid "Database not specified"
+msgstr "Chưa ghi rõ cơ sở dữ liệu"
+
+#: src/authmode.c:534
+#, c-format
+msgid "Cannot open database %s: %s"
+msgstr "Không mở được cơ sở dữ liệu %s: %s"
+
+#: src/authmode.c:541
+#, c-format
+msgid "Found record for `%s'."
+msgstr "Tìm thấy mục ghi cho `%s'."
+
+#: src/authmode.c:546
+#, c-format
+msgid "Cannot retrieve data from the SASL database: %s"
+msgstr "Không gọi được dữ liệu từ cơ sở dữ liêu SASL: %s"
+
+#: src/authmode.c:551
+#, c-format
+msgid "Record for `%s' not found."
+msgstr "Không tìm thấy mục ghi cho `%s'"
+
+#: src/authmode.c:606
+msgid "MTA has not been specified. Set either REMOTE-MTA or LOCAL-MTA."
+msgstr "Chưa ghi rõ MTA (tác nhân chuyển giao thông điệp). Hãy lập hoặc REMOTE-MTA (MTA ở xa) hay LOCAL-MTA (MTA cục bộ)."
+
+#: src/authmode.c:637 src/map.c:164 src/net.c:150 src/net.c:217
+#: src/transmode.c:98
+#, c-format
+msgid "Illegal address length received for host %s"
+msgstr "Nhận độ dài địa chỉ sai cho máy %s"
+
+#: src/authmode.c:651 src/transmode.c:112
+msgid "Loop not allowed. Connection rejected."
+msgstr "Không cho phép vòng lặp nên từ chối kết nối."
+
+#: src/authmode.c:683 src/transmode.c:143
+msgid "Connection closed successfully."
+msgstr "Đã đóng kết nối rồi."
+
+#: src/authmode.c:690 src/transmode.c:149
+msgid "PAM: Session closed."
+msgstr "PAM: đã đóng phiên làm việc rồi."
+
+#: src/authmode.c:694 src/transmode.c:153
+msgid "PAM: failed to release authenticator."
+msgstr "PAM: không nhả điều xác thức được"
+
+#: src/daemon.c:49
+msgid "daemon() failed"
+msgstr "daemon() (tập lệnh trình nền) không thành công"
+
+#: src/daemon.c:56
+msgid "Cannot fork."
+msgstr "Không tạo được tiến trình con."
+
+#: src/daemon.c:64
+msgid "setsid() failed"
+msgstr "setsid() không thành công"
+
+#: src/daemon.c:76
+#, c-format
+msgid "%s daemon startup succeeded."
+msgstr "%s khởi động trình nền được."
+
+#: src/daemon.c:88
+#, c-format
+msgid "Exited successfully"
+msgstr "Đã thoát rồi."
+
+#: src/daemon.c:90
+#, c-format
+msgid "Failed with status %d"
+msgstr "Không thành công với trạng thái %d"
+
+#: src/daemon.c:95
+#, c-format
+msgid "Terminated on signal %d"
+msgstr "Bị kết thức tại tín hiệu %d"
+
+#: src/daemon.c:98
+#, c-format
+msgid "Stopped on signal %d"
+msgstr "Ngừng tại tín hiệu %d"
+
+#: src/daemon.c:101
+#, c-format
+msgid "Dumped core"
+msgstr "Lõi bị đổi"
+
+#: src/daemon.c:104
+#, c-format
+msgid "Terminated"
+msgstr "Bị kết thức"
+
+#: src/daemon.c:121
+#, c-format
+msgid "Child [%lu] finished. %s. %d client left."
+msgid_plural "Child [%lu] finished. %s. %d clients left."
+msgstr[0] "Tiến trình con [%lu] đã xong. %s. %d trình/máy khách còn lại"
+
+#: src/daemon.c:169
+msgid "WARNING: An unprivileged user has not been specified!"
+msgstr "CẢNH BÁO: chưa ghi rõ người dùng không co quyền."
+
+#: src/daemon.c:214
+msgid "GNU Anubis is running..."
+msgstr "Trình Anubis của GNU đang chạy..."
+
+#: src/daemon.c:226 src/exec.c:122
+msgid "accept() failed"
+msgstr "accept() không thành công"
+
+#: src/daemon.c:244
+#, c-format
+msgid "TCP wrappers: connection from %s:%u rejected."
+msgstr "Lớp bọc choTCP: kết nối từ %s:%u bị từ chối."
+
+#: src/daemon.c:269
+#, c-format
+msgid "Too many clients. Connection from %s:%u rejected."
+msgstr "Quá nhiều máy khách: kết nối từ %s:%u bị từ chối."
+
+#: src/daemon.c:276
+#, c-format
+msgid "Connection from %s:%u"
+msgstr "Kết nối từ %s:%u"
+
+#: src/daemon.c:281
+msgid "daemon: cannot fork"
+msgstr "trình nền: không tạo được tiến trình con"
+
+#: src/daemon.c:362 src/transmode.c:68
+msgid "The MTA has not been specified. Set the REMOTE-MTA or LOCAL-MTA."
+msgstr "Chưa ghi rõ MTA (tác nhân chuyển giao thông điệp). Hãy lập hoặc REMOTE-MTA (MTA ở xa) hay LOCAL-MTA (MTA cục bộ)."
+
+#: src/env.c:172
+#, c-format
+msgid "Try '%s --help' for more information."
+msgstr "Hãy thử lệnh '%s --help' (trơ giúp) để xem thông tin thêm."
+
+#: src/env.c:273
+#, c-format
+msgid "setgroups(1, %lu) failed"
+msgstr "setgroups(1, %lu) không thành công"
+
+#: src/env.c:283
+#, c-format
+msgid "setegid(%lu) failed"
+msgstr "setegid(%lu) không thành công"
+
+#: src/env.c:286
+#, c-format
+msgid "setregid(%lu,%lu) failed"
+msgstr "setregid(%lu,%lu) không thành công"
+
+#: src/env.c:290
+#, c-format
+msgid "setresgid(%lu,%lu,%lu) failed"
+msgstr "setresgid(%lu,%lu,%lu) không thành công"
+
+#: src/env.c:299
+#, c-format
+msgid "setgid(%lu) failed"
+msgstr "setgid(%lu) không thành công"
+
+#: src/env.c:302
+#, c-format
+msgid "cannot set effective gid to %lu"
+msgstr "không lập được GID hữu ích cho %lu"
+
+#: src/env.c:324
+#, c-format
+msgid "setreuid(%lu,-1) failed"
+msgstr "setreuid(%lu,-1) không thành công"
+
+#: src/env.c:330
+#, c-format
+msgid "second setuid(%lu) failed"
+msgstr "second setuid(%lu) không thành công"
+
+#: src/env.c:338
+#, c-format
+msgid "setuid(%lu) failed"
+msgstr "setuid(%lu) không thành công"
+
+#: src/env.c:347
+msgid "seteuid(0) succeeded when it should not"
+msgstr "seteuid(0) thành công khi không nên."
+
+#: src/env.c:352
+msgid "cannot drop non-root setuid privileges"
+msgstr "không bỏ được quyền truy cập setuid không phải của người chủ"
+
+#: src/env.c:379
+msgid "PAM: Session opened (restrictions applied)."
+msgstr "PAM: đã mở phiên làm việc (đã áp dụng các hạn chế)."
+
+#: src/env.c:382
+msgid "PAM: Not authenticated to use GNU Anubis."
+msgstr "PAM: không có xác thức để sử dụng trình Anubis của GNU."
+
+#: src/env.c:394 src/main.c:156
+#, c-format
+msgid "UID:%d (%s), GID:%d, EUID:%d, EGID:%d"
+msgstr "UID:%d (%s), GID:%d, EUID:%d, EGID:%d"
+
+#: src/env.c:429
+#, c-format
+msgid "Invalid user ID: %s"
+msgstr "UID (thông tin nhận biết người dùng) không hợp lệ: %s"
+
+#: src/env.c:435
+#, c-format
+msgid "Invalid user name: %s"
+msgstr "Tên người dùng không hợp lệ: %s"
+
+#: src/env.c:458
+#, c-format
+msgid "Wrong permissions on %s. Set 0600."
+msgstr "Quyền truy cập sai với %s. Lập 0600."
+
+#: src/env.c:484
+#, c-format
+msgid "%s is not a regular file or a symbolic link."
+msgstr "%s không phải là một tập tin bình thường hay một liên kết mềm."
+
+#: src/env.c:507
+#, c-format
+msgid "Unknown mode: %s"
+msgstr "Không biết chế độ: %s"
+
+#: src/env.c:522
+#, c-format
+msgid "Cannot open pid file '%s'"
+msgstr "Không mở được tập tin PID '%s'"
+
+#: src/errs.c:88
+msgid "warning"
+msgstr "cảnh báo"
+
+#: src/errs.c:96
+#, c-format
+msgid "Could not write to socket: %s"
+msgstr "Không ghi được vào ổ cắm: %s"
+
+#: src/errs.c:98
+msgid "Could not write to socket"
+msgstr "Không ghi được vào ổ cắm"
+
+#: src/errs.c:108
+#, c-format
+msgid "Unknown host %s."
+msgstr "Không biết máy %s."
+
+#: src/errs.c:111
+#, c-format
+msgid "%s: host name is valid but does not have an IP address."
+msgstr "%s: tên máy là hợp lệ nhưng mà không có địa chỉ IP."
+
+#: src/errs.c:115
+#, c-format
+msgid "%s: unrecoverable name server error occured."
+msgstr "%s: gặp lỗi máy chủ tên không thể phục hồi."
+
+#: src/errs.c:118
+#, c-format
+msgid "%s: a temporary name server error occured. Try again later."
+msgstr "%s: gặp lỗi máy chủ tên tạm thời nên hãy thư lại lần sau."
+
+#: src/errs.c:121
+#, c-format
+msgid "%s: unknown DNS error %d."
+msgstr "%s: không biết lỗi DNS %d."
+
+#: src/esmtp.c:165
+msgid "Malformed or unexpected reply"
+msgstr "Trả lời dạng sai hay rỗng."
+
+#: src/esmtp.c:189
+#, c-format
+msgid "SASL gsasl_client_start: %s"
+msgstr "SASL gsasl_client_start: %s"
+
+#: src/esmtp.c:198 src/esmtp.c:216
+#, c-format
+msgid "GSASL handshake aborted: %d %s"
+msgstr "Việc bắt tay GSASL bị hủy bỏ: %d %s"
+
+#: src/esmtp.c:227
+#, c-format
+msgid "GSASL error: %s"
+msgstr "Lỗi GSASL: %s"
+
+#: src/esmtp.c:241
+#, c-format
+msgid "Authentication failed: %d %s"
+msgstr "Không xác thức được: %d %s"
+
+#: src/esmtp.c:244
+msgid "Authentication successful."
+msgstr "Đã xác thức rồi."
+
+#: src/esmtp.c:263
+msgid "Got empty list of authentication methods"
+msgstr "Đã gọi danh sách phương pháp xác thức rỗng"
+
+#: src/esmtp.c:288
+msgid "Server did not offer any feasible authentication mechanism"
+msgstr "Máy chủ chưa đưa cơ chế xác thức nào có thể"
+
+#: src/esmtp.c:298
+msgid "INTERNAL ERROR"
+msgstr "LỖI NỘI BỘ"
+
+#: src/esmtp.c:306
+#, c-format
+msgid "Selected authentication mechanism %s requires TLS encryption. Not using ESMTP authentication"
+msgstr "Cơ chế xác thức đã chọn %s thì cần thiết mật mã TLS. Không xác thức loại ESMTP."
+
+#: src/esmtp.c:313
+#, c-format
+msgid "Selected authentication mechanism %s"
+msgstr "Cơ chế xác thức đã chon %s"
+
+#: src/esmtp.c:319
+#, c-format
+msgid "Cannot initialize libgsasl: %s"
+msgstr "Không khởi chạy được libgsasl: %s"
+
+#: src/esmtp.c:340
+msgid "ESMTP AUTH is not supported"
+msgstr "Không hỗ trợ cach xác thức (AUTH) ESMTP"
+
+#: src/exec.c:82
+msgid "#1 socket() failed."
+msgstr "#1 socket() (ổ cắm) không thành công."
+
+#: src/exec.c:87
+msgid "#2 socket() failed."
+msgstr "#2 socket() (ổ cắm) không thành công."
+
+#: src/exec.c:97
+msgid "#1 bind() failed"
+msgstr "#1 bind() (đóng kết) không thành công."
+
+#: src/exec.c:102
+msgid "#2 bind() failed"
+msgstr "#2 bind() (đóng kết) không thành công."
+
+#: src/exec.c:107 src/net.c:237
+msgid "listen() failed"
+msgstr "listen() (nghe) không thành công."
+
+#: src/exec.c:112
+#, c-format
+msgid "getsockname() failed: %s."
+msgstr "getsockname() (gọi tên ổ cắm) không thành công: %s."
+
+#: src/exec.c:117
+msgid "connect() failed"
+msgstr "connect() (kết nối) không thành công."
+
+#: src/exec.c:129
+msgid "socketpair() failed"
+msgstr "socketpair() (cặp ổ cắm) không thành công."
+
+#: src/exec.c:143
+#, c-format
+msgid "Local program [%lu] finished."
+msgstr "Chương trình cục bộ [%lu] đã xong rồi."
+
+#: src/exec.c:179
+#, c-format
+msgid "Executing %s %s..."
+msgstr "Thực hiện %s %s..."
+
+#: src/exec.c:187
+msgid "fork() failed"
+msgstr "fork() (tạo tiến trình con) không thành công."
+
+#: src/exec.c:201
+msgid "execvp() failed"
+msgstr "execvp() không thành công."
+
+# Name of a program: do not translate/ tên chương trình: đừng dịch
+#: src/gpg.c:54
+#, c-format
+msgid "GPGME: %s."
+msgstr "GPGME: %s."
+
+#: src/gpg.c:100
+#, c-format
+msgid "Install GPGME version %s or later."
+msgstr "Cài đặt trình GPGME phiên bản %s hay sau."
+
+#: src/gpg.c:107
+#, c-format
+msgid "GPGME: failed. %s."
+msgstr "GPGME: không thành công. %s."
+
+#: src/gpg.c:159 src/gpg.c:407
+#, c-format
+msgid "GPGME: Cannot list keys: %s"
+msgstr "GPGME: không thể liệt kê các khóa: %s"
+
+#: src/gpg.c:288 src/gpg.c:430
+#, c-format
+msgid "GPGME: Invalid recipient encountered: %s"
+msgstr "GPGME: gặp người nhận không hợp lệ: %s"
+
+#: src/gpg.c:333
+#, c-format
+msgid "GPGME: Invalid signer found: %s"
+msgstr "GPGME: tìm thấy người ký tên không hợp lệ: %s"
+
+#: src/gpg.c:340
+msgid "GPGME: Unexpected number of signatures created"
+msgstr "GPGME: đã tạo số lượng ký tên bất ngờ"
+
+#: src/gpg.c:347
+msgid "GPGME: Wrong type of signature created"
+msgstr "GPGME: đã tạo chữ ký kiểu không đúng"
+
+#: src/gpg.c:352
+#, c-format
+msgid "GPGME: Wrong pubkey algorithm reported: %i"
+msgstr "GPGME: đã thông báo thuật toán khóa công không đúng: %i"
+
+#: src/gpg.c:359
+#, c-format
+msgid "GPGME: Wrong hash algorithm reported: %i"
+msgstr "GPGME: đã thông báo thuật toán băm không đúng: %i"
+
+#: src/gpg.c:366
+#, c-format
+msgid "GPGME: Wrong signature class reported: %u"
+msgstr "GPGME: đã thông báo loại chữ ký không đúng: %u"
+
+#: src/guile.c:79
+#, c-format
+msgid "cannot open guile output file %s"
+msgstr "không mở được tập tin xuất cua guile %s"
+
+#: src/guile.c:266
+msgid "missing procedure name"
+msgstr "thiếu tên thủ tuc"
+
+#: src/guile.c:281
+#, c-format
+msgid "%s not a procedure object"
+msgstr "%s không phải là môt đối tượng thủ tục"
+
+#: src/guile.c:323
+#, c-format
+msgid "Bad car type in return from %s"
+msgstr "%s đã gởi trả kiểu car sai"
+
+#: src/guile.c:342
+#, c-format
+msgid "Bad cdr type in return from %s"
+msgstr "%s đã gởi trả kiểu cdr sai"
+
+#: src/guile.c:345
+#, c-format
+msgid "Bad return type from %s"
+msgstr "Kiểu trả vệ sai từ %s"
+
+#: src/help.c:85
+msgid ""
+"\n"
+"GNU Anubis is free software; you can redistribute it and/or modify\n"
+"it under the terms of the GNU General Public License as published by\n"
+"the Free Software Foundation; either version 2 of the License, or\n"
+"(at your option) any later version."
+msgstr ""
+"\n"
+"Trình Anubis của GNU là phần mềm tự do: bạn có thể phân phối lại nó\n"
+"và/hay sửa đổi nó với điều kiện của Quyền Công Chung GNU (GPL)\n"
+"như đã xuất bởi Tổ chức Phần mềm Tự do, hoặc phiên bản 2\n"
+"của Quyền ấy, hay (tùy chọn) bất cứ phiên bản sau nào."
+
+#: src/help.c:89
+msgid ""
+"\n"
+"GNU Anubis is distributed in the hope that it will be useful,\n"
+"but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
+"GNU General Public License for more details."
+msgstr ""
+"\n"
+"Trình Anubis của GNU được phân phối vì chúng tôi mong nó có ích,\n"
+"nhưng mà không bảo đảm gì cả,\n"
+"dù khả năng bán hay khả năng làm việc dứt khoát.\n"
+"Hãy xem Quyền Công Chung GNU để tìm chi tiết."
+
+#: src/help.c:93
+msgid ""
+"\n"
+"You should have received a copy of the GNU General Public License\n"
+"along with GNU Anubis; if not, write to the Free Software\n"
+"Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA"
+msgstr ""
+"\n"
+"Bạn nên đã nhận một bản sao của Quyền Công Chung GNU (GPL)\n"
+"cùng với trình Anubis của GNU; nếu không thì hãy viết thư cho:\n"
+"Free Software Foundation, Inc.,\n"
+"59 Temple Place, Suite 330,\n"
+"Boston, MA  02111-1307  USA (Mỹ)"
+
+#: src/help.c:96
+msgid ""
+"\n"
+"GNU Anubis is released under the GPL with the additional exemption that\n"
+"compiling, linking, and/or using OpenSSL is allowed.\n"
+msgstr ""
+"\n"
+"Trình Anubis của GNU được phát hành với điều kiện của GPL\n"
+"và cũng với sự miễn là cho phép biên dịch, liên kết và/hay sử dụng OpenSSL.\n"
+
+#: src/help.c:104
+msgid "Usage: anubis [options]\n"
+msgstr "Cách sử dụng: anubis [tùy_chọn]\n"
+
+#: src/help.c:105
+msgid ""
+" -b, --bind [HOST:]PORT       Specify the TCP port on which GNU Anubis listens\n"
+"                              for connections. The default HOST is INADDR_ANY,\n"
+"                              and default PORT is 24 (private mail system)."
+msgstr ""
+" -b, --bind [MÁY:]CỔNG       Ghi rõ cổng TCP nơi trình Anubis của GNU\n"
+"\t\t\t\tlắng nghe kết nối nào. Máy mặc định là INADDR_ANY,\n"
+"\t\t\t\tvà cổng mặc định là 24 (hệ thống thư cá nhân)"
+
+#: src/help.c:108
+msgid ""
+" -r, --remote-mta HOST[:PORT] Specify a remote SMTP host name or IP address.\n"
+"                              The default PORT number is 25."
+msgstr ""
+" -r, --remote-mta MÁY[:CỔNG] \t\tGhi rõ tên máy SMTP _ở xa_ hay địa chỉ IP.\n"
+"\t\t\t\t\t\t\t\tSố cổng mặc định là 25."
+
+#: src/help.c:110
+msgid ""
+" -l, --local-mta FILE         Execute a local SMTP server, which works on\n"
+"                              standard input and output (inetd-type program).\n"
+"                              This option excludes the '--remote-mta' option."
+msgstr ""
+" -l, --local-mta FILE         Thực hiện trình hỗ trợ SMTP _địa phương_\n"
+"\t\t\t\tmà làm việc với thiết bị gõ/xuất chuẩn (trình kiểu inetd).\n"
+"\t\t\t\tTùy chọn này loạị trừ tùy chọn '--remote-mta'."
+
+#: src/help.c:113
+msgid " -m, --mode=MODE              Select operation mode."
+msgstr " -m, --mode=CHẾ_ĐỘ           Chọn _chế độ_ thao tác."
+
+#: src/help.c:114
+msgid "                              MODE is either \"transparent\" or \"auth\""
+msgstr ""
+"                              CHẾ ĐỘ ấy là hoặc \"transparent\" (trong suốt)\n"
+"\t\t\t\t\t\t\thay \"auth\" (xác thức)"
+
+#: src/help.c:115
+msgid " -f, --foreground             Foreground mode."
+msgstr " -f, --foreground             Chế độ _cảnh gần_."
+
+#: src/help.c:116
+msgid ""
+" -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as described\n"
+"                              in RFC 821 on standard input and output."
+msgstr ""
+" -i, --stdio                  Sử dụng giao thức SMTP (OMP/Tunnel) như được diễn tả\n"
+"\t\t\t\t\ttrong RFC 821, với _thiết bị gõ/xuất chuẩn_."
+
+#: src/help.c:118
+msgid "Output options:\n"
+msgstr "Tùy chọn xuất:\n"
+
+#: src/help.c:119
+msgid " -s, --silent                 Work silently."
+msgstr " -s, --silent                 Không xuất chi tiết (_im_)."
+
+#: src/help.c:120
+msgid " -v, --verbose                Work noisily."
+msgstr " -v, --verbose                Xuất _chi tiết_."
+
+#: src/help.c:121
+msgid " -D, --debug                  Debug mode."
+msgstr " -D, --debug                  Chế độ _gỡ lỗi_."
+
+#: src/help.c:122
+msgid ""
+"\n"
+"Miscellaneous options:\n"
+msgstr ""
+"\n"
+"Tùy chọn thêm:\n"
+
+#: src/help.c:123
+msgid " -c, --check-config           Run the configuration file syntax checker."
+msgstr " -c, --check-config           Chạy trình _kiểm tra_ cú pháp trong tập tin _cấu hình_."
+
+#: src/help.c:124
+msgid ""
+" --show-config-options        Print a list of configuration options used\n"
+"                              to build GNU Anubis."
+msgstr ""
+" --show-config-options        _Hiển thị_ danh sách _tùy chọn cấu hình_\n"
+"\t\t\t\t\t\tđược dùng để xây dụng trình Anubis của GNU."
+
+#: src/help.c:126
+msgid " --relax-perm-check           Do not check user configuration file permissions."
+msgstr ""
+" --relax-perm-check           Không _kiểm tra quyền truy cập_ tập tin cấu hình\n"
+"\t\t\t\t\t\tngười dùng (_nới lỏng_)."
+
+#: src/help.c:127
+msgid " --altrc FILE                 Specify alternate system configuration file."
+msgstr " --altrc TẬP_TIN          Ghi rõ tập tin ấy là tập tin cấu hình hệ thống _thay thế_."
+
+#: src/help.c:128
+msgid " --norc                       Ignore system configuration file."
+msgstr " --norc                       Bỏ qua tập tin cấu hình hế thống."
+
+#: src/help.c:129
+msgid " --version                    Print version number and copyright."
+msgstr " --version                    Hiển thị số _phiên bản_ và thông tin quyền."
+
+#: src/help.c:130
+msgid " --help                       It's obvious..."
+msgstr " --help                      _Trợ giúp_"
+
+#: src/help.c:131
+#, c-format
+msgid ""
+"\n"
+"Report bugs to <%s>.\n"
+msgstr ""
+"\n"
+"Hãy thông báo lỗi cho <%s>.\n"
+
+#: src/ident.c:105
+msgid "IDENT: socket() failed"
+msgstr "IDENT: socket() (ổ cắm) không thành công"
+
+#: src/ident.c:117
+msgid "IDENT: connect() failed"
+msgstr "IDENT: connect() (kết nối) không thành công"
+
+#: src/ident.c:123
+#, c-format
+msgid "IDENT: connected to %s:%u"
+msgstr "IDENT: hiện có kết nối đến %s:%u"
+
+#: src/ident.c:132
+#, c-format
+msgid "IDENT: stream_write() failed: %s."
+msgstr "IDENT: stream_write() (ghi dòng) không thành công: %s."
+
+#: src/ident.c:140
+#, c-format
+msgid "IDENT: recvline() failed: %s."
+msgstr "IDENT: recvline() (dòng nhận) không thành công: %s."
+
+#: src/ident.c:151
+msgid "IDENT: incorrect data."
+msgstr "IDENT: dữ liệu không đúng."
+
+#: src/ident.c:162
+msgid "IDENT: data probably encrypted with DES..."
+msgstr "IDENT: rất có thể là dữ liệu được mật mã bằng DES..."
+
+#: src/ident.c:170
+msgid "IDENT: incorrect data (DES deciphered)."
+msgstr "IDENT: dữ liệu không đúng (đã giải mật mã DES)."
+
+#: src/ident.c:188
+#, c-format
+msgid "IDENT: resolved remote user to %s."
+msgstr "IDENT: đã quyết định người dùng ở xa là %s."
+
+#: src/map.c:71
+#, c-format
+msgid "%s remapped to %s@localhost."
+msgstr "Đã ảnh xạ lại %s thành %s@localhost."
+
+#: src/map.c:123
+msgid "Translation map: incorrect syntax."
+msgstr "Bản đồ thông dịch: cú pháp không đúng."
+
+#: src/mem.c:37
+msgid "malloc() failed. Cannot allocate enough memory."
+msgstr "malloc() (phân chia bộ nhớ) không thể phân chia đủ bộ nhớ."
+
+#: src/mem.c:52
+msgid "realloc() failed. Cannot reallocate enough memory."
+msgstr "realloc() (phân chia lại bộ nhớ) không thể phân chia lại đủ bộ nhớ."
+
+#: src/misc.c:332
+msgid "Can't find out my own hostname"
+msgstr "Không tìm thấy tên máy mình"
+
+#: src/net.c:50
+msgid "SERVER"
+msgstr "MÁY CHỦ"
+
+#: src/net.c:53
+msgid "CLIENT"
+msgstr "MÁY KHÁCH"
+
+#: src/net.c:131
+msgid "Getting remote host information..."
+msgstr "Gọi thông tin máy ở xa..."
+
+#: src/net.c:168
+msgid "Cannot create stream socket."
+msgstr "Không tạo được ổ cắm dòng."
+
+#: src/net.c:173
+#, c-format
+msgid "Couldn't connect to %s:%u. %s."
+msgstr "Không thể kết nối đến %s:%u. %s."
+
+#: src/net.c:178
+#, c-format
+msgid "Connected to %s:%u"
+msgstr "Hiện có kết nối đến %s:%u"
+
+#: src/net.c:200
+msgid "Cannot create stream socket"
+msgstr "Không tạo được ổ cắm dòng."
+
+#: src/net.c:233
+msgid "bind() failed"
+msgstr "bind() (đóng kết) không thành công."
+
+#: src/net.c:234
+#, c-format
+msgid "GNU Anubis bound to %s:%u"
+msgstr "Trình Anubis của GNU đã đóng kết đến %s:%u"
+
+#: src/net.c:261
+msgid "Short write"
+msgstr "Ghi vắn"
+
+#: src/net.c:339
+msgid "INTERNAL ERROR (get_response_smtp): buffer exhausted. Please report."
+msgstr "LỖI NỘI BỘ (get_response_smtp): (gọi trả lời SMTP) hết bộ đệm rồi. Hãy thông báo lỗi này."
+
+#: src/socks.c:53
+msgid "Using SOCKS Proxy..."
+msgstr "Dùng máy ủy nhiệm SOCKS..."
+
+#: src/socks.c:71
+#, c-format
+msgid "SOCKS proxy: %s"
+msgstr "Máy ủy nhiệm SOCKS: %s"
+
+#: src/socks.c:143
+msgid "Address must be an IP, not a domain name."
+msgstr "Địa chỉ phải là địa chỉ IP (v.d. 127.0.0.0), không phải tên miền (v.d. www.miềnnày.com)."
+
+#: src/socks.c:180 src/socks.c:399
+msgid "SOCKS Proxy Connection: succeeded."
+msgstr "Kết nối ủy nhiệm SOCKS: thành công."
+
+#: src/socks.c:183
+msgid "Request rejected or failed."
+msgstr "Yêu cầu bị từ chối hay không thành công."
+
+#: src/socks.c:186
+msgid "Request rejected."
+msgstr "Yêu cầu bị từ chối."
+
+#: src/socks.c:189
+msgid "Request rejected, because the client program and identd reported different User-IDs."
+msgstr "Yêu cầu bị từ chối, vì chương trình khách và identd đã thông báo thông tin nhận biết người dùng (UID) khác nhau."
+
+#: src/socks.c:193 src/socks.c:426
+msgid "Server reply is not valid."
+msgstr "Máy chủ trả lời không hợp lệ."
+
+#: src/socks.c:234
+msgid "Possibly not a SOCKS proxy service."
+msgstr "Có lẽ không phải một dịch vụ ủy nhiệm SOCKS."
+
+#: src/socks.c:246
+msgid "SOCKS Proxy AUTH method: NO AUTHENTICATION REQUIRED"
+msgstr "Phương pháp xac thức (AUTH) ủy nhiệm SOCKS: KHÔNG CẦN PHẢI XÁC THỨC"
+
+#: src/socks.c:249
+msgid "SOCKS Proxy AUTH method: USER NAME/PASSWORD"
+msgstr "Phương pháp xac thức (AUTH) ủy nhiệm SOCKS: TÊN DÙNG/MẬT KHẨU"
+
+#: src/socks.c:253
+msgid "Cannot send null user name or password."
+msgstr "Không gởi được tên dùng hay mật khẩu rỗng."
+
+#: src/socks.c:295
+msgid "Bad user name or password."
+msgstr "Tên dùng hay mật khẩu sai."
+
+#: src/socks.c:299
+msgid "SOCKS Proxy AUTH: succeeded."
+msgstr "Xac thức (AUTH) ủy nhiệm SOCKS: thành công."
+
+#: src/socks.c:302
+msgid "Server does not accept any method."
+msgstr "Máy chủ không chấp nhận phương pháp nào."
+
+#: src/socks.c:305
+msgid "Server does not accept an AUTH method."
+msgstr "Máy chủ không chấp nhận phương pháp AUTH (xác thức)."
+
+#: src/socks.c:402
+msgid "General SOCKS server failure."
+msgstr "Lỗi máy chủ SOCKS chung."
+
+#: src/socks.c:405
+msgid "Connection not allowed by a ruleset."
+msgstr "Một bộ quy tắc không cho phép kết nối ấy."
+
+#: src/socks.c:408
+msgid "Network unreachable."
+msgstr "Không tớí được mạng."
+
+#: src/socks.c:411
+msgid "Host unreachable."
+msgstr "Không tới được máy."
+
+#: src/socks.c:414
+msgid "Connection refused."
+msgstr "Kết nối bị từ chối."
+
+#: src/socks.c:417
+msgid "TTL expired."
+msgstr "Thời gian sống đã hết hạn."
+
+#: src/socks.c:420
+msgid "Command not supported."
+msgstr "Không hỗ trợ lệnh ấy."
+
+#: src/socks.c:423
+msgid "Address type not supported."
+msgstr "Không hỗ trợ kiểu địa chỉ ấy."
+
+#: src/quit.c:31
+msgid "Signal Caught. Exiting Cleanly..."
+msgstr "Đã bắt tín hiệu, thoát được..."
+
+#: src/quit.c:38
+msgid "Timeout! Exiting..."
+msgstr "Thời hạn! Thoát..."
+
+#: src/rcfile.c:121
+#, c-format
+msgid "cannot stat file `%s'"
+msgstr "không thể stat (gọi các thông tin về) tập tin `%s'"
+
+#: src/rcfile.c:131
+#, c-format
+msgid "File `%s' has already been read.\n"
+msgstr "Đã đọc tập tin `%s' rồi.\n"
+
+#: src/rcfile.c:149
+#, c-format
+msgid "Welcome user %s !"
+msgstr "Chào mừng người dùng %s !"
+
+#: src/rcfile.c:185
+#, c-format
+msgid "Reading system configuration file %s..."
+msgstr "Đọc tập tin cấu hình hệ thống %s..."
+
+#: src/rcfile.c:197
+#, c-format
+msgid "Reading user configuration file %s..."
+msgstr "Đọc tập tin cấu hình người dùng %s..."
+
+#: src/rcfile.c:341
+msgid "`logfile' directive is ignored in main configuration file"
+msgstr "Chỉ thị `logfile' (tập tin bản ghi) bị bỏ qua trong tập tin cấu hình chính."
+
+#: src/rcfile.c:789
+#, c-format
+msgid "No such section: %s"
+msgstr "Không có phần như: %s"
+
+#: src/rcfile.l:181
+#, c-format
+msgid "Stray character in config: \\%03o. Possibly missing quotes around the string"
+msgstr "Gặp ký tự rải rác trong cấu hình: \\%03o. Có lẽ thiếu dấu trích dẫn ở quanh chuỗi."
+
+#: src/rcfile.l:385
+msgid "Anubis RC file error"
+msgstr "Lỗi tập tin RC Anubis."
+
+#: src/rcfile.y:170 src/rcfile.y:178
+#, c-format
+msgid "Section %s already defined"
+msgstr "Đã định nghĩa phần %s rồi."
+
+#: src/rcfile.y:230
+#, c-format
+msgid "unknown keyword: %s"
+msgstr "không biết từ khóa: %s"
+
+#: src/rcfile.y:532
+msgid "missing replacement value"
+msgstr "thiếu giá trị thay thế"
+
+#: src/rcfile.y:629
+#, c-format
+msgid "Not a valid debugging level: %s"
+msgstr "Không phải là mức độ gỡ lỗi hợp lệ: %s"
+
+#: src/rcfile.y:1179
+msgid "Unknown regexp modifier"
+msgstr "Không biết ký tự sửa đổi biểu thức chính quy"
+
+#: src/rcfile.y:1277
+msgid "STOP"
+msgstr "NGỪNG"
+
+#: src/rcfile.y:1282
+#, c-format
+msgid "Calling %s"
+msgstr "Đang gọi %s"
+
+#: src/rcfile.y:1288
+#, c-format
+msgid "ADD %s [%s] %s"
+msgstr "THÊM %s [%s] %s"
+
+#: src/rcfile.y:1298
+#, c-format
+msgid "MODIFY %s [%s] [%s] %s"
+msgstr "SỬA ĐỔI %s [%s] [%s] %s"
+
+#: src/rcfile.y:1311
+#, c-format
+msgid "REMOVE HEADER [%s]"
+msgstr "LOẠI BỎ DÒNG ĐẦU [%s]"
+
+#: src/rcfile.y:1334
+#, c-format
+msgid "Executing %s"
+msgstr "Đang thực hiện %s"
+
+#: src/rcfile.y:1414
+#, c-format
+msgid "Matched trigger \"%s\""
+msgstr "Thủ tục lẫy đã khớp \"%s\""
+
+#: src/rcfile.y:1418
+#, c-format
+msgid "Matched condition %s[%s] \"%s\""
+msgstr "Điều kiện đã khớp %s[%s] \"%s\""
+
+#: src/rcfile.y:1528
+#, c-format
+msgid "Section %s"
+msgstr "Phần %s"
+
+#: src/rcfile.y:1552
+#, c-format
+msgid "Unknown section: %s"
+msgstr "Không biết phần: %s"
+
+#: src/rcfile.y:1599
+msgid "program is not allowed in this section"
+msgstr "không cho phép chương trình ấy trong phần này"
+
+#: src/regex.c:113
+#, c-format
+msgid "INTERNAL ERROR at %s:%d: missing or invalid regex"
+msgstr "LỖI NỘI BỘ tại %s:%d: thiếu biểu thức chính quy hay nó không hợp lệ"
+
+#: src/regex.c:332
+#, c-format
+msgid "regcomp() failed at %s: %s."
+msgstr "regcomp() không thành công tại %s: %s."
+
+#: src/regex.c:408
+#, c-format
+msgid "pcre_compile() failed at offset %d: %s."
+msgstr "pcre_compile() không thành công tại hiệu số %d: %s."
+
+#: src/regex.c:433
+#, c-format
+msgid "pcre_fullinfo() failed: %d."
+msgstr "pcre_fullinfo() không thành công: %d."
+
+#: src/regex.c:445
+msgid "Matched, but too many substrings."
+msgstr "Khớp được, nhưng mà có quá nhiều chuỗi phụ."
+
+#: src/regex.c:458
+#, c-format
+msgid "Get substring %d failed (%d)."
+msgstr "Gọi chuỗi phụ %d không thành công (%d)."
+
+#: src/ssl.c:59
+msgid "Seeding random number generator..."
+msgstr "Chèn bộ tạo số ngẫu nhiên..."
+
+#: src/ssl.c:63
+msgid "Unable to seed random number generator."
+msgstr "Không chèn được bộ tạo số ngẫu nhiên."
+
+#: src/ssl.c:80
+#, c-format
+msgid "Write error: %s"
+msgstr "Lỗi ghi: %s"
+
+#: src/ssl.c:98
+#, c-format
+msgid "Read error: %s"
+msgstr "Lỗi đọc: %s"
+
+#: src/ssl.c:277
+msgid "SSLv23_client_method() failed."
+msgstr "SSLv23_client_method() (phương pháp máy khách) không thành công."
+
+#: src/ssl.c:282 src/ssl.c:363
+msgid "Can't create SSL_CTX object."
+msgstr "Không tạo được đối tượng SSL_CTX."
+
+#: src/ssl.c:288 src/ssl.c:383
+msgid "SSL_CTX_set_cipher_list() failed."
+msgstr "SSL_CTX_set_cipher_list() (lập danh sách mật mã) không thành công."
+
+#: src/ssl.c:309 src/tls.c:168
+msgid "Initializing the TLS/SSL connection with MTA..."
+msgstr "Khởi động kết nối TLS/SSL với MTA..."
+
+#: src/ssl.c:313 src/ssl.c:404
+msgid "Can't create a new SSL structure for a connection."
+msgstr "Không tạo được cấu trúc SSL mới để kết nối."
+
+#: src/ssl.c:329 src/tls.c:202
+#, c-format
+msgid "TLS/SSL handshake failed: %s"
+msgstr "Việc bắt tay TLS/SSL không thành công: %s"
+
+#: src/ssl.c:358
+msgid "SSLv23_server_method() failed."
+msgstr "SSLv23_server_method() (phương pháp máy chủ) không thành công."
+
+#: src/ssl.c:368
+msgid "SSL_CTX_use_certificate_file() failed."
+msgstr "SSL_CTX_use_certificate_file() (dùng tập tin chứng nhận) không thành công."
+
+#: src/ssl.c:373
+msgid "SSL_CTX_use_PrivateKey_file() failed."
+msgstr "SSL_CTX_use_PrivateKey_file() (dùng tập tin khóa riêng) không thành công."
+
+#: src/ssl.c:378
+msgid "Private key does not match the certificate public key."
+msgstr "Khóa riêng không khớp khóa công của chứng nhận."
+
+#: src/ssl.c:400 src/tls.c:252
+msgid "Initializing the TLS/SSL connection with MUA..."
+msgstr "Khởi động kết nối TLS/SSL vớí MUA..."
+
+#: src/ssl.c:417 src/tls.c:284
+msgid "TLS/SSL handshake failed!"
+msgstr "Việc bắt tây TLS/SSL không thành công."
+
+#: src/ssl.c:450
+#, c-format
+msgid "%s connection using %s (%u bit)"
+msgid_plural "%s connection using %s (%u bits)"
+msgstr[0] "%s kết nối dùng %s (%u bit)"
+
+#: src/ssl.c:462
+#, c-format
+msgid "Server public key is %d bit"
+msgid_plural "Server public key is %d bits"
+msgstr[0] "Khóa công máy chủ là %d bit"
+
+#: src/ssl.c:467
+msgid "Certificate:"
+msgstr "Chứng nhận:"
+
+#: src/ssl.c:472
+msgid "X509_NAME_oneline [subject] failed!"
+msgstr "X509_NAME_oneline [subject] (tên dòng đơn [chủ đề]) không thành công."
+
+#: src/ssl.c:475
+#, c-format
+msgid "Subject: %s"
+msgstr "Chủ đề: %s"
+
+#: src/ssl.c:479
+msgid "X509_NAME_oneline [issuer] failed!"
+msgstr "X509_NAME_oneline [issuer] (tên dòng đơn [nhà phat hành] không thành công."
+
+#: src/ssl.c:482
+#, c-format
+msgid "Issuer:  %s"
+msgstr "Nhà phát hành: %s"
+
+#: src/tls.c:185 src/tls.c:263
+#, c-format
+msgid "TLS error reading `%s': %s"
+msgstr "Gặp lỗi TLS khi đọc `%s': %s"
+
+#: src/tls.c:305
+msgid "No certificate was sent."
+msgstr "Chưa gởi chứng nhận."
+
+#: src/tls.c:310
+msgid "The certificate is not trusted."
+msgstr "Không tin chứng nhận ấy."
+
+#: src/tls.c:315
+msgid "The certificate has expired."
+msgstr "Chứng nhận ấy đã hết hạn."
+
+#: src/tls.c:320
+msgid "The certificate is not yet activated."
+msgstr "Chưa hoạt hóa chứng nhận ấy."
+
+#: src/tls.c:330
+msgid "No certificate was found!"
+msgstr "Chưa tìm thấy chứng nhận."
+
+#: src/tls.c:335
+msgid "The certificate is trusted."
+msgstr "Tin chứng nhận ấy."
+
+#: src/tls.c:365
+#, c-format
+msgid "- Anonymous DH using prime of %d bit.\n"
+msgid_plural "- Anonymous DH using prime of %d bits.\n"
+msgstr[0] "- DH vô danh dùng số nguyên tố của %d bit.\n"
+
+#: src/tls.c:373
+#, c-format
+msgid "- Ephemeral DH using prime of %d bit.\n"
+msgid_plural "- Ephemeral DH using prime of %d bits.\n"
+msgstr[0] "- DH phù du dùng số nguyên tố của %d bit.\n"
+
+#: src/tls.c:384
+#, c-format
+msgid "- Protocol: %s\n"
+msgstr "- Giao thức: %s\n"
+
+#: src/tls.c:388
+#, c-format
+msgid "- Certificate Type: %s\n"
+msgstr "- Kiểu chứng nhận: %s\n"
+
+#: src/tls.c:391
+#, c-format
+msgid "- Compression: %s\n"
+msgstr "- Nén: %s\n"
+
+#: src/tls.c:394
+#, c-format
+msgid "- Cipher: %s\n"
+msgstr "- Mật mã: %s\n"
+
+#: src/tls.c:397
+#, c-format
+msgid "- MAC: %s\n"
+msgstr "- MAC: %s\n"
+
+#: src/tls.c:425
+#, c-format
+msgid "- Certificate info:\n"
+msgstr "- Thông tin chứng nhận:\n"
+
+#: src/tls.c:429
+#, c-format
+msgid "- Certificate is valid since: %s"
+msgstr "- Chứng nhận ấy hợp lệ sau: %s"
+
+#: src/tls.c:431
+#, c-format
+msgid "- Certificate expires: %s"
+msgstr "- Chứng nhận ấy hết hạn: %s"
+
+#: src/tls.c:436
+#, c-format
+msgid "- Certificate fingerprint: "
+msgstr "- Dấu điềm chỉ chứng nhận: "
+
+#: src/tls.c:446
+#, c-format
+msgid "- Certificate serial number: "
+msgstr "- Số sản xuất chứng nhận: "
+
+#: src/tls.c:455
+#, c-format
+msgid "- Certificate public key: "
+msgstr "- Khóa công chứng nhận: "
+
+#: src/tls.c:458
+#, c-format
+msgid "RSA\n"
+msgstr "RSA\n"
+
+#: src/tls.c:459
+#, c-format
+msgid "- Modulus: %d bit\n"
+msgid_plural "- Modulus: %d bits\n"
+msgstr[0] "- Giá trị tuyệt đối: %d bit\n"
+
+#: src/tls.c:464
+#, c-format
+msgid "DSA\n"
+msgstr "DSA\n"
+
+#: src/tls.c:465
+#, c-format
+msgid "- Exponent: %d bit\n"
+msgid_plural "- Exponent: %d bits\n"
+msgstr[0] "- Số mũ: %d bit\n"
+
+#: src/tls.c:469
+#, c-format
+msgid "UNKNOWN\n"
+msgstr "KHÔNG BIẾT\n"
+
+#: src/tls.c:471
+#, c-format
+msgid "- Certificate version: #%d\n"
+msgstr "- Phiên bản chứng nhận: #%d\n"
+
+#: src/tls.c:478
+#, c-format
+msgid "- Certificate Issuer's DN: %s\n"
+msgstr "- Tên miền của nhà phát hành chứng nhận: %s\n"
+
+#: src/tunnel.c:318 src/tunnel.c:387
+msgid "Transferring message(s)..."
+msgstr "Truyền thông điệp..."
+
+#: src/tunnel.c:385
+msgid "Starting SMTP session..."
+msgstr "Bắt đầu phiên làm việc SMTP..."
+
+#: src/tunnel.c:468
+msgid "Using the TLS/SSL encryption..."
+msgstr "Dùng mật mã TLS/SSL..."
+
+#: src/tunnel.c:482 src/tunnel.c:626
+#, c-format
+msgid "WARNING: %s"
+msgstr "CẢNH BÁO: %s"
+
+#: src/tunnel.c:483
+msgid "STARTTLS command failed."
+msgstr "Lệnh STARTTLS không thành công."
+
+#: src/tunnel.c:617
+msgid "Using TLS/SSL encryption between Anubis and remote MTA only..."
+msgstr "Dùng mật mã TLS/SSL chỉ giữa trình Anubis và MTA ở xa thôi..."
+
+#: src/tunnel.c:627
+msgid "STARTTLS (ONEWAY) command failed."
+msgstr "Lệnh STARTTLS (ONEWAY) (chỉ một chiều) không thành công."
+
+#: lib/getopt.c:629 lib/getopt.c:641
+#, c-format
+msgid "%s: option `%s' is ambiguous\n"
+msgstr "%s: tùy chọn `%s' là mơ hồ\n"
+
+#: lib/getopt.c:674 lib/getopt.c:678
+#, c-format
+msgid "%s: option `--%s' doesn't allow an argument\n"
+msgstr "%s: tùy chọn `--%s' không cho phép đối số\n"
+
+#: lib/getopt.c:687 lib/getopt.c:692
+#, c-format
+msgid "%s: option `%c%s' doesn't allow an argument\n"
+msgstr "%s: tùy chọn `%c%s' không cho phép đối số\n"
+
+#: lib/getopt.c:728 lib/getopt.c:741 lib/getopt.c:1030 lib/getopt.c:1043
+#, c-format
+msgid "%s: option `%s' requires an argument\n"
+msgstr "%s: tùy chọn `%s' cần đến đối số\n"
+
+#: lib/getopt.c:779 lib/getopt.c:782
+#, c-format
+msgid "%s: unrecognized option `--%s'\n"
+msgstr "%s: không chấp nhận tùy chọn `--%s'\n"
+
+#: lib/getopt.c:790 lib/getopt.c:793
+#, c-format
+msgid "%s: unrecognized option `%c%s'\n"
+msgstr "%s: không chấp nhận tùy chọn `%c%s'\n"
+
+#: lib/getopt.c:840 lib/getopt.c:843
+#, c-format
+msgid "%s: illegal option -- %c\n"
+msgstr "%s: không cho phép tùy chọn -- %c\n"
+
+#: lib/getopt.c:849 lib/getopt.c:852
+#, c-format
+msgid "%s: invalid option -- %c\n"
+msgstr "%s: tùy chọn không hợp lệ -- %c\n"
+
+#: lib/getopt.c:899 lib/getopt.c:910 lib/getopt.c:1096 lib/getopt.c:1109
+#, c-format
+msgid "%s: option requires an argument -- %c\n"
+msgstr "%s: tùy chọn cần đến đối số -- %c\n"
+
+#: lib/getopt.c:962 lib/getopt.c:973
+#, c-format
+msgid "%s: option `-W %s' is ambiguous\n"
+msgstr "%s: tùy chọn `-W %s' là mơ hồ\n"
+
+#: lib/getopt.c:997 lib/getopt.c:1009
+#, c-format
+msgid "%s: option `-W %s' doesn't allow an argument\n"
+msgstr "%s: tùy chọn `-W %s' không cho phép đối số\n"
+
+#: lib/obstack.c:433 lib/obstack.c:436
+msgid "memory exhausted"
+msgstr "hết bộ nhớ rồi"
