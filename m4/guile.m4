@@ -12,8 +12,8 @@ dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 dnl GNU General Public License for more details.
 dnl
 dnl You should have received a copy of the GNU General Public License
-dnl along with this program; if not, write to the Free Software
-dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+dnl along with this program; if not, write to the Free Software Foundation,
+dnl Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 dnl
 
 dnl MU_RESULT_ACTIONS -- generate shell code for the result of a test
@@ -22,7 +22,7 @@ dnl   $2 -- NAME  -- if not empty, used to generate a default value TRUE:
 dnl                  `AC_DEFINE(HAVE_NAME)'
 dnl   $2 -- TRUE  -- what to do if the CVAR is not `no'
 dnl   $3 -- FALSE -- what to do otherwise; defaults to `:'
-dnl
+
 AC_DEFUN([MU_RESULT_ACTIONS], [
 [if test "$$1" != "" -a "$$1" != no; then
   ]ifelse([$3], ,
@@ -99,6 +99,4 @@ AC_DEFUN([MU_CHECK_GUILE],
     fi
  fi
 ])
- 
-	
 
