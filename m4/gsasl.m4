@@ -12,8 +12,8 @@ dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 dnl GNU General Public License for more details.
 dnl 
 dnl You should have received a copy of the GNU General Public License
-dnl along with GNU Mailutils; if not, write to the Free Software
-dnl Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA  
+dnl along with GNU Mailutils; if not, write to the Free Software Foundation,
+dnl Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA  
 dnl
 AC_DEFUN([MU_CHECK_GSASL],
 [AC_CACHE_CHECK([whether to use GNU SASL library],

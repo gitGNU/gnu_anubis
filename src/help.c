@@ -15,8 +15,8 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GNU Anubis; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+   along with GNU Anubis; if not, write to the Free Software Foundation,
+   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
    GNU Anubis is released under the GPL with the additional exemption that
    compiling, linking, and/or using OpenSSL is allowed.
@@ -92,7 +92,7 @@ print_version (void)
 	  "GNU General Public License for more details."));
   puts (_("\nYou should have received a copy of the GNU General Public License\n"
 	  "along with GNU Anubis; if not, write to the Free Software\n"
-	  "Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA"));
+	  "Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA"));
   puts (_("\nGNU Anubis is released under the GPL with the additional exemption that\n"
 	  "compiling, linking, and/or using OpenSSL is allowed.\n"));
   exit (0);

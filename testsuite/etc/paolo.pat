@@ -12,14 +12,14 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GNU Anubis; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# along with GNU Anubis; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 # Anubis coredumped on `modify body' statements that shrunk the input
 # strings.
 # Reference: Reported by Paolo <oopla@users.sourceforge.net>. Messages
 # causing coredump and relevant configuration files were sent privately
-# to <gray@mirddin.farlep.net> on 2 Dec 2005 under message ID
+# to <gray@mirddin.farlep.net> on 2 Jan 2005 under message ID
 # <20050101214820.GC6075@pp>
 
 :TEST Removing substrings from the body
