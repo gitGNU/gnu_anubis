@@ -115,5 +115,14 @@ DEFS = @DEFS@ -DLOCALEDIR=\"$(localedir)\"
 INCLUDES = @INCLUDES@ @LIBGNUTLS_CFLAGS@ -I$(top_srcdir)/lib \
 	-I$(top_srcdir)/intl 
 
+FLOWCHART_FILES=$(anubis_SOURCES) $(libanubisdb_a_SOURCES)
+
+flowchart: anubis.cflow
+
+anubis.cflow: $(FLOWCHART_FILES) 
+	CFLOWRC=$(top_srcdir)/build/cflow.rc \
+	 cflow -o$@ --brief -i^s $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	            $(CPPFLAGS) $(FLOWCHART_FILES)
+
 ## EOF
 
