@@ -1,3 +1,15 @@
+2005-05-25  Sergey Poznyakoff 
+
+	* TODO: Updated
+	* src/Makefile.am (flowchart,anubis.cflow): New rules
+	* src/authmode.c: Do not duplicate remote_client/remote_server as
+	parameters/autos. 
+	* src/daemon.c: Likewise.
+	* src/extern.h: Likewise.
+	* src/gsasl_srv.c: Likewise.
+	* src/headers.h: Likewise.
+	* src/transmode.c: Likewise.
+
 2005-04-20  Sergey Poznyakoff
 
 	* configure.ac: Changed version number to 4.0.90.

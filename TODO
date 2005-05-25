@@ -1,20 +1,16 @@
+GNU Anubis TODO list. 2005-05-25
+Copyright (C) 2003,2004,2005 The Anubis Team
+
+* Urgent: 
 
- TO DO
- =====
+** Get rid of global vs. local variable mess. 
 
-* Urgent: Get rid of static buffers (recvline et al.) Use dynamically
-allocated buffers instead.
-
-* Urgent: Get rid of global vs. local variable mess. Most horrible
-example are remote_client and remote_server variables that are often
-duplicated as autos/arguments. These all should be automatic variables.
-
-* Urgent: Write general-purpose (e)smtp io functions and use them throughout
+** Write general-purpose (e)smtp io functions and use them throughout
 the code (take anubisusr.c as an example)
 
-* Urgent: Remove duplicated functions: place them all into a library
+** Remove duplicated functions: place them all into a library
 
-* Urgent: Do we need session.execpath at all? I guess we don't... 
+** Do we need session.execpath at all? I guess we don't... 
  
 * anubisusr.c: Provide (configuration file||command line||envar) options
 to hold authentication credentials.
@@ -46,8 +42,6 @@ and/or anti-virus software.
 ** An external performance test.
 
 * Minor issues
-** Fix diagnostic messages to conform to standards texi: replace contracted
-verbal forms with full ones, check the proper use of 'illegal' and 'path'. 
 
 
 Local variables:
