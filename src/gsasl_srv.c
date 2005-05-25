@@ -126,8 +126,7 @@ auth_gsasl_capa_init ()
 #define SP(x) ((x)?(x):"NULL")
 
 int
-anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER * usr,
-		   NET_STREAM * stream)
+anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER * usr)
 {
   char *input = arg;
   size_t input_size = 0;
@@ -196,7 +195,7 @@ anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER * usr,
 	usr->smtp_authid, usr->username ? usr->username : "NONE");
 
   if (sess_ctx)
-    install_gsasl_stream (sess_ctx, stream);
+    install_gsasl_stream (sess_ctx, &remote_client);
 
   asmtp_reply (235, "Authentication successful.");
   return 0;

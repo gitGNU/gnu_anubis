@@ -390,7 +390,7 @@ asmtp_ehlo (enum asmtp_state state, ANUBIS_USER * usr)
   case KW_AUTH:
     mech = get_command_arg ();
     init_input = get_command_arg ();
-    if (anubis_auth_gsasl (mech, init_input, usr, &remote_client) == 0)
+    if (anubis_auth_gsasl (mech, init_input, usr) == 0)
       state = state_auth;
     break;
     
@@ -558,13 +558,11 @@ anubis_get_db_record (const char *username, ANUBIS_USER * usr)
 
 
 int
-anubis_authenticate_mode (NET_STREAM *psd_client,
-			  struct sockaddr_in *addr)
+anubis_authenticate_mode (struct sockaddr_in *addr)
 {
   ANUBIS_USER usr;
 
-  remote_client = *psd_client;
-  remote_server = *psd_client;
+  remote_server = remote_client;
   alarm (900);
 
   if (anubis_smtp (&usr))
@@ -675,7 +673,6 @@ anubis_authenticate_mode (NET_STREAM *psd_client,
   
   net_close_stream (&remote_client);
   net_close_stream (&remote_server);
-  *psd_client = NULL;
   
   info (NORMAL, _("Connection closed successfully."));
 
@@ -768,3 +765,4 @@ authmode_section_init (void)
 #endif /* WITH_GSASL */
 
 /* EOF */
+

@@ -171,7 +171,7 @@ set_unprivileged_user (void)
 }
 
 int
-anubis_child_main (NET_STREAM *sd_client, struct sockaddr_in *addr)
+anubis_child_main (struct sockaddr_in *addr)
 {
   int rc;
 
@@ -180,20 +180,20 @@ anubis_child_main (NET_STREAM *sd_client, struct sockaddr_in *addr)
   switch (anubis_mode)
     {
     case anubis_transparent:
-      rc = anubis_transparent_mode (sd_client, addr);
+      rc = anubis_transparent_mode (addr);
       break;
 
     case anubis_authenticate:
-      rc = anubis_authenticate_mode (sd_client, addr);
+      rc = anubis_authenticate_mode (addr);
 
     default:
       abort();
     }
 #else
-  rc = anubis_transparent_mode (sd_client, addr);
+  rc = anubis_transparent_mode (addr);
 #endif /* WITH_GSASL */
   proclist_cleanup (subprocess_report_status);
-  net_close_stream (sd_client);
+  net_close_stream (remote_client);
   return rc;
 }
 
@@ -219,7 +219,6 @@ loop (int sd_bind)
 
   for (;;)
     {
-      NET_STREAM sd_client = NULL;
       int fd;
       size_t count;
       
@@ -238,8 +237,9 @@ loop (int sd_bind)
 	}
 
       /* Create the TCP stream */
-      net_create_stream (&sd_client, fd);
-
+      net_create_stream (&remote_client, fd);
+      remote_server = NULL;
+      
       /*
          Check the TCP wrappers settings.
        */
@@ -252,7 +252,7 @@ loop (int sd_bind)
 	  info (NORMAL,
 		_("TCP wrappers: connection from %s:%u rejected."),
 		inet_ntoa (addr.sin_addr), ntohs (addr.sin_port));
-	  service_unavailable (&sd_client);
+	  service_unavailable (&remote_client);
 	  continue;
 	}
 #endif /* USE_LIBWRAP */
@@ -272,7 +272,7 @@ loop (int sd_bind)
 	  info (NORMAL,
 		_("Too many clients. Connection from %s:%u rejected."),
 		inet_ntoa (addr.sin_addr), ntohs (addr.sin_port));
-	  service_unavailable (&sd_client);
+	  service_unavailable (&remote_client);
 	}
       else
 	{
@@ -286,12 +286,12 @@ loop (int sd_bind)
 	    {			/* a child process */
 	      /* FIXME */
 	      signal (SIGCHLD, SIG_IGN);
-	      quit (anubis_child_main (&sd_client, &addr));
+	      quit (anubis_child_main (&addr));
 	    }
 	  else /* master process */
 	    proclist_register (childpid);
 	  
-	  net_close_stream (&sd_client);
+	  net_close_stream (&remote_client);
 	}
     }
   return;
@@ -359,9 +359,6 @@ create_stdio_stream (NET_STREAM *s)
 void
 stdinout (void)
 {
-  NET_STREAM sd_client = NULL;
-  NET_STREAM sd_server = NULL;
-
   topt &= ~T_SSL;
   topt |= T_FOREGROUND;
   topt |= T_SMTP_ERROR_CODES;
@@ -378,32 +375,29 @@ stdinout (void)
 			               "Set the REMOTE-MTA or LOCAL-MTA."));
     }
 
-  create_stdio_stream (&sd_client);
+  create_stdio_stream (&remote_client);
 
   alarm (300);
   if (topt & T_LOCAL_MTA)
-    sd_server = make_local_connection (session.execpath, session.execargs);
+    remote_server = make_local_connection (session.execpath, session.execargs);
   else
-    sd_server = make_remote_connection (session.mta, session.mta_port);
+    remote_server = make_remote_connection (session.mta, session.mta_port);
   alarm (0);
 
-  if (sd_server == NULL)
+  if (remote_server == NULL)
     {
-      service_unavailable (&sd_client);
+      service_unavailable (&remote_client);
       free_mem ();
       return;
     }
-  stream_set_read (sd_server, _stdio_read);
-  stream_set_write (sd_server, _stdio_write);
-  stream_set_strerror (sd_server, _stdio_strerror);
-
-  remote_client = sd_client;
-  remote_server = sd_server;
+  stream_set_read (remote_server, _stdio_read);
+  stream_set_write (remote_server, _stdio_write);
+  stream_set_strerror (remote_server, _stdio_strerror);
 
   smtp_session_transparent ();
   proclist_cleanup (subprocess_report_status);
   
-  net_close_stream (&sd_server);
+  net_close_stream (&remote_server);
   free_mem ();
   return;
 }

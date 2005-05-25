@@ -591,12 +591,10 @@ void mysql_db_init (void);
 void pgsql_db_init (void);
 
 /* transmode.c */
-int anubis_transparent_mode (NET_STREAM * sd_client,
-			     struct sockaddr_in *addr);
+int anubis_transparent_mode (struct sockaddr_in *addr);
 
 /* authmode.c */
-int anubis_authenticate_mode (NET_STREAM * sd_client,
-			      struct sockaddr_in *addr);
+int anubis_authenticate_mode (struct sockaddr_in *addr);
 void anubis_set_password_db (char *arg);
 void asmtp_reply (int code, char *fmt, ...);
 void asmtp_capa_add_prefix (char *prefix, char *name);
@@ -605,8 +603,7 @@ void authmode_section_init (void);
 
 /* gsasl.c */
 void auth_gsasl_init (void);
-int anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER * usr,
-		       NET_STREAM * stream);
+int anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER * usr);
 #ifdef WITH_GSASL
 void install_gsasl_stream (Gsasl_session_ctx * sess_ctx, NET_STREAM * stream);
 #endif

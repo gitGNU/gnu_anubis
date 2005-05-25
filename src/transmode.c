@@ -26,17 +26,16 @@
 #include "extern.h"
 
 int
-anubis_transparent_mode (NET_STREAM * psd_client, struct sockaddr_in *addr)
+anubis_transparent_mode (struct sockaddr_in *addr)
 {
   int rs = 0;
   int cs = 0;
-  NET_STREAM sd_server = NULL;
 
   rs = auth_ident (addr, &session.clientname);
 
   if ((topt & T_DROP_UNKNOWN_USER) && !rs)
     {
-      service_unavailable (psd_client);
+      service_unavailable (remote_client);
       return 0;
     }
 
@@ -54,7 +53,7 @@ anubis_transparent_mode (NET_STREAM * psd_client, struct sockaddr_in *addr)
       else
 	set_unprivileged_user ();
     }
-  else
+  else 
     set_unprivileged_user ();
 
   auth_tunnel ();
@@ -112,29 +111,27 @@ anubis_transparent_mode (NET_STREAM * psd_client, struct sockaddr_in *addr)
   alarm (300);
   if (topt & T_LOCAL_MTA)
     {
-      sd_server = make_local_connection (session.execpath, session.execargs);
-      if (!sd_server)
+      remote_server = make_local_connection (session.execpath,
+					     session.execargs);
+      if (!remote_server)
 	{
-	  service_unavailable (psd_client);
+	  service_unavailable (remote_client);
 	  return EXIT_FAILURE;
 	}
     }
   else
     {
-      sd_server = make_remote_connection (session.mta, session.mta_port);
-      if (!sd_server)
-	service_unavailable (psd_client);
+      remote_server = make_remote_connection (session.mta, session.mta_port);
+      if (!remote_server)
+	service_unavailable (remote_client);
     }
 
-  remote_client = *psd_client;
-  remote_server = sd_server;
   alarm (900);
   smtp_session_transparent ();
   alarm (0);
 
-  net_close_stream (&sd_server);
-  net_close_stream (psd_client);
-  *psd_client = NULL;
+  net_close_stream (&remote_server);
+  net_close_stream (&remote_client);
 
   info (NORMAL, _("Connection closed successfully."));
 
