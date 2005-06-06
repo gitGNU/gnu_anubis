@@ -35,7 +35,7 @@ END
 
 BEGIN AUTH
 sasl-password-db text://TESTDIR/data/text.db
-sasl-allowed-mech CRAM-MD5 DIGEST-MD5
+sasl-allowed-mech CRAM-MD5
 smtp-greeting-message "Hej, sloneczko"
 smtp-help-message "Czlowieku, dopomoz sobie sam!"
 END
