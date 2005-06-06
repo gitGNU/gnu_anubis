@@ -302,7 +302,8 @@ list_locate (struct list *list, void *data, list_comp_t cmp)
 
 /* Computes an intersection of the two lists. The resulting list
    contains elements from the list A that are also encountered
-   in the list B. Elements are compared using function CMP. */
+   in the list B. Elements are compared using function CMP.
+   The resulting list preserves the ordering of A. */
 ANUBIS_LIST *
 list_intersect (ANUBIS_LIST *a, ANUBIS_LIST *b, list_comp_t cmp)
 {
