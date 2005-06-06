@@ -107,7 +107,12 @@ auth_gsasl_capa_init ()
     {
       size_t size = strlen (listmech);
       ANUBIS_LIST *mech = auth_method_list (listmech);
-      ANUBIS_LIST *p = list_intersect (mech, anubis_mech_list,
+
+      /* Compute intersection of both lists. Make sure we compute
+	 (anubis_mech_list X mech), not (mech X anubis_mech_list),
+	 so that the resulting list preserves the ordering of
+	 anubis_mech_list */
+      ANUBIS_LIST *p = list_intersect (anubis_mech_list, mech,
 				       anubis_name_cmp);
       auth_list_to_string (p, listmech, size);
       list_destroy (&p, NULL, NULL);
