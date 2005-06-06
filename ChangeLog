@@ -1,3 +1,12 @@
+2005-06-06  Sergey Poznyakoff
+
+	* src/gsasl_srv.c (auth_gsasl_capa_init): Make sure the list
+	of supported mechanisms preserves ordering of
+	sasl-allowed-mech variable.
+	* src/list.c (list_intersect): Give more detail in the comment.
+	* testsuite/etc/target.in.in (sasl-allowed-mech): Only CRAM-MD5
+	for testing purposes.
+
 2005-05-25  Sergey Poznyakoff 
 
 	* TODO: Updated
