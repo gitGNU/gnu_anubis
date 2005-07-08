@@ -1,14 +1,14 @@
 # Anubis Bahasa Melayu (Malay) (ms).
 # Copyright (C) 2002 The Anubis Team
 # This file is distributed under the same license as the Anubis package.
-# Sharuzzaman Ahmat Raslan <sharuzzaman@myrealbox.com>, 2003, 2004, 2005.
+# Sharuzzaman Ahmat Raslan <sharuzzaman@myrealbox.com>, 2003, 2004, 2005
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: anubis 3.9.96\n"
+"Project-Id-Version: anubis 4.0\n"
 "Report-Msgid-Bugs-To: bug-anubis@gnu.org\n"
-"POT-Creation-Date: 2004-09-22 15:14+0300\n"
-"PO-Revision-Date: 2005-04-06 15:07+0800\n"
+"POT-Creation-Date: 2004-12-18 11:30+0100\n"
+"PO-Revision-Date: 2005-07-04 10:10+0800\n"
 "Last-Translator: Sharuzzaman Ahmat Raslan <sharuzzaman@myrealbox.com>\n"
 "Language-Team: Malay <translation-team-ms@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -49,29 +49,29 @@ msgstr "Tidak dapat mengambil data dari pengkalan data SASL: %s"
 msgid "Record for `%s' not found."
 msgstr "Rekod untuk `%s' tidak dijumpai."
 
-#: src/authmode.c:604
+#: src/authmode.c:606
 msgid "MTA has not been specified. Set either REMOTE-MTA or LOCAL-MTA."
-msgstr "MTA tidak dinyatakan. Tetapkan sama ada REMOTE-MTA atau LOCAL-MTA."
+msgstr "MTA telah tidak dinyatakan. Tetapkan sama ada REMOTE-MTA atau LOCAL-MTA."
 
-#: src/authmode.c:635 src/map.c:164 src/net.c:150 src/net.c:217
+#: src/authmode.c:637 src/map.c:164 src/net.c:150 src/net.c:217
 #: src/transmode.c:98
 #, c-format
 msgid "Illegal address length received for host %s"
 msgstr "Panjang alamat tidak sah diterima untuk hos %s"
 
-#: src/authmode.c:649 src/transmode.c:112
+#: src/authmode.c:651 src/transmode.c:112
 msgid "Loop not allowed. Connection rejected."
 msgstr "Gelung tidak dibenarkan. Sambungan ditolak."
 
-#: src/authmode.c:681 src/transmode.c:143
+#: src/authmode.c:683 src/transmode.c:143
 msgid "Connection closed successfully."
 msgstr "Sambungan berjaya ditutup."
 
-#: src/authmode.c:688 src/transmode.c:149
+#: src/authmode.c:690 src/transmode.c:149
 msgid "PAM: Session closed."
 msgstr "PAM: Sessi ditutup."
 
-#: src/authmode.c:692 src/transmode.c:153
+#: src/authmode.c:694 src/transmode.c:153
 msgid "PAM: failed to release authenticator."
 msgstr "PAM: gagal untuk melepaskan pengesah."
 
@@ -95,7 +95,7 @@ msgstr "memulakan daemon %s berjaya."
 #: src/daemon.c:88
 #, c-format
 msgid "Exited successfully"
-msgstr "Berjaya keluar"
+msgstr "Keluar dengan berjaya"
 
 #: src/daemon.c:90
 #, c-format
@@ -132,34 +132,34 @@ msgstr[0] "Child [%lu] selesai. %s. %d klien yang tinggal."
 msgid "WARNING: An unprivileged user has not been specified!"
 msgstr "AMARAN: Pengguna tanpa kelebihan tidak dinyatakan!"
 
-#: src/daemon.c:213
+#: src/daemon.c:214
 msgid "GNU Anubis is running..."
 msgstr "GNU Anubis sedang berjalan..."
 
-#: src/daemon.c:225 src/exec.c:122
+#: src/daemon.c:226 src/exec.c:122
 msgid "accept() failed"
 msgstr "accept() gagal"
 
-#: src/daemon.c:243
+#: src/daemon.c:244
 #, c-format
 msgid "TCP wrappers: connection from %s:%u rejected."
 msgstr "Pembalut TCP: sambungann dari %s:%u ditolak."
 
-#: src/daemon.c:264
+#: src/daemon.c:269
 #, c-format
 msgid "Too many clients. Connection from %s:%u rejected."
 msgstr "Terlalu banyak klien. Sambungan daripada %s:%u ditolak."
 
-#: src/daemon.c:271
+#: src/daemon.c:276
 #, c-format
 msgid "Connection from %s:%u"
 msgstr "Sambungan daripada %s:%u"
 
-#: src/daemon.c:276
+#: src/daemon.c:281
 msgid "daemon: cannot fork"
 msgstr "daemon: tidak dapat mencabang"
 
-#: src/daemon.c:357 src/transmode.c:68
+#: src/daemon.c:362 src/transmode.c:68
 msgid "The MTA has not been specified. Set the REMOTE-MTA or LOCAL-MTA."
 msgstr "MTA telah tidak dinyatakan. Tetapkan REMOTE-MTA atau LOCAL-MTA."
 
@@ -271,11 +271,11 @@ msgstr "amaran"
 #: src/errs.c:96
 #, c-format
 msgid "Could not write to socket: %s"
-msgstr "Tidak dapat menulis pada soket: %s"
+msgstr "Tidak dapat menulis ke soket: %s"
 
 #: src/errs.c:98
 msgid "Could not write to socket"
-msgstr "Tidak dapat menulis pada soket"
+msgstr "Tidak dapat menulis ke soket"
 
 #: src/errs.c:108
 #, c-format
@@ -285,7 +285,7 @@ msgstr "Hos tidak diketahui %s."
 #: src/errs.c:111
 #, c-format
 msgid "%s: host name is valid but does not have an IP address."
-msgstr "%s: nama hos adalah sah tetapi tidak mempunyai alamat IP."
+msgstr "%s: nama hos adalah sah tetatpi tidak mempunyai alamat IP."
 
 #: src/errs.c:115
 #, c-format
@@ -302,27 +302,64 @@ msgstr "%s: ralat sementara pelayan nama berlaku. Cuba lagi kemudian."
 msgid "%s: unknown DNS error %d."
 msgstr "%s: ralat DNS tidak diketahui %d."
 
-#: src/esmtp.c:58
-msgid "Using ESMTP authentication mechanism CRAM-MD5..."
-msgstr "Menggunakan mekanisma pengesahan ESMTP CRAM-MD5..."
+#: src/esmtp.c:165
+msgid "Malformed or unexpected reply"
+msgstr "Jawapan tidak sah atau tidak dijangka"
 
-#: src/esmtp.c:65 src/esmtp.c:107
-msgid "Server rejected the AUTH command."
-msgstr "Pelayan menolak arahan AUTH."
-
-#: src/esmtp.c:74 src/esmtp.c:116 src/esmtp.c:128
+#: src/esmtp.c:189
 #, c-format
-msgid "Challenge decoded: %s\n"
-msgstr "Cabaran dinyahkod: %s\n"
+msgid "SASL gsasl_client_start: %s"
+msgstr "SASL gsasl_client_start: %s"
 
-#: src/esmtp.c:93 src/esmtp.c:139
+#: src/esmtp.c:198 src/esmtp.c:216
 #, c-format
-msgid "ESMTP AUTH: %s."
-msgstr "ESMTP AUTH: %s."
+msgid "GSASL handshake aborted: %d %s"
+msgstr "Salaman GSASL dibatalkan: %d %s"
 
-#: src/esmtp.c:100
-msgid "Using ESMTP authentication mechanism LOGIN..."
-msgstr "Menggunakan mekanisma pengesahan ESMTP LOGIN..."
+#: src/esmtp.c:227
+#, c-format
+msgid "GSASL error: %s"
+msgstr "Ralat GSASL: %s"
+
+#: src/esmtp.c:241
+#, c-format
+msgid "Authentication failed: %d %s"
+msgstr "Pengesahan gagal: %d %s"
+
+#: src/esmtp.c:244
+msgid "Authentication successful."
+msgstr "Pengesahan berjaya."
+
+#: src/esmtp.c:263
+msgid "Got empty list of authentication methods"
+msgstr "Mendapat senarai kosong kaedah pengesahan"
+
+#: src/esmtp.c:288
+msgid "Server did not offer any feasible authentication mechanism"
+msgstr "Pelayan tidak menawarkan sebarang kemungkinan mekanisma pengesahan"
+
+#: src/esmtp.c:298
+msgid "INTERNAL ERROR"
+msgstr "RALAT DALAMAN"
+
+#: src/esmtp.c:306
+#, c-format
+msgid "Selected authentication mechanism %s requires TLS encryption. Not using ESMTP authentication"
+msgstr "Mekanisma pengesahan dipilih %s memerlukan enkripsi TLS. Tidak menggunakan pengesahan ESMTP"
+
+#: src/esmtp.c:313
+#, c-format
+msgid "Selected authentication mechanism %s"
+msgstr "Mekanisma pengesahan dipilih %s"
+
+#: src/esmtp.c:319
+#, c-format
+msgid "Cannot initialize libgsasl: %s"
+msgstr "Tidak dapat memulakan libgsasl: %s"
+
+#: src/esmtp.c:340
+msgid "ESMTP AUTH is not supported"
+msgstr "ESMTP AUTH tidak disokong"
 
 #: src/exec.c:82
 msgid "#1 socket() failed."
@@ -457,7 +494,7 @@ msgstr "Jenis cdr tidak sah dalam pulangan dari %s"
 msgid "Bad return type from %s"
 msgstr "Jenis pulangan tidak sah dari %s"
 
-#: src/help.c:82
+#: src/help.c:85
 msgid ""
 "\n"
 "GNU Anubis is free software; you can redistribute it and/or modify\n"
@@ -471,7 +508,7 @@ msgstr ""
 "Free Software Foundation; sama ada versi ke-2 Lesen tersebut, atau\n"
 "(atas pilihan anda) sebarang versi selepasnya."
 
-#: src/help.c:86
+#: src/help.c:89
 msgid ""
 "\n"
 "GNU Anubis is distributed in the hope that it will be useful,\n"
@@ -485,7 +522,7 @@ msgstr ""
 "atau KESESUAIAN UNTUK SESUATU TUJUAN KHUSUS.  Lihat GNU General\n"
 "Public License untuk maklumat terperinci."
 
-#: src/help.c:90
+#: src/help.c:93
 msgid ""
 "\n"
 "You should have received a copy of the GNU General Public License\n"
@@ -497,7 +534,7 @@ msgstr ""
 "GNU Anubis; jika tidak, sila tulis kepada Free Software Foundation, Inc.,\n"
 "59 Temple Place, Suite 330, Boston, MA 02111-1307  USA"
 
-#: src/help.c:93
+#: src/help.c:96
 msgid ""
 "\n"
 "GNU Anubis is released under the GPL with the additional exemption that\n"
@@ -507,11 +544,11 @@ msgstr ""
 "GNU Anubis diterbitkan dibawah GPL dengan tambahan pengecualian dimana\n"
 "penghimpunan, pautan, dan/atau menggunakan OpenSSL adalah dibenarkan.\n"
 
-#: src/help.c:101
+#: src/help.c:104
 msgid "Usage: anubis [options]\n"
 msgstr "Penggunaan: anubis [pilihan]\n"
 
-#: src/help.c:102
+#: src/help.c:105
 msgid ""
 " -b, --bind [HOST:]PORT       Specify the TCP port on which GNU Anubis listens\n"
 "                              for connections. The default HOST is INADDR_ANY,\n"
@@ -521,7 +558,7 @@ msgstr ""
 "                              untuk sambungan. HOS default adalah INADDR_ANY,\n"
 "                              dan PORT default ialah 24 (sistem mel persendirian)."
 
-#: src/help.c:105
+#: src/help.c:108
 msgid ""
 " -r, --remote-mta HOST[:PORT] Specify a remote SMTP host name or IP address.\n"
 "                              The default PORT number is 25."
@@ -529,7 +566,7 @@ msgstr ""
 " -r, --remote-mta HOS[:PORT]  Nyatakan nama hos jauh SMTP atau alamatIP.\n"
 "                              Nombor PORT default adalah 25."
 
-#: src/help.c:107
+#: src/help.c:110
 msgid ""
 " -l, --local-mta FILE         Execute a local SMTP server, which works on\n"
 "                              standard input and output (inetd-type program).\n"
@@ -539,19 +576,19 @@ msgstr ""
 "                              masukan dan keluaran piawai (program jenis-inetd).\n"
 "                              Pilihan ini tidak termasuk pilihan '--remote-mta'."
 
-#: src/help.c:110
+#: src/help.c:113
 msgid " -m, --mode=MODE              Select operation mode."
 msgstr " -m, --mode=MOD               Pilih mod operasi."
 
-#: src/help.c:111
+#: src/help.c:114
 msgid "                              MODE is either \"transparent\" or \"auth\""
 msgstr "                              MOD adalah sama ada \"transparent\" atau \"auth\""
 
-#: src/help.c:112
+#: src/help.c:115
 msgid " -f, --foreground             Foreground mode."
 msgstr " -f, --foreground             Mod latardepan."
 
-#: src/help.c:113
+#: src/help.c:116
 msgid ""
 " -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as described\n"
 "                              in RFC 821 on standard input and output."
@@ -559,23 +596,23 @@ msgstr ""
 " -i, --stdio                  Guna protokol SMTP (OMP/Tunnel) seperti diterangkan\n"
 "                              didalam RFC 821 pada masukan dan keluaran piawai."
 
-#: src/help.c:115
+#: src/help.c:118
 msgid "Output options:\n"
 msgstr "Pilihan keluaran:\n"
 
-#: src/help.c:116
+#: src/help.c:119
 msgid " -s, --silent                 Work silently."
 msgstr " -s, --silent                 Berkerja dengan senyap."
 
-#: src/help.c:117
+#: src/help.c:120
 msgid " -v, --verbose                Work noisily."
 msgstr " -v, --verbose                Berkerja dengan riuh."
 
-#: src/help.c:118
+#: src/help.c:121
 msgid " -D, --debug                  Debug mode."
 msgstr " -D, --debug                  Mod nyahpepijat."
 
-#: src/help.c:119
+#: src/help.c:122
 msgid ""
 "\n"
 "Miscellaneous options:\n"
@@ -583,11 +620,11 @@ msgstr ""
 "\n"
 "Pilihan lain:\n"
 
-#: src/help.c:120
+#: src/help.c:123
 msgid " -c, --check-config           Run the configuration file syntax checker."
-msgstr " -c, --check-config           Laksana penyemak sintaks fail tetapan.file syntax checker."
+msgstr " -c, --check-config           Laksana penyemak sintaks fail tetapan."
 
-#: src/help.c:121
+#: src/help.c:124
 msgid ""
 " --show-config-options        Print a list of configuration options used\n"
 "                              to build GNU Anubis."
@@ -595,27 +632,27 @@ msgstr ""
 " --show-config-options        Papar senarai pilihan tetapan yang digunakan\n"
 "                              untuk membina GNU Anubis."
 
-#: src/help.c:123
+#: src/help.c:126
 msgid " --relax-perm-check           Do not check user configuration file permissions."
 msgstr " --relax-perm-check           Jangan periksa kebenaran fail tetapan pengguna."
 
-#: src/help.c:124
+#: src/help.c:127
 msgid " --altrc FILE                 Specify alternate system configuration file."
 msgstr " --altrc FAIL                 Nyatakan fail konfigurasi sistem gantian."
 
-#: src/help.c:125
+#: src/help.c:128
 msgid " --norc                       Ignore system configuration file."
 msgstr " --norc                       Abai fail konfigurasi sistem."
 
-#: src/help.c:126
+#: src/help.c:129
 msgid " --version                    Print version number and copyright."
 msgstr " --version                    Cetak nombor versi dan hakcipta."
 
-#: src/help.c:127
+#: src/help.c:130
 msgid " --help                       It's obvious..."
 msgstr " --help                       Sangat jelas..."
 
-#: src/help.c:128
+#: src/help.c:131
 #, c-format
 msgid ""
 "\n"
@@ -728,6 +765,10 @@ msgstr "GNU Anubis terhad kepada %s:%u"
 msgid "Short write"
 msgstr "Menulis pendek"
 
+#: src/net.c:339
+msgid "INTERNAL ERROR (get_response_smtp): buffer exhausted. Please report."
+msgstr "RALAT DALAMAN (get_response_smtp): kehabisan buffer. Sila lapor."
+
 #: src/socks.c:53
 msgid "Using SOCKS Proxy..."
 msgstr "Menggunakan Proksi SOCKS..."
@@ -737,91 +778,91 @@ msgstr "Menggunakan Proksi SOCKS..."
 msgid "SOCKS proxy: %s"
 msgstr "Proksi SOCKS: %s"
 
-#: src/socks.c:141
+#: src/socks.c:143
 msgid "Address must be an IP, not a domain name."
 msgstr "Alamat mestilah IP, bukan nama domain."
 
-#: src/socks.c:178 src/socks.c:397
+#: src/socks.c:180 src/socks.c:399
 msgid "SOCKS Proxy Connection: succeeded."
 msgstr "Sambungan Proksi SOCKS: berjaya."
 
-#: src/socks.c:181
+#: src/socks.c:183
 msgid "Request rejected or failed."
 msgstr "Permintaan ditolak atau gagal."
 
-#: src/socks.c:184
+#: src/socks.c:186
 msgid "Request rejected."
 msgstr "Permintaan ditolak."
 
-#: src/socks.c:187
+#: src/socks.c:189
 msgid "Request rejected, because the client program and identd reported different User-IDs."
 msgstr "Permintaan ditolak, kerana program pelanggan dan identd melaporkan perbezaan ID-Pengguna."
 
-#: src/socks.c:191 src/socks.c:424
+#: src/socks.c:193 src/socks.c:426
 msgid "Server reply is not valid."
 msgstr "Jawapan pelayan tidak sah."
 
-#: src/socks.c:232
+#: src/socks.c:234
 msgid "Possibly not a SOCKS proxy service."
 msgstr "Mungkin bukan khidmat proksi SOCKS."
 
-#: src/socks.c:244
+#: src/socks.c:246
 msgid "SOCKS Proxy AUTH method: NO AUTHENTICATION REQUIRED"
 msgstr "Cara AUTH Proksi SOCKS: TIADA PENGESAHAN DIPERLUKAN"
 
-#: src/socks.c:247
+#: src/socks.c:249
 msgid "SOCKS Proxy AUTH method: USER NAME/PASSWORD"
 msgstr "Cara AUTH Proksi SOCKS: NAMA PENGGUNA/KATA LALUAN"
 
-#: src/socks.c:251
+#: src/socks.c:253
 msgid "Cannot send null user name or password."
 msgstr "Tidak boleh menghantar nama pengguna atau kata laluan kosong."
 
-#: src/socks.c:293
+#: src/socks.c:295
 msgid "Bad user name or password."
 msgstr "Nama pengguna atau kata laluan tidak sah."
 
-#: src/socks.c:297
+#: src/socks.c:299
 msgid "SOCKS Proxy AUTH: succeeded."
 msgstr "AUTH Proksi SOCKS: berjaya."
 
-#: src/socks.c:300
+#: src/socks.c:302
 msgid "Server does not accept any method."
 msgstr "Pelayan tidak menerima sebarang cara."
 
-#: src/socks.c:303
+#: src/socks.c:305
 msgid "Server does not accept an AUTH method."
 msgstr "Pelayan tidak menerima cara AUTH."
 
-#: src/socks.c:400
+#: src/socks.c:402
 msgid "General SOCKS server failure."
 msgstr "Kegagalan umum pelayan SOCKS."
 
-#: src/socks.c:403
+#: src/socks.c:405
 msgid "Connection not allowed by a ruleset."
 msgstr "Sambungan tidak dibenarkan oleh set peraturan."
 
-#: src/socks.c:406
+#: src/socks.c:408
 msgid "Network unreachable."
 msgstr "Rangkaian tidak dapat dicapai."
 
-#: src/socks.c:409
+#: src/socks.c:411
 msgid "Host unreachable."
 msgstr "Hos tidak dapat dicapai."
 
-#: src/socks.c:412
+#: src/socks.c:414
 msgid "Connection refused."
 msgstr "Sambungan ditolak."
 
-#: src/socks.c:415
+#: src/socks.c:417
 msgid "TTL expired."
 msgstr "TTL tamat tempoh."
 
-#: src/socks.c:418
+#: src/socks.c:420
 msgid "Command not supported."
 msgstr "Arahan tidak disokong."
 
-#: src/socks.c:421
+#: src/socks.c:423
 msgid "Address type not supported."
 msgstr "Jenis alamat tidak disokong."
 
@@ -858,11 +899,11 @@ msgstr "Membaca fail konfigurasi sistem %s..."
 msgid "Reading user configuration file %s..."
 msgstr "Membaca fail konfigurasi pengguna %s..."
 
-#: src/rcfile.c:330
+#: src/rcfile.c:341
 msgid "`logfile' directive is ignored in main configuration file"
 msgstr "arahan `logfile' diabaikan dalam fail tetapan utama"
 
-#: src/rcfile.c:709
+#: src/rcfile.c:789
 #, c-format
 msgid "No such section: %s"
 msgstr "Tiada seksyen sebegitu: %s"
@@ -957,26 +998,26 @@ msgstr "program tidak dibenarkan dalam seksyen ini"
 msgid "INTERNAL ERROR at %s:%d: missing or invalid regex"
 msgstr "RALAT DALAMAN pada %s:%d: regex hilang atau tidak sah"
 
-#: src/regex.c:316
+#: src/regex.c:332
 #, c-format
 msgid "regcomp() failed at %s: %s."
 msgstr "regcomp() gagal pada %s: %s."
 
-#: src/regex.c:392
+#: src/regex.c:408
 #, c-format
 msgid "pcre_compile() failed at offset %d: %s."
 msgstr "pcre_compile() gagal pada offset %d: %s."
 
-#: src/regex.c:417
+#: src/regex.c:433
 #, c-format
 msgid "pcre_fullinfo() failed: %d."
 msgstr "pcre_fullinfo() gagal: %d."
 
-#: src/regex.c:429
+#: src/regex.c:445
 msgid "Matched, but too many substrings."
 msgstr "Sepadan, tetapi terlalu banyak subrentetan."
 
-#: src/regex.c:442
+#: src/regex.c:458
 #, c-format
 msgid "Get substring %d failed (%d)."
 msgstr "Mendapatkan subrentetan %d gagal (%d)."
@@ -1203,7 +1244,7 @@ msgstr[0] "- Eksponen: %d bit\n"
 #: src/tls.c:469
 #, c-format
 msgid "UNKNOWN\n"
-msgstr "TIDAK DIKETAHUI\n"
+msgstr "TDAK DIKETAHUI\n"
 
 #: src/tls.c:471
 #, c-format
@@ -1215,32 +1256,32 @@ msgstr "- Versi sijil: #%d\n"
 msgid "- Certificate Issuer's DN: %s\n"
 msgstr "- DN Pengeluar Sijil: %s\n"
 
-#: src/tunnel.c:319 src/tunnel.c:388
+#: src/tunnel.c:318 src/tunnel.c:387
 msgid "Transferring message(s)..."
 msgstr "Memindahkan mesej..."
 
-#: src/tunnel.c:386
+#: src/tunnel.c:385
 msgid "Starting SMTP session..."
 msgstr "Memulakan sessi SMTP..."
 
-#: src/tunnel.c:469
+#: src/tunnel.c:468
 msgid "Using the TLS/SSL encryption..."
 msgstr "Menggunakan enkripsi TLS/SSL..."
 
-#: src/tunnel.c:483 src/tunnel.c:627
+#: src/tunnel.c:482 src/tunnel.c:626
 #, c-format
 msgid "WARNING: %s"
 msgstr "AMARAN: %s"
 
-#: src/tunnel.c:484
+#: src/tunnel.c:483
 msgid "STARTTLS command failed."
 msgstr "Arahan STARTTLS gagal."
 
-#: src/tunnel.c:618
+#: src/tunnel.c:617
 msgid "Using TLS/SSL encryption between Anubis and remote MTA only..."
 msgstr "Menggunakan enkripsi TLS/SSL antara Anubis dan MTA jauh sahaja..."
 
-#: src/tunnel.c:628
+#: src/tunnel.c:627
 msgid "STARTTLS (ONEWAY) command failed."
 msgstr "Arahan STARTTLS (ONEWAY) gagal."
 
@@ -1299,6 +1340,6 @@ msgstr "%s: pilihan `-W %s' adalah kabur\n"
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr "%s: pilihan `-W %s' tidak mengizinkan hujah\n"
 
-#: lib/obstack.c:403 lib/obstack.c:406
+#: lib/obstack.c:433 lib/obstack.c:436
 msgid "memory exhausted"
 msgstr "kehabisan memori"
