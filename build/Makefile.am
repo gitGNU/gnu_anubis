@@ -23,7 +23,7 @@
 ##
 
 SUBDIRS = guile-1.6
-EXTRA_DIST = keygen.sh specgen.sh ylwrap
+EXTRA_DIST = keygen.sh specgen.sh ylwrap cflow.rc
 
 ## EOF
 
