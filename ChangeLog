@@ -1,3 +1,13 @@
+2005-07-09  Wojciech Polak
+
+	* src/daemon.c (set_unprivileged_user): Copy an unprivileged
+	user name to session.clientname.
+	* src/rcfile.c (control_parser): Bugfix. Set T_USER_NOTPRIVIL
+	flag for KW_USER_NOTPRIVILEGED.
+	* src/authmode.c (anubis_authenticate_mode): Try to open user's
+	configuration file from default location if the CONFIG field
+	is null.
+	
 2005-07-09  Sergey Poznyakoff
 
 	* src/Makefile.am (anubis.cflow): Do not process header
