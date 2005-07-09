@@ -45,7 +45,9 @@ anubis_transparent_mode (struct sockaddr_in *addr)
 		  &session.clientname);
 
   if (cs == 1)
-    anubis_changeowner (session.clientname);
+    {
+      anubis_changeowner (session.clientname);
+    }
   else if (rs && cs == -1 && ntohl (addr->sin_addr.s_addr) == INADDR_LOOPBACK)
     {
       if (check_username (session.clientname))
@@ -53,7 +55,7 @@ anubis_transparent_mode (struct sockaddr_in *addr)
       else
 	set_unprivileged_user ();
     }
-  else 
+  else
     set_unprivileged_user ();
 
   auth_tunnel ();
