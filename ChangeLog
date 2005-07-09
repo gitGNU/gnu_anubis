@@ -1,3 +1,10 @@
+2005-07-09  Sergey Poznyakoff
+
+	* src/Makefile.am (anubis.cflow): Do not process header
+	files, they will be included anyway.
+	* build/cflow.rc: New file
+	* build/Makefile.am: Add cflow.rc.
+
 2005-06-06  Sergey Poznyakoff
 
 	* src/gsasl_srv.c (auth_gsasl_capa_init): Make sure the list
