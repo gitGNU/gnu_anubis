@@ -570,24 +570,21 @@ anubis_authenticate_mode (struct sockaddr_in *addr)
 
   if (usr.username)
     {
-      assign_string (&session.clientname, usr.username);
-      if (check_username (session.clientname))
-	anubis_changeowner (session.clientname);
+      if (check_username (usr.username)) {
+	anubis_changeowner (usr.username);
+	assign_string (&session.clientname, usr.username);
+      }
       else
 	set_unprivileged_user ();
     }
   else
-    {
-      assign_string (&session.clientname, usr.smtp_authid);
-      set_unprivileged_user ();
-    }
+    set_unprivileged_user ();
 
   if (usr.rcfile_name)
-    {
-      session.rcfile_name = usr.rcfile_name;
-      open_rcfile (CF_CLIENT);
-      process_rcfile (CF_CLIENT);
-    }
+    session.rcfile_name = usr.rcfile_name;
+
+  open_rcfile (CF_CLIENT);
+  process_rcfile (CF_CLIENT);
   
   if (topt & T_XELO)
     {
