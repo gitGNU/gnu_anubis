@@ -156,13 +156,20 @@ set_unprivileged_user (void)
 {
   if (topt & T_USER_NOTPRIVIL)
     {
-      if (check_username (session.notprivileged))
+      if (check_username (session.notprivileged)) {
 	anubis_changeowner (session.notprivileged);
+	assign_string (&session.clientname, session.notprivileged);
+      }
+      else
+	anubis_error (EXIT_FAILURE, 0,
+		      _("WARNING: An unprivileged user cannot be resolved. Verify your settings!"));
     }
   else
     {
-      if (check_username (DEFAULT_UNPRIVILEGED_USER))
+      if (check_username (DEFAULT_UNPRIVILEGED_USER)) {
 	anubis_changeowner (DEFAULT_UNPRIVILEGED_USER);
+	assign_string (&session.clientname, DEFAULT_UNPRIVILEGED_USER);
+      }
       else
 	info (NORMAL,
 	      _("WARNING: An unprivileged user has not been specified!"));
