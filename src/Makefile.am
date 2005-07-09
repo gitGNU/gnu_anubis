@@ -119,10 +119,10 @@ FLOWCHART_FILES=$(anubis_SOURCES) $(libanubisdb_a_SOURCES)
 
 flowchart: anubis.cflow
 
-anubis.cflow: $(FLOWCHART_FILES) 
+anubis.cflow: $(FLOWCHART_FILES)
 	CFLOWRC=$(top_srcdir)/build/cflow.rc \
 	 cflow -o$@ --brief -i^s $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
-	            $(CPPFLAGS) $(FLOWCHART_FILES)
+	            $(CPPFLAGS) `echo $(FLOWCHART_FILES)|sed 's/[^ ]*\.h //g'`
 
 ## EOF
 
