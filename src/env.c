@@ -355,7 +355,7 @@ anubis_changeowner (char *user)
 #endif
   struct passwd *pwd;
 
-  if (user == 0 || check_superuser () == 0)
+  if (user == NULL || check_superuser () == 0)
     return;
 
 #ifdef HAVE_PAM
@@ -394,7 +394,7 @@ check_username (char *user)
 {
   struct passwd *pwd;
 
-  if (user == 0)
+  if (user == NULL)
     return 0;
 
   pwd = getpwnam (user);
