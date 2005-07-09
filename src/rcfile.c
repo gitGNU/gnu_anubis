@@ -341,6 +341,7 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
 
   case KW_USER_NOTPRIVILEGED:
     assign_string (&session.notprivileged, arg);
+    topt |= T_USER_NOTPRIVIL;
     break;
 
   case KW_LOGFILE:
@@ -861,7 +862,9 @@ char *
 user_rcfile_name (void)
 {
   if (session.rcfile_name)
-    return strdup (session.rcfile_name);
+    {
+      return strdup (session.rcfile_name);
+    }
   else
     {
       char homedir[MAXPATHLEN + 1];
