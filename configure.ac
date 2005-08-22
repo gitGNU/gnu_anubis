@@ -207,8 +207,15 @@ else
  fi
 fi
 
+WITH_SQL=no
+with_mysql=no
+with_postgres=no
+with_gdbm=no
+with_gsasl=no
+
 dnl Use option --with-gsasl to compile GSASL library support.
 MU_CHECK_GSASL(0.2.3, [
+    with_gsasl=yes
     AC_DEFINE(WITH_GSASL,1,[Define if Anubis is using GNU SASL])
     AC_MSG_RESULT([Enabling GSASL support...])
     ANUBIS_SBIN_ADM='$(adm_sbin_programs)'
@@ -219,7 +226,8 @@ MU_CHECK_GSASL(0.2.3, [
     fi
 
     AC_CHECK_LIB(gdbm, gdbm_open,
-                 [LIBS="$LIBS -lgdbm"
+                 [with_gdbm=yes
+                  LIBS="$LIBS -lgdbm"
                   AC_DEFINE(HAVE_LIBGDBM,1,[Define if you have libgdbm])],
                  [AC_MSG_RESULT([Disabling GDBM support...])])
 
@@ -240,9 +248,10 @@ MU_CHECK_GSASL(0.2.3, [
 			        [AC_MSG_FAILURE([The requested library libmysqlclient is not found or is unusable])],
                                 [/usr/local/lib/mysql /usr/lib/mysql])
                 if test "$USE_SQL" = "1" ;then
-		       WITH_SQL=1
+		       WITH_SQL=yes
                        LIBS="$LIBS $anubis_cv_lib_mysqlclient"
                        AC_MSG_RESULT([Enabling MySQL support...])
+                       with_mysql=yes
 	        else
 		       AC_MSG_FAILURE([Required MySQL libraries not found])
 		fi
@@ -266,9 +275,10 @@ MU_CHECK_GSASL(0.2.3, [
 		                 [AC_MSG_FAILURE([The requested library libpq is not found or is unusable])],
                                  [/usr/local/pgsql/lib /usr/pgsql/lib])
                 if test "$USE_SQL" = "1" ;then
-		       WITH_SQL=1
+		       WITH_SQL=yes
                        LIBS="$LIBS $anubis_cv_lib_pq"
                        AC_MSG_RESULT([Enabling PostgreSQL support...])
+                       with_postgres=yes
 	        else
 		       AC_MSG_FAILURE([Required PostgreSQL libraries not found])
 		fi
@@ -277,7 +287,7 @@ MU_CHECK_GSASL(0.2.3, [
 	 *)     AC_MSG_FAILURE([Unexpected option argument $withval. Please use either --with-postgres or --without-postgres]);;
         esac])
 
-    if test "$WITH_SQL" = "1"; then
+    if test "$WITH_SQL" = "yes"; then
        AC_DEFINE(WITH_SQL, 1, [Define this if you use an SQL interface])
     fi
 
@@ -421,6 +431,47 @@ if test "$EMACS" != "no"; then
 fi
 AC_SUBST(lisp_LISP)
 
+AC_CONFIG_COMMANDS([status],[
+cat <<EOF
+
+*******************************************************************
+GNU Anubis configured with the following settings:
+
+Use Guile...................... $useguile
+Use GPGme...................... $with_gpgme
+Use GNU SASL................... $mu_cv_lib_gsasl
+Use GDBM....................... $with_gdbm
+Use SQL........................ $WITH_SQL
+Use MySQL...................... $with_mysql
+Use PostgreSQL................. $with_postgres
+Use GNU TLS.................... $with_gnutls
+Use OpenSSL.................... $with_openssl
+Support for SOCKS v4/5......... $with_socks_proxy
+Perl-style regular expressions. $with_pcre
+Enable PAM Support............. $with_pam
+Use TCP wrapper library........ $with_tcp_wrappers
+Unprivileged user name......... $with_unprivileged_user
+
+*******************************************************************
+
+Before proceeding, make sure these satisfy your requirements. 
+EOF
+],
+[useguile=$useguile
+with_gpgme=$with_gpgme
+mu_cv_lib_gsasl=$mu_cv_lib_gsasl
+with_gdbm=$with_gdbm
+WITH_SQL=$WITH_SQL
+with_mysql=$with_mysql
+with_postgres=$with_postgres
+with_gnutls=$with_gnutls
+with_openssl=$with_openssl
+with_socks_proxy=$with_socks_proxy
+with_pcre=$with_pcre
+with_pam=$with_pam
+with_tcp_wrappers=$with_tcp_wrappers
+with_unprivileged_user=$with_unprivileged_user])
+
 AC_CONFIG_FILES([Makefile
  build/Makefile
  build/guile-1.6/Makefile
@@ -439,7 +490,7 @@ AC_CONFIG_FILES([Makefile
  testsuite/data/Makefile
  testsuite/etc/Makefile
  ])
+
 AC_OUTPUT
 
-dnl EOF
 
