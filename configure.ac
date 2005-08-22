@@ -208,14 +208,13 @@ else
 fi
 
 WITH_SQL=no
-with_mysql=no
-with_postgres=no
-with_gdbm=no
-with_gsasl=no
+WITH_MYSQL=no
+WITH_POSTGRES=no
+WITH_GDBM=no
 
 dnl Use option --with-gsasl to compile GSASL library support.
 MU_CHECK_GSASL(0.2.3, [
-    with_gsasl=yes
+    WITH_GSASL=yes
     AC_DEFINE(WITH_GSASL,1,[Define if Anubis is using GNU SASL])
     AC_MSG_RESULT([Enabling GSASL support...])
     ANUBIS_SBIN_ADM='$(adm_sbin_programs)'
@@ -226,7 +225,7 @@ MU_CHECK_GSASL(0.2.3, [
     fi
 
     AC_CHECK_LIB(gdbm, gdbm_open,
-                 [with_gdbm=yes
+                 [WITH_GDBM=yes
                   LIBS="$LIBS -lgdbm"
                   AC_DEFINE(HAVE_LIBGDBM,1,[Define if you have libgdbm])],
                  [AC_MSG_RESULT([Disabling GDBM support...])])
@@ -251,7 +250,7 @@ MU_CHECK_GSASL(0.2.3, [
 		       WITH_SQL=yes
                        LIBS="$LIBS $anubis_cv_lib_mysqlclient"
                        AC_MSG_RESULT([Enabling MySQL support...])
-                       with_mysql=yes
+                       WITH_MYSQL=yes
 	        else
 		       AC_MSG_FAILURE([Required MySQL libraries not found])
 		fi
@@ -278,7 +277,7 @@ MU_CHECK_GSASL(0.2.3, [
 		       WITH_SQL=yes
                        LIBS="$LIBS $anubis_cv_lib_pq"
                        AC_MSG_RESULT([Enabling PostgreSQL support...])
-                       with_postgres=yes
+                       WITH_POSTGRES=yes
 	        else
 		       AC_MSG_FAILURE([Required PostgreSQL libraries not found])
 		fi
@@ -439,11 +438,11 @@ GNU Anubis configured with the following settings:
 
 Use Guile...................... $useguile
 Use GPGme...................... $with_gpgme
-Use GNU SASL................... $mu_cv_lib_gsasl
-Use GDBM....................... $with_gdbm
+Use GNU SASL................... $WITH_GSASL
+Use GDBM....................... $WITH_GDBM
 Use SQL........................ $WITH_SQL
-Use MySQL...................... $with_mysql
-Use PostgreSQL................. $with_postgres
+Use MySQL...................... $WITH_MYSQL
+Use PostgreSQL................. $WITH_POSTGRES
 Use GNU TLS.................... $with_gnutls
 Use OpenSSL.................... $with_openssl
 Support for SOCKS v4/5......... $with_socks_proxy
@@ -460,10 +459,11 @@ EOF
 [useguile=$useguile
 with_gpgme=$with_gpgme
 mu_cv_lib_gsasl=$mu_cv_lib_gsasl
-with_gdbm=$with_gdbm
+WITH_GDBM=$WITH_GDBM
 WITH_SQL=$WITH_SQL
-with_mysql=$with_mysql
-with_postgres=$with_postgres
+WITH_MYSQL=$WITH_MYSQL
+WITH_POSTGRES=$WITH_POSTGRES
+WITH_GSASL=$WITH_GSASL
 with_gnutls=$with_gnutls
 with_openssl=$with_openssl
 with_socks_proxy=$with_socks_proxy
