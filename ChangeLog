@@ -1,3 +1,8 @@
+2005-08-22  Sergey Poznyakoff 
+
+	* m4/gsasl.m4: Enable GSASL by default whenever possible.
+	* configure.ac: Display summary after configuring.
+
 2005-07-09  Wojciech Polak
 
 	* src/daemon.c (set_unprivileged_user): Copy an unprivileged
