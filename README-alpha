@@ -13,10 +13,9 @@ instructions.
 
 Report bugs to <bug-anubis@gnu.org>.
 
-To get this information from CVS issue the following commands:
+To get this information from CVS, issue the following commands:
 
- export CVS_RSH="ssh"
- cvs -d :ext:anoncvs@savannah.gnu.org:/cvsroot/anubis co anubis
+ cvs -d :pserver:anoncvs@cvs.savannah.gnu.org:/cvsroot/anubis co anubis
 
 Press enter when prompted for a password.
 
