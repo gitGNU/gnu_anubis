@@ -1,0 +1,277 @@
+#! /bin/sh
+
+# Copyright (C) 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+# 02111-1307, USA.
+
+# Written by Paul Eggert and Sergey Poznyakoff.
+
+# URL of our text domain page in Translation Project
+TP_URL="http://www.iro.umontreal.ca/translation/maint/anubis/"
+
+# Ensure file names are sorted consistently across platforms;
+# e.g., m4/ulonglong_gl.m4 should follow m4/ulonglong.m4.
+LC_ALL=C
+export LC_ALL
+
+usage() {
+ cat <<EOF
+ usage: $0 [--gnulib-srcdir=DIR][--cvs-auth=AUTH-METHOD][--cvs-user=USERNAME][--no-po]
+ Options are:
+ --gnulib-srcdir=DIRNAME      Specify the local directory where gnulib
+                              sources reside. Use this if you already
+                              have gnulib sources on your machine, and
+                              do not want to waste your bandwidth dowloading
+                              them again.
+ --cvs-auth=METHOD            Set the CVS access method used for downloading
+                              gnulib files. METHOD is one of the keywords
+                              accepted by cvs -d option (see info cvs
+                              repository).
+ --cvs-user=USERNAME          Set the CVS username to be used when accessing
+                              the gnulib repository.
+
+The following two options are reserved for future use:
+			      
+ --no-po                      Do not download po files.
+ --update-po[=LANG]           Update po file(s) and exit.
+
+If the file `.bootstrap' exists in the current working directory, its
+contents is read, comments and empty lines removed, shell variables expanded
+and the result is prepended to the command line options.
+
+Running without arguments will suffice in most cases. It is equivalent
+to
+
+    ./bootstrap --cvs-auth=ext --cvs-user=anoncvs
+
+EOF
+}
+
+update_po() {
+  if [ $# = 1 ]; then
+    case $1 in
+    *.po)  POFILE=$1;;
+    *)     POFILE=${1}.po;;
+    esac
+    echo "$0: getting translation for $1..."
+    wget -r -C off $TP_URL/$POFILE
+  else
+    echo "$0: getting translations into po..."
+    (cd po &&
+     rm -f dummy `ls | sed -n '/\.gmo$/p; /\.po/p'` &&
+      wget -nv -nd -r -l 1 -A .po -C off $TP_URL &&
+      rm -f index.html index.html.[0-9]*
+      ls *.po | sed 's/\.po$//' >LINGUAS
+    ) || exit
+  fi
+}
+
+# Read configuration file
+if [ -r .bootstrap ]; then
+  echo "$0: Reading configuration file .bootstrap"
+  eval set -- "`sed 's/#.*$//;/^$/d' .bootstrap | tr '\n' ' '` $*"
+fi
+
+# Parse options.
+
+DOWNLOAD_PO=no
+for option
+do
+  case $option in
+  --help)
+    usage
+    exit;;
+  --gnulib-srcdir=*)
+    GNULIB_SRCDIR=`expr "$option" : '--gnulib-srcdir=\(.*\)'`;;
+  --cvs-auth=*)
+    CVS_AUTH=`expr "$option" : '--cvs-auth=\(.*\)'`;;
+  --cvs-user=*)
+    CVS_USER=`expr "$option" : '--cvs-user=\(.*\)'`;;
+  --no-po)
+    DOWNLOAD_PO=no;;
+  --update-po=*)
+    DOWNLOAD_PO=`expr "$option" : '--update-po=\(.*\)'`;;
+  --update-po)
+    DOWNLOAD_PO=only;;
+  *)
+    echo >&2 "$0: $option: unknown option"
+    exit 1;;
+  esac
+done
+
+case $DOWNLOAD_PO in
+only)	update_po
+	exit 0
+	;;
+no|yes) ;;
+*)	update_po $DOWNLOAD_PO
+	exit 0
+esac
+
+echo "$0: Bootstrapping CVS Anubis..."
+
+build_cvs_prefix() {
+  CVS_PREFIX=:${1}:
+  if [ "${2}" != - ]; then
+    CVS_PREFIX=${CVS_PREFIX}${2}@
+  fi
+  if [ "$1" = "ext" ]; then
+    if [ -z "${CVS_RSH}" ]; then
+       CVS_RSH=ssh
+       export CVS_RSH
+    fi
+  fi
+}
+
+# checkout package
+checkout() {
+  if [ ! -d $1 ]; then
+    echo "$0: getting $1 files..."
+
+    trap exit 1 2 13 15
+    trap 'rm -fr $1; exit 1' 0
+
+    case "${CVS_AUTH--}" in
+    -)       build_cvs_prefix ext anoncvs
+             ;;
+    pserver) build_cvs_prefix $CVS_AUTH ${CVS_USER:-anoncvs}
+             ;;
+    gserver|server)
+	     build_cvs_prefix $CVS_AUTH ${CVS_USER--}
+	     ;;
+    ext)     build_cvs_prefix $CVS_AUTH ${CVS_USER--}
+             ;;
+    *)       echo "$0: Unknown CVS access method" >&2
+	     exit 1;;
+    esac
+    if [ "${CVS_AUTH--}" = "pserver" ]; then
+      cvs -d ${CVS_PREFIX}subversions.gnu.org:/cvsroot/$1 login || exit
+    fi
+    cvs -q -d ${CVS_PREFIX}subversions.gnu.org:/cvsroot/$1 co $1 || exit
+
+    trap 0
+  fi
+}
+
+# Prepare temporary module list
+cat /dev/null > modlist.tmp
+trap 'rm -f modlist.tmp' 0 1 2 13 15
+
+get_modules() {
+	sed '/^[ 	]*#/d;/^[ 	]*$/d' $* >> modlist.tmp
+}
+
+# copy_files srcdir dstdir
+copy_files() {
+  for file in `cat $1/DISTFILES`
+  do
+    case $file in
+    "#*")  continue;;
+    esac
+    echo "$0: Copying file $1/$file"
+    cp -p $1/$file $2/`expr $file : '.*/\(.*\)'`
+  done
+}
+
+# Get gnulib files.
+
+case ${GNULIB_SRCDIR--} in
+-) checkout gnulib
+   GNULIB_SRCDIR=gnulib
+esac
+
+<$GNULIB_SRCDIR/gnulib-tool || exit
+
+get_modules build/gnulib.modules
+
+gnulib_modules=`sort -u modlist.tmp`
+previous_gnulib_modules=
+while [ "$gnulib_modules" != "$previous_gnulib_modules" ]; do
+  previous_gnulib_modules=$gnulib_modules
+  gnulib_modules=`
+    (echo "$gnulib_modules"
+     for gnulib_module in $gnulib_modules; do
+       $GNULIB_SRCDIR/gnulib-tool --extract-dependencies $gnulib_module
+     done) | sort -u
+  `
+done
+
+gnulib_files=`
+  (for gnulib_module in $gnulib_modules; do
+     $GNULIB_SRCDIR/gnulib-tool --extract-filelist $gnulib_module 
+   done) | sort -u
+`
+
+gnulib_dirs=`echo "$gnulib_files" | sed 's,/[^/]*$,,' | sort -u`
+mkdir -p $gnulib_dirs || exit
+
+for file in build/*.m4; do
+  dest=m4/`basename $file`
+
+  rm -f $dest &&
+  echo "$0: Copying file $file" &&
+  cp -p $file $dest || exit
+done
+
+for gnulib_file in $gnulib_files; do
+  case $gnulib_file in
+  config/*) dest=`echo $gnulib_file | sed 's,config/,build-aux/,'`;;
+  # These will be overwritten by autopoint, which still uses
+  # old jm_.* macro names, so we have to keep both copies.
+  m4/gettext.m4 | m4/glibc21.m4 | m4/inttypes_h.m4 | m4/lib-ld.m4 | \
+  m4/lib-prefix.m4 | m4/po.m4 | m4/stdint_h.m4 | m4/uintmax_t.m4 | \
+  m4/ulonglong.m4)
+           dest=`expr $gnulib_file : '\(.*\).m4'`_gl.m4;;
+  *)       dest=$gnulib_file;;
+  esac
+  rm -f $dest &&
+  echo "$0: Copying file $GNULIB_SRCDIR/$gnulib_file" &&
+  cp -p $GNULIB_SRCDIR/$gnulib_file $dest || exit
+done
+
+echo "$0: Creating m4/gnulib.m4"
+(echo "# This file is generated automatically. Please, do not edit."
+ echo "#"
+ echo "AC_DEFUN([anubis_GNULIB],["
+ for gnulib_module in $gnulib_modules; do
+    echo "# $gnulib_module"
+    $GNULIB_SRCDIR/gnulib-tool --extract-autoconf-snippet $gnulib_module
+ done | sed '/AM_GNU_GETTEXT/d'
+ echo "])") > ./m4/gnulib.m4
+
+echo "$0: Updating lib/Makefile.am"
+(cat lib/Makefile.am | sed '/##:##.*##:##/,$d'
+ echo "##:## EOF marker for bootstrap script. Please, do not remove ##:##"
+ echo "## Do not change anything below this line ##"
+
+ for gnulib_module in $gnulib_modules; do
+    echo "# $gnulib_module"
+    $GNULIB_SRCDIR/gnulib-tool --extract-automake-snippet $gnulib_module
+ done | sed 's/lib_SOURCES/libanubis_a_SOURCES/g' ) > lib/Makefile.$$
+ mv lib/Makefile.$$ lib/Makefile.am
+
+# Get translations.
+if test "$DOWNLOAD_PO" = "yes"; then
+  update_po
+fi
+
+# Reconfigure, getting other files.
+
+echo "$0: autoreconf --verbose --install --force ..."
+autoreconf --verbose --install --force || exit 1
+
+
+echo "$0: done.  Now you can run './configure'."
