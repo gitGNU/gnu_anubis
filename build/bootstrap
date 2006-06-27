@@ -218,13 +218,15 @@ gnulib_files=`
 gnulib_dirs=`echo "$gnulib_files" | sed 's,/[^/]*$,,' | sort -u`
 mkdir -p $gnulib_dirs || exit
 
-for file in build/*.m4; do
-  dest=m4/`basename $file`
-
-  rm -f $dest &&
-  echo "$0: Copying file $file" &&
-  cp -p $file $dest || exit
-done
+## FIXME: Normally, project-specific *.m4 files should live in build, and
+## m4 directory should be removed from the CVS. 
+# for file in build/*.m4; do
+#   dest=m4/`basename $file`
+#
+#   rm -f $dest &&
+#   echo "$0: Copying file $file" &&
+#   cp -p $file $dest || exit
+# done
 
 for gnulib_file in $gnulib_files; do
   case $gnulib_file in
