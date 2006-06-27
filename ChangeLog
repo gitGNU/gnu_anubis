@@ -1,3 +1,27 @@
+2006-06-27  Sergey Poznyakoff  <gray@gnu.org.ua>
+
+	* build/bootstrap: Auxiliary script to update anubis library from
+	gnulib.
+	* build/gnulib.modules: List of modules to use.
+	
+	* configure.ac: Remove explicit checks for getopt_long, obstack,
+	snprintf, getline, getpass in favor of gnulib check.
+	* lib/Makefile.am: Rewritten for automatic updates
+	
+	* lib/getline.c, lib/getline.h, lib/getopt.c, lib/getopt.h,
+	lib/getopt1.c, lib/getpass.c, lib/gettext.h, lib/obstack.c,
+	lib/obstack.h, lib/exit.h, lib/exitfail.c, lib/exitfail.h,
+	lib/getdelim.c, lib/getdelim.h, lib/getopt_.h, lib/getopt_int.h,
+	lib/getpass.h, lib/stdbool_.h: Update from gnulib
+
+	* m4/libgnutls.m4: Properly quote macro name.
+	* m4/exitfail.m4, m4/getdelim.m4, m4/getline.m4, m4/getopt.m4,
+	m4/getpass.m4, m4/gnulib.m4, m4/inttypes_h_gl.m4, m4/obstack.m4,
+	m4/onceonly_2_57.m4, m4/stdbool.m4, m4/stdint_h_gl.m4,
+	m4/uintmax_t_gl.m4, m4/ulonglong_gl.m4, m4/unistd_h.m4: Update
+	from gnulib
+	* m4/.cvsignore: Update
+
 2006-02-10  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	* configure.ac (WITH_GSASL): Default to no
