@@ -2,7 +2,7 @@ dnl
 dnl configure.ac
 dnl
 dnl This file is part of GNU Anubis.
-dnl Copyright (C) 2001, 2002, 2003, 2004, 2005 The Anubis Team.
+dnl Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006 The Anubis Team.
 dnl
 dnl GNU Anubis is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -29,14 +29,12 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([build])
 AC_CONFIG_SRCDIR([src/main.c])
 AM_INIT_AUTOMAKE
+AC_GNU_SOURCE
+gl_USE_SYSTEM_EXTENSIONS
 
 if test "$CFLAGS"; then
  CFLAGS_CUSTOM=yes
 fi
-
-dnl Internationalization macros.
-AM_GNU_GETTEXT
-AM_GNU_GETTEXT_VERSION(0.14.1)
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -53,7 +51,6 @@ AC_TYPE_SIZE_T
 AC_TYPE_PID_T
 AC_TYPE_SIGNAL
 AC_CHECK_TYPE(u_char, unsigned char)
-
 AC_CHECK_HEADERS(arpa/inet.h syslog.h regex.h \
  sys/types.h sys/socket.h socket.h sysexits.h)
 
@@ -71,19 +68,15 @@ AC_CHECK_TYPE(socklen_t, , AC_DEFINE(socklen_t, int,
 #endif
 ])
 
-dnl Check for getopt_long in standard library
-AC_CHECK_FUNCS(getopt_long,, [AC_LIBOBJ(getopt)
-                              AC_LIBOBJ(getopt1)])
-
 dnl Checks for library functions.
+
+anubis_GNULIB
+
 AC_CHECK_FUNCS(syslog getrlimit setrlimit socketpair strdup)
 AC_CHECK_FUNCS(setegid setregid setresgid seteuid setreuid)
 AC_CHECK_FUNCS(regcomp daemon putenv)
 
-AC_REPLACE_FUNCS(snprintf setenv getline getpass)
-AC_CHECK_FUNCS(_obstack_begin,
-               [AC_DEFINE(HAVE_OBSTACK,1,[Define if GNU obstack is present])],
-               [AC_LIBOBJ(obstack)])
+AC_REPLACE_FUNCS(setenv)
 
 AC_FUNC_SETVBUF_REVERSED
 AH_BOTTOM([
@@ -102,6 +95,10 @@ case $build in
   *-apple-darwin*)
     INCLUDES="$INCLUDES -I/usr/include" ;;
 esac
+
+dnl Internationalization macros.
+AM_GNU_GETTEXT
+AM_GNU_GETTEXT_VERSION(0.14.1)
 
 dnl Use option --without-guile to NOT compile Guile support.
 AC_ARG_WITH([guile],
@@ -211,7 +208,6 @@ WITH_SQL=no
 WITH_MYSQL=no
 WITH_POSTGRES=no
 WITH_GDBM=no
-WITH_GSASL=no
 
 dnl Use option --with-gsasl to compile GSASL library support.
 MU_CHECK_GSASL(0.2.3, [
