@@ -2,7 +2,7 @@ dnl
 dnl configure.ac
 dnl
 dnl This file is part of GNU Anubis.
-dnl Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006 The Anubis Team.
+dnl Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007 The Anubis Team.
 dnl
 dnl GNU Anubis is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -17,9 +17,6 @@ dnl
 dnl You should have received a copy of the GNU General Public License
 dnl along with GNU Anubis; if not, write to the Free Software Foundation,
 dnl Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-dnl
-dnl GNU Anubis is released under the GPL with the additional exemption that
-dnl compiling, linking, and/or using OpenSSL is allowed.
 dnl
 
 dnl Process this file with autoconf to produce a configure script.
@@ -296,45 +293,6 @@ AC_ARG_WITH(gnutls,
 	[with_gnutls=${withval}],
 	[with_gnutls=yes])
 
-dnl Use option --with-openssl to compile OpenSSL support.
-AC_ARG_WITH(openssl,
-	AC_HELP_STRING([--with-openssl],
-	[with OpenSSL library support (disable GnuTLS)]),
-	[with_openssl=${withval}],
-	[with_openssl=no])
-
-if test "$with_openssl" = "yes"; then
- with_gnutls=no
-fi
-
-if test "$with_openssl" = "yes"; then
- AC_CHECK_LIB(crypto, main,, with_openssl=no)
- AC_CHECK_LIB(ssl, main,, with_openssl=no)
- if test "$with_openssl" = "yes"; then
-  findopenssldir() { :
-   if test -f "$1/include/openssl/ssl.h"; then
-    openssldir=1
-    INCLUDES="$INCLUDES -I$1/include"
-    AC_MSG_CHECKING(for $1/include/openssl/ssl.h)
-    AC_MSG_RESULT([yes])
-    return 0
-   fi
-   return 1
-  }
-  for maindir in /usr/pkg /opt /sw; do
-   findopenssldir $maindir && break 2
-  done
-  if test $openssldir; then
-   AC_DEFINE(HAVE_OPENSSL_SSL_H, 1, [Define to 1 if HAVE_OPENSSL_SSL_H is requested.])
-  else
-   AC_CHECK_HEADERS(openssl/ssl.h)
-  fi
-  M4_DEFS="$M4_DEFS -DWITH_SSL -DWITH_OPENSSL"
-  AC_DEFINE(USE_OPENSSL, 1, [Define to 1 if USE_OPENSSL is requested.])
-  AC_MSG_RESULT([Enabling OpenSSL support...])
- fi
-fi
-
 if test $with_gnutls = yes; then
   AC_CHECK_HEADERS(gnutls/gnutls.h)
   if test $ac_cv_header_gnutls_gnutls_h != no; then
@@ -441,7 +399,6 @@ Use SQL........................ $WITH_SQL
 Use MySQL...................... $WITH_MYSQL
 Use PostgreSQL................. $WITH_POSTGRES
 Use GNU TLS.................... $with_gnutls
-Use OpenSSL.................... $with_openssl
 Support for SOCKS v4/5......... $with_socks_proxy
 Perl-style regular expressions. $with_pcre
 Enable PAM Support............. $with_pam
@@ -462,7 +419,6 @@ WITH_MYSQL=$WITH_MYSQL
 WITH_POSTGRES=$WITH_POSTGRES
 WITH_GSASL=$WITH_GSASL
 with_gnutls=$with_gnutls
-with_openssl=$with_openssl
 with_socks_proxy=$with_socks_proxy
 with_pcre=$with_pcre
 with_pam=$with_pam
