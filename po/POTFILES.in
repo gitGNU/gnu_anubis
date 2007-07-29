@@ -1,6 +1,6 @@
 #
 # List of source files containing translatable strings.
-# Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
+# Copyright (C) 2001, 2002, 2003, 2004, 2007 The Anubis Team.
 #
 
 src/authmode.c
@@ -27,7 +27,6 @@ src/rcfile.c
 src/rcfile.l
 src/rcfile.y
 src/regex.c
-src/ssl.c
 src/tls.c
 src/transmode.c
 src/tunnel.c
