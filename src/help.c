@@ -2,7 +2,7 @@
    help.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2007 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,9 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with GNU Anubis; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
-   GNU Anubis is released under the GPL with the additional exemption that
-   compiling, linking, and/or using OpenSSL is allowed.
 */
 
 #include "headers.h"
@@ -47,9 +44,6 @@ static char *config_opts[] = {
 #ifdef HAVE_TLS
   "GNUTLS",
 #endif				/* HAVE_TLS */
-#ifdef HAVE_SSL
-  "OPENSSL",
-#endif				/* HAVE_SSL */
 #ifdef HAVE_GPG
   "GPG",
 #endif				/* HAVE_GPG */
@@ -93,8 +87,6 @@ print_version (void)
   puts (_("\nYou should have received a copy of the GNU General Public License\n"
 	  "along with GNU Anubis; if not, write to the Free Software\n"
 	  "Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA"));
-  puts (_("\nGNU Anubis is released under the GPL with the additional exemption that\n"
-	  "compiling, linking, and/or using OpenSSL is allowed.\n"));
   exit (0);
 }
 

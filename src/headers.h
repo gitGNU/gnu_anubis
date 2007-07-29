@@ -2,7 +2,7 @@
    headers.h
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004, 2005 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,9 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with GNU Anubis; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
-   GNU Anubis is released under the GPL with the additional exemption that
-   compiling, linking, and/or using OpenSSL is allowed.
 */
 
 #ifdef HAVE_CONFIG_H
@@ -29,11 +26,6 @@
 # if defined(HAVE_GNUTLS_GNUTLS_H)
 #  define HAVE_GNUTLS
 # endif	/* HAVE_GNUTLS_GNUTLS_H */
-# if defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
-#  if defined(HAVE_OPENSSL_SSL_H)
-#   define HAVE_OPENSSL
-#  endif /* HAVE_OPENSSL_SSL_H */
-# endif	/* HAVE_LIBSSL and HAVE_LIBCRYPTO */
 # if defined(HAVE_LIBGPGME) && defined(HAVE_GPGME_H) && !defined(NOGPG)
 #  define HAVE_GPG
 # endif	/* HAVE_LIBGPGME and HAVE_GPGME_H and not NOGPG */
@@ -107,19 +99,7 @@
 # include <gnutls/gnutls.h>
 # include <gnutls/x509.h>
 # define HAVE_TLS
-# undef USE_OPENSSL
 #endif /* USE_GNUTLS and HAVE_GNUTLS */
-
-#if defined(USE_OPENSSL) && defined(HAVE_OPENSSL)
-# include <openssl/crypto.h>
-# include <openssl/x509.h>
-# include <openssl/pem.h>
-# include <openssl/ssl.h>
-# include <openssl/err.h>
-# include <openssl/rand.h>
-# include <openssl/md5.h>
-# define HAVE_SSL
-#endif /* USE_OPENSSL and HAVE_OPENSSL */
 
 #if defined(HAVE_TLS) || defined(HAVE_SSL)
 # define USE_SSL
@@ -487,7 +467,7 @@ void quit (int);
 int check_socks_proxy (int, char *, unsigned int);
 #endif /* USE_SOCKS_PROXY */
 
-/* tls.c or ssl.c */
+/* tls.c */
 #ifdef USE_SSL
 void init_ssl_libs (void);
 NET_STREAM start_ssl_client (NET_STREAM str, const char *cafile, int verbose);

@@ -1,6 +1,6 @@
 /*
    GNU Anubis v4.0 -- an SMTP message submission daemon.
-   Copyright (C) 2001, 2002, 2003, 2004, 2005 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,9 +15,6 @@
    You should have received a copy of the GNU General Public License
    along with GNU Anubis; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
-   GNU Anubis is released under the GPL with the additional exemption that
-   compiling, linking, and/or using OpenSSL is allowed.
 */
 
 #include "headers.h"
@@ -27,7 +24,7 @@ ANUBIS_MODE anubis_mode = anubis_transparent;
 
 const char version[] = "GNU Anubis v" VERSION;
 const char copyright[] =
-  "Copyright (C) 2001, 2002, 2003, 2004, 2005 The Anubis Team.";
+  "Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007 The Anubis Team.";
 
 struct options_struct options;
 struct session_struct session;
@@ -162,7 +159,7 @@ main (int argc, char *argv[])
 	(int) geteuid (), (int) getegid ());
 
   /*
-     Initialize GnuTLS or OpenSSL library and the PRNG.
+     Initialize GnuTLS and the PRNG.
    */
 
 #ifdef USE_SSL
