@@ -3,15 +3,16 @@
 # This file is distributed under the same license as the anubis package.
 # Karl Eichwalder <ke@suse.de>, 2002.
 # Roland Illig <roland.illig@gmx.de>, 2004.
+# Roland Illig <roland.illig@gmx.de>, 2007.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: anubis 3.9.96\n"
+"Project-Id-Version: anubis 4.0\n"
 "Report-Msgid-Bugs-To: bug-anubis@gnu.org\n"
-"POT-Creation-Date: 2004-09-22 15:14+0300\n"
-"PO-Revision-Date: 2004-10-16 08:34+0100\n"
+"POT-Creation-Date: 2004-12-18 11:30+0100\n"
+"PO-Revision-Date: 2007-02-04 20:58+0100\n"
 "Last-Translator: Roland Illig <roland.illig@gmx.de>\n"
-"Language-Team: German <de@li.org>\n"
+"Language-Team: German <translation-team-de@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -49,29 +50,29 @@ msgstr "Kann die Daten aus der SASL-Datenbank nicht bekommen: %s"
 msgid "Record for `%s' not found."
 msgstr "Datensatz für »%s« nicht gefunden."
 
-#: src/authmode.c:604
+#: src/authmode.c:606
 msgid "MTA has not been specified. Set either REMOTE-MTA or LOCAL-MTA."
 msgstr "Kein MTA angegeben. Legen Sie den REMOTE-MTA oder den LOCAL-MTA fest."
 
-#: src/authmode.c:635 src/map.c:164 src/net.c:150 src/net.c:217
+#: src/authmode.c:637 src/map.c:164 src/net.c:150 src/net.c:217
 #: src/transmode.c:98
 #, c-format
 msgid "Illegal address length received for host %s"
 msgstr "Ungültige Adresslänge für den Rechner »%s« empfangen."
 
-#: src/authmode.c:649 src/transmode.c:112
+#: src/authmode.c:651 src/transmode.c:112
 msgid "Loop not allowed. Connection rejected."
 msgstr "Schleifen nicht erlaubt. Verbindung abgewiesen."
 
-#: src/authmode.c:681 src/transmode.c:143
+#: src/authmode.c:683 src/transmode.c:143
 msgid "Connection closed successfully."
 msgstr "Verbindung erfolgreich geschlossen."
 
-#: src/authmode.c:688 src/transmode.c:149
+#: src/authmode.c:690 src/transmode.c:149
 msgid "PAM: Session closed."
 msgstr "PAM: Sitzung beendet."
 
-#: src/authmode.c:692 src/transmode.c:153
+#: src/authmode.c:694 src/transmode.c:153
 msgid "PAM: failed to release authenticator."
 msgstr "PAM: Konnte die Echtheitsbestätigung nicht ermitteln."
 
@@ -133,34 +134,34 @@ msgstr[1] "Kindprozess [%lu] mit Endzustand %s beendet. Noch %d Kindprozesse."
 msgid "WARNING: An unprivileged user has not been specified!"
 msgstr "WARNUNG: Es wurde kein unprivilegierter Benutzer angegeben!"
 
-#: src/daemon.c:213
+#: src/daemon.c:214
 msgid "GNU Anubis is running..."
 msgstr "GNU Anubis läuft ..."
 
-#: src/daemon.c:225 src/exec.c:122
+#: src/daemon.c:226 src/exec.c:122
 msgid "accept() failed"
 msgstr "accept() fehlgeschlagen"
 
-#: src/daemon.c:243
+#: src/daemon.c:244
 #, c-format
 msgid "TCP wrappers: connection from %s:%u rejected."
 msgstr "TCP-Wrapper: Verbindung von %s:%u abgewiesen."
 
-#: src/daemon.c:264
+#: src/daemon.c:269
 #, c-format
 msgid "Too many clients. Connection from %s:%u rejected."
 msgstr "Zu viele Verbindungen. Verbindung von %s:%u abgewiesen."
 
-#: src/daemon.c:271
+#: src/daemon.c:276
 #, c-format
 msgid "Connection from %s:%u"
 msgstr "Verbindung von %s:%u"
 
-#: src/daemon.c:276
+#: src/daemon.c:281
 msgid "daemon: cannot fork"
 msgstr "Deamon: fork() fehlgeschlagen"
 
-#: src/daemon.c:357 src/transmode.c:68
+#: src/daemon.c:362 src/transmode.c:68
 msgid "The MTA has not been specified. Set the REMOTE-MTA or LOCAL-MTA."
 msgstr "Kein MTA angegeben. Legen Sie den REMOTE-MTA oder den LOCAL-MTA fest."
 
@@ -303,27 +304,64 @@ msgstr "%s: Ein temporärer Nameserver-Fehler ist aufgetreten. Versuchen Sie es 
 msgid "%s: unknown DNS error %d."
 msgstr "%s: unbekannter DNS-Fehler %d."
 
-#: src/esmtp.c:58
-msgid "Using ESMTP authentication mechanism CRAM-MD5..."
-msgstr "Benutze die ESMTP-Authentifizierung CRAM-MD5 ..."
+#: src/esmtp.c:165
+msgid "Malformed or unexpected reply"
+msgstr "Kaputte oder unerwartete Antwort"
 
-#: src/esmtp.c:65 src/esmtp.c:107
-msgid "Server rejected the AUTH command."
-msgstr "Der Server hat den AUTH-Befehl zurückgewiesen."
-
-#: src/esmtp.c:74 src/esmtp.c:116 src/esmtp.c:128
+#: src/esmtp.c:189
 #, c-format
-msgid "Challenge decoded: %s\n"
-msgstr "Challenge decodiert: %s\n"
+msgid "SASL gsasl_client_start: %s"
+msgstr "SASL gsasl_client_start: %s"
 
-#: src/esmtp.c:93 src/esmtp.c:139
+#: src/esmtp.c:198 src/esmtp.c:216
 #, c-format
-msgid "ESMTP AUTH: %s."
-msgstr "ESMTP AUTH: %s."
+msgid "GSASL handshake aborted: %d %s"
+msgstr "GSASL-Handshake fehlgeschlagen: %d %s"
 
-#: src/esmtp.c:100
-msgid "Using ESMTP authentication mechanism LOGIN..."
-msgstr "Benutze die ESMTP-Authentifizierung LOGIN ..."
+#: src/esmtp.c:227
+#, c-format
+msgid "GSASL error: %s"
+msgstr "GSASL-Fehler: %s"
+
+#: src/esmtp.c:241
+#, c-format
+msgid "Authentication failed: %d %s"
+msgstr "Authentifizierung fehlgeschlagen: %d %s"
+
+#: src/esmtp.c:244
+msgid "Authentication successful."
+msgstr "Authentifizierung erfolgreich."
+
+#: src/esmtp.c:263
+msgid "Got empty list of authentication methods"
+msgstr "Leere Liste von Authentifizierungsmethoden bekommen"
+
+#: src/esmtp.c:288
+msgid "Server did not offer any feasible authentication mechanism"
+msgstr "Der Server hat keine ordentlichen Authentifizierungsmechanismen angeboten"
+
+#: src/esmtp.c:298
+msgid "INTERNAL ERROR"
+msgstr "INTERNER FEHLER"
+
+#: src/esmtp.c:306
+#, c-format
+msgid "Selected authentication mechanism %s requires TLS encryption. Not using ESMTP authentication"
+msgstr "Der ausgewählte Authentifizierungsmechanismus %s benötigt TLS-Verschlüsselung. Daher wird keine ESMTP-Authentifizierung benutzt"
+
+#: src/esmtp.c:313
+#, c-format
+msgid "Selected authentication mechanism %s"
+msgstr "Benutze Authentifizierungsmechanismus %s"
+
+#: src/esmtp.c:319
+#, c-format
+msgid "Cannot initialize libgsasl: %s"
+msgstr "Kann libgsasl nicht initialisieren: %s"
+
+#: src/esmtp.c:340
+msgid "ESMTP AUTH is not supported"
+msgstr "ESMTP AUTH wird nicht unterstützt"
 
 #: src/exec.c:82
 msgid "#1 socket() failed."
@@ -458,7 +496,7 @@ msgstr "Falscher cdr-Datentyp bei der Rückkehr von %s"
 msgid "Bad return type from %s"
 msgstr "Falscher Rückgabetyp von %s"
 
-#: src/help.c:82
+#: src/help.c:85
 msgid ""
 "\n"
 "GNU Anubis is free software; you can redistribute it and/or modify\n"
@@ -473,7 +511,7 @@ msgstr ""
 "von der Free Software Foundation; entweder in Version 2, oder (nach Ihrer Wahl)\n"
 "einer späteren Version."
 
-#: src/help.c:86
+#: src/help.c:89
 msgid ""
 "\n"
 "GNU Anubis is distributed in the hope that it will be useful,\n"
@@ -488,7 +526,7 @@ msgstr ""
 "BESTIMMTEN ZWECK. Siehe auch die GNU General Public License für\n"
 "weitere Details."
 
-#: src/help.c:90
+#: src/help.c:93
 msgid ""
 "\n"
 "You should have received a copy of the GNU General Public License\n"
@@ -504,7 +542,7 @@ msgstr ""
 "        Boston, MA 02111-1307\n"
 "        USA"
 
-#: src/help.c:93
+#: src/help.c:96
 msgid ""
 "\n"
 "GNU Anubis is released under the GPL with the additional exemption that\n"
@@ -514,11 +552,11 @@ msgstr ""
 "GNU Anubis ist unter der GPL veröffentlicht, mit der zusätzlichen Erlaubnis,\n"
 "OpenSSL zu compilieren, zu linken und/oder zu benutzen.\n"
 
-#: src/help.c:101
+#: src/help.c:104
 msgid "Usage: anubis [options]\n"
 msgstr "Aufruf: anubis [Optionen]\n"
 
-#: src/help.c:102
+#: src/help.c:105
 msgid ""
 " -b, --bind [HOST:]PORT       Specify the TCP port on which GNU Anubis listens\n"
 "                              for connections. The default HOST is INADDR_ANY,\n"
@@ -529,7 +567,7 @@ msgstr ""
 "                              INADDR_ANY und PORT ist standardmäßig 24\n"
 "                              (privates Mailsystem)."
 
-#: src/help.c:105
+#: src/help.c:108
 msgid ""
 " -r, --remote-mta HOST[:PORT] Specify a remote SMTP host name or IP address.\n"
 "                              The default PORT number is 25."
@@ -538,7 +576,7 @@ msgstr ""
 "                              -IP-Adresse angeben. Die PORTnummer ist\n"
 "                              standardmäßig 25."
 
-#: src/help.c:107
+#: src/help.c:110
 msgid ""
 " -l, --local-mta FILE         Execute a local SMTP server, which works on\n"
 "                              standard input and output (inetd-type program).\n"
@@ -548,19 +586,19 @@ msgstr ""
 "                              Standardeingabe und -ausgabe arbeitet.\n"
 "                              Diese Option schließt »--remote-mta« aus."
 
-#: src/help.c:110
+#: src/help.c:113
 msgid " -m, --mode=MODE              Select operation mode."
 msgstr " -m, --mode=MODUS             Ausführungsmodus auswählen."
 
-#: src/help.c:111
+#: src/help.c:114
 msgid "                              MODE is either \"transparent\" or \"auth\""
 msgstr "                              MODUS ist entweder \"transparent\" oder \"auth\""
 
-#: src/help.c:112
+#: src/help.c:115
 msgid " -f, --foreground             Foreground mode."
 msgstr " -f, --foreground             Vordergrundmodus."
 
-#: src/help.c:113
+#: src/help.c:116
 msgid ""
 " -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as described\n"
 "                              in RFC 821 on standard input and output."
@@ -569,23 +607,23 @@ msgstr ""
 "                              beschrieben mit der Standardeingabe und -ausgabe\n"
 "                              benutzen."
 
-#: src/help.c:115
+#: src/help.c:118
 msgid "Output options:\n"
 msgstr "Ausgabeoptionen:\n"
 
-#: src/help.c:116
+#: src/help.c:119
 msgid " -s, --silent                 Work silently."
 msgstr " -s, --silent                 Leise arbeiten."
 
-#: src/help.c:117
+#: src/help.c:120
 msgid " -v, --verbose                Work noisily."
 msgstr " -v, --verbose                Gesprächig arbeiten."
 
-#: src/help.c:118
+#: src/help.c:121
 msgid " -D, --debug                  Debug mode."
 msgstr " -D, --debug                  Debugmodus."
 
-#: src/help.c:119
+#: src/help.c:122
 msgid ""
 "\n"
 "Miscellaneous options:\n"
@@ -593,11 +631,11 @@ msgstr ""
 "\n"
 "Verschiedene Optionen:\n"
 
-#: src/help.c:120
+#: src/help.c:123
 msgid " -c, --check-config           Run the configuration file syntax checker."
 msgstr " -c, --check-config           Syntax der Konfigurationsdatei überprüfen."
 
-#: src/help.c:121
+#: src/help.c:124
 msgid ""
 " --show-config-options        Print a list of configuration options used\n"
 "                              to build GNU Anubis."
@@ -605,27 +643,27 @@ msgstr ""
 " --show-config-options        Eine Liste von Konfigurationsoptionen ausgeben,\n"
 "                              mit denen GNU Anubis erstellt wurde."
 
-#: src/help.c:123
+#: src/help.c:126
 msgid " --relax-perm-check           Do not check user configuration file permissions."
 msgstr " --relax-perm-check           Berechtigungen für die Konfigurationsdatei nicht überprüfen."
 
-#: src/help.c:124
+#: src/help.c:127
 msgid " --altrc FILE                 Specify alternate system configuration file."
 msgstr " --altrc FILE                 Alternative Systemkonfigurationsdatei angeben."
 
-#: src/help.c:125
+#: src/help.c:128
 msgid " --norc                       Ignore system configuration file."
 msgstr " --norc                       Systemkonfigurationsdatei ignorieren."
 
-#: src/help.c:126
+#: src/help.c:129
 msgid " --version                    Print version number and copyright."
 msgstr " --version                    Versionsnummer und Copyright ausgeben."
 
-#: src/help.c:127
+#: src/help.c:130
 msgid " --help                       It's obvious..."
 msgstr " --help                       Diese Übersicht ausgeben."
 
-#: src/help.c:128
+#: src/help.c:131
 #, c-format
 msgid ""
 "\n"
@@ -738,6 +776,10 @@ msgstr "GNU Anubis mit %s:%u verbunden."
 msgid "Short write"
 msgstr "Unvollständiges Schreiben"
 
+#: src/net.c:339
+msgid "INTERNAL ERROR (get_response_smtp): buffer exhausted. Please report."
+msgstr "INTERNER FEHLER (get_response_smtp): Puffer voll. Bitte melden."
+
 #: src/socks.c:53
 msgid "Using SOCKS Proxy..."
 msgstr "Benutze SOCKS-Proxy ..."
@@ -747,91 +789,91 @@ msgstr "Benutze SOCKS-Proxy ..."
 msgid "SOCKS proxy: %s"
 msgstr "SOCKS-Proxy: %s"
 
-#: src/socks.c:141
+#: src/socks.c:143
 msgid "Address must be an IP, not a domain name."
 msgstr "Die Adresse muss eine IP-Adresse sein, kein Domainname."
 
-#: src/socks.c:178 src/socks.c:397
+#: src/socks.c:180 src/socks.c:399
 msgid "SOCKS Proxy Connection: succeeded."
 msgstr "SOCKS-Proxyverbindung: erfolgreich."
 
-#: src/socks.c:181
+#: src/socks.c:183
 msgid "Request rejected or failed."
 msgstr "Anfrage zurückgewiesen oder fehlgeschlagen."
 
-#: src/socks.c:184
+#: src/socks.c:186
 msgid "Request rejected."
 msgstr "Anfrage zurückgewiesen."
 
-#: src/socks.c:187
+#: src/socks.c:189
 msgid "Request rejected, because the client program and identd reported different User-IDs."
 msgstr "Anfrage abgewiesen, da das Clientprogramm und identd verschiedene Benutzer-IDs zurückgegeben haben."
 
-#: src/socks.c:191 src/socks.c:424
+#: src/socks.c:193 src/socks.c:426
 msgid "Server reply is not valid."
 msgstr "Serverantwort ist ungültig."
 
-#: src/socks.c:232
+#: src/socks.c:234
 msgid "Possibly not a SOCKS proxy service."
 msgstr "Vielleicht ist es kein SOCKS-Proxydienst."
 
-#: src/socks.c:244
+#: src/socks.c:246
 msgid "SOCKS Proxy AUTH method: NO AUTHENTICATION REQUIRED"
 msgstr "SOCKS-Proxy-AUTH-Methode: KEINE AUTHENTIFIZIERUNG NÖTIG"
 
-#: src/socks.c:247
+#: src/socks.c:249
 msgid "SOCKS Proxy AUTH method: USER NAME/PASSWORD"
 msgstr "SOCKS-Proxy-AUTH-Methode: BENUTZERNAME/PASSWORT"
 
-#: src/socks.c:251
+#: src/socks.c:253
 msgid "Cannot send null user name or password."
 msgstr "Kann keinen leeren Benutzernamen oder leeres Passwort senden."
 
-#: src/socks.c:293
+#: src/socks.c:295
 msgid "Bad user name or password."
 msgstr "Falscher Benutzername oder falsches Passwort."
 
-#: src/socks.c:297
+#: src/socks.c:299
 msgid "SOCKS Proxy AUTH: succeeded."
 msgstr "SOCKS-Proxy-AUTH: erfolgreich."
 
-#: src/socks.c:300
+#: src/socks.c:302
 msgid "Server does not accept any method."
 msgstr "Der Server akzeptiert keine der Methoden."
 
-#: src/socks.c:303
+#: src/socks.c:305
 msgid "Server does not accept an AUTH method."
 msgstr "Der Server akzeptiert keine der AUTH-Methoden."
 
-#: src/socks.c:400
+#: src/socks.c:402
 msgid "General SOCKS server failure."
 msgstr "Allgemeiner SOCKS-Serverfehler."
 
-#: src/socks.c:403
+#: src/socks.c:405
 msgid "Connection not allowed by a ruleset."
 msgstr "Die Verbindung wird von den Regeln nicht erlaubt."
 
-#: src/socks.c:406
+#: src/socks.c:408
 msgid "Network unreachable."
 msgstr "Das Netzwerk ist nicht erreichbar."
 
-#: src/socks.c:409
+#: src/socks.c:411
 msgid "Host unreachable."
 msgstr "Der Rechner ist nicht erreichbar."
 
-#: src/socks.c:412
+#: src/socks.c:414
 msgid "Connection refused."
 msgstr "Verbindungsaufbau abgelehnt."
 
-#: src/socks.c:415
+#: src/socks.c:417
 msgid "TTL expired."
 msgstr "Wartezeit abgelaufen."
 
-#: src/socks.c:418
+#: src/socks.c:420
 msgid "Command not supported."
 msgstr "Der Befehl wird nicht unterstützt."
 
-#: src/socks.c:421
+#: src/socks.c:423
 msgid "Address type not supported."
 msgstr "Der Adresstyp wird nicht unterstützt."
 
@@ -868,11 +910,11 @@ msgstr "Lese die Systemkonfigurationsdatei »%s« ..."
 msgid "Reading user configuration file %s..."
 msgstr "Lese die Benutzerkonfigurationsdatei »%s« ..."
 
-#: src/rcfile.c:330
+#: src/rcfile.c:341
 msgid "`logfile' directive is ignored in main configuration file"
 msgstr "Die Direktive »logfile« wird in der Hauptkonfigurationsdatei ignoriert"
 
-#: src/rcfile.c:709
+#: src/rcfile.c:789
 #, c-format
 msgid "No such section: %s"
 msgstr "Kein passender Bereich: %s"
@@ -967,26 +1009,26 @@ msgstr "Programm ist in diesem Bereich nicht erlaubt"
 msgid "INTERNAL ERROR at %s:%d: missing or invalid regex"
 msgstr "INTERNER FEHLER an %s:%d: Regulärer Ausdruck fehlt oder ist ungültig"
 
-#: src/regex.c:316
+#: src/regex.c:332
 #, c-format
 msgid "regcomp() failed at %s: %s."
 msgstr "regcomp() an %s fehlgeschlagen: %s"
 
-#: src/regex.c:392
+#: src/regex.c:408
 #, c-format
 msgid "pcre_compile() failed at offset %d: %s."
 msgstr "pcre_compile() an Offset %d fehlgeschlagen: %s."
 
-#: src/regex.c:417
+#: src/regex.c:433
 #, c-format
 msgid "pcre_fullinfo() failed: %d."
 msgstr "pcre_fullinfo() fehlgeschlagen: %d."
 
-#: src/regex.c:429
+#: src/regex.c:445
 msgid "Matched, but too many substrings."
 msgstr "Passt, aber zu viele Teilzeichenketten."
 
-#: src/regex.c:442
+#: src/regex.c:458
 #, c-format
 msgid "Get substring %d failed (%d)."
 msgstr "Lesen der Teilzeichenkette %d fehlgeschlagen (%d)."
@@ -1231,32 +1273,32 @@ msgstr "- Zertifikatversion: #%d\n"
 msgid "- Certificate Issuer's DN: %s\n"
 msgstr "- Domainname des Herausgebers: %s\n"
 
-#: src/tunnel.c:319 src/tunnel.c:388
+#: src/tunnel.c:318 src/tunnel.c:387
 msgid "Transferring message(s)..."
 msgstr "Übertrage Nachricht(en) ..."
 
-#: src/tunnel.c:386
+#: src/tunnel.c:385
 msgid "Starting SMTP session..."
 msgstr "Baue SMTP-Verbindung auf ..."
 
-#: src/tunnel.c:469
+#: src/tunnel.c:468
 msgid "Using the TLS/SSL encryption..."
 msgstr "Benutze die TLS/SSL-Verschlüsselung ..."
 
-#: src/tunnel.c:483 src/tunnel.c:627
+#: src/tunnel.c:482 src/tunnel.c:626
 #, c-format
 msgid "WARNING: %s"
 msgstr "WARNUNG: %s"
 
-#: src/tunnel.c:484
+#: src/tunnel.c:483
 msgid "STARTTLS command failed."
 msgstr "STARTTLS-Befehl fehlgeschlagen."
 
-#: src/tunnel.c:618
+#: src/tunnel.c:617
 msgid "Using TLS/SSL encryption between Anubis and remote MTA only..."
 msgstr "Benutze TLS/SSL-Verschlüsselung nur zwischen Anubis und dem entfernten MTA ..."
 
-#: src/tunnel.c:628
+#: src/tunnel.c:627
 msgid "STARTTLS (ONEWAY) command failed."
 msgstr "STARTTLS-(EINWEG)-Befehl fehlgeschlagen."
 
@@ -1315,6 +1357,18 @@ msgstr "%s: Option »-W %s« ist mehrdeutig\n"
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr "%s: Option »-W %s« erlaubt kein Argument\n"
 
-#: lib/obstack.c:403 lib/obstack.c:406
+#: lib/obstack.c:433 lib/obstack.c:436
 msgid "memory exhausted"
 msgstr "Zu wenig Speicher"
+
+#~ msgid "Using ESMTP authentication mechanism CRAM-MD5..."
+#~ msgstr "Benutze die ESMTP-Authentifizierung CRAM-MD5 ..."
+
+#~ msgid "Server rejected the AUTH command."
+#~ msgstr "Der Server hat den AUTH-Befehl zurückgewiesen."
+
+#~ msgid "Challenge decoded: %s\n"
+#~ msgstr "Challenge decodiert: %s\n"
+
+#~ msgid "ESMTP AUTH: %s."
+#~ msgstr "ESMTP AUTH: %s."

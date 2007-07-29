@@ -1,16 +1,16 @@
 # Polish messages for GNU Anubis -*- mode: po; buffer-file-coding-system: iso-8859-2; default-input-method: latin-2-prefix -*-
-# Copyright (C) 2003, 2004 Free Software Foundation, Inc.
-# Sergey Poznyakoff <gray@gnu.org>, 2003, 2004.
+# Copyright (C) 2003-2006 Free Software Foundation, Inc.
+# Sergey Poznyakoff <gray@gnu.org>, 2003, 2004, 2006.
 #
 # Local Variables:
 # Local IspellDict: polish
 # End:
 msgid ""
 msgstr ""
-"Project-Id-Version: anubis 3.9.96\n"
+"Project-Id-Version: anubis 4.0\n"
 "Report-Msgid-Bugs-To: bug-anubis@gnu.org\n"
-"POT-Creation-Date: 2004-09-22 15:14+0300\n"
-"PO-Revision-Date: 2004-11-16 12:25+0200\n"
+"POT-Creation-Date: 2004-12-18 11:30+0100\n"
+"PO-Revision-Date: 2006-12-21 15:44+0100\n"
 "Last-Translator: Sergey Poznyakoff <gray@gnu.org>\n"
 "Language-Team: Polish <translation-team-pl@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -50,29 +50,29 @@ msgstr "Nie mo¿na pobraæ dane z bazy SASL: %s"
 msgid "Record for `%s' not found."
 msgstr "Brak wpisu dla %s."
 
-#: src/authmode.c:604
+#: src/authmode.c:606
 msgid "MTA has not been specified. Set either REMOTE-MTA or LOCAL-MTA."
 msgstr "Nie podano MTA. Ustaw w pliku konfiguracyjnym REMOTE-MTA lub LOCAL-MTA."
 
-#: src/authmode.c:635 src/map.c:164 src/net.c:150 src/net.c:217
+#: src/authmode.c:637 src/map.c:164 src/net.c:150 src/net.c:217
 #: src/transmode.c:98
 #, c-format
 msgid "Illegal address length received for host %s"
 msgstr "Otrzymano niepoprawn± d³ugo¶æ adresu od hosta %s"
 
-#: src/authmode.c:649 src/transmode.c:112
+#: src/authmode.c:651 src/transmode.c:112
 msgid "Loop not allowed. Connection rejected."
 msgstr "Pêtla nie jest dozwolona. Po³±czenie odrzucono."
 
-#: src/authmode.c:681 src/transmode.c:143
+#: src/authmode.c:683 src/transmode.c:143
 msgid "Connection closed successfully."
 msgstr "Po³±czenie zamkniêto poprawnie."
 
-#: src/authmode.c:688 src/transmode.c:149
+#: src/authmode.c:690 src/transmode.c:149
 msgid "PAM: Session closed."
 msgstr "PAM: Sesja zamkniêta."
 
-#: src/authmode.c:692 src/transmode.c:153
+#: src/authmode.c:694 src/transmode.c:153
 msgid "PAM: failed to release authenticator."
 msgstr "PAM: zwolnienie warto¶ci uwierzytelniaj±cej nie powiod³o siê."
 
@@ -135,34 +135,34 @@ msgstr[2] "Proces potomny [%lu] zakoñczy³ pracê. %s. Pozosta³o %d procesów potom
 msgid "WARNING: An unprivileged user has not been specified!"
 msgstr "OSTRZE¯ENIE: Brak nazwy u¿ytkownika nieuprzywilejowanego!"
 
-#: src/daemon.c:213
+#: src/daemon.c:214
 msgid "GNU Anubis is running..."
 msgstr "GNU Anubis zosta³ uruchomiony..."
 
-#: src/daemon.c:225 src/exec.c:122
+#: src/daemon.c:226 src/exec.c:122
 msgid "accept() failed"
 msgstr "accept() nie powiod³a siê"
 
-#: src/daemon.c:243
+#: src/daemon.c:244
 #, c-format
 msgid "TCP wrappers: connection from %s:%u rejected."
 msgstr "os³ona TCP: odrzucono próbê po³±czenia siê z %s:%u"
 
-#: src/daemon.c:264
+#: src/daemon.c:269
 #, c-format
 msgid "Too many clients. Connection from %s:%u rejected."
 msgstr "Zbyt du¿o klientów. Odrzucono po³±czenie z %s:%u"
 
-#: src/daemon.c:271
+#: src/daemon.c:276
 #, c-format
 msgid "Connection from %s:%u"
 msgstr "Po³±czenie z %s:%u"
 
-#: src/daemon.c:276
+#: src/daemon.c:281
 msgid "daemon: cannot fork"
 msgstr "demon: fork nie powiód³ siê"
 
-#: src/daemon.c:357 src/transmode.c:68
+#: src/daemon.c:362 src/transmode.c:68
 msgid "The MTA has not been specified. Set the REMOTE-MTA or LOCAL-MTA."
 msgstr "Nie podano MTA. Ustaw w pliku konfiguracyjnym REMOTE-MTA lub LOCAL-MTA."
 
@@ -305,27 +305,64 @@ msgstr "%s: wyst±pi³ tymczasowy b³±d serwera nazw. Spróbuj ponownie pó¼niej."
 msgid "%s: unknown DNS error %d."
 msgstr "%s: nieznany b³±d DNS: %d."
 
-#: src/esmtp.c:58
-msgid "Using ESMTP authentication mechanism CRAM-MD5..."
-msgstr "U¿ycie uwierzytelnienia ESMTP CRAM-MD5..."
+#: src/esmtp.c:165
+msgid "Malformed or unexpected reply"
+msgstr "B³êdnie sformatowana lub nieoczekiwana odpowied¼"
 
-#: src/esmtp.c:65 src/esmtp.c:107
-msgid "Server rejected the AUTH command."
-msgstr "Serwer odrzuci³ polecenie AUTH."
-
-#: src/esmtp.c:74 src/esmtp.c:116 src/esmtp.c:128
+#: src/esmtp.c:189
 #, c-format
-msgid "Challenge decoded: %s\n"
-msgstr "Zdekodowano wezwanie: %s\n"
+msgid "SASL gsasl_client_start: %s"
+msgstr "SASL gsasl_client_start: %s"
 
-#: src/esmtp.c:93 src/esmtp.c:139
+#: src/esmtp.c:198 src/esmtp.c:216
 #, c-format
-msgid "ESMTP AUTH: %s."
-msgstr "ESMTP AUTH: %s."
+msgid "GSASL handshake aborted: %d %s"
+msgstr "Przerwany proces negocjacji GSASL: %d %s"
 
-#: src/esmtp.c:100
-msgid "Using ESMTP authentication mechanism LOGIN..."
-msgstr "U¿ycie uwierzytelnienia ESMTP LOGIN..."
+#: src/esmtp.c:227
+#, c-format
+msgid "GSASL error: %s"
+msgstr "B³±d GSASL: %s"
+
+#: src/esmtp.c:241
+#, c-format
+msgid "Authentication failed: %d %s"
+msgstr "Uwierzytelnienie siê nie powiod³o: %d %s"
+
+#: src/esmtp.c:244
+msgid "Authentication successful."
+msgstr "Uwierzytelniono pomy¶lnie."
+
+#: src/esmtp.c:263
+msgid "Got empty list of authentication methods"
+msgstr "Otrzymano pust± listê metod uwierzytelnienia"
+
+#: src/esmtp.c:288
+msgid "Server did not offer any feasible authentication mechanism"
+msgstr "Serwer nie zaoferowa³ ¿adnego u¿ywalnego mechanizmu uwierzytelniania"
+
+#: src/esmtp.c:298
+msgid "INTERNAL ERROR"
+msgstr "B£¡D WEWNÊTRZNY"
+
+#: src/esmtp.c:306
+#, c-format
+msgid "Selected authentication mechanism %s requires TLS encryption. Not using ESMTP authentication"
+msgstr "Wybrany mechanizm uwierzytelniania %s wymaga szyfrowania TLS. Uwierzytelnianie ESMTP nie bêdzie u¿ywane."
+
+#: src/esmtp.c:313
+#, c-format
+msgid "Selected authentication mechanism %s"
+msgstr "Wybrany mechanizm uwierzytelnienia %s"
+
+#: src/esmtp.c:319
+#, c-format
+msgid "Cannot initialize libgsasl: %s"
+msgstr "Nie mo¿na zainicjalizowaæ libgsasl: %s"
+
+#: src/esmtp.c:340
+msgid "ESMTP AUTH is not supported"
+msgstr "ESMTP AUTH nie jest wspierane"
 
 #: src/exec.c:82
 msgid "#1 socket() failed."
@@ -460,7 +497,7 @@ msgstr "B³êdny typ komórki cdr w powrocie z %s"
 msgid "Bad return type from %s"
 msgstr "B³êdny typ danych w powrocie z %s"
 
-#: src/help.c:82
+#: src/help.c:85
 msgid ""
 "\n"
 "GNU Anubis is free software; you can redistribute it and/or modify\n"
@@ -475,7 +512,7 @@ msgstr ""
 "Oprogramowania - wed³ug wersji 2-giej tej Licencji lub której¶\n"
 "z pózniejszych wersji."
 
-#: src/help.c:86
+#: src/help.c:89
 msgid ""
 "\n"
 "GNU Anubis is distributed in the hope that it will be useful,\n"
@@ -490,7 +527,7 @@ msgstr ""
 "ZASTOSOWAÑ. W celu uzyskania bli¿szych informacji przeczytaj\n"
 "Powszechn± Licencjê Publiczn± GNU."
 
-#: src/help.c:90
+#: src/help.c:93
 msgid ""
 "\n"
 "You should have received a copy of the GNU General Public License\n"
@@ -503,7 +540,7 @@ msgstr ""
 "je¶li za¶ nie - napisz do Free Software Foundation, Inc., \n"
 "59 Temple Place, Suite 330, Boston, MA 02111-1307  USA"
 
-#: src/help.c:93
+#: src/help.c:96
 msgid ""
 "\n"
 "GNU Anubis is released under the GPL with the additional exemption that\n"
@@ -513,11 +550,11 @@ msgstr ""
 "GNU Anubis rozpowszechnia siê pod warunkami GPL z dodatkowym zezwoleniem na\n"
 "kompilacjê, ³±czenie i/lub u¿ycie z OpenSSL.\n"
 
-#: src/help.c:101
+#: src/help.c:104
 msgid "Usage: anubis [options]\n"
 msgstr "Sk³adnia: anubis [opcje]\n"
 
-#: src/help.c:102
+#: src/help.c:105
 msgid ""
 " -b, --bind [HOST:]PORT       Specify the TCP port on which GNU Anubis listens\n"
 "                              for connections. The default HOST is INADDR_ANY,\n"
@@ -527,7 +564,7 @@ msgstr ""
 "                              Domniemany HOST INADDR_ANY, port -- 24 (prywatny\n"
 "                              system pocztowy)."
 
-#: src/help.c:105
+#: src/help.c:108
 msgid ""
 " -r, --remote-mta HOST[:PORT] Specify a remote SMTP host name or IP address.\n"
 "                              The default PORT number is 25."
@@ -535,7 +572,7 @@ msgstr ""
 " -r, --remote-mta HOST[:PORT] Podaje nazwê lub IP zdalnego hostu SMTP.\n"
 "                              Domniemany numer portu 25."
 
-#: src/help.c:107
+#: src/help.c:110
 msgid ""
 " -l, --local-mta FILE         Execute a local SMTP server, which works on\n"
 "                              standard input and output (inetd-type program).\n"
@@ -547,19 +584,19 @@ msgstr ""
 "                              U¿ycie tej opcji wy³±cza u¿ycie opcji\n"
 "                              --remote-mta"
 
-#: src/help.c:110
+#: src/help.c:113
 msgid " -m, --mode=MODE              Select operation mode."
 msgstr " -m, --mode=TRYB              Ustawia tryb dzia³ania."
 
-#: src/help.c:111
+#: src/help.c:114
 msgid "                              MODE is either \"transparent\" or \"auth\""
 msgstr "                              Warto¶ci± TRYB jest \"transparent\" b±d¼ \"auth\""
 
-#: src/help.c:112
+#: src/help.c:115
 msgid " -f, --foreground             Foreground mode."
 msgstr " -f, --foreground             Tryb pierwszoplanowy."
 
-#: src/help.c:113
+#: src/help.c:116
 msgid ""
 " -i, --stdio                  Use the SMTP protocol (OMP/Tunnel) as described\n"
 "                              in RFC 821 on standard input and output."
@@ -567,23 +604,23 @@ msgstr ""
 " -i, --stdio                  U¿yj protoko³u SMTP (OMP/Tunnel, RFC 821) na\n"
 "                              standardowym wej¶ciu/wyj¶ciu."
 
-#: src/help.c:115
+#: src/help.c:118
 msgid "Output options:\n"
 msgstr "Opcje kontroluj±ce wyj¶cie:\n"
 
-#: src/help.c:116
+#: src/help.c:119
 msgid " -s, --silent                 Work silently."
 msgstr " -s, --silent                 Wy³±czenie komunikatów o b³êdach."
 
-#: src/help.c:117
+#: src/help.c:120
 msgid " -v, --verbose                Work noisily."
 msgstr " -v, --verbose                Wy¶wietla du¿o informacji diagnostycznej."
 
-#: src/help.c:118
+#: src/help.c:121
 msgid " -D, --debug                  Debug mode."
 msgstr " -D, --debug                  Tryb odpluskwiania."
 
-#: src/help.c:119
+#: src/help.c:122
 msgid ""
 "\n"
 "Miscellaneous options:\n"
@@ -591,13 +628,13 @@ msgstr ""
 "\n"
 "Ró¿ne opcje:\n"
 
-#: src/help.c:120
+#: src/help.c:123
 msgid " -c, --check-config           Run the configuration file syntax checker."
 msgstr ""
 " -c, --check-config           Uruchomienie kontroli sk³adni pliku\n"
 "                              konfiguracyjnego."
 
-#: src/help.c:121
+#: src/help.c:124
 msgid ""
 " --show-config-options        Print a list of configuration options used\n"
 "                              to build GNU Anubis."
@@ -605,29 +642,29 @@ msgstr ""
 " --show-config-options        Wypisanie warto¶ci domy¶lnych, u¿ytych podczas\n"
 "                              budowy GNU Anubisa."
 
-#: src/help.c:123
+#: src/help.c:126
 msgid " --relax-perm-check           Do not check user configuration file permissions."
 msgstr ""
 " --relax-perm-check           Wy³±cza sprawdzanie uprawnieñ do pliku\n"
 "                              konfiguracyjnego u¿ytkownika."
 
-#: src/help.c:124
+#: src/help.c:127
 msgid " --altrc FILE                 Specify alternate system configuration file."
 msgstr " --altrc PLIK                 Podaje nazwê alternatywnego pliku konfiguracyjnego."
 
-#: src/help.c:125
+#: src/help.c:128
 msgid " --norc                       Ignore system configuration file."
 msgstr " --norc                       Ignorowanie systemowego pliku konfiguracyjnego."
 
-#: src/help.c:126
+#: src/help.c:129
 msgid " --version                    Print version number and copyright."
 msgstr " --version                    Wy¶wietla numer wersji i copyright."
 
-#: src/help.c:127
+#: src/help.c:130
 msgid " --help                       It's obvious..."
 msgstr " --help                       Samo przez siê rozumie..."
 
-#: src/help.c:128
+#: src/help.c:131
 #, c-format
 msgid ""
 "\n"
@@ -740,6 +777,10 @@ msgstr "GNU Anubis zosta³ przywi±zany do %s:%u"
 msgid "Short write"
 msgstr "B³±d zapisu"
 
+#: src/net.c:339
+msgid "INTERNAL ERROR (get_response_smtp): buffer exhausted. Please report."
+msgstr "B£¡D WEWNÊTRZNY (get_response_smtp): przekroczony rozmiar bufora. Proszê zg³osiæ."
+
 #: src/socks.c:53
 msgid "Using SOCKS Proxy..."
 msgstr "U¿ycie serwera SOCKS..."
@@ -749,91 +790,91 @@ msgstr "U¿ycie serwera SOCKS..."
 msgid "SOCKS proxy: %s"
 msgstr "serwer SOCKS: %s"
 
-#: src/socks.c:141
+#: src/socks.c:143
 msgid "Address must be an IP, not a domain name."
 msgstr "Adres musi byæ adresem IP, nie nazw± domeny."
 
-#: src/socks.c:178 src/socks.c:397
+#: src/socks.c:180 src/socks.c:399
 msgid "SOCKS Proxy Connection: succeeded."
 msgstr "Po³±czenie siê do serwera SOCKS powiod³o siê."
 
-#: src/socks.c:181
+#: src/socks.c:183
 msgid "Request rejected or failed."
 msgstr "¯±danie nie powiod³o siê lub zosta³o odrzucone."
 
-#: src/socks.c:184
+#: src/socks.c:186
 msgid "Request rejected."
 msgstr "¯±danie odrzucono."
 
-#: src/socks.c:187
+#: src/socks.c:189
 msgid "Request rejected, because the client program and identd reported different User-IDs."
 msgstr "¯±danie odrzucono, poniewa¿ program klienta a identd poda³y ró¿ne identyfikatory u¿ytkownika."
 
-#: src/socks.c:191 src/socks.c:424
+#: src/socks.c:193 src/socks.c:426
 msgid "Server reply is not valid."
 msgstr "Odpowied¼ serwera nie jest poprawna."
 
-#: src/socks.c:232
+#: src/socks.c:234
 msgid "Possibly not a SOCKS proxy service."
 msgstr "Nie wygl±da to na us³ugê serwera SOCKS."
 
-#: src/socks.c:244
+#: src/socks.c:246
 msgid "SOCKS Proxy AUTH method: NO AUTHENTICATION REQUIRED"
 msgstr "Metoda uwierzytelnienia serwera SOCKS: UWIERZYTELNIENIE NIE JEST WYMAGANE"
 
-#: src/socks.c:247
+#: src/socks.c:249
 msgid "SOCKS Proxy AUTH method: USER NAME/PASSWORD"
 msgstr "Metoda uwierzytelnienia serwera SOCKS: NAZWA U¯YTKOWNIKA/HAS£O"
 
-#: src/socks.c:251
+#: src/socks.c:253
 msgid "Cannot send null user name or password."
 msgstr "Nie mo¿na wys³aæ pustej nazwy u¿ytkownika lub has³a."
 
-#: src/socks.c:293
+#: src/socks.c:295
 msgid "Bad user name or password."
 msgstr "Niepoprawna nazwa u¿ytkownika lub has³o."
 
-#: src/socks.c:297
+#: src/socks.c:299
 msgid "SOCKS Proxy AUTH: succeeded."
 msgstr "serwer SOCKS, AUTH: powodzenie."
 
-#: src/socks.c:300
+#: src/socks.c:302
 msgid "Server does not accept any method."
 msgstr "Serwer nie przyjmuje ¿adnej metody."
 
-#: src/socks.c:303
+#: src/socks.c:305
 msgid "Server does not accept an AUTH method."
 msgstr "Serwer nie przyjmuje metody uwierzytelnienia."
 
-#: src/socks.c:400
+#: src/socks.c:402
 msgid "General SOCKS server failure."
 msgstr "Ogólny b³±d serwera SOCKS"
 
-#: src/socks.c:403
+#: src/socks.c:405
 msgid "Connection not allowed by a ruleset."
 msgstr "Pod³±czenie nie dozwolone zestawem regu³."
 
-#: src/socks.c:406
+#: src/socks.c:408
 msgid "Network unreachable."
 msgstr "Sieæ jest niedostêpna."
 
-#: src/socks.c:409
+#: src/socks.c:411
 msgid "Host unreachable."
 msgstr "Host jest niedostêpny."
 
-#: src/socks.c:412
+#: src/socks.c:414
 msgid "Connection refused."
 msgstr "Po³±czenie odrzucono."
 
-#: src/socks.c:415
+#: src/socks.c:417
 msgid "TTL expired."
 msgstr "TTL wyczerpany."
 
-#: src/socks.c:418
+#: src/socks.c:420
 msgid "Command not supported."
 msgstr "Polecenie nie jest obs³ugiwane."
 
-#: src/socks.c:421
+#: src/socks.c:423
 msgid "Address type not supported."
 msgstr "Typ adresu nie jest obs³ugiwany."
 
@@ -870,11 +911,11 @@ msgstr "Odczytanie systemowego pliku konfiguracyjnego %s..."
 msgid "Reading user configuration file %s..."
 msgstr "Odczytanie pliku konfiguracyjnego u¿ytkownika %s..."
 
-#: src/rcfile.c:330
+#: src/rcfile.c:341
 msgid "`logfile' directive is ignored in main configuration file"
 msgstr "Dyrektywa `logfile' jest ignorowana w g³ównym pliku konfiguracyjnym"
 
-#: src/rcfile.c:709
+#: src/rcfile.c:789
 #, c-format
 msgid "No such section: %s"
 msgstr "Brak takiej sekcji: %s"
@@ -969,26 +1010,26 @@ msgstr "u¿ycie programu w tej sekcji nie jest dozwolone"
 msgid "INTERNAL ERROR at %s:%d: missing or invalid regex"
 msgstr "B£¡D WEWNÊTRZNY w %s:%d: brakuj±ce b±d¼ niepoprawne wyra¿enie regularne"
 
-#: src/regex.c:316
+#: src/regex.c:332
 #, c-format
 msgid "regcomp() failed at %s: %s."
 msgstr "regcomp() nie powiod³a siê przy '%s': %s"
 
-#: src/regex.c:392
+#: src/regex.c:408
 #, c-format
 msgid "pcre_compile() failed at offset %d: %s."
 msgstr "pcre_compile() nie powiod³a siê przy pozycji %d: %s."
 
-#: src/regex.c:417
+#: src/regex.c:433
 #, c-format
 msgid "pcre_fullinfo() failed: %d."
 msgstr "pcre_fullinfo() nie powiod³a siê: %d."
 
-#: src/regex.c:429
+#: src/regex.c:445
 msgid "Matched, but too many substrings."
 msgstr "£añcuch dopasowany, ale za du¿o pod³añcuchów."
 
-#: src/regex.c:442
+#: src/regex.c:458
 #, c-format
 msgid "Get substring %d failed (%d)."
 msgstr "Otrzymanie pod³añcucha %d nie powiod³o siê (%d)."
@@ -1239,32 +1280,32 @@ msgstr " - Wersja certyfikatu: #%d\n"
 msgid "- Certificate Issuer's DN: %s\n"
 msgstr " - Informacje o wydawcy certyfikatu: %s\n"
 
-#: src/tunnel.c:319 src/tunnel.c:388
+#: src/tunnel.c:318 src/tunnel.c:387
 msgid "Transferring message(s)..."
 msgstr "Przekazywanie wiadomo¶ci..."
 
-#: src/tunnel.c:386
+#: src/tunnel.c:385
 msgid "Starting SMTP session..."
 msgstr "Uruchamianie sesji SMTP..."
 
-#: src/tunnel.c:469
+#: src/tunnel.c:468
 msgid "Using the TLS/SSL encryption..."
 msgstr "U¿ycie szyfrowania TLS/SSL..."
 
-#: src/tunnel.c:483 src/tunnel.c:627
+#: src/tunnel.c:482 src/tunnel.c:626
 #, c-format
 msgid "WARNING: %s"
 msgstr "OSTRZE¯ENIE: %s"
 
-#: src/tunnel.c:484
+#: src/tunnel.c:483
 msgid "STARTTLS command failed."
 msgstr "Polecenie STARTTLS nie powiod³o siê."
 
-#: src/tunnel.c:618
+#: src/tunnel.c:617
 msgid "Using TLS/SSL encryption between Anubis and remote MTA only..."
 msgstr "U¿ycie jednokierunkowego szyfrowania TLS/SSL tylko miêdzy Anubisem i zdalnym MTA..."
 
-#: src/tunnel.c:628
+#: src/tunnel.c:627
 msgid "STARTTLS (ONEWAY) command failed."
 msgstr "Polecenie STARTTLS (jednokierunkowe) nie powiod³o siê."
 
@@ -1323,57 +1364,6 @@ msgstr "%s: opcja `-W %s' jest niejednoznaczna\n"
 msgid "%s: option `-W %s' doesn't allow an argument\n"
 msgstr "%s: opcja `-W %s' nie mo¿e mieæ argumentów\n"
 
-#: lib/obstack.c:403 lib/obstack.c:406
+#: lib/obstack.c:433 lib/obstack.c:436
 msgid "memory exhausted"
 msgstr "pamiêæ wyczerpana"
-
-#~ msgid "OK"
-#~ msgstr "DOBRZE"
-
-#~ msgid "ERROR"
-#~ msgstr "B£¡D"
-
-#~ msgid "Connection terminated."
-#~ msgstr "Po³±czenie zakoñczono."
-
-#~ msgid "Using the ESMTP CRAM-MD5 authentication..."
-#~ msgstr "U¿ycie uwierzytelnienia ESMTP CRAM-MD5..."
-
-#~ msgid "Connecting to %s:%u..."
-#~ msgstr "Po³±czenie z %s:%u..."
-
-#~ msgid "Using the 'ONEWAY' TLS/SSL encryption..."
-#~ msgstr "U¿ycie jednokierunkowego szyfrowania TLS/SSL..."
-
-#~ msgid "getpeername() failed: %s."
-#~ msgstr "getpeername() nie powiod³a siê: %s"
-
-#~ msgid "The %s section has been found. Processing..."
-#~ msgstr "Odnaleziono sekcjê %s. Przetwarzanie..."
-
-#~ msgid "IDENT: send() failed: %s."
-#~ msgstr "IDENT: send() nie powiód³ siê: %s"
-
-#~ msgid "Built-in support for: "
-#~ msgstr "Wbudowana obs³uga: "
-
-#~ msgid "Initializing socket..."
-#~ msgstr "Inicjalizacja gniazda..."
-
-#~ msgid "(%ld)SERVER >>> %s"
-#~ msgstr "(%ld)SERWER >>> %s"
-
-#~ msgid "(%ld)CLIENT >>> %s"
-#~ msgstr "(%ld)KLIENT <<< %s"
-
-#~ msgid "(%d)SERVER <<< %s"
-#~ msgstr "(%d)SERWER <<< %s"
-
-#~ msgid "(%d)CLIENT <<< %s"
-#~ msgstr "(%d)KLIENT <<< %s"
-
-#~ msgid "Fatal fclose() error. %s."
-#~ msgstr "B³±d krytyczny podczas fclose(). %s."
-
-#~ msgid "SSL_set_fd() failed."
-#~ msgstr "SSL_set_fd() nie powiód³ siê."
