@@ -14,7 +14,8 @@
 @syncodeindex fn cp
 
 @copying
-Copyright @copyright{} 2001, 2002, 2003, 2004 Wojciech Polak and Sergey Poznyakoff.
+Copyright @copyright{} 2001, 2002, 2003, 2004, 2007 Wojciech Polak and
+Sergey Poznyakoff.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.2 or
@@ -2984,7 +2985,6 @@ from the @file{contrib} directory (part of the distribution).
 @cindex Transport Layer Security, TLS
 @cindex Secure Socket Layer, SSL
 @cindex GnuTLS
-@cindex OpenSSL
 @cindex encryption
 
 According to the RFC 2246 document, the TLS (Transport Layer Security)
@@ -2996,8 +2996,7 @@ communicating applications. The TLS protocol itself is based on the SSL 3.0
 (Secure Socket Layer) protocol specification.
 
 GNU Anubis supports the TLS/SSL (via the GnuTLS, a Transport Layer Security
-Library available at @w{@uref{http://www.gnutls.org/}}, or OpenSSL,
-a cryptographic package available at @w{@uref{http://www.openssl.org/}}),
+Library available at @w{@uref{http://www.gnutls.org/}},
 but your MTA must provide the STARTTLS command first. This can be checked by:
 
 @smallexample
