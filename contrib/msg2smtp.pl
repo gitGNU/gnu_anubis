@@ -48,9 +48,6 @@ $0 -h HOST [options]
 #  along with GNU Anubis; if not, write to the Free Software Foundation,
 #  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 # 
-#  GNU Anubis is released under the GPL with the additional exemption that
-#  compiling, linking, and/or using OpenSSL is allowed.
-# 
 #  msg2smtp.pl code: Michael de Beer <michael@debeer.org>
 #    ext_auth() mainly taken from the Net::SMTP module
 #
