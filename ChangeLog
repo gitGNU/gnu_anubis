@@ -1,3 +1,7 @@
+2007-07-29  Wojciech Polak
+
+	* */*: OpenSSL support has been dropped.
+
 2006-06-27  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	* build/bootstrap: Auxiliary script to update anubis library from
