@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # This file is part of GNU Anubis.
-# Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
+# Copyright (C) 2001, 2002, 2003, 2004, 2007 The Anubis Team.
 #
 # GNU Anubis is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,9 +17,6 @@
 # along with GNU Anubis; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# GNU Anubis is released under the GPL with the additional exemption that
-# compiling, linking, and/or using OpenSSL is allowed.
-#
 
 cat <<EOF
 Summary: An SMTP message submission daemon.
@@ -31,8 +28,8 @@ Source: ftp://ftp.gnu.org/gnu/anubis/%{name}-%{version}.tar.gz
 Group: System Environment/Daemons
 Copyright: GPL
 BuildRoot: %{_tmppath}/%{name}-%{version}
-BuildRequires: openssl-devel
-Requires: openssl pidentd
+BuildRequires: gnutls-devel
+Requires: gnutls pidentd
 Prereq: /sbin/chkconfig /sbin/install-info /usr/sbin/useradd /usr/sbin/userdel
 
 %description
@@ -51,7 +48,7 @@ considerable flexibility and is easily extensible.
 %setup -q
 
 %build
-CFLAGS="\$RPM_OPT_FLAGS" ./configure --prefix=/usr --with-openssl
+CFLAGS="\$RPM_OPT_FLAGS" ./configure --prefix=/usr
 make
 
 %install
