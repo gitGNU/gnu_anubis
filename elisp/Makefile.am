@@ -1,5 +1,6 @@
+##
 ## This file is part of GNU Anubis.
-## Copyright (C) 2003 The Anubis Team.
+## Copyright (C) 2003, 2007 The Anubis Team.
 ##
 ## GNU Anubis is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -15,8 +16,6 @@
 ## along with GNU Anubis; if not, write to the Free Software Foundation,
 ## Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ##
-## GNU Anubis is released under the GPL with the additional exemption that
-## compiling, linking, and/or using OpenSSL is allowed.
 
 LISPSRC=anubis-mode.el
 lisp_LISP=@lisp_LISP@
