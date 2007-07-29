@@ -1,5 +1,6 @@
+dnl
 dnl This file is part of GNU Anubis.
-dnl Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
+dnl Copyright (C) 2001, 2002, 2003, 2004, 2007 The Anubis Team.
 dnl
 dnl GNU Anubis is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -15,8 +16,6 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with GNU Anubis; if not, write to the Free Software Foundation,
 dnl Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 dnl
-dnl GNU Anubis is released under the GPL with the additional exemption that
-dnl compiling, linking, and/or using OpenSSL is allowed.
 
 dnl Autoconf macros for libgpgme
 dnl $Id$
