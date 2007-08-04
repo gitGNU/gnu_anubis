@@ -128,7 +128,6 @@ msgstr "Sonlandırıldı"
 msgid "Child [%lu] finished. %s. %d client left."
 msgid_plural "Child [%lu] finished. %s. %d clients left."
 msgstr[0] "Altsüreç [%lu] tamamlandı. Çıkış durumu: %s. %d istemci kaldı."
-msgstr[1] "Altsüreç [%lu] tamamlandı. Çıkış durumu: %s. %d istemci kaldı."
 
 #: src/daemon.c:169
 msgid "WARNING: An unprivileged user has not been specified!"
@@ -1102,14 +1101,12 @@ msgstr "TLS/SSL elsıkışması başarısız!"
 msgid "%s connection using %s (%u bit)"
 msgid_plural "%s connection using %s (%u bits)"
 msgstr[0] "%2$s kullanarak %1$s bağlantısı (%3$u bit)"
-msgstr[1] "%2$s kullanarak %1$s bağlantısı (%3$u bit)"
 
 #: src/ssl.c:462
 #, c-format
 msgid "Server public key is %d bit"
 msgid_plural "Server public key is %d bits"
 msgstr[0] "Sunucu genel anahtarı %d bit"
-msgstr[1] "Sunucu genel anahtarı %d bit"
 
 #: src/ssl.c:467
 msgid "Certificate:"
@@ -1167,14 +1164,12 @@ msgstr "Sertifikaya güvenildi."
 msgid "- Anonymous DH using prime of %d bit.\n"
 msgid_plural "- Anonymous DH using prime of %d bits.\n"
 msgstr[0] "- Anonim DH %d bit asal sayısı kullanıyor.\n"
-msgstr[1] "- Anonim DH %d bit asal sayısı kullanıyor.\n"
 
 #: src/tls.c:373
 #, c-format
 msgid "- Ephemeral DH using prime of %d bit.\n"
 msgid_plural "- Ephemeral DH using prime of %d bits.\n"
 msgstr[0] "- Geçici DH %d bit asal sayısı kullanıyor.\n"
-msgstr[1] "- Geçici DH %d bit asal sayısı kullanıyor.\n"
 
 #: src/tls.c:384
 #, c-format
@@ -1241,7 +1236,6 @@ msgstr "RSA\n"
 msgid "- Modulus: %d bit\n"
 msgid_plural "- Modulus: %d bits\n"
 msgstr[0] "- Modülo: %d bit\n"
-msgstr[1] "- Modülo: %d bit\n"
 
 #: src/tls.c:464
 #, c-format
@@ -1253,7 +1247,6 @@ msgstr "DSA\n"
 msgid "- Exponent: %d bit\n"
 msgid_plural "- Exponent: %d bits\n"
 msgstr[0] "- Üs: %d bit\n"
-msgstr[1] "- Üs: %d bit\n"
 
 #: src/tls.c:469
 #, c-format
