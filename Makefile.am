@@ -21,7 +21,7 @@
 
 AUTOMAKE_OPTIONS = 1.8.3 gnits
 ACLOCAL_AMFLAGS = -I m4
-SUBDIRS = build lib intl po doc scripts examples guile contrib \
+SUBDIRS = build lib po doc scripts examples guile contrib \
 	src elisp testsuite
 
 ## EOF
