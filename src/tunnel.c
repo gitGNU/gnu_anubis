@@ -477,19 +477,22 @@ handle_starttls (char *command)
   if (!(topt & T_LOCAL_MTA))
     {
       NET_STREAM stream;
-      char reply[LINEBUFFER + 1];
+      char *reply = NULL;
+      size_t size = 0;
       swrite (CLIENT, remote_server, "STARTTLS" CRLF);
 
-      get_response_smtp (CLIENT, remote_server, reply, sizeof (reply) - 1);
+      get_response_smtp (CLIENT, remote_server, &reply, &size);
 
       if (!isdigit ((unsigned char) reply[0])
 	  || (unsigned char) reply[0] > '3')
 	{
 	  remcrlf (reply);
 	  info (VERBOSE, _("WARNING: %s"), reply);
+	  free (reply);
 	  anubis_error (0, 0, _("STARTTLS command failed."));
 	  return 0;
 	}
+      free (reply);
 
       stream = start_ssl_client (remote_server,
 				 secure.cafile,
@@ -612,7 +615,6 @@ handle_ehlo (char *command, char **reply)
       && (topt & T_STARTTLS) && !(topt & T_SSL_FINISHED))
     {
       NET_STREAM stream;
-      char ehlo[128];
       char *newreply = NULL;
       size_t nsize = 0;
 
@@ -637,7 +639,7 @@ handle_ehlo (char *command, char **reply)
 	  free (newreply);
 	  anubis_error (0, 0, _("STARTTLS (ONEWAY) command failed."));
 	  topt &= ~T_SSL_ONEWAY;
-	  swrite (SERVER, remote_client, reply);
+	  swrite (SERVER, remote_client, *reply);
 	  return 1;
 	}
 
@@ -647,7 +649,7 @@ handle_ehlo (char *command, char **reply)
       if (!stream)
 	{
 	  topt &= ~T_SSL_ONEWAY;
-	  swrite (SERVER, remote_client, reply);
+	  swrite (SERVER, remote_client, *reply);
 	  return 1;
 	}
 
