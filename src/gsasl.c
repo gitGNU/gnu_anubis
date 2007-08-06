@@ -78,7 +78,7 @@ write_chunk (void *data, char *start, char *end)
 
 
 static int
-_gsasl_write (void *sd, char *data, size_t size, size_t * nbytes)
+_gsasl_write (void *sd, const char *data, size_t size, size_t * nbytes)
 {
   struct anubis_gsasl_stream *s = sd;
   int rc = _auth_lb_grow (s->lb, data, size);
