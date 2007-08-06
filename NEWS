@@ -1,5 +1,5 @@
-GNU Anubis NEWS -- history of user-visible changes.  2005-04-20
-Copyright (C) 2001, 2002, 2003, 2004, 2005 The Anubis Team.
+GNU Anubis NEWS -- history of user-visible changes. 2007-08-06
+Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007 The Anubis Team.
 
 See the end of file for copying conditions.
 Please send your bug reports to <bug-anubis@gnu.org>.
@@ -400,7 +400,7 @@ a lot of other improvements and bugfixes.
 
  Copyright information:
 
- Copyright (C) 2001, 2002, 2003, 2004 The Anubis Team.
+ Copyright (C) 2001, 2002, 2003, 2004, 2007 The Anubis Team.
 
  Permission is granted to anyone to make or distribute verbatim copies
  of this document as received, in any medium, provided that the
@@ -413,4 +413,10 @@ a lot of other improvements and bugfixes.
  carry prominent notices stating who last changed them.
 
 
-EOF
+Local variables:
+eval: (add-hook 'write-file-hooks 'time-stamp)
+time-stamp-start: "changes. "
+time-stamp-format: "%:y-%02m-%02d"
+time-stamp-end: "\n"
+end:
+
