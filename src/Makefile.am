@@ -89,11 +89,11 @@ libanubisdb_a_SOURCES = \
 
 YLWRAP = $(SHELL) $(top_srcdir)/build/ylwrap
 AM_YFLAGS = -dtv
-EXTRA_DIST = rcfile.y rcfile.l 
+EXTRA_DIST = rcfile.y rcfile.l getopt.m4 env.opt
 
 BUILT_SOURCES= \
   rcfile-gram.c rcfile-gram.h \
-  rcfile-lex.c
+  rcfile-lex.c env.c
 
 rcfile-lex.c: $(srcdir)/rcfile.l rcfile-gram.h
 	$(YLWRAP) "$(LEX) $(AM_LEXFLAGS) $(LEXFLAGS)" \
@@ -110,6 +110,11 @@ localedir = $(datadir)/locale
 DEFS = @DEFS@ -DLOCALEDIR=\"$(localedir)\"
 INCLUDES = @INCLUDES@ @LIBGNUTLS_CFLAGS@ -I$(top_srcdir)/lib \
 	-I$(top_srcdir)/intl 
+
+SUFFIXES=.opt .c
+
+.opt.c:
+	m4 -s $(top_srcdir)/src/getopt.m4 $< | sed '1d' > $@
 
 FLOWCHART_FILES=$(anubis_SOURCES) $(libanubisdb_a_SOURCES)
 
