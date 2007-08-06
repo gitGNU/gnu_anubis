@@ -291,7 +291,8 @@ typedef struct message_struct MESSAGE;
 /* stream.c */
 
 typedef struct net_stream *NET_STREAM;
-typedef int (*stream_io_t) (void *, char *, size_t, size_t *);
+typedef int (*stream_read_t) (void *, char *, size_t, size_t *);
+typedef int (*stream_write_t) (void *, const char *, size_t, size_t *);
 typedef int (*stream_close_t) (void *);
 typedef int (*stream_destroy_t) (void *);
 typedef const char *(*stream_strerror_t) (void *, int);
@@ -299,16 +300,17 @@ typedef const char *(*stream_strerror_t) (void *, int);
 void stream_create (NET_STREAM * str);
 int stream_set_io (NET_STREAM str,
 		   void *data,
-		   stream_io_t read, stream_io_t write,
+		   stream_read_t read, stream_write_t write,
 		   stream_close_t close,
 		   stream_destroy_t destroy, stream_strerror_t strerror);
-int stream_set_read (struct net_stream *str, stream_io_t read);
-int stream_set_write (struct net_stream *str, stream_io_t write);
+int stream_set_read (struct net_stream *str, stream_read_t read);
+int stream_set_write (struct net_stream *str, stream_write_t write);
 int stream_set_strerror (struct net_stream *str, stream_strerror_t strerr);
 int stream_close (NET_STREAM str);
 const char *stream_strerror (NET_STREAM str, int errcode);
 int stream_read (NET_STREAM str, char *buf, size_t size, size_t * nbytes);
-int stream_write (NET_STREAM str, char *buf, size_t size, size_t * nbytes);
+int stream_write (NET_STREAM str, const char *buf, size_t size,
+		  size_t * nbytes);
 int stream_readline (NET_STREAM str, char *buf, size_t size, size_t * nbytes);
 int stream_destroy (NET_STREAM *);
 
@@ -334,7 +336,7 @@ int setenv (const char *, const char *, int);
 void get_options (int, char *[]);
 void get_homedir (char *, char *, int);
 void anubis_getlogin (char **);
-void anubis_changeowner (char *);
+void anubis_changeowner (const char *);
 int anubis_set_mode (char *modename);
 int check_superuser (void);
 int check_username (char *);

@@ -31,8 +31,8 @@ enum stream_state
 struct net_stream
 {
   enum stream_state state;
-  stream_io_t read;
-  stream_io_t write;
+  stream_read_t read;
+  stream_write_t write;
   stream_strerror_t strerror;
   stream_close_t close;
   stream_destroy_t destroy;
@@ -52,7 +52,7 @@ _def_strerror (void *data, int rc)
 }
 
 static int
-_def_write (void *sd, char *data, size_t size, size_t * nbytes)
+_def_write (void *sd, const char *data, size_t size, size_t * nbytes)
 {
   int rc = send ((int) sd, data, size, 0);
   if (rc >= 0)
@@ -91,7 +91,7 @@ stream_create (struct net_stream **str)
 int
 stream_set_io (struct net_stream *str,
 	       void *data,
-	       stream_io_t read, stream_io_t write,
+	       stream_read_t read, stream_write_t write,
 	       stream_close_t close, stream_destroy_t destroy,
 	       stream_strerror_t strerror)
 {
@@ -108,7 +108,7 @@ stream_set_io (struct net_stream *str,
 }
 
 int
-stream_set_read (struct net_stream *str, stream_io_t read)
+stream_set_read (struct net_stream *str, stream_read_t read)
 {
   if (!str)
     return EINVAL;
@@ -117,7 +117,7 @@ stream_set_read (struct net_stream *str, stream_io_t read)
 }
 
 int
-stream_set_write (struct net_stream *str, stream_io_t write)
+stream_set_write (struct net_stream *str, stream_write_t write)
 {
   if (!str)
     return EINVAL;
@@ -173,7 +173,8 @@ stream_read (struct net_stream *str, char *buf, size_t size, size_t * nbytes)
 }
 
 int
-stream_write (struct net_stream *str, char *buf, size_t size, size_t * nbytes)
+stream_write (struct net_stream *str, const char *buf, size_t size,
+	      size_t *nbytes)
 {
   if (!str)
     return EINVAL;
