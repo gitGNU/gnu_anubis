@@ -1,5 +1,31 @@
 2007-08-06  Sergey Poznyakoff  <gray@gnu.org.ua>
 
+	* Makefile.am: Place src before po, to satisfy the dependency
+	POTFILES -> env.c 
+	* configure.ac: Check for locale.h
+	* lib/argcv.c (argcv_string): Fix type mismatch in conditional
+	* src/daemon.c (anubis_child_main): Fix call to net_close_stream
+	* src/env.opt (anubis_changeowner): Argument is const
+	* src/exec.c (sig_local): Remove forward decl.
+	* src/headers.h (stream_io_t): Remove
+	(stream_read_t, stream_write_t): Introduce instead
+	All dependencies updated
+	(stream_write): Second argument is const
+	(anubis_changeowner): argument is const
+	* src/stream.c: Likewise 
+	* src/gsasl.c (_gsasl_write): Fix signature
+	* src/tls.c (_tls_write) : Fix signature
+	* src/net.c (connect_directly_to): Fix error message
+	* src/rcfile.c (_anubis_hang): Fix type
+	* src/transmode.c: (anubis_transparent_mode): Fix calls to
+	service_unavailable
+	* src/tunnel.c (handle_starttls): Fix get_response_smtp invocation
+	(handle_ehlo): Fix calls to swrite
+	* src/xdatabase.c: Fix error message
+	* testsuite/findport.c: Include string.h
+
+2007-08-06  Sergey Poznyakoff  <gray@gnu.org.ua>
+
 	* bootstrap.conf: New file
 	* Makefile.am (SUBDIRS): Remove intl
 	* configure.ac: Use gnulib
