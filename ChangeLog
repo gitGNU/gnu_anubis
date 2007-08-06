@@ -1,3 +1,35 @@
+2007-08-06  Sergey Poznyakoff  <gray@gnu.org.ua>
+
+	* bootstrap.conf: New file
+	* Makefile.am (SUBDIRS): Remove intl
+	* configure.ac: Use gnulib
+	* lib/Makefile.am: Likewise
+	* src/Makefile.am (EXTRA_DIST): Add getopt.m4 and env.opt
+	* src/env.c: Removed.
+	* src/env.opt, src/getopt.m4: New files
+	* src/headers.h (ANUBIS_PRINTFLIKE): New macro
+	(anubis_error,anubis_warning): Mark with ANUBIS_PRINTFLIKE
+	(print_version,print_usage): Removed
+	* src/help.c (print_version,print_usage): Remove functions
+
+	* lib/getline.c, lib/getline.h, lib/getopt.c, lib/getopt1.c,
+	lib/getpass.c, lib/gettext.h, lib/obstack.c, lib/obstack.h,
+	lib/setenv.c, lib/getopt.h: Remove
+
+	* m4/exitfail.m4, m4/getdelim.m4, m4/getline.m4, m4/getopt.m4,
+	m4/getpass.m4, m4/gnulib.m4, m4/inttypes_h_gl.m4,
+	m4/obstack.m4, m4/onceonly_2_57.m4, m4/uintmax_t_gl.m4,
+	m4/ulonglong_gl.m4, m4/unistd_h.m4, m4/stdbool.m4,
+	m4/stdint_h_gl.m4: Remove
+
+	* po/de.po, po/fr.po, po/ms.po, po/nb.po, po/nl.po, po/pl.po,
+	po/ro.po, po/ru.po, po/tr.po, po/uk.po, po/vi.po, po/LINGUAS,
+	po/Makevars: Remove
+
+	* build/bootstrap: Modified version from gnulib
+	* NEWS, README-alpha: Update
+	* README-hacking: New file
+	
 2007-07-29  Wojciech Polak
 
 	* */*: OpenSSL support has been dropped.
