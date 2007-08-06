@@ -32,7 +32,7 @@ anubis_transparent_mode (struct sockaddr_in *addr)
 
   if ((topt & T_DROP_UNKNOWN_USER) && !rs)
     {
-      service_unavailable (remote_client);
+      service_unavailable (&remote_client);
       return 0;
     }
 
@@ -114,7 +114,7 @@ anubis_transparent_mode (struct sockaddr_in *addr)
 					     session.execargs);
       if (!remote_server)
 	{
-	  service_unavailable (remote_client);
+	  service_unavailable (&remote_client);
 	  return EXIT_FAILURE;
 	}
     }
@@ -122,7 +122,7 @@ anubis_transparent_mode (struct sockaddr_in *addr)
     {
       remote_server = make_remote_connection (session.mta, session.mta_port);
       if (!remote_server)
-	service_unavailable (remote_client);
+	service_unavailable (&remote_client);
     }
 
   alarm (900);
