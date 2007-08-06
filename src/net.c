@@ -168,7 +168,7 @@ connect_directly_to (char *host, unsigned int port)
   if (connect (sd, (struct sockaddr *) &addr, sizeof (addr)) == -1)
     {
       anubis_error (EXIT_FAILURE, errno, _("Couldn't connect to %s:%u. %s."),
-		    host, port);
+		    host, port, strerror (errno));
       return -1;
     }
   else
