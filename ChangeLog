@@ -1,5 +1,9 @@
 2007-08-06  Sergey Poznyakoff  <gray@gnu.org.ua>
 
+	Relicense everything under GPLv3+
+	
+2007-08-06  Sergey Poznyakoff  <gray@gnu.org.ua>
+
 	* Makefile.am: Place src before po, to satisfy the dependency
 	POTFILES -> env.c 
 	* configure.ac: Check for locale.h

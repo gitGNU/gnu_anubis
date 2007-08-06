@@ -9,6 +9,8 @@ Please send your bug reports to <bug-anubis@gnu.org>.
   4.0.90 (Unreleased)
  *******************
 
+The package is licensed under GPL version 3 (see COPYING for the details).
+
 ** New features:
 * New working mode: MDA
 
