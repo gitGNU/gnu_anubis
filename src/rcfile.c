@@ -279,7 +279,7 @@ list_to_argv (ANUBIS_LIST * list)
    Anubis will sleep for one second intervals, decrementing `_anubis_hang'
    until it's zero.  Thus you can force the program to continue by attaching
    a debugger and setting it to 0 yourself.  */
-static volatile int _anubis_hang;
+static volatile unsigned long _anubis_hang;
 
 /* List of users who are allowed to use HANG in their profiles */
 ANUBIS_LIST *allow_hang_users; 
