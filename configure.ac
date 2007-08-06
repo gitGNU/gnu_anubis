@@ -20,14 +20,13 @@ dnl Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 dnl
 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT([GNU Anubis], [4.0.90], [bug-anubis@gnu.org], [anubis])
+AC_INIT([GNU Anubis], [4.0.90], [bug-anubis@gnu.org])
 AC_PREREQ([2.59])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([build])
 AC_CONFIG_SRCDIR([src/main.c])
 AM_INIT_AUTOMAKE
 AC_GNU_SOURCE
-gl_USE_SYSTEM_EXTENSIONS
 
 if test "$CFLAGS"; then
  CFLAGS_CUSTOM=yes
@@ -35,12 +34,13 @@ fi
 
 dnl Checks for programs.
 AC_PROG_CC
+gl_EARLY
 AC_PROG_YACC
 AM_PROG_LEX
 AC_PATH_PROG(idecrypt_path,idecrypt,/usr/sbin/idecrypt,
 $PATH:/sbin:/usr/sbin:/usr/local/sbin)
 AC_DEFINE_UNQUOTED(IDECRYPT_PATH,"${idecrypt_path}",
-[Define if IDECRYPT_PATH is requested.])
+[Define if IDECRYPT_PATH is present.])
 
 dnl Checks for header files.
 AC_HEADER_STDC
@@ -66,14 +66,11 @@ AC_CHECK_TYPE(socklen_t, , AC_DEFINE(socklen_t, int,
 ])
 
 dnl Checks for library functions.
-
-anubis_GNULIB
+gl_INIT
 
 AC_CHECK_FUNCS(syslog getrlimit setrlimit socketpair strdup)
 AC_CHECK_FUNCS(setegid setregid setresgid seteuid setreuid)
 AC_CHECK_FUNCS(regcomp daemon putenv)
-
-AC_REPLACE_FUNCS(setenv)
 
 AC_FUNC_SETVBUF_REVERSED
 AH_BOTTOM([
@@ -94,8 +91,8 @@ case $build in
 esac
 
 dnl Internationalization macros.
-AM_GNU_GETTEXT
-AM_GNU_GETTEXT_VERSION(0.14.1)
+AM_GNU_GETTEXT([external], [need-formatstring-macros])
+AM_GNU_GETTEXT_VERSION([0.16])
 
 dnl Use option --without-guile to NOT compile Guile support.
 AC_ARG_WITH([guile],
@@ -434,7 +431,6 @@ AC_CONFIG_FILES([Makefile
  examples/Makefile
  examples/pam/Makefile
  guile/Makefile
- intl/Makefile
  lib/Makefile
  po/Makefile.in
  scripts/Makefile
