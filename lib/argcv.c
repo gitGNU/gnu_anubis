@@ -390,7 +390,7 @@ argcv_string (int argc, char **argv, char **pstring)
     return 1;
   *buffer = '\0';
 
-  for (len = i = j = 0; (argc > 0) ? i < argc : argv[i]; i++)
+  for (len = i = j = 0; (argc > 0) ? i < argc : (argv[i] != NULL); i++)
     {
       int quote = 0;
       int toklen;
