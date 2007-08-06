@@ -23,7 +23,6 @@
 #include "extern.h"
 
 static int make_sockets (int fd[]);
-static void sig_local (int);
 
 /*************************
  Connect to stdin/stdout.
