@@ -89,11 +89,11 @@ make_temp_file (struct obstack *stk, char *rcname, char **name)
 
   save_umask = umask (077);
   fp = fopen (p, "w");
-  umask (save_umask);
   if (!fp)
-    {
-      anubis_error (0, errno, _("Cannot open temporary file %s: %s"), p);
-    }
+    anubis_error (0, errno, _("Cannot open temporary file %s: %s"),
+		  p, strerror (errno));
+
+  umask (save_umask);
   return fp;
 }
 
