@@ -23,6 +23,15 @@
 
 #include <config.h>
 
+#if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 7)
+#  define __attribute__(x)
+#endif
+
+#ifndef ANUBIS_PRINTFLIKE
+# define ANUBIS_PRINTFLIKE(fmt,narg) \
+  __attribute__ ((__format__ (__printf__, fmt, narg)))
+#endif
+
 # if defined(HAVE_GNUTLS_GNUTLS_H)
 #  define HAVE_GNUTLS
 # endif	/* HAVE_GNUTLS_GNUTLS_H */
@@ -335,8 +344,9 @@ void write_pid_file (void);
 
 /* errs.c */
 #define EXIT_ABORT 256
-void anubis_error (int, int, const char *, ...);
-void anubis_warning (int error_code, const char *fmt, ...);
+void anubis_error (int, int, const char *, ...) ANUBIS_PRINTFLIKE(3,4);
+void anubis_warning (int error_code, const char *fmt, ...)
+     ANUBIS_PRINTFLIKE(2,3);
 void socket_error (const char *);
 void hostname_error (char *);
 
@@ -452,8 +462,6 @@ void rcfile_call_section (int, char *, void *, MESSAGE *);
 char *user_rcfile_name (void);
 
 /* help.c */
-void print_version (void);
-void print_usage (void);
 void print_config_options (void);
 
 /* quit.c */
