@@ -46,7 +46,7 @@ _tls_strerror (void *unused_data, int rc)
 }
 
 static int
-_tls_write (void *sd, char *data, size_t size, size_t * nbytes)
+_tls_write (void *sd, const char *data, size_t size, size_t * nbytes)
 {
   int rc;
 
