@@ -197,7 +197,7 @@ anubis_child_main (struct sockaddr_in *addr)
   rc = anubis_transparent_mode (addr);
 #endif /* WITH_GSASL */
   proclist_cleanup (subprocess_report_status);
-  net_close_stream (remote_client);
+  net_close_stream (&remote_client);
   return rc;
 }
 
@@ -307,7 +307,7 @@ loop (int sd_bind)
 *********************************************/
 
 static int
-_stdio_write (void *sd, char *data, size_t size, size_t * nbytes)
+_stdio_write (void *sd, const char *data, size_t size, size_t * nbytes)
 {
   int rc;
   int fd = (int) sd;
