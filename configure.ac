@@ -49,7 +49,7 @@ AC_TYPE_PID_T
 AC_TYPE_SIGNAL
 AC_CHECK_TYPE(u_char, unsigned char)
 AC_CHECK_HEADERS(arpa/inet.h syslog.h regex.h \
- sys/types.h sys/socket.h socket.h sysexits.h)
+ sys/types.h sys/socket.h socket.h sysexits.h locale.h)
 
 AC_CHECK_TYPE(socklen_t, , AC_DEFINE(socklen_t, int,
 [Define to int if <sys/types.h> does not define]),
