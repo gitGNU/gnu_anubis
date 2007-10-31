@@ -50,18 +50,15 @@ anubis_core (void)
 # define anubis_core() anubis(NULL)
 #endif /* WITH_GUILE */
 
-static void
-anubis_memory_error (const char *msg)
+void
+xalloc_die ()
 {
-  anubis_error (EXIT_FAILURE, 0, "%s", msg);
+  anubis_error (EXIT_FAILURE, 0, "%s", _("Not enough memory"));
 }
 
 int
 main (int argc, char *argv[])
 {
-  /* Register memory error printer */
-  memory_error = anubis_memory_error;
-  
   /*
      Signal handling.
    */
