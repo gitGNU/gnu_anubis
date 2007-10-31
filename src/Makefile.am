@@ -76,8 +76,6 @@ libanubisdb_a_SOURCES = \
  list.c \
  list.h \
  md5.c \
- mem.c \
- mem.h \
  mysql.c \
  pgsql.c \
  sql.h \
