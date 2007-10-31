@@ -100,13 +100,13 @@ Indices
 @cindex MUA, Mail User Agent
 @cindex MTA, Mail Transport Agent
 
-GNU Anubis is an SMTP message submission daemon. Its purpose is to receive
+GNU Anubis is an @acronym{SMTP} message submission daemon. Its purpose is to receive
 the outgoing message, perform some manipulations over its contents,
 and to forward the altered message to the mail transport agent.
 
 The usual mail sending scheme looks as follows: the user composes
 his message using @dfn{mail user agent} (@dfn{MUA} for short). Once
-the message is composed, the user sends it. When the MUA receives
+the message is composed, the user sends it. When the @acronym{MUA} receives
 the send command it connects to the @dfn{mail transport agent}
 (@dfn{MTA} for short) and passes it the message for delivery. The
 figure below illustrates this interaction:
@@ -128,12 +128,12 @@ As shown in this figure, the outgoing message (@dfn{outmsg}), reaches
 the recipient's mailbox unaltered.
 
 However, there are situations where it may be necessary to modify
-the outgoing message before it reaches MTA. As the simplest example,
+the outgoing message before it reaches @acronym{MTA}. As the simplest example,
 the user might wish to sign the outgoing messages with his PGP
-key, but his MUA does not support this operation or supports it
+key, but his @acronym{MUA} does not support this operation or supports it
 unconditionally.
 
-In such cases, installing GNU Anubis between the MUA and MTA
+In such cases, installing GNU Anubis between the @acronym{MUA} and @acronym{MTA}
 allows the user to perform any additional processing on the
 sent message. The figure below illustrates this concept:
 
@@ -153,12 +153,12 @@ sent message. The figure below illustrates this concept:
 @end smallexample
 
 The outgoing message is processed by GNU Anubis, and it is
-the resulting message (@dfn{modmsg}) that reaches the MTA.
+the resulting message (@dfn{modmsg}) that reaches the @acronym{MTA}.
 
 GNU Anubis is able to perform on messages a wide set of operations,
 such as modifying message headers or body, encrypting or signing
 messages with GPG (GNU Privacy Guard) keys, installing secure tunnels
-to MTA using TLS/SSL encryption, tunneling messages through
+to @acronym{MTA} using @acronym{TLS/SSL} encryption, tunneling messages through
 SOCKS proxies, etc.
 
 When the set of built-in operations is not enough, the user can
@@ -186,7 +186,7 @@ two or more programs, devices, or systems.
 
 @item SMTP
 Simple Mail Transport Protocol is a common mechanism for exchanging
-mail across a network. This protocol is described in the RFC 821 document.
+mail across a network. This protocol is described in the @acronym{RFC} 821 document.
 
 @item Daemon
 We use a term @dfn{daemon} to define a process that runs in the
@@ -201,7 +201,7 @@ service.
 
 @item Proxy
 We use a term @dfn{proxy} to define a program, which goes
-between the MUA and the MTA (it makes a tunnel). It can be used as a gateway
+between the @acronym{MUA} and the @acronym{MTA} (it makes a tunnel). It can be used as a gateway
 to the outside world, while using a firewall. In this case the host
 under the firewall sends data to the proxy server, which in turn
 forwards it to the real server outside, receives 
@@ -218,7 +218,7 @@ For more information about Guile,
 GNU Privacy Guard, a tool compatible with the Pretty Good Privacy.
 @end table
 
-@node Authentication, User Database, Glossary, Top
+@node Authentication, Configuration, Glossary, Top
 @chapter Authentication
 @cindex authentication
 
@@ -236,7 +236,7 @@ up to 3.6.2. In this mode, Anubis relies on AUTH service (@command{identd})
 to authenticate users.
 
 @item auth
-This mode uses SMTP AUTH mechanism to authenticate incoming
+This mode uses @acronym{SMTP} AUTH mechanism to authenticate incoming
 connections. @xref{Pixie-Dixie}, this is the first draft
 description of this mode.
 @end table
@@ -268,9 +268,9 @@ Advantages:
 Deficiencies:
 @enumerate
 @item You have to maintain your users database
-@item User's MUA must be able to perform ESMTP AUTH.@footnote{It is
+@item User's @acronym{MUA} must be able to perform ESMTP AUTH.@footnote{It is
 not a serious restriction, however. The user may install Anubis on his
-machine for the sole purpose of SMTP authentication, as Pixie-Dixie suggests.}
+machine for the sole purpose of @acronym{SMTP} authentication, as Pixie-Dixie suggests.}
 @end enumerate
 
 @noindent
@@ -289,7 +289,7 @@ Anubis runs.
 * Managing the Database::
 @end menu
 
-@node User Database, Database URL, Authentication, Authentication
+@node User Database
 @section User Database
 
 GNU Anubis uses @dfn{User Database} for keeping @dfn{user credentials},
@@ -308,10 +308,10 @@ The record fields are:
 
 @table @code
 @item SMTP AUTHID
-SMTP authentication ID of the user.
+@acronym{SMTP} authentication @acronym{ID} of the user.
 
 @item AUTH PASSWORD
-SMTP password.
+@acronym{SMTP} password.
 
 @item ACCOUNT
 System user name to be used.
@@ -346,7 +346,7 @@ for file @file{~/.anubisrc} (where @samp{~} denotes home directory
 for the system account obtained on the previous step) and if such
 a file exists, loads it.
 
-@node Database URL, text, User Database, Authentication
+@node Database URL
 @section Database URL
 
 Anubis database is identified by its @dfn{URL}, or @dfn{Universal
@@ -383,7 +383,7 @@ User name necessary to access the database.
 User password necessary to access the database. 
 
 @item host
-Domain name or IP address of a machine running the database.
+Domain name or @acronym{IP} address of a machine running the database.
 
 @item path
 A @dfn{path} to the database. The exact meaning of this element
@@ -402,26 +402,26 @@ by semicolons.
 * sql::         MySQL and PostgreSQL databases
 @end menu
 
-@node text, gdbm, Database URL, Database URL
+@node text
 @subsection Plain text databases
 
 This is the simplest database possible. It is kept in a plain text
 file. Each line in this file represents a single @dfn{record}, empty lines
 and lines beginning with @samp{#} (@dfn{comments}) sign are ignored.
 Records consist of @dfn{fields}, each field being a sequence of
-characters. Fields are separated by colons (@samp{:}, ASCII 58).
+characters. Fields are separated by colons (@samp{:}, @acronym{ASCII} 58).
 If @samp{:} character occurs in a field, it is preceeded by a single
-backslash character (@samp{\\}, ASCII 92). A record must contain
+backslash character (@samp{\\}, @acronym{ASCII} 92). A record must contain
 at least two fields.
 
 @enumerate 1
-@item SMTP @samp{AUTHID}.
-@item SMTP password.
+@item @acronym{SMTP} @samp{AUTHID}.
+@item @acronym{SMTP} password.
 @item Account name. 
 @item Path to user configuration file.
 @end enumerate 
 
-@subheading URL syntax
+@subsubheading URL syntax
 
 The @acronym{URL} syntax for this type of databases is quite simple:
 
@@ -432,7 +432,7 @@ text:@var{path}
 @noindent
 where @var{path} specifies absolute file name of the database file.
 
-@node gdbm, sql, text, Database URL
+@node gdbm
 @subsection Databases in GDBM format
 
 The protocol value @samp{gdbm} specifies a @dfn{GDBM database}. For
@@ -441,7 +441,7 @@ the detailed description of @acronym{GDBM} system
 
 @FIXME{Technically speaking, each @acronym{GDBM} record consists of
 a @dfn{key} and @dfn{content}. Its @code{key} holds the value of
-SMTP @samp{AUTHID}, whereas its @code{content} holds SMTP password,
+@acronym{SMTP} @samp{AUTHID}, whereas its @code{content} holds @acronym{SMTP} password,
 system account name and path to user configuration file, separated by
 commas. As usual, the two last fields are optional.
 
@@ -457,7 +457,7 @@ gdbm:@var{path}
 @noindent
 where @var{path} specifies absolute file name of the database file.
 
-@node sql, Managing the Database, gdbm, Database URL
+@node sql
 @subsection MySQL and PostgreSQL
 
 This is the most flexible database format. GNU Anubis @value{VERSION}
@@ -468,13 +468,13 @@ behind a single consistent Anubis interface.
 
 GNU Anubis supposes that all user data are kept in a single database
 table. This table must have at least four columns for storing
-SMTP @samp{AUTHID}, SMTP password, system account name and path to
+@acronym{SMTP} @samp{AUTHID}, @acronym{SMTP} password, system account name and path to
 user configuration file. Among those, only the last two may have
 NULL values. There is no restriction on the name of the database or
 the authentication table, nor on its column names. This information
 may be specified in @acronym{URL} as discussed below.
 
-@subheading URL syntax
+@subsubheading URL syntax
 
 @smallexample
 @var{proto}://[[@var{user}[:@var{password}]@@@var{host}/@var{dbname}[@var{params}]
@@ -487,7 +487,7 @@ databases.
 Optional @var{user} and @var{password} specify authentication
 credentials used to access the database. 
 
-@var{Host} sets domain name or IP address of the machine running
+@var{Host} sets domain name or @acronym{IP} address of the machine running
 the database. It may be omitted if the database resides on 
 @samp{localhost}.
 
@@ -539,7 +539,7 @@ path to the user's configuration file. Default is @samp{rcfile}.
 
 @end table
 
-@node Managing the Database, Administrators, sql, Authentication
+@node Managing the Database
 @section Managing the Database
 
 Managing the user database is a complex task, which looks differently
@@ -556,7 +556,7 @@ for the creation of his record.
 * Users::               The User's View
 @end menu
 
-@node Administrators, Create, Managing the Database, Managing the Database
+@node Administrators
 @subsection Administrators
 
 All administrative tasks are done using @command{anubisadm} command ---
@@ -597,7 +597,7 @@ the word}.
 * anubisadm summary::   Summary of All Administrative Commands
 @end menu
 
-@node Create, List, Administrators, Administrators
+@node Create
 @subsubsection Creating the Database
 
 To create a database use @kbd{anubisadm --create} (or
@@ -649,7 +649,7 @@ anubisadm --list text:/etc/anubis.db | \
 @noindent 
 That's all there is to it!
 
-@node List, Add, Create, Administrators
+@node List
 @subsubsection Listing Database Records
 
 The command @option{--list} (or @option{-l}) lists the existing
@@ -673,7 +673,7 @@ example$ anubisadm --list --authid test gdbm:/etc/anubis.db
 @end smallexample
 
 
-@node Add, Remove, List, Administrators
+@node Add
 @subsubsection Adding New Records
 
 To add a new record use command @option{--add} (@option{-a}).
@@ -706,7 +706,7 @@ anubisadm --add --authid test --password guessme \
           --user gray gdbm:/etc/anubis.db
 @end smallexample
 
-@node Remove, Modify, Add, Administrators
+@node Remove
 @subsubsection Removing Existing Records
 
 Removing a record is quite straightforward: use @option{--remove}
@@ -718,7 +718,7 @@ in the previous subsection, run:
 anubisadm --remove --authid test gdbm:/etc/anubis.db
 @end smallexample
 
-@node Modify, anubisadm summary, Remove, Administrators
+@node Modify
 @subsubsection Modifying Existing Records
 
 To modify an existing record use command @option{--modify}
@@ -747,16 +747,16 @@ anubisadm --authid smith \
           --rcfile=/var/spool/anubis/common gdbm:/etc/anubis.db
 @end smallexample
 
-@node anubisadm summary, Users, Modify, Administrators
+@node anubisadm summary
 @subsubsection Summary of All Administrative Commands
 
-@subheading Usage
+@itemize @bullet
+@item Usage
 @smallexample
 anubisadm @var{command} [@var{options}] @var{database-url}
 @end smallexample
 
-@noindent
-@subheading Commands:
+@item Commands:
 @table @option
 @item -c
 @itemx --create
@@ -785,8 +785,7 @@ Display program version number and exit.
 Display short usage summary and exit.
 @end table
 
-@noindent
-@subheading Options:
+@item Options:
 @table @option
 @item -i @var{string}
 @itemx --authid=@var{string}
@@ -811,8 +810,9 @@ Specify the rc file to be used for this authid. The option may
 be used with @option{--add}, @option{--modify}, and @option{--remove}
 commands.
 @end table
+@end itemize
 
-@node Users, Configuration, anubisadm summary, Managing the Database
+@node Users
 @subsection Users
 
 Users maintain their database records using @command{anubisusr}
@@ -826,7 +826,7 @@ sure that your configuration file is up to date when you log in.
 @footnote{Make sure to run @command{anubisusr} in background, so
 it does not slow down your normal login sequence}.
 
-@subheading Usage
+@subsubheading Usage
 
 @smallexample
 anubisusr [@var{options}] [@var{smtp-url}]
@@ -839,7 +839,7 @@ Notice that if it lacks user name and password, then
 @file{~/.netrc} file (See @cite{netrc(5)} for more info), and if not
 found it will prompt you to supply them.
 
-@subheading Options
+@subsubheading Options
 
 @table @option
 @item -m @var{mech}
@@ -859,7 +859,7 @@ Display program version number and exit.
 Display short usage summary and exit.
 @end table
 
-@node Configuration, Rule System, Users, Top
+@node Configuration, Rule System, Authentication, Top
 @chapter Configuration
 @cindex configuration
 @cindex settings
@@ -897,20 +897,20 @@ table:
 
 @table @asis
 @item \a
-Audible bell character (ASCII 7)
+Audible bell character (@acronym{ASCII} 7)
 @item \b
 @c FIXME: Remove the footnote when the next version is out
-Backspace (ASCII 8)@footnote{This escape is not supported by Anubis 4.0}
+Backspace (@acronym{ASCII} 8)@footnote{This escape is not supported by Anubis 4.0}
 @item \e
-Escape character (ASCII 27)
+Escape character (@acronym{ASCII} 27)
 @item \f
-Form feed (ASCII 12)
+Form feed (@acronym{ASCII} 12)
 @item \n
-Newline (ASCII 10)
+Newline (@acronym{ASCII} 10)
 @item \r
-Carriage return (ASCII 13)
+Carriage return (@acronym{ASCII} 13)
 @item \t
-Horizontal tab (ASCII 9)
+Horizontal tab (@acronym{ASCII} 9)
 @item \d
 (where @samp{d} represents a single decimal digit) Reproduced
 verbatim.
@@ -1055,7 +1055,7 @@ messages (conditional and unconditional rules).
 * GUILE Section::
 @end menu
 
-@node AUTH Section, CONTROL Section, Configuration, Configuration
+@node AUTH Section
 @section AUTH Section
 @cindex AUTH section
 
@@ -1069,7 +1069,7 @@ the connection.
 
 @deffn Option smtp-help-message @var{help-text}
 @opindex smtp-help-message @var{help-text}
-Sets the test of the message issued by Anubis in response to SMTP
+Sets the test of the message issued by Anubis in response to @acronym{SMTP}
 @code{HELP} command. @var{Help-text} is a list of strings. Each string
 from the list will be displayed at a separate response line.
 @end deffn
@@ -1084,7 +1084,7 @@ Sets the user database @acronym{URL} (@pxref{User Database}).
 Defines the list of allowed authentication methods.
 @end deffn
 
-@node CONTROL Section, TRANSLATION Section, AUTH Section, Configuration
+@node CONTROL Section
 @section CONTROL Section
 @cindex CONTROL section
 
@@ -1110,18 +1110,18 @@ for instance: @code{bind} or @code{BIND} or @code{BiNd}, and so on.
 @end menu
 
 
-@node Basic Settings, Output and Debugging Settings, CONTROL Section, CONTROL Section
+@node Basic Settings
 @subsection Basic Settings
 @UNREVISED{}
 
 @deffn Option bind [@var{host}:]@var{port}
 @opindex bind [@var{host}:]@var{port}
-Specify the TCP port on which GNU Anubis listens for connections.
+Specify the @acronym{TCP} port on which GNU Anubis listens for connections.
 The default @var{host} value is @w{@samp{INADDR_ANY}}, which means
 that anyone can connect to GNU Anubis. The default @var{port} number
 is 24 (private mail system). This option is available only in the
 system configuration file. If you would like, for instance, to bind
-GNU Anubis to port 25 (SMTP) and limit its clients only to those from
+GNU Anubis to port 25 (@acronym{SMTP}) and limit its clients only to those from
 @samp{localhost}, then set the following in your system
 configuration file:
 
@@ -1132,14 +1132,14 @@ bind localhost:25
 
 @deffn Option remote-mta @var{host}[:@var{port}]
 @opindex remote-mta @var{host}[:@var{port}]
-Specify a remote SMTP host name or IP address, which GNU Anubis will
+Specify a remote @acronym{SMTP} host name or @acronym{IP} address, which GNU Anubis will
 connect and forward mail to (after a processing). The default @var{port}
 number is 25. This option is available in both configuration files.
 @end deffn
 
 @deffn Option local-mta @var{file-name} [@var{args}]
 @opindex local-mta @var{file-name} [@var{args}]
-Execute a local SMTP server, which works on standard input and output
+Execute a local @acronym{SMTP} server, which works on standard input and output
 (inetd-type program). This option excludes the @samp{remote-mta} keyword
 (or @samp{--remote-mta} command line option). For example:
 
@@ -1191,7 +1191,7 @@ Declares name of processing sections for outgoing mail. Default is
 configuration file.
 @end deffn
 
-@node Output and Debugging Settings, Proxy Settings, Basic Settings, CONTROL Section
+@node Output and Debugging Settings
 @subsection Output Settings
 
 @deffn Option termlevel @var{level}
@@ -1287,7 +1287,7 @@ set variable _anubis_hang=0
 
 @end deffn
 
-@node Proxy Settings, ESMTP Authentication Settings, Output and Debugging Settings, CONTROL Section
+@node Proxy Settings
 @subsection Proxy Settings
 @cindex SOCKS proxy
 
@@ -1310,13 +1310,13 @@ Specify a user name and a password, if a SOCKS proxy server requires them.
 A @var{username} and a @var{password} are separated with a colon (@samp{:}).
 @end deffn
 
-@node ESMTP Authentication Settings, Encryption Settings, Proxy Settings, CONTROL Section
+@node ESMTP Authentication Settings
 @subsection ESMTP Authentication Settings
 @cindex ESMTP authentication
 
-The following options set authentication credentials for ESMTP
-authentication. You may use this option, for example, if your MTA
-requires such an authentication, but your MUA does not support it.
+The following options set authentication credentials for @acronym{ESMTP}
+authentication. You may use this option, for example, if your @acronym{MTA}
+requires such an authentication, but your @acronym{MUA} does not support it.
 
 @deffn Option esmtp-allowed-mech @var{mech-list}
 @opindex esmtp-allowed-mech @var{mech-list}
@@ -1325,10 +1325,10 @@ is a list of valid authentication mechanism names separated by
 whitespace.
 
 Anubis selects the authentication method using following algorithm:
-The MTA presents the list of authentication methods it supports.
+The @acronym{MTA} presents the list of authentication methods it supports.
 For each element in @var{mech-list}, Anubis tests whether it is
-available in the list presented by MTA. If found, this method is
-selected. For example, suppose that the MTA supports following
+available in the list presented by @acronym{MTA}. If found, this method is
+selected. For example, suppose that the @acronym{MTA} supports following
 mechanisms:
 
 @smallexample
@@ -1363,12 +1363,12 @@ This prevents sending user password over an unencrypted connection.
 
 @deffn Option esmtp-auth-id @var{authentication-id}
 @opindex esmtp-auth-id @var{authentication-id}
-Sets authentication ID (user name).
+Sets authentication @acronym{ID} (user name).
 @end deffn
 
 @deffn Option esmtp-authz-id @var{authorization-id}
 @opindex esmtp-authz-id @var{authorization-id}
-Sets authorization ID (user name).
+Sets authorization @acronym{ID} (user name).
 @end deffn
 
 @deffn Option esmtp-password @var{password}
@@ -1378,7 +1378,7 @@ Sets password to be used in authentication.
 
 @deffn Option esmtp-auth @var{username}:@var{password}
 @opindex esmtp-auth @var{username}:@var{password}
-This option sets both authentication and authorization IDs and the
+This option sets both authentication and authorization @acronym{ID}s and the
 password. It is equivalent to
 
 @smallexample
@@ -1424,13 +1424,13 @@ Following option is useful with ANONYMOUS authentication mechanism:
 Sets the token to be used with ANONYMOUS authentication mechanism
 @end deffn
 
-@node Encryption Settings, Security Settings, ESMTP Authentication Settings, CONTROL Section
+@node Encryption Settings
 @subsection Encryption Settings
 
 @deffn Option ssl @var{yes-or-no}
 @opindex ssl @var{yes-or-no}
-This option enables the TLS/SSL encryption between the MUA and the MTA.
-Value @samp{no} is the default, but using the TLS/SSL encryption
+This option enables the @acronym{TLS/SSL} encryption between the @acronym{MUA} and the @acronym{MTA}.
+Value @samp{no} is the default, but using the @acronym{TLS/SSL} encryption
 is recommended. You should also specify a private key and a certificate
 using the @samp{ssl-key} and @samp{ssl-cert} keywords (defined below).
 @xref{TLS/SSL}, for details.
@@ -1439,20 +1439,20 @@ using the @samp{ssl-key} and @samp{ssl-cert} keywords (defined below).
 @deffn Option ssl-oneway @var{yes-or-no}
 @opindex ssl-oneway @var{yes-or-no}
 This option enables the @dfn{ONEWAY} encryption. Use this mode,
-when you want to use the TLS/SSL, but your MUA doesn't provide
-a support for ESMTP TLS/SSL. Using this option doesn't require
+when you want to use the @acronym{TLS/SSL}, but your @acronym{MUA} doesn't provide
+a support for @acronym{ESMTP} @acronym{TLS/SSL}. Using this option doesn't require
 using the @samp{ssl-key} and @samp{ssl-cert} keywords.
 @end deffn
 
 @deffn Option ssl-cert @var{file-name}
 @opindex ssl-cert @var{file-name}
-Specify a certificate for the TLS/SSL encryption.
+Specify a certificate for the @acronym{TLS/SSL} encryption.
 Value @file{anubis.pem} is the default.
 @end deffn
 
 @deffn Option ssl-key @var{file-name}
 @opindex ssl-key @var{file-name}
-Specify a private key for the TLS/SSL encryption.
+Specify a private key for the @acronym{TLS/SSL} encryption.
 Value @file{anubis.pem} is the default.
 @end deffn
 
@@ -1462,7 +1462,7 @@ Specify a CA certificate file (supported only by GnuTLS).
 @end deffn
 
 
-@node Security Settings, , Encryption Settings, CONTROL Section
+@node Security Settings
 @subsection Security Settings
 
 The following options control various security settings. 
@@ -1480,7 +1480,7 @@ configuration file.
 @deffn Option drop-unknown-user @var{yes-or-no}
 @opindex drop-unknown-user @var{yes-or-no}
 This option drops an unknown user, i.e. a client which has not
-been verified by IDENT service. Value @samp{no} is the default.
+been verified by @acronym{IDENT} service. Value @samp{no} is the default.
 @end deffn
 
 @deffn Option user-notprivileged @var{username}
@@ -1539,7 +1539,7 @@ system-wide settings always override the user private settings.
 @end table
 @end deffn
 
-@node TRANSLATION Section, GUILE Section, CONTROL Section, Configuration
+@node TRANSLATION Section
 @section TRANSLATION Section
 @cindex TRANSLATION section
 
@@ -1557,7 +1557,7 @@ translate  [@var{user}@@]@var{address} into  @var{username}
 @end group
 @end smallexample
 
-@var{address} means host name or IP address. You can also specify
+@var{address} means host name or @acronym{IP} address. You can also specify
 @samp{0.0.0.0}, and it means any address (@samp{INADDR_ANY}).
 
 An example:
@@ -1578,7 +1578,7 @@ and this means that @emph{all} users at @samp{somewhere.net} are allowed to use
 the local john's configuration file.
 
 
-@node GUILE Section, , TRANSLATION Section, Configuration
+@node GUILE Section
 @section GUILE Section
 @cindex GUILE section
 @cindex Guile
@@ -1645,7 +1645,7 @@ statement}.
 @end menu
 
 
-@node Actions, Conditional Statements, Rule System, Rule System
+@node Actions
 @section Actions
 @cindex actions defined
 
@@ -1662,55 +1662,65 @@ Where @var{command} specifies a particular operation and
 is optional.
 
 
-@node Conditional Statements, Triggers, Actions, Rule System
+@node Conditional Statements
 @section Conditional Statements
 @cindex Conditional statements
 @cindex @code{if}, conditional statements
 @cindex @code{else}, conditional statements
 @cindex @code{fi}, conditional statements
 
-A @dfn{conditional statement} defines the control flow in the section.
+A @dfn{conditional statement} defines the control flow in a section.
 It allows to execute arbitrary actions depending on whether a certain
-condition is met. A conditional statement in its simplest form is:
+condition is met. The conditional statement in its simplest form is:
 
 @smallexample
-if @var{part} [@var{pattern-match-flags}] @var{cond-expr}
+if @var{condition}
   @var{action-list-1}
 fi
 @end smallexample
-    
+
+If @var{condition} evaluates to true, then the list of statements
+@var{action-list-1} is executed.
+
+A simple @var{condition} has the following syntax:
+
+@smallexample
+@var{part} [@var{sep}] [@var{op}] [@var{pattern-match-flags}] @var{regex}
+@end smallexample
+
+@noindent
+(where the square brackets denote optional parts).  Its parts are:
+
+@table @var
+@item part
 The @var{part} specifies which part of the input should be considered
 when evaluating the condition. It is either @samp{command}, meaning
 the text of an smtp command issued while sending the message, or
-@samp{header}, meaning the value of an RFC822 header. Either of the
-two may be followed by the name of the corresponding command or
+@samp{header}, meaning the value of an @acronym{RFC}822 header. Either
+of the two may be followed by the name of the corresponding command or
 header enclosed in square brackets. If this part is missing, all
 command or headers will be searched. 
 
-The optional @var{pattern-match-flags} alter the pattern matching
+@item sep
+Optional @dfn{concatenation separator}.  @FIXME-xref{concatenation}
+for its meaning.
+
+@item op
+Either @samp{=}, meaning ``match'', or @samp{!=}, meaning ``does not
+match''.  Missing @var{op} is equivalent to @samp{=}.
+
+@item pattern-match-flags
+Optional @var{pattern-match-flags} alter the pattern matching
 type used in subsequent conditional expression. It
 will be described in detail in the section @ref{Regular Expressions}.
-The @var{cond-expr} is a @dfn{conditional expression}.
-It consists of a series of @dfn{conditions} joined together with
-boolean operators @samp{and} or @samp{or} (@pxref{Boolean Operators}).
-Each condition is:
 
-@table @asis
-@item = @var{regexp}
-Returns true if the requested part of the input matches the given regular
-expression (@var{regexp}).
-
-@item != @var{regexp}
-Returns true if the requested part of the input does not match the given
-regular expression.
-
-@item not @var{condition}
-Reverses the sense of @var{condition}
-
-@item ( @var{cond-expr} )
-Returns the result of the conditional expression in parentheses. This
-is useful for changing operator precedence. 
+@item regex
+The @var{regex} is a regular expression enclosed in double quotes.
 @end table
+
+The condition yields true if the requested part of the input matches
+the given regular expression (if @var{op} is @samp{=}), or does not
+match it (if @var{op} is @samp{!=}).
 
 The simplest example:
 
@@ -1731,20 +1741,20 @@ the two different action sets depending on a given condition. The
 syntax is:
 
 @smallexample
-if @var{part} [@var{flags}] @var{cond-expr}
+if @var{condition}
   @var{action-list-1}
 else
   @var{action-list-2}
 fi
 @end smallexample
 
-Here, the @var{action-list-1} is executed if the condition
-@var{cond-expr} is met. Otherwise, @var{action-list-2} is
+Here, the @var{action-list-1} is executed if the 
+@var{condition} is met. Otherwise, @var{action-list-2} is
 executed.
 
 @smallexample
 @group
-if @var{part} [@var{flags}] @var{cond-expr}
+if @var{condition}
   @var{action-list-1}
 else
   @var{action-list-2}  
@@ -1774,7 +1784,7 @@ This statement, depending on the value of @code{List-Id} header, will
 prepend the @code{Subject} header with an identification string, or add
 an @code{X-Passed} header if no known @code{List-Id} was found.
 
-@node Triggers, Boolean Operators, Conditional Statements, Rule System
+@node Triggers
 @section Triggers
 @cindex Triggers
 
@@ -1857,7 +1867,7 @@ without creating separate rules for each user; thanks to back-references,
 those 3---4 lines are enough.
 
 
-@node Boolean Operators, Regular Expressions, Triggers, Rule System
+@node Boolean Operators
 @section Boolean Operators
 
 The following table lists the three boolean operators that can be used
@@ -1907,7 +1917,7 @@ Notice the use of parentheses to change the binding strength of the
 boolean operators.
 
 
-@node Regular Expressions, Action List, Boolean Operators, Rule System
+@node Regular Expressions
 @section Regular Expressions
 @cindex regex, flag
 @cindex re, flag
@@ -2023,7 +2033,7 @@ For information about Perl-style regular expressions, refer to the
 Perl documentation.
 
 
-@node Action List, Using Guile Actions, Regular Expressions, Rule System
+@node Action List
 @section Action List
 @cindex Action List
 
@@ -2044,7 +2054,7 @@ can use for instance: @samp{add} or @samp{ADD} or @samp{AdD}, and so on.
 @end menu
 
 
-@node Stop Action, Call Action, Action List, Action List
+@node Stop Action
 @subsection Stop Action
 @cindex @code{stop}
 
@@ -2059,7 +2069,7 @@ fi
 @end smallexample
 
 
-@node Call Action, Adding Headers or Text, Stop Action, Action List
+@node Call Action
 @subsection Call Action
 @cindex @code{call}
 
@@ -2084,7 +2094,7 @@ END
 @end smallexample
 
 
-@node Adding Headers or Text, Removing Headers, Call Action, Action List
+@node Adding Headers or Text
 @subsection Adding Headers or Text
 @cindex @code{add}
 
@@ -2117,7 +2127,7 @@ add body <<-EOT
 @end deffn
 
 
-@node Removing Headers, Modifying Messages, Adding Headers or Text, Action List
+@node Removing Headers
 @subsection Removing Headers
 @cindex @code{remove}
 
@@ -2145,7 +2155,7 @@ headers.
 @end deffn
 
 
-@node Modifying Messages, Inserting Files, Removing Headers, Action List
+@node Modifying Messages
 @subsection Modifying Messages
 @cindex @code{modify}
 
@@ -2237,7 +2247,7 @@ modify body :extended ["the old \([[:alnum:]]+\)"] "the new \1"
 @end deffn
 
 
-@node Inserting Files, Mail Encryption, Modifying Messages, Action List
+@node Inserting Files
 @subsection Inserting Files
 
 @deffn Command signature-file-append @var{yes-or-no}
@@ -2272,7 +2282,7 @@ body-append @var{file-name}
 @end deffn
 
 
-@node Mail Encryption, External Processor, Inserting Files, Action List
+@node Mail Encryption
 @subsection Mail Encryption
 @cindex GNU Privacy Guard, GnuPG
 @cindex Pretty Good Privacy, PGP
@@ -2356,7 +2366,7 @@ gpg-se John@@example.key:office@@example.key
 @end deffn
 
 
-@node External Processor, Quick Example, Mail Encryption, Action List
+@node External Processor
 @subsection Using an External Processor
 
 @deffn Command external-body-processor @var{program} [@var{args}]
@@ -2390,7 +2400,7 @@ program. In contrast, when @code{read-entire-body} is set to
 @code{yes}, the message is not decoded. Thus, your external processor
 must be able to cope with MIME messages.
 
-@node Quick Example, , External Processor, Action List
+@node Quick Example
 @subsection Quick Example
 
 Here is a quick example of using an action list:
@@ -2415,7 +2425,7 @@ message with your private key, and add a simple signature file from your
 home directory.
 
 
-@node Using Guile Actions, , Action List, Rule System
+@node Using Guile Actions
 @section Using Guile Actions
 @cindex Guile
 
@@ -2441,7 +2451,7 @@ Predefined Guile Actions
 @end menu
 
 
-@node Defining Guile Actions, Invoking Guile Actions, Using Guile Actions, Using Guile Actions
+@node Defining Guile Actions
 @subsection Defining Guile Actions
 @cindex Guile Actions, defining
 
@@ -2539,7 +2549,7 @@ If REST is not empty, append its car to BODY"
 @end smalllisp
 
 
-@node Invoking Guile Actions, Rot-13, Defining Guile Actions, Using Guile Actions
+@node Invoking Guile Actions
 @subsection Invoking Guile Actions
 @cindex @code{guile-process}
 
@@ -2578,7 +2588,7 @@ In this example, the additional argument (a string of three lines) is
 passed to the function, which will add it to the message of the body.
 
 
-@node Rot-13, Remailers, Invoking Guile Actions, Using Guile Actions
+@node Rot-13
 @subsection Support for @sc{rot-13}
 @cindex rot-13
 
@@ -2624,7 +2634,7 @@ done
 @end smallexample  
 @end deffn
 
-@node Remailers, Entire Message Filters, Rot-13, Using Guile Actions
+@node Remailers
 @subsection Remailers Type-I
 @cindex remailer
 
@@ -2706,7 +2716,7 @@ done
 @xref{Mail Encryption}, for more information on mail encryption in
 GNU Anubis.
 
-@node Entire Message Filters, , Remailers, Using Guile Actions
+@node Entire Message Filters
 @subsection Entire Message Filters
 @cindex entire-msg.scm
 @fnindex entire-msg-filter, Scheme function
@@ -2788,7 +2798,7 @@ Specify alternate system configuration file.
 
 @item --bind [@var{host}:]@var{port}
 @itemx -b
-Specify the TCP port on which GNU Anubis listens for connections.
+Specify the @acronym{TCP} port on which GNU Anubis listens for connections.
 The default @var{host} value is @w{@samp{INADDR_ANY}}, and default
 @var{port} number is 24 (private mail system).
 
@@ -2824,7 +2834,7 @@ Print short usage summary and exit.
 
 @item --local-mta @var{file}
 @itemx -l
-Execute a local SMTP server, which works on standard input and output
+Execute a local @acronym{SMTP} server, which works on standard input and output
 (inetd-type program). This option excludes the @samp{--remote-mta} option.
 
 @item --mode @var{mode-name}
@@ -2841,7 +2851,7 @@ Do not check a user config file permissions.
 
 @item --remote-mta @var{host}[:@var{port}]
 @itemx -r
-Specify a remote SMTP host name or IP address, which GNU Anubis will
+Specify a remote @acronym{SMTP} host name or @acronym{IP} address, which GNU Anubis will
 connect and forward mail to (after a processing).
 The default @var{port} number is 25.
 
@@ -2854,7 +2864,7 @@ Print a list of configuration options used to build GNU Anubis.
 
 @item --stdio
 @itemx -i
-Use the SMTP protocol (OMP/Tunnel) as described in RFC 821 on standard
+Use the @acronym{SMTP} protocol (OMP/Tunnel) as described in @acronym{RFC} 821 on standard
 input and output.
 
 @item --verbose
@@ -2889,7 +2899,7 @@ $ anubis -f --local-mta /usr/sbin/sendmail -- sendmail -bs
 
 @noindent
 Similar to above, but create a tunnel between localhost:24
-and a local program (local MTA). In this example local program
+and a local program (local @acronym{MTA}). In this example local program
 is @command{sendmail} with @samp{-bs} command line option.
 The @samp{-bs} option forces @command{sendmail} to work on standard
 input and output.
@@ -2914,7 +2924,7 @@ $ anubis -i
 @end smallexample
 
 @noindent
-Use the SMTP protocol (OMP/Tunnel) as described in RFC 821
+Use the @acronym{SMTP} protocol (OMP/Tunnel) as described in @acronym{RFC} 821
 on standard input and output.
 
 
@@ -2922,16 +2932,16 @@ on standard input and output.
 @chapter Sample Beginning
 
 By default, GNU Anubis binds to port number 24 (private mail system),
-so there shouldn't be any conflict with your local MTA (Mail Transport
-Agent). You just have to reconfigure your MUA (Mail User Agent) to make
-it talk to GNU Anubis directly on port number 24. All MUAs are normally
-set up to talk directly to the MTA, so you must change their settings
+so there shouldn't be any conflict with your local @acronym{MTA} (Mail Transport
+Agent). You just have to reconfigure your @acronym{MUA} (Mail User Agent) to make
+it talk to GNU Anubis directly on port number 24. All @acronym{MUA}s are normally
+set up to talk directly to the @acronym{MTA}, so you must change their settings
 and specify GNU Anubis' port number as their target. This makes GNU
-Anubis to work as an outgoing mail processor between your MUA and the
-MTA. Read your MUA's documentation for more information.
+Anubis to work as an outgoing mail processor between your @acronym{MUA} and the
+@acronym{MTA}. Read your @acronym{MUA}'s documentation for more information.
 
 Now you must choose whether you want to connect GNU Anubis with a remote
-or local SMTP host via TCP/IP or a local SMTP program, which works on
+or local @acronym{SMTP} host via @acronym{TCP/IP} or a local @acronym{SMTP} program, which works on
 standard input and output. In the first case, specify the following option:
 
 @smallexample
@@ -2939,19 +2949,19 @@ REMOTE-MTA @var{smtp-host}:25
 @end smallexample
 
 @noindent
-In the second case (local SMTP program), specify this:
+In the second case (local @acronym{SMTP} program), specify this:
 
 @smallexample
 LOCAL-MTA @var{/path/to/your/mta/mta-executable} -bs
 @end smallexample
 
 Please note that the @samp{-bs} command line option is a common way
-to run MTAs on standard input and output, but it is not a rule.
-Read your local MTA's documentation, how to get it working on standard
-input and output.
+to run @acronym{MTA}s on standard input and output, but it is not a rule.
+Read your local @acronym{MTA}'s documentation, how to get it working
+on standard input and output.
 
 If you would like to run GNU Anubis on port number 25 (which is a default
-value for the SMTP) or any other port number, then you must specify the
+value for the @acronym{SMTP}) or any other port number, then you must specify the
 @samp{bind} keyword. For instance, the following code will bind GNU Anubis
 to @samp{localhost:25}:
 
@@ -2959,11 +2969,11 @@ to @samp{localhost:25}:
 BIND localhost:25
 @end smallexample
 
-This can make a conflict between GNU Anubis and your local MTA, which usually
+This can make a conflict between GNU Anubis and your local @acronym{MTA}, which usually
 listens on port number 25. To solve this problem, you can for instance
-disable the MTA and specify the @samp{local-mta} keyword, or run MTA on port
+disable the @acronym{MTA} and specify the @samp{local-mta} keyword, or run @acronym{MTA} on port
 number different than GNU Anubis' port number (e.g. 1111). Please read your
-local MTA's documentation about this topic. For example:
+local @acronym{MTA}'s documentation about this topic. For example:
 
 @smallexample
 @group
@@ -2974,10 +2984,10 @@ REMOTE-MTA localhost:1111
 
 @strong{Caution:} Make sure that your local machine doesn't accept any
 incoming mail (i.e. it is @emph{not} a POP or IMAP server), otherwise
-you cannot disable your MTA or change its port number!
+you cannot disable your @acronym{MTA} or change its port number!
 
-All Mutt users, who would like to set up GNU Anubis between their MUA
-and MTA, should consider using the @samp{msg2smtp.pl} Perl script
+All Mutt users, who would like to set up GNU Anubis between their @acronym{MUA}
+and @acronym{MTA}, should consider using the @samp{msg2smtp.pl} Perl script
 from the @file{contrib} directory (part of the distribution).
 
 @node TLS/SSL, S/MIME, Sample Beginning, Top
@@ -2987,7 +2997,7 @@ from the @file{contrib} directory (part of the distribution).
 @cindex GnuTLS
 @cindex encryption
 
-According to the RFC 2246 document, the TLS (Transport Layer Security)
+According to the @acronym{RFC} 2246 document, the TLS (Transport Layer Security)
 protocol provides communications privacy over the Internet. The protocol
 allows client/server applications to communicate in a way that is designed
 to prevent eavesdropping, tampering, or message forgery. The primary goal
@@ -2995,9 +3005,9 @@ of the TLS Protocol is to provide privacy and data integrity between two
 communicating applications. The TLS protocol itself is based on the SSL 3.0
 (Secure Socket Layer) protocol specification.
 
-GNU Anubis supports the TLS/SSL (via the GnuTLS, a Transport Layer Security
+GNU Anubis supports the @acronym{TLS/SSL} (via the GnuTLS, a Transport Layer Security
 Library available at @w{@uref{http://www.gnutls.org/}},
-but your MTA must provide the STARTTLS command first. This can be checked by:
+but your @acronym{MTA} must provide the STARTTLS command first. This can be checked by:
 
 @smallexample
 @group
@@ -3008,11 +3018,12 @@ $ telnet @var{your-smtp-host} 25
 
 @noindent
 The server will response with all its available commands.
-If you see the STARTTLS, then you can use the TLS/SSL encryption.
-If your MUA doesn't support the TLS/SSL encryption, but your MTA does,
-then you should use the @samp{oneway-ssl} keyword in your configuration
-file. Before using the TLS/SSL encryption, you must generate a proper
-private key and a certificate. You can do it simply with:
+If you see the STARTTLS, then you can use the @acronym{TLS/SSL} encryption.
+If your @acronym{MUA} doesn't support the @acronym{TLS/SSL} encryption, but your
+@acronym{MTA} does, then you should use the @samp{oneway-ssl} keyword
+in your configuration file. Before using the @acronym{TLS/SSL} encryption, you
+must generate a proper private key and a certificate. You can do it
+simply with: 
 
 @smallexample
 @group
@@ -3057,8 +3068,8 @@ keywords in its own user configuration file.
 @cindex openssl
 
 Anubis version @value{VERSION} does not yet provide built-in support
-for S/MIME encryption or signing. To encrypt or sign messages using
-S/MIME, you will have to use external programs. Usually such programs
+for @acronym{S/MIME} encryption or signing. To encrypt or sign messages using
+@acronym{S/MIME}, you will have to use external programs. Usually such programs
 require the whole message as their input, so simply using
 @code{external-body-processor} will not work. GNU Anubis distribution
 includes a special Guile program, @file{entire-msg.scm}, designed for
@@ -3066,7 +3077,7 @@ use with such programs. For its detailed description, please refer to
 @ref{Entire Message Filters}. This chapter addresses a special case of
 using it with @code{openssl} to sign outgoing messages.
 
-To use @code{openssl} for S/MIME signing, invoke it using
+To use @code{openssl} for @acronym{S/MIME} signing, invoke it using
 @code{openssl-filter} function defined in @file{entire-msg.scm}. You
 will have to supply at least @code{-sign} and @code{-signer} arguments
 to the program. Notice, that you should not specify any input or
@@ -3091,12 +3102,10 @@ END
 @cindex incoming mail, processing
 
 Historically Anubis was designed to process outgoing mail. Support for
-processing incoming mail was added in version
-@value{VERSION}. @FIXME{Change this to the number of the next stable
-version when it is released.}
+processing incoming mail was added in version 4.1.
 
 To process incoming mail, Anubis must be started as @dfn{mail
-delivery agent} from your MTA configuration file. The invocation
+delivery agent} from your @acronym{MTA} configuration file. The invocation
 line must contain @option{--mode=mda} option, that tells Anubis
 to act in @dfn{mail delivery mode}. In this mode, Anubis receives
 the message from standard input, processes it using configuration
@@ -3131,7 +3140,7 @@ This option sets sender email address (see @code{%sender} meta
 variable above). It implies @option{--mode=mda}. If the option is
 not given, GNU Anubis will deduce sender address from UNIX
 @samp{From } header or, if it is not present, from the value of
-@code{From} SMTP header.
+@code{From} @acronym{SMTP} header.
 
 @item
 In MDA mode, Anubis takes names of the recipients from the command line.
@@ -3260,7 +3269,7 @@ set sendmail="@var{mail.remote} smtp://@var{hostname}[:@var{port}]"
 @noindent
 where @var{mail.remote} stands for the full file name of
 @command{mail.remote} utility, @var{hostname} and optional
-@var{port} specify the host name (or IP address) of the machine
+@var{port} specify the host name (or @acronym{IP} address) of the machine
 running @command{anubis} and the port it listens on. Notice, that
 default port value for @command{mail.remote} is 25, which means
 that in most cases you will have to specify it explicitely.
@@ -3324,7 +3333,7 @@ set sendmail="/usr/local/libexec/msg2smtp.pl -h @var{hostname} -p @var{port}"
 @end smallexample
 
 @noindent
-where @var{hostname} and @var{port} specify the host name (or IP
+where @var{hostname} and @var{port} specify the host name (or @acronym{IP}
 address) of the machine running @command{anubis} and the port it
 listens on, respectively.
 @end enumerate
@@ -3352,7 +3361,7 @@ following new keywords in its configuration file:
 
 @table @code
 @item set smtp_host = @var{hostname}
-Sets the hostname or IP address of the remote @acronym{SMTP} host.
+Sets the hostname or @acronym{IP} address of the remote @acronym{SMTP} host.
 
 @item set smtp_port = @var{port}
 Sets the port number to use.
