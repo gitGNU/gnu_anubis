@@ -40,4 +40,4 @@ manual:
 	TEXINPUTS=$(srcdir):$(top_srcdir)/build:$(TEXINPUTS) \
 	 MAKEINFO="$(MAKEINFO) $(MAKEINFOFLAGS)" \
 	 TEXI2DVI="$(TEXI2DVI) -t @finalout" \
-	$(GENDOCS) $(PACKAGE) '$(PACKAGE_NAME) manual'
+	$(GENDOCS) --texi2html $(PACKAGE) '$(PACKAGE_NAME) manual'
