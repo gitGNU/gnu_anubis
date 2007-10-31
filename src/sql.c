@@ -150,7 +150,7 @@ sql_db_list (void *d, ANUBIS_LIST * list, int *ecode)
       const char *p;
       if (amp->get_tuple (amp, i))
 	break;
-      rec = xmalloc (sizeof (*rec));
+      rec = xzalloc (sizeof (*rec));
       rec->smtp_authid = strdup (amp->get_column (amp, 0));
       rec->smtp_passwd = strdup (amp->get_column (amp, 1));
       if ((p = amp->get_column (amp, 2)))

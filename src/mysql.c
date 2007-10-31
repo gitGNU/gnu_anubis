@@ -163,7 +163,7 @@ mysql_db_open (void **dp, ANUBIS_URL * url, enum anubis_db_mode mode,
 	}
     }
 
-  amp = xmalloc (sizeof (*amp));
+  amp = xzalloc (sizeof (*amp));
   amp->buf = xmalloc (bufsize);
   amp->bufsize = bufsize;
   mdata = xmalloc (sizeof (*mdata));

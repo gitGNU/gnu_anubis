@@ -178,7 +178,7 @@ pgsql_db_open (void **dp, ANUBIS_URL * url, enum anubis_db_mode mode,
       return ANUBIS_DB_FAIL;
     }
 
-  amp = xmalloc (sizeof (*amp));
+  amp = xzalloc (sizeof (*amp));
   amp->buf = xmalloc (bufsize);
   amp->bufsize = bufsize;
   pdata = xmalloc (sizeof (*pdata));

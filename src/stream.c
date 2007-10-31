@@ -84,7 +84,7 @@ _def_close (void *sd)
 void
 stream_create (struct net_stream **str)
 {
-  *str = xmalloc (sizeof **str);
+  *str = xzalloc (sizeof **str);
 }
 
 int

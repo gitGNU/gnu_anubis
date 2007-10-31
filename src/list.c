@@ -47,6 +47,7 @@ list_create ()
   struct list *p = xmalloc (sizeof (*p));
   p->head = p->tail = NULL;
   p->itr = NULL;
+  p->count = 0;
   return p;
 }
 
@@ -117,7 +118,7 @@ iterator_create (ANUBIS_LIST *list)
 
   if (!list)
     return NULL;
-  itr = xmalloc (sizeof (*itr));
+  itr = xzalloc (sizeof (*itr));
   _iterator_attach (list, itr);
   return itr;
 }
