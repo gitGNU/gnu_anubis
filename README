@@ -1,14 +1,15 @@
 
- Introduction
- ============
+Introduction
+============
 
- GNU Anubis is an SMTP message submission daemon. It represents an intermediate
- layer between mail user agent (MUA) and mail transport agent (MTA), receiving
- messages from the MUA, applying to them a set of predefined changes and finally
- inserting modified messages into an MTA routing network. The set of changes
- applied to a message is configurable on a system-wide and per-user basis. The
- built-in configuration language used for defining sets of changes allows for
- considerable flexibility and is easily extensible.
+   GNU Anubis is an SMTP message submission daemon.  It represents an
+intermediate layer between mail user agent (MUA) and mail transport agent
+(MTA), receiving messages from the MUA, applying to them a set of
+predefined changes and finally inserting modified messages into an MTA
+routing network.  The set of changes applied to a message is configurable on
+a system-wide and per-user basis.  The built-in configuration language used
+for defining sets of changes allows for considerable flexibility and is
+easily extensible.  
 
  --------*      --------**      ------***
  |  MUA  | ---> | Anubis | ---> |  MTA  |
@@ -18,59 +19,61 @@
  **  An SMTP message submission daemon.
  *** Mail Transport Agent (server)
 
- GNU Anubis is GNU software. See the home page at:
- http://www.gnu.org/software/anubis/
+   GNU Anubis is GNU software.  See the home page at:
+http://www.gnu.org/software/anubis/
 
  License:
- GNU Anubis is free software. Read the COPYING file.
+ GNU Anubis is free software distributed under the terms of GNU General
+Public License version 3 or later.  See the file COPYING for the copying
+conditions. 
 
 
- SUPPORTED SOFTWARE
- ==================
+SUPPORTED SOFTWARE
+==================
 
- Recommended:
+Recommended:
 
- * GSASL -- an implementation of the SASL framework
-   (http://www.gnu.org/software/gsasl/). Anubis requires GSASL version 0.2.3
-   or newer.
+* GSASL -- an implementation of the SASL framework
+  (http://www.gnu.org/software/gsasl/).  Anubis requires GSASL version
+  0.2.3 or newer.
 
- * A database, any from the following:
+* A database, any from the following:
    - GDBM -- (http://www.gnu.org/software/gdbm/).
    - MySQL -- (http://www.mysql.com/).
    - PostgreSQL -- (http://www.postgresql.com/)
 
- * GnuTLS -- a Transport Layer Security Library (http://www.gnutls.org/)
- * Guile -- The GNU extension language (http://www.gnu.org/software/guile/).
- * GnuPG -- The GNU Privacy Guard (http://www.gnupg.org/)
-   with GPGME -- GnuPG Made Easy (http://www.gnupg.org/gpgme.html).
+* GnuTLS -- a Transport Layer Security Library
+(http://www.gnutls.org/)
+* Guile -- The GNU extension language (http://www.gnu.org/software/guile/).
+* GnuPG -- The GNU Privacy Guard (http://www.gnupg.org/)
+  with GPGME -- GnuPG Made Easy (http://www.gnupg.org/gpgme.html).
 
- Optional:
+Optional:
 
- * The TCP/IP Identification Protocol (RFC 1413) server (any).
- * PCRE -- Perl-Compatible Regular Expression Library (http://www.pcre.org/).
- * PAM -- Pluggable Authentication Modules
-   (http://www.kernel.org/pub/linux/libs/pam/).
- * libwrap (TCP wrappers) -- an access control library.
+* The TCP/IP Identification Protocol (RFC 1413) server (any).
+* PCRE -- Perl-Compatible Regular Expression Library (http://www.pcre.org/).
+* PAM -- Pluggable Authentication Modules
+  (http://www.kernel.org/pub/linux/libs/pam/).
+* libwrap (TCP wrappers) -- an access control library.
 
 
- INSTALLATION
- ============
+INSTALLATION
+============
 
  $ ./configure
  $ make
  $ make check (optional)
  $ make install
 
- By default, GNU Anubis will be installed in `/usr/local/sbin/anubis',
- but this can be changed with the `--prefix' command, for instance:
+   By default, GNU Anubis will be installed in `/usr/local/sbin/anubis',
+but this can be changed with the `--prefix' command, for instance: 
 
  $ ./configure --prefix=/usr
  $ make
  $ make check (optional)
  $ make install
 
- For better control, use the options below.
- Set the `./configure' script with:
+   For better control, use the options below:
 
  `--with-gsasl'        to support SASL authentication.
  `--with-mysql'        to support MySQL database.
@@ -86,50 +89,55 @@
  `--with-unprivileged-user=USER'
                        to set an unprivileged user (default is "nobody").
 
- Next, write a proper init script for your system. See the examples
- in the `scripts' directory (part of the distribution).
+   Next, write a proper init script for your system.  See the examples in
+the `scripts' directory (part of the distribution). 
 
- NOTE: Remember about activating GNU Anubis with `ntsysv' tool
- or similar, and configure its system configuration file (read
- the GNU Anubis Manual about this topic).
+   NOTE: Remember about activating GNU Anubis with `ntsysv' tool or
+similar, and configure its system configuration file (read the GNU Anubis
+Manual about this topic). 
 
- CAUTION: It is now optional to install the TCP/IP IDENT protocol
- server (RFC 1413). It depends on whether you are going to use
- a "transparent" mode, or not. Please consult the documentation.
- Most modern GNU/Linux (or *BSD) distributions have already
- installed an IDENT server. If not, try `pidentd', available at:
- ftp://ftp.lysator.liu.se/pub/ident/servers/
+   CAUTION: It is now optional to install the TCP/IP IDENT protocol server
+(RFC 1413).  It depends on whether you are going to use a "transparent"
+mode, or not.  Please consult the documentation.  Most modern GNU/Linux (or
+*BSD) distributions come with an IDENT server.  If you don't have it, try
+`pidentd', available at: ftp://ftp.lysator.liu.se/pub/ident/servers/
 
 
- Editing Configuration Files with GNU Emacs
- ==========================================
+Editing Configuration Files with GNU Emacs
+==========================================
 
- The file elisp/anubis-mode.el provides the Emacs major mode for
- editing Anubis configuration files.
+   The file elisp/anubis-mode.el provides the Emacs major mode for editing
+Anubis configuration files. 
 
- After `make install' Emacs should be able to use anubis-mode
- when editing appropriate configuration files. You will
- have to add the following to your .emacs or site-start file:
+   After `make install' Emacs should be able to use anubis-mode when
+editing appropriate configuration files.  You will have to add the following
+to your .emacs or site-start file: 
 
  (autoload 'anubis-mode "anubis-mode")
  (setq auto-mode-alist (append auto-mode-alist
                                 '(("/.anubisrc$" . anubis-mode)
                                   ("/anubisrc$" . anubis-mode))))
 
- You may also wish to modify the following variables:
+   You may also wish to modify the following variables:
 
- * anubis-path
+* anubis-path
 
- The path to the anubis executable. Use this if anubis cannot be
- found using the search path.
+   The path to the anubis executable.  Use this if anubis cannot be found
+using the search path. 
 
- * anubis-section-body-indent
+* anubis-section-body-indent
 
- Sets the indentation level for a section body. Defaults to 0.
+   Sets the indentation level for a section body.  Defaults to 0.
 
- * anubis-level-indent
+* anubis-level-indent
 
- Sets amount of indentation per block nesting level. Defaults to 2.
+   Sets amount of indentation per block nesting level.  Defaults to 2.
 
- EOF
 
+^L
+Local Variables:
+mode: auto-fill
+fill-column: 75
+paragraph-separate: "[	^L]*$"
+version-control: never
+End:
