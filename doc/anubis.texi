@@ -1702,7 +1702,7 @@ header enclosed in square brackets. If this part is missing, all
 command or headers will be searched. 
 
 @item sep
-Optional @dfn{concatenation separator}.  @FIXME-xref{concatenation}
+Optional @dfn{concatenation separator}.  @xref{Concatenations},
 for its meaning.
 
 @item op
@@ -1783,6 +1783,48 @@ fi
 This statement, depending on the value of @code{List-Id} header, will
 prepend the @code{Subject} header with an identification string, or add
 an @code{X-Passed} header if no known @code{List-Id} was found.
+
+@menu
+* Concatenations::
+@end menu
+
+
+@node Concatenations
+@subsection Concatenations
+
+It is important to understand that, conditional expressions choose
+the first match.  To illustrate this, lets suppose you need to store
+values of all recipients from the envelope in the
+@samp{X-Also-Delivered-To} header.  A naive way to do so is:
+
+@smallexample
+if command [rcpt to:] = "(.*)"
+  add header [X-Also-Delivered-To] "\1"
+fi
+@end smallexample
+
+However, this will store only the very first @code{RCPT TO} value, so
+you will not achieve your goal.
+
+To help you in this case, @command{anubis} offers a
+@dfn{concatenation} operator, whose effect is to concatenate the
+values of all requested keys prior to matching them against the
+regular expression.  Syntactically, the concatenation operator is a
+string enclosed in parentheses, placed right after the key part of a
+condition.  This string is used as a separator when concatenating
+values.  For example:
+
+@smallexample
+if command [rcpt to:] (",") = "(.*)"
+  add header [X-Also-Delivered-To] "\1"
+fi
+@end smallexample
+
+This fragment will first create a string consisting of all @code{RCPT
+TO} addresses, separated by a comma, and then will match it against
+the regular expression on the right hand side.  Since this expression
+matches any string, the @samp{\1} will contain a comma-separated list
+of addresses.
 
 @node Triggers
 @section Triggers

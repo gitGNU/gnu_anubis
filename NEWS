@@ -1,4 +1,4 @@
-GNU Anubis NEWS -- history of user-visible changes. 2007-08-06
+GNU Anubis NEWS -- history of user-visible changes. 2007-11-01
 Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007 The Anubis Team.
 
 See the end of file for copying conditions.
@@ -12,7 +12,31 @@ Please send your bug reports to <bug-anubis@gnu.org>.
 The package is licensed under GPL version 3 (see COPYING for the details).
 
 ** New features:
+
 * New working mode: MDA
+
+* The != (``not match'') operator is implemented.
+
+The statement:
+
+  if header ["To:"]  != "smith@.*"
+
+is equivalent to
+
+  if not header ["To:"] = "smith@.*"
+
+* Concatenation operator
+
+Concatenation operator allows to run tests on a concatenation of values
+of all headers or commands having same key.  For example to get a
+comma-separated list of all recipients, one could use:
+
+    if command ["rcpt to:"] (",") = "(.*)"
+
+Here, the (",") instructs Anubis to concatenate the values of all RCPT TO
+commands, using comma as a separator. The match on the right hand side will
+always succeed, and the concatenated value will be available via the "\1"
+substitution.
 
 ** Bug fixes
 * Fixed handling of regular expressions
