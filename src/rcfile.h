@@ -83,6 +83,9 @@ enum rc_node_type
 struct rc_expr
 {
   int part;			/* HEADER, COMMAND or BODY */
+  char *sep;                    /* If not-null, concatenate all values of
+				   a same key, using this string as a separator
+				   before matching */
   char *key;
   RC_REGEX *re;
 };
