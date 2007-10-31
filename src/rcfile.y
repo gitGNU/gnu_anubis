@@ -76,6 +76,7 @@ static struct rc_secdef *rc_secdef;
     int part;
     RC_REGEX *key;
     char *string;
+    char *sep;
   } msgpart;
   RC_LOC loc;
   struct {
@@ -83,9 +84,10 @@ static struct rc_secdef *rc_secdef;
     char *name;
   } begin_sec;
   ANUBIS_LIST *list;
+  int eq;
 };
 
-%token EOL T_BEGIN T_END AND OR
+%token EOL T_BEGIN T_END AND OR NE
 %token IF FI ELSE RULE DONE
 %token CALL STOP ADD REMOVE MODIFY
 %token <string> IDENT STRING REGEX D_BEGIN
@@ -95,7 +97,7 @@ static struct rc_secdef *rc_secdef;
 %left AND
 %left NOT
 
-%type <string> keyword string modifier arg string_key
+%type <string> keyword string modifier arg string_key opt_sep
 %type <section> section seclist
 %type <stmtlist> stmtlist
 %type <stmt> stmt asgn_stmt cond_stmt rule_stmt inst_stmt modf_stmt
@@ -105,6 +107,7 @@ static struct rc_secdef *rc_secdef;
 %type <list> arglist
 %type <regex> regex
 %type <begin_sec> begin
+%type <eq> meq
 
 %%
 
@@ -306,7 +309,17 @@ cond     : expr
          ;
 
 meq      : /* empty */
+           {
+	     $$ = 1;
+	   }
          | '='
+           {
+	     $$ = 1;
+	   }
+         | NE
+           {
+	     $$ = 0;
+	   }
          ;
 
 key      : regex
@@ -331,12 +344,23 @@ opt_key  : /* empty */
          | key
 	 ;
 
-msgpart  : T_MSGPART opt_key
+msgpart  : T_MSGPART opt_key 
            {
 	     $$ = $2;
+	     $$.sep = NULL;
 	     $$.part = $1;
 	   }
          | key
+         ;
+
+opt_sep  : /* empty */
+           {
+	     $$ = NULL;
+	   }
+         | '(' string ')'
+           {
+	     $$ = $2;
+	   }
          ;
 
 s_msgpart: msgpart
@@ -380,13 +404,23 @@ string_key: /* empty */
 	   }
 	 ;
 
-expr     : s_msgpart opt_modlist meq opt_modlist string
+expr     : s_msgpart opt_sep meq opt_modlist string
            {
-	     $$ = rc_node_create (rc_node_expr);
-	     $$->v.expr.part = $1.part;
-	     $$->v.expr.key = $1.string;
-	     $$->v.expr.re = anubis_regex_compile ($5, $4|$2);
+	     RC_NODE *node = rc_node_create (rc_node_expr);
+	     node->v.expr.part = $1.part;
+	     node->v.expr.key = $1.string;
+	     node->v.expr.sep = $2;
+	     node->v.expr.re = anubis_regex_compile ($5, $4);
 	     free ($5);
+	     if ($3)
+	       $$ = node;
+	     else
+	       {
+		 $$ = rc_node_create (rc_node_bool);
+		 $$->v.bool.op = bool_not;
+		 $$->v.bool.left = node;
+		 $$->v.bool.right = NULL;
+	       }
 	   }
          ;
 
@@ -911,6 +945,8 @@ rc_node_print (RC_NODE *node)
     printf ("%s", part_string (node->v.expr.part));
     if (node->v.expr.key && node->v.expr.key[0] != '\n')
       printf ("[%s]",node->v.expr.key);
+    if (node->v.expr.sep)
+      printf ("(%s)", node->v.expr.sep);
     printf (" ");
     anubis_regex_print (node->v.expr.re);
     break;
@@ -1355,7 +1391,7 @@ asgn_eval (struct eval_env *env, RC_ASGN *asgn)
 
 
 int
-re_eval_list (struct eval_env *env, char *key,
+re_eval_list (struct eval_env *env, char *key, char *sep,
 	      RC_REGEX *re, ANUBIS_LIST *list)
 {
   ASSOC *p;
@@ -1363,11 +1399,49 @@ re_eval_list (struct eval_env *env, char *key,
   int rc = 0;
 
   itr = iterator_create (list);
-  for (p = iterator_first (itr); rc == 0 && p; p = iterator_next (itr))
+  if (sep)
     {
-      if (!p->key || !strcasecmp (p->key, key))
-	rc = anubis_regex_match (re, p->value,
-				 &env->refcnt, &env->refstr);
+      char *tmpbuf = NULL;
+      size_t tmpsize = 0;
+      size_t seplen = strlen (sep);
+      char *first_val = NULL;
+      
+      for (p = iterator_first (itr); p; p = iterator_next (itr))
+	{
+	  if (!p->key || !strcasecmp (p->key, key))
+	    {
+	      if (tmpsize == 0)
+		{
+		  if (!first_val)
+		    {
+		      first_val = p->value; /* Initialize copy on write */
+		      continue;
+		    }
+		  else
+		    {
+		      tmpbuf = xstrdup (first_val);
+		      tmpsize = strlen (tmpbuf);
+		      first_val = NULL;
+		    }
+		}
+	      tmpsize += seplen + strlen (p->value);
+	      tmpbuf = xrealloc (tmpbuf, tmpsize + 1);
+	      strcat (tmpbuf, sep);
+	      strcat (tmpbuf, p->value);
+	    }
+	}
+      rc = anubis_regex_match (re, first_val ? first_val : tmpbuf,
+			       &env->refcnt, &env->refstr);
+      free (tmpbuf);
+    }
+  else
+    {
+      for (p = iterator_first (itr); rc == 0 && p; p = iterator_next (itr))
+	{
+	  if (!p->key || !strcasecmp (p->key, key))
+	    rc = anubis_regex_match (re, p->value,
+				     &env->refcnt, &env->refstr);
+	}
     }
   iterator_destroy (&itr);
   return rc;
@@ -1394,12 +1468,12 @@ expr_eval (struct eval_env *env, RC_EXPR *expr)
   
   switch (expr->part) {
   case COMMAND:
-    rc = re_eval_list (env, expr->key, expr->re,
+    rc = re_eval_list (env, expr->key, expr->sep, expr->re,
 		       env->msg->commands);
     break;
     
   case HEADER:
-    rc = re_eval_list (env, expr->key, expr->re, env->msg->header);
+    rc = re_eval_list (env, expr->key, expr->sep, expr->re, env->msg->header);
     break;
     
   case BODY:
