@@ -38,7 +38,7 @@ struct gpg_struct
 
 static struct gpg_struct gpg;
 
-static int gpgme_init (void);
+//static int gpgme_init (void);
 static char *gpg_sign (char *);
 static char *gpg_encrypt (char *);
 static char *gpg_sign_encrypt (char *);
@@ -87,7 +87,7 @@ print_engine_info (gpgme_engine_info_t info)
 
 #define GPGME_REQ_VERSION "0.9.0"	/* GPGME 0.9.0 or later */
 
-static int
+int
 gpgme_init (void)
 {
   gpgme_error_t err;
@@ -534,7 +534,7 @@ gpg_parser (int method, int key, ANUBIS_LIST * arglist,
 
     case KW_GPG_ENCRYPT:
       xfree (gpg.encryption_keys);
-      gpg.encryption_keys = allocbuf (arg, 0);
+      gpg.encryption_keys = xstrdup (arg);
       if (gpg.inited == 0 && gpgme_init ())
 	break;
       gpg_proc (msg, gpg_encrypt);
@@ -562,13 +562,13 @@ gpg_parser (int method, int key, ANUBIS_LIST * arglist,
 	    if (strcasecmp (p, "default") && strcasecmp (p, "yes"))
 	      {
 		xfree (gpg.sign_keys);
-		gpg.sign_keys = allocbuf (p, 0);
+		gpg.sign_keys = xstrdup (p);
 	      }
 	    *--p = '\0';
-	    gpg.encryption_keys = allocbuf (arg, 0);
+	    gpg.encryption_keys = xstrdup (arg);
 	  }
 	else
-	  gpg.encryption_keys = allocbuf (arg, 0);
+	  gpg.encryption_keys = xstrdup (arg);
 
 	if (gpg.inited == 0 && gpgme_init ())
 	  break;

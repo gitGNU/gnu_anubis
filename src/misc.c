@@ -279,7 +279,7 @@ substitute (char *inbuf, char **subbuf)
   if (!inbuf || !subbuf)
     return NULL;
 
-  tmpbuf = allocbuf (inbuf, 0);
+  tmpbuf = xstrdup (inbuf);
   tmp++;
   while (*tmp)
     {
@@ -386,10 +386,7 @@ assign_string (char **pstr, const char *s)
 {
   free (*pstr);
   if (s)
-    {
-      *pstr = xmalloc (strlen (s) + 1);
-      strcpy (*pstr, s);
-    }
+    *pstr = xstrdup (s);
   else
     *pstr = NULL;
 }

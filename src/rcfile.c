@@ -344,7 +344,7 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
     if (method == CF_CLIENT)
       {
 	xfree (options.ulogfile);
-	options.ulogfile = allocbuf (arg, MAXPATHLEN);
+	options.ulogfile = xstrdup (arg);
       }
     else if (getpid () == 0)
       anubis_warning (0,
@@ -353,7 +353,7 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
       {
 	topt |= T_DISABLE_SYSLOG;
 	xfree (options.ulogfile);
-	options.ulogfile = allocbuf (arg, MAXPATHLEN);
+	options.ulogfile = xstrdup (arg);
       }
     break;
 
@@ -390,7 +390,7 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
 	      }
 	    else
 	      {
-		options.tracefile = allocbuf (arg, MAXPATHLEN);
+		options.tracefile = xstrdup (arg);
 		topt |= T_TRACEFILE_USR;
 	      }
 	  }
@@ -692,19 +692,19 @@ tls_parser (int method, int key, ANUBIS_LIST * arglist,
 
   case KW_SSL_CERT:
     xfree (secure.cert);
-    secure.cert = allocbuf (arg, MAXPATHLEN);
+    secure.cert = xstrdup (arg);
     break;
 
   case KW_SSL_KEY:
     xfree (secure.key);
-    secure.key = allocbuf (arg, MAXPATHLEN);
+    secure.key = xstrdup (arg);
     if (method == CF_CLIENT)
       topt |= T_SSL_CKCLIENT;
     break;
 
   case KW_SSL_CAFILE:
     xfree (secure.cafile);
-    secure.cafile = allocbuf (arg, MAXPATHLEN);
+    secure.cafile = xstrdup (arg);
     break;
 
   default:

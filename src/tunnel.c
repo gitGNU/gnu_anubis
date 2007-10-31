@@ -507,7 +507,7 @@ handle_starttls (char *command)
    */
 
   if (!secure.cert)
-    secure.cert = allocbuf (DEFAULT_SSL_PEM, MAXPATHLEN);
+    secure.cert = xstrdup (DEFAULT_SSL_PEM);
   if (!check_filename (secure.cert, NULL))
     {
       swrite (SERVER, remote_client,
@@ -516,7 +516,7 @@ handle_starttls (char *command)
     }
 
   if (!secure.key)
-    secure.key = allocbuf (secure.cert, MAXPATHLEN);
+    secure.key = xstrdup (secure.cert);
   else if (!check_filename (secure.key, NULL))
     {
       swrite (SERVER, remote_client,

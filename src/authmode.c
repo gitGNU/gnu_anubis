@@ -348,7 +348,7 @@ asmtp_ehlo (enum asmtp_state state, ANUBIS_USER * usr)
 	NET_STREAM stream;
 	
 	if (!secure.cert)
-	  secure.cert = allocbuf (DEFAULT_SSL_PEM, MAXPATHLEN);
+	  secure.cert = xstrdup (DEFAULT_SSL_PEM);
 	if (!check_filename (secure.cert, NULL))
 	  {
 	    asmtp_reply (454, "TLS not available due to temporary reason");
@@ -356,7 +356,7 @@ asmtp_ehlo (enum asmtp_state state, ANUBIS_USER * usr)
 	  }
 
 	if (!secure.key)
-	  secure.key = allocbuf (secure.cert, MAXPATHLEN);
+	  secure.key = xstrdup (secure.cert);
 	else if (!check_filename (secure.key, NULL))
 	  {
 	    asmtp_reply (454, "TLS not available due to temporary reason");
