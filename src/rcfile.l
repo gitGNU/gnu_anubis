@@ -174,6 +174,7 @@ END |
 \\\n           { cfg_line_num++; }
 \n             { cfg_line_num++; return EOL; }
 {PUNCT}        return yytext[0];
+!=             return NE;
 .              { parse_error (_("Stray character in config: \\%03o. Possibly missing quotes around the string"), yytext[0]); }
 
 %%
@@ -221,6 +222,7 @@ void
 string_add (char *str, int len)
 {
   struct string_list *s = xmalloc (sizeof (*s) + len);
+  s->next = NULL;
   s->str = (char*)(s+1);
   memcpy (s->str, str, len);
   s->length = len;
