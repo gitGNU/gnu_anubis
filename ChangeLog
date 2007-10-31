@@ -1,3 +1,44 @@
+2007-10-31  Sergey Poznyakoff  <gray@gnu.org.ua>
+
+	* README: Clean up formatting.
+	* README-hacking: Update.
+	* doc/Makefile.am (manual): Use texi2html to create HTML sources.
+	* doc/gendocs_template: Likewise.
+	* doc/anubis.texi: Fix sectioning commands. Use @acronym when
+	needed.
+	* lib/Makefile.am: Initialize some variables before including
+	gnulib.mk.
+	* src/mem.c, src/mem.h: Remove.
+	* src/Makefile.am (libanubisdb_a_SOURCES): Remove mem.c and mem.h.
+	* src/anubisadm.c: Do not include getline.h.
+	Define xalloc_die instead of adm_memory_error.
+	* src/anubisusr.c: Likewise.
+	* src/headers.h: Remove mem.h.
+	Include xalloc.h.
+	* src/main.c: Define xalloc_die.
+	
+	* src/list.c, src/pgsql.c, src/mysql.c, src/sql.c,
+	src/stream.c: Fix memory management .
+	* src/authmode.c, src/gpg.c, src/misc.c, src/rcfile.c,
+	src/tunnel.c: Use xstrdup instead of allocbuf.
+
+	* src/anubisdb.c, src/sql.h, src/tls.c: Minor change .
+
+	* src/rcfile.h (struct rc_expr): New member `sep'.
+	* src/rcfile.l: Return != as a token.
+	(string_add): Initialize next.
+	* src/rcfile.y: Handle optional concatentation directive in expr
+	statement. Handle != opcode.
+	Disallow placing regex modifiers before opcode (= or !=).
+	(rc_node_print): Reflect concatenation separator.
+	(re_eval_list): Take new argument: concatenation separator.
+	All uses updated.
+
+	* testsuite/lib/anubis.exp: Do not display "be patient"
+	warning. Things have become faster nowadays.
+	* testsuite/etc/mod-header.in, testsuite/etc/std.in: Remove
+	obsolete usage of regex flags before the equals sign.
+	
 2007-08-06  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	Relicense everything under GPLv3+
