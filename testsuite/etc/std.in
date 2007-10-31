@@ -1,6 +1,6 @@
 # -*- anubis -*-
 # This file is part of GNU Anubis testsuite.
-# Copyright (C) 2003 The Anubis Team.
+# Copyright (C) 2003, 2007 The Anubis Team.
 #
 # GNU Anubis is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ if command["mail from"] = ".*<?root@localhost>?"
   STOP
 fi
 
-if header[Subject] = "(.*)" and not header[Subject] :scase = "URGENT"
+if header[Subject] = "(.*)" and not header[Subject] = :scase "URGENT"
   add [X-Comment] "This message is not URGENT (\1)."
   add [X-Comment] "GNU's Not Unix! (\1)"
 fi

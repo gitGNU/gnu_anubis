@@ -1,6 +1,6 @@
 # -*- anubis -*-
 # This file is part of GNU Anubis testsuite.
-# Copyright (C) 2003 The Anubis Team.
+# Copyright (C) 2003, 2007 The Anubis Team.
 #
 # GNU Anubis is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,13 +22,13 @@ local-mta TESTDIR/mta -bs -d TESTDIR/etc/mta.log
 ---END---
 
 ---BEGIN RULE---
-if header[Subject] :scase = "Hybrid Theory"
+if header[Subject] = :scase "Hybrid Theory"
   modify [Subject] "Meteora"
   modify header :re ["X-\(.*\)"] ["X-Old-\1"]
   modify header [X-Old-LP-InTheEnd] [X-LP-Faint] "rules!"
 fi
 
-if header[Subject] :scase = "Renegades of Funk"
+if header[Subject] = :scase "Renegades of Funk"
   modify [Subject] "[RATM \\& music] &"
 fi
 ---END---
