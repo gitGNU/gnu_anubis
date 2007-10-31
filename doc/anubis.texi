@@ -1791,8 +1791,8 @@ an @code{X-Passed} header if no known @code{List-Id} was found.
 
 @node Concatenations
 @subsection Concatenations
-
-It is important to understand that, conditional expressions choose
+@cindex Concatenation
+It is important to understand that conditional expressions choose
 the first match.  To illustrate this, lets suppose you need to store
 values of all recipients from the envelope in the
 @samp{X-Also-Delivered-To} header.  A naive way to do so is:
