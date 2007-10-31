@@ -22,8 +22,7 @@
 
 #include "headers.h"
 #include "extern.h"
-#include <getopt.h>
-#include <getline.h>
+#include "getopt.h"
 
 #define OPT_VERSION          257
 #define OPT_HELP             258
@@ -63,10 +62,10 @@ error (const char *fmt, ...)
   fprintf (stderr, "\n");
 }
 
-static void
-adm_memory_error (const char *msg)
+void
+xalloc_die ()
 {
-  error ("%s", msg);
+  error ("%s", _("Not enough memory"));
   exit (1);
 }
 
@@ -426,9 +425,6 @@ main (int argc, char **argv)
     progname++;
   else
     progname = argv[0];
-
-  /* Register memory error printer */
-  memory_error = adm_memory_error;
 
   /* Initialize various database formats */
 

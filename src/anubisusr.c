@@ -24,8 +24,7 @@
 #include "extern.h"
 #include "rcfile.h"
 #include <gsasl.h>
-#include <getopt.h>
-#include <getline.h>
+#include "getopt.h"
 
 #define obstack_chunk_alloc malloc
 #define obstack_chunk_free free
@@ -1212,6 +1211,12 @@ read_netrc (void)
     }
 }
 
+void
+xalloc_die ()
+{
+  error ("%s", _("Not enough memory"));
+  exit (1);
+}
 
 int
 main (int argc, char **argv)
