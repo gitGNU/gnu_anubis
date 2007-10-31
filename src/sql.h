@@ -22,8 +22,8 @@ struct anubis_sql_db
 {
   /* Access methods */
   int (*query) (struct anubis_sql_db * amp);
-    size_t (*num_tuples) (struct anubis_sql_db * amp);
-    size_t (*num_columns) (struct anubis_sql_db * amp);
+  size_t (*num_tuples) (struct anubis_sql_db * amp);
+  size_t (*num_columns) (struct anubis_sql_db * amp);
   int (*release_result) (struct anubis_sql_db * amp);
   int (*get_tuple) (struct anubis_sql_db * amp, size_t i);
   const char *(*get_column) (struct anubis_sql_db * amp, size_t i);

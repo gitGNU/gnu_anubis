@@ -105,9 +105,9 @@ anubis_db_open (char *arg, enum anubis_db_mode mode, void **dptr, char **err)
     }
   inst = xmalloc (sizeof *inst);
   inst->db_type = dbt;
-  inst->db_handle = NULL;
   inst->mode = mode;
   inst->error_code = 0;
+  inst->db_handle = NULL;
   *dptr = inst;
   rc = dbt->db_open (&inst->db_handle, url, mode, err);
   anubis_url_destroy (&url);

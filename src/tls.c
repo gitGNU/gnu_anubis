@@ -372,9 +372,8 @@ cipher_info (gnutls_session session)
 	}
       print_x509_certificate_info (session);
       break;
-    case GNUTLS_CRD_SRP:
-    case GNUTLS_CRD_PSK:
-    case GNUTLS_CRD_IA:
+
+    default:
       break;
     }
 
