@@ -139,8 +139,8 @@
 # include <libguile.h>
 #endif /* WITH_GUILE */
 
+#include "xalloc.h"
 #include <argcv.h>
-#include "mem.h"		/* xfree(), xfree_pptr() */
 #include "list.h"
 
 #ifdef HAVE_SYSEXITS_H
@@ -287,6 +287,20 @@ typedef struct rc_regex RC_REGEX;
 typedef struct assoc ASSOC;
 typedef struct message_struct MESSAGE;
 
+#define xfree(p) do\
+	if (p) { \
+		free(p); \
+		p = NULL; \
+	}\
+     while (0)
+
+#define xfree_pptr(p) do\
+	if (p) { \
+		free_pptr(p); \
+		p = NULL; \
+	}\
+     while (0)
+
 /* stream.c */
 
 typedef struct net_stream *NET_STREAM;
@@ -315,16 +329,6 @@ int stream_destroy (NET_STREAM *);
 
 /* main.c */
 void anubis (char *);
-
-/* mem.c */
-extern void (*memory_error) (const char *message);
-void *xmalloc (int);
-void *xrealloc (void *, int);
-char *allocbuf (char *, int);
-#ifndef HAVE_STRDUP
-char *strdup (const char *);
-#endif /* not HAVE_STRDUP */
-void free_pptr (char **);
 
 /* setenv.c */
 #if !defined(HAVE_SETENV) && defined(HAVE_PUTENV)
