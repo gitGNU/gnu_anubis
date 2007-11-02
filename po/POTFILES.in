@@ -16,7 +16,6 @@ src/help.c
 src/ident.c
 src/main.c
 src/map.c
-src/mem.c
 src/mime.c
 src/misc.c
 src/mysql.c
