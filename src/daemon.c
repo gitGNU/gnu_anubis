@@ -340,8 +340,10 @@ _stdio_read (void *sd, char *data, size_t size, size_t * nbytes)
       n = read (fd, data, size);
       if (n >= 0)
 	*nbytes = n;
+      else
+	return errno;
     }
-  return errno;
+  return 0;
 }
 
 static const char *
