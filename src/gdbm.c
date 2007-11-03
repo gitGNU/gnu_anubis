@@ -76,6 +76,7 @@ gdbm_content_to_record (char *keystr, datum content, ANUBIS_USER * rec)
   char *text = xmalloc (content.dsize + 1);
 
   memcpy (text, content.dptr, content.dsize);
+  text[content.dsize] = 0;
   rec->smtp_authid = strdup (keystr);
   p = strtok (text, ",");
   if (p)
