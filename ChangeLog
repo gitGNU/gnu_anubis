@@ -1,5 +1,12 @@
 2007-11-03  Sergey Poznyakoff  <gray@gnu.org.ua>
 
+	* src/authmode.c (anubis_authenticate_mode): Fix indentation.
+	* src/daemon.c (_stdio_read): Fix return value.
+	* src/headers.h (xdatabase_capability): Change signature.
+	* src/tunnel.c (handle_ehlo): Update call to xdatabase_capability.
+	* src/xdatabase.c (xdatabase_capability): Expand reply buffer as
+	needed. 
+
 	* configure.ac, NEWS: version 4.1.
 	* src/exec.c (exec_argv): Fix reading program's output.
 	* src/gdbm.c (gdbm_content_to_record): zero-terminate the key.
