@@ -1,3 +1,15 @@
+2007-11-03  Sergey Poznyakoff  <gray@gnu.org.ua>
+
+	* configure.ac, NEWS: version 4.1.
+	* src/exec.c (exec_argv): Fix reading program's output.
+	* src/gdbm.c (gdbm_content_to_record): zero-terminate the key.
+	* src/getopt.m4 (print_help): Override bug in GNU M4.
+	* src/gpg.c (anubis_gpg_read): New function.
+	(gpg_sign, gpg_encrypt, gpg_sign_encrypt): Fix reading GPG
+	output.
+	* src/mime.c (message_append_signature_file): Remmove useless
+	MAXPATHLEN limit.
+	
 2007-11-02  Wojciech Polak
 
 	* bootstrap.conf (gnulib_modules): Add xalloc.
