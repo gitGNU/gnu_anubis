@@ -566,10 +566,11 @@ anubis_authenticate_mode (struct sockaddr_in *addr)
 
   if (usr.username)
     {
-      if (check_username (usr.username)) {
-	anubis_changeowner (usr.username);
-	assign_string (&session.clientname, usr.username);
-      }
+      if (check_username (usr.username))
+	{
+	  anubis_changeowner (usr.username);
+	  assign_string (&session.clientname, usr.username);
+	}
       else
 	set_unprivileged_user ();
     }
