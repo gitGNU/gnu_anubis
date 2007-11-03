@@ -34,23 +34,24 @@ xdatabase_enable ()
 }
 
 void
-xdatabase_capability (char *reply, size_t reply_size)
+xdatabase_capability (char **preply, size_t *preply_size)
 {
   static char capa_string[] = "250-XDATABASE\r\n";
   size_t capa_len = strlen (capa_string);
   size_t len;
   char *p;
-
+  char *reply;
+  
   if (!xdatabase_active)
     return;
 
-  if (strlen (reply) + capa_len >= reply_size)
+  if (strlen (*preply) + capa_len >= *preply_size)
     {
-      anubis_error (0, 0,
-		    _("Cannot add capability: not enough buffer space."));
-      return;
+      *preply_size = strlen (*preply) + capa_len + 1;
+      *preply = xrealloc (*preply, *preply_size);
     }
-
+  reply = *preply;
+  
   p = strstr (reply, "250 ");
   if (!p)
     {
