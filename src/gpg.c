@@ -131,6 +131,39 @@ passphrase_cb (void *hook, const char *uid_hint, const char *passphrase_info,
   return 0;
 }
 
+static int
+anubis_gpg_read (gpgme_data_t dh, size_t size, char **pdata)
+{
+  char buf[256];
+  char *data;
+  size_t pos;
+  size_t nread;
+  
+  pos = 0;
+  size += EXTRA_GPG_BUF;
+  data = xmalloc (size);
+  while ((nread = gpgme_data_read (dh, buf, sizeof (buf))) > 0)
+    {
+      if (size - pos < nread)
+	{
+	  size += sizeof (buf);
+	  data = xrealloc (data, size);
+	}
+      memcpy (data + pos, buf, nread);
+      pos += nread;
+    }
+  if (size - pos == 0)
+    {
+      size++;
+      data = xrealloc (data, size);
+    }
+  data[pos] = 0;
+  if (nread == -1)
+    fail_if_err (errno);
+  *pdata = data;
+  return pos ;
+}
+
 static char *
 gpg_sign (char *gpg_data)
 {
@@ -138,14 +171,8 @@ gpg_sign (char *gpg_data)
   gpgme_error_t err = 0;
   gpgme_data_t in, out;
   gpgme_key_t key;
-  char buf[256];
   char *p, *signed_data;
-  int size;
-  size_t nread;
 
-  size = strlen (gpg_data) + EXTRA_GPG_BUF;
-  signed_data = (char *) xmalloc (size);
-  memset (buf, 0, sizeof (buf));
   fail_if_err (gpgme_new (&ctx));
 
   if (gpg.sign_keys)
@@ -163,7 +190,6 @@ gpg_sign (char *gpg_data)
 	{
 	  anubis_error (0, 0, _("GPGME: Cannot list keys: %s"),
 			gpgme_strerror (err));
-          xfree (signed_data);
           gpgme_release (ctx);
           return NULL;
 	}
@@ -183,26 +209,8 @@ gpg_sign (char *gpg_data)
   if (options.termlevel == DEBUG)
     gpgme_debug_info (ctx);
 
-  while ((nread = gpgme_data_read (out, buf, sizeof (buf))) > 0)
-    {
-      if (size > nread)
-	{
-	  strncat (signed_data, buf, nread);
-	  size -= nread;
-	}
-      else
-	{
-	  size = EXTRA_GPG_BUF;
-	  signed_data = (char *) xrealloc ((char *) signed_data,
-					   strlen (signed_data) + size);
-	  strncat (signed_data, buf, nread);
-	  size -= nread;
-	}
-      memset (buf, 0, sizeof (buf));
-    }
-  if (nread == -1)
-    fail_if_err (errno);
-
+  anubis_gpg_read (out, strlen (gpg_data), &signed_data);
+  
   gpgme_data_release (in);
   gpgme_data_release (out);
   gpgme_release (ctx);
@@ -265,18 +273,12 @@ gpg_encrypt (char *gpg_data)
 {
   gpgme_ctx_t ctx;
   gpgme_data_t in, out;
-  char buf[256];
   char *encrypted_data;
   size_t nread;
   gpgme_key_t *keyptr;
   struct obstack stk;
   gpgme_encrypt_result_t result;
-  size_t size;
   
-  size = strlen (gpg_data) + EXTRA_GPG_BUF;
-  encrypted_data = (char *) xmalloc (size);
-  memset (buf, 0, sizeof (buf));
-
   fail_if_err (gpgme_new (&ctx));
   gpgme_set_armor (ctx, 1);
 
@@ -298,23 +300,7 @@ gpg_encrypt (char *gpg_data)
   if (options.termlevel == DEBUG)
     gpgme_debug_info (ctx);
 
-  while ((nread = gpgme_data_read (out, buf, sizeof (buf))) > 0)
-    {
-      if (size > nread)
-	{
-	  strncat (encrypted_data, buf, nread);
-	  size -= nread;
-	}
-      else
-	{
-	  size = EXTRA_GPG_BUF;
-	  encrypted_data = (char *) xrealloc ((char *) encrypted_data,
-					      strlen (encrypted_data) + size);
-	  strncat (encrypted_data, buf, nread);
-	  size -= nread;
-	}
-      memset (buf, 0, sizeof (buf));
-    }
+  anubis_gpg_read (out, strlen (gpg_data), &encrypted_data);
   for (; *keyptr; keyptr++)
     gpgme_key_unref (*keyptr);
   obstack_free (&stk, NULL);
@@ -383,17 +369,11 @@ gpg_sign_encrypt (char *gpg_data)
   gpgme_error_t err = 0;
   gpgme_data_t in, out;
   gpgme_key_t *keyptr, key;
-  char buf[256];
   char *p, *se_data;		/* Signed-Encrypted Data */
-  int size;
   gpgme_encrypt_result_t result;
   gpgme_sign_result_t sign_result;
   struct obstack stk;
   
-  size = strlen (gpg_data) + EXTRA_GPG_BUF;
-  se_data = (char *) xmalloc (size);
-  memset (buf, 0, sizeof (buf));
-
   fail_if_err (gpgme_new (&ctx));
 
   if (gpg.sign_keys)
@@ -437,31 +417,12 @@ gpg_sign_encrypt (char *gpg_data)
   sign_result = gpgme_op_sign_result (ctx);
   if (check_result (sign_result, GPGME_SIG_MODE_NORMAL) == 0)
     {
-      size_t nread;
       fail_if_err (rewind_gpgme_data (out));
 
       if (options.termlevel == DEBUG)
         gpgme_debug_info (ctx);
 
-      while ((nread = gpgme_data_read (out, buf, sizeof (buf))) > 0)
-        {
-          if (size > nread)
-	    {
-	      strncat (se_data, buf, nread);
-	      size -= nread;
- 	    }
-          else
-	    {
-	      size = EXTRA_GPG_BUF;
-	      se_data = (char *) xrealloc ((char *) se_data,
-				           strlen (se_data) + size);
-	      strncat (se_data, buf, nread);
-	      size -= nread;
-	    }
-          memset (buf, 0, sizeof (buf));
-        }
-     if (nread == -1)
-       fail_if_err (errno);
+      anubis_gpg_read (out, strlen (gpg_data), &se_data);
     }
   else 
     xfree (se_data);
