@@ -1,4 +1,4 @@
-GNU Anubis NEWS -- history of user-visible changes. 2007-11-01
+GNU Anubis NEWS -- history of user-visible changes. 2007-11-03
 Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007 The Anubis Team.
 
 See the end of file for copying conditions.
@@ -6,7 +6,7 @@ Please send your bug reports to <bug-anubis@gnu.org>.
 
 
  *******************
-  4.0.90 (Unreleased)
+  4.1 (3 Nov 2007)
  *******************
 
 The package is licensed under GPL version 3 (see COPYING for the details).
