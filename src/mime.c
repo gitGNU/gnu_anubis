@@ -84,8 +84,7 @@ message_append_signature_file (MESSAGE * msg)
   get_homedir (session.clientname, homedir, sizeof (homedir));
 
   n = strlen (homedir) + strlen (signature_file) + 2;
-  n = n > MAXPATHLEN ? MAXPATHLEN + 1 : n + 1;
-  signature_path = (char *) xmalloc (n);
+  signature_path = xmalloc (n);
   snprintf (signature_path, n - 1, "%s/%s", homedir, signature_file);
 
   _append_text_file (msg, signature_path, "-- \n");
