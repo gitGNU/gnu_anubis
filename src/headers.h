@@ -609,7 +609,7 @@ void anubis_set_server_mech_list (ANUBIS_LIST *list);
 
 /* xdatabase.c */
 int xdatabase (char *command);
-void xdatabase_capability (char *reply, size_t reply_size);
+void xdatabase_capability (char **preply, size_t *preply_size);
 void xdatabase_enable (void);
 
 /* md5.c */
