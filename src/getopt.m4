@@ -273,9 +273,12 @@ print_help(void)
     }
   
   putchar ('\n');
-  print_option_descr (_("Mandatory or optional arguments to long options are "
-                        "also mandatory or optional for any corresponding "
-                        "short options."), 0, RMARGIN);
+dnl **************************************************************************
+dnl This string cannot be split over serveal lines, because this would trigger
+dnl a bug in GNU M4 (version 1.4.9 and 1.4.10), which would insert #line
+dnl directives between the lines.
+dnl **************************************************************************
+  print_option_descr (_("Mandatory or optional arguments to long options are also mandatory or optional for any corresponding short options."), 0, RMARGIN);
   putchar ('\n');
   printf (_("Report bugs to %s.\n"), program_bug_address);
 }
