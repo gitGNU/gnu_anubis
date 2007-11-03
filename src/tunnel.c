@@ -607,7 +607,7 @@ handle_ehlo (char *command, char **reply)
     topt |= T_STARTTLS;		/* Yes, we can use the TLS/SSL
 				   encryption. */
 
-  xdatabase_capability (*reply, reply_size);
+  xdatabase_capability (reply, &reply_size);
 
 #ifdef USE_SSL
   if ((topt & T_SSL_ONEWAY)
