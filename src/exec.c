@@ -184,7 +184,8 @@ exec_argv (int *rs, char *path, char **argv, char *src, char *dst,
   int fd;
   int n;
   char *buf;
-
+  size_t dstpos;
+  
   fd = make_local_connection_fd (path ? path : argv[0], argv);
   if (fd == -1)
     {
@@ -205,38 +206,46 @@ exec_argv (int *rs, char *path, char **argv, char *src, char *dst,
 
   buf = (char *) xmalloc (DATABUFFER + 1);
   memset (dst, 0, dstsize);
+  dstpos = 0;
 
   if (dst && dstsize)
     {				/* static array */
-      while ((n = read (fd, buf, DATABUFFER)) > 0)
+      dstsize--; /* leave place for the terminating nul */
+      while (dstpos < dstsize && (n = read (fd, buf, DATABUFFER)) > 0)
 	{
-	  strncat (dst, buf, dstsize);
-	  memset (buf, 0, DATABUFFER + 1);
-	  dstsize -= n;
-	  if (dstsize < 1)
-	    break;
+	  size_t len = dstsize - dstpos;
+	  if (len > n)
+	    len = n;
+	  memcpy (dst + dstpos, buf, len);
+	  dstpos += len;
 	}
+      dst[dstpos] = 0;   
     }
   else
     {				/* dynamic array */
-      dst = (char *) xmalloc (1);
+      dstsize = DATABUFFER;
+      dst = xmalloc (dstsize);
       while ((n = read (fd, buf, DATABUFFER)) > 0)
 	{
-	  dst = xrealloc (dst, strlen (dst) + n + 1);
-	  strncat (dst, buf, n);
-	  memset (buf, 0, DATABUFFER + 1);
+	  if (dstsize - dstpos < n)
+	    {
+	       dstsize += DATABUFFER;
+	       dst = xrealloc (dst, dstsize);
+	    } 
+	  memcpy (dst + dstpos, buf, n);  
 	}
-      free (buf);
-      close (fd);
-      waitpid (-1, &status, WNOHANG);
-      *rs = 0;
-      return dst;
+      if (dstsize - dstpos < n)
+        {
+          dstsize++;
+          dst = xrealloc (dst, dstsize);
+        }
+      dst[dstpos] = 0;
     }
   free (buf);
   close (fd);
   waitpid (-1, &status, WNOHANG);
   *rs = 0;
-  return 0;
+  return dst;
 }
 
 /* EOF */
