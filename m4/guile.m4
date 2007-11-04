@@ -44,11 +44,11 @@ AC_DEFUN([MU_CHECK_GUILE],
    fi
 
    if test $GUILE_CONFIG != no; then
-     AC_MSG_CHECKING(for guile version 1.6 or higher)
+     AC_MSG_CHECKING(for guile version 1.8 or higher)
      GUILE_VERSION=`($GUILE_CONFIG --version 2>&1; echo '')|sed -n 's/guile-config - Guile version \([[0-9]][[0-9]]*\)\.\([[0-9]][[0-9]]*\).*/\1\2/p'`
      case "x$GUILE_VERSION" in
      x[[0-9]]*)
-       if test $GUILE_VERSION -lt 16; then
+       if test $GUILE_VERSION -lt 18; then
          AC_MSG_RESULT(Nope. Version number too low.)
          mu_cv_lib_guile=no
        else
