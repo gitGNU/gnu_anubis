@@ -1,4 +1,4 @@
-GNU Anubis NEWS -- history of user-visible changes. 2007-11-03
+GNU Anubis NEWS -- history of user-visible changes. 2007-11-04
 Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007 The Anubis Team.
 
 See the end of file for copying conditions.
@@ -6,7 +6,7 @@ Please send your bug reports to <bug-anubis@gnu.org>.
 
 
  *******************
-  4.1 (3 Nov 2007)
+  4.1 (4 Nov 2007)
  *******************
 
 The package is licensed under GPL version 3 (see COPYING for the details).
@@ -37,6 +37,10 @@ Here, the (",") instructs Anubis to concatenate the values of all RCPT TO
 commands, using comma as a separator. The match on the right hand side will
 always succeed, and the concatenated value will be available via the "\1"
 substitution.
+
+* Guile
+
+With guile support enabled, Guile version 1.8.0 or later is required.
 
 ** Bug fixes
 * Fixed handling of regular expressions
