@@ -274,9 +274,7 @@ guile_process_proc (ANUBIS_LIST *arglist, MESSAGE *msg)
   invlist = scm_append
                (scm_list_2
 		  (scm_list_3 (procsym,
-			       scm_append
-			          (scm_list_2 (scm_list_1 (SCM_IM_QUOTE),
-					       arg_hdr)),
+			       scm_cons (SCM_IM_QUOTE, arg_hdr),
 			       arg_body),
 		   rest_arg));
   

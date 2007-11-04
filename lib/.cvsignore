@@ -42,3 +42,14 @@ unistd_.h
 unsetenv.c
 wchar.h
 wchar_.h
+alloca.in.h
+getopt.in.h
+realloc.c
+stdbool.in.h
+stdint.in.h
+stdio.in.h
+stdlib.in.h
+unistd.in.h
+wchar.in.h
+xalloc.h
+xmalloc.c
