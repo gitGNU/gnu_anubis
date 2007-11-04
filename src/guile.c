@@ -110,9 +110,14 @@ guile_load_path_append (ANUBIS_LIST *arglist, MESSAGE *msg)
   for (scm = path_scm; scm != SCM_EOL; scm = SCM_CDR (scm))
     {
       SCM val = SCM_CAR (scm);
-      if (SCM_NIMP (val) && SCM_STRINGP (val))
-	if (strcmp (SCM_STRING_CHARS (val), path) == 0)
-	  return;
+      if (scm_is_string (val))
+	{
+	  char *p = scm_to_locale_string (val);
+	  int rc = strcmp (p, path);
+	  free (p);
+	  if (rc == 0)
+	    return;
+	}
     }
 
   pscm = SCM_VARIABLE_LOC (scm_c_lookup ("%load-path"));
@@ -148,8 +153,8 @@ guile_to_anubis (SCM cell)
 	{
 	  ASSOC *asc = xmalloc (sizeof (*asc));
 
-	  asc->key = SCM_STRING_CHARS (SCM_CAR (car));
-	  asc->value = SCM_STRING_CHARS (SCM_CDR (car));
+	  asc->key = scm_to_locale_string (SCM_CAR (car));
+	  asc->value = scm_to_locale_string (SCM_CDR (car));
 	  list_append (list, asc);
 	}
     }
@@ -161,8 +166,7 @@ anubis_to_guile (ANUBIS_LIST * list)
 {
   ASSOC *asc;
   ITERATOR *itr;
-  SCM head = SCM_EOL, tail;	/* Don't let gcc fool you: tail cannot be used 
-				   uninitialized */
+  SCM head = SCM_EOL, tail = SCM_EOL;
 
   itr = iterator_create (list);
   for (asc = iterator_first (itr); asc; asc = iterator_next (itr))
@@ -176,18 +180,15 @@ anubis_to_guile (ANUBIS_LIST * list)
 
       cdr = scm_makfrom0str (asc->value);
 
-      SCM_NEWCELL (cell);
-
-      SCM_SETCAR (cell, scm_cons (car, cdr));
+      cell = scm_cons (scm_cons (car, cdr), SCM_EOL);
       if (head == SCM_EOL)
 	head = cell;
       else
 	SCM_SETCDR (tail, cell);
+
       tail = cell;
     }
   iterator_destroy (&itr);
-  if (head != SCM_EOL)
-    SCM_SETCDR (tail, SCM_EOL);
   return head;
 }
 
@@ -205,7 +206,6 @@ list_to_args (ANUBIS_LIST * arglist)
   while ((p = iterator_next (itr)))
     {
       SCM cell;
-      SCM_NEWCELL (cell);
 
       if (p[0] == '#')
 	{
@@ -226,7 +226,7 @@ list_to_args (ANUBIS_LIST * arglist)
       else
 	val = scm_makfrom0str (p);
 
-      SCM_SETCAR (cell, scm_list_2 (SCM_IM_QUOTE, val));
+      cell = scm_cons (val, SCM_EOL);
 
       if (head == SCM_EOL)
 	head = cell;
@@ -235,8 +235,6 @@ list_to_args (ANUBIS_LIST * arglist)
       tail = cell;
     }
   iterator_destroy (&itr);
-  if (head != SCM_EOL)
-    SCM_SETCDR (tail, SCM_EOL);
   return head;
 }
 
@@ -273,13 +271,15 @@ guile_process_proc (ANUBIS_LIST *arglist, MESSAGE *msg)
       return;
     }
 
-  invlist = scm_append (SCM_LIST2 (SCM_LIST3 (procsym,
-					      SCM_LIST2 (SCM_IM_QUOTE,
-							 arg_hdr),
-					      SCM_LIST2 (SCM_IM_QUOTE,
-							 arg_body)),
-				   rest_arg));
-
+  invlist = scm_append
+               (scm_list_2
+		  (scm_list_3 (procsym,
+			       scm_append
+			          (scm_list_2 (scm_list_1 (SCM_IM_QUOTE),
+					       arg_hdr)),
+			       arg_body),
+		   rest_arg));
+  
   res = scm_primitive_eval (invlist);
 
   if (SCM_IMP (res) && SCM_BOOLP (res))
@@ -314,11 +314,11 @@ guile_process_proc (ANUBIS_LIST *arglist, MESSAGE *msg)
 	  free (msg->body);
 	  msg->body = strdup ("");
 	}
-      else if (SCM_NIMP (ret_body) && SCM_STRINGP (ret_body))
+      else if (scm_is_string (ret_body))
 	{
 	  /* Replace with the given string */
 	  xfree (msg->body);
-	  msg->body = strdup (SCM_STRING_CHARS (ret_body));
+	  msg->body = scm_to_locale_string (ret_body);
 	}
       else
 	anubis_error (0, 0, _("Bad cdr type in return from %s"), procname);
