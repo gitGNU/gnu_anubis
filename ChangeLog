@@ -1,3 +1,9 @@
+2007-11-04  Wojciech Polak  <polak@gnu.org>
+
+	======================
+	 Released version 4.1
+	======================
+
 2007-11-04  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	* src/guile.c: Switch to Guile 1.8.x
@@ -20,7 +26,7 @@
 	* src/gpg.c (anubis_gpg_read): New function.
 	(gpg_sign, gpg_encrypt, gpg_sign_encrypt): Fix reading GPG
 	output.
-	* src/mime.c (message_append_signature_file): Remmove useless
+	* src/mime.c (message_append_signature_file): Remove useless
 	MAXPATHLEN limit.
 	
 2007-11-02  Wojciech Polak
