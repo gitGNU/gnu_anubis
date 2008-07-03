@@ -29,9 +29,7 @@ which are extracted from other source packages:
 
 2. Run
 
-   ./build/bootstrap GNULIB-DIR
-
-where GNULIB-DIR is the directory where Gnulib sources reside.      
+   ./build/bootstrap
 
 Once done, proceed as described in the file README (section
 INSTALLATION).
@@ -43,17 +41,19 @@ avoiding downloading the same files again. If so, create in GNU anubis
 root directory the file named `.bootstrap' with the following
 contents:
 
-   $HOME/gnulib --skip-po
+   --gnulib-srcdir=$HOME/gnulib
 
 Replace `$HOME/gnulib' with the actual directory where the Gnulib
-sources reside.
+sources reside.  Another option that might be useful in `.bootstrap'
+is `--skip-po', which tells bootstrap not to download localization
+files.
    
 For more information about `bootstrap', run `bootstrap --help'.
 
 
 * Copyright information
 
- Copyright (C) 2007 The Anubis Team.
+ Copyright (C) 2007, 2008 The Anubis Team.
 
  Permission is granted to anyone to make or distribute verbatim copies
  of this document as received, in any medium, provided that the

@@ -1,3 +1,23 @@
+2008-07-03  Sergey Poznyakoff  <gray@gnu.org.ua>
+
+	Fix loop-detection code, add some minor improvements.
+	
+	* README-hacking: Update.
+	* bootstrap.conf: Add sysexits.
+	* build/bootstrap: Synch with gnulib repository.
+	* build/gnulib.modules: Remove.
+	* lib/.cvsignore, m4/.cvsignore, po/.cvsignore: Update.
+	* lib/Makefile.am: Remove unnecessary initializations.
+	* src/authmode.c (anubis_authenticate_mode): Remove a block of
+	code duplicated in transmode.c and replace it with a call to
+	session_prologue.
+	* src/transmode.c (anubis_transparent_mode): Likewise.
+	(string_to_ipaddr, session_prologue): New functions.
+	* src/env.opt: Fix Emacs mode marker.
+	* src/headers.h: Include sysexits.h unconditionally.
+	(session_prologue): New prototype.
+	* src/tls.c (cipher_info): Add missing newline.
+
 2007-11-04  Wojciech Polak  <polak@gnu.org>
 
 	======================

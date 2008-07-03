@@ -361,6 +361,7 @@ cipher_info (gnutls_session session)
 	    ngettext ("- Anonymous DH using prime of %d bit.\n",
 		      "- Anonymous DH using prime of %d bits.\n", bits), bits);
       break;
+
     case GNUTLS_CRD_CERTIFICATE:	/* certificate authentication */
       if (kx == GNUTLS_KX_DHE_RSA || kx == GNUTLS_KX_DHE_DSS)
 	{

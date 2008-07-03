@@ -2,7 +2,7 @@
    transmode.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2004, 2005, 2007 The Anubis Team.
+   Copyright (C) 2003, 2004, 2005, 2007, 2008 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -20,6 +20,72 @@
 
 #include "headers.h"
 #include "extern.h"
+
+static unsigned long 
+string_to_ipaddr (const char *str)
+{
+  unsigned long inaddr;
+  struct sockaddr_in ad;
+
+  memset (&ad, 0, sizeof (ad));
+  inaddr = inet_addr (str);
+  if (inaddr != INADDR_NONE)
+    memcpy (&ad.sin_addr, &inaddr, sizeof (inaddr));
+  else
+    {
+      struct hostent *hp = 0;
+      hp = gethostbyname (str);
+      if (hp == 0)
+	hostname_error (str);
+      else
+	{
+	  if (hp->h_length != 4 && hp->h_length != 8)
+	    {
+	      anubis_error (EXIT_FAILURE, 0,
+			    _("Illegal address length received for host %s"),
+			    str);
+	    }
+	  else
+	    memcpy ((char *) &ad.sin_addr.s_addr, hp->h_addr, hp->h_length);
+	}
+    }
+
+  return inaddr;
+}
+
+void
+session_prologue ()
+{
+  if (!(topt & T_LOCAL_MTA) && !session.mta)
+    anubis_error (EXIT_FAILURE, 0, _("The MTA has not been specified. "
+				     "Set the REMOTE-MTA or LOCAL-MTA."));
+  
+  if (!(topt & T_LOCAL_MTA)
+      && string_to_ipaddr (session.mta)
+         == string_to_ipaddr (session.anubis)
+      && session.anubis_port == session.mta_port)
+    anubis_error (EXIT_FAILURE, 0, _("remote-mta loops back to Anubis"));
+  
+  alarm (300);
+  if (topt & T_LOCAL_MTA)
+    {
+      remote_server = make_local_connection (session.execpath,
+					     session.execargs);
+      if (!remote_server)
+	{
+	  service_unavailable (&remote_client);
+	  return EXIT_FAILURE;
+	}
+    }
+  else
+    {
+      remote_server = make_remote_connection (session.mta, session.mta_port);
+      if (!remote_server)
+	service_unavailable (&remote_client);
+    }
+  
+  alarm (900);
+}
 
 int
 anubis_transparent_mode (struct sockaddr_in *addr)
@@ -55,76 +121,8 @@ anubis_transparent_mode (struct sockaddr_in *addr)
     set_unprivileged_user ();
 
   auth_tunnel ();
-  
-  if (!(topt & T_LOCAL_MTA) && !session.mta)
-    {
-      anubis_error (EXIT_FAILURE, 0, _("The MTA has not been specified. "
-			               "Set the REMOTE-MTA or LOCAL-MTA."));
-    }
 
-  /*
-     Protection against a loop connection.
-   */
-
-  if (!(topt & T_LOCAL_MTA))
-    {
-      unsigned long inaddr;
-      struct sockaddr_in ad;
-
-      memset (&ad, 0, sizeof (ad));
-      inaddr = inet_addr (session.mta);
-      if (inaddr != INADDR_NONE)
-	memcpy (&ad.sin_addr, &inaddr, sizeof (inaddr));
-      else
-	{
-	  struct hostent *hp = 0;
-	  hp = gethostbyname (session.mta);
-	  if (hp == 0)
-	    {
-	      hostname_error (session.mta);
-	    }
-	  else
-	    {
-	      if (hp->h_length != 4 && hp->h_length != 8)
-		{
-		  anubis_error (EXIT_FAILURE, 0,
-				_("Illegal address length received for host %s"),
-				session.mta);
-		}
-	      else
-		{
-		  memcpy ((char *) &ad.sin_addr.s_addr,
-			  hp->h_addr, hp->h_length);
-		}
-	    }
-	}
-      if (ntohl (ad.sin_addr.s_addr) == INADDR_LOOPBACK
-	  && session.anubis_port == session.mta_port)
-	{
-	  anubis_error (EXIT_FAILURE, 0,
-                        _("Loop not allowed. Connection rejected."));
-	}
-    }
-
-  alarm (300);
-  if (topt & T_LOCAL_MTA)
-    {
-      remote_server = make_local_connection (session.execpath,
-					     session.execargs);
-      if (!remote_server)
-	{
-	  service_unavailable (&remote_client);
-	  return EXIT_FAILURE;
-	}
-    }
-  else
-    {
-      remote_server = make_remote_connection (session.mta, session.mta_port);
-      if (!remote_server)
-	service_unavailable (&remote_client);
-    }
-
-  alarm (900);
+  session_prologue ();
   smtp_session_transparent ();
   alarm (0);
 

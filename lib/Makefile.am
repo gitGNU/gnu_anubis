@@ -18,11 +18,6 @@
 ## with GNU Anubis.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
-MOSTLYCLEANFILES=
-noinst_LIBRARIES=
-BUILT_SOURCES=
-EXTRA_DIST=
-AM_CPPFLAGS=
 include gnulib.mk
 EXTRA_DIST += argcv.c argcv.h lbuf.c lbuf.h  
 

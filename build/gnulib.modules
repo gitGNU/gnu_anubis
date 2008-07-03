@@ -1,8 +1,0 @@
-# List of gnulib modules needed for GNU Anubis.
-# A module name per line. Empty lines and comments are ignored.
-
-getline
-getopt
-getpass
-obstack
-#setenv

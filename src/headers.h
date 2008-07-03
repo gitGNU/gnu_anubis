@@ -2,7 +2,7 @@
    headers.h
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -60,17 +60,17 @@
 
 #include <stdio.h>
 #ifdef STDC_HEADERS
-#include <stdlib.h>
-#include <stdarg.h>
+# include <stdlib.h>
+# include <stdarg.h>
 #endif /* STDC_HEADERS */
 #ifdef HAVE_STRING_H
-#include <string.h>
+# include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+# include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #ifdef HAVE_MEMORY_H
-#include <memory.h>
+# include <memory.h>
 #endif /* HAVE_MEMORY_H */
 #include <signal.h>
 #include <errno.h>
@@ -79,10 +79,10 @@
 #include <time.h>
 #include <pwd.h>
 #ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
+# include <sys/types.h>
 #endif /* HAVE_SYS_TYPES_H */
 #ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
+# include <sys/stat.h>
 #endif /* HAVE_SYS_STAT_H */
 #include <sys/file.h>
 #include <sys/fcntl.h>
@@ -143,28 +143,7 @@
 #include <argcv.h>
 #include "list.h"
 
-#ifdef HAVE_SYSEXITS_H
-# include <sysexits.h>
-#else
-# define EX_OK          0       /* successful termination */
-# define EX__BASE       64      /* base value for error messages */
-# define EX_USAGE       64      /* command line usage error */
-# define EX_DATAERR     65      /* data format error */
-# define EX_NOINPUT     66      /* cannot open input */
-# define EX_NOUSER      67      /* addressee unknown */
-# define EX_NOHOST      68      /* host name unknown */
-# define EX_UNAVAILABLE 69      /* service unavailable */
-# define EX_SOFTWARE    70      /* internal software error */
-# define EX_OSERR       71      /* system error (e.g., can't fork) */
-# define EX_OSFILE      72      /* critical OS file missing */
-# define EX_CANTCREAT   73      /* can't create (user) output file */
-# define EX_IOERR       74      /* input/output error */
-# define EX_TEMPFAIL    75      /* temp failure; user is invited to retry */
-# define EX_PROTOCOL    76      /* remote error in protocol */
-# define EX_NOPERM      77      /* permission denied */
-# define EX_CONFIG      78      /* configuration error */
-# define EX__MAX        78      /* maximum listed value */
-#endif
+#include <sysexits.h>
 
 #ifndef INADDR_NONE
 # define INADDR_NONE (unsigned long)0xffffffff
@@ -585,6 +564,7 @@ void pgsql_db_init (void);
 
 /* transmode.c */
 int anubis_transparent_mode (struct sockaddr_in *addr);
+void session_prologue ();
 
 /* authmode.c */
 int anubis_authenticate_mode (struct sockaddr_in *addr);
