@@ -24,9 +24,9 @@
 :EXPECT 220
 HELO localhost		
 :EXPECT 250
-MAIL FROM: <gray@gnu.org>
+MAIL FROM:<gray@gnu.org>
 :EXPECT 250
-RCPT TO: <polak@gnu.org>
+RCPT TO:<polak@gnu.org>
 :EXPECT 250
 DATA
 :EXPECT 354
@@ -43,9 +43,9 @@ Through Test Suites measureless to Man
 Down to a sunless C.
 .
 :EXPECT 250
-MAIL FROM: <gray@gnu.org>
+MAIL FROM:<gray@gnu.org>
 :EXPECT 250
-RCPT TO: <polak@gnu.org>
+RCPT TO:<polak@gnu.org>
 :EXPECT 250
 DATA
 :EXPECT 354
@@ -67,9 +67,9 @@ X-Comment: Anubis testsuite
 :ADD Qbja gb n fhayrff P.
 .
 :EXPECT 250
-MAIL FROM: <gray@gnu.org>
+MAIL FROM:<gray@gnu.org>
 :EXPECT 250
-RCPT TO: <polak@gnu.org>
+RCPT TO:<polak@gnu.org>
 :EXPECT 250
 DATA
 :EXPECT 354

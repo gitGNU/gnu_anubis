@@ -1,3 +1,40 @@
+2008-10-13  Sergey Poznyakoff  <gray@gnu.org.ua>
+
+	* src/tunnel.c (transfer_command): Ensure outgoing mail from and
+	rcpt to commands don't have whitespace after the colon.
+	* NEWS, configure.ac: version 4.1.1
+	* doc/anubis.texi: Minor fix.
+	* guile/entire-msg.scm: Use (ice-9 rdelim)
+
+	* testsuite/mta.c (check_address_command): New function (ported
+	from mailfromd).
+	(smtp): Improve RFC compliance.
+	* testsuite/etc/add-body-file.pat: 
+	* testsuite/etc/add-body.pat
+	* testsuite/etc/add1.pat
+	* testsuite/etc/add2.pat
+	* testsuite/etc/add3.pat
+	* testsuite/etc/cond.pat
+	* testsuite/etc/del1.pat
+	* testsuite/etc/del2.pat
+	* testsuite/etc/del3.pat
+	* testsuite/etc/del4.pat
+	* testsuite/etc/empty.pat
+	* testsuite/etc/gpgcrypt.pat
+	* testsuite/etc/gpgse.pat
+	* testsuite/etc/gpgsign.pat
+	* testsuite/etc/mime1.pat
+	* testsuite/etc/mime2.pat
+	* testsuite/etc/mod-body.pat
+	* testsuite/etc/mod-header.pat
+	* testsuite/etc/mult.pat
+	* testsuite/etc/no-backref.pat
+	* testsuite/etc/paolo.pat
+	* testsuite/etc/remail.pat
+	* testsuite/etc/rot-13.pat
+	* testsuite/etc/tlsoneway.pat
+	* testsuite/etc/trigger.pat	
+
 2008-07-03  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	Fix loop-detection code, add some minor improvements.

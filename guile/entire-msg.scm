@@ -2,7 +2,7 @@
 ;;; entire-msg.scm
 ;;;
 ;;; This file is part of GNU Anubis.
-;;; Copyright (C) 2003, 2004, 2007 The Anubis Team.
+;;; Copyright (C) 2003, 2004, 2007, 2008 The Anubis Team.
 ;;;
 ;;; GNU Anubis is free software; you can redistribute it and/or modify it
 ;;; under the terms of the GNU General Public License as published by the
@@ -17,7 +17,8 @@
 ;;; You should have received a copy of the GNU General Public License along
 ;;; with GNU Anubis.  If not, see <http://www.gnu.org/licenses/>.
 
-(use-modules (ice-9 popen))
+(use-modules (ice-9 popen)
+             (ice-9 rdelim))
 
 ;; Starts program PROG with arguments ARGS
 ;; Returns a list:

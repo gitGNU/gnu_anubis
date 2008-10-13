@@ -602,6 +602,41 @@ smtp_help (void)
   smtp_reply (502, "HELP not implemented");
 }
 
+/* Check if (*PARGV)[1] begins with the string PFX, followed by ':'.
+   Return 0 if so, 1 otherwise.
+   If any characters follow the semicolon, reformat *PARGV so that
+   [1] contains only PFX:, [2] contains the characters in question,
+   and the rest of entries after [2] is properly reindexed.
+*/
+int
+check_address_command(const char *pfx, int *pargc, char ***pargv)
+{
+  int argc = *pargc;
+  char **argv = *pargv;
+  int pfxlen = strlen (pfx);
+  int arglen = strlen (argv[1]);
+  
+  if (argc >= 2 && arglen > pfxlen
+      && strncasecmp (argv[1], pfx, pfxlen) == 0
+      && argv[1][pfxlen] == ':') {
+
+    if (arglen > pfxlen + 1)
+      {
+	argc++;
+	argv = realloc (argv, (argc + 1) * sizeof (argv[0]));
+	memmove (&argv[2], &argv[1], (argc - 1) * sizeof argv[1]);
+	argv[2] = strdup (argv[1] + pfxlen + 1);
+	argv[1][pfxlen + 1] = 0;
+
+	*pargc = argc;
+	*pargv = argv;
+      }
+    
+    return 0;
+  }
+  return 1;
+}
+
 void
 smtp (void)
 {
@@ -674,7 +709,7 @@ smtp (void)
 	  break;
 	  
 	case KW_MAIL:
-	  if (argc == 3 && strcasecmp (argv[1], "from:") == 0)
+	  if (check_address_command("from", &argc, &argv) == 0)
 	    {
 	      smtp_reply (250, "Sender OK");
 	      state = STATE_MAIL;
@@ -696,7 +731,7 @@ smtp (void)
       case STATE_MAIL:
 	switch (kw) {
 	case KW_RCPT:
-	  if (argc == 3 && strcasecmp (argv[1], "to:") == 0)
+	  if (check_address_command("to", &argc, &argv) == 0)
 	    {
 	      smtp_reply (250, "Recipient OK");
 	      state = STATE_RCPT;

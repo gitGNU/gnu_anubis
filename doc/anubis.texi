@@ -1133,7 +1133,7 @@ bind localhost:25
 @deffn Option remote-mta @var{host}[:@var{port}]
 @opindex remote-mta @var{host}[:@var{port}]
 Specify a remote @acronym{SMTP} host name or @acronym{IP} address, which GNU Anubis will
-connect and forward mail to (after a processing). The default @var{port}
+connect and forward mail to (after processing). The default @var{port}
 number is 25. This option is available in both configuration files.
 @end deffn
 

@@ -27,9 +27,9 @@ EHLO localhost
 :ADD EHLO localhost
 :EXPECT 250-pleased to meet you
 :EXPECT 250 HELP
-MAIL FROM: <gray@gnu.org>
+MAIL FROM:<gray@gnu.org>
 :EXPECT 250
-RCPT TO: <polak@gnu.org>
+RCPT TO:<polak@gnu.org>
 :EXPECT 250
 DATA
 :EXPECT 354

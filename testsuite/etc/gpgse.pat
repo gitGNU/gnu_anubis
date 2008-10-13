@@ -24,7 +24,7 @@
 :EXPECT 220
 HELO localhost		
 :EXPECT 250
-MAIL FROM: <polak@gnu.org>
+MAIL FROM:<polak@gnu.org>
 :EXPECT 250
 RCPT TO: <gray@gnu.org>
 :EXPECT 250
