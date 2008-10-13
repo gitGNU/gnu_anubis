@@ -714,7 +714,7 @@ strip_inter_ws(char *buf, size_t len, size_t pfxlen)
       size_t i;
       for (i = pfxlen; i < len && isspace (buf[i]); i++)
 	;
-      memmove(buf + pfxlen, buf + i, len - i + 1);
+      memmove (buf + pfxlen, buf + i, len - i + 1);
     }
 }
 
@@ -744,13 +744,13 @@ transfer_command (MESSAGE * msg, char *command)
   assign_string (&buf, command);
   make_lowercase (buf);
 
-  len = strlen(command);
-  if (len > sizeof(CMD_MAIL_FROM)
-      && is_prefix(command, CMD_MAIL_FROM))
-    strip_inter_ws(command, len, sizeof(CMD_MAIL_FROM) - 1);
-  else if (len > sizeof(CMD_RCPT_TO)
-	   && is_prefix(command, CMD_RCPT_TO))
-    strip_inter_ws(command, len, sizeof(CMD_RCPT_TO) - 1);
+  len = strlen (command);
+  if (len > sizeof (CMD_MAIL_FROM)
+      && is_prefix (command, CMD_MAIL_FROM))
+    strip_inter_ws (command, len, sizeof (CMD_MAIL_FROM) - 1);
+  else if (len > sizeof (CMD_RCPT_TO)
+	   && is_prefix (command, CMD_RCPT_TO))
+    strip_inter_ws (command, len, sizeof (CMD_RCPT_TO) - 1);
   
   swrite (CLIENT, remote_server, command);
 
