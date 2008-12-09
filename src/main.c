@@ -1,6 +1,6 @@
 /*
-   GNU Anubis v4.1 -- an SMTP message submission daemon.
-   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007 The Anubis Team.
+   GNU Anubis -- an SMTP message submission daemon.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -23,7 +23,7 @@ ANUBIS_MODE anubis_mode = anubis_transparent;
 
 const char version[] = "GNU Anubis v" VERSION;
 const char copyright[] =
-  "Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007 The Anubis Team.";
+  "Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008 The Anubis Team.";
 
 struct options_struct options;
 struct session_struct session;

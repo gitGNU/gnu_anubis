@@ -2,7 +2,7 @@ dnl
 dnl configure.ac
 dnl
 dnl This file is part of GNU Anubis.
-dnl Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007 The Anubis Team.
+dnl Copyright (C) 2001,2002,2003,2004,2005,2006,2007,2008 The Anubis Team.
 dnl
 dnl GNU Anubis is free software; you can redistribute it and/or modify it
 dnl under the terms of the GNU General Public License as published by the
@@ -26,10 +26,6 @@ AC_CONFIG_AUX_DIR([build])
 AC_CONFIG_SRCDIR([src/main.c])
 AM_INIT_AUTOMAKE
 AC_GNU_SOURCE
-
-if test "$CFLAGS"; then
- CFLAGS_CUSTOM=yes
-fi
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -185,16 +181,8 @@ AC_ARG_ENABLE(gcc-debug,
 	[enable_gcc_debug=yes],
 	[enable_gcc_debug=no])
 if test "$enable_gcc_debug" = "yes" && (test "$GCC" = "yes"); then
- if test -z "$CFLAGS_CUSTOM"; then
-  CFLAGS="-Wall -ggdb"
- else
-  CFLAGS="$CFLAGS -ggdb"
- fi
+ CFLAGS="$CFLAGS -ggdb"
  AC_MSG_RESULT([Enabling GCC DEBUG support...])
-else
- if test -z "$CFLAGS_CUSTOM" && (test "$GCC" = "yes"); then
-  CFLAGS="-Wall -O2"
- fi
 fi
 
 WITH_SQL=no
@@ -440,5 +428,3 @@ AC_CONFIG_FILES([Makefile
  ])
 
 AC_OUTPUT
-
-

@@ -1,3 +1,7 @@
+2008-12-09  Wojciech Polak  <polak@gnu.org>
+
+	* configure.ac: Use default CFLAGS.
+	
 2008-10-13  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	* src/tunnel.c (transfer_command): Ensure outgoing mail from and
