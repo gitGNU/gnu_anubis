@@ -63,7 +63,7 @@ anubis_set_encryption_mech_list (ANUBIS_LIST *list)
 }
 
 static int
-cb_anonymous (Gsasl_session_ctx *ctx, char *out, size_t *outlen)
+cb_anonymous (Gsasl_session *sess_ctx, char *out, size_t *outlen)
 {
   if (anon_token == NULL)
     return GSASL_AUTHENTICATION_ERROR;
@@ -72,7 +72,7 @@ cb_anonymous (Gsasl_session_ctx *ctx, char *out, size_t *outlen)
 }
 
 static int
-cb_authorization_id (Gsasl_session_ctx *ctx, char *out, size_t *outlen)
+cb_authorization_id (Gsasl_session *sess_ctx, char *out, size_t *outlen)
 {
   if (authorization_id == NULL)
     return GSASL_AUTHENTICATION_ERROR;
@@ -81,7 +81,7 @@ cb_authorization_id (Gsasl_session_ctx *ctx, char *out, size_t *outlen)
 }
 
 static int
-cb_authentication_id (Gsasl_session_ctx *ctx, char *out, size_t *outlen)
+cb_authentication_id (Gsasl_session *sess_ctx, char *out, size_t *outlen)
 {
   if (authentication_id == NULL)
     return GSASL_AUTHENTICATION_ERROR;
@@ -90,7 +90,7 @@ cb_authentication_id (Gsasl_session_ctx *ctx, char *out, size_t *outlen)
 }
 
 static int
-cb_password (Gsasl_session_ctx * ctx, char *out, size_t * outlen)
+cb_password (Gsasl_session *sess_ctx, char *out, size_t * outlen)
 {
   if (auth_password == NULL)
     return GSASL_AUTHENTICATION_ERROR;
@@ -99,7 +99,7 @@ cb_password (Gsasl_session_ctx * ctx, char *out, size_t * outlen)
 }
 
 static int
-cb_service (Gsasl_session_ctx * ctx, char *srv, size_t * srvlen,
+cb_service (Gsasl_session *sess_ctx, char *srv, size_t * srvlen,
 	    char *host, size_t * hostlen, char *srvname, size_t * srvnamelen)
 {
   int rc;
@@ -129,7 +129,7 @@ cb_service (Gsasl_session_ctx * ctx, char *srv, size_t * srvlen,
 }
 
 static int
-cb_passcode (Gsasl_session_ctx * ctx, char *out, size_t * outlen)
+cb_passcode (Gsasl_session *sess_ctx, char *out, size_t * outlen)
 {
   if (auth_passcode == NULL)
     return GSASL_AUTHENTICATION_ERROR;
@@ -138,7 +138,7 @@ cb_passcode (Gsasl_session_ctx * ctx, char *out, size_t * outlen)
 }
 
 static int
-cb_realm (Gsasl_session_ctx *ctx, char *out, size_t *outlen)
+cb_realm (Gsasl_session *sess_ctx, char *out, size_t *outlen)
 {
   if (auth_realm == NULL)
     return GSASL_AUTHENTICATION_ERROR;
@@ -168,11 +168,11 @@ get_reply (NET_STREAM str, int *code, char **buf, size_t *psize)
 }
 
 int
-do_gsasl_auth (NET_STREAM *pstr, Gsasl_ctx * ctx, char *mech)
+do_gsasl_auth (NET_STREAM *pstr, Gsasl *ctx, char *mech)
 {
   char *output;
   int rc;
-  Gsasl_session_ctx *sess_ctx = NULL;
+  Gsasl_session *sess_ctx = NULL;
   char sbuf[LINEBUFFER + 1];
   char *buf = NULL;
   size_t size = 0;
@@ -255,7 +255,7 @@ do_gsasl_auth (NET_STREAM *pstr, Gsasl_ctx * ctx, char *mech)
 int
 esmtp_auth (NET_STREAM *pstr, char *input)
 {
-  Gsasl_ctx *ctx;
+  Gsasl *ctx;
   int rc;
   ANUBIS_LIST *isect;
   ANUBIS_LIST *mech_list = auth_method_list (input);

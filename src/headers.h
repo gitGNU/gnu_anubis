@@ -584,7 +584,7 @@ void authmode_section_init (void);
 void auth_gsasl_init (void);
 int anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER * usr);
 #ifdef WITH_GSASL
-void install_gsasl_stream (Gsasl_session_ctx * sess_ctx, NET_STREAM * stream);
+void install_gsasl_stream (Gsasl_session *sess_ctx, NET_STREAM * stream);
 #endif
 
 /* gsasl_srv.c */

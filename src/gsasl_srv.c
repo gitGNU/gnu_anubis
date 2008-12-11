@@ -23,7 +23,7 @@
 
 #if defined(WITH_GSASL)
 
-static Gsasl_ctx *ctx;
+static Gsasl *ctx;
 static ANUBIS_LIST *anubis_mech_list;
 
 /* Converts the auth method list from a textual representation to
@@ -133,7 +133,7 @@ anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER * usr)
   size_t input_size = 0;
   char *output;
   int rc;
-  Gsasl_session_ctx *sess_ctx = NULL;
+  Gsasl_session *sess_ctx = NULL;
 
   if (options.termlevel == DEBUG)
     fprintf (stderr, "SASL mech=%s, inp=%s\n", SP(auth_type), SP(arg));
@@ -208,7 +208,7 @@ anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER * usr)
 
 /* This is for DIGEST-MD5 */
 static int
-cb_realm (Gsasl_session_ctx * ctx, char *out, size_t * outlen, size_t nth)
+cb_realm (Gsasl_session *sess_ctx, char *out, size_t *outlen, size_t nth)
 {
   char *realm = get_localname ();
 
@@ -228,11 +228,11 @@ cb_realm (Gsasl_session_ctx * ctx, char *out, size_t * outlen, size_t nth)
 }
 
 static int
-cb_validate (Gsasl_session_ctx * ctx,
+cb_validate (Gsasl_session *sess_ctx,
 	     const char *authorization_id,
 	     const char *authentication_id, const char *password)
 {
-  ANUBIS_USER *usr = gsasl_server_application_data_get (ctx);
+  ANUBIS_USER *usr = gsasl_server_application_data_get (sess_ctx);
 
   if (usr->smtp_authid == NULL
       && anubis_get_db_record (authentication_id, usr) != ANUBIS_DB_SUCCESS)
@@ -248,7 +248,7 @@ cb_validate (Gsasl_session_ctx * ctx,
 #define GSSAPI_SERVICE "anubis"
 
 static int
-cb_service (Gsasl_session_ctx * ctx, char *srv, size_t * srvlen,
+cb_service (Gsasl_session *sess_ctx, char *srv, size_t * srvlen,
 	    char *host, size_t * hostlen)
 {
   char *hostname = get_localname ();
@@ -280,7 +280,7 @@ cb_service (Gsasl_session_ctx * ctx, char *srv, size_t * srvlen,
 
 /* This gets called when SASL mechanism EXTERNAL is invoked */
 static int
-cb_external (Gsasl_session_ctx * ctx)
+cb_external (Gsasl_session *sess_ctx)
 {
   return GSASL_AUTHENTICATION_ERROR;
 }
@@ -288,12 +288,12 @@ cb_external (Gsasl_session_ctx * ctx)
 /* This gets called when SASL mechanism CRAM-MD5 or DIGEST-MD5 is invoked */
 
 static int
-cb_retrieve (Gsasl_session_ctx * ctx,
+cb_retrieve (Gsasl_session *sess_ctx,
 	     const char *authentication_id,
 	     const char *authorization_id,
 	     const char *realm, char *key, size_t * keylen)
 {
-  ANUBIS_USER *usr = gsasl_server_application_data_get (ctx);
+  ANUBIS_USER *usr = gsasl_server_application_data_get (sess_ctx);
   
   if (usr->smtp_authid == NULL
       && anubis_get_db_record (authentication_id, usr) != ANUBIS_DB_SUCCESS)

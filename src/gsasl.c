@@ -30,7 +30,7 @@
 
 struct anubis_gsasl_stream
 {
-  Gsasl_session_ctx *sess_ctx;	/* Context */
+  Gsasl_session *sess_ctx; /* Context */
   struct _line_buffer *lb;
   NET_STREAM stream;
 };
@@ -154,14 +154,14 @@ _gsasl_destroy (void *sd)
 {
   struct anubis_gsasl_stream *s = sd;
   if (s->sess_ctx)
-    gsasl_server_finish (s->sess_ctx);
+    gsasl_finish (s->sess_ctx);
   _auth_lb_destroy (&s->lb);
   free (sd);
   return 0;
 }
 
 void
-install_gsasl_stream (Gsasl_session_ctx * sess_ctx, NET_STREAM * stream)
+install_gsasl_stream (Gsasl_session *sess_ctx, NET_STREAM *stream)
 {
   struct anubis_gsasl_stream *s = xmalloc (sizeof *s);
 

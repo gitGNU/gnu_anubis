@@ -632,7 +632,7 @@ get_input (const char *prompt)
 }
 
 int
-cb_anonymous (Gsasl_session_ctx * ctx, char *out, size_t * outlen)
+cb_anonymous (Gsasl_session *sess_ctx, char *out, size_t *outlen)
 {
   int rc;
 
@@ -651,7 +651,7 @@ cb_anonymous (Gsasl_session_ctx * ctx, char *out, size_t * outlen)
 }
 
 int
-cb_authorization_id (Gsasl_session_ctx * ctx, char *out, size_t * outlen)
+cb_authorization_id (Gsasl_session *sess_ctx, char *out, size_t * outlen)
 {
   int rc;
 
@@ -670,7 +670,7 @@ cb_authorization_id (Gsasl_session_ctx * ctx, char *out, size_t * outlen)
 }
 
 int
-cb_authentication_id (Gsasl_session_ctx * ctx, char *out, size_t * outlen)
+cb_authentication_id (Gsasl_session *sess_ctx, char *out, size_t *outlen)
 {
   int rc;
 
@@ -689,7 +689,7 @@ cb_authentication_id (Gsasl_session_ctx * ctx, char *out, size_t * outlen)
 }
 
 int
-cb_password (Gsasl_session_ctx * ctx, char *out, size_t * outlen)
+cb_password (Gsasl_session *sess_ctx, char *out, size_t *outlen)
 {
   int rc;
 
@@ -707,7 +707,7 @@ cb_password (Gsasl_session_ctx * ctx, char *out, size_t * outlen)
 }
 
 int
-cb_service (Gsasl_session_ctx * ctx, char *srv, size_t * srvlen,
+cb_service (Gsasl_session *sess_ctx, char *srv, size_t *srvlen,
 	    char *host, size_t * hostlen, char *srvname, size_t * srvnamelen)
 {
   int rc;
@@ -751,7 +751,7 @@ cb_service (Gsasl_session_ctx * ctx, char *srv, size_t * srvlen,
 }
 
 int
-cb_passcode (Gsasl_session_ctx * ctx, char *out, size_t * outlen)
+cb_passcode (Gsasl_session *sess_ctx, char *out, size_t *outlen)
 {
   int rc;
 
@@ -769,7 +769,7 @@ cb_passcode (Gsasl_session_ctx * ctx, char *out, size_t * outlen)
 }
 
 int
-cb_realm (Gsasl_session_ctx * ctx, char *out, size_t * outlen)
+cb_realm (Gsasl_session *sess_ctx, char *out, size_t *outlen)
 {
   int rc;
 
@@ -799,11 +799,11 @@ smtp_quit (void)
 /* GSASL Authentication */
 
 int
-do_gsasl_auth (Gsasl_ctx * ctx, char *mech)
+do_gsasl_auth (Gsasl *ctx, char *mech)
 {
   char *output;
   int rc;
-  Gsasl_session_ctx *sess_ctx = NULL;
+  Gsasl_session *sess_ctx = NULL;
   struct smtp_reply repl;
   char buf[LINEBUFFER + 1];
 
@@ -885,7 +885,7 @@ do_gsasl_auth (Gsasl_ctx * ctx, char *mech)
 void
 smtp_auth (void)
 {
-  Gsasl_ctx *ctx;
+  Gsasl *ctx;
   char *mech;
   int rc;
 
@@ -1166,7 +1166,6 @@ xalloc_die ()
 int
 main (int argc, char **argv)
 {
-  int c;
   int index;
   
   progname = strrchr (argv[0], '/');

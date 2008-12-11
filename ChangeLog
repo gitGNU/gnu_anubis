@@ -1,3 +1,9 @@
+2008-12-11  Wojciech Polak  <polak@gnu.org>
+
+	* configure.ac: Remove -Wno-deprecated-declarations.
+	* src/anubisusr.c, src/esmtp.c, src/gsasl.c, src/gsasl_srv.c,
+	src/headers.h: Update deprecated GSASL API calls.
+
 2008-12-11  Sergey Poznyakoff  <gray@gnu.org.ua>
 
 	* src/Makefile.am (anubisadm_SOURCES): Add new files.
