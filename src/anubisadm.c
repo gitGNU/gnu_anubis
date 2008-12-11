@@ -1,6 +1,6 @@
 /*
    This file is part of GNU Anubis 
-   Copyright (C) 2004, 2007 The Anubis Team.
+   Copyright (C) 2004, 2007, 2008 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -16,34 +16,7 @@
    with GNU Anubis.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
-#include "headers.h"
-#include "extern.h"
-#include "getopt.h"
-
-#define OPT_VERSION          257
-#define OPT_HELP             258
-
-static struct option option[] = {
-  {"create", no_argument, 0, 'c'},
-  {"list", no_argument, 0, 'l'},
-  {"add", no_argument, 0, 'a'},
-  {"remove", no_argument, 0, 'r'},
-  {"modify", no_argument, 0, 'm'},
-  {"authid", required_argument, 0, 'i'},
-  {"user", required_argument, 0, 'u'},
-  {"rcfile", required_argument, 0, 'f'},
-  {"password", optional_argument, 0, 'p'},
-
-  {"version", no_argument, 0, OPT_VERSION},
-  {"help", no_argument, 0, OPT_HELP},
-  {NULL, 0, 0, 0}
-};
-
-typedef int (*operation_fp) (int, char **);
+#include "anubisadm.h"
 
 char *progname;
 char *authid;
@@ -110,7 +83,7 @@ op_create (int argc, char **argv)
   size_t n = 0;
   size_t line = 0;
   void *db;
-  int rc;
+  int rc = 0;
 
   if (opendb (&db, argc, argv, anubis_db_rdwr))
     return 1;
@@ -326,7 +299,7 @@ int
 op_remove (int argc, char **argv)
 {
   void *db;
-  int rc;
+  int rc = 0;
 
   if (!authid)
     {
@@ -347,7 +320,8 @@ op_remove (int argc, char **argv)
     case ANUBIS_DB_FAIL:
       error (_("database error: %s"), anubis_db_strerror (db));
       rc = 1;
-
+      break;
+      
     case ANUBIS_DB_SUCCESS:
       rc = 0;
     }
@@ -362,61 +336,10 @@ op_modify (int argc, char **argv)
 			   _("Record not found. Use --add to create it."));
 }
 
-void
-print_help (void)
-{
-  puts (_("anubisadm -- Interface for GNU Anubis database administration."));
-  puts (_("Usage: anubisadm [COMMAND] [OPTIONS] URL"));
-
-  puts (_("\nCOMMAND is one of\n"));
-  puts (_("  -c, --create            Creates the database."));
-  puts (_
-	("  -l, --list              List the contents of an existing database."));
-  puts (_("  -a, --add               Add a new record."));
-  puts (_("  -m, --modify            Modify existing record."));
-  puts (_("  -r, --remove            Remove existing record."));
-  puts (_
-	("  --version               Display program version number and exit."));
-  puts (_("  --help                  Display this help screen and exit."));
-
-  puts (_("\nOPTION is one or more of\n"));
-  puts (_
-	("  -i, --authid=STRING     Specify the authid to operate upon. This option\n"
-	 "                          is mandatory with --add, --modify and --remove.\n"
-	 "                          It is optional when used with --list."));
-  puts (_
-	("  -p, --password=STRING   Specify the password for the authid. Mandatory\n"
-	 "                          with --add, --modify and --remove."));
-  puts (_
-	("  -u, --user=STRING       Specify the system user name corresponding to\n"
-	 "                          the given authid. Optional for --add, --modify\n"
-	 "                          and --remove."));
-  puts (_
-	("  -f, --rcfile=STRING     Specify the rc file to be used for this authid.\n"
-	 "                          Optional for --add, --modify and --remove."));
-
-  puts (_("\nEXAMPLES\n"));
-  puts (_("1. Create the GDBM database from a plaintext file:\n\n"
-	  "example$ anubisadm --create gdbm:/etc/anubis.db < plaintext\n"));
-
-  puts (_("2. Add SMTP authid \"test\" with password \"guessme\" and map it\n"
-	  "to the system account \"gray\":\n\n"
-	  "example$ anubisadm --add --authid test --password guessme \\\n"
-	  "                   --user gray gdbm:/etc/anubis.db\n"));
-
-  puts (_("3. List the entire database contents:\n\n"
-	  "example$ anubisadm --list gdbm:/etc/anubis.db\n"));
-
-  puts (_("4. List only the record with authid \"test\":\n\n"
-	  "example$ anubisadm --list --authid test gdbm:/etc/anubis.db\n"));
-
-  printf (_("\nReport bugs to <%s>.\n"), PACKAGE_BUGREPORT);
-}
-
 int
 main (int argc, char **argv)
 {
-  int c;
+  int index;
   operation_fp operation = op_usage;
 
   /* save the program name */
@@ -439,63 +362,8 @@ main (int argc, char **argv)
   pgsql_db_init ();
 # endif
 
-  while ((c = getopt_long (argc, argv, "clarmi:u:f:p:?",
-			   option, NULL)) != EOF)
-    {
-      switch (c)
-	{
-	case OPT_VERSION:
-	  printf ("%s\n", PACKAGE_STRING);
-	  exit (0);
-	  break;
-
-	case OPT_HELP:
-	  print_help ();
-	  exit (0);
-	  break;
-
-	case 'c':
-	  operation = op_create;
-	  break;
-
-	case 'l':
-	  operation = op_list;
-	  break;
-
-	case 'a':
-	  operation = op_add;
-	  break;
-
-	case 'r':
-	  operation = op_remove;
-	  break;
-
-	case 'm':
-	  operation = op_modify;
-	  break;
-
-	case 'i':
-	  authid = optarg;
-	  break;
-
-	case 'u':
-	  username = optarg;
-	  break;
-
-	case 'f':
-	  rcfile = optarg;
-	  break;
-
-	case 'p':
-	  password = optarg;
-	  break;
-
-	default:
-	  return 1;
-	}
-    }
-
-  return operation (argc - optind, argv + optind);
+  adm_get_options (argc, argv, &operation, &index);
+  return operation (argc - index, argv + index);
 }
 
 /* EOF */

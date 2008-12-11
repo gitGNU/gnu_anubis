@@ -1,0 +1,106 @@
+/* -*- c -*-
+   This file is part of GNU Anubis.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008 The Anubis Team.
+
+   GNU Anubis is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   GNU Anubis is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with GNU Anubis.  If not, see <http://www.gnu.org/licenses/>.
+*/
+#include <anubisadm.h>
+
+OPTIONS_BEGIN(gnu,"anubisadm",
+              [<Interface for GNU Anubis database administration.>],
+	      URL,
+	      [<EXAMPLES:\n\n
+	      
+	        1. Create the GDBM database from a plaintext file:\n\n
+	        example$ anubisadm --create gdbm:/etc/anubis.db < plaintext\n\n
+                2. Add SMTP authid "test" with password "guessme" and map it
+                to the system account "gray":\n\n
+                example$ anubisadm --add --authid test --password guessme 
+	        --user gray gdbm:/etc/anubis.db\n\n
+		3. List the database:\n\n
+	        example$ anubisadm --list gdbm:/etc/anubis.db\n\n
+                4. List only the record with authid "test":\n\n
+	        example$ anubisadm --list --authid test gdbm:/etc/anubis.db
+		\n\n>])
+
+GROUP([<Administration commands:>])
+OPTION(create,c,,
+       Creates the database.)
+BEGIN
+       *operation = op_create;
+END
+
+OPTION(list,l,,
+       List contents of existing database.)
+BEGIN
+	  *operation = op_list;
+END
+
+OPTION(add,a,,
+       Add a new record.)
+BEGIN
+	  *operation = op_add;
+END
+
+OPTION(modify,m,,
+       Modify existing record.)
+BEGIN
+	  *operation = op_modify;
+END
+
+OPTION(remove,r,,
+       Remove existing record.)
+BEGIN
+	  rcfile = optarg;
+END
+
+GROUP(Options:)
+
+OPTION(authid,i,STRING,
+       [<Specify the authid to operate upon. This option
+         is mandatory with --add, --modify and --remove.
+         It is optional when used with --list.>])
+BEGIN
+	  authid = optarg;
+END
+
+OPTION(password,p,STRING,
+       [<Specify the password for the authid. Mandatory
+	 with --add, --modify and --remove.>])
+BEGIN
+	  password = optarg;
+END
+
+OPTION(user,u,STRING,
+       [<Specify the system user name corresponding to
+         the given authid. Optional for --add, --modify and --remove.>])
+BEGIN
+	  username = optarg;
+END
+
+OPTION(rcfile,f,STRING,
+       [<Specify the rc file to be used for this authid.
+         Optional for --add, --modify and --remove.>])
+BEGIN
+	  rcfile = optarg;
+END
+
+OPTIONS_END
+
+void
+adm_get_options (int argc, char *argv[], operation_fp *operation, int *index)
+{
+    GETOPT(argc, argv, index);
+}
+

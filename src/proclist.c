@@ -2,7 +2,7 @@
    proclist.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2005, 2007 The Anubis Team.
+   Copyright (C) 2005, 2007, 2008 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -93,7 +93,7 @@ proclist_cleanup (void (*fun) (size_t, pid_t, int))
   sigemptyset (&blockset);
   sigaddset (&blockset, SIGCHLD);
   sigprocmask (SIG_BLOCK, &blockset, NULL);		
-  while (ps = list_remove (process_list, NULL, finished_process))
+  while ((ps = list_remove (process_list, NULL, finished_process)))
     {
       if (fun)
 	fun (count, ps->pid, ps->status);

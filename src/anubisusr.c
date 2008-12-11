@@ -1,7 +1,7 @@
 /*
    anubisusr.c
    
-   Copyright (C) 2004, 2005, 2007 The Anubis Team.
+   Copyright (C) 2004, 2005, 2007, 2008 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -17,23 +17,7 @@
    with GNU Anubis.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-#include "headers.h"
-#include "extern.h"
-#include "rcfile.h"
-#include <gsasl.h>
-#include "getopt.h"
-
-#define obstack_chunk_alloc malloc
-#define obstack_chunk_free free
-#include <obstack.h>
-
-#if defined(USE_GNUTLS) && defined(HAVE_GNUTLS_GNUTLS_H)
-# include <gnutls/gnutls.h>
-# define HAVE_TLS
-#endif /* USE_GNUTLS and HAVE_GNUTLS_GNUTLS_H */
+#include <anubisusr.h>
 
 #ifdef HAVE_TLS
 char *tls_cafile;
@@ -324,7 +308,8 @@ send_line (char *buf)
 int
 smtp_get_reply (struct smtp_reply *repl)
 {
-  char buf[LINEBUFFER + 1];
+  char *buf = NULL;
+  size_t bufsize = 0;
   char *p;
   int i;
   int cont = 0;
@@ -333,7 +318,7 @@ smtp_get_reply (struct smtp_reply *repl)
   do
     {
       size_t n;
-      int rc = stream_readline (iostream, buf, sizeof buf, &n);
+      int rc = stream_getline (iostream, &buf, &bufsize, &n);
 
       if (rc)
 	{
@@ -382,6 +367,7 @@ smtp_get_reply (struct smtp_reply *repl)
 	}
     }
   while (cont || *p == '-');
+  free (buf);
   obstack_1grow (&input_stk, 0);
   repl->base = obstack_finish (&input_stk);
 
@@ -1152,47 +1138,6 @@ synch (void)
 }
 
 
-/* Main */
-#define OPT_VERSION          257
-#define OPT_HELP             258
-
-static struct option gnu_options[] = {
-  {"verbose", no_argument, 0, 'v'},
-  {"version", no_argument, 0, OPT_VERSION},
-  {"help", no_argument, 0, OPT_HELP},
-  {"file", required_argument, 0, 'f'},
-  {"netrc", required_argument, 0, 'n'},
-#ifdef HAVE_TLS
-  {"disable-tls", no_argument, 0, 'd'},
-  {"tls-cafile", required_argument, 0, 'C'},
-#endif
-  {"mechanism", required_argument, 0, 'm'},
-  {0, 0, 0, 0}
-};
-
-void
-help (void)
-{
-  puts (_("anubisusr -- Synchronize local and remote copies of the user's RC file"));
-  puts (_("Usage: anubisusr [OPTIONS] [URL]"));
-  puts (_("OPTIONS are:"));
-#ifdef HAVE_TLS
-  puts (_("  -d, --disable-tls       Disable TLS encryption"));
-  puts (_("  -C, --tls-cafile FILE   Use given CA file"));
-#endif
-  puts (_("  -f, --file FILE         Set user configuration file name"));
-  puts (_("  -m, --mechanism MECH    Restrict allowed SASL mechanisms"));
-  puts (_("  -n, --netrc FILE        Set .netrc file name"));
-  puts (_("  -v, --verbose           Verbose output. Multiple options\n"
-	  "                          increase the verbosity. Maximum is\n"
-	  "                          3"));
-  puts ("");
-  puts (_("  --version               Display program version"));
-  puts (_("  --help                  Display this help list"));
-  printf (_("\nReport bugs to <%s>.\n"), PACKAGE_BUGREPORT);
-  exit (0);
-}
-
 #define NETRC_NAME ".netrc"
 void
 read_netrc (void)
@@ -1222,56 +1167,15 @@ int
 main (int argc, char **argv)
 {
   int c;
-
+  int index;
+  
   progname = strrchr (argv[0], '/');
   if (!progname)
     progname = argv[0];
   else
     progname++;
 
-  while ((c = getopt_long (argc, argv, "dC:f:n:m:v", gnu_options, NULL)) != EOF)
-    {
-      switch (c)
-	{
-#ifdef HAVE_TLS
-	case 'd':
-	  enable_tls = 0;
-	  break;
-
-	case 'C':
-	  tls_cafile = optarg;
-	  break;
-
-#endif
-	case 'f':
-	  rcfile_name = optarg;
-	  break;
-
-	case 'n':
-	  netrc_name = optarg;
-	  break;
-	  
-	case 'm':
-	  add_mech (optarg);
-	  break;
-
-	case 'v':
-	  verbose++;
-	  break;
-
-	case OPT_VERSION:
-	  printf ("anubisusr (%s)\n", PACKAGE_STRING);
-	  exit (0);
-
-	case OPT_HELP:
-	  help ();
-	  break;
-
-	default:
-	  fprintf (stderr, "%s: unknown option -%c\n", progname, optopt);
-	  exit (1);
-	}
-    }
+  usr_get_options (argc, argv, &index);
 
   argc -= optind;
   argv += optind;

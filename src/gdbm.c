@@ -2,7 +2,7 @@
    gdbm.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2004, 2007 The Anubis Team.
+   Copyright (C) 2003, 2004, 2007, 2008 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -48,6 +48,10 @@ gdbm_db_open (void **dp, ANUBIS_URL * url, enum anubis_db_mode mode,
 
     case anubis_db_rdwr:
       flags = GDBM_WRCREAT;
+      break;
+
+    default:
+      flags = 0;
     }
 
   path = anubis_url_full_path (url);

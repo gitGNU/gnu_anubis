@@ -2,7 +2,7 @@
    tunnel.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -220,10 +220,10 @@ collect_body (MESSAGE * msg)
   while (state != ST_DONE
 	 && (nread = recvline (SERVER, remote_client, &buf, &size)))
     {
-      if (strncmp (buf, "." CRLF, 3) == 0)	/* EOM */
-	break;
-
       remcrlf (buf);
+
+      if (strcmp (buf, ".") == 0)	/* EOM */
+	break;
 
       if (msg->boundary)
 	{
@@ -351,6 +351,8 @@ smtp_session_transparent (void)
   message_init (&msg);
   while (recvline (SERVER, remote_client, &command, &size))
     {
+      remcrlf (command);
+
       if (process_command (&msg, command))
 	continue;
 
@@ -395,6 +397,8 @@ smtp_session (void)
   message_init (&msg);
   while (recvline (SERVER, remote_client, &command, &size))
     {
+      remcrlf (command);
+      
       if (process_command (&msg, command))
 	continue;
 
@@ -557,7 +561,6 @@ process_command (MESSAGE * msg, char *command)
   char buf[LINEBUFFER + 1];
 
   safe_strcpy (buf, command);	/* make a back-up */
-  remcrlf (buf);
   make_lowercase (buf);
   save_command (msg, buf);
 
@@ -753,6 +756,7 @@ transfer_command (MESSAGE * msg, char *command)
     strip_inter_ws (command, len, sizeof (CMD_RCPT_TO) - 1);
   
   swrite (CLIENT, remote_server, command);
+  swrite (CLIENT, remote_server, CRLF);
 
   if (!strncmp (buf, "ehlo", 4))
     {
@@ -803,7 +807,12 @@ process_data (MESSAGE * msg)
   transfer_body (msg);
 
   if (recvline (CLIENT, remote_server, &buf, &size))
-    swrite (SERVER, remote_client, buf);
+    {
+      remcrlf (buf);
+      
+      swrite (SERVER, remote_client, buf);
+      send_eol (SERVER, remote_client);
+    }
   free (buf);
 
   message_free (msg);
@@ -829,9 +838,11 @@ raw_transfer (void)
   char *buf = NULL;
   while (recvline (SERVER, remote_client, &buf, &size) > 0)
     {
-      if (strncmp (buf, "." CRLF, 3) == 0)	/* EOM */
+      remcrlf (buf);
+      if (strcmp (buf, ".") == 0)	/* EOM */
 	break;
       swrite (CLIENT, remote_server, buf);
+      send_eol (CLIENT, remote_server);
     }
   free (buf);
 }

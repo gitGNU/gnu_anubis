@@ -2,7 +2,7 @@
    guile.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2004, 2005, 2007 The Anubis Team.
+   Copyright (C) 2003, 2004, 2005, 2007, 2008 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -197,8 +197,7 @@ list_to_args (ANUBIS_LIST * arglist)
 {
   char *p;
   ITERATOR *itr;
-  SCM head = SCM_EOL, tail;	/* Don't let gcc fool you: tail cannot be used 
-				   uninitialized */
+  SCM head = SCM_EOL, tail = SCM_EOL;
   SCM val;
 
   itr = iterator_create (arglist);
@@ -221,6 +220,11 @@ list_to_args (ANUBIS_LIST * arglist)
 
 	    case 't':
 	      val = SCM_BOOL_T;
+	      break;
+
+	    default:
+	      /* FIXME: Spit out a message? */
+	      val = SCM_BOOL_F;
 	    }
 	}
       else
@@ -228,7 +232,7 @@ list_to_args (ANUBIS_LIST * arglist)
 
       cell = scm_cons (val, SCM_EOL);
 
-      if (head == SCM_EOL)
+      if (tail == SCM_EOL)
 	head = cell;
       else
 	SCM_SETCDR (tail, cell);
@@ -372,7 +376,7 @@ int
 guile_parser (int method, int key, ANUBIS_LIST * arglist,
 	      void *inv_data, void *func_data, MESSAGE * msg)
 {
-  int rc;
+  int rc = 0;
   char *arg = list_item (arglist, 0);
   struct inner_closure closure;
   jmp_buf jmp_env;

@@ -2,7 +2,7 @@
    net.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -268,37 +268,16 @@ send_eol (int method, NET_STREAM sd)
   Read data
 ***************/
 
-#define INIT_RECVLINE_SIZE 81
-
 int
-recvline (int method, NET_STREAM sd, char **vptr, size_t * maxlen)
+recvline (int method, NET_STREAM sd, char **vptr, size_t *maxlen)
 {
-  int rc;
-  size_t off = 0;
+  size_t nread;
+  int rc = stream_getline (sd, vptr, maxlen, &nread);
 
-  *vptr = NULL;
-  *maxlen = 0;
-  while (1)
-    {
-      size_t nbytes;
-
-      if (*maxlen - off <= 1)
-	{
-	  *maxlen += INIT_RECVLINE_SIZE;
-	  *vptr = xrealloc (*vptr, *maxlen);
-	}
-      rc = stream_readline (sd, *vptr + off, *maxlen - off, &nbytes);
-      if (rc)
-        socket_error (stream_strerror (sd, rc));
-      if (nbytes == 0)
-	break;
-      off += nbytes;
-      if ((*vptr)[off - 1] == '\n')
-	break;
-    }
-  (*vptr)[off] = 0;
-  DPRINTF (method, 0, off, *vptr);
-  return off;
+  if (rc)
+    socket_error (stream_strerror (sd, rc));
+  DPRINTF (method, 0, nread, *vptr);
+  return nread;
 }
 
 /*****************

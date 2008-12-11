@@ -1,3 +1,33 @@
+2008-12-11  Sergey Poznyakoff  <gray@gnu.org.ua>
+
+	* src/Makefile.am (anubisadm_SOURCES): Add new files.
+	(anubisusr_SOURCES): Add new files.
+	* src/anubisadm.h: New file.
+	* src/adm.opt: New file.
+	* src/anubisusr.h: New file.
+	* src/usr.opt: New file.
+	* src/anubisadm.c: Remove command line option parsing. See adm.opt.
+	* src/anubisusr.c: Remove command line option parsing. See
+	usr.opt.
+	(smtp_get_reply): Use stream_getline, this fixes buffer size
+	problems.
+	* src/env.opt: Fix argument quoting.
+	* src/errs.c (hostname_error): Argument is const.
+	* src/gdbm.c, src/gpg.c, src/guile.c, src/proclist.c,
+	src/transmode.c: Minor change.
+	* src/getopt.m4: Import from Dico.
+	* src/headers.h (stream_getline): New prototype.
+	(hostname_error): Argument is const.
+	* src/main.c (copyright): Remove.
+	(xalloc_die): Call abort to pacify gcc.
+	* src/net.c (recvline): Rewrite using stream_getline. This also fixes
+	memory leak.
+	* src/stream.c (stream_readline): Do not insert \r before \n. This
+	is impossible to do correctly without a proper buffering scheme.
+	(stream_getline): New function.
+	* src/tunnel.c: Remove CRLF after a call to recvline.
+	(transfer_command): Compensate for this.
+
 2008-12-09  Wojciech Polak  <polak@gnu.org>
 
 	* configure.ac: Use default CFLAGS.

@@ -31,6 +31,10 @@
   __attribute__ ((__format__ (__printf__, fmt, narg)))
 #endif
 
+#ifndef ANUBIS_NORETURN
+# define ANUBIS_NORETURN __attribute__((__noreturn__))
+#endif
+
 # if defined(HAVE_GNUTLS_GNUTLS_H)
 #  define HAVE_GNUTLS
 # endif	/* HAVE_GNUTLS_GNUTLS_H */
@@ -300,10 +304,11 @@ int stream_set_write (struct net_stream *str, stream_write_t write);
 int stream_set_strerror (struct net_stream *str, stream_strerror_t strerr);
 int stream_close (NET_STREAM str);
 const char *stream_strerror (NET_STREAM str, int errcode);
-int stream_read (NET_STREAM str, char *buf, size_t size, size_t * nbytes);
+int stream_read (NET_STREAM str, char *buf, size_t size, size_t *nbytes);
 int stream_write (NET_STREAM str, const char *buf, size_t size,
-		  size_t * nbytes);
-int stream_readline (NET_STREAM str, char *buf, size_t size, size_t * nbytes);
+		  size_t *nbytes);
+int stream_readline (NET_STREAM str, char *buf, size_t size, size_t *nbytes);
+int stream_getline (NET_STREAM sd, char **vptr, size_t *maxlen, size_t *nread);
 int stream_destroy (NET_STREAM *);
 
 /* main.c */
@@ -328,11 +333,12 @@ void write_pid_file (void);
 
 /* errs.c */
 #define EXIT_ABORT 256
-void anubis_error (int, int, const char *, ...) ANUBIS_PRINTFLIKE(3,4);
+void anubis_error (int, int, const char *, ...)
+     ANUBIS_PRINTFLIKE(3,4);
 void anubis_warning (int error_code, const char *fmt, ...)
      ANUBIS_PRINTFLIKE(2,3);
 void socket_error (const char *);
-void hostname_error (char *);
+void hostname_error (const char *);
 
 /* log.c */
 void mprintf (const char *, ...);

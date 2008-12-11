@@ -74,7 +74,7 @@ session_prologue ()
       if (!remote_server)
 	{
 	  service_unavailable (&remote_client);
-	  return EXIT_FAILURE;
+	  return;
 	}
     }
   else

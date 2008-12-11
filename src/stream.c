@@ -2,7 +2,7 @@
    stream.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2004, 2007 The Anubis Team.
+   Copyright (C) 2004, 2007, 2008 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -205,7 +205,7 @@ read_char (struct net_stream *str, char *ptr, size_t * pcount)
 
 int
 stream_readline (struct net_stream *str, char *buf, size_t size,
-		 size_t * nbytes)
+		 size_t *nbytes)
 {
   int rc = 0;
   size_t n;
@@ -222,11 +222,9 @@ stream_readline (struct net_stream *str, char *buf, size_t size,
       rc = read_char (str, &c, &count);
       if (rc)
 	break;
-
+      
       if (count == 1)
 	{
-	  if (c == '\n' && (n == 1 || (n > 1 && ptr[-1] != '\r')))
-	    *ptr++ = '\r';
 	  *ptr++ = c;
 	  if (c == '\n')
 	    break;
@@ -238,3 +236,36 @@ stream_readline (struct net_stream *str, char *buf, size_t size,
   *nbytes = ptr - buf;
   return rc;
 }
+
+#define INIT_GETLINE_SIZE 128
+
+int
+stream_getline (NET_STREAM sd, char **vptr, size_t *maxlen, size_t *nread)
+{
+  int rc;
+  size_t off = 0;
+
+  while (1)
+    {
+      size_t nbytes;
+
+      if (*maxlen - off <= 1)
+	{
+	  *maxlen += INIT_GETLINE_SIZE;
+	  *vptr = xrealloc (*vptr, *maxlen);
+	}
+      rc = stream_readline (sd, *vptr + off, *maxlen - off, &nbytes);
+      if (rc)
+        return rc;
+      if (nbytes == 0)
+	break;
+      off += nbytes;
+      if ((*vptr)[off - 1] == '\n')
+	break;
+    }
+  (*vptr)[off] = 0;
+  if (nread)
+    *nread = off;
+  return 0;
+}
+

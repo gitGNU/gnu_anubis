@@ -10,3 +10,5 @@ y.output
 rcfile-lex.c
 rcfile-gram.c
 rcfile-gram.h
+usr.c
+adm.c

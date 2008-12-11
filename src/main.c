@@ -22,8 +22,6 @@
 ANUBIS_MODE anubis_mode = anubis_transparent;
 
 const char version[] = "GNU Anubis v" VERSION;
-const char copyright[] =
-  "Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008 The Anubis Team.";
 
 struct options_struct options;
 struct session_struct session;
@@ -54,6 +52,7 @@ void
 xalloc_die ()
 {
   anubis_error (EXIT_FAILURE, 0, "%s", _("Not enough memory"));
+  abort ();
 }
 
 int

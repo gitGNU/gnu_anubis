@@ -1,5 +1,7 @@
 alloca.h
 alloca.in.h
+errno.h
+errno.in.h
 error.c
 error.h
 exitfail.c
@@ -18,6 +20,7 @@ gettext.h
 gnulib.mk
 intprops.h
 lseek.c
+malloc.c
 malloca.c
 malloca.h
 malloca.valgrind
@@ -30,13 +33,17 @@ stdbool.in.h
 stdint.h
 stdint.in.h
 stdio-impl.h
+stdio-write.c
 stdio.h
 stdio.in.h
 stdlib.h
 stdlib.in.h
+strdup.c
 strerror.c
 string.h
 string.in.h
+sysexits.h
+sysexits.in.h
 unistd.h
 unistd.in.h
 wchar.h

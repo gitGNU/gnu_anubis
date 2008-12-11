@@ -1,0 +1,70 @@
+/* -*- c -*-
+   This file is part of GNU Anubis.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008 The Anubis Team.
+
+   GNU Anubis is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   GNU Anubis is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with GNU Anubis.  If not, see <http://www.gnu.org/licenses/>.
+*/
+#include <anubisusr.h>
+
+OPTIONS_BEGIN(gnu,"anubisusr",
+              [<Synchronize local and remote copies of the user's RC file.>],
+	      [URL])
+
+OPTION(disable-tls, d, ,
+       Disable TLS encryption.)
+BEGIN
+#ifdef HAVE_TLS
+       enable_tls = 0;
+#endif
+END
+
+OPTION(tls-cafile,C,FILE,
+       Use given CA file.)
+BEGIN
+#ifdef HAVE_TLS
+       tls_cafile = optarg;
+#endif
+END
+
+OPTION(file,f,FILE,
+       Set user configuration file name.)
+BEGIN
+       rcfile_name = optarg;
+END
+
+OPTION(mechanism,m,MECH,
+       Restrict allowed SASL mechanisms.)
+BEGIN
+	  add_mech (optarg);
+END
+
+OPTION(netrc,n,FILE,
+       Set .netrc file name.)
+BEGIN
+       netrc_name = optarg;
+END
+
+OPTION(verbose, v,,
+       Verbose output. Multiple options increase the verbosity. Maximum is 3.)
+BEGIN
+       verbose++;
+END
+
+OPTIONS_END
+
+void
+usr_get_options (int argc, char *argv[], int *index)
+{
+    GETOPT(argc, argv, index);
+}

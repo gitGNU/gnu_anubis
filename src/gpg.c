@@ -2,7 +2,7 @@
    gpg.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004, 2007 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2007, 2008 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -274,7 +274,6 @@ gpg_encrypt (char *gpg_data)
   gpgme_ctx_t ctx;
   gpgme_data_t in, out;
   char *encrypted_data;
-  size_t nread;
   gpgme_key_t *keyptr;
   struct obstack stk;
   gpgme_encrypt_result_t result;
@@ -304,9 +303,6 @@ gpg_encrypt (char *gpg_data)
   for (; *keyptr; keyptr++)
     gpgme_key_unref (*keyptr);
   obstack_free (&stk, NULL);
-
-  if (nread == -1)
-    fail_if_err (errno);
 
   gpgme_data_release (in);
   gpgme_data_release (out);

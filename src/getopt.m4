@@ -1,5 +1,5 @@
 dnl This file is part of GNU Anubis.
-dnl Copyright (C) 2007 Sergey Poznyakoff.
+dnl Copyright (C) 2007, 2008 The Anubis Team.
 dnl 
 dnl GNU Anubis is free software; you can redistribute it and/or modify it
 dnl under the terms of the GNU General Public License as published by the
@@ -13,9 +13,7 @@ dnl GNU General Public License for more details.
 dnl 
 dnl You should have received a copy of the GNU General Public License along
 dnl with GNU Anubis.  If not, see <http://www.gnu.org/licenses/>.
-dnl 
-dnl GNU Anubis is released under the GPL with the additional exemption that
-dnl compiling, linking, and/or using OpenSSL is allowed.
+dnl
 divert(-1)
 changequote([<,>])
 changecom(/*,*/)
@@ -55,8 +53,13 @@ dnl of preceding and following whitespace by a single space character, remove
 dnl leading whitespace, and escape double-quotes.
 dnl
 define([<prep>],
- [<escape(flushleft(patsubst([<$1>],[<[ 	]*
+[<escape(flushleft(patsubst([<$1>],[<[ 	]*
 +[ 	]*>],[< >])))>])
+
+define([<newline>],
+[<patsubst([<concat($*)>],[<\\n>],[<\n>])>])
+
+define([<mprep>],[<newline(prep($1))>])
 
 dnl SHORT_OPTS
 dnl Accumulator for the 3rd argument of getopt_long
@@ -70,6 +73,28 @@ define([<GROUP>],[<dnl
 divert(3)
 	{ NULL, NULL, 0, N_("prep([<$1>])") },
 divert(-1)>]) 
+
+define([<__GATHER_OPTIONS>],[<
+define([<KEY>],ifelse([<$2>],,[<OPTION_>]upcase(patsubst($1,-,_)),'$2'))
+ifelse([<$2>],,[<
+divert(1)
+	KEY,
+divert(-1)
+>])
+define([<SELECTOR>],ifdef([<SELECTOR>],SELECTOR) case KEY:)
+ifelse([<$1>],,,[<
+divert(2)
+	{ "$1", ARGTYPE, 0, KEY },
+divert(-1)>])
+dnl
+define([<SHORT_OPTS>],SHORT_OPTS[<>]dnl
+ifelse([<$2>],,,$2[<>]ifelse(ARGTYPE,[<no_argument>],,ARGTYPE,[<required_argument>],:,ARGTYPE,[<optional_argument>],::)))
+dnl
+ifelse([<$1>],,,dnl
+[<define([<LONG_TAG>],ifelse(LONG_TAG,,[<--$1>],[<LONG_TAG; --$1>]))>])
+ifelse([<$2>],,,dnl
+[<define([<SHORT_TAG>],ifelse(SHORT_TAG,,[<-$2>],[<SHORT_TAG; -$2>]))>])
+>])
 
 dnl OPTION(long-opt, short-opt, [arg], [descr])
 dnl Introduce a command line option. Arguments:
@@ -89,39 +114,46 @@ dnl If descr is not given the option will not appear in the --help and
 dnl --usage outputs.
 dnl
 define([<OPTION>],[<
-define([<KEY>],ifelse([<$2>],,[<OPTION_>]upcase(patsubst($1,-,_)),'$2'))
-ifelse([<$2>],,[<
-divert(1)
-	KEY,
-divert(-1)
->])
-define([<SELECTOR>],ifdef([<SELECTOR>],SELECTOR) case KEY:)
+pushdef([<LONG_TAG>])
+pushdef([<SHORT_TAG>])
+pushdef([<ARGNAME>],[<$3>])
+pushdef([<DOCSTRING>],[<prep([<$4>])>])
 pushdef([<ARGTYPE>],[<ifelse([<$3>],,[<no_argument>],dnl
 patsubst([<$3>],[<\[.*\]>]),,[<optional_argument>],dnl
 [<required_argument>])>])
-ifelse([<$1>],,,[<
-divert(2)
-	{ "$1", ARGTYPE, 0, KEY },
-divert(-1)>])
-define([<SHORT_OPTS>],SHORT_OPTS[<>]dnl
-ifelse([<$2>],,,$2[<>]ifelse(ARGTYPE,[<no_argument>],,ARGTYPE,[<required_argument>],:,ARGTYPE,[<optional_argument>],::)))
-pushdef([<TAG>],[<ifelse([<$2>],,,-[<$2[<>]ifelse([<$1>],,,[<, >])>])dnl
-ifelse([<$1>],,,[<--$1>])>])
-ifelse([<$4>],,,[<
-divert(3)
-	{ "TAG", ifelse([<$3>],,[<NULL, 0>],
-[<ifelse(ARGTYPE,[<optional_argument>],
-[<patsubst([<$3>],[<\[\(.*\)\]>],[<N_("\1"), 1>])>],[<N_("$3"), 0>])>]), N_("prep([<$4>])") },
-divert(-1)>])
-popdef([<ARGTYPE>])
-popdef([<TAG>])>])
+__GATHER_OPTIONS($@)
+>])
+
+dnl ALIAS(long-opt, short-opt)
+dnl Declare aliases for the previous OPTION statement.
+dnl   long-opt     Long option.
+dnl   short-opt    Short option (a single char)
+dnl   (At least one of long-opt or short-opt must be present)
+dnl An OPTION statement may be followed by any number of ALIAS statements.
+dnl 
+define([<ALIAS>],[<
+__GATHER_OPTIONS($1,$2)
+>])
 
 dnl BEGIN
 dnl Start an action associated with the declared option. Must follow OPTION
-dnl statement.
+dnl statement, with optional ALIAS statements in between.
 dnl
 define([<BEGIN>],[<
+ifelse([<DOCSTRING>],,,[<
+divert(3)
+	{ "translit(dnl
+ifelse(SHORT_TAG,,LONG_TAG,[<SHORT_TAG[<>]ifelse(LONG_TAG,,,; LONG_TAG)>]),
+                    [<;>],[<,>])", ifelse(ARGNAME,,[<NULL, 0>],
+[<ifelse(ARGTYPE,[<optional_argument>],
+[<patsubst([<ARGNAME>],[<\[\(.*\)\]>],[<N_("\1"), 1>])>],[<N_("ARGNAME"), 0>])>]), N_("DOCSTRING") },
+divert(-1)>])
+popdef([<ARGTYPE>])
+popdef([<ARGNAME>])
+popdef([<DOCSTRING>])
 divert(4)dnl
+popdef([<LONG_TAG>])dnl
+popdef([<SHORT_TAG>])dnl
 	SELECTOR
           {
 >])
@@ -135,39 +167,40 @@ define([<END>],[<
 divert(-1)
 undefine([<SELECTOR>])>])
 
-dnl GETOPT(argc, argv, [long_index])
+dnl GETOPT(argc, argv, [optindex])
 dnl Emit option parsing code. Arguments:
 dnl
 dnl  argc        Name of the 1st argument to getopt_long.
 dnl  argv        Name of the 2nd argument to getopt_long.
-dnl  long_index  Name of the 5th argument to getopt_long.  If not given,
-dnl              NULL will be passed
+dnl  optindex    Variable to assign optind to.
 dnl
 define([<GETOPT>],[<
  {
   int c;
-  pushdef([<INDEX>],[<ifelse([<$#>],3,[<&$3>],[<NULL>])>])dnl
 
   while ((c = getopt_long($1, $2, "SHORT_OPTS",
-                          long_options, INDEX)) != EOF)
+                          long_options, NULL)) != EOF)
     {
       switch (c)
         {
+        default:
+	   exit(1);
 	undivert(4)
         }
     }
-  popdef([<INDEX>])
+  ifelse([<$#>],3,[<$3 = optind;>])
  }   
 >])
 
 define([<STDFUNC>],[<
 divert(0)
-static void print_help(void);
-static void print_usage(void);
+void print_help(void);
+void print_usage(void);
 divert(5)
-static const char *program_version = [<$1>];
+const char *program_version = [<$1>];
 static char doc[] = N_("[<$3>]");
 static char args_doc[] = N_("[<$4>]");
+static char *after_desc ifelse([<$5>],,[<= NULL>],[<= N_("mprep($5)")>]);
 const char *program_bug_address = "<" PACKAGE_BUGREPORT ">";
 		    
 #define DESCRCOLUMN 30
@@ -190,10 +223,17 @@ print_option_descr (const char *descr, size_t lmargin, size_t rmargin)
       size_t s = 0;
       size_t i;
       size_t width = rmargin - lmargin;
-
+      
+      while (*descr && (*descr == ' ' || *descr == '\t'))
+	descr++;
       for (i = 0; ; i++)
 	{
-	  if (descr[i] == 0 || isspace (descr[i]))
+	  if (descr[i] == '\n')
+	    {
+	      s = i;
+	      break;
+	    }
+	  if (descr[i] == 0 || (descr[i] == ' ' || descr[i] == '\t'))
 	    {
 	      if (i > width)
 		break;
@@ -202,6 +242,9 @@ print_option_descr (const char *descr, size_t lmargin, size_t rmargin)
 		break;
 	    }
 	}
+      if (s > width)
+	while (!(descr[s] == ' ' || descr[s] == '\t'))
+	  s--;
       printf ("%*.*s\n", s, s, descr);
       descr += s;
       if (*descr)
@@ -212,7 +255,7 @@ print_option_descr (const char *descr, size_t lmargin, size_t rmargin)
     }
 }
 
-static void
+void
 print_help(void)
 {
   unsigned i;
@@ -264,7 +307,8 @@ print_help(void)
 	}
       else
 	{
-	  putchar ('\n');
+	  if (i)
+	    putchar ('\n');
 	  indent (0, GROUPCOLUMN);
 	  print_option_descr (gettext (opthelp[i].descr),
 			      GROUPCOLUMN, RMARGIN);
@@ -280,10 +324,15 @@ dnl directives between the lines.
 dnl **************************************************************************
   print_option_descr (_("Mandatory or optional arguments to long options are also mandatory or optional for any corresponding short options."), 0, RMARGIN);
   putchar ('\n');
+
+  if (after_desc)
+    {
+      print_option_descr (gettext (after_desc), 0, RMARGIN);
+    }	
   printf (_("Report bugs to %s.\n"), program_bug_address);
 }
 
-static void
+void
 print_usage(void)
 {
   unsigned i;
@@ -400,6 +449,36 @@ print_usage(void)
   
 }
 
+const char version_etc_copyright[] =
+  /* Do *not* mark this string for translation.  %s is a copyright
+     symbol suitable for this locale. */
+  "Copyright %s 2001, 2002, 2003, 2004, 2005, 2007, 2008 The Anubis Team.";
+
+void
+print_version_only(const char *program_version, FILE *stream)
+{
+  fprintf (stream, "%s\n", program_version);
+  /* TRANSLATORS: Translate "(C)" to the copyright symbol
+     (C-in-a-circle), if this symbol is available in the user's
+     locale.  Otherwise, do not translate "(C)"; leave it as-is.  */
+  fprintf (stream, version_etc_copyright, _("(C)"));
+  fputc ('\n', stream);
+}
+
+void
+print_version(const char *program_version, FILE *stream)
+{
+  print_version_only(program_version, stream);
+	
+dnl **************************************************************************
+dnl This string cannot be split over serveal lines, because this would trigger
+dnl a bug in GNU M4 (version 1.4.9 and 1.4.10), which would insert #line
+dnl directives between the lines.
+dnl **************************************************************************
+  fputs (_("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\nThis is free software: you are free to change and redistribute it.\nThere is NO WARRANTY, to the extent permitted by law.\n\n"),
+	 stream);
+}
+
 divert(-1)
 popdef([<ADDC>])
 popdef([<FLUSH>])
@@ -409,13 +488,13 @@ define([<OPTIONS_BEGIN>],
    [<divert(-1)
      define([<GETOPT_STYLE>],[<$1>]) 
      ifelse([<$1>],[<gnu>],
-       [<STDFUNC([<PACKAGE_STRING>], [<$2>], [<$3>], [<$4>])>])
+	    [<STDFUNC([<$2 " (" PACKAGE_STRING ")">], [<$2>], [<$3>], [<$4>], [<$5>])>])
 >])
   
 define([<OPTIONS_END>],[<
 ifelse(GETOPT_STYLE,[<gnu>],[<
          GROUP([<Other options>])
-         OPTION([<help>],?,,[<Give this help list>])
+         OPTION([<help>],h,,[<Give this help list>])
          BEGIN
 		print_help ();
                 exit (0);
@@ -428,7 +507,7 @@ ifelse(GETOPT_STYLE,[<gnu>],[<
 	 OPTION([<version>],,,[<Print program version>])
 	 BEGIN
 		/* Give version */
-		printf("%s\n", program_version);
+		print_version(program_version, stdout);
 		exit (0);
          END>])
 divert
