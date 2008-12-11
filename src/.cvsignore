@@ -12,3 +12,4 @@ rcfile-gram.c
 rcfile-gram.h
 usr.c
 adm.c
+env.c

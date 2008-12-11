@@ -1,9 +1,13 @@
 *.gmo
 *.mo
+*.po
+.reference
 Makefile
 Makefile.in
 Makefile.in.in
+Makevars
 Makevars.template
+LINGUAS
 POTFILES
 Rules-quot
 anubis.pot
