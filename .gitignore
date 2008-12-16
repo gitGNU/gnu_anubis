@@ -1,5 +1,11 @@
+*.a
+*.o
+*~
+.deps
+.emacs*
 ABOUT-NLS
 COPYING
+ChangeLog
 INSTALL
 Makefile
 Makefile.in
@@ -11,4 +17,5 @@ config.log
 config.status
 configure
 intl
+m4
 stamp-h1

@@ -1,9 +1,9 @@
-These notes intend to help people working on the CVS version of
+These notes intend to help people working on the Git version of
 this package.
 
 * Requirements
 
-You need the following packages to build the CVS version of GNU
+You need the following packages to build the Git version of GNU
 Anubis.  We do not make any efforts to accommodate older versions of
 these packages, so please make sure that you have the latest stable
 version. 
@@ -20,7 +20,7 @@ version.
 * Bootstrapping
 
 Obviously, if you are reading these notes, you did manage to check out
-Anubis from CVS. The next step is to get other files needed to build,
+Anubis from Git. The next step is to get other files needed to build,
 which are extracted from other source packages: 
 
 1. Change to the source tree directory
@@ -71,5 +71,4 @@ mode: outline
 paragraph-separate: "[	^L]*$"
 version-control: never
 End:
-
 

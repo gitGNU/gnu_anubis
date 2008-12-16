@@ -5,6 +5,7 @@ config.rpath
 config.sub
 depcomp
 elisp-comp
+gitlog-to-changelog
 install-sh
 link-warning.h
 mdate-sh

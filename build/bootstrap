@@ -2,7 +2,7 @@
 
 # Bootstrap this package from checked-out sources.
 
-# Copyright (C) 2003-2008 Free Software Foundation, Inc.
+# Copyright (C) 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -96,11 +96,6 @@ package=`sed -n "$extract_package_name" configure.ac` || exit
 gnulib_name=lib$package
 
 build_aux=build-aux
-source_base=lib
-m4_base=m4
-doc_base=doc
-tests_base=tests
-
 # Extra files from gnulib, which override files from other sources.
 gnulib_extra_files="
 	$build_aux/install-sh
@@ -125,9 +120,6 @@ XGETTEXT_OPTIONS='\\\
  --flag=N_:1:pass-c-format\\\
  --flag=error:3:c-format --flag=error_at_line:5:c-format\\\
 '
-
-# Package bug report address for gettext files
-MSGID_BUGS_ADDRESS=bug-$package@gnu.org
 
 # Files we don't want to import.
 excluded_files=
@@ -278,7 +270,6 @@ update_po_files() {
     new_po="$ref_po_dir/$po.po"
     cksum_file="$ref_po_dir/$po.s1"
     if ! test -f "$cksum_file" ||
-	! test -f "$po_dir/$po.po" ||
 	! sha1sum -c --status "$cksum_file" < "$new_po" > /dev/null; then
       echo "updated $po_dir/$po.po..."
       cp "$new_po" "$po_dir/$po.po" && sha1sum < "$new_po" > "$cksum_file"
@@ -376,11 +367,11 @@ cp_mark_as_generated()
       *)                  c1=     ; c2=     ;;
     esac
 
-    # If the destination directory doesn't exist, create it.
-    # This is required at least for "lib/uniwidth/cjk.h".
     dst_dir=`dirname "$cp_dst"`
-    test -d "$dst_dir" || mkdir -p "$dst_dir"
-
+    if ! test -d "$dst_dir"; then
+      mkdir -p "$dst_dir"
+    fi
+    
     if test -z "$c1"; then
       cmp -s "$cp_src" "$cp_dst" || {
 	echo "$0: cp -f $cp_src $cp_dst" &&
@@ -414,9 +405,7 @@ version_controlled_file() {
     grep -F "/$file/" $dir/CVS/Entries 2>/dev/null |
 	     grep '^/[^/]*/[0-9]' > /dev/null && found=yes
   elif test -d .git; then
-    git rm -n "$dir/$file" > /dev/null 2>&1 && found=yes
-  elif test -d .svn; then
-    svn log -r HEAD "$dir/$file" > /dev/null 2>&1 && found=yes
+    git-rm -n "$dir/$file" > /dev/null 2>&1 && found=yes
   else
     echo "$0: no version control for $dir/$file?" >&2
   fi
@@ -498,13 +487,13 @@ gnulib_tool_options="\
  --import\
  --no-changelog\
  --aux-dir $bt/$build_aux\
- --doc-base $bt/$doc_base\
+ --doc-base $bt/doc\
  --lib $gnulib_name\
- --m4-base $bt/$m4_base/\
- --source-base $bt/$source_base/\
- --tests-base $bt/$tests_base\
+ --m4-base $bt/m4/\
+ --source-base $bt/lib/\
+ --tests-base $bt/tests\
  --local-dir $local_gl_dir\
- $gnulib_tool_option_extras\
+$gnulib_tool_option_extras\
 "
 echo "$0: $gnulib_tool $gnulib_tool_options --import ..."
 $gnulib_tool $gnulib_tool_options --import $gnulib_modules &&
@@ -548,23 +537,12 @@ if test -f $mam_template; then
   done
 fi
 
-# Remove any dangling symlink matching "*.m4" or "*.[ch]" in some
-# gnulib-populated directories.  Such .m4 files would cause aclocal to fail.
-# The following requires GNU find 4.2.3 or newer.  Considering the usual
-# portability constraints of this script, that may seem a very demanding
-# requirement, but it should be ok.  Ignore any failure, which is fine,
-# since this is only a convenience to help developers avoid the relatively
-# unusual case in which a symlinked-to .m4 file is git-removed from gnulib
-# between successive runs of this script.
-find "$m4_base" "$source_base" \
-  -depth \( -name '*.m4' -o -name '*.[ch]' \) \
-  -type l -xtype l -delete > /dev/null 2>&1
-
 # Reconfigure, getting other files.
 
+aclocal_flags=`sed -n 's/ACLOCAL_AMFLAGS *=//p' Makefile.am`
 for command in \
   libtool \
-  'aclocal --force -I m4' \
+  "aclocal --force $aclocal_flags" \
   'autoconf --force' \
   'autoheader --force' \
   'automake --add-missing --copy --force-missing';
@@ -595,7 +573,7 @@ if test $with_gettext = yes; then
   rm -f po/Makevars
   sed '
     /^EXTRA_LOCALE_CATEGORIES *=/s/=.*/= '"$EXTRA_LOCALE_CATEGORIES"'/
-    /^MSGID_BUGS_ADDRESS *=/s/=.*/= '"$MSGID_BUGS_ADDRESS"'/
+    /^MSGID_BUGS_ADDRESS *=/s/=.*/= bug-'"$package"'@gnu.org/
     /^XGETTEXT_OPTIONS *=/{
       s/$/ \\/
       a\

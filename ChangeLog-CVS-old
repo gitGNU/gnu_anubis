@@ -2866,4 +2866,5 @@
 Local Variables:
 mode: change-log
 version-control: never
+buffer-read-only: t
 End:

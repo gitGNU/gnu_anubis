@@ -2,12 +2,12 @@
 *.mo
 *.po
 .reference
+LINGUAS
 Makefile
 Makefile.in
 Makefile.in.in
 Makevars
 Makevars.template
-LINGUAS
 POTFILES
 Rules-quot
 anubis.pot
