@@ -27,9 +27,9 @@ SUBDIRS = build lib src po doc scripts examples guile contrib \
 make-ChangeLog:
 	if test -d .git; then                                           \
 	  perl $(top_srcdir)/build/gitlog-to-changelog --since=2008-12-16 | \
-            sed '/<unknown>$$/d' | fmt -s >> $(distdir)/cl-t;           \
+            sed '/<unknown>$$/d' | fmt -s > $(distdir)/cl-t;            \
 	  echo >> $(distdir)/cl-t;                                      \
-	  cat ChangeLog-CVS-old > $(distdir)/cl-t;                      \
+	  cat ChangeLog-CVS-old >> $(distdir)/cl-t;                     \
 	  rm -f $(distdir)/ChangeLog;                                   \
 	  mv $(distdir)/cl-t $(distdir)/ChangeLog;                      \
 	fi
