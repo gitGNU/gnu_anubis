@@ -505,7 +505,7 @@ parse_netrc (const char *filename)
   char *buf = NULL;
   size_t n = 0;
   int def_argc = 0;
-  char **def_argv;
+  char **def_argv = NULL;
   char **p_argv = NULL;
   int line = 0;
 
@@ -601,20 +601,6 @@ parse_netrc (const char *filename)
     }
 }
 
-/* FIXME: Add UTF-8 conversion */
-static int
-utf8cpy (char *dst, size_t * dstlen, char *src, size_t srclen)
-{
-  size_t len = strlen (src);
-
-  if (dst && *dstlen < len)
-    return GSASL_TOO_SMALL_BUFFER;
-  *dstlen = len;
-  if (dst)
-    strcpy (dst, src);
-  return GSASL_OK;
-}
-
 char *
 get_input (const char *prompt)
 {
@@ -631,159 +617,85 @@ get_input (const char *prompt)
   return buf;
 }
 
-int
-cb_anonymous (Gsasl_session *sess_ctx, char *out, size_t *outlen)
+static int
+callback (Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 {
-  int rc;
+  int rc = GSASL_OK;
 
-  if (auth_args.anon_token == NULL)
-    auth_args.anon_token = get_input (_("Anonymous token: "));
-
-  if (auth_args.anon_token == NULL)
-    return GSASL_AUTHENTICATION_ERROR;
-
-  rc = utf8cpy (out, outlen, auth_args.anon_token,
-		strlen (auth_args.anon_token));
-  if (rc != GSASL_OK)
-    return rc;
-
-  return GSASL_OK;
-}
-
-int
-cb_authorization_id (Gsasl_session *sess_ctx, char *out, size_t * outlen)
-{
-  int rc;
-
-  if (auth_args.authorization_id == NULL)
-    auth_args.authorization_id = get_input (_("Authorization ID: "));
-
-  if (auth_args.authorization_id == NULL)
-    return GSASL_AUTHENTICATION_ERROR;
-
-  rc = utf8cpy (out, outlen, auth_args.authorization_id,
-		strlen (auth_args.authorization_id));
-  if (rc != GSASL_OK)
-    return rc;
-
-  return GSASL_OK;
-}
-
-int
-cb_authentication_id (Gsasl_session *sess_ctx, char *out, size_t *outlen)
-{
-  int rc;
-
-  if (auth_args.authentication_id == NULL)
-    auth_args.authentication_id = get_input (_("Authentication ID: "));
-
-  if (auth_args.authentication_id == NULL)
-    return GSASL_AUTHENTICATION_ERROR;
-
-  rc = utf8cpy (out, outlen, auth_args.authentication_id,
-		strlen (auth_args.authentication_id));
-  if (rc != GSASL_OK)
-    return rc;
-
-  return GSASL_OK;
-}
-
-int
-cb_password (Gsasl_session *sess_ctx, char *out, size_t *outlen)
-{
-  int rc;
-
-  if (auth_args.password == NULL)
-    auth_args.password = getpass (_("Password: "));
-
-  if (auth_args.password == NULL)
-    return GSASL_AUTHENTICATION_ERROR;
-
-  rc = utf8cpy (out, outlen, auth_args.password, strlen (auth_args.password));
-  if (rc != GSASL_OK)
-    return rc;
-
-  return GSASL_OK;
-}
-
-int
-cb_service (Gsasl_session *sess_ctx, char *srv, size_t *srvlen,
-	    char *host, size_t * hostlen, char *srvname, size_t * srvnamelen)
-{
-  int rc;
-
-  if (auth_args.service == NULL)
-    auth_args.service = get_input (_("GSSAPI service name: "));
-
-  if (auth_args.hostname == NULL)
-    auth_args.hostname = get_input (_("Hostname of server: "));
-
-  if (srvnamelen && auth_args.service_name == NULL)
-    auth_args.service_name = get_input (_("Generic service name: "));
-
-  if (auth_args.service == NULL)
-    return GSASL_AUTHENTICATION_ERROR;
-
-  if (auth_args.hostname == NULL)
-    return GSASL_AUTHENTICATION_ERROR;
-
-  if (srvnamelen && auth_args.service_name == NULL)
-    return GSASL_AUTHENTICATION_ERROR;
-
-  rc = utf8cpy (srv, srvlen, auth_args.service, strlen (auth_args.service));
-  if (rc != GSASL_OK)
-    return rc;
-
-  rc = utf8cpy (host, hostlen, auth_args.hostname,
-		strlen (auth_args.hostname));
-  if (rc != GSASL_OK)
-    return rc;
-
-  if (srvnamelen)
+  switch (prop)
     {
-      rc = utf8cpy (srvname, srvnamelen, auth_args.service_name,
-		    strlen (auth_args.service_name));
-      if (rc != GSASL_OK)
-	return rc;
+    case GSASL_PASSWORD:
+      if (auth_args.password == NULL)
+	auth_args.password = getpass (_("Password: "));
+
+      if (auth_args.password == NULL)
+	return GSASL_AUTHENTICATION_ERROR;
+      gsasl_property_set (sctx, prop, auth_args.password);
+      break;
+
+    case GSASL_SERVICE:
+      if (auth_args.service == NULL)
+	auth_args.service = get_input (_("GSSAPI service name: "));
+      if (auth_args.service == NULL)
+	return GSASL_AUTHENTICATION_ERROR;
+      gsasl_property_set (sctx, prop, auth_args.service);
+      break;
+
+    case GSASL_REALM:
+      if (auth_args.realm == NULL)
+	auth_args.realm = get_input (_("Client realm: "));
+      if (auth_args.realm == NULL)
+	return GSASL_AUTHENTICATION_ERROR;
+      gsasl_property_set (sctx, prop, auth_args.realm);
+      break;
+
+    case GSASL_HOSTNAME:
+      if (auth_args.hostname == NULL)
+	auth_args.hostname = get_input (_("Hostname of server: "));
+      if (auth_args.hostname == NULL)
+	return GSASL_AUTHENTICATION_ERROR;
+      gsasl_property_set (sctx, prop, auth_args.hostname);
+      break;
+
+    case GSASL_ANONYMOUS_TOKEN:
+      if (auth_args.anon_token == NULL)
+	auth_args.anon_token = get_input (_("Anonymous token: "));
+      if (auth_args.anon_token == NULL)
+	return GSASL_AUTHENTICATION_ERROR;
+      gsasl_property_set (sctx, prop, auth_args.anon_token);
+      break;
+
+    case GSASL_AUTHID:
+      if (auth_args.authentication_id == NULL)
+	auth_args.authentication_id = get_input (_("Authentication ID: "));
+      if (auth_args.authentication_id == NULL)
+	return GSASL_AUTHENTICATION_ERROR;
+      gsasl_property_set (sctx, prop, auth_args.authentication_id);
+      break;
+
+    case GSASL_AUTHZID:
+      if (auth_args.authorization_id == NULL)
+	auth_args.authorization_id = get_input (_("Authorization ID: "));
+      if (auth_args.authorization_id == NULL)
+	return GSASL_AUTHENTICATION_ERROR;
+      gsasl_property_set (sctx, prop, auth_args.authorization_id);
+      break;
+
+    case GSASL_PASSCODE:
+      if (auth_args.passcode == NULL)
+	auth_args.passcode = getpass (_("Passcode: "));
+      if (auth_args.passcode == NULL)
+	return GSASL_AUTHENTICATION_ERROR;
+      gsasl_property_set (sctx, prop, auth_args.passcode);
+      break;
+
+    default:
+      rc = GSASL_NO_CALLBACK;
+      error (_("Unsupported callback property %d"), prop);
+      break;
     }
 
-  return GSASL_OK;
-}
-
-int
-cb_passcode (Gsasl_session *sess_ctx, char *out, size_t *outlen)
-{
-  int rc;
-
-  if (auth_args.passcode == NULL)
-    auth_args.passcode = getpass (_("Passcode: "));
-
-  if (auth_args.passcode == NULL)
-    return GSASL_AUTHENTICATION_ERROR;
-
-  rc = utf8cpy (out, outlen, auth_args.passcode, strlen (auth_args.passcode));
-  if (rc != GSASL_OK)
-    return rc;
-
-  return GSASL_OK;
-}
-
-int
-cb_realm (Gsasl_session *sess_ctx, char *out, size_t *outlen)
-{
-  int rc;
-
-  if (auth_args.realm == NULL)
-    auth_args.realm = get_input (_("Client realm: "));
-
-  if (auth_args.realm == NULL)
-    return GSASL_AUTHENTICATION_ERROR;
-
-  rc = utf8cpy (out, outlen, auth_args.realm, strlen (auth_args.realm));
-  if (rc != GSASL_OK)
-    return rc;
-
-  return GSASL_OK;
+  return rc;
 }
 
 void
@@ -906,13 +818,7 @@ smtp_auth (void)
       exit (1);
     }
 
-  gsasl_client_callback_anonymous_set (ctx, cb_anonymous);
-  gsasl_client_callback_authentication_id_set (ctx, cb_authentication_id);
-  gsasl_client_callback_authorization_id_set (ctx, cb_authorization_id);
-  gsasl_client_callback_password_set (ctx, cb_password);
-  gsasl_client_callback_passcode_set (ctx, cb_passcode);
-  gsasl_client_callback_service_set (ctx, cb_service);
-  gsasl_client_callback_realm_set (ctx, cb_realm);
+  gsasl_callback_set (ctx, callback);
 
   do_gsasl_auth (ctx, mech);
 }

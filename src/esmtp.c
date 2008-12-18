@@ -22,19 +22,6 @@
 #include "extern.h"
 
 #if defined(WITH_GSASL)
-/* FIXME: Duplicated in anubisusr.c */
-static int
-utf8cpy (char *dst, size_t * dstlen, char *src, size_t srclen)
-{
-  size_t len = strlen (src);
-
-  if (dst && *dstlen < len)
-    return GSASL_TOO_SMALL_BUFFER;
-  *dstlen = len;
-  if (dst)
-    strcpy (dst, src);
-  return GSASL_OK;
-}
 
 ANUBIS_LIST *anubis_client_mech_list;     /* List of auth methods allowed by
 					     the client */
@@ -46,6 +33,7 @@ char *authentication_id;
 char *auth_password;
 char *auth_service;
 char *auth_hostname;
+/* FIXME: Not used: */
 char *generic_service_name;
 char *auth_passcode;
 char *auth_realm;
@@ -63,88 +51,70 @@ anubis_set_encryption_mech_list (ANUBIS_LIST *list)
 }
 
 static int
-cb_anonymous (Gsasl_session *sess_ctx, char *out, size_t *outlen)
+callback (Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 {
-  if (anon_token == NULL)
-    return GSASL_AUTHENTICATION_ERROR;
-
-  return utf8cpy (out, outlen, anon_token, strlen (anon_token));
-}
-
-static int
-cb_authorization_id (Gsasl_session *sess_ctx, char *out, size_t *outlen)
-{
-  if (authorization_id == NULL)
-    return GSASL_AUTHENTICATION_ERROR;
-
-  return utf8cpy (out, outlen, authorization_id, strlen (authorization_id));
-}
-
-static int
-cb_authentication_id (Gsasl_session *sess_ctx, char *out, size_t *outlen)
-{
-  if (authentication_id == NULL)
-    return GSASL_AUTHENTICATION_ERROR;
-
-  return utf8cpy (out, outlen, authentication_id, strlen (authentication_id));
-}
-
-static int
-cb_password (Gsasl_session *sess_ctx, char *out, size_t * outlen)
-{
-  if (auth_password == NULL)
-    return GSASL_AUTHENTICATION_ERROR;
-
-  return utf8cpy (out, outlen, auth_password, strlen (auth_password));
-}
-
-static int
-cb_service (Gsasl_session *sess_ctx, char *srv, size_t * srvlen,
-	    char *host, size_t * hostlen, char *srvname, size_t * srvnamelen)
-{
-  int rc;
+  int rc = GSASL_OK;
   
-  if (auth_service == NULL)
-    return GSASL_AUTHENTICATION_ERROR;
+  switch (prop)
+    {
+    case GSASL_AUTHID:
+      if (authentication_id == NULL)
+	return GSASL_AUTHENTICATION_ERROR;
+      gsasl_property_set (sctx, prop, authentication_id);
+      break;
 
-  if (auth_hostname == NULL)
-    return GSASL_AUTHENTICATION_ERROR;
+    case GSASL_AUTHZID:
+      if (authorization_id == NULL)
+	return GSASL_AUTHENTICATION_ERROR;
+      gsasl_property_set (sctx, prop, authorization_id);
+      break;
 
-  if (srvnamelen && generic_service_name == NULL)
-    return GSASL_AUTHENTICATION_ERROR;
+    case GSASL_PASSWORD:
+      if (auth_password == NULL)
+	return GSASL_AUTHENTICATION_ERROR;
+      gsasl_property_set (sctx, prop, auth_password);
+      break;
 
-  rc = utf8cpy (srv, srvlen, auth_service, strlen (auth_service));
-  if (rc != GSASL_OK)
-    return rc;
+    case GSASL_ANONYMOUS_TOKEN:
+      if (anon_token == NULL)
+	return GSASL_AUTHENTICATION_ERROR;
+      gsasl_property_set (sctx, prop, anon_token);
+      break;
 
-  rc = utf8cpy (host, hostlen, auth_hostname, strlen (auth_hostname));
-  if (rc != GSASL_OK)
-    return rc;
+    case GSASL_SERVICE:
+      if (auth_service == NULL)
+	return GSASL_AUTHENTICATION_ERROR;
+      gsasl_property_set (sctx, prop, auth_service);
+      break;
 
-  if (srvnamelen)
-    rc = utf8cpy (srvname, srvnamelen, generic_service_name,
-		  strlen (generic_service_name));
+    case GSASL_HOSTNAME:
+      if (auth_hostname == NULL)
+	return GSASL_AUTHENTICATION_ERROR;
+      gsasl_property_set (sctx, prop, auth_hostname);
+      break;
+
+    case GSASL_PASSCODE:
+      if (auth_passcode == NULL)
+	return GSASL_AUTHENTICATION_ERROR;
+      gsasl_property_set (sctx, prop, auth_passcode);
+      break;
+
+    case GSASL_REALM:
+      if (auth_realm == NULL)
+	return GSASL_AUTHENTICATION_ERROR;
+      gsasl_property_set (sctx, prop, auth_realm);
+      break;
+
+    default:
+      rc = GSASL_NO_CALLBACK;
+      anubis_error (0, 0, _("Unsupported callback property %d"), prop);
+      break;
+    }
 
   return rc;
 }
+      
 
-static int
-cb_passcode (Gsasl_session *sess_ctx, char *out, size_t * outlen)
-{
-  if (auth_passcode == NULL)
-    return GSASL_AUTHENTICATION_ERROR;
-
-  return utf8cpy (out, outlen, auth_passcode, strlen (auth_passcode));
-}
-
-static int
-cb_realm (Gsasl_session *sess_ctx, char *out, size_t *outlen)
-{
-  if (auth_realm == NULL)
-    return GSASL_AUTHENTICATION_ERROR;
-
-  return utf8cpy (out, outlen, auth_realm, strlen (auth_realm));
-}
 
 static char *
 get_reply (NET_STREAM str, int *code, char **buf, size_t *psize)
@@ -324,13 +294,7 @@ esmtp_auth (NET_STREAM *pstr, char *input)
       return 1;
     }
 
-  gsasl_client_callback_anonymous_set (ctx, cb_anonymous);
-  gsasl_client_callback_authentication_id_set (ctx, cb_authentication_id);
-  gsasl_client_callback_authorization_id_set (ctx, cb_authorization_id);
-  gsasl_client_callback_password_set (ctx, cb_password);
-  gsasl_client_callback_passcode_set (ctx, cb_passcode);
-  gsasl_client_callback_service_set (ctx, cb_service);
-  gsasl_client_callback_realm_set (ctx, cb_realm);
+  gsasl_callback_set (ctx, callback);
 
   rc = do_gsasl_auth (pstr, ctx, mech);
   list_destroy (&mech_list, anubis_free_list_item, NULL);

@@ -2,7 +2,7 @@
    gsasl_srv.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2004, 2007 The Anubis Team.
+   Copyright (C) 2003, 2004, 2007, 2008 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -20,6 +20,12 @@
 
 #include "headers.h"
 #include "extern.h"
+
+#define ANUBIS_SERVICE "anubis"
+
+char *anubis_sasl_service;
+char *anubis_sasl_realm;
+char *anubis_sasl_hostname;
 
 #if defined(WITH_GSASL)
 
@@ -39,7 +45,8 @@ auth_method_list (char *input)
   return list;
 }
 
-/* Converts the authentication method ANUBIS_LIST to its textual representation. */
+/* Converts the authentication method ANUBIS_LIST to its textual
+   representation. */
 static void
 auth_list_to_string (ANUBIS_LIST * list, char *buf, size_t bufsize)
 {
@@ -129,7 +136,7 @@ auth_gsasl_capa_init ()
 int
 anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER * usr)
 {
-  char *input = arg;
+  char *input = NULL;
   size_t input_size = 0;
   char *output;
   int rc;
@@ -147,15 +154,21 @@ anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER * usr)
       return 1;
     }
 
-  gsasl_server_application_data_set (sess_ctx, usr);
+  gsasl_callback_hook_set (ctx, usr);
 
   output = NULL;
   /* RFC 2554 4.:
      Unlike a zero-length client answer to a 334 reply, a zero-
      length initial response is sent as a single equals sign */
-  if (input && strcmp (input, "=") == 0)
-    input = "";
-
+  if (arg)
+    {
+      if (strcmp (arg, "=") == 0)
+	arg = "";
+      
+      input = xstrdup (arg);
+      input_size = strlen (input) + 1;
+    }
+  
   while ((rc = gsasl_step64 (sess_ctx, input, &output)) == GSASL_NEEDS_MORE)
     {
       asmtp_reply (334, "%s", output);
@@ -164,12 +177,12 @@ anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER * usr)
       if (strcmp (input, "*") == 0)
 	{
 	  asmtp_reply (501, "AUTH aborted");
+	  free (input);
 	  return 1;
 	}
     }
 
-  if (input_size)
-    free (input);
+  free (input);
 
   if (rc != GSASL_OK)
     {
@@ -203,111 +216,99 @@ anubis_auth_gsasl (char *auth_type, char *arg, ANUBIS_USER * usr)
 }
 
 
-
-/* Various callback functions */
-
-/* This is for DIGEST-MD5 */
 static int
-cb_realm (Gsasl_session *sess_ctx, char *out, size_t *outlen, size_t nth)
+retrieve_password (Gsasl *ctx, Gsasl_session *sctx)
 {
-  char *realm = get_localname ();
+  ANUBIS_USER *usr = gsasl_callback_hook_get (ctx);
+  const char *authid = gsasl_property_get (sctx, GSASL_AUTHID);
 
-  if (nth > 0)
-    return GSASL_NO_MORE_REALMS;
+  if (usr->smtp_authid == NULL
+      && anubis_get_db_record (authid, usr) != ANUBIS_DB_SUCCESS)
+    return GSASL_AUTHENTICATION_ERROR;
 
-  if (out)
-    {
-      if (*outlen < strlen (realm))
-	return GSASL_TOO_SMALL_BUFFER;
-      memcpy (out, realm, strlen (realm));
-    }
-
-  *outlen = strlen (realm);
-
+  gsasl_property_set (sctx, GSASL_PASSWORD, usr->smtp_passwd);
   return GSASL_OK;
 }
 
 static int
-cb_validate (Gsasl_session *sess_ctx,
-	     const char *authorization_id,
-	     const char *authentication_id, const char *password)
+cb_validate (Gsasl *ctx, Gsasl_session *sctx)
 {
-  ANUBIS_USER *usr = gsasl_server_application_data_get (sess_ctx);
+  ANUBIS_USER *usr = gsasl_callback_hook_get (ctx);
+  const char *authid = gsasl_property_get (sctx, GSASL_AUTHID);
+  const char *pass = gsasl_property_get (sctx, GSASL_PASSWORD);
 
-  if (usr->smtp_authid == NULL
-      && anubis_get_db_record (authentication_id, usr) != ANUBIS_DB_SUCCESS)
-    return GSASL_AUTHENTICATION_ERROR;
-  
+  if (!authid)
+    return GSASL_NO_AUTHID;
+  if (!pass)
+    return GSASL_NO_PASSWORD;
+
   if (usr->smtp_authid == NULL
       || strcmp (usr->smtp_authid, authentication_id)
-      || strcmp (usr->smtp_passwd, password))
+      || strcmp (usr->smtp_passwd, pass))
     return GSASL_AUTHENTICATION_ERROR;
   return GSASL_OK;
 }
 
-#define GSSAPI_SERVICE "anubis"
-
 static int
-cb_service (Gsasl_session *sess_ctx, char *srv, size_t * srvlen,
-	    char *host, size_t * hostlen)
+callback (Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 {
-  char *hostname = get_localname ();
-
-  if (srv)
-    {
-      if (*srvlen < strlen (GSSAPI_SERVICE))
-	return GSASL_TOO_SMALL_BUFFER;
-
-      memcpy (srv, GSSAPI_SERVICE, strlen (GSSAPI_SERVICE));
-    }
-
-  if (srvlen)
-    *srvlen = strlen (GSSAPI_SERVICE);
-
-  if (host)
-    {
-      if (*hostlen < strlen (hostname))
-	return GSASL_TOO_SMALL_BUFFER;
-
-      memcpy (host, hostname, strlen (hostname));
-    }
-
-  if (hostlen)
-    *hostlen = strlen (hostname);
-
-  return GSASL_OK;
-}
-
-/* This gets called when SASL mechanism EXTERNAL is invoked */
-static int
-cb_external (Gsasl_session *sess_ctx)
-{
-  return GSASL_AUTHENTICATION_ERROR;
-}
-
-/* This gets called when SASL mechanism CRAM-MD5 or DIGEST-MD5 is invoked */
-
-static int
-cb_retrieve (Gsasl_session *sess_ctx,
-	     const char *authentication_id,
-	     const char *authorization_id,
-	     const char *realm, char *key, size_t * keylen)
-{
-  ANUBIS_USER *usr = gsasl_server_application_data_get (sess_ctx);
+  int rc = GSASL_OK;
   
-  if (usr->smtp_authid == NULL
-      && anubis_get_db_record (authentication_id, usr) != ANUBIS_DB_SUCCESS)
-    return GSASL_AUTHENTICATION_ERROR;
-
-  if (key)
+  switch (prop)
     {
-      if (*keylen < strlen (usr->smtp_passwd))
-	return GSASL_TOO_SMALL_BUFFER;
-      strncpy (key, usr->smtp_passwd, *keylen);
+    case GSASL_PASSWORD:
+      rc = retrieve_password (ctx, sctx);
+      break;
+
+    case GSASL_SERVICE:
+      gsasl_property_set (sctx, prop,
+			  anubis_sasl_service ?
+			    anubis_sasl_service : ANUBIS_SERVICE);
+      break;
+
+    case GSASL_REALM:
+      gsasl_property_set (sctx, prop,
+			  anubis_sasl_realm ?
+			    anubis_sasl_realm : get_localdomain ());
+      break;
+
+    case GSASL_HOSTNAME:
+      gsasl_property_set (sctx, prop,
+			  anubis_sasl_hostname ?
+			    anubis_sasl_hostname : get_localname ());
+      break;
+
+#if 0
+    FIXME:
+    case GSASL_VALIDATE_EXTERNAL:
+    case GSASL_VALIDATE_SECURID:
+#endif
+
+    case GSASL_VALIDATE_SIMPLE:
+      rc = cb_validate (ctx, sctx);
+      break;
+
+    case GSASL_VALIDATE_ANONYMOUS:
+      /* FIXME: */
+      info (NORMAL, _("Anonymous access not supported"));
+      rc = GSASL_AUTHENTICATION_ERROR;
+      break;
+
+    case GSASL_VALIDATE_GSSAPI:
+      {
+	ANUBIS_USER *usr = gsasl_callback_hook_get (ctx);
+	/* FIXME: Free? */
+	usr->smtp_authid = strdup (gsasl_property_get(sctx, GSASL_AUTHZID));
+	break;
+      }
+      
+    default:
+      rc = GSASL_NO_CALLBACK;
+      anubis_error (0, 0, _("Unsupported callback property %d"), prop);
+      break;
     }
-  else
-    *keylen = strlen (usr->smtp_passwd);
-  return GSASL_OK;
+
+  return rc;
 }
 
 
@@ -323,11 +324,7 @@ auth_gsasl_init ()
       info (NORMAL, _("cannot initialize libgsasl: %s"), gsasl_strerror (rc));
     }
 
-  gsasl_server_callback_realm_set (ctx, cb_realm);
-  gsasl_server_callback_external_set (ctx, cb_external);
-  gsasl_server_callback_validate_set (ctx, cb_validate);
-  gsasl_server_callback_service_set (ctx, cb_service);
-  gsasl_server_callback_retrieve_set (ctx, cb_retrieve);
+  gsasl_callback_set (ctx, callback);
 
   auth_gsasl_capa_init ();
 }

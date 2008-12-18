@@ -618,8 +618,11 @@ anubis_authenticate_mode (struct sockaddr_in *addr)
 
 #define KW_SASL_PASSWORD_DB      1
 #define KW_SASL_ALLOWED_MECH     2
-#define KW_SMTP_GREETING_MESSAGE 3
-#define KW_SMTP_HELP_MESSAGE     4
+#define KW_SASL_SERVICE          3
+#define KW_SASL_REALM            4
+#define KW_SASL_HOSTNAME         5
+#define KW_SMTP_GREETING_MESSAGE 6
+#define KW_SMTP_HELP_MESSAGE     7
 
 static int
 rc_parser (int method, int key, ANUBIS_LIST * arglist,
@@ -651,6 +654,27 @@ rc_parser (int method, int key, ANUBIS_LIST * arglist,
     anubis_set_server_mech_list (arglist);
     break;
 
+  case KW_SASL_SERVICE:
+    if (list_count (arglist) != 1)
+      return RC_KW_ERROR;
+    xfree (anubis_sasl_service);
+    anubis_sasl_service = strdup (arg);
+    break;
+    
+  case KW_SASL_REALM:
+    if (list_count (arglist) != 1)
+      return RC_KW_ERROR;
+    xfree (anubis_sasl_realm);
+    anubis_sasl_realm = strdup (arg);
+    break;
+    
+  case KW_SASL_HOSTNAME:
+    if (list_count (arglist) != 1)
+      return RC_KW_ERROR;
+    xfree (anubis_sasl_hostname);
+    anubis_sasl_hostname = strdup (arg);
+    break;
+    
   default:
     return RC_KW_UNKNOWN;
   }
@@ -662,6 +686,9 @@ static struct rc_kwdef init_authmode_kw[] = {
   { "smtp-help-message",     KW_SMTP_HELP_MESSAGE },
   { "sasl-password-db",      KW_SASL_PASSWORD_DB },
   { "sasl-allowed-mech",     KW_SASL_ALLOWED_MECH },
+  { "sasl-service",          KW_SASL_SERVICE },
+  { "sasl-hostname",         KW_SASL_HOSTNAME },
+  { "sasl-realm",            KW_SASL_REALM },
   { NULL }
 };
 

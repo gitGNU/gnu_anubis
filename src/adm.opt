@@ -101,6 +101,6 @@ OPTIONS_END
 void
 adm_get_options (int argc, char *argv[], operation_fp *operation, int *index)
 {
-    GETOPT(argc, argv, index);
+    GETOPT(argc, argv, *index);
 }
 
