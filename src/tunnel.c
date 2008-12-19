@@ -312,7 +312,7 @@ smtp_session_transparent (void)
      First of all, transfer a welcome message.
    */
 
-  info (VERBOSE, _("Transferring message(s)..."));
+  info (VERBOSE, _("Transferring messages..."));
   get_response_smtp (CLIENT, remote_server, &command, &size);
 
   if (command &&
@@ -392,7 +392,7 @@ smtp_session (void)
 
   info (VERBOSE, _("Starting SMTP session..."));
   smtp_begin ();
-  info (VERBOSE, _("Transferring message(s)..."));
+  info (VERBOSE, _("Transferring messages..."));
 
   message_init (&msg);
   while (recvline (SERVER, remote_client, &command, &size))
