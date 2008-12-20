@@ -1,4 +1,4 @@
-GNU Anubis NEWS -- history of user-visible changes. 2008-12-09
+GNU Anubis NEWS -- history of user-visible changes. 2008-12-20
 Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008 The Anubis Team.
 
 See the end of file for copying conditions.
@@ -9,7 +9,16 @@ Please send your bug reports to <bug-anubis@gnu.org>.
  4.1.1 (?? Dec 2008)
  *******************
 
+* Automatic correction of MAIL and RCPT SMTP commands.
+
+Some mail software inserts whitespace between 'MAIL TO:' or 'RCPT FROM:'
+command and its argument. When handling these commands, Anubis removes
+this extra whitespace, thereby making them compliant to RFC 2821. This
+feature is particularly useful when working with MTAs that enforce strict
+RFC compliance, such as MeTA1.
+
 * Fix loop-detection code.
+* New configuration keywords sasl-realm, sasl-hostname and sasl-service.
 * Minor improvements and bugfixes.
 * New Danish, Indonesian, Italian, and Swedish message translations.
 

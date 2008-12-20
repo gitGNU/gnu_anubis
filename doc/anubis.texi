@@ -104,7 +104,7 @@ GNU Anubis is an @acronym{SMTP} message submission daemon. Its purpose is to rec
 the outgoing message, perform some manipulations over its contents,
 and to forward the altered message to the mail transport agent.
 
-The usual mail sending scheme looks as follows: the user composes
+The usual mail sending scheme looks as follows: a user composes
 his message using @dfn{mail user agent} (@dfn{MUA} for short). Once
 the message is composed, the user sends it. When the @acronym{MUA} receives
 the send command it connects to the @dfn{mail transport agent}
@@ -129,7 +129,7 @@ the recipient's mailbox unaltered.
 
 However, there are situations where it may be necessary to modify
 the outgoing message before it reaches @acronym{MTA}. As the simplest example,
-the user might wish to sign the outgoing messages with his PGP
+the user might wish to sign outgoing messages with his PGP
 key, but his @acronym{MUA} does not support this operation or supports it
 unconditionally.
 
@@ -152,11 +152,11 @@ sent message. The figure below illustrates this concept:
                                                   +--------------+
 @end smallexample
 
-The outgoing message is processed by GNU Anubis, and it is
+The outgoing message is modified by GNU Anubis, and it is
 the resulting message (@dfn{modmsg}) that reaches the @acronym{MTA}.
 
-GNU Anubis is able to perform on messages a wide set of operations,
-such as modifying message headers or body, encrypting or signing
+GNU Anubis is able to perform a wide set of operations on messages,
+such as modifying headers or body, encrypting or signing 
 messages with GPG (GNU Privacy Guard) keys, installing secure tunnels
 to @acronym{MTA} using @acronym{TLS/SSL} encryption, tunneling messages through
 SOCKS proxies, etc.
@@ -165,11 +165,18 @@ When the set of built-in operations is not enough, the user can
 define his own operations using Guile, a @dfn{GNU's Ubiquitous
 Intelligent Language for Extensions}.
 
-The message processing is controlled by system-wide and per-user
+@cindex SMTP normalization
+Apart from configurable operations, GNU Anubis always performs
+@dfn{SMTP session normalization}, a process that ensures that the
+@acronym{SMTP} stream coming out of Anubis complies with the RFC
+2821, even if the incoming stream does not. In particular, Anubis
+removes any extra whitespace appearing between @samp{MAIL FROM:} or
+@samp{SMTP TO} command and its argument.
+
+Message processing is controlled by system-wide and per-user
 configuration files written in a flexible and easy to use
 command scripting language, specially designed for this
 purpose.
-
 
 @node Glossary, Authentication, Overview, Top
 @chapter Glossary of Frequently Used Terms
@@ -212,7 +219,7 @@ GNU's Ubiquitous Intelligent Language for Extensions. It provides a
 Scheme interpreter conforming to the R4RS language specification. GNU
 Anubis uses Guile as its extension language.
 For more information about Guile,
-@xref{Top,,Overview,guile,The Guile Reference Manual}.
+@ref{Top,,Overview,guile,The Guile Reference Manual}.
 
 @item GPG
 GNU Privacy Guard, a tool compatible with the Pretty Good Privacy.
@@ -245,7 +252,7 @@ Both modes have their advantages and deficiencies, which you
 have to weigh carefully before choosing which one to use. These
 are discussed below:
 
-@subheading Transparent (@samp{traditional}) mode.
+@heading Transparent (@samp{traditional}) mode.
 
 Deficiencies:
 @enumerate
@@ -263,7 +270,7 @@ Advantages:
 @item Authentication is performed immediately after the connection.
 @end enumerate
 
-@subheading Auth mode.
+@heading Auth mode.
 
 Deficiencies:
 @enumerate
@@ -292,11 +299,11 @@ Anubis runs.
 @node User Database
 @section User Database
 
-GNU Anubis uses @dfn{User Database} for keeping @dfn{user credentials},
-i.e. data used to authenticate and authorize users. The exact way of
-storing these data does not matter here, it will be addressed further
-in this manual. In this section we treat user database as an
-abstraction layer.
+@dfn{User Database} is a place where GNU Anubis uses keeps @dfn{user
+credentials}, i.e. data used to authenticate and authorize users. The
+exact way of storing these data does not matter here, it will be
+addressed further in this manual. In this section we treat user
+database as an abstraction layer.
 
 The user database consists of @dfn{records}. Each record keeps
 information about a particular @dfn{user}. A record consists
@@ -1082,6 +1089,22 @@ Sets the user database @acronym{URL} (@pxref{User Database}).
 @deffn Option sasl-allowed-mech @var{mech-list}
 @opindex sasl-allowed-mech @var{mech-list}
 Defines the list of allowed authentication methods.
+@end deffn
+
+@deffn Option sasl-service @var{name}
+Set SASL @dfn{service name}. It is used, among others, with GSSAPI
+authentication method. Default is @samp{anubis}.
+@end deffn
+
+@deffn Option sasl-hostname @var{name}
+Set SASL hostname. By default, the server determines it
+automatically. If, however, it makes a wrong guess, you can fix it
+using this directive.
+@end deffn
+
+@deffn Option sasl-realm @var{name}
+Set SASL realm. By default, the domain part of the current hostname is
+used as SASL realm.
 @end deffn
 
 @node CONTROL Section
