@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # This file is part of GNU Anubis.
-# Copyright (C) 2001, 2002, 2003, 2004, 2007 The Anubis Team.
+# Copyright (C) 2001, 2002, 2003, 2004, 2007, 2009 The Anubis Team.
 #
 # GNU Anubis is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the Free
@@ -21,23 +21,39 @@ cat <<EOF
 Summary: An SMTP message submission daemon.
 Name: anubis
 Version: $1
-Release: 1
+Release: 1%{?dist}
+License: GPLv3+
 URL: http://www.gnu.org/software/anubis/
 Source: ftp://ftp.gnu.org/gnu/anubis/%{name}-%{version}.tar.gz
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Group: System Environment/Daemons
-Copyright: GPL
-BuildRoot: %{_tmppath}/%{name}-%{version}
-BuildRequires: gnutls-devel
-Requires: gnutls pidentd
-Prereq: /sbin/chkconfig /sbin/install-info /usr/sbin/useradd /usr/sbin/userdel
+Requires: gnutls >= 1.0.18
+Requires: libgsasl >= 0.2.3
+Requires: gpgme >= 1.0.0
+Requires: guile >= 1.6
+Requires: gdbm
+Requires: pcre
+Requires: mysql-libs
+BuildRequires: gettext
+BuildRequires: gnutls-devel >= 1.0.18
+BuildRequires: libgsasl-devel >= 0.2.3
+BuildRequires: gpgme-devel >= 1.0.0
+BuildRequires: guile-devel >= 1.6
+BuildRequires: gdbm-devel
+BuildRequires: pcre-devel
+BuildRequires: mysql-devel
+BuildRequires: emacs
+
+Prereq: /sbin/chkconfig /usr/sbin/useradd /usr/sbin/userdel
 
 %description
-GNU Anubis is an SMTP message submission daemon. It represents an intermediate
-layer between mail user agent (MUA) and mail transport agent (MTA), receiving
-messages from the MUA, applying to them a set of predefined changes and finally
-inserting modified messages into an MTA routing network. The set of changes
-applied to a message is configurable on a system-wide and per-user basis. The
-built-in configuration language used for defining sets of changes allows for
+GNU Anubis is an SMTP message submission daemon. It represents an
+intermediate layer between mail user agent (MUA) and mail transport
+agent (MTA), receiving messages from the MUA, applying to them a set
+of predefined changes and finally inserting modified messages into an
+MTA routing network. The set of changes applied to a message is
+configurable on a system-wide and per-user basis. The built-in
+configuration language used for defining sets of changes allows for
 considerable flexibility and is easily extensible.
 
 %define _initdir /etc/init.d
@@ -47,28 +63,27 @@ considerable flexibility and is easily extensible.
 %setup -q
 
 %build
-CFLAGS="\$RPM_OPT_FLAGS" ./configure --prefix=/usr
+CFLAGS="\$RPM_OPT_FLAGS" ./configure --prefix=%{_prefix} \\
+			 --with-mysql --with-pcre
 make
 
+%check
+make check
+
 %install
-if [ -d \$RPM_BUILD_ROOT ]
-then
- rm -fr \$RPM_BUILD_ROOT
-fi
-make install prefix=\$RPM_BUILD_ROOT/usr mandir=\$RPM_BUILD_ROOT%{_mandir} \
-infodir=\$RPM_BUILD_ROOT%{_infodir}
+rm -rf \$RPM_BUILD_ROOT
+mkdir -p \$RPM_BUILD_ROOT
 mkdir -p \$RPM_BUILD_ROOT%{_initdir}
+make DESTDIR=\$RPM_BUILD_ROOT install
 install -m 0755 ./scripts/redhat.init \$RPM_BUILD_ROOT%{_initdir}/anubis
+%find_lang %{name}
 
 %clean
-rm -f ./src/anubis*
-rm -fr \$RPM_BUILD_ROOT
-make distclean
+rm -rf \$RPM_BUILD_ROOT
 
 %pre
 rm -f %{_infodir}/anubis.info*
 rm -f %{_mandir}/man1/anubis.1*
-rm -f /usr/man/man1/anubis.1*
 /usr/sbin/useradd -s /dev/null %{_unprivileged} >/dev/null 2>&1 || :
 
 %post
@@ -82,17 +97,23 @@ rm -f /usr/man/man1/anubis.1*
 %postun
 /usr/sbin/userdel -r %{_unprivileged} >/dev/null 2>&1 || :
 
-%files
-%defattr(-,root,root)
+%files -f %{name}.lang
+%defattr(-,root,root,-)
 %doc COPYING AUTHORS THANKS README INSTALL NEWS ChangeLog TODO
-%doc examples contrib
+%{_bindir}/anubisusr
+%{_bindir}/msg2smtp.pl
+%{_sbindir}/anubis
+%{_sbindir}/anubisadm
 %{_mandir}/man1/anubis.1*
-%attr(0644,root,root) %{_infodir}/anubis.info*
-%attr(0755,root,root) %{_sbindir}/anubis
+%{_infodir}/*
+%{_datadir}/anubis/*
+%{_datadir}/emacs/site-lisp/anubis*
 %attr(0755,root,root) %config %{_initdir}/anubis
-%attr(0644,root,root) /usr/share/locale/*/*/anubis.mo
 
 %changelog
+* Tue Feb 23 2009  Wojciech Polak
+- Major update.
+
 * Tue Dec 03 2002  Wojciech Polak
 - removed default system configuration file.
 
