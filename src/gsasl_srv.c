@@ -243,7 +243,11 @@ cb_validate (Gsasl *ctx, Gsasl_session *sctx)
     return GSASL_NO_PASSWORD;
 
   if (usr->smtp_authid == NULL
-      || strcmp (usr->smtp_authid, authentication_id)
+        && anubis_get_db_record (authid, usr) != ANUBIS_DB_SUCCESS)
+    return GSASL_AUTHENTICATION_ERROR;
+
+  if (usr->smtp_authid == NULL
+      || strcmp (usr->smtp_authid, authid)
       || strcmp (usr->smtp_passwd, pass))
     return GSASL_AUTHENTICATION_ERROR;
   return GSASL_OK;
