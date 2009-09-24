@@ -2,7 +2,7 @@
    guile.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2004, 2005, 2007, 2008 The Anubis Team.
+   Copyright (C) 2003, 2004, 2005, 2007, 2008, 2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -28,23 +28,49 @@ static void guile_ports_open (void);
 static void guile_ports_close (void);
 
 static SCM
-catch_body (void *data)
+eval_catch_body(void *list)
 {
-  scm_init_load_path ();
-  anubis (data);
-  return SCM_BOOL_F;
+  return scm_primitive_eval ((SCM)list);
 }
 
 static SCM
-catch_handler (void *data, SCM tag, SCM throw_args)
+eval_catch_handler (void *data, SCM tag, SCM throw_args)
 {
-  return scm_handle_by_message_noexit ("anubis", tag, throw_args);
+  scm_handle_by_message_noexit ("anubis", tag, throw_args);
+  longjmp(*(jmp_buf*)data, 1);
 }
 
-void
-anubis_boot (void *closure, int argc, char **argv)
+struct scheme_exec_data
 {
-  scm_internal_catch (SCM_BOOL_T, catch_body, closure, catch_handler, NULL);
+  SCM (*handler) (void *data);
+  void *data;
+  SCM result;
+};
+
+static SCM
+scheme_safe_exec_body (void *data)
+{
+  struct scheme_exec_data *ed = data;
+  ed->result = ed->handler (ed->data);
+  return SCM_BOOL_F;
+}
+
+static int
+guile_safe_exec (SCM (*handler) (void *data), void *data, SCM *result)
+{
+  jmp_buf jmp_env;
+  struct scheme_exec_data ed;
+	
+  if (setjmp(jmp_env))
+    return 1;
+  ed.handler = handler;
+  ed.data = data;
+  scm_internal_lazy_catch (SCM_BOOL_T,
+			   scheme_safe_exec_body, (void*)&ed,
+			   eval_catch_handler, &jmp_env);
+  if (result)
+    *result = ed.result;
+  return 0;
 }
 
 void
@@ -57,12 +83,20 @@ guile_debug (int val)
 }
 
 void
-guile_ports_open (void)
+init_guile ()
+{
+	scm_init_guile ();
+	scm_load_goops ();
+}
+
+
+void
+guile_ports_open ()
 {
   SCM port;
   int fd = -1;
   char *name = options.glogfile;
-
+  
   if (topt & (T_FOREGROUND_INIT | T_STDINOUT))
     return;
 
@@ -93,17 +127,20 @@ guile_ports_open (void)
 }
 
 void
-guile_ports_close (void)
+guile_ports_close ()
 {
-  if (topt & (T_FOREGROUND_INIT | T_STDINOUT))
-    return;
-  scm_close_output_port (scm_current_error_port ());
-  scm_close_output_port (scm_current_output_port ());
+  if (!(topt & (T_FOREGROUND_INIT | T_STDINOUT)))
+    {
+      scm_close_output_port (scm_current_error_port ());
+      scm_close_output_port (scm_current_output_port ());
+    }
 }
 
-void
-guile_load_path_append (ANUBIS_LIST *arglist, MESSAGE *msg)
+
+SCM
+guile_load_path_append_handler (void *data)
 {
+  ANUBIS_LIST *arglist = data;
   char *path = list_item (arglist, 0);
   SCM scm, path_scm, *pscm;
   path_scm = SCM_VARIABLE_REF (scm_c_lookup ("%load-path"));
@@ -116,7 +153,7 @@ guile_load_path_append (ANUBIS_LIST *arglist, MESSAGE *msg)
 	  int rc = strcmp (p, path);
 	  free (p);
 	  if (rc == 0)
-	    return;
+	    return SCM_UNSPECIFIED;
 	}
     }
 
@@ -124,22 +161,43 @@ guile_load_path_append (ANUBIS_LIST *arglist, MESSAGE *msg)
   *pscm = scm_append (scm_list_3 (path_scm,
 				  scm_list_1 (scm_makfrom0str (path)),
 				  SCM_EOL));
+  return SCM_UNSPECIFIED;
 }
 
 void
-guile_load_program (ANUBIS_LIST *arglist, MESSAGE *msg)
+guile_load_path_append (ANUBIS_LIST *arglist, MESSAGE *msg /* unused */)
 {
-  scm_primitive_load_path (scm_makfrom0str (list_item (arglist, 0)));
+  guile_safe_exec (guile_load_path_append_handler, arglist, NULL);
 }
+
+  
+struct load_closure
+{
+  char *filename;
+  int argc;
+  char **argv;
+};
 
 static SCM
-eval_catch_handler (void *data, SCM tag, SCM throw_args)
+load_path_handler (void *data)
 {
-  scm_handle_by_message_noexit ("anubis", tag, throw_args);
-  longjmp (*(jmp_buf *) data, 1);
+  struct load_closure *lp = data;
+    
+  scm_set_program_arguments (lp->argc, lp->argv, lp->filename);
+  scm_primitive_load_path (scm_makfrom0str (lp->filename));
+  return SCM_UNDEFINED;
 }
 
-
+void
+guile_load_program (ANUBIS_LIST *arglist, MESSAGE *msg /* unused */)
+{
+  struct load_closure clos;
+  clos.filename = list_item (arglist, 0);
+  clos.argc = 0;
+  clos.argv = NULL;
+  guile_safe_exec (load_path_handler, &clos, NULL);
+}
+
 static ANUBIS_LIST *
 guile_to_anubis (SCM cell)
 {
@@ -193,7 +251,7 @@ anubis_to_guile (ANUBIS_LIST * list)
 }
 
 static SCM
-list_to_args (ANUBIS_LIST * arglist)
+list_to_args (ANUBIS_LIST *arglist)
 {
   char *p;
   ITERATOR *itr;
@@ -241,24 +299,24 @@ list_to_args (ANUBIS_LIST * arglist)
   iterator_destroy (&itr);
   return head;
 }
-
+
 /* (define (postproc header-list body) */
 
-void
-guile_process_proc (ANUBIS_LIST *arglist, MESSAGE *msg)
+struct proc_handler_closure
 {
-  char *procname;
+  SCM procsym;
+  ANUBIS_LIST *arglist;
+  MESSAGE *msg;
+};
+  
+SCM
+guile_process_proc_handler (void *data)
+{
+  struct proc_handler_closure *clp = data;
+  ANUBIS_LIST *arglist = clp->arglist;
+  MESSAGE *msg = clp->msg;
   SCM arg_hdr, arg_body;
   SCM invlist, rest_arg;
-  SCM procsym;
-  SCM res;
-
-  procname = list_item (arglist, 0);
-  if (!procname)
-    {
-      anubis_error (0, 0, _("missing procedure name"));
-      return;
-    }
 
   /* Prepare the required arguments */
   arg_hdr = anubis_to_guile (msg->header);
@@ -266,6 +324,31 @@ guile_process_proc (ANUBIS_LIST *arglist, MESSAGE *msg)
 
   /* Prepare the optional arguments */
   rest_arg = list_to_args (arglist);
+
+  invlist = scm_append
+               (scm_list_2
+		(scm_list_3 (clp->procsym,
+			       scm_cons (SCM_IM_QUOTE, arg_hdr),
+			       arg_body),
+		   rest_arg));
+  
+  return scm_primitive_eval (invlist);
+}
+
+void
+guile_process_proc (ANUBIS_LIST *arglist, MESSAGE *msg)
+{
+  struct proc_handler_closure clos;
+  SCM procsym;
+  SCM res;
+  char *procname;
+  
+  procname = list_item (arglist, 0);
+  if (!procname)
+    {
+      anubis_error (0, 0, _("missing procedure name"));
+      return;
+    }
 
   /* Evaluate the procedure */
   procsym = SCM_VARIABLE_REF (scm_c_lookup (procname));
@@ -275,14 +358,12 @@ guile_process_proc (ANUBIS_LIST *arglist, MESSAGE *msg)
       return;
     }
 
-  invlist = scm_append
-               (scm_list_2
-		  (scm_list_3 (procsym,
-			       scm_cons (SCM_IM_QUOTE, arg_hdr),
-			       arg_body),
-		   rest_arg));
-  
-  res = scm_primitive_eval (invlist);
+  clos.procsym = procsym;
+  clos.arglist = arglist;
+  clos.msg = msg;
+  if (guile_safe_exec (guile_process_proc_handler, &clos, &res))
+    return;
+
 
   if (SCM_IMP (res) && SCM_BOOLP (res))
     {
@@ -329,6 +410,7 @@ guile_process_proc (ANUBIS_LIST *arglist, MESSAGE *msg)
     anubis_error (0, 0, _("Bad return type from %s"), procname);
 }
 
+
 /* RC file stuff */
 
 #define KW_GUILE_OUTPUT           0
@@ -368,7 +450,9 @@ static SCM
 inner_catch_body (void *data)
 {
   struct inner_closure *closure = data;
+  guile_ports_open ();
   closure->fun (closure->arglist, closure->msg);
+  guile_ports_close ();
   return SCM_BOOL_F;
 }
 
@@ -416,7 +500,6 @@ guile_parser (int method, int key, ANUBIS_LIST * arglist,
       return RC_KW_UNKNOWN;
     }
 
-  guile_ports_open ();
   if (setjmp (jmp_env) == 0)
     scm_internal_lazy_catch (SCM_BOOL_T,
 			     inner_catch_body,
@@ -424,8 +507,6 @@ guile_parser (int method, int key, ANUBIS_LIST * arglist,
 			     eval_catch_handler, &jmp_env);
   else
     rc = RC_KW_ERROR;
-
-  guile_ports_close ();
 
   return rc;
 }

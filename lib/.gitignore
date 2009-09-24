@@ -30,6 +30,8 @@ realloc.c
 setenv.c
 stdbool.h
 stdbool.in.h
+stddef.h
+stddef.in.h
 stdint.h
 stdint.in.h
 stdio-impl.h

@@ -37,17 +37,6 @@ char *anubis_domain;      /* Local domain for EHLO in authentication mode */
 char *incoming_mail_rule; /* Name of section for incoming mail processing */
 char *outgoing_mail_rule; /* Name of section for outgoing mail processing */
 
-#ifdef WITH_GUILE
-void
-anubis_core (void)
-{
-  char *argv[] = { "anubis", NULL };
-  scm_boot_guile (1, argv, anubis_boot, NULL);
-}
-#else
-# define anubis_core() anubis(NULL)
-#endif /* WITH_GUILE */
-
 void
 xalloc_die ()
 {
@@ -161,17 +150,14 @@ main (int argc, char *argv[])
   init_ssl_libs ();
 #endif /* USE_SSL */
 
+#ifdef WITH_GUILE
+  init_guile ();
+#endif
+  
   /*
      Enter the main core...
    */
 
-  anubis_core ();
-  return 0;
-}
-
-void
-anubis (char *arg)
-{
   if (anubis_mode == anubis_mda)  /* Mail Delivery Agent */
     mda ();
   else if (topt & T_STDINOUT)     /* stdin/stdout */
@@ -186,6 +172,8 @@ anubis (char *arg)
 	daemonize ();
       loop (sd_bind);
     }
+  return 0;
 }
+
 
 /* EOF */

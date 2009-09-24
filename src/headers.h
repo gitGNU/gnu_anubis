@@ -481,7 +481,7 @@ void gpg_section_init (void);
 
 /* guile.c */
 #ifdef WITH_GUILE
-void anubis_boot (void *, int, char **);
+void init_guile (void);
 void guile_debug (int);
 void guile_section_init (void);
 #endif /* WITH_GUILE */
