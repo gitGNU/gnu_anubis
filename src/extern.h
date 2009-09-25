@@ -111,6 +111,9 @@ extern char **x_argv;
 extern char *incoming_mail_rule;
 extern char *outgoing_mail_rule;
 
+extern char *log_tag;
+extern int log_facility;
+
 extern char *from_address;
 
 extern char *anubis_sasl_service;

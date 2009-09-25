@@ -166,6 +166,7 @@ main (int argc, char *argv[])
     {				  /* daemon */
       int sd_bind;
       sd_bind = bind_and_listen (session.anubis, session.anubis_port);
+      
       if (topt & T_FOREGROUND_INIT)
 	topt |= T_FOREGROUND;
       else

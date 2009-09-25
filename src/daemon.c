@@ -2,7 +2,7 @@
    daemon.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -27,6 +27,9 @@
 int deny_severity = LOG_INFO;
 int allow_severity = LOG_INFO;
 #endif /* USE_LIBWRAP */
+
+char *log_tag = "anubis";
+int log_facility = LOG_MAIL;
 
 /************
   DAEMONIZE
@@ -63,10 +66,8 @@ daemonize (void)
   topt &= ~T_FOREGROUND;
   topt |= T_DAEMON;
 
-#ifdef HAVE_SYSLOG
-  openlog ("anubis", LOG_PID, 0);
+  openlog (log_tag, LOG_PID, log_facility);
   info (NORMAL, _("%s daemon startup succeeded."), version);
-#endif /* HAVE_SYSLOG */
   write_pid_file ();
   return;
 }

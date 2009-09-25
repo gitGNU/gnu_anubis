@@ -49,17 +49,14 @@ info (int mode, const char *fmt, ...)
   vsnprintf (msg, LINEBUFFER, fmt, arglist);
   va_end (arglist);
 
-#ifdef HAVE_SYSLOG
   if ((topt & T_DAEMON) && !(topt & T_FOREGROUND))
     {
       if (!(topt & T_DISABLE_SYSLOG))
-	syslog (LOG_INFO | LOG_MAIL, "%s", msg);
+	syslog (LOG_INFO, "%s", msg);
       if (options.ulogfile && options.uloglevel >= ALL)
 	filelog (options.ulogfile, msg);
     }
-  else
-#endif /* HAVE_SYSLOG */
-  if (topt & T_FOREGROUND)
+  else if (topt & T_FOREGROUND)
     mprintf ("> [%d] %s", (int) getpid (), msg);
   else
     mprintf ("> %s", msg);
@@ -108,12 +105,9 @@ tracefile (RC_LOC * loc, const char *fmt, ...)
 
   if ((topt & T_TRACEFILE_SYS) && options.termlevel != SILENT)
     {
-#ifdef HAVE_SYSLOG
       if ((topt & T_DAEMON) && !(topt & T_FOREGROUND))
-	syslog (LOG_INFO | LOG_MAIL, "%s", msg);
-      else
-#endif /* HAVE_SYSLOG */
-      if (topt & T_FOREGROUND)
+	syslog (LOG_INFO, "%s", msg);
+      else if (topt & T_FOREGROUND)
 	mprintf ("> [%d] %s", (int) getpid (), msg);
       else
 	mprintf ("> %s", msg);

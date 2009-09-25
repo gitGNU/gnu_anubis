@@ -28,12 +28,6 @@ static void guile_ports_open (void);
 static void guile_ports_close (void);
 
 static SCM
-eval_catch_body(void *list)
-{
-  return scm_primitive_eval ((SCM)list);
-}
-
-static SCM
 eval_catch_handler (void *data, SCM tag, SCM throw_args)
 {
   scm_handle_by_message_noexit ("anubis", tag, throw_args);
@@ -87,16 +81,18 @@ init_guile ()
 {
 	scm_init_guile ();
 	scm_load_goops ();
+	guile_init_anubis_info_port ();
+	guile_init_anubis_error_port ();
 }
 
 
 void
 guile_ports_open ()
 {
-  SCM port;
+  SCM port = SCM_UNSPECIFIED;
   int fd = -1;
   char *name = options.glogfile;
-  
+
   if (topt & (T_FOREGROUND_INIT | T_STDINOUT))
     return;
 
@@ -109,20 +105,20 @@ guile_ports_open ()
 			_("cannot open guile output file %s"),
 			options.glogfile);
 	}
-    }
-  else
-    name = "/dev/null";
 
-  if (fd == -1)
-    {
-      name = "/dev/null";
-      fd = open (name, O_WRONLY|O_APPEND);
+      if (fd >= 0)
+	{
+	  port = scm_fdes_to_port (fd, "a", scm_makfrom0str (name));
+	  guile_ports_close ();
+	  scm_set_current_error_port (port);
+	  scm_set_current_output_port (port);
+	  scm_close_input_port (scm_current_input_port ());
+	  return;
+	}
     }
-  
-  port = scm_fdes_to_port (fd, "a", scm_makfrom0str (name));
-  guile_ports_close ();
-  scm_set_current_error_port (port);
-  scm_set_current_output_port (port);
+
+  scm_set_current_error_port (guile_make_anubis_error_port (1));
+  scm_set_current_output_port (guile_make_anubis_info_port ());
   scm_close_input_port (scm_current_input_port ());
 }
 

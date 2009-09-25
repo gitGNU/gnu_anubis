@@ -2,7 +2,8 @@
    headers.h
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008,
+   2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -96,6 +97,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <syslog.h>
 
 #if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
 # include <sys/resource.h>
@@ -103,9 +105,6 @@
 #ifdef HAVE_ARPA_INET_H
 # include <arpa/inet.h>
 #endif /* HAVE_ARPA_INET_H */
-#if defined(HAVE_SYSLOG) && defined(HAVE_SYSLOG_H)
-# include <syslog.h>
-#endif /* HAVE_SYSLOG and HAVE_SYSLOG_H */
 
 #if defined(USE_GNUTLS) && defined(HAVE_GNUTLS)
 # include <gnutls/gnutls.h>
@@ -145,6 +144,7 @@
 
 #include "xalloc.h"
 #include <argcv.h>
+#include <keyword.h>
 #include "list.h"
 
 #include <sysexits.h>
@@ -484,6 +484,10 @@ void gpg_section_init (void);
 void init_guile (void);
 void guile_debug (int);
 void guile_section_init (void);
+void guile_init_anubis_error_port (void);
+SCM guile_make_anubis_error_port (int err);
+void guile_init_anubis_info_port (void);
+SCM guile_make_anubis_info_port (void);
 #endif /* WITH_GUILE */
 
 /* url.c */

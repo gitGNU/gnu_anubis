@@ -19,7 +19,7 @@
 ##
 
 include gnulib.mk
-EXTRA_DIST += argcv.c argcv.h lbuf.c lbuf.h  
+EXTRA_DIST += argcv.c argcv.h lbuf.c lbuf.h keyword.c keyword.h
 
-libanubis_a_SOURCES += argcv.c argcv.h lbuf.c lbuf.h 
+libanubis_a_SOURCES += argcv.c argcv.h lbuf.c lbuf.h keyword.c keyword.h
 

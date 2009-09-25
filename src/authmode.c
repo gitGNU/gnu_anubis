@@ -68,12 +68,7 @@ enum asmtp_state
 static int
 asmtp_kw (const char *name)
 {
-  static struct kw
-  {
-    char *name;
-    int code;
-  }
-  kw[] = {
+  static struct anubis_keyword kw[] = {
     { "helo", KW_HELO },
     { "ehlo", KW_EHLO },
     { "xelo", KW_XELO },
@@ -86,14 +81,9 @@ asmtp_kw (const char *name)
     { "xdatabase", KW_XDATABASE },
     { NULL },
   };
-  int i;
-
-  if (name)
-    {
-      for (i = 0; kw[i].name != NULL; i++)
-	if (strcasecmp (name, kw[i].name) == 0)
-	  return kw[i].code;
-    }
+  struct anubis_keyword *kwp = anubis_keyword_lookup_ci (kw, name);
+  if (kwp)
+    return kwp->tok;
   return -1;
 }
 

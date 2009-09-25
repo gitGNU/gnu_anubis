@@ -2,7 +2,7 @@ dnl
 dnl configure.ac
 dnl
 dnl This file is part of GNU Anubis.
-dnl Copyright (C) 2001,2002,2003,2004,2005,2006,2007,2008 The Anubis Team.
+dnl Copyright (C) 2001,2002,2003,2004,2005,2006,2007,2008,2009 The Anubis Team.
 dnl
 dnl GNU Anubis is free software; you can redistribute it and/or modify it
 dnl under the terms of the GNU General Public License as published by the
@@ -19,7 +19,7 @@ dnl with GNU Anubis.  If not, see <http://www.gnu.org/licenses/>.
 dnl
 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT([GNU Anubis], [4.1.1], [bug-anubis@gnu.org])
+AC_INIT([GNU Anubis], [4.1.90], [bug-anubis@gnu.org])
 AC_PREREQ([2.59])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([build])
@@ -43,7 +43,7 @@ AC_TYPE_SIZE_T
 AC_TYPE_PID_T
 AC_TYPE_SIGNAL
 AC_CHECK_TYPE(u_char, unsigned char)
-AC_CHECK_HEADERS(arpa/inet.h syslog.h regex.h \
+AC_CHECK_HEADERS(arpa/inet.h regex.h \
  sys/types.h sys/socket.h socket.h sysexits.h locale.h)
 
 AC_CHECK_TYPE(socklen_t, , AC_DEFINE(socklen_t, int,
@@ -63,7 +63,7 @@ AC_CHECK_TYPE(socklen_t, , AC_DEFINE(socklen_t, int,
 dnl Checks for library functions.
 gl_INIT
 
-AC_CHECK_FUNCS(syslog getrlimit setrlimit socketpair strdup)
+AC_CHECK_FUNCS(getrlimit setrlimit socketpair strdup)
 AC_CHECK_FUNCS(setegid setregid setresgid seteuid setreuid)
 AC_CHECK_FUNCS(regcomp daemon putenv)
 

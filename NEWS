@@ -1,8 +1,18 @@
-GNU Anubis NEWS -- history of user-visible changes. 2008-12-20
-Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008 The Anubis Team.
+GNU Anubis NEWS -- history of user-visible changes. 2009-09-25
+Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009 The Anubis Team.
 
 See the end of file for copying conditions.
 Please send your bug reports to <bug-anubis@gnu.org>.
+
+
+* Version 4.1.90 (Git)
+
+* New keywords: log-facility and log-tag
+
+* Guile output
+
+By default Scheme's standard error and output ports are redirected to
+syslog, using priorities `err' and `warning' correspondingly.
 
 
 * Version 4.1.1, 2008-12-20

@@ -22,7 +22,8 @@
 #include "extern.h"
 
 void
-anubis_verror (int error_code, const char *pfx, const char *fmt, va_list ap)
+anubis_verror_log (int prio, int error_code, const char *pfx,
+		   const char *fmt, va_list ap)
 {
   if (options.termlevel != SILENT)
     {
@@ -45,20 +46,23 @@ anubis_verror (int error_code, const char *pfx, const char *fmt, va_list ap)
       if (error_code && (n >= 0 && n < sizeof msg))
 	snprintf (msg + n, size - n, ": %s", strerror (error_code));
 	  
-#ifdef HAVE_SYSLOG
       if ((topt & T_DAEMON) && !(topt & T_FOREGROUND))
 	{
-	  syslog (LOG_ERR | LOG_MAIL, "%s", msg);
+	  syslog (prio, "%s", msg);
 	  if (options.ulogfile && options.uloglevel >= FAILS)
 	    filelog (options.ulogfile, msg);
 	}
-      else
-#endif /* HAVE_SYSLOG */
-      if (topt & T_FOREGROUND)
+      else if (topt & T_FOREGROUND)
 	mprintf ("[%lu] %s", (unsigned long) getpid (), msg);
       else
 	mprintf ("%s", msg);
     }
+}
+
+void
+anubis_verror (int error_code, const char *pfx, const char *fmt, va_list ap)
+{
+  return anubis_verror_log (LOG_ERR, error_code, pfx, fmt, ap);
 }
 
 void
@@ -67,7 +71,7 @@ anubis_error (int exit_code, int error_code, const char *fmt, ...)
   va_list ap;
   
   va_start (ap, fmt);
-  anubis_verror (error_code, NULL, fmt, ap);
+  anubis_verror_log (LOG_ERR, error_code, NULL, fmt, ap);
   va_end (ap);
   if (exit_code == EXIT_ABORT)
     abort ();
@@ -81,7 +85,7 @@ anubis_warning (int error_code, const char *fmt, ...)
   va_list ap;
   
   va_start (ap, fmt);
-  anubis_verror (error_code, _("warning"), fmt, ap);
+  anubis_verror_log (LOG_WARNING, error_code, _("warning"), fmt, ap);
   va_end (ap);
 }
 

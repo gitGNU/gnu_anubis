@@ -57,10 +57,8 @@ free_mem (void)
 void
 quit (int code)
 {
-#ifdef HAVE_SYSLOG
   if ((topt & T_DAEMON) && !(topt & T_FOREGROUND))
     closelog ();
-#endif /* HAVE_SYSLOG */
   free_mem ();
   exit (code);
 }

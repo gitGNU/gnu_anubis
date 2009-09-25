@@ -1069,25 +1069,21 @@ messages (conditional and unconditional rules).
 @code{AUTH} session controls various aspects of authentication mode.
 
 @deffn Option smtp-greeting-message @var{text}
-@opindex smtp-greeting-message @var{text}
 Configures the greeting message issued by GNU Anubis upon accepting
 the connection.
 @end deffn
 
 @deffn Option smtp-help-message @var{help-text}
-@opindex smtp-help-message @var{help-text}
 Sets the test of the message issued by Anubis in response to @acronym{SMTP}
 @code{HELP} command. @var{Help-text} is a list of strings. Each string
 from the list will be displayed at a separate response line.
 @end deffn
 
 @deffn Option sasl-password-db @var{url}
-@opindex sasl-password-db @var{url}
 Sets the user database @acronym{URL} (@pxref{User Database}).
 @end deffn
 
 @deffn Option sasl-allowed-mech @var{mech-list}
-@opindex sasl-allowed-mech @var{mech-list}
 Defines the list of allowed authentication methods.
 @end deffn
 
@@ -1103,8 +1099,8 @@ using this directive.
 @end deffn
 
 @deffn Option sasl-realm @var{name}
-Set SASL realm. By default, the domain part of the current hostname is
-used as SASL realm.
+Set SASL realm. By default, the local domain is used as SASL realm
+(@pxref{Basic Settings, local-domain}).
 @end deffn
 
 @node CONTROL Section
@@ -1138,7 +1134,6 @@ for instance: @code{bind} or @code{BIND} or @code{BiNd}, and so on.
 @UNREVISED{}
 
 @deffn Option bind [@var{host}:]@var{port}
-@opindex bind [@var{host}:]@var{port}
 Specify the @acronym{TCP} port on which GNU Anubis listens for connections.
 The default @var{host} value is @w{@samp{INADDR_ANY}}, which means
 that anyone can connect to GNU Anubis. The default @var{port} number
@@ -1154,14 +1149,12 @@ bind localhost:25
 @end deffn
 
 @deffn Option remote-mta @var{host}[:@var{port}]
-@opindex remote-mta @var{host}[:@var{port}]
 Specify a remote @acronym{SMTP} host name or @acronym{IP} address, which GNU Anubis will
 connect and forward mail to (after processing). The default @var{port}
 number is 25. This option is available in both configuration files.
 @end deffn
 
 @deffn Option local-mta @var{file-name} [@var{args}]
-@opindex local-mta @var{file-name} [@var{args}]
 Execute a local @acronym{SMTP} server, which works on standard input and output
 (inetd-type program). This option excludes the @samp{remote-mta} keyword
 (or @samp{--remote-mta} command line option). For example:
@@ -1172,8 +1165,6 @@ local-mta /usr/sbin/sendmail -bs
 @end deffn
 
 @deffn Option mode @var{mode-name}
-@opindex mode @var{mode-name}
-
 Selects Anubis operation mode. Allowed values for @var{mode-name}
 are:
 
@@ -1187,7 +1178,6 @@ operation modes.
 @end deffn
 
 @deffn Option read-entire-body @var{yes-or-no}
-@opindex read-entire-body @var{yes-or-no}
 When processing a multi-part message using an external
 filter (@pxref{External Processor}) Anubis normally feeds
 to it only the first part. The rest of the message is copied
@@ -1197,8 +1187,6 @@ in your control  section.
 @end deffn
 
 @deffn Option incoming-mail-rule @var{string} 
-@opindex incoming-mail-rule @var{string} 
-
 Declares name of processing sections for incoming mail. Default is
 @samp{INCOMING}. This option is available only for system
 configuration file. @xref{MDA Mode}, for detailed description of
@@ -1207,18 +1195,35 @@ incoming mail processing.
 @end deffn
 
 @deffn Option outgoing-mail-rule @var{string}
-@opindex outgoing-mail-rule @var{string}
-
 Declares name of processing sections for outgoing mail. Default is
 @samp{RULE}. This option is available only for system
 configuration file.
+@end deffn
+
+@deffn Option log-tag @var{string}
+Tag syslog messages with @var{string}. Default is @samp{anubis}.
+@end deffn
+
+@deffn Option log-facility @var{string}
+Use syslog facility @var{string} for logging. Valid argument values
+are: @samp{user}, @samp{daemon}, @samp{auth}, @samp{authpriv},
+@samp{mail}, @samp{cron}, @samp{local0} through @samp{local7} (all
+names case-insensitive, optionally prefixed by @samp{log_}), or a
+facility number.  Default is @samp{mail}.
+@end deffn
+
+@deffn Option local-domain @var{string}
+Set local domain name.  By default, the domain name is defined as the
+the part of the local host name following the first dot.
+
+Local domain name is used as @acronym{SASL} realm, if not overridden
+by @samp{sasl-realm} statement (@pxref{AUTH Section, sasl-realm}).
 @end deffn
 
 @node Output and Debugging Settings
 @subsection Output Settings
 
 @deffn Option termlevel @var{level}
-@opindex termlevel @var{level}
 This is a logging level for @code{syslogd} or a terminal (if using the
 @samp{--foreground} command line option).  @var{level} can be one
 of the following:
@@ -1242,7 +1247,6 @@ This command may be used only in system configuration file.
 @end deffn
 
 @deffn Option logfile @var{file-name}
-@opindex logfile @var{file-name}
 This command specifies an additional file, where GNU Anubis can log its
 information, but only those information available for a client. Only in
 user configuration file. For example:
@@ -1255,7 +1259,6 @@ This will log to the @file{~/anubis.log} file in a client's home directory.
 @end deffn
 
 @deffn Option loglevel @var{level}
-@opindex loglevel @var{level}
 This option specifies an output level for an additional file
 (@samp{logfile}). It can be used only in user configuration file.
 @var{level} is one of the following:
@@ -1269,8 +1272,6 @@ This option specifies an output level for an additional file
 
 @deffn Option tracefile @var{yes-or-no}
 @deffnx Option tracefile @var{file-name}
-@opindex tracefile @var{yes-or-no}
-@opindex tracefile @var{file-name}
 This option instructs @command{anubis} to log the execution of
 tests and actions from the RULE sections. This is useful
 for debugging the configuration files.
@@ -1288,7 +1289,6 @@ as @samp{logfile} (if possible).
 @end deffn
 
 @deffn Option HANG @var{delay}
-@opindex HANG @var{delay}
 @emph{Do not use this option, unless you are developing or debugging Anubis!} 
 This option instructs a child process to hang for the given number
 of seconds. Before hanging, the process will issue the following
@@ -1315,20 +1315,17 @@ set variable _anubis_hang=0
 @cindex SOCKS proxy
 
 @deffn Option socks-proxy @var{host}[:@var{port}]
-@opindex socks-proxy @var{host}[:@var{port}]
 This option enables tunneling the connections through a SOCKS proxy server,
 specified as an argument @var{host}. The @var{port} default value is
 1080, which is a common port number for SOCKS proxies.
 @end deffn
 
 @deffn Option socks-v4 @var{yes-or-no}
-@opindex socks-v4 @var{yes-or-no}
 This specifies a SOCKS protocol version 4. By default it is turned off,
 and a default mode is SOCKS protocol version 5.
 @end deffn
 
 @deffn Option socks-auth @var{username}:@var{password}
-@opindex socks-auth @var{username}:@var{password}
 Specify a user name and a password, if a SOCKS proxy server requires them.
 A @var{username} and a @var{password} are separated with a colon (@samp{:}).
 @end deffn
@@ -1342,7 +1339,6 @@ authentication. You may use this option, for example, if your @acronym{MTA}
 requires such an authentication, but your @acronym{MUA} does not support it.
 
 @deffn Option esmtp-allowed-mech @var{mech-list}
-@opindex esmtp-allowed-mech @var{mech-list}
 Defines the list of allowed authentication mechanisms. @var{Mech-list}
 is a list of valid authentication mechanism names separated by
 whitespace.
@@ -1371,7 +1367,6 @@ In this case Anubis will select CRAM-MD5.
 @end deffn
 
 @deffn Option esmtp-require-encryption @var{mech-list}
-@opindex esmtp-require-encryption @var{mech-list}
 This statement declares the list of mechanisms that can be used only over
 a TLS encrypted channel. By default Anubis uses
 
@@ -1385,22 +1380,18 @@ This prevents sending user password over an unencrypted connection.
 @end deffn
 
 @deffn Option esmtp-auth-id @var{authentication-id}
-@opindex esmtp-auth-id @var{authentication-id}
 Sets authentication @acronym{ID} (user name).
 @end deffn
 
 @deffn Option esmtp-authz-id @var{authorization-id}
-@opindex esmtp-authz-id @var{authorization-id}
 Sets authorization @acronym{ID} (user name).
 @end deffn
 
 @deffn Option esmtp-password @var{password}
-@opindex esmtp-password @var{password}
 Sets password to be used in authentication.
 @end deffn
 
 @deffn Option esmtp-auth @var{username}:@var{password}
-@opindex esmtp-auth @var{username}:@var{password}
 This option sets both authentication and authorization @acronym{ID}s and the
 password. It is equivalent to
 
@@ -1416,34 +1407,28 @@ The following options specify authentication credentials for GSSAPI,
 DIGEST-MD5 and KERBEROS_V5 authentication mechanisms:
 
 @deffn Option esmtp-service @var{service-name}
-@opindex esmtp-service @var{service-name}
 Sets the name of GSSAPI service.
 @end deffn
 
 @deffn Option esmtp-hostname @var{hostname}
-@opindex esmtp-hostname @var{hostname}
 Sets hostname of the machine.
 @end deffn
 
 @deffn Option esmtp-generic-service @var{servise-name}
-@opindex esmtp-generic-service @var{servise-name}
 Sets generic service name.
 @end deffn
 
 @deffn Option esmtp-passcode @var{passcode}
-@opindex esmtp-passcode @var{passcode}
 Sets passcode.
 @end deffn
 
 @deffn Option esmtp-realm @var{realm-name}
-@opindex esmtp-realm @var{realm-name}
 Sets GSSAPI realm.
 @end deffn
 
 Following option is useful with ANONYMOUS authentication mechanism:
 
 @deffn Option esmtp-anonymous-token @var{token}
-@opindex esmtp-anonymous-token @var{token}
 Sets the token to be used with ANONYMOUS authentication mechanism
 @end deffn
 
@@ -1451,7 +1436,6 @@ Sets the token to be used with ANONYMOUS authentication mechanism
 @subsection Encryption Settings
 
 @deffn Option ssl @var{yes-or-no}
-@opindex ssl @var{yes-or-no}
 This option enables the @acronym{TLS/SSL} encryption between the @acronym{MUA} and the @acronym{MTA}.
 Value @samp{no} is the default, but using the @acronym{TLS/SSL} encryption
 is recommended. You should also specify a private key and a certificate
@@ -1460,7 +1444,6 @@ using the @samp{ssl-key} and @samp{ssl-cert} keywords (defined below).
 @end deffn
 
 @deffn Option ssl-oneway @var{yes-or-no}
-@opindex ssl-oneway @var{yes-or-no}
 This option enables the @dfn{ONEWAY} encryption. Use this mode,
 when you want to use the @acronym{TLS/SSL}, but your @acronym{MUA} doesn't provide
 a support for @acronym{ESMTP} @acronym{TLS/SSL}. Using this option doesn't require
@@ -1468,19 +1451,16 @@ using the @samp{ssl-key} and @samp{ssl-cert} keywords.
 @end deffn
 
 @deffn Option ssl-cert @var{file-name}
-@opindex ssl-cert @var{file-name}
 Specify a certificate for the @acronym{TLS/SSL} encryption.
 Value @file{anubis.pem} is the default.
 @end deffn
 
 @deffn Option ssl-key @var{file-name}
-@opindex ssl-key @var{file-name}
 Specify a private key for the @acronym{TLS/SSL} encryption.
 Value @file{anubis.pem} is the default.
 @end deffn
 
 @deffn Option ssl-cafile @var{file-name}
-@opindex ssl-cafile @var{file-name}
 Specify a CA certificate file (supported only by GnuTLS).
 @end deffn
 
@@ -1491,7 +1471,6 @@ Specify a CA certificate file (supported only by GnuTLS).
 The following options control various security settings. 
 
 @deffn Option allow-local-mta @var{yes-or-no}
-@opindex allow-local-mta @var{yes-or-no}
 For security reasons, this option is set to @samp{no}, but the @samp{yes}
 value enables the @samp{local-mta} keyword (or @samp{--local-mta}
 command line option), so if you want to use a local mail server,
@@ -1501,13 +1480,11 @@ configuration file.
 @end deffn
 
 @deffn Option drop-unknown-user @var{yes-or-no}
-@opindex drop-unknown-user @var{yes-or-no}
 This option drops an unknown user, i.e. a client which has not
 been verified by @acronym{IDENT} service. Value @samp{no} is the default.
 @end deffn
 
 @deffn Option user-notprivileged @var{username}
-@opindex user-notprivileged @var{username}
 For security reasons, it is recommended to create an unprivileged user,
 which the server runs as most of the time, when doing unprivileged
 operations. The option is available only in system
@@ -1523,8 +1500,6 @@ in the @file{/etc/passwd}, if necessary. Add this user name also to the
 @end deffn
 
 @deffn Option rule-priority @var{value}
-@opindex rule-priority @var{value}
-
 This statement defines the order of execution of the system and user
 @code{RULE} sections (@xref{Rule System}, for detailed description).
 It is available only in system configuration file.
@@ -1545,8 +1520,6 @@ Only the user @code{RULE} section is executed.
 @end deffn
 
 @deffn Option control-priority @var{value}
-@opindex control-priority @var{value}
-
 Sets the order of processing the @code{CONTROL} sections. The option is
 available only in system configuration file. Its possible values are:
 
@@ -1610,7 +1583,13 @@ the local john's configuration file.
 
 @deffn Command guile-output @var{file}
 Specifies the name of the file to bind to the Scheme standard error
-and output ports. This option has no effect if GNU Anubis is started
+and output ports.
+
+By default both ports are redirected to syslog. Standart error port
+uses the @samp{err} priority, standard output port writes to the
+@samp{warning} priority.
+
+This option has no effect if GNU Anubis is started
 with either of @option{--foreground} or @option{--stdio} command line
 options. 
 @end deffn

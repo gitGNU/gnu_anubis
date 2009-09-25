@@ -256,6 +256,8 @@ process_rcfile (int method)
 #define KW_OUTGOING_MAIL_RULE       31
 #define KW_HANG                     32
 #define KW_ALLOW_HANG               33
+#define KW_LOG_FACILITY             34
+#define KW_LOG_TAG                  35
 
 char **
 list_to_argv (ANUBIS_LIST * list)
@@ -274,6 +276,47 @@ list_to_argv (ANUBIS_LIST * list)
   return argv;
 }
 
+#ifndef LOG_AUTHPRIV
+# define LOG_AUTHPRIV LOG_AUTH
+#endif
+
+static void
+parse_log_facility (const char *arg)
+{
+  unsigned long n;
+  char *endp;
+  struct anubis_keyword kw[] = {
+    { "USER",    LOG_USER },   
+    { "DAEMON",  LOG_DAEMON },
+    { "AUTH",    LOG_AUTH },
+    { "AUTHPRIV",LOG_AUTHPRIV },
+    { "MAIL",    LOG_MAIL },
+    { "CRON",    LOG_CRON },
+    { "LOCAL0",  LOG_LOCAL0 },
+    { "LOCAL1",  LOG_LOCAL1 },
+    { "LOCAL2",  LOG_LOCAL2 },
+    { "LOCAL3",  LOG_LOCAL3 },
+    { "LOCAL4",  LOG_LOCAL4 },
+    { "LOCAL5",  LOG_LOCAL5 },
+    { "LOCAL6",  LOG_LOCAL6 },
+    { "LOCAL7",  LOG_LOCAL7 },
+    { NULL }
+  };
+  struct anubis_keyword *p;
+  
+  if (strlen (arg) > 4 && strncasecmp (arg, "LOG_", 4) == 0)
+    arg += 4;
+  p = anubis_keyword_lookup_ci (kw, arg);
+  if (p)
+    log_facility = p->tok;
+  else if (((n = strtoul (kw, &endp, 0)), *endp == 0)
+	   && (log_facility = n) == n)
+    /* nothing */;
+  else
+    anubis_warning (0,
+		    _("%s: invalid syslog facility"), arg);
+}
+  
 /* When HANG=NUMBER is set in CONTROL section, `_anubis_hang' is set and
    Anubis will sleep for one second intervals, decrementing `_anubis_hang'
    until it's zero.  Thus you can force the program to continue by attaching
@@ -543,6 +586,14 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
     outgoing_mail_rule = strdup (arg);
     break;
 
+  case KW_LOG_FACILITY:
+    parse_log_facility (arg);
+    break;
+    
+  case KW_LOG_TAG:
+    log_tag = strdup (arg);
+    break;
+    
   case KW_ALLOW_HANG:
     {
       char *p;
@@ -588,6 +639,8 @@ static struct rc_kwdef init_kw[] = {
   { "mode",         KW_MODE },
   { "incoming-mail-rule", KW_INCOMING_MAIL_RULE },
   { "outgoing-mail-rule", KW_OUTGOING_MAIL_RULE },
+  { "log-facility", KW_LOG_FACILITY },
+  { "log-tag", KW_LOG_TAG },
   { "ALLOW-HANG",   KW_ALLOW_HANG },
   { NULL },
 };
