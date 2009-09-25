@@ -47,11 +47,6 @@
 #   define HAVE_PCRE
 #  endif /* HAVE_PCRE_H or HAVE_PCRE_PCRE_H */
 # endif	/* HAVE_LIBPCRE */
-# if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
-#  define HAVE_REGEX
-# else
-#  error POSIX Regular Expressions are required!
-# endif	/* HAVE_REGEX_H and HAVE_REGCOMP */
 # if defined(HAVE_LIBPAM) && defined(HAVE_LIBPAM_MISC)
 #  if defined(HAVE_SECURITY_PAM_APPL_H) && defined(HAVE_SECURITY_PAM_MISC_H)
 #   define HAVE_PAM

@@ -43,8 +43,7 @@ AC_TYPE_SIZE_T
 AC_TYPE_PID_T
 AC_TYPE_SIGNAL
 AC_CHECK_TYPE(u_char, unsigned char)
-AC_CHECK_HEADERS(arpa/inet.h regex.h \
- sys/types.h sys/socket.h socket.h sysexits.h locale.h)
+AC_CHECK_HEADERS(arpa/inet.h sys/types.h sys/socket.h socket.h locale.h)
 
 AC_CHECK_TYPE(socklen_t, , AC_DEFINE(socklen_t, int,
 [Define to int if <sys/types.h> does not define]),
@@ -63,9 +62,9 @@ AC_CHECK_TYPE(socklen_t, , AC_DEFINE(socklen_t, int,
 dnl Checks for library functions.
 gl_INIT
 
-AC_CHECK_FUNCS(getrlimit setrlimit socketpair strdup)
+AC_CHECK_FUNCS(getrlimit setrlimit socketpair)
 AC_CHECK_FUNCS(setegid setregid setresgid seteuid setreuid)
-AC_CHECK_FUNCS(regcomp daemon putenv)
+AC_CHECK_FUNCS(daemon putenv)
 
 AC_FUNC_SETVBUF_REVERSED
 AH_BOTTOM([

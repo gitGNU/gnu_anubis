@@ -1,0 +1,13 @@
+# List of gnulib modules needed for GNU Anubis.
+# A module name per line. Empty lines and comments are ignored.
+
+gettext
+getline
+gitlog-to-changelog
+obstack
+getopt
+getpass
+regex
+setenv
+sysexits
+xalloc
