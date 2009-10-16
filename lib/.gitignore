@@ -2,7 +2,9 @@ alloca.c
 alloca.h
 alloca.in.h
 btowc.c
+charset.alias
 config.charset
+configmake.h
 errno.h
 errno.in.h
 error.c

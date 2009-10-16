@@ -20,12 +20,15 @@ dnl
 
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT([GNU Anubis], [4.1.90], [bug-anubis@gnu.org])
-AC_PREREQ([2.59])
+AC_PREREQ([2.63])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([build])
 AC_CONFIG_SRCDIR([src/main.c])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([1.11 gnits])
 AC_GNU_SOURCE
+
+dnl Enable silent rules by default:
+AM_SILENT_RULES([yes])
 
 dnl Checks for programs.
 AC_PROG_CC
