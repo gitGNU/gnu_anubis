@@ -148,4 +148,22 @@ anubis_transparent_mode (struct sockaddr_in *addr)
   return 0;
 }
 
+int
+anubis_proxy_mode (struct sockaddr_in *addr)
+{
+  set_unprivileged_user ();
+
+  info (NORMAL, _("Initiated proxy mode."));
+
+  session_prologue ();
+  smtp_session_transparent ();
+  alarm (0);
+
+  net_close_stream (&remote_server);
+  net_close_stream (&remote_client);
+
+  info (NORMAL, _("Connection closed successfully."));
+  return 0;
+}
+
 /* EOF */

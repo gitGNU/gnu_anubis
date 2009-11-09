@@ -309,7 +309,7 @@ parse_log_facility (const char *arg)
   p = anubis_keyword_lookup_ci (kw, arg);
   if (p)
     log_facility = p->tok;
-  else if (((n = strtoul (kw, &endp, 0)), *endp == 0)
+  else if (((n = strtoul (arg, &endp, 0)), *endp == 0)
 	   && (log_facility = n) == n)
     /* nothing */;
   else
@@ -565,7 +565,6 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
     setbool (arg, topt, T_DROP_UNKNOWN_USER);
     break;
 
-#ifdef WITH_GSASL
   case KW_MODE:
     if (anubis_mode != anubis_mda) /* Special case. See comment to
 				      KW_LOCAL_MAILER directive, though */
@@ -576,7 +575,6 @@ control_parser (int method, int key, ANUBIS_LIST * arglist,
 	  return RC_KW_ERROR;
       }
     break;
-#endif /* WITH_GSASL */
 
   case KW_INCOMING_MAIL_RULE:
     incoming_mail_rule = strdup (arg);

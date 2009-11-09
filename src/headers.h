@@ -205,7 +205,8 @@ typedef enum anubis_mode
 {
   anubis_transparent,
   anubis_authenticate,
-  anubis_mda
+  anubis_mda,
+  anubis_proxy
 }
 ANUBIS_MODE;
 
@@ -569,6 +570,7 @@ void pgsql_db_init (void);
 
 /* transmode.c */
 int anubis_transparent_mode (struct sockaddr_in *addr);
+int anubis_proxy_mode (struct sockaddr_in *addr);
 void session_prologue ();
 
 /* authmode.c */

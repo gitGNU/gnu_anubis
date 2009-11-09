@@ -180,22 +180,25 @@ anubis_child_main (struct sockaddr_in *addr)
   int rc;
 
   proclist_init ();
-#ifdef WITH_GSASL
   switch (anubis_mode)
     {
     case anubis_transparent:
       rc = anubis_transparent_mode (addr);
       break;
 
+#ifdef WITH_GSASL
     case anubis_authenticate:
       rc = anubis_authenticate_mode (addr);
+      break;
+#endif /* WITH_GSASL */
 
+    case anubis_proxy:
+      rc = anubis_proxy_mode (addr);
+      break;
+      
     default:
       abort();
     }
-#else
-  rc = anubis_transparent_mode (addr);
-#endif /* WITH_GSASL */
   proclist_cleanup (subprocess_report_status);
   net_close_stream (&remote_client);
   return rc;

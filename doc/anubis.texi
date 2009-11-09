@@ -234,9 +234,14 @@ the remote party, i.e. determine whether it has the right to use
 Anubis resources and, if so, what configuration settings should be
 used during the session. We call this process @dfn{authentication}.
 The exact method of authentication depends on Anubis @dfn{operation
-mode}. Currently there are two modes:
+mode}. Currently there are three modes:
 
 @table @asis
+@item proxy
+No authentication is performed.  Anubis switches to the unprivileged
+user (@pxref{Security Settings,,user-unprivileged}) and acts as an
+@dfn{@acronym{SMTP} proxy}.
+
 @item transparent
 This is the default mode. It is compatible with versions of GNU Anubis
 up to 3.6.2. In this mode, Anubis relies on AUTH service (@command{identd})
@@ -1169,6 +1174,7 @@ Selects Anubis operation mode. Allowed values for @var{mode-name}
 are:
 
 @table @asis
+@item proxy
 @item transparent
 @item auth
 @end table
