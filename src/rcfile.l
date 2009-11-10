@@ -335,7 +335,7 @@ escape (int c)
   case 'n':
     return '\n';
   case 'r':
-    return '\t';
+    return '\r';
   case 't':
     return '\t';
   case 'v':
