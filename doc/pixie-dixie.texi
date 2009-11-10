@@ -1,4 +1,4 @@
-@appendix Pixie & Dixie
+@c @appendix Pixie & Dixie
 
 @macro pixie
 @samp{Pixie}

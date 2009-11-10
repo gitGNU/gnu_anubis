@@ -48,14 +48,19 @@ Software Foundation raise funds for GNU development.''
 @insertcopying
 @end titlepage
 
+@ifnothtml
+@page
+@summarycontents
+@page
+@contents
+@end ifnothtml
 
-@node Top, Overview, , (dir)
-@ifinfo
-@insertcopying
-@chapter GNU Anubis
+@ifnottex
+@node Top
+@top GNU Anubis
 This edition of the @cite{GNU Anubis Manual}, last updated @value{UPDATED},
 documents GNU Anubis Version @value{VERSION}.
-@end ifinfo
+@end ifnottex
 
 @menu
 * Overview::                        Preliminary information.
@@ -83,10 +88,97 @@ Indices
 
 * Concept Index::                   Index of concepts.
 
+@detailmenu
+ --- The Detailed Node Listing ---
+
+Auth mode.
+
+* User Database::
+* Database URL::
+* Managing the Database::
+
+Database URL
+
+* text::        Plain text databases
+* gdbm::        Databases in GDBM format
+* sql::         MySQL and PostgreSQL databases
+
+Managing the Database
+
+* Administrators::      The Administrator's View
+* Users::               The User's View
+
+Administrators
+
+* Create::              Creating the Database
+* List::                Listing Database Records
+* Add::                 Adding New Records
+* Remove::              Removing Existing Records       
+* Modify::              Modifying Existing Records
+* anubisadm summary::   Summary of All Administrative Commands
+
+Logical Structure
+
+* AUTH Section::
+* CONTROL Section::
+* TRANSLATION Section::
+* GUILE Section::
+
+CONTROL Section
+
+* Basic Settings::
+* Output and Debugging Settings::
+* Proxy Settings::
+* ESMTP Authentication Settings::
+* Encryption Settings::
+* Security Settings::
+
+The Rule System
+
+* Actions::
+* Conditional Statements::
+* Triggers::
+* Boolean Operators::
+* Regular Expressions::
+* Action List::
+* Using Guile Actions::
+
+Conditional Statements
+
+* Concatenations::
+
+Action List
+
+* Stop Action::            Stopping the Processing
+* Call Action::            Invoking Another Section
+* Adding Headers or Text:: How to add a new header or body line(s).
+* Removing Headers::       How to remove a message header line(s).
+* Modifying Messages::     How to modify a message contents on-the-fly.
+* Inserting Files::        How to append text files to an outgoing message.
+* Mail Encryption::        How to encrypt a message on-the-fly.
+* External Processor::     How to process a message body using an external tool.
+* Quick Example::          A quick example of using an action list.
+
+Using Guile Actions
+
+* Defining Guile Actions::
+* Invoking Guile Actions::
+
+Predefined Guile Actions
+* Rot-13::
+* Remailers::
+* Entire Message Filters::
+
+Using Mutt with Anubis
+
+* mutt-smtp::            Using @acronym{SMTP}
+* maidag::               Using GNU Mailutils
+* msg2smtp.pl::          Using @command{msg2smtp.pl}
+
+@end detailmenu
 @end menu
 
-
-@node Overview, Glossary, Top, Top
+@node Overview
 @chapter Overview
 @cindex overview
 @cindex Simple Mail Transport Protocol, SMTP
@@ -178,7 +270,7 @@ configuration files written in a flexible and easy to use
 command scripting language, specially designed for this
 purpose.
 
-@node Glossary, Authentication, Overview, Top
+@node Glossary
 @chapter Glossary of Frequently Used Terms
 
 @table @dfn
@@ -225,7 +317,7 @@ For more information about Guile,
 GNU Privacy Guard, a tool compatible with the Pretty Good Privacy.
 @end table
 
-@node Authentication, Configuration, Glossary, Top
+@node Authentication
 @chapter Authentication
 @cindex authentication
 
@@ -871,7 +963,7 @@ Display program version number and exit.
 Display short usage summary and exit.
 @end table
 
-@node Configuration, Rule System, Authentication, Top
+@node Configuration
 @chapter Configuration
 @cindex configuration
 @cindex settings
@@ -1614,7 +1706,7 @@ Reads the given Scheme program.
 @end deffn
 
 
-@node Rule System, Invoking Anubis, Configuration, Top
+@node Rule System
 @chapter The Rule System
 @cindex rule system
 
@@ -2584,18 +2676,18 @@ the body of the message.
 them with \"Re:\".
 If REST is not empty, append its car to BODY"
   (cons (append
-	 (map (lambda (x)
-		(if (and (string-ci=? (car x) "subject")
-			 (string-ci=? (substring (cdr x) 0 4) "ODP:"))
-		    (cons (car x)
-			  (string-append "Re:"
-					 (substring (cdr x) 4)))
-		    x))
-	      hdr)
-	 (list (cons "X-Processed-By" "GNU Anubis")))
-	(if (null? rest)
-	    #t
-	    (string-append body "\n" (car rest)))))
+         (map (lambda (x)
+                (if (and (string-ci=? (car x) "subject")
+                         (string-ci=? (substring (cdr x) 0 4) "ODP:"))
+                    (cons (car x)
+                          (string-append "Re:"
+                                         (substring (cdr x) 4)))
+                    x))
+              hdr)
+         (list (cons "X-Processed-By" "GNU Anubis")))
+        (if (null? rest)
+            #t
+            (string-append body "\n" (car rest)))))
 @end smalllisp
 
 
@@ -2831,7 +2923,7 @@ Its arguments
 @xref{S/MIME}, for an example of use of this function.
 @end deffn
 
-@node Invoking Anubis, Sample Beginning, Rule System, Top
+@node Invoking Anubis
 @chapter Invoking GNU Anubis
 @cindex command line
 
@@ -2978,7 +3070,7 @@ Use the @acronym{SMTP} protocol (OMP/Tunnel) as described in @acronym{RFC} 821
 on standard input and output.
 
 
-@node Sample Beginning, TLS/SSL, Invoking Anubis, Top
+@node Sample Beginning
 @chapter Sample Beginning
 
 By default, GNU Anubis binds to port number 24 (private mail system),
@@ -3040,7 +3132,7 @@ All Mutt users, who would like to set up GNU Anubis between their @acronym{MUA}
 and @acronym{MTA}, should consider using the @samp{msg2smtp.pl} Perl script
 from the @file{contrib} directory (part of the distribution).
 
-@node TLS/SSL, S/MIME, Sample Beginning, Top
+@node TLS/SSL
 @chapter Using the TLS/SSL Encryption
 @cindex Transport Layer Security, TLS
 @cindex Secure Socket Layer, SSL
@@ -3112,7 +3204,7 @@ keywords in its own user configuration file.
 @noindent
 @xref{Encryption Settings}, for details.
 
-@node S/MIME, MDA Mode, TLS/SSL, Top
+@node S/MIME
 @chapter Using S/MIME Signatures
 @cindex smime
 @cindex openssl
@@ -3146,7 +3238,7 @@ guile-process openssl-filter /usr/local/ssl/bin/openssl \
 END
 @end smallexample
 
-@node MDA Mode, Mutt, S/MIME, Top
+@node MDA Mode
 @chapter Using Anubis to Process Incoming Mail
 @cindex MDA mode
 @cindex incoming mail, processing
@@ -3159,9 +3251,10 @@ delivery agent} from your @acronym{MTA} configuration file. The invocation
 line must contain @option{--mode=mda} option, that tells Anubis
 to act in @dfn{mail delivery mode}. In this mode, Anubis receives
 the message from standard input, processes it using configuration
-file sections named @code{incoming-mail-rule} @FIXME-xref{} and
-finally calls local mailer to actually deliver the modified message.
-The local mailer must be given using @option{--local-mta} option.
+file sections named @code{incoming-mail-rule} (@pxref{Basic Settings,,
+incoming-mail-rule}) and finally calls local mailer to actually
+deliver the modified message. The local mailer must be given using
+@option{--local-mta} option.
 
 
 Let's summarize the special features of mail delivery mode
@@ -3199,7 +3292,7 @@ In MDA mode, Anubis takes names of the recipients from the command line.
 Anubis uses a separate rule section for processing incoming mails. The
 default section name is @samp{INCOMING}. It may be overridden in 
 system configuration file using @option{incoming-mail-rule}
-(@pxref{Basic Settings}).
+(@pxref{Basic Settings,,incoming-mail-rule}).
 @end enumerate
 
 Following discussion explains how to configure Anubis in MDA mode with
@@ -3261,79 +3354,114 @@ mail_local:
 @end itemize
 @FIXME{More mailers, anybody?}
 
-@node Mutt, Problems, MDA Mode, Top
+@node Mutt
 @chapter Using Mutt with Anubis
 @cindex mutt
 
-At the time of this writing @command{mutt}@footnote{versions 1.4.1 and
-1.5.3}is not able to send mail via @acronym{SMTP} channell, instead it
-invokes local mailer program to transmit the message. There are at
-least three possible ways to overcome this difficulty:
+Newer versions of @command{mutt} (1.5.20) are able to
+send mail directly via @acronym{SMTP} channell.  Older ones
+(1.4.1 and 1.5.3) can only use an external program to send
+messages.
 
-@enumerate 1
-@item Using @command{mail.remote} from GNU mailutils
-@item Using @command{msg2smtp.pl} script provided with Anubis
-@item Using a patch by Steven Engelhardt
-(@code{patch-@var{version}.sde.libesmtp.3}) that enables
-@command{mutt} to use @acronym{SMTP}.
-@end enumerate 
-
-The following sections discuss each method in detail.
+The following sections describe the recommended ways of
+configuring @command{mutt}.
 
 @menu
-* mail.remote::          Using GNU Mailutils
+* mutt-smtp::            Using @acronym{SMTP}
+* maidag::               Using GNU Mailutils
 * msg2smtp.pl::          Using @command{msg2smtp.pl}
-* patch.sde.libesmtp.3:: Enabling @command{mutt} to talk
-* comparison::           Which method to choose?
 @end menu
 
-@node mail.remote
+@node mutt-smtp
+@section Configure Mutt @acronym{SMTP}
+
+@command{Mutt} version 1.5.20 supports @acronym{SMTP} if compiled
+with the @option{--enable-smtp} option. You can verify if it is so
+by running the following command:
+
+@smallexample
+mutt -v | fgrep '+USE_SMTP'
+@end smallexample
+
+If the output contains @samp{+USE_SMTP}, then @command{mutt} is
+compiled properly and you can use further instructions from this
+section.
+
+@table @code
+@item set smtp_url = "@var{url}"
+Sets @acronym{URL} of the Anubis server. The format of @var{url} is
+
+@smallexample
+smtp://[@var{user}[:@var{pass}]@@]host[:@var{port}]
+@end smallexample
+
+@noindent
+where square brackets denote optional parts.  If Anubis is running
+in @samp{auth} mode, @var{user} and @var{pass} become mandatory.
+The latter can also be set using the following statement.
+
+@item set smtp_pass = "@var{pass}"
+Sets @acronym{SMTP} password.
+
+@item set smtp_authenticators="@var{auth-list}"
+Sets the list of the authentication methods to try when
+attempting to perform @acronym{SMTP AUTH}.  The argument
+is a colon-delimited list of method names.
+@end table
+
+For example, if Anubis runs on the server @samp{anubis.domain.org},
+port 24, your @file{.muttrc} could contain:
+
+@smallexample
+set smtp_url = "smtp://anubis.domain.org:24"
+@end smallexample
+
+@node maidag
 @section Using GNU mailutils as an interface to mutt
-@cindex mail.remote
+@cindex maidag
 @cindex mailutils
 @cindex GNU mailutils
 
 GNU Mailutils is a collection of utilities for handling electronic
 mail. It includes lots of programs necessary for dealing with
-e-mail messages. One of them is @command{mail.remote}, which is
-designed as a drop-in replacement for @command{sendmail} to forward
-all mail directly to an @acronym{SMTP} gateway. Its interface is
-compatible with @command{sendmail} which makes the program
-especially useful as an interface between @command{mutt} and
-@command{anubis}. The package can be downloaded from
-@url{ftp://ftp.gnu.org/@/gnu/@/mailutils} or any of the mirrors
+e-mail messages. One of them is @command{maidag} --- a general-purpose
+mail delivery agent (@pxref{maidag,,, mailutils, GNU Mailutils
+Manual}).
+
+The package can be downloaded from
+@url{ftp://ftp.gnu.org/@/gnu/@/mailutils} or any of the mirrors 
 (See @url{http://www.gnu.org/@/order/@/ftp.html} for a complete
 list of these. Please, select the mirror closest too you). The
 complete information about the package is available from its
 home page at @url{http://www.gnu.org/@/software/@/mailutils/} 
 
-To use @command{mail.remote}, first download and install GNU mailutils
+To use @command{maidag}, first download and install GNU mailutils
 (as usual the package is shipped with files @file{README} and
 @file{INSTALL} which provide the necessary guidelines). Then
 add to your @file{.muttrc} file the following line:
 
 @smallexample
-set sendmail="@var{mail.remote} smtp://@var{hostname}[:@var{port}]"
+set sendmail="@var{maidag} --url smtp://@var{hostname}[:@var{port}]"
 @end smallexample
 
 @noindent
-where @var{mail.remote} stands for the full file name of
-@command{mail.remote} utility, @var{hostname} and optional
+where @var{maidag} stands for the full file name of
+@command{maidag} utility, @var{hostname} and optional
 @var{port} specify the host name (or @acronym{IP} address) of the machine
 running @command{anubis} and the port it listens on. Notice, that
-default port value for @command{mail.remote} is 25, which means
+default port value for @samp{smtp} is 25, which means
 that in most cases you will have to specify it explicitely.
 
 For example, suppose you run @command{anubis} on machine
 @samp{anubis.domain.org} and that it listens on port 24.
 Let's also assume you have installed mailutils in the default
-location, so that full file name of @command{mail.remote} is
-@file{/usr/local/libexec/mail.remote}. Then, your @file{.muttrc}
+location, so that full file name of the @command{maidag} utility is
+@file{/usr/local/sbin/maidag}. Then, your @file{.muttrc}
 will contain:
 
 @smallexample
-set sendmail="/usr/local/libexec/mail.remote \
-              smtp://anubis.domain.org:24"
+set sendmail="/usr/local/sbin/maidag \
+              --url smtp://anubis.domain.org:24"
 @end smallexample
 
 @noindent
@@ -3348,35 +3476,14 @@ designed as an interface between it and @command{mutt}. The script
 is kindly contributed by Michael de Beer. 
 
 The script is located in the subdirectory @file{contrib} of 
-GNU Anubis distribution. To use it:
-
-@enumerate 1
-@item Make sure its first line correctly refers to the full file name
-of the @command{perl} interpreter on your system. By default the first
-line reads 
-
-@smallexample
-#!/usr/bin/perl
-@end smallexample
-
-@noindent
-If the file name after @samp{!} differs from the actual file name of
-the @command{perl} interpreter, update it. For example, if
-@command{perl} is installed in @file{/usr/local/bin/perl}, the first
-line of @command{msg2smtp.pl} should read
-
-@smallexample
-#!/usr/local/bin/perl
-@end smallexample
-
-@item Copy the script to any convenient location. Simply running @code{cp}
-will do, e.g.
+GNU Anubis distribution. Copy it to any convenient location, e.g.:
 
 @smallexample
 cp anubis-@value{VERSION}/contrib/msg2smtp.pl /usr/local/libexec
 @end smallexample
 
-@item Add to your @file{.muttrc} the following line:
+@noindent
+and add the following line to your @file{.muttrc}:
 
 @smallexample
 set sendmail="/usr/local/libexec/msg2smtp.pl -h @var{hostname} -p @var{port}"
@@ -3386,115 +3493,11 @@ set sendmail="/usr/local/libexec/msg2smtp.pl -h @var{hostname} -p @var{port}"
 where @var{hostname} and @var{port} specify the host name (or @acronym{IP}
 address) of the machine running @command{anubis} and the port it
 listens on, respectively.
-@end enumerate
 
-Complete description of @command{msg2smtp.pl} and a discussion of
+A complete description of @command{msg2smtp.pl} and a discussion of
 its command line switches can be found in file @file{contrib/msg2smtp.txt}.
 
-@node patch.sde.libesmtp.3
-@section Patching mutt
-@cindex mutt, using SMTP gateways
-
-Steven Engelhardt modified @command{mutt} so that it is able to use
-@acronym{SMTP} to transfer messages. For the time being the patch is
-not accepted by the mainline @command{mutt} distribution, but one
-of the authors of GNU Anubis@footnote{Sergey Poznyakoff, blame it on
-him:^)}, has tested it extensively and has found it to be quite adequate
-for interfacing between @command{anubis} and @command{mutt}. The
-patch is described in detail at
-@url{http://www.deez.info/@/sengelha/@/projects/@/mutt/@/libesmtp/} and is
-available for @command{mutt} versions 1.4.x and 1.5.3.
-
-To use it, follow the instructions on the page mentioned above. Once
-you compile the patched @command{mutt} you will be able to use the
-following new keywords in its configuration file:
-
-@table @code
-@item set smtp_host = @var{hostname}
-Sets the hostname or @acronym{IP} address of the remote @acronym{SMTP} host.
-
-@item set smtp_port = @var{port}
-Sets the port number to use.
-
-@item set smtp_auth_username = @var{user-name}
-Sets the username to use with @acronym{SMTP AUTH} command (optional).
-@end table
-
-So, assuming you run @command{anubis} on machine
-@samp{anubis.domain.org} and it is listening on port 24, you will
-add to your @file{.muttrc} the following two lines:
-
-@smallexample
-@group
-set smtp_host = anubis.domain.org
-set smtp_port = 24
-@end group
-@end smallexample
-
-@node comparison
-@section Comparison of the Three Interface Methods
-@cindex mail.remote
-@cindex mailutils
-@cindex GNU mailutils
-@cindex msg2smtp.pl
-@cindex mutt, using SMTP gateways
-
-The following short discussion summarizes the advantages and
-deficiencies of the three interface methods described in the
-previous sections. It could serve you as a guideline on which
-interface method to choose.
-
-@subheading Using mail.remote
-
-Advanatages:
-@enumerate
-@item Does not require modifying @command{mutt}.
-@item Is compatible with any version of @command{mutt}.
-@item Runs faster than @command{msg2smtp.pl}
-@end enumerate
-
-@noindent
-Deficiences:
-@enumerate
-@item @anchor{extprog}Running an external program to transmit the message is not
-the best idea. However, it is mutt default, anyway...
-@item Runs slower than directly connecting to @command{anubis} using @acronym{SMTP}
-@end enumerate
-
-@subheading Using msg2smtp.pl
-
-Advantages:
-@enumerate
-@item Does not require modifying @command{mutt}.
-@item Is compatible with any version of @command{mutt}.
-@end enumerate
-
-@noindent
-Deficiences:
-@enumerate
-@item @xref{extprog}.
-@item Runs slower than the other two methods (sending each message
-requires loading @command{perl} interpreter, which is rather expensive).
-@end enumerate
-
-@subheading Using patch.sde.libesmtp.3
-
-Advantages:
-@enumerate
-@item Is the fastest of the three methods.
-@item Does not require any intermediate programs.
-@end enumerate
-
-@noindent
-Deficiences:
-@enumerate
-@item Requires patching @command{mutt}, which is not always possible
-or acceptable.
-@item May not work for versions of mutt newer than 1.5.3 (but then,
-again, not necessarily so).
-@end enumerate
-
-@node Problems, Pixie-Dixie, Mutt, Top
+@node Problems
 @chapter Reporting Bugs
 @cindex bugs
 @cindex problems
@@ -3508,16 +3511,19 @@ really says you can do what you are trying to do. If it is
 not clear whether you should be able to do something or not,
 report that too; it's a bug in the documentation!
 
-@node Pixie-Dixie, Multi-Part Message Processing, Problems, Top
+@node Pixie-Dixie
+@appendix Pixie & Dixie
 @include pixie-dixie.texi
 
-@node Multi-Part Message Processing, GNU Free Documentation License, Pixie-Dixie, Top
+@node Multi-Part Message Processing
+@appendix Multi-Part Message Processing
 @include mime.texi
 
-@node GNU Free Documentation License, Concept Index, Multi-Part Message Processing, Top
+@node GNU Free Documentation License
+@appendix GNU Free Documentation License
 @include fdl.texi
 
-@node Concept Index, , GNU Free Documentation License, Top
+@node Concept Index
 @unnumbered Concept Index
 @printindex cp
 @shortcontents

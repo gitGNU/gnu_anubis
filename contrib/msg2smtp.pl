@@ -1,6 +1,7 @@
-#!/usr/bin/perl
-
-# $Id$
+# Apart from the three lines below, it is actually a -*- perl -*- code.
+eval '(exit $?0)' && eval 'exec perl -wS "$0" ${1+"$@"}'
+  & eval 'exec perl -wS "$0" $argv:q'
+    if 0;
 
 my $usage = qq!
 $0 takes a mail message on STDIN and relays it to an SMTP server.

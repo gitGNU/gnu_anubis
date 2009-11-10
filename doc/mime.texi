@@ -1,4 +1,4 @@
-@appendix Multi-Part Message Processing
+@c @appendix Multi-Part Message Processing
 
 @enumerate 0
 @item PREFACE
