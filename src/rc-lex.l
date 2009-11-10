@@ -28,7 +28,7 @@
 #include "headers.h"
 #include "extern.h"
 #include "rcfile.h"
-#include "rcfile-gram.h"	
+#include "rc-gram.h"	
 
 struct string_list
 {

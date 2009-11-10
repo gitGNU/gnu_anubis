@@ -24,7 +24,7 @@ AC_PREREQ([2.63])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([build])
 AC_CONFIG_SRCDIR([src/main.c])
-AM_INIT_AUTOMAKE([1.11 gnits])
+AM_INIT_AUTOMAKE([1.11 gnits tar-ustar dist-bzip2 std-options silent-rules])
 AC_GNU_SOURCE
 
 dnl Enable silent rules by default:

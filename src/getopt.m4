@@ -1,5 +1,5 @@
 dnl This file is part of GNU Anubis.
-dnl Copyright (C) 2007, 2008 The Anubis Team.
+dnl Copyright (C) 2007, 2008, 2009 The Anubis Team.
 dnl 
 dnl GNU Anubis is free software; you can redistribute it and/or modify it
 dnl under the terms of the GNU General Public License as published by the
@@ -262,7 +262,7 @@ print_help(void)
   
   printf ("%s %s [%s]... %s\n", _("Usage:"), [<$2>], _("[<OPTION>]"),
 	  gettext (args_doc)); 
-  if (doc && doc[0])
+  if (doc[0])
     print_option_descr(gettext (doc), 0, RMARGIN);
   putchar ('\n');
 

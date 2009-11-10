@@ -23,8 +23,8 @@ src/net.c
 src/socks.c
 src/quit.c
 src/rcfile.c
-src/rcfile.l
-src/rcfile.y
+src/rc-lex.l
+src/rc-gram.y
 src/regex.c
 src/tls.c
 src/transmode.c

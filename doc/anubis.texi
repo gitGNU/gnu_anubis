@@ -1607,9 +1607,7 @@ user-notprivileged "anubis"
 @end smallexample
 
 @strong{Caution:} This user must exist in the system user database
-(@file{/etc/passwd}). @FIXME{Verify if this is true:}If GNU Anubis is
-using PAM support, it is recommended to add this user to the
-@w{@file{/etc/anubis.allow}} file. 
+(@file{/etc/passwd}).
 @end deffn
 
 @deffn Option rule-priority @var{value}

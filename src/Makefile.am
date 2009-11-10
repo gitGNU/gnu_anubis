@@ -56,9 +56,9 @@ anubis_SOURCES = \
  quit.c \
  rcfile.c \
  rcfile.h \
- rcfile-gram.c \
- rcfile-gram.h \
- rcfile-lex.c \
+ rc-gram.y \
+ rc-gram.h \
+ rc-lex.l \
  regex.c \
  socks.c \
  transmode.c \
@@ -86,24 +86,10 @@ libanubisdb_a_SOURCES = \
  tls.c \
  url.c 
 
-YLWRAP = $(SHELL) $(top_srcdir)/build/ylwrap
 AM_YFLAGS = -dtv
-EXTRA_DIST = rcfile.y rcfile.l getopt.m4 env.opt
+EXTRA_DIST = getopt.m4 env.opt
 
-BUILT_SOURCES= \
-  rcfile-gram.c rcfile-gram.h \
-  rcfile-lex.c env.c
-
-rcfile-lex.c: $(srcdir)/rcfile.l rcfile-gram.h
-	$(YLWRAP) "$(LEX) $(AM_LEXFLAGS) $(LEXFLAGS)" \
-                  $(srcdir)/rcfile.l lex.yy.c rcfile-lex.c \
-                  -- -yy rc_yy
-
-rcfile-gram.c rcfile-gram.h: $(srcdir)/rcfile.y
-	$(YLWRAP) "$(YACC) $(AM_YFLAGS) $(YFLAGS)" $(srcdir)/rcfile.y \
-	          y.tab.c rcfile-gram.c y.tab.h rcfile-gram.h \
-                  y.output y.output \
-                  -- -yy rc_yy
+BUILT_SOURCES = env.c
 
 localedir = $(datadir)/locale
 DEFS = @DEFS@ -DLOCALEDIR=\"$(localedir)\"

@@ -6,10 +6,10 @@ anubis
 anubisadm
 anubisusr
 libanubisdb.a
-y.output
-rcfile-lex.c
-rcfile-gram.c
-rcfile-gram.h
+rc-lex.c
+rc-gram.c
+rc-gram.h
+rc-gram.output
 usr.c
 adm.c
 env.c
