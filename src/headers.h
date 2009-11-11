@@ -448,6 +448,16 @@ void rcfile_process_section (int, char *, void *, MESSAGE *);
 void rcfile_call_section (int, char *, void *, MESSAGE *);
 char *user_rcfile_name (void);
 
+typedef struct eval_env *EVAL_ENV;
+struct rc_loc const *eval_env_locus (EVAL_ENV);
+int eval_env_method (EVAL_ENV);
+MESSAGE *eval_env_message (EVAL_ENV);
+void *eval_env_data (EVAL_ENV);
+void eval_error (int retcode, EVAL_ENV env, const char *fmt, ...)
+  ANUBIS_PRINTFLIKE(3,4);
+void eval_warning (EVAL_ENV env, const char *fmt, ...)
+  ANUBIS_PRINTFLIKE(2,3);
+
 /* help.c */
 void print_config_options (void);
 

@@ -452,28 +452,26 @@ inner_catch_body (void *data)
   return SCM_BOOL_F;
 }
 
-int
-guile_parser (int method, int key, ANUBIS_LIST * arglist,
-	      void *inv_data, void *func_data, MESSAGE * msg)
+void
+guile_parser (EVAL_ENV env, int key, ANUBIS_LIST *arglist, void *inv_data)
 {
-  int rc = 0;
   char *arg = list_item (arglist, 0);
   struct inner_closure closure;
   jmp_buf jmp_env;
   
   closure.arglist = arglist;
-  closure.msg = msg;
+  closure.msg = eval_env_message (env);
 
   switch (key)
     {
     case KW_GUILE_OUTPUT:
       xfree (options.glogfile);
       options.glogfile = strdup (arg);
-      return RC_KW_HANDLED;
+      return;
 
     case KW_GUILE_DEBUG:
       guile_debug (strncmp ("yes", arg, 3) == 0);
-      return RC_KW_HANDLED;
+      return;
 
     case KW_GUILE_LOAD_PATH_APPEND:
       closure.fun = guile_load_path_append;
@@ -489,11 +487,16 @@ guile_parser (int method, int key, ANUBIS_LIST * arglist,
 
     case KW_GUILE_REWRITE_LINE:
       /*FIXME*/
+      eval_error (0, env, _("%s is not supported yet"), "guile-rewrite-line");
       /*guile_rewrite_line(arg, line); */
-      return RC_KW_HANDLED;
+      return;
 
     default:
-      return RC_KW_UNKNOWN;
+      eval_error (2, env,
+		  _("INTERNAL ERROR at %s:%d: unhandled key %d; "
+		    "please report"),
+		  __FILE__, __LINE__,
+		  key);
     }
 
   if (setjmp (jmp_env) == 0)
@@ -501,10 +504,6 @@ guile_parser (int method, int key, ANUBIS_LIST * arglist,
 			     inner_catch_body,
 			     &closure,
 			     eval_catch_handler, &jmp_env);
-  else
-    rc = RC_KW_ERROR;
-
-  return rc;
 }
 
 static struct rc_secdef_child guile_secdef_child = {

@@ -166,13 +166,9 @@ struct rc_stmt
 };
 
 /* Semantic handler tables */
-#define RC_KW_HANDLED 0
-#define RC_KW_UNKNOWN 1
-#define RC_KW_ERROR   2
 
-typedef int (*rc_kw_parser_t) (int method, int key, ANUBIS_LIST * arg,
-			       void *inv_data, void *func_data,
-			       MESSAGE * msg);
+typedef void (*rc_kw_parser_t) (EVAL_ENV env, int key, ANUBIS_LIST *arg,
+				void *inv_data);
 
 /* Keyword flags */
 #define KWF_HIDDEN 0x0001	/* Replace RHS with stars in debugging output */

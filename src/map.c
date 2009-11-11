@@ -81,11 +81,10 @@ struct rc_kwdef translate_kw[] = {
 };
 
 
-int
-translate_parser (int method, int key, ANUBIS_LIST * arglist, void *inv_data,
-		  void *func_data, MESSAGE * msg)
+void
+translate_parser (EVAL_ENV env, int key, ANUBIS_LIST *arglist, void *inv_data)
 {
-  struct translate_env *env = func_data;
+  struct translate_env *xlat_env = eval_env_data (env);
   char *p = 0;
   int cu = 0;			/* check a user name */
   char a1[65];
@@ -96,8 +95,8 @@ translate_parser (int method, int key, ANUBIS_LIST * arglist, void *inv_data,
   struct sockaddr_in addr;
   size_t argc;
 
-  if (!env || env->stop)
-    return RC_KW_HANDLED;
+  if (!xlat_env || xlat_env->stop)
+    return;
 
   switch (key)
     {
@@ -107,34 +106,36 @@ translate_parser (int method, int key, ANUBIS_LIST * arglist, void *inv_data,
          argv[1] = "into"
          argv[2] = USERNAME */
 
-      safe_strcpy (a1, env->extaddr);
+      safe_strcpy (a1, xlat_env->extaddr);
       memset (&addr, 0, sizeof (addr));
 
       argc = list_count (arglist);
       if (argc < 3 || argc > 4 || strcmp (list_item (arglist, 1), "into"))
 	{
+	  /* FIXME: Merge the two functions? */
+	  eval_error (0, env, _("invalid syntax"));
 	  info (VERBOSE, _("Translation map: incorrect syntax."));
 	  break;
 	}
 
-      safe_strcpy (env->translate, list_item (arglist, 0));
+      safe_strcpy (xlat_env->translate, list_item (arglist, 0));
       p = list_item (arglist, 2);
       if (p[0] == '=')
 	p = list_item (arglist, 3);
-      safe_strcpy (env->into, p);
+      safe_strcpy (xlat_env->into, p);
 
-      if (strchr (env->translate, '@'))
+      if (strchr (xlat_env->translate, '@'))
 	{
-	  if (env->extuser == 0)
+	  if (xlat_env->extuser == 0)
 	    break;		/* failed */
-	  safe_strcpy (user, env->translate);
+	  safe_strcpy (user, xlat_env->translate);
 	  p = strchr (user, '@');
 	  *p++ = '\0';
 	  safe_strcpy (address, p);
 	  cu = 1;
 	}
       else
-	safe_strcpy (address, env->translate);
+	safe_strcpy (address, xlat_env->translate);
 
       inaddr = inet_addr (address);
       if (inaddr != INADDR_NONE)
@@ -153,9 +154,9 @@ translate_parser (int method, int key, ANUBIS_LIST * arglist, void *inv_data,
 	    {
 	      if (hp->h_length != 4 && hp->h_length != 8)
 		{
-		  anubis_error (0, 0,
-			_("Illegal address length received for host %s"),
-				address);
+		  eval_error (0, env,
+			      _("Illegal address length received for host %s"),
+			      address);
 		  cu = 0;
 		  break;	/* failed */
 		}
@@ -169,19 +170,19 @@ translate_parser (int method, int key, ANUBIS_LIST * arglist, void *inv_data,
       safe_strcpy (a2, inet_ntoa (addr.sin_addr));
       if (cu)
 	{
-	  if (strcmp (env->extuser, user) == 0)
+	  if (strcmp (xlat_env->extuser, user) == 0)
 	    {
 	      /* a temporary solution */
 	      if (strcmp (a2, "0.0.0.0") == 0)
 		{
-		  env->cs = 1;	/* success */
-		  env->stop = 1;
+		  xlat_env->cs = 1;	/* success */
+		  xlat_env->stop = 1;
 		  break;
 		}
 	      if (strcmp (a1, a2) == 0)
 		{
-		  env->cs = 1;	/* success */
-		  env->stop = 1;
+		  xlat_env->cs = 1;	/* success */
+		  xlat_env->stop = 1;
 		  break;
 		}
 	    }
@@ -191,23 +192,26 @@ translate_parser (int method, int key, ANUBIS_LIST * arglist, void *inv_data,
 	  /* a temporary solution */
 	  if (strcmp (a2, "0.0.0.0") == 0)
 	    {
-	      env->cs = 1;	/* success */
-	      env->stop = 1;
+	      xlat_env->cs = 1;	/* success */
+	      xlat_env->stop = 1;
 	      break;
 	    }
 	  if (strcmp (a1, a2) == 0)
 	    {
-	      env->cs = 1;	/* success */
-	      env->stop = 1;
+	      xlat_env->cs = 1;	/* success */
+	      xlat_env->stop = 1;
 	      break;
 	    }
 	}
       break;
 
     default:
-      return RC_KW_UNKNOWN;
+      eval_error (2, env,
+		  _("INTERNAL ERROR at %s:%d: unhandled key %d; "
+		    "please report"),
+		  __FILE__, __LINE__,
+		  key);
     }
-  return RC_KW_HANDLED;
 }
 
 static struct rc_secdef_child translate_secdef_child = {

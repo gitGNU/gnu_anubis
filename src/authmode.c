@@ -614,61 +614,64 @@ anubis_authenticate_mode (struct sockaddr_in *addr)
 #define KW_SMTP_GREETING_MESSAGE 6
 #define KW_SMTP_HELP_MESSAGE     7
 
-static int
-rc_parser (int method, int key, ANUBIS_LIST * arglist,
-	   void *inv_data, void *func_data, MESSAGE * msg)
+static void
+rc_parser (EVAL_ENV env, int key, ANUBIS_LIST *arglist, void *inv_data)
 {
   char *arg = list_item (arglist, 0);
 
-  switch (key) {
-  case KW_SMTP_GREETING_MESSAGE:
-    if (list_count (arglist) != 1)
-      return RC_KW_ERROR;
-    xfree (smtp_greeting_message);
-    smtp_greeting_message = strdup (arg);
-    break;
-    
-  case KW_SMTP_HELP_MESSAGE:
-    if (list_count (arglist) != 1)
-      return RC_KW_ERROR;
-    make_help_message (arg);
-    break;
-    
-  case KW_SASL_PASSWORD_DB:
-    if (list_count (arglist) != 1)
-      return RC_KW_ERROR;
-    anubis_set_password_db (arg);
-    break;
-    
-  case KW_SASL_ALLOWED_MECH:
-    anubis_set_server_mech_list (arglist);
-    break;
-
-  case KW_SASL_SERVICE:
-    if (list_count (arglist) != 1)
-      return RC_KW_ERROR;
-    xfree (anubis_sasl_service);
-    anubis_sasl_service = strdup (arg);
-    break;
-    
-  case KW_SASL_REALM:
-    if (list_count (arglist) != 1)
-      return RC_KW_ERROR;
-    xfree (anubis_sasl_realm);
-    anubis_sasl_realm = strdup (arg);
-    break;
-    
-  case KW_SASL_HOSTNAME:
-    if (list_count (arglist) != 1)
-      return RC_KW_ERROR;
-    xfree (anubis_sasl_hostname);
-    anubis_sasl_hostname = strdup (arg);
-    break;
-    
-  default:
-    return RC_KW_UNKNOWN;
-  }
-  return RC_KW_HANDLED;
+  switch (key)
+    {
+    case KW_SMTP_GREETING_MESSAGE:
+      if (list_count (arglist) != 1)
+	eval_error (0, env, _("invalid number of arguments"));
+      xfree (smtp_greeting_message);
+      smtp_greeting_message = strdup (arg);
+      break;
+      
+    case KW_SMTP_HELP_MESSAGE:
+      if (list_count (arglist) != 1)
+	eval_error (0, env, _("invalid number of arguments"));
+      make_help_message (arg);
+      break;
+      
+    case KW_SASL_PASSWORD_DB:
+      if (list_count (arglist) != 1)
+	eval_error (0, env, _("invalid number of arguments"));
+      anubis_set_password_db (arg);
+      break;
+      
+    case KW_SASL_ALLOWED_MECH:
+      anubis_set_server_mech_list (arglist);
+      break;
+      
+    case KW_SASL_SERVICE:
+      if (list_count (arglist) != 1)
+	eval_error (0, env, _("invalid number of arguments"));
+      xfree (anubis_sasl_service);
+      anubis_sasl_service = strdup (arg);
+      break;
+      
+    case KW_SASL_REALM:
+      if (list_count (arglist) != 1)
+	eval_error (0, env, _("invalid number of arguments"));
+      xfree (anubis_sasl_realm);
+      anubis_sasl_realm = strdup (arg);
+      break;
+      
+    case KW_SASL_HOSTNAME:
+      if (list_count (arglist) != 1)
+	eval_error (0, env, _("invalid number of arguments"));
+      xfree (anubis_sasl_hostname);
+      anubis_sasl_hostname = strdup (arg);
+      break;
+      
+    default:
+      eval_error (2, env,
+		  _("INTERNAL ERROR at %s:%d: unhandled key %d; "
+		    "please report"),
+		  __FILE__, __LINE__,
+		  key);
+    }
 }
 
 static struct rc_kwdef init_authmode_kw[] = {

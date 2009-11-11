@@ -472,9 +472,8 @@ gpg_free (void)
 #define KW_GPG_SIGN_ENCRYPT       4
 #define KW_GPG_HOME               5
 
-int
-gpg_parser (int method, int key, ANUBIS_LIST * arglist,
-	    void *inv_data, void *func_data, MESSAGE * msg)
+void
+gpg_parser (EVAL_ENV env, int key, ANUBIS_LIST *arglist, void *inv_data)
 {
   char *arg = list_item (arglist, 0);
   switch (key)
@@ -494,7 +493,7 @@ gpg_parser (int method, int key, ANUBIS_LIST * arglist,
       gpg.encryption_keys = xstrdup (arg);
       if (gpg.inited == 0 && gpgme_init ())
 	break;
-      gpg_proc (msg, gpg_encrypt);
+      gpg_proc (eval_env_message (env), gpg_encrypt);
       break;
 
     case KW_GPG_SIGN:
@@ -505,7 +504,7 @@ gpg_parser (int method, int key, ANUBIS_LIST * arglist,
 	    gpg.sign_keys = strdup (arg);
 	  if (gpg.inited == 0 && gpgme_init ())
 	    break;
-	  gpg_proc (msg, gpg_sign);
+	  gpg_proc (eval_env_message (env), gpg_sign);
 	}
       break;
 
@@ -529,7 +528,7 @@ gpg_parser (int method, int key, ANUBIS_LIST * arglist,
 
 	if (gpg.inited == 0 && gpgme_init ())
 	  break;
-	gpg_proc (msg, gpg_sign_encrypt);
+	gpg_proc (eval_env_message (env), gpg_sign_encrypt);
       }
       break;
 
@@ -538,9 +537,12 @@ gpg_parser (int method, int key, ANUBIS_LIST * arglist,
       break;
 
     default:
-      return RC_KW_UNKNOWN;
+      eval_error (2, env,
+		  _("INTERNAL ERROR at %s:%d: unhandled key %d; "
+		    "please report"),
+		  __FILE__, __LINE__,
+		  key);
     }
-  return RC_KW_HANDLED;
 }
 
 

@@ -22,24 +22,25 @@
 #include "extern.h"
 #include "rcfile.h"
 
-#define setbool(a, b, c) \
-   do {\
-        if (strcasecmp("yes", a) == 0) \
-		(b) |= (c); \
-	else if (strcasecmp("no", a) == 0) \
-		(b) &= ~(c); \
-        else \
-                return RC_KW_ERROR; \
-   } while (0)
+#define setbool(env, a, b, c)						\
+  do {									\
+    if (strcasecmp("yes", a) == 0)					\
+      (b) |= (c);							\
+    else if (strcasecmp("no", a) == 0)					\
+      (b) &= ~(c);							\
+    else								\
+      eval_error (0, env, _("expected `yes' or `no', but found %s"), a); \
+  }									\
+  while (0)
 
-#define if_empty_set(a, b, c) \
-   do {\
-	if (strlen(a) == 0) { \
-		(b) &= ~(c); \
-	} else { \
-		(b) |= (c); \
-	}\
-   } while (0)
+#define if_empty_set(a, b, c)			\
+  do {						\
+    if (strlen(a) == 0) {			\
+      (b) &= ~(c);				\
+    } else {					\
+      (b) |= (c);				\
+    }						\
+  } while (0)
 
 #define MAX_SECTIONS 10
 
@@ -326,309 +327,314 @@ static volatile unsigned long _anubis_hang;
 /* List of users who are allowed to use HANG in their profiles */
 ANUBIS_LIST *allow_hang_users; 
 
-int
-control_parser (int method, int key, ANUBIS_LIST * arglist,
-		void *inv_data, void *func_data, MESSAGE * msg)
+void
+control_parser (EVAL_ENV env, int key, ANUBIS_LIST *arglist, void *inv_data)
 {
   char *arg = list_item (arglist, 0);
-
-  switch (key) {
-  case KW_BIND:
-    parse_mtahost (arg, &session.anubis, &session.anubis_port);
-    if (session.anubis && strlen (session.anubis) != 0)
-      topt |= T_NAMES;
-    break;
-
-  case KW_RULE_PRIORITY:
-    if (strcasecmp (arg, "user") == 0)
-      anubis_section_set_prio ("RULE", prio_user);
-    else if (strcasecmp (arg, "user-only") == 0)
-      anubis_section_set_prio ("RULE", prio_user_only);
-    else if (strcasecmp (arg, "system") == 0)
-      anubis_section_set_prio ("RULE", prio_system);
-    else if (strcasecmp (arg, "system-only") == 0)
-      anubis_section_set_prio ("RULE", prio_system_only);
-    else
-      return RC_KW_ERROR;
-    break;
-
-  case KW_CONTROL_PRIORITY:
-    if (strcasecmp (arg, "user") == 0)
-      anubis_section_set_prio ("CONTROL", prio_user);
-    else if (strcasecmp (arg, "system") == 0)
-      anubis_section_set_prio ("CONTROL", prio_system);
-    else
-      return RC_KW_ERROR;
-    break;
-
-  case KW_TERMLEVEL:
-    if (strcasecmp ("silent", arg) == 0)
-      options.termlevel = SILENT;
-    else if (strcasecmp ("normal", arg) == 0)
-      options.termlevel = NORMAL;
-    else if (strcasecmp ("verbose", arg) == 0)
-      options.termlevel = VERBOSE;
-    else if (strcasecmp ("debug", arg) == 0)
-      options.termlevel = DEBUG;
-    else
-      return RC_KW_ERROR;
-    break;
-
-  case KW_ALLOW_LOCAL_MTA:
-    setbool (arg, topt, T_ALLOW_LOCAL_MTA);
-    break;
-
-  case KW_USER_NOTPRIVILEGED:
-    assign_string (&session.notprivileged, arg);
-    topt |= T_USER_NOTPRIVIL;
-    break;
-
-  case KW_LOGFILE:
-    if (method == CF_CLIENT)
-      {
-	xfree (options.ulogfile);
-	options.ulogfile = xstrdup (arg);
-      }
-    else if (getpid () == 0)
-      anubis_warning (0,
-	       _("`logfile' directive is ignored in main configuration file"));
-    else
-      {
-	topt |= T_DISABLE_SYSLOG;
-	xfree (options.ulogfile);
-	options.ulogfile = xstrdup (arg);
-      }
-    break;
-
-  case KW_LOGLEVEL:
-    if (strcasecmp ("none", arg) == 0)
-      options.uloglevel = NONE;
-    else if (strcasecmp ("all", arg) == 0)
-      options.uloglevel = ALL;
-    else if (strcasecmp ("fails", arg) == 0)
-      options.uloglevel = FAILS;
-    else
-      return RC_KW_ERROR;
-    break;
-
-  case KW_TRACEFILE:
-    if (method & (CF_SUPERVISOR | CF_INIT))
-      setbool (arg, topt, T_TRACEFILE_SYS);
-    else if (method == CF_CLIENT)
-      {
-	if (strcasecmp ("no", arg) == 0)
-	  topt &= ~T_TRACEFILE_USR;
-	else
-	  {
-	    xfree (options.tracefile);
-	    if (strcasecmp ("yes", arg) == 0)
-	      {
-		if (options.ulogfile)
-		  {
-		    options.tracefile = strdup (options.ulogfile);
-		    topt |= T_TRACEFILE_USR;
-		  }
-		else
-		  topt &= ~T_TRACEFILE_USR;
-	      }
-	    else
-	      {
-		options.tracefile = xstrdup (arg);
-		topt |= T_TRACEFILE_USR;
-	      }
-	  }
-      }
-    break;
-
-  case KW_REMOTE_MTA:
-    parse_mtaport (arg, &session.mta, &session.mta_port);
-    break;
-
-  case KW_LOCAL_MTA:
-    if (!(topt & T_LOCAL_MTA)) /* Command line option overrides config */
-                               /* FIXME: generally speaking *all* command
-				  line options should */
-      { 
-	xfree (session.execpath);
-	argcv_free (-1, session.execargs);
-	session.execpath = strdup (arg);
-	session.execargs = list_to_argv (arglist);
-	topt |= T_LOCAL_MTA;
-      }
-    break;
-
-#if defined (WITH_GSASL)
-  case KW_ESMTP_AUTH:
+  int method = eval_env_method (env);
+  
+  switch (key)
     {
-      char *p = strchr (arg, ':');
-      if (p)
+    case KW_BIND:
+      parse_mtahost (arg, &session.anubis, &session.anubis_port);
+      if (session.anubis && strlen (session.anubis) != 0)
+	topt |= T_NAMES;
+      break;
+      
+    case KW_RULE_PRIORITY:
+      if (strcasecmp (arg, "user") == 0)
+	anubis_section_set_prio ("RULE", prio_user);
+      else if (strcasecmp (arg, "user-only") == 0)
+	anubis_section_set_prio ("RULE", prio_user_only);
+      else if (strcasecmp (arg, "system") == 0)
+	anubis_section_set_prio ("RULE", prio_system);
+      else if (strcasecmp (arg, "system-only") == 0)
+	anubis_section_set_prio ("RULE", prio_system_only);
+      else
+	eval_error (0, env, _("invalid rule priority"));
+      break;
+      
+    case KW_CONTROL_PRIORITY:
+      if (strcasecmp (arg, "user") == 0)
+	anubis_section_set_prio ("CONTROL", prio_user);
+      else if (strcasecmp (arg, "system") == 0)
+	anubis_section_set_prio ("CONTROL", prio_system);
+      else
+	eval_error (0, env, _("invalid control priority"));
+      break;
+      
+    case KW_TERMLEVEL:
+      if (strcasecmp ("silent", arg) == 0)
+	options.termlevel = SILENT;
+      else if (strcasecmp ("normal", arg) == 0)
+	options.termlevel = NORMAL;
+      else if (strcasecmp ("verbose", arg) == 0)
+	options.termlevel = VERBOSE;
+      else if (strcasecmp ("debug", arg) == 0)
+	options.termlevel = DEBUG;
+      else
+	eval_error (0, env, _("invalid termlevel"));
+      break;
+      
+    case KW_ALLOW_LOCAL_MTA:
+      setbool (env, arg, topt, T_ALLOW_LOCAL_MTA);
+      break;
+      
+    case KW_USER_NOTPRIVILEGED:
+      assign_string (&session.notprivileged, arg);
+      topt |= T_USER_NOTPRIVIL;
+      break;
+      
+    case KW_LOGFILE:
+      if (method == CF_CLIENT)
 	{
-	  *p++ = 0;
-	  auth_password = strdup (p);
-	  authentication_id = strdup (arg);
-	  authorization_id = strdup (arg);
-	  topt |= T_ESMTP_AUTH;
+	  xfree (options.ulogfile);
+	  options.ulogfile = xstrdup (arg);
 	}
-    }
-    break;
-
-  case KW_ESMTP_ANONYMOUS_TOKEN:
-    anon_token = strdup (arg);
-    topt |= T_ESMTP_AUTH;
-    break;
-    
-  case KW_ESMTP_AUTH_ID:
-    authentication_id = strdup (arg);
-    topt |= T_ESMTP_AUTH;
-    break;
-    
-  case KW_ESMTP_AUTHZ_ID:
-    authorization_id = strdup (arg);
-    topt |= T_ESMTP_AUTH;
-    break;
-    
-  case KW_ESMTP_PASSWORD:
-    auth_password = strdup (arg);
-    topt |= T_ESMTP_AUTH;
-    break;
-    
-  case KW_ESMTP_SERVICE:
-    auth_service = strdup (arg);
-    topt |= T_ESMTP_AUTH;
-    break;
-    
-  case KW_ESMTP_HOSTNAME:
-    auth_hostname = strdup (arg);
-    topt |= T_ESMTP_AUTH;
-    break;
-    
-  case KW_ESMTP_GENERIC_SERVICE:
-    generic_service_name = strdup (arg);
-    topt |= T_ESMTP_AUTH;
-    break;
-    
-  case KW_ESMTP_PASSCODE:
-    auth_passcode = strdup (arg);
-    topt |= T_ESMTP_AUTH;
-    break;
-    
-  case KW_ESMTP_REALM:
-    auth_realm = strdup (arg);
-    topt |= T_ESMTP_AUTH;
-    break;
-
-  case KW_ESMTP_ALLOWED_MECH:
-    anubis_set_client_mech_list (arglist);
-    topt |= T_ESMTP_AUTH;
-    break;
-
-  case KW_ESMTP_REQUIRE_ENCRYPTION:
-    anubis_set_encryption_mech_list (arglist);
-    break;
-    
-#endif 
-
-  case KW_LOCAL_DOMAIN:
-    anubis_domain = strdup (arg);
-    break;
-
-#ifdef USE_SOCKS_PROXY
-  case KW_SOCKS_PROXY:
-    parse_mtaport (arg, &session.socks, &session.socks_port);
-    if_empty_set (session.socks, topt, T_SOCKS);
-    break;
-
-  case KW_SOCKS_V4:
-    setbool (arg, topt, T_SOCKS_V4);
-    break;
-
-  case KW_SOCKS_AUTH:
-    {
-      char *p = 0;
-      p = strchr (arg, ':');
-      if (p)
+      else if (getpid () == 0)
+	eval_warning (env,
+		      _("`logfile' directive is ignored in main configuration file"));
+      else
 	{
-	  *p++ = 0;
-	  assign_string (&session.socks_password, p);
-	  assign_string (session.socks_username, arg);
-	  topt |= T_SOCKS_AUTH;
+	  topt |= T_DISABLE_SYSLOG;
+	  xfree (options.ulogfile);
+	  options.ulogfile = xstrdup (arg);
 	}
       break;
-    }
+      
+    case KW_LOGLEVEL:
+      if (strcasecmp ("none", arg) == 0)
+	options.uloglevel = NONE;
+      else if (strcasecmp ("all", arg) == 0)
+	options.uloglevel = ALL;
+      else if (strcasecmp ("fails", arg) == 0)
+	options.uloglevel = FAILS;
+      else
+	eval_error (0, env, _("invalid loglevel"));
+      break;
+      
+    case KW_TRACEFILE:
+      if (method & (CF_SUPERVISOR | CF_INIT))
+	setbool (env, arg, topt, T_TRACEFILE_SYS);
+      else if (method == CF_CLIENT)
+	{
+	  if (strcasecmp ("no", arg) == 0)
+	    topt &= ~T_TRACEFILE_USR;
+	  else
+	    {
+	      xfree (options.tracefile);
+	      if (strcasecmp ("yes", arg) == 0)
+		{
+		  if (options.ulogfile)
+		    {
+		      options.tracefile = strdup (options.ulogfile);
+		      topt |= T_TRACEFILE_USR;
+		    }
+		  else
+		    topt &= ~T_TRACEFILE_USR;
+		}
+	      else
+		{
+		  options.tracefile = xstrdup (arg);
+		  topt |= T_TRACEFILE_USR;
+		}
+	    }
+	}
+      break;
+      
+    case KW_REMOTE_MTA:
+      parse_mtaport (arg, &session.mta, &session.mta_port);
+      break;
+      
+    case KW_LOCAL_MTA:
+      if (!(topt & T_LOCAL_MTA)) /* Command line option overrides config */
+	                         /* FIXME: generally speaking *all* command
+				    line options should */
+	{ 
+	  xfree (session.execpath);
+	  argcv_free (-1, session.execargs);
+	  session.execpath = strdup (arg);
+	  session.execargs = list_to_argv (arglist);
+	  topt |= T_LOCAL_MTA;
+	}
+      break;
+      
+#if defined (WITH_GSASL)
+    case KW_ESMTP_AUTH:
+      {
+	char *p = strchr (arg, ':');
+	if (p)
+	  {
+	    *p++ = 0;
+	    auth_password = strdup (p);
+	    authentication_id = strdup (arg);
+	    authorization_id = strdup (arg);
+	    topt |= T_ESMTP_AUTH;
+	  }
+      }
+      break;
+      
+    case KW_ESMTP_ANONYMOUS_TOKEN:
+      anon_token = strdup (arg);
+      topt |= T_ESMTP_AUTH;
+      break;
+      
+    case KW_ESMTP_AUTH_ID:
+      authentication_id = strdup (arg);
+      topt |= T_ESMTP_AUTH;
+      break;
+      
+    case KW_ESMTP_AUTHZ_ID:
+      authorization_id = strdup (arg);
+      topt |= T_ESMTP_AUTH;
+      break;
+      
+    case KW_ESMTP_PASSWORD:
+      auth_password = strdup (arg);
+      topt |= T_ESMTP_AUTH;
+      break;
+      
+    case KW_ESMTP_SERVICE:
+      auth_service = strdup (arg);
+      topt |= T_ESMTP_AUTH;
+      break;
+      
+    case KW_ESMTP_HOSTNAME:
+      auth_hostname = strdup (arg);
+      topt |= T_ESMTP_AUTH;
+      break;
+      
+    case KW_ESMTP_GENERIC_SERVICE:
+      generic_service_name = strdup (arg);
+      topt |= T_ESMTP_AUTH;
+      break;
+      
+    case KW_ESMTP_PASSCODE:
+      auth_passcode = strdup (arg);
+      topt |= T_ESMTP_AUTH;
+      break;
+      
+    case KW_ESMTP_REALM:
+      auth_realm = strdup (arg);
+      topt |= T_ESMTP_AUTH;
+      break;
+      
+    case KW_ESMTP_ALLOWED_MECH:
+      anubis_set_client_mech_list (arglist);
+      topt |= T_ESMTP_AUTH;
+      break;
+      
+    case KW_ESMTP_REQUIRE_ENCRYPTION:
+      anubis_set_encryption_mech_list (arglist);
+      break;
+      
+#endif 
+
+    case KW_LOCAL_DOMAIN:
+      anubis_domain = strdup (arg);
+      break;
+
+#ifdef USE_SOCKS_PROXY
+    case KW_SOCKS_PROXY:
+      parse_mtaport (arg, &session.socks, &session.socks_port);
+      if_empty_set (session.socks, topt, T_SOCKS);
+      break;
+      
+    case KW_SOCKS_V4:
+      setbool (env, arg, topt, T_SOCKS_V4);
+      break;
+      
+    case KW_SOCKS_AUTH:
+      {
+	char *p = 0;
+	p = strchr (arg, ':');
+	if (p)
+	  {
+	    *p++ = 0;
+	    assign_string (&session.socks_password, p);
+	    assign_string (session.socks_username, arg);
+	    topt |= T_SOCKS_AUTH;
+	  }
+	break;
+      }
 #endif /* USE_SOCKS_PROXY */
 
-  case KW_READ_ENTIRE_BODY:
-    setbool (arg, topt, T_ENTIRE_BODY);
-    break;
-
-  case KW_DROP_UNKNOWN_USER:
-    setbool (arg, topt, T_DROP_UNKNOWN_USER);
-    break;
-
-  case KW_MODE:
-    if (anubis_mode != anubis_mda) /* Special case. See comment to
-				      KW_LOCAL_MAILER directive, though */
-      {
-	if (list_count (arglist) != 1)
-	  return RC_KW_ERROR;
-	if (anubis_set_mode (arg))
-	  return RC_KW_ERROR;
-      }
-    break;
-
-  case KW_INCOMING_MAIL_RULE:
-    incoming_mail_rule = strdup (arg);
-    break;
-    
-  case KW_OUTGOING_MAIL_RULE:
-    outgoing_mail_rule = strdup (arg);
-    break;
-
-  case KW_LOG_FACILITY:
-    parse_log_facility (arg);
-    break;
-    
-  case KW_LOG_TAG:
-    log_tag = strdup (arg);
-    break;
-    
-  case KW_ALLOW_HANG:
-    {
-      char *p;
-      ITERATOR *itr = iterator_create (arglist);
+    case KW_READ_ENTIRE_BODY:
+      setbool (env, arg, topt, T_ENTIRE_BODY);
+      break;
       
-      allow_hang_users = list_create ();
-      for (p = iterator_first (itr); p; p = iterator_next (itr))
-	list_append (allow_hang_users, strdup (p));
-    }
-    break;
-    
-  case KW_HANG:
-    if (list_locate (allow_hang_users, session.clientname, anubis_name_cmp))
+    case KW_DROP_UNKNOWN_USER:
+      setbool (env, arg, topt, T_DROP_UNKNOWN_USER);
+      break;
+      
+    case KW_MODE:
+      if (anubis_mode != anubis_mda) /* Special case. See comment to
+					KW_LOCAL_MAILER directive, though */
+	{
+	  if (list_count (arglist) != 1)
+	    eval_error (1, env, _("not enough arguments"));
+	  else if (anubis_set_mode (arg))
+	    eval_error (0, env, _("invalid mode: %s"), arg);
+	}
+      break;
+      
+    case KW_INCOMING_MAIL_RULE:
+      incoming_mail_rule = strdup (arg);
+      break;
+      
+    case KW_OUTGOING_MAIL_RULE:
+      outgoing_mail_rule = strdup (arg);
+      break;
+      
+    case KW_LOG_FACILITY:
+      parse_log_facility (arg);
+      break;
+      
+    case KW_LOG_TAG:
+      log_tag = strdup (arg);
+      break;
+      
+    case KW_ALLOW_HANG:
       {
-	int keep_termlevel = options.termlevel;
-
-	_anubis_hang = atoi (arg ? arg : "3600");
-	options.termlevel = DEBUG;
-	anubis_warning (0, ngettext ("Child process suspended for %lu second",
-				     "Child process suspended for %lu seconds",
-				     _anubis_hang),
-			_anubis_hang);
-	options.termlevel = keep_termlevel;
+	char *p;
+	ITERATOR *itr = iterator_create (arglist);
 	
-	while (_anubis_hang-- > 0)
-	  sleep (1);
+	allow_hang_users = list_create ();
+	for (p = iterator_first (itr); p; p = iterator_next (itr))
+	  list_append (allow_hang_users, strdup (p));
       }
-    else
-      anubis_warning (0,
-		      _("Command HANG is not allowed for user `%s'"),
-		      session.clientname);
-    break;
-    
-  default:
-    return RC_KW_UNKNOWN;
-  }
-  return RC_KW_HANDLED;
+      break;
+      
+    case KW_HANG:
+      if (list_locate (allow_hang_users, session.clientname, anubis_name_cmp))
+	{
+	  int keep_termlevel = options.termlevel;
+	  
+	  _anubis_hang = atoi (arg ? arg : "3600");
+	  options.termlevel = DEBUG;
+	  eval_warning (env,
+			ngettext ("Child process suspended for %lu second",
+				  "Child process suspended for %lu seconds",
+				  _anubis_hang),
+			_anubis_hang);
+	  options.termlevel = keep_termlevel;
+	  
+	  while (_anubis_hang-- > 0)
+	    sleep (1);
+	}
+      else
+	anubis_warning (0,
+			_("Command HANG is not allowed for user `%s'"),
+			session.clientname);
+      break;
+      
+    default:
+      eval_error (2, env,
+		  _("INTERNAL ERROR at %s:%d: unhandled key %d; "
+		    "please report"),
+		  __FILE__, __LINE__,
+		  key);
+    }
 }
 
 static struct rc_kwdef init_kw[] = {
@@ -727,41 +733,44 @@ static struct rc_secdef_child control_sect_child = {
 #define KW_SSL_KEY             4
 #define KW_SSL_CAFILE          5
 
-int
-tls_parser (int method, int key, ANUBIS_LIST * arglist,
-	    void *inv_data, void *func_data, MESSAGE * msg)
+void
+tls_parser (EVAL_ENV env, int key, ANUBIS_LIST *arglist, void *inv_data)
 {
   char *arg = list_item (arglist, 0);
-  switch (key) {
-  case KW_SSL:
-    setbool (arg, topt, T_SSL);
-    break;
-
-  case KW_SSL_ONEWAY:
-    setbool (arg, topt, T_SSL_ONEWAY);
-    break;
-
-  case KW_SSL_CERT:
-    xfree (secure.cert);
-    secure.cert = xstrdup (arg);
-    break;
-
-  case KW_SSL_KEY:
-    xfree (secure.key);
-    secure.key = xstrdup (arg);
-    if (method == CF_CLIENT)
-      topt |= T_SSL_CKCLIENT;
-    break;
-
-  case KW_SSL_CAFILE:
-    xfree (secure.cafile);
-    secure.cafile = xstrdup (arg);
-    break;
-
-  default:
-    return RC_KW_UNKNOWN;
+  switch (key)
+    {
+    case KW_SSL:
+      setbool (env, arg, topt, T_SSL);
+      break;
+      
+    case KW_SSL_ONEWAY:
+      setbool (env, arg, topt, T_SSL_ONEWAY);
+      break;
+      
+    case KW_SSL_CERT:
+      xfree (secure.cert);
+      secure.cert = xstrdup (arg);
+      break;
+      
+    case KW_SSL_KEY:
+      xfree (secure.key);
+      secure.key = xstrdup (arg);
+      if (eval_env_method (env) == CF_CLIENT)
+	topt |= T_SSL_CKCLIENT;
+      break;
+      
+    case KW_SSL_CAFILE:
+      xfree (secure.cafile);
+      secure.cafile = xstrdup (arg);
+      break;
+      
+    default:
+      eval_error (2, env,
+		  _("INTERNAL ERROR at %s:%d: unhandled key %d; "
+		    "please report"),
+		  __FILE__, __LINE__,
+		  key);
   }
-  return RC_KW_HANDLED;
 }
 
 static struct rc_kwdef tls_kw[] = {
@@ -803,44 +812,48 @@ control_section_init (void)
 #define KW_EXTERNAL_BODY_PROCESSOR  4
 #define KW_BODY_CLEAR               5
 
-int
-rule_parser (int method, int key, ANUBIS_LIST * arglist,
-	     void *inv_data, void *func_data, MESSAGE * msg)
+void
+rule_parser (EVAL_ENV env, int key, ANUBIS_LIST *arglist, void *inv_data)
 {
+  MESSAGE *msg = eval_env_message (env);
   char *arg = list_item (arglist, 0);
   char **argv;
 
-  switch (key) {
-  case KW_SIGNATURE_FILE_APPEND:
-    if (strcasecmp ("no", arg))
-      message_append_signature_file (msg);
-    break;
-
-  case KW_BODY_APPEND:
-    message_append_text_file (msg, arg);
-    break;
-
-  case KW_BODY_CLEAR:
-    xfree (msg->body);
-    msg->body = strdup ("");
-    break;
-
-  case KW_BODY_CLEAR_APPEND:
-    xfree (msg->body);
-    msg->body = strdup ("");
-    message_append_text_file (msg, arg);
-    break;
-
-  case KW_EXTERNAL_BODY_PROCESSOR:
-    argv = list_to_argv (arglist);
-    message_external_proc (msg, argv);
-    argcv_free (-1, argv);
-    break;
-
-  default:
-    return RC_KW_UNKNOWN;
-  }
-  return RC_KW_HANDLED;
+  switch (key)
+    {
+    case KW_SIGNATURE_FILE_APPEND:
+      if (strcasecmp ("no", arg))
+	message_append_signature_file (msg);
+      break;
+      
+    case KW_BODY_APPEND:
+      message_append_text_file (msg, arg);
+      break;
+      
+    case KW_BODY_CLEAR:
+      xfree (msg->body);
+      msg->body = strdup ("");
+      break;
+      
+    case KW_BODY_CLEAR_APPEND:
+      xfree (msg->body);
+      msg->body = strdup ("");
+      message_append_text_file (msg, arg);
+      break;
+      
+    case KW_EXTERNAL_BODY_PROCESSOR:
+      argv = list_to_argv (arglist);
+      message_external_proc (msg, argv);
+      argcv_free (-1, argv);
+      break;
+      
+    default:
+      eval_error (2, env,
+		  _("INTERNAL ERROR at %s:%d: unhandled key %d; "
+		    "please report"),
+		  __FILE__, __LINE__,
+		  key);
+    }
 }
 
 struct rc_kwdef rule_kw[] = {
@@ -887,7 +900,7 @@ rc_system_init (void)
 }
 
 void
-rcfile_process_section (int method, char *name, void *data, MESSAGE * msg)
+rcfile_process_section (int method, char *name, void *data, MESSAGE *msg)
 {
   RC_SECTION *sec;
 
@@ -897,7 +910,7 @@ rcfile_process_section (int method, char *name, void *data, MESSAGE * msg)
 }
 
 void
-rcfile_call_section (int method, char *name, void *data, MESSAGE * msg)
+rcfile_call_section (int method, char *name, void *data, MESSAGE *msg)
 {
   RC_SECTION *sec = rc_section_lookup (parse_tree, name);
   if (!sec)

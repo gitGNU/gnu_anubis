@@ -1333,6 +1333,51 @@ struct eval_env
   int traceable;
 };
 
+struct rc_loc const *
+eval_env_locus (struct eval_env *env)
+{
+  return &env->loc;
+}
+
+int
+eval_env_method (struct eval_env *env)
+{
+  return env->method;
+}
+
+MESSAGE *
+eval_env_message (struct eval_env *env)
+{
+  return env->msg;
+}
+
+void *
+eval_env_data (struct eval_env *env)
+{
+  return env->data;
+}
+
+void
+eval_error (int retcode, struct eval_env *env, const char *fmt, ...)
+{
+  va_list ap;
+  va_start(ap, fmt);
+  rc_error_printer (rc_error_printer_data, &env->loc, fmt, ap);
+  va_end(ap);
+  if (retcode)
+    longjmp(env->jmp, retcode);
+}
+
+void
+eval_warning (struct eval_env *env, const char *fmt, ...)
+{
+  va_list ap;
+  va_start(ap, fmt);
+  /* FIXME: Prefix fmt with 'warning: ' */
+  rc_error_printer (rc_error_printer_data, &env->loc, fmt, ap);
+  va_end(ap);
+}
+
 static void asgn_eval (struct eval_env *env, RC_ASGN *asgn);
 static int node_eval (struct eval_env *env, RC_NODE *node);
 static int bool_eval (struct eval_env *env, RC_BOOL *bool);
@@ -1431,12 +1476,11 @@ asgn_eval (struct eval_env *env, RC_ASGN *asgn)
 	  list_append (arg, str);
 	}
       iterator_destroy (&itr);
-      p->parser (env->method, key, arg, p->data, env->data, env->msg);
+      p->parser (env, key, arg, p->data);
       list_destroy (&arg, anubis_free_list_item, NULL);
     }
   else
-    p->parser (env->method, key, asgn->rhs, p->data, env->data,
-	       env->msg);
+    p->parser (env, key, asgn->rhs, p->data);
 }
 
 
