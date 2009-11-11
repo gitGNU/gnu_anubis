@@ -33,31 +33,73 @@
 extern int yylex (void);
 int yyerror (char *s);
 
-static RC_SECTION *rc_section_create (char *, size_t, RC_STMT *);
+static RC_SECTION *rc_section_create (char *, RC_LOC *, RC_STMT *);
 static void rc_section_destroy (RC_SECTION **);
 static void rc_section_print (RC_SECTION *);
 static void rc_asgn_destroy (RC_ASGN *);
 static void rc_bool_destroy (RC_BOOL *);
 static void rc_level_print (int, char *);
-static RC_NODE *rc_node_create (enum rc_node_type);
+ static RC_NODE *rc_node_create (enum rc_node_type, struct rc_loc *loc);
 static void rc_node_destroy (RC_NODE *);
 static void rc_node_print (RC_NODE *);
 static void rc_rule_destroy (RC_RULE *);
 static void rc_cond_destroy (RC_COND *);
-static RC_STMT *rc_stmt_create (enum rc_stmt_type);
+ static RC_STMT *rc_stmt_create (enum rc_stmt_type, struct rc_loc *loc);
 static void rc_stmt_destroy (RC_STMT *);
 static void rc_stmt_list_destroy (RC_STMT *);
 static void rc_stmt_print (RC_STMT *, int);
-static int reg_modifier_add (int *, char *);
+ static int reg_modifier_add (int *, char *, struct rc_loc *);
 static int check_kw (char *ident, int *flags);
-static int is_prog_allowed (void);
+static int is_prog_allowed (struct rc_loc *);
  
 static RC_SECTION *rc_section;
 static int debug_level;
 static int error_count;
 static int def_regex_modifier = R_POSIX;
 static struct rc_secdef *rc_secdef;
+
+#define YYLLOC_DEFAULT(Current, Rhs, N)			  \
+  do							  \
+    {							  \
+      if (N)						  \
+	{						  \
+	  (Current).beg = YYRHSLOC(Rhs, 1).beg;		  \
+	  (Current).end = YYRHSLOC(Rhs, N).end;		  \
+	}						  \
+      else						  \
+	{						  \
+	  (Current).beg = YYRHSLOC(Rhs, 0).end;		  \
+	  (Current).end = (Current).beg;		  \
+	}						  \
+    }							  \
+  while (0)
+
+#define YY_LOCATION_PRINT(File, Loc)			    \
+  do							    \
+    {							    \
+      if (RC_LOCUS_FILE_EQ(&(Loc).beg, &(Loc).end))	    \
+	fprintf(File, "%s:%lu.%lu-%lu.%lu",		    \
+		(Loc).beg.file,				    \
+		(unsigned long) (Loc).beg.line,		    \
+		(unsigned long) (Loc).beg.column,	    \
+		(unsigned long) (Loc).end.line,		    \
+		(unsigned long) (Loc).end.column);	    \
+      else						    \
+	fprintf(File, "%s:%lu.%lu-%s:%lu.%lu",		    \
+		(Loc).beg.file,				    \
+		(unsigned long) (Loc).beg.line,		    \
+		(unsigned long) (Loc).beg.column,	    \
+		(Loc).end.file,				    \
+		(unsigned long) (Loc).end.line,		    \
+		(unsigned long) (Loc).end.column);	    \
+    }							    \
+  while (0)
+ 
 %}
+
+%error-verbose
+%locations
+%expect 2
 
 %union {
   char *string;
@@ -79,10 +121,7 @@ static struct rc_secdef *rc_secdef;
     char *sep;
   } msgpart;
   RC_LOC loc;
-  struct {
-    size_t line;
-    char *name;
-  } begin_sec;
+  char *begin_sec;
   ANUBIS_LIST *list;
   int eq;
 };
@@ -153,7 +192,7 @@ section  : /* empty */ EOL
 	   }
          | begin stmtlist end
            {
-	     $$ = rc_section_create ($1.name, $1.line, $2.head);
+	     $$ = rc_section_create ($1, &@1.beg, $2.head);
 	   }
          | begin end
            {
@@ -163,18 +202,16 @@ section  : /* empty */ EOL
 
 begin    : T_BEGIN { verbatim (); } string EOL
            {
-	     $$.line = cfg_line_num - 1;
-	     $$.name = $3;
+	     $$ = $3;
 	     if (rc_section_lookup (rc_section, $3)) 
-	       parse_error (_("Section %s already defined"), $3);
+	       parse_error (&@3.beg, _("Section %s already defined"), $3);
 	     rc_secdef = anubis_find_section ($3);
 	   }
          | D_BEGIN EOL
            {
-	     $$.line = cfg_line_num - 1;
-	     $$.name = $1;
+	     $$ = $1;
 	     if (rc_section_lookup (rc_section, $1)) 
-	       parse_error (_("Section %s already defined"), $1);
+	       parse_error (&@1.beg, _("Section %s already defined"), $1);
 	     rc_secdef = anubis_find_section ($1);
 	   }		   
          ;
@@ -226,11 +263,11 @@ asgn_stmt: keyword arglist
 	     int flags;
 	     if (!check_kw ($1, &flags))
 	       {
-		 parse_error (_("unknown keyword: %s"), $1);
+		 parse_error (&@1.beg, _("unknown keyword: %s"), $1);
 		 YYERROR;
 	       }
 
-	     $$ = rc_stmt_create (rc_stmt_asgn);
+	     $$ = rc_stmt_create (rc_stmt_asgn, &@1.beg);
 	     $$->v.asgn.lhs = $1;
 	     if (list_count ($2))
 	       {
@@ -266,14 +303,14 @@ arg      : string
 
 cond_stmt: if cond stmtlist fi
            {
-	     $$ = rc_stmt_create (rc_stmt_cond);
+	     $$ = rc_stmt_create (rc_stmt_cond, &@1.beg);
 	     $$->v.cond.node = $2;
 	     $$->v.cond.iftrue = $3.head;
 	     $$->v.cond.iffalse = NULL;
 	   }
          | if cond stmtlist else stmtlist fi
            {
-	     $$ = rc_stmt_create (rc_stmt_cond);
+	     $$ = rc_stmt_create (rc_stmt_cond, &@1.beg);
 	     $$->v.cond.node = $2;
 	     $$->v.cond.iftrue = $3.head;
 	     $$->v.cond.iffalse = $5.head;
@@ -287,21 +324,21 @@ cond     : expr
 	   }
          | cond AND cond
            {
-	     $$ = rc_node_create (rc_node_bool);
+	     $$ = rc_node_create (rc_node_bool, &@2.beg);
 	     $$->v.bool.op = bool_and;
 	     $$->v.bool.left = $1;
 	     $$->v.bool.right = $3;
 	   }
          | cond OR cond
            {
-	     $$ = rc_node_create (rc_node_bool);
+	     $$ = rc_node_create (rc_node_bool, &@2.beg);
 	     $$->v.bool.op = bool_or;
 	     $$->v.bool.left = $1;
 	     $$->v.bool.right = $3;
 	   }
          | NOT cond
            {
-	     $$ = rc_node_create (rc_node_bool);
+	     $$ = rc_node_create (rc_node_bool, &@1.beg);
 	     $$->v.bool.op = bool_not;
 	     $$->v.bool.left = $2;
 	     $$->v.bool.right = NULL;
@@ -367,7 +404,8 @@ s_msgpart: msgpart
            {
 	     $$ = $1;
 	     if ($$.key)
-	       parse_error ("regexp is not allowed in this context");
+	       parse_error (&@1.beg,
+			    _("regexp is not allowed in this context"));
 	   }
          ;
 
@@ -388,7 +426,8 @@ regex    : modlist '[' string ']'
 	     free ($3);
 	     if (!$$)
 	       {
-		 parse_error (_("Invalid regular expression (see the above message)"));
+		 parse_error (&@3.beg,
+			      _("Invalid regular expression (see the above message)"));
 		 YYERROR;
 	       }
 	   }
@@ -406,7 +445,7 @@ string_key: /* empty */
 
 expr     : s_msgpart opt_sep meq opt_modlist string
            {
-	     RC_NODE *node = rc_node_create (rc_node_expr);
+	     RC_NODE *node = rc_node_create (rc_node_expr, &@1.beg);
 	     node->v.expr.part = $1.part;
 	     node->v.expr.key = $1.string;
 	     node->v.expr.sep = $2;
@@ -416,7 +455,7 @@ expr     : s_msgpart opt_sep meq opt_modlist string
 	       $$ = node;
 	     else
 	       {
-		 $$ = rc_node_create (rc_node_bool);
+		 $$ = rc_node_create (rc_node_bool, &@1.beg);
 		 $$->v.bool.op = bool_not;
 		 $$->v.bool.left = node;
 		 $$->v.bool.right = NULL;
@@ -427,12 +466,12 @@ expr     : s_msgpart opt_sep meq opt_modlist string
 modlist  : modifier
            {
 	     $$ = def_regex_modifier;
-	     reg_modifier_add (&$$, $1);
+	     reg_modifier_add (&$$, $1, &@1.beg);
 	     xfree ($1);
 	   }
          | modlist modifier
            {
-	     reg_modifier_add (&$1, $2);
+	     reg_modifier_add (&$1, $2, &@1.beg);
 	     xfree ($2);
 	     $$ = $1;
 	   }
@@ -453,7 +492,7 @@ modifier   : ':' IDENT
 
 if       : IF
            {
-	     if (!is_prog_allowed ())
+	     if (!is_prog_allowed (&@1.beg))
 	       YYERROR;
 	   }
          ;
@@ -466,7 +505,7 @@ else     : ELSE
 
 rule_stmt: rule_start EOL stmtlist DONE
            {
-	     $$ = rc_stmt_create (rc_stmt_rule);
+	     $$ = rc_stmt_create (rc_stmt_rule, &@1.beg);
 	     $$->v.rule.node = $1;
 	     $$->v.rule.stmt = $3.head;
 	   }
@@ -474,7 +513,7 @@ rule_stmt: rule_start EOL stmtlist DONE
 
 rule_start: rule opt_modlist string
            {
-	     $$ = rc_node_create (rc_node_expr);
+	     $$ = rc_node_create (rc_node_expr, &@1.beg);
 	     $$->v.expr.part = HEADER;
 	     $$->v.expr.key = strdup (X_ANUBIS_RULE_HEADER);
 	     $$->v.expr.re = anubis_regex_compile ($3, $2);
@@ -484,7 +523,7 @@ rule_start: rule opt_modlist string
 
 rule     : RULE
            {
-	     if (!is_prog_allowed ())
+	     if (!is_prog_allowed (&@1.beg))
 	       YYERROR;
 	   }
          ;
@@ -495,10 +534,10 @@ string   : STRING
 
 inst_stmt: STOP
            {
-	     if (!is_prog_allowed ())
+	     if (!is_prog_allowed (&@1.beg))
 	       YYERROR;
 
-	     $$ = rc_stmt_create (rc_stmt_inst);
+	     $$ = rc_stmt_create (rc_stmt_inst, &@1.beg);
 	     $$->v.inst.opcode = inst_stop;
 	     $$->v.inst.part = NIL;
 	     $$->v.inst.key  = NULL;
@@ -507,10 +546,10 @@ inst_stmt: STOP
 	   }
          | CALL string
            {
-	     if (!is_prog_allowed ())
+	     if (!is_prog_allowed (&@1.beg))
 	       YYERROR;
 
-	     $$ = rc_stmt_create (rc_stmt_inst);
+	     $$ = rc_stmt_create (rc_stmt_inst, &@1.beg);
 	     $$->v.inst.opcode = inst_call;
 	     $$->v.inst.key = NULL;
 	     $$->v.inst.part = NIL;
@@ -519,10 +558,10 @@ inst_stmt: STOP
 	   }
          | ADD s_msgpart string
            {
-	     if (!is_prog_allowed ())
+	     if (!is_prog_allowed (&@1.beg))
 	       YYERROR;
 
-	     $$ = rc_stmt_create (rc_stmt_inst);
+	     $$ = rc_stmt_create (rc_stmt_inst, &@1.beg);
 	     $$->v.inst.opcode = inst_add;
 	     $$->v.inst.part = $2.part;
 	     $$->v.inst.key  = NULL;
@@ -531,10 +570,10 @@ inst_stmt: STOP
 	   }
          | REMOVE r_msgpart
            {
-	     if (!is_prog_allowed ())
+	     if (!is_prog_allowed (&@1.beg))
 	       YYERROR;
 
-	     $$ = rc_stmt_create (rc_stmt_inst);
+	     $$ = rc_stmt_create (rc_stmt_inst, &@1.beg);
 	     $$->v.inst.opcode = inst_remove;
 	     $$->v.inst.part = $2.part;
 	     $$->v.inst.key = $2.key;
@@ -543,10 +582,10 @@ inst_stmt: STOP
 	   }
          | MODIFY r_msgpart string_key string
            {
-	     if (!is_prog_allowed ())
+	     if (!is_prog_allowed (&@1.beg))
 	       YYERROR;
 
-	     $$ = rc_stmt_create (rc_stmt_inst);
+	     $$ = rc_stmt_create (rc_stmt_inst, &@1.beg);
 	     $$->v.inst.opcode = inst_modify;
 	     $$->v.inst.part = $2.part;
 	     $$->v.inst.key  = $2.key;
@@ -555,16 +594,17 @@ inst_stmt: STOP
 	   }
          | MODIFY r_msgpart string_key 
            {
-	     if (!is_prog_allowed ())
+	     if (!is_prog_allowed (&@1.beg))
 	       YYERROR;
 
-	     $$ = rc_stmt_create (rc_stmt_inst);
+	     $$ = rc_stmt_create (rc_stmt_inst, &@1.beg);
 	     $$->v.inst.opcode = inst_modify;
 	     $$->v.inst.part = $2.part;
 	     $$->v.inst.key  = $2.key;
 	     if ($3 == NULL && anubis_regex_refcnt ($2.key))
 	       {
-		 parse_error (_("missing replacement value"));
+		 /* FIXME: Perhaps --line? */
+		 parse_error (&@2.end, _("missing replacement value"));
 	       }
 	     $$->v.inst.key2 = $3;
 	     $$->v.inst.arg  = NULL;
@@ -573,7 +613,7 @@ inst_stmt: STOP
 
 modf_stmt: REGEX modlist
            {
-	     if (!is_prog_allowed ())
+	     if (!is_prog_allowed (&@1.beg))
 	       YYERROR;
 
 	     def_regex_modifier = $2;
@@ -583,33 +623,34 @@ modf_stmt: REGEX modlist
 
 %%
 
-static int
-err_line_num (void)
-{
-  return yychar == EOL ? cfg_line_num - 1 : cfg_line_num;
-}
-
 static void
 default_error_printer (void *data, 
-		       const char *filename, int line,
+		       struct rc_loc *loc,
 		       const char *fmt, va_list ap)
 {
   char buf[LINEBUFFER];
   vsnprintf (buf, sizeof buf, fmt, ap);
-  anubis_error (0, 0, "%s:%d: %s", filename, line, buf);
+  if (topt & T_LOCATION_COLUMN)
+    anubis_error (0, 0, "%s:%lu.%lu: %s",
+		  loc->file,
+		  (unsigned long)loc->line,
+		  (unsigned long)loc->column,
+		  buf);
+  else
+    anubis_error (0, 0, "%s:%lu: %s",
+		  loc->file, (unsigned long)loc->line, buf);
 }	
 
 static void *rc_error_printer_data;
 static RC_ERROR_PRINTER rc_error_printer = default_error_printer;
 
 void
-parse_error (const char *fmt, ...)
+parse_error (struct rc_loc *loc, const char *fmt, ...)
 {
   va_list ap;
   
   va_start (ap, fmt);
-  rc_error_printer (rc_error_printer_data,
-		    cfg_file, err_line_num (), fmt, ap);
+  rc_error_printer (rc_error_printer_data, loc ? loc : &rc_locus, fmt, ap);
   va_end (ap);
   error_count++;
 }
@@ -617,7 +658,7 @@ parse_error (const char *fmt, ...)
 int
 yyerror (char *s)
 {
-  parse_error ("%s", s);
+  parse_error (NULL, "%s", s);
   return 0;
 }
 
@@ -625,6 +666,15 @@ RC_SECTION *
 rc_parse (char *name)
 {
   int status;
+
+  yydebug = yy_flex_debug = 0;
+  if (debug_level > 1)
+    {
+      yydebug = 1;
+      if (debug_level > 2)
+	yy_flex_debug = 1;
+    }
+
   if (rc_open (name))
     return NULL;
 
@@ -666,8 +716,6 @@ rc_set_debug_level (char *arg)
     }
   else
     debug_level = arg[0] - '0';
-  if (debug_level > 1)
-    yydebug = debug_level;
 }
 
 
@@ -738,10 +786,11 @@ string_destroy (char *str)
 /* Initializes LOC with the current location. If the second argument
    is not zero, it overrides the current line number. */
 void
-rc_mark_loc (RC_LOC *loc, size_t line)
+rc_mark_loc (RC_LOC *dst, RC_LOC *src)
 {
-  loc->file = string_create (cfg_file);
-  loc->line = line ? line : cfg_line_num;
+  dst->file = string_create (src->file);
+  dst->line = src->line;
+  dst->column = src->column;
 }
 
 /* Reclaims the memory associated with the LOC */
@@ -755,10 +804,10 @@ rc_destroy_loc (RC_LOC *loc)
 /* Section manipulation */
 
 RC_SECTION *
-rc_section_create (char *name, size_t line, RC_STMT *stmt)
+rc_section_create (char *name, struct rc_loc *loc, RC_STMT *stmt)
 {
   RC_SECTION *p = xmalloc (sizeof (*p));
-  rc_mark_loc (&p->loc, line);
+  rc_mark_loc (&p->loc, loc);
   p->next = NULL;
   p->name = name;
   p->stmt = stmt;
@@ -892,12 +941,13 @@ rc_bool_destroy (RC_BOOL *bool)
 
 /* Nodes */
 
+/* FIXME: 2nd should better be struct rc_yyltype */
 RC_NODE *
-rc_node_create (enum rc_node_type t)
+rc_node_create (enum rc_node_type t, struct rc_loc *loc)
 {
   RC_NODE *p = xmalloc (sizeof (*p));
   memset (p, 0, sizeof (*p));
-  rc_mark_loc (&p->loc, 0);
+  rc_mark_loc (&p->loc, loc);
   p->type = t;
   return p;
 }
@@ -1055,13 +1105,13 @@ rc_inst_print (RC_INST *inst, int level)
 }
 
 /* Statements */
-
+/* FIXME: See rc_node_create */
 RC_STMT *
-rc_stmt_create (enum rc_stmt_type type)
+rc_stmt_create (enum rc_stmt_type type, struct rc_loc *loc)
 {
   RC_STMT *p = xmalloc (sizeof (*p));
   memset (p, 0, sizeof (*p));
-  rc_mark_loc (&p->loc, 0);
+  rc_mark_loc (&p->loc, loc);
   p->type = type;
   return p;
 }
@@ -1173,7 +1223,7 @@ rc_stmt_print (RC_STMT *stmt, int level)
 }
 
 int
-reg_modifier_add (int *flag, char *opt)
+reg_modifier_add (int *flag, char *opt, struct rc_loc *loc)
 {
   /* Regex types: */
   if (!strcasecmp (opt, "re") || !strcasecmp (opt, "regex"))
@@ -1213,7 +1263,7 @@ reg_modifier_add (int *flag, char *opt)
     re_clear_flag (*flag, R_SCASE);
   else
     {
-      parse_error (_("Unknown regexp modifier"));
+      parse_error (loc, _("Unknown regexp modifier"));
       return 1;
     }
   return 0;
@@ -1665,13 +1715,13 @@ check_kw (char *ident, int *flags)
 }
 
 static int
-is_prog_allowed (void)
+is_prog_allowed (struct rc_loc *loc)
 {
   struct rc_secdef *p = rc_secdef;
   if (!p)
     p = anubis_find_section ("RULE");
   
   if (!p->allow_prog)
-    parse_error (_("program is not allowed in this section"));
+    parse_error (loc, _("program is not allowed in this section"));
   return p->allow_prog;
 }

@@ -240,6 +240,7 @@ ANUBIS_MODE;
 #define T_TRACEFILE_SYS     0x04000000
 #define T_TRACEFILE_USR     0x08000000
 #define T_XELO              0x10000000
+#define T_LOCATION_COLUMN   0x20000000
 
 /* Regexp modifiers */
 /* Basic types */

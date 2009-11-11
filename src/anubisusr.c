@@ -889,7 +889,7 @@ diff (char *file, struct smtp_reply *repl)
       error (_("Invalid MD5 digest: %s"), repl->argv[0]);
       return CMP_ERROR;
     }
-  string_hex_to_bin (sample, repl->argv[0], len);
+  string_hex_to_bin (sample, (unsigned char*)repl->argv[0], len);
 
   return memcmp (digest, sample, sizeof digest) == 0 ?
                  CMP_UNCHANGED : CMP_CHANGED;

@@ -101,7 +101,7 @@ make_temp_file (struct obstack *stk, char *rcname, char **name)
 
 static void
 _xdb_error_printer (void *data,
-		    const char *filename, int line,
+		    struct rc_loc *loc,
 		    const char *fmt, va_list ap)
 {
   struct obstack *stk = data;
@@ -109,8 +109,15 @@ _xdb_error_printer (void *data,
   int n;
 
   obstack_grow (stk, ERROR_PREFIX, sizeof ERROR_PREFIX - 1);
-  n = snprintf (buf, sizeof buf, "%d: ", line);
+  /* FIXME: column? */
+  n = snprintf (buf, sizeof buf, "%lu", (unsigned long)loc->line);
   obstack_grow (stk, buf, n);
+  if (topt & T_LOCATION_COLUMN)
+    {
+      n = snprintf (buf, sizeof buf, ".%lu", (unsigned long)loc->column);
+      obstack_grow (stk, buf, n);
+    }
+  obstack_grow (stk, ": ", 2);
   n = vsnprintf (buf, sizeof buf, fmt, ap);
   obstack_grow (stk, buf, n);
   obstack_grow (stk, CRLF, 2);

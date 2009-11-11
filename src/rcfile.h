@@ -34,7 +34,24 @@ struct rc_loc
 {
   char *file;
   size_t line;
+  size_t column;
 };
+
+/* Input location for the parser */
+struct rc_yyltype
+{
+  struct rc_loc beg;
+  struct rc_loc end;
+};
+
+#define YYLTYPE struct rc_yyltype
+
+#define RC_LOCUS_FILE_EQ(a,b)						\
+  (((a)->file == (b)->file) ||						\
+   ((a)->file && (b)->file && strcmp ((a)->file, (b)->file) == 0))
+
+#define RC_LOCUS_EQ(a,b)				\
+  (RC_LOCUS_FILE_EQ(a,b) && (a)->line == (b)->line)
 
 struct rc_section
 {				/* RC Section */
@@ -195,12 +212,11 @@ struct rc_secdef
 };
 
 typedef void (*RC_ERROR_PRINTER) (void *data,
-				  const char *filename, int line,
+				  struct rc_loc *loc,
 				  const char *fmt, va_list ap);
 
 /* Global data */
-extern int cfg_line_num;
-extern char *cfg_file;
+struct rc_loc rc_locus;
 
 /* Function declarations */
 void verbatim (void);
@@ -225,7 +241,8 @@ int rc_open (char *);
 struct rc_secdef *anubis_add_section (char *);
 struct rc_secdef *anubis_find_section (char *);
 
-void parse_error (const char *fmt, ...);
+void parse_error (struct rc_loc *loc, const char *fmt, ...);
 void tracefile (RC_LOC *, const char *fmt, ...);
 
+extern int yy_flex_debug;
 /* EOF */

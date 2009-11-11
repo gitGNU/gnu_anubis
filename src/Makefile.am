@@ -87,15 +87,14 @@ libanubisdb_a_SOURCES = \
  url.c 
 
 AM_YFLAGS = -dtv
+AM_LFLAGS = -dvp
 EXTRA_DIST = getopt.m4 env.opt
 
 BUILT_SOURCES = env.c
 
 localedir = $(datadir)/locale
 DEFS = @DEFS@ -DLOCALEDIR=\"$(localedir)\"
-INCLUDES = @INCLUDES@ @LIBGNUTLS_CFLAGS@ -I$(top_srcdir)/lib \
-	-I$(top_srcdir)/intl 
-
+INCLUDES = @INCLUDES@ @LIBGNUTLS_CFLAGS@ -I$(top_srcdir)/lib
 SUFFIXES=.opt .c
 
 .opt.c:

@@ -56,15 +56,35 @@ static char *multiline_delimiter;
 static int strip_tabs;
  
 static struct string_list *str_head, *str_tail;
-int cfg_line_num;
-char *cfg_file;
+struct rc_loc rc_locus;
 
-extern int yydebug;
-#define DBG(t,s) do {\
- if (yydebug > 1) \
-   printf ("LEX %s:%d: %s %s\n", cfg_file, cfg_line_num, t, s);\
- } while (0)
- 
+#define DBG(t,s)							\
+  do									\
+    {									\
+      if (yy_flex_debug)						\
+	fprintf (stderr,						\
+		 "LEX %s:%lu.%lu-%lu.%lu: %s %s\n",			\
+		 yylloc.beg.file,					\
+		 (unsigned long) yylloc.beg.line,			\
+		 (unsigned long) yylloc.beg.column,			\
+		 (unsigned long) yylloc.end.line,			\
+		 (unsigned long) yylloc.end.column,			\
+		 t, s);							\
+    }									\
+  while (0)
+
+/* Advance locus to the next line */
+void
+advance_line ()
+{
+        ++rc_locus.line;
+        rc_locus.column = 0;
+}
+
+#define YY_USER_ACTION					  \
+  yylloc.beg = yylloc.end = rc_locus;			  \
+  yylloc.end.column += yyleng;
+
 %}
 
 %x STR LIT ML
@@ -76,7 +96,7 @@ RDASHES [ \t]*---
 PUNCT [=:()\[\]]
 %%
          /* End-of-line comments */
-#.*\n          { cfg_line_num++; return EOL; }
+#.*\n          { advance_line(); return EOL; }
 #.*            /* end-of-file comment */;
          /* Keywords */
 BEGIN          return T_BEGIN;
@@ -141,9 +161,9 @@ END |
 <INITIAL,LIT>"<<"-?{IDENT}[ \t]*\n |
 <INITIAL,LIT>"<<"-?{IDENT}[ \t]*#.*\n { BEGIN (ML);
                                         multiline_begin ();
-	                         	cfg_line_num++; }
+	                         	advance_line (); }
 <ML>.*\n { char *p = multiline_strip_tabs (yytext);
-           cfg_line_num++;
+           advance_line ();
 	   
            if (strncmp (p, multiline_delimiter, strlen (multiline_delimiter))
 	        == 0
@@ -157,25 +177,26 @@ END |
 	    multiline_add (p);
          } 
          /* Literal */
-<LIT>\\\n     { cfg_line_num++; }
+<LIT>\\\n     { advance_line (); }
 <LIT>[^ \t\n]+\\\n   { yylval.string = malloc (yyleng-1);
                        memcpy (yylval.string, yytext, yyleng-2);
 		       yylval.string[yyleng-2] = 0;
 		       DBG ("<LIT>STRING", yylval.string);
-		       cfg_line_num++;
+		       advance_line ();
 		       return STRING; }
 <LIT>[^ \t\n]+   { yylval.string = trimcpy ();
 		   DBG ("<LIT>STRING", yylval.string);
 		   return STRING; }
 <LIT>{WS}        ;
-<LIT>\n          { BEGIN (INITIAL); cfg_line_num++; return EOL; }
+<LIT>\n          { BEGIN (INITIAL); advance_line (); return EOL; }
          /* Other tokens */
 {WS}           ;
-\\\n           { cfg_line_num++; }
-\n             { cfg_line_num++; return EOL; }
+\\\n           { advance_line (); }
+\n             { advance_line (); return EOL; }
 {PUNCT}        return yytext[0];
 !=             return NE;
-.              { parse_error (_("Stray character in config: \\%03o. Possibly missing quotes around the string"), yytext[0]); }
+.              { parse_error (&rc_locus,
+			      _("Stray character in config: \\%03o. Possibly missing quotes around the string"), yytext[0]); }
 
 %%
 
@@ -386,8 +407,9 @@ rc_open (char *name)
       return -1;
     }
   
-  cfg_file = name;
-  cfg_line_num = 1;
+  rc_locus.file = name;
+  rc_locus.line = 1;
+  rc_locus.column = 0;
   return 0;
 }
 
@@ -400,13 +422,17 @@ error_sync_begin ()
     {
       if (c == T_BEGIN)
 	{
+	  rc_locus.column -= yyleng;
 	  yyless (0);
+	  yylloc.beg = yylloc.end = rc_locus;
 	  break;
 	}
       else if (c == D_BEGIN)
 	{
 	  xfree (yylval.string);
+	  rc_locus.column -= yyleng;
 	  yyless (0);
+	  yylloc.beg = yylloc.end = rc_locus;
 	  break;
 	}
     }
