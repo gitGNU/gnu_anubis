@@ -97,8 +97,15 @@ tracefile (RC_LOC * loc, const char *fmt, ...)
     return;
 
   if (loc)
-    n = snprintf (msg, LINEBUFFER, "%s:%lu: ",
-		  loc->file, (unsigned long) loc->line);
+    {
+      if (topt & T_LOCATION_COLUMN)
+	n = snprintf (msg, LINEBUFFER, "%s:%lu.%lu: ",
+		      loc->file, (unsigned long) loc->line,
+		      (unsigned long) loc->column);
+      else
+	n = snprintf (msg, LINEBUFFER, "%s:%lu: ",
+		      loc->file, (unsigned long) loc->line);
+    }
   va_start (ap, fmt);
   vsnprintf (msg + n, LINEBUFFER - n, fmt, ap);
   va_end (ap);

@@ -241,8 +241,10 @@ int rc_open (char *);
 struct rc_secdef *anubis_add_section (char *);
 struct rc_secdef *anubis_find_section (char *);
 
-void parse_error (struct rc_loc *loc, const char *fmt, ...);
-void tracefile (RC_LOC *, const char *fmt, ...);
+void parse_error (struct rc_loc *loc, const char *fmt, ...)
+  ANUBIS_PRINTFLIKE(2,3);
+void tracefile (RC_LOC *, const char *fmt, ...)
+  ANUBIS_PRINTFLIKE(2,3);
 
 extern int yy_flex_debug;
 /* EOF */

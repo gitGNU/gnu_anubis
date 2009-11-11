@@ -832,7 +832,8 @@ mta_daemon (int argc, char **argv)
     {
       fd_set rfds;
       struct sockaddr_in his_addr;
-      int sfd, len, status;
+      int sfd, status;
+      socklen_t len;
 
       FD_ZERO (&rfds);
       FD_SET (fd, &rfds);

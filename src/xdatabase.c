@@ -236,7 +236,7 @@ xexamine ()
       memset (hex, 0, sizeof hex); 
       string_bin_to_hex (hex, digest, sizeof digest);
       swrite (SERVER, remote_client, "250 ");
-      swrite (SERVER, remote_client, hex);
+      swrite (SERVER, remote_client, (char*) hex);
       swrite (SERVER, remote_client, CRLF);
     }
   free (rcname);

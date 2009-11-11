@@ -319,7 +319,7 @@ verify_certificate (gnutls_session session)
   if (gnutls_certificate_type_get (session) == GNUTLS_CRT_X509)
     {
       const gnutls_datum *cert_list;
-      int cert_list_size;
+      unsigned int cert_list_size;
       cert_list = gnutls_certificate_get_peers (session, &cert_list_size);
       if (cert_list == 0)
 	{
@@ -404,10 +404,12 @@ print_x509_certificate_info (gnutls_session session)
   char serial[40];
   size_t dn_size = sizeof (dn);
   size_t digest_size = sizeof (digest);
-  int serial_size = sizeof (serial);
+  size_t serial_size = sizeof (serial);
   time_t expiret, activet;
-  int algo, bits, i;
-  int cert_list_size = 0;
+  int algo;
+  unsigned i;
+  unsigned bits;
+  unsigned cert_list_size = 0;
   const gnutls_datum *cert_list;
   gnutls_x509_crt cert;
 

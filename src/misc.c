@@ -112,12 +112,16 @@ anubis_assoc_cmp (void *item, void *data)
 }
 
 static void
-get_port_number (int *port, char *str)
+get_port_number (unsigned *port, char *str)
 {
   char *p;
-  *port = strtoul (str, &p, 0);
-  if (*p)
+  unsigned short sp;
+  unsigned long lp;
+  
+  sp = lp = strtoul (str, &p, 0);
+  if (*p || sp != lp)
     anubis_error (1, 0, _("Invalid port number: %s"), str);
+  *port = (unsigned) lp;
 }
 
 /****************************

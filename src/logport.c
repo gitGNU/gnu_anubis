@@ -114,7 +114,7 @@ _anubis_error_port_flush (SCM port)
   
   wrsize = nl - pt->write_buf;
 
-  dp->flush (dp->flag, pt->write_buf, wrsize);
+  dp->flush (dp->flag, (char *) pt->write_buf, wrsize);
   
   if (wrsize < size)
     {

@@ -78,7 +78,7 @@ void
 advance_line ()
 {
         ++rc_locus.line;
-        rc_locus.column = 0;
+        rc_locus.column = 1;
 }
 
 #define YY_USER_ACTION					  \
@@ -409,7 +409,7 @@ rc_open (char *name)
   
   rc_locus.file = name;
   rc_locus.line = 1;
-  rc_locus.column = 0;
+  rc_locus.column = 1;
   return 0;
 }
 
