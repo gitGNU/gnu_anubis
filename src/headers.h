@@ -458,6 +458,8 @@ void eval_error (int retcode, EVAL_ENV env, const char *fmt, ...)
 void eval_warning (EVAL_ENV env, const char *fmt, ...)
   ANUBIS_PRINTFLIKE(2,3);
 
+void rc_disable_keyword (int mask, const char *kw);
+
 /* help.c */
 void print_config_options (void);
 

@@ -183,7 +183,8 @@ file @file{~/.anubisrc}.
 This solution will free the users from the obligation to have
 @file{~/.anubisrc} on the server machine, so they, for the first time 
 since early Anubis versions, will be able to have their @emph{own}
-configuration files. Current versions (@FIXME{up to version 3.6.2}) require
+configuration files. Current versions(@footnote{At the time of writing
+this document --- Anubis versions up to 3.6.2.} require
 that the user configuration file be stored on the server machine
 before the user is able to use the service. This approach requires a
 certain attention from the system administrator. Should the user

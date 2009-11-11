@@ -209,6 +209,7 @@ struct rc_secdef
 
 typedef void (*RC_ERROR_PRINTER) (void *data,
 				  struct rc_loc *loc,
+				  const char *pfx,
 				  const char *fmt, va_list ap);
 
 /* Global data */

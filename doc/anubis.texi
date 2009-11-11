@@ -548,16 +548,14 @@ The protocol value @samp{gdbm} specifies a @dfn{GDBM database}. For
 the detailed description of @acronym{GDBM} system
 @ref{Top,,Introduction,gdbm,The GNU DBM Manual}.
 
-@FIXME{Technically speaking, each @acronym{GDBM} record consists of
+Technically speaking, each @acronym{GDBM} record consists of
 a @dfn{key} and @dfn{content}. Its @code{key} holds the value of
-@acronym{SMTP} @samp{AUTHID}, whereas its @code{content} holds @acronym{SMTP} password,
-system account name and path to user configuration file, separated by
-commas. As usual, the two last fields are optional.
+@acronym{SMTP} @samp{AUTHID}, whereas its @code{content} holds
+@acronym{SMTP} password, system account name and path to user
+configuration file, separated by commas. As usual, the two last fields
+are optional. 
 
-I doubt if this technical information would be of any use to the
-reader.}
-
-@acronym{URL} syntax for @acronym{GDBM} databases is: 
+The @acronym{URL} syntax for @acronym{GDBM} databases is: 
 
 @smallexample
 gdbm:@var{path}
@@ -690,10 +688,6 @@ five categories:
 @item Removing Existing Records       
 @item Modifying Existing Records
 @end itemize
-
-These operations are described in detail in the following
-subsections@FIXME{Err, actually ``subsubsections'', but I don't like
-the word}. 
 
 @menu
 * Create::              Creating the Database
@@ -1592,7 +1586,7 @@ For security reasons, this option is set to @samp{no}.}
 If this option is set to @samp{yes}, @command{anubis} drops
 sessions which failed verification by the @acronym{IDENT} service.
 
-@FIXME{This option is in effect only in @samp{transparent} mode.}
+This option is in effect only in @samp{transparent} mode.
 
 Default is @samp{no}.
 @end deffn
@@ -2940,12 +2934,18 @@ Its arguments
 @chapter Invoking GNU Anubis
 @cindex command line
 
-The @command{anubis} executable acts like a daemon.
-The program's behavior is controlled by two configuration files,
-which have a @strong{higher} priority than command line options.
-@xref{Configuration}, for details.
+The @command{anubis} executable acts like a daemon, i.e. after
+a successful startup it disconnects itself from the controlling
+terminal@footnote{Unless given the @option{--foreground} command line
+option.} and continues its work in the background. The program reads
+its initial settings from the @samp{CONTROL} section of the site-wide
+configuration file (@pxref{CONTROL Section}) and from the command
+line options.
 
-GNU @command{anubis} supports the following command line options:
+Command line options have higher priority than configuration file
+settings and can be used to temporarily override them.
+
+The following command line options are understood:
 
 @table @samp
 @item --altrc @var{file}
@@ -3284,7 +3284,7 @@ It cannot be specified in configuration file. @FIXME{Why?}
 Anubis uses local mailer to actually deliver messages. The invocation
 line of the local mailer must be given via @option{--local-mta}
 command line option. The @option{local-mta} settings (if any) (@pxref{Basic
-Settings}) are ignored. @FIXME{Again: why?}
+Settings}) are ignored. @FIXME{Is it really so? And, again: why?}
 
 The local mailer invocation line may contain meta-variables
 @code{%sender} and @code{%recipient}, which will be replaced by

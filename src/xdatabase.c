@@ -102,6 +102,7 @@ make_temp_file (struct obstack *stk, char *rcname, char **name)
 static void
 _xdb_error_printer (void *data,
 		    struct rc_loc *loc,
+		    const char *pfx,
 		    const char *fmt, va_list ap)
 {
   struct obstack *stk = data;
@@ -118,6 +119,11 @@ _xdb_error_printer (void *data,
       obstack_grow (stk, buf, n);
     }
   obstack_grow (stk, ": ", 2);
+  if (pfx)
+    {
+      obstack_grow (stk, pfx, strlen (pfx));
+      obstack_grow (stk, ": ", 2);
+    }
   n = vsnprintf (buf, sizeof buf, fmt, ap);
   obstack_grow (stk, buf, n);
   obstack_grow (stk, CRLF, 2);

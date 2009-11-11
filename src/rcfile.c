@@ -447,16 +447,11 @@ control_parser (EVAL_ENV env, int key, ANUBIS_LIST *arglist, void *inv_data)
       break;
       
     case KW_LOCAL_MTA:
-      if (!(topt & T_LOCAL_MTA)) /* Command line option overrides config */
-	                         /* FIXME: generally speaking *all* command
-				    line options should */
-	{ 
-	  xfree (session.execpath);
-	  argcv_free (-1, session.execargs);
-	  session.execpath = strdup (arg);
-	  session.execargs = list_to_argv (arglist);
-	  topt |= T_LOCAL_MTA;
-	}
+      xfree (session.execpath);
+      argcv_free (-1, session.execargs);
+      session.execpath = strdup (arg);
+      session.execargs = list_to_argv (arglist);
+      topt |= T_LOCAL_MTA;
       break;
       
 #if defined (WITH_GSASL)

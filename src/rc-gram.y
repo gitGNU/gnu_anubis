@@ -626,19 +626,25 @@ modf_stmt: REGEX modlist
 static void
 default_error_printer (void *data, 
 		       struct rc_loc *loc,
+		       const char *pfx,
 		       const char *fmt, va_list ap)
 {
   char buf[LINEBUFFER];
   vsnprintf (buf, sizeof buf, fmt, ap);
   if (topt & T_LOCATION_COLUMN)
-    anubis_error (0, 0, "%s:%lu.%lu: %s",
+    anubis_error (0, 0, "%s:%lu.%lu: %s%s%s",
 		  loc->file,
 		  (unsigned long)loc->line,
 		  (unsigned long)loc->column,
+		  pfx ? pfx : "",
+		  pfx ? ": " : "",
 		  buf);
   else
-    anubis_error (0, 0, "%s:%lu: %s",
-		  loc->file, (unsigned long)loc->line, buf);
+    anubis_error (0, 0, "%s:%lu: %s%s%s",
+		  loc->file, (unsigned long)loc->line,
+		  pfx ? pfx : "",
+		  pfx ? ": " : "",
+		  buf);
 }	
 
 static void *rc_error_printer_data;
@@ -650,7 +656,8 @@ parse_error (struct rc_loc *loc, const char *fmt, ...)
   va_list ap;
   
   va_start (ap, fmt);
-  rc_error_printer (rc_error_printer_data, loc ? loc : &rc_locus, fmt, ap);
+  rc_error_printer (rc_error_printer_data, loc ? loc : &rc_locus, NULL,
+		    fmt, ap);
   va_end (ap);
   error_count++;
 }
@@ -1319,6 +1326,65 @@ rc_child_lookup (struct rc_secdef_child *child, char *str,
   return NULL;
 }
 
+
+struct disabled_keyword
+{
+  int method_mask;
+  char *keyword;
+};
+
+
+static ANUBIS_LIST *disabled_keyword_list;
+
+void
+rc_disable_keyword (int mask, const char *kw)
+{
+  ITERATOR *itr;
+  struct disabled_keyword *p;
+  
+  if (!disabled_keyword_list)
+    disabled_keyword_list = list_create ();
+
+  itr = iterator_create (disabled_keyword_list);
+  for (p = iterator_first (itr); p; p = iterator_next (itr))
+    {
+      if (strcmp (p->keyword, kw) == 0)
+	{
+	  p->method_mask |= mask;
+	  break;
+	}
+    }
+  iterator_destroy (&itr);
+  
+  if (!p)
+    {
+      p = xmalloc (sizeof (*p));
+      p->method_mask = mask;
+      p->keyword = xstrdup (kw);
+      list_append (disabled_keyword_list, p);
+    }
+}
+
+int
+rc_keyword_is_disabled (int mask, const char *kw)
+{
+  int rc = 0;
+  if (disabled_keyword_list)
+    {
+      ITERATOR *itr = iterator_create (disabled_keyword_list);
+      struct disabled_keyword *p;
+
+      for (p = iterator_first (itr); p; p = iterator_next (itr))
+	{
+	  if ((rc = (p->method_mask & mask) && strcmp (p->keyword, kw) == 0))
+	    break;
+	}
+      iterator_destroy (&itr);
+    }
+  return rc;
+}
+
+
 struct eval_env
 {
   int method;
@@ -1362,7 +1428,7 @@ eval_error (int retcode, struct eval_env *env, const char *fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
-  rc_error_printer (rc_error_printer_data, &env->loc, fmt, ap);
+  rc_error_printer (rc_error_printer_data, &env->loc, NULL, fmt, ap);
   va_end(ap);
   if (retcode)
     longjmp(env->jmp, retcode);
@@ -1372,9 +1438,10 @@ void
 eval_warning (struct eval_env *env, const char *fmt, ...)
 {
   va_list ap;
+  
   va_start(ap, fmt);
-  /* FIXME: Prefix fmt with 'warning: ' */
-  rc_error_printer (rc_error_printer_data, &env->loc, fmt, ap);
+  rc_error_printer (rc_error_printer_data, &env->loc, _("warning"),
+		    fmt, ap);
   va_end(ap);
 }
 
@@ -1461,7 +1528,14 @@ asgn_eval (struct eval_env *env, RC_ASGN *asgn)
 					       env->method, &key, NULL);
   if (!p)
     return;
-  
+
+  if (rc_keyword_is_disabled (env->method, asgn->lhs))
+    {
+      eval_warning (env,
+		    _("ignoring statement overridden from the command line"));
+      return;
+    }
+
   if (env->traceable)
     tracefile (&env->loc, _("Executing %s"), asgn->lhs);
 
