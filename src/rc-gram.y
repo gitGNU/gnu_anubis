@@ -902,21 +902,22 @@ rc_section_link (RC_SECTION **ap, RC_SECTION *b)
       sd = anubis_find_section (b->name);
       if (sd)
 	{
-	  switch (sd->prio) {
-	  case prio_user:
-	    b->next = *ap;
-	    *ap = b;
-	    break;
+	  switch (sd->prio)
+	    {
+	    case prio_user:
+	      b->next = *ap;
+	      *ap = b;
+	      break;
 	    
-	  case prio_system_only:
-	    rc_section_destroy (&b);
-	    break;
+	    case prio_system_only:
+	      rc_section_destroy (&b);
+	      break;
 	    
-	  default:
-	    b->next = NULL;
-	    a->next = b;
-	    a = b;
-	  }
+	    default:
+	      b->next = NULL;
+	      a->next = b;
+	      a = b;
+	    }
 	}
       else
 	{
@@ -964,15 +965,16 @@ rc_node_destroy (RC_NODE *node)
 {
   if (!node)
     return;
-  switch (node->type) {
-  case rc_node_bool:
-    rc_bool_destroy (&node->v.bool);
-    break;
+  switch (node->type)
+    {
+    case rc_node_bool:
+      rc_bool_destroy (&node->v.bool);
+      break;
     
-  case rc_node_expr:
-    free (node->v.expr.key);
-    anubis_regex_free (&node->v.expr.re);
-  }
+    case rc_node_expr:
+      free (node->v.expr.key);
+      anubis_regex_free (&node->v.expr.re);
+    }
   rc_destroy_loc (&node->loc);
   xfree (node);
 }
@@ -980,59 +982,62 @@ rc_node_destroy (RC_NODE *node)
 static char *
 part_string (int part)
 {
-  switch (part) {
-  case NIL:
-    return "NIL";
-  case COMMAND:
-    return "COMMAND";
-  case HEADER:
-    return "HEADER";
-  case BODY:
-    return "BODY";
-  default:
-    return "UNKNOWN";
-  }
+  switch (part)
+    {
+    case NIL:
+      return "NIL";
+    case COMMAND:
+      return "COMMAND";
+    case HEADER:
+      return "HEADER";
+    case BODY:
+      return "BODY";
+    default:
+      return "UNKNOWN";
+    }
 }
 
 void
 rc_node_print (RC_NODE *node)
 {
-  switch (node->type) {
-  case rc_node_expr:
-    printf ("%s", part_string (node->v.expr.part));
-    if (node->v.expr.key && node->v.expr.key[0] != '\n')
-      printf ("[%s]",node->v.expr.key);
-    if (node->v.expr.sep)
-      printf ("(%s)", node->v.expr.sep);
-    printf (" ");
-    anubis_regex_print (node->v.expr.re);
-    break;
+  switch (node->type)
+    {
+    case rc_node_expr:
+      printf ("%s", part_string (node->v.expr.part));
+      if (node->v.expr.key && node->v.expr.key[0] != '\n')
+	printf ("[%s]",node->v.expr.key);
+      if (node->v.expr.sep)
+	printf ("(%s)", node->v.expr.sep);
+      printf (" ");
+      anubis_regex_print (node->v.expr.re);
+      break;
 		
-  case rc_node_bool:
-    switch (node->v.bool.op) {
-    case bool_not:
-      printf ("NOT (");
-      rc_node_print (node->v.bool.left);
-      printf (")");
-      break;
+    case rc_node_bool:
+      switch (node->v.bool.op)
+	{
+	case bool_not:
+	  printf ("NOT (");
+	  rc_node_print (node->v.bool.left);
+	  printf (")");
+	  break;
       
-    case bool_and:
-      printf ("AND (");
-      rc_node_print (node->v.bool.left);
-      printf (",");
-      rc_node_print (node->v.bool.right);
-      printf (")");
-      break;
+	case bool_and:
+	  printf ("AND (");
+	  rc_node_print (node->v.bool.left);
+	  printf (",");
+	  rc_node_print (node->v.bool.right);
+	  printf (")");
+	  break;
       
-    case bool_or:
-      printf ("OR (");
-      rc_node_print (node->v.bool.left);
-      printf (",");
-      rc_node_print (node->v.bool.right);
-      printf (")");
-      break;
+	case bool_or:
+	  printf ("OR (");
+	  rc_node_print (node->v.bool.left);
+	  printf (",");
+	  rc_node_print (node->v.bool.right);
+	  printf (")");
+	  break;
+	}
     }
-  }
 }
 
 /* Rules */
@@ -1067,18 +1072,19 @@ rc_inst_destroy (RC_INST *inst)
 static char *
 inst_name (enum rc_inst_opcode opcode)
 {
-  switch (opcode) {
-  case inst_stop:
-    return "STOP";
-  case inst_call:
-    return "CALL";
-  case inst_add:
-    return "ADD";
-  case inst_remove:
-    return "REMOVE";
-  case inst_modify:
-    return "MODIFY";
-  }
+  switch (opcode)
+    {
+    case inst_stop:
+      return "STOP";
+    case inst_call:
+      return "CALL";
+    case inst_add:
+      return "ADD";
+    case inst_remove:
+      return "REMOVE";
+    case inst_modify:
+      return "MODIFY";
+    }
   return "UNKNOWN";
 }
 
@@ -1086,29 +1092,30 @@ void
 rc_inst_print (RC_INST *inst, int level)
 {
   rc_level_print (level, inst_name (inst->opcode));
-  switch (inst->opcode) {
-  case inst_stop:
-    break;
+  switch (inst->opcode)
+    {
+    case inst_stop:
+      break;
     
-  case inst_call:
-    printf (" %s", inst->arg);
-    break;
+    case inst_call:
+      printf (" %s", inst->arg);
+      break;
     
-  case inst_add:
-    printf (" %s[%s]", part_string (inst->part), inst->key2);
-    if (inst->arg)
-      printf (" \"%s\"", inst->arg);
-    break;
+    case inst_add:
+      printf (" %s[%s]", part_string (inst->part), inst->key2);
+      if (inst->arg)
+	printf (" \"%s\"", inst->arg);
+      break;
     
-  default:
-    printf (" %s ", part_string (inst->part));
-    if (inst->key)
-      anubis_regex_print (inst->key);
-    if (inst->key2)
-      printf (" [%s]", inst->key2);
-    if (inst->arg)
-      printf (" \"%s\"", inst->arg);
-  }
+    default:
+      printf (" %s ", part_string (inst->part));
+      if (inst->key)
+	anubis_regex_print (inst->key);
+      if (inst->key2)
+	printf (" [%s]", inst->key2);
+      if (inst->arg)
+	printf (" \"%s\"", inst->arg);
+    }
 }
 
 /* Statements */
@@ -1126,22 +1133,23 @@ rc_stmt_create (enum rc_stmt_type type, struct rc_loc *loc)
 void
 rc_stmt_destroy (RC_STMT *stmt)
 {
-  switch (stmt->type) {
-  case rc_stmt_asgn:
-    rc_asgn_destroy (&stmt->v.asgn);
-    break;
+  switch (stmt->type)
+    {
+    case rc_stmt_asgn:
+      rc_asgn_destroy (&stmt->v.asgn);
+      break;
     
-  case rc_stmt_rule:
-    rc_rule_destroy (&stmt->v.rule);
-    break;
+    case rc_stmt_rule:
+      rc_rule_destroy (&stmt->v.rule);
+      break;
     
-  case rc_stmt_cond:
-    rc_cond_destroy (&stmt->v.cond);
-    break;
+    case rc_stmt_cond:
+      rc_cond_destroy (&stmt->v.cond);
+      break;
     
-  case rc_stmt_inst:
-    rc_inst_destroy (&stmt->v.inst);
-  }
+    case rc_stmt_inst:
+      rc_inst_destroy (&stmt->v.inst);
+    }
   rc_destroy_loc (&stmt->loc);
   xfree (stmt);
 }
@@ -1186,45 +1194,46 @@ rc_stmt_print (RC_STMT *stmt, int level)
 {
   for (; stmt; stmt = stmt->next)
     {
-      switch (stmt->type) {
-      case rc_stmt_asgn:
-	rc_level_print (level, "ASGN: ");
-	printf ("%s =", stmt->v.asgn.lhs);
-	list_iterate (stmt->v.asgn.rhs,
-		      (stmt->v.asgn.flags & KWF_HIDDEN) ?
-		      _print_stars : _print_str, NULL);
-	break;
+      switch (stmt->type)
+	{
+	case rc_stmt_asgn:
+	  rc_level_print (level, "ASGN: ");
+	  printf ("%s =", stmt->v.asgn.lhs);
+	  list_iterate (stmt->v.asgn.rhs,
+			(stmt->v.asgn.flags & KWF_HIDDEN) ?
+			_print_stars : _print_str, NULL);
+	  break;
 	
-      case rc_stmt_cond:
-	rc_level_print (level, "COND: ");
-	rc_node_print (stmt->v.cond.node);
-	printf ("\n");
-	rc_level_print (level, "IFTRUE:\n");
-	rc_stmt_print (stmt->v.cond.iftrue, level+1);
-	if (stmt->v.cond.iffalse)
-	  {
-	    rc_level_print (level, "IFFALSE:\n");
-	    rc_stmt_print (stmt->v.cond.iffalse, level+1);
-	  }
-	rc_level_print (level, "END COND");
-	break;
+	case rc_stmt_cond:
+	  rc_level_print (level, "COND: ");
+	  rc_node_print (stmt->v.cond.node);
+	  printf ("\n");
+	  rc_level_print (level, "IFTRUE:\n");
+	  rc_stmt_print (stmt->v.cond.iftrue, level+1);
+	  if (stmt->v.cond.iffalse)
+	    {
+	      rc_level_print (level, "IFFALSE:\n");
+	      rc_stmt_print (stmt->v.cond.iffalse, level+1);
+	    }
+	  rc_level_print (level, "END COND");
+	  break;
 	
-      case rc_stmt_rule:
-	rc_level_print (level, "RULE: ");
-	rc_node_print (stmt->v.rule.node);
-	printf ("\n");
-	rc_level_print (level, "BODY\n");
-	rc_stmt_print (stmt->v.rule.stmt, level+1);
-	rc_level_print (level, "END RULE");
-	break;
+	case rc_stmt_rule:
+	  rc_level_print (level, "RULE: ");
+	  rc_node_print (stmt->v.rule.node);
+	  printf ("\n");
+	  rc_level_print (level, "BODY\n");
+	  rc_stmt_print (stmt->v.rule.stmt, level+1);
+	  rc_level_print (level, "END RULE");
+	  break;
 	
-      case rc_stmt_inst:
-	rc_inst_print (&stmt->v.inst, level);
-	break;
+	case rc_stmt_inst:
+	  rc_inst_print (&stmt->v.inst, level);
+	  break;
 	
-      default:
-	abort ();
-      }
+	default:
+	  abort ();
+	}
       printf ("\n");
     }
 }
@@ -1471,50 +1480,51 @@ inst_eval (struct eval_env *env, RC_INST *inst)
 	arg = inst->arg;
     }
   
-  switch (inst->opcode) {
-  case inst_stop:
-    tracefile (&env->loc, _("STOP"));
-    longjmp (env->jmp, 1);
-    break;
+  switch (inst->opcode)
+    {
+    case inst_stop:
+      tracefile (&env->loc, _("STOP"));
+      longjmp (env->jmp, 1);
+      break;
     
-  case inst_call:
-    tracefile (&env->loc, _("Calling %s"), inst->arg);
-    rcfile_call_section (env->method, inst->arg,
-			 env->data, env->msg);
-    break;
+    case inst_call:
+      tracefile (&env->loc, _("Calling %s"), inst->arg);
+      rcfile_call_section (env->method, inst->arg,
+			   env->data, env->msg);
+      break;
     
-  case inst_add:
-    tracefile (&env->loc, _("ADD %s [%s] %s"),
-	       (inst->part == BODY) ? "BODY" : "HEADER",
-	       VALID_STR (inst->key2), arg);
-    if (inst->part == BODY) 
-      message_add_body (env->msg, inst->key2, arg);
-    else
-      message_add_header (env->msg, inst->key2, arg);
-    break;
+    case inst_add:
+      tracefile (&env->loc, _("ADD %s [%s] %s"),
+		 (inst->part == BODY) ? "BODY" : "HEADER",
+		 VALID_STR (inst->key2), arg);
+      if (inst->part == BODY) 
+	message_add_body (env->msg, inst->key2, arg);
+      else
+	message_add_header (env->msg, inst->key2, arg);
+      break;
     
-  case inst_modify:
-    tracefile (&env->loc, _("MODIFY %s [%s] [%s] %s"),
-	       (inst->part == BODY) ? "BODY" : "HEADER",
-	       anubis_regex_source (inst->key), 
-	       VALID_STR (inst->key2), arg);
+    case inst_modify:
+      tracefile (&env->loc, _("MODIFY %s [%s] [%s] %s"),
+		 (inst->part == BODY) ? "BODY" : "HEADER",
+		 anubis_regex_source (inst->key), 
+		 VALID_STR (inst->key2), arg);
     
-    if (inst->part == BODY)
-      message_modify_body (env->msg, inst->key, arg);
-    else
-      message_modify_headers (env->msg, inst->key,
-			      inst->key2, arg);
-    break;
+      if (inst->part == BODY)
+	message_modify_body (env->msg, inst->key, arg);
+      else
+	message_modify_headers (env->msg, inst->key,
+				inst->key2, arg);
+      break;
     
-  case inst_remove:
-    tracefile (&env->loc, _("REMOVE HEADER [%s]"),
-	       anubis_regex_source (inst->key));
-    message_remove_headers (env->msg, inst->key);
-    break;
+    case inst_remove:
+      tracefile (&env->loc, _("REMOVE HEADER [%s]"),
+		 anubis_regex_source (inst->key));
+      message_remove_headers (env->msg, inst->key);
+      break;
     
-  default:
-    abort ();
-  }
+    default:
+      abort ();
+    }
   
   if (argp)
     free (argp);
@@ -1634,23 +1644,24 @@ expr_eval (struct eval_env *env, RC_EXPR *expr)
       env->refstr = NULL;
     }
   
-  switch (expr->part) {
-  case COMMAND:
-    rc = re_eval_list (env, expr->key, expr->sep, expr->re,
-		       env->msg->commands);
-    break;
+  switch (expr->part)
+    {
+    case COMMAND:
+      rc = re_eval_list (env, expr->key, expr->sep, expr->re,
+			 env->msg->commands);
+      break;
     
-  case HEADER:
-    rc = re_eval_list (env, expr->key, expr->sep, expr->re, env->msg->header);
-    break;
+    case HEADER:
+      rc = re_eval_list (env, expr->key, expr->sep, expr->re, env->msg->header);
+      break;
     
-  case BODY:
-    rc = re_eval_text (env, expr->re, env->msg->body);
-    break;
+    case BODY:
+      rc = re_eval_text (env, expr->re, env->msg->body);
+      break;
     
-  default:
-    abort ();
-  }
+    default:
+      abort ();
+    }
 
   if (rc)
     {
@@ -1674,18 +1685,19 @@ node_eval (struct eval_env *env, RC_NODE *node)
 	     Note default: branch below */
   
   env->loc = node->loc;
-  switch (node->type) {
-  case rc_node_bool:
-    rc = bool_eval (env, &node->v.bool);
-    break;
+  switch (node->type)
+    {
+    case rc_node_bool:
+      rc = bool_eval (env, &node->v.bool);
+      break;
     
-  case rc_node_expr:
-    rc = expr_eval (env, &node->v.expr);
-    break;
+    case rc_node_expr:
+      rc = expr_eval (env, &node->v.expr);
+      break;
     
-  default:
-    abort ();
-  }
+    default:
+      abort ();
+    }
   
   return rc;
 }
@@ -1695,20 +1707,21 @@ bool_eval (struct eval_env *env, RC_BOOL *bool)
 {
   int rc = node_eval (env, bool->left);
 
-  switch (bool->op) {
-  case bool_not:
-    return !rc;
+  switch (bool->op)
+    {
+    case bool_not:
+      return !rc;
     
-  case bool_and:
-    if (!rc)
-      return 0;
-    break;
+    case bool_and:
+      if (!rc)
+	return 0;
+      break;
     
-  case bool_or:
-    if (rc)
-      return 1;
-    break;
-  }
+    case bool_or:
+      if (rc)
+	return 1;
+      break;
+    }
   return node_eval (env, bool->right);
 }
 
@@ -1735,22 +1748,23 @@ stmt_list_eval (struct eval_env *env, RC_STMT *stmt)
     {
       env->loc = stmt->loc;
       
-      switch (stmt->type) {
-      case rc_stmt_asgn:
-	asgn_eval (env, &stmt->v.asgn);
-	break;
+      switch (stmt->type)
+	{
+	case rc_stmt_asgn:
+	  asgn_eval (env, &stmt->v.asgn);
+	  break;
 	
-      case rc_stmt_cond:
-	cond_eval (env, &stmt->v.cond);
-	break;
+	case rc_stmt_cond:
+	  cond_eval (env, &stmt->v.cond);
+	  break;
 	
-      case rc_stmt_rule:
-	rule_eval (env, &stmt->v.rule);
-	break;
+	case rc_stmt_rule:
+	  rule_eval (env, &stmt->v.rule);
+	  break;
 	
-      case rc_stmt_inst:
-	inst_eval (env, &stmt->v.inst);
-      }
+	case rc_stmt_inst:
+	  inst_eval (env, &stmt->v.inst);
+	}
     }
 }
 
