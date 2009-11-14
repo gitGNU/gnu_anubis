@@ -35,13 +35,22 @@ static ANUBIS_LIST *anubis_mech_list;
 /* Converts the auth method list from a textual representation to
    a ANUBIS_LIST of string values */
 ANUBIS_LIST *
-auth_method_list (char *input)
+auth_method_list (const char *input)
 {
-  char *p;
   ANUBIS_LIST *list = list_create ();
 
-  for (p = strtok (input, " \t"); p; p = strtok (NULL, " \t"))
-    list_append (list, strdup (p));
+  while (*input)
+    {
+      size_t len = strcspn (input, " \t");
+      char *p = xmalloc (len + 1);
+      memcpy (p, input, len);
+      p[len] = 0;
+      list_append (list, p);
+      
+      input += len;
+      while (*input && (*input == ' ' || *input == '\t'))
+	input++;
+    }
   return list;
 }
 

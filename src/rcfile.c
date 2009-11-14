@@ -235,7 +235,6 @@ process_rcfile (int method)
 #define KW_ESMTP_AUTH                9
 #define KW_DROP_UNKNOWN_USER        10
 #define KW_USER_NOTPRIVILEGED       11
-#define KW_ALLOW_LOCAL_MTA          12
 #define KW_SOCKS_PROXY              13
 #define KW_SOCKS_V4                 14
 #define KW_SOCKS_AUTH               15
@@ -374,10 +373,6 @@ control_parser (EVAL_ENV env, int key, ANUBIS_LIST *arglist, void *inv_data)
 	options.termlevel = DEBUG;
       else
 	eval_error (0, env, _("invalid termlevel"));
-      break;
-      
-    case KW_ALLOW_LOCAL_MTA:
-      setbool (env, arg, topt, T_ALLOW_LOCAL_MTA);
       break;
       
     case KW_USER_NOTPRIVILEGED:
@@ -654,7 +649,6 @@ static struct rc_secdef_child init_sect_child = {
 
 static struct rc_kwdef init_supervisor_kw[] = {
   { "termlevel",          KW_TERMLEVEL },
-  { "allow-local-mta",    KW_ALLOW_LOCAL_MTA },
   { "user-notprivileged", KW_USER_NOTPRIVILEGED },
   { "drop-unknown-user",  KW_DROP_UNKNOWN_USER },
   { "rule-priority",      KW_RULE_PRIORITY },

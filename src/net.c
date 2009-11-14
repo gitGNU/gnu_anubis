@@ -35,7 +35,7 @@ debug_cache =
 -1, -1, 0, 0};
 
 static void
-_debug_printer (int method, int output, unsigned long nleft, char *ptr)
+_debug_printer (int method, int output, unsigned long nleft, const char *ptr)
 {
   int i;
   char *mode = "?";
@@ -239,7 +239,7 @@ bind_and_listen (char *host, unsigned int port)
 ***************/
 
 void
-swrite (int method, NET_STREAM sd, char *ptr)
+swrite (int method, NET_STREAM sd, const char *ptr)
 {
   int rc;
   size_t nleft, nwritten = 0;
@@ -261,7 +261,8 @@ swrite (int method, NET_STREAM sd, char *ptr)
 void
 send_eol (int method, NET_STREAM sd)
 {
-  swrite (method, sd, (anubis_mode == anubis_mda) ? "\n" : CRLF);
+  swrite (method, sd,
+	  (anubis_mode == anubis_mda && (topt & T_LOCAL_MTA)) ? "\n" : CRLF);
 }
 
 /**************
@@ -284,38 +285,27 @@ recvline (int method, NET_STREAM sd, char **vptr, size_t *maxlen)
   Get a response
 ******************/
 
-void
-get_response_smtp (int method, NET_STREAM sd, char **pbuf, size_t *psize)
+struct net_reader_closure
 {
-  char *line = NULL;
-  size_t size = 0;
-  char *buf = NULL;
+  int method;
+  NET_STREAM stream;
+};
   
-  do
-    {
-      if (recvline (method, sd, &line, &size) == 0)
-	break;
+static ssize_t
+_net_reader (void *data, char **sptr, size_t *psize)
+{
+  struct net_reader_closure *np = data;
+  return recvline (np->method, np->stream, sptr, psize);
+}
 
-      if (!buf)
-	assign_string (&buf, line);
-      else
-	{
-	  buf = xrealloc (buf, strlen (buf) + strlen (line) + 1);
-	  strcat (buf, line);
-	}
-    }
-  while (line[3] == '-');
+void
+smtp_reply_get (int method, NET_STREAM sd, ANUBIS_SMTP_REPLY reply)
+{
+  struct net_reader_closure clos;
 
-  if (buf)
-    {
-      *pbuf = buf;
-      *psize = strlen (buf) + 1;
-    }
-  else
-    {
-      assign_string (&buf, "");
-      *psize = 0;
-    }
+  clos.method = method;
+  clos.stream = sd;
+  smtp_reply_read (reply, _net_reader, &clos);
 }
 
 /**************************

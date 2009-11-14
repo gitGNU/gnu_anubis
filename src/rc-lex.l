@@ -352,7 +352,7 @@ escape (int c)
   case 'f':
     return '\f';
   case 'e':
-    return '\e';
+    return '\033';
   case 'n':
     return '\n';
   case 'r':

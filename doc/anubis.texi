@@ -32,7 +32,10 @@ Software Foundation raise funds for GNU development.''
 @ifinfo
 @dircategory Email
 @direntry
-* Anubis: (anubis).             The GNU SMTP message submission daemon.
+* Anubis: (anubis).                   The GNU SMTP message submission daemon.
+* anubis: (anubis) Invoking Anubis.   Anubis command line summary.
+* anubisadm: (anubis) Administrators. Administration of the Anubis User Database. 
+* anubisusr: (anubis) Users.          User interface to the Anubis User Database.
 @end direntry
 @end ifinfo
 
@@ -1004,6 +1007,7 @@ table:
 @item Sequence @tab Replaced with
 @item \a @tab Audible bell character (@acronym{ASCII} 7)
 @item \b @tab Backspace character (@acronym{ASCII} 8)
+@item \e @tab Escape (@acronym{ASCII} (@acronym{ASCII} 27)
 @item \f @tab Form-feed character (@acronym{ASCII} 12)
 @item \n @tab Newline character (@acronym{ASCII} 10)
 @item \r @tab Carriage return character (@acronym{ASCII} 13)
@@ -1570,17 +1574,6 @@ Specify CA certificate file (supported only by GnuTLS).
 @subsection Security Settings
 
 The following options control various security settings. 
-
-@deffn Option allow-local-mta @var{yes-or-no}
-This option is reserved for future use.
-@FIXME{When set to @samp{yes}, this option enables the use of
-the @samp{local-mta} keyword (or @samp{--local-mta}
-command line option). It is available only in system
-configuration file.
-
-For security reasons, this option is set to @samp{no}.}
-@FIXME{What are those reasons??}
-@end deffn
 
 @deffn Option drop-unknown-user @var{yes-or-no}
 If this option is set to @samp{yes}, @command{anubis} drops

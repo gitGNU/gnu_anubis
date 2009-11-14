@@ -220,7 +220,7 @@ asmtp_ehlo_reply (char *args)
       return state_init;
     }
   
-  set_ehlo_domain(domain);
+  set_ehlo_domain (domain, strlen (domain));
   
   helo_count++;
   asmtp_reply (R_CONT | 250, "Anubis is pleased to meet you.");

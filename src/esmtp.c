@@ -120,18 +120,22 @@ static char *
 get_reply (NET_STREAM str, int *code, char **buf, size_t *psize)
 {
   char *p;
-  
-  get_response_smtp (CLIENT, str, buf, psize);
+
+  if (recvline (CLIENT, str, buf, psize) == 0)
+    {
+      anubis_error (1, 0, _("unexpected eof in input"));
+    }
+      
   remcrlf (*buf);
   *code = strtoul (*buf, &p, 10);
   if (*p == 0 || *p == '\r')
     return p;
-
+  
   if (!isspace (*p))
     {
       anubis_error (1, 0, _("Malformed or unexpected reply"));
     }
-
+  
   while (*p && isspace (*p))
     p++;
   return p;
@@ -223,7 +227,7 @@ do_gsasl_auth (NET_STREAM *pstr, Gsasl *ctx, char *mech)
 }
 
 int
-esmtp_auth (NET_STREAM *pstr, char *input)
+esmtp_auth (NET_STREAM *pstr, const char *input)
 {
   Gsasl *ctx;
   int rc;

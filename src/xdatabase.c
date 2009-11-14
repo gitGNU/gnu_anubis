@@ -34,34 +34,10 @@ xdatabase_enable ()
 }
 
 void
-xdatabase_capability (char **preply, size_t *preply_size)
+xdatabase_capability (ANUBIS_SMTP_REPLY reply)
 {
-  static char capa_string[] = "250-XDATABASE\r\n";
-  size_t capa_len = strlen (capa_string);
-  size_t len;
-  char *p;
-  char *reply;
-  
-  if (!xdatabase_active)
-    return;
-
-  if (strlen (*preply) + capa_len >= *preply_size)
-    {
-      *preply_size = strlen (*preply) + capa_len + 1;
-      *preply = xrealloc (*preply, *preply_size);
-    }
-  reply = *preply;
-  
-  p = strstr (reply, "250 ");
-  if (!p)
-    {
-      anubis_error (0, 0,
-		    _("Cannot add capability: input string missing end marker"));
-      return;
-    }
-  len = strlen (p);
-  memmove (p + capa_len, p, len);
-  memmove (p, capa_string, capa_len);
+  if (!smtp_reply_has_capa (reply, "XDATABASE", NULL))
+    smtp_reply_add_line (reply, "XDATABASE");
 }
 
 static FILE *

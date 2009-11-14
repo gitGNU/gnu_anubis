@@ -56,10 +56,7 @@ string_to_ipaddr (const char *str)
 void
 session_prologue ()
 {
-  if (!(topt & T_LOCAL_MTA) && !session.mta)
-    anubis_error (EXIT_FAILURE, 0, _("The MTA has not been specified. "
-				     "Set the REMOTE-MTA or LOCAL-MTA."));
-  
+  ASSERT_MTA_CONFIG ();
   if (!(topt & T_LOCAL_MTA)
       && string_to_ipaddr (session.mta)
          == string_to_ipaddr (session.anubis)
@@ -151,6 +148,8 @@ anubis_transparent_mode (struct sockaddr_in *addr)
 int
 anubis_proxy_mode (struct sockaddr_in *addr)
 {
+  ASSERT_MTA_CONFIG ();
+
   set_unprivileged_user ();
 
   info (NORMAL, _("Initiated proxy mode."));

@@ -377,12 +377,7 @@ stdinout (void)
   anubis_getlogin (&session.clientname);
   auth_tunnel ();		/* session.clientname = session.supervisor */
 
-  if (!(topt & T_LOCAL_MTA) && !session.mta)
-    {
-      options.termlevel = NORMAL;
-      anubis_error (EXIT_FAILURE, 0, _("The MTA has not been specified. "
-			               "Set the REMOTE-MTA or LOCAL-MTA."));
-    }
+  ASSERT_MTA_CONFIG ();
 
   create_stdio_stream (&remote_client);
 

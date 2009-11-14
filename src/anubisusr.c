@@ -36,20 +36,11 @@ int verbose;
 
 #define VDETAIL(n,s) do { if (verbose>=(n)) printf s; } while(0)
 
-struct smtp_reply
-{
-  int code;			/* Reply code */
-  char *base;			/* Pointer to the start of the reply string */
-  int argc;			/* Number of arguments in the parsed reply */
-  char **argv;			/* Parsed reply */
-};
-
-struct smtp_reply smtp_capa;
+ANUBIS_SMTP_REPLY smtp_capa;
 
 void error (const char *, ...);
 int send_line (char *buf);
-int smtp_get_reply (struct smtp_reply *repl);
-void smtp_free_reply (struct smtp_reply *repl);
+void smtp_get_reply (ANUBIS_SMTP_REPLY repl);
 static void smtp_quit (void);
 
 #define R_CONT     0x8000
@@ -105,16 +96,17 @@ anubis_error (int exit_code, int error_code, const char *fmt, ...)
 void
 starttls (void)
 {
-  struct smtp_reply reply;
+  ANUBIS_SMTP_REPLY reply = smtp_reply_new ();
 
   VDETAIL (1, (_("Starting TLS negotiation\n")));
   send_line ("STARTTLS");
-  smtp_get_reply (&reply);
-  if (reply.code != 220)
+  smtp_get_reply (reply);
+  if (!smtp_reply_code_eq (reply, "220"))
     {
       error (_("Server rejected TLS negotiation"));
       exit (1);
     }
+  smtp_reply_free (reply);
   iostream = start_ssl_client (iostream, tls_cafile, verbose > 2);
   if (!iostream)
     {
@@ -207,39 +199,6 @@ add_mech (char *arg)
 
 /* Capability handling */
 
-int
-find_capa (struct smtp_reply *repl, const char *name, const char *value)
-{
-  int i;
-  for (i = 0; i < repl->argc; i++)
-    {
-      char *p = skipword (repl->argv[i]);
-      if (strncmp (name, repl->argv[i], p - repl->argv[i]) == 0)
-	{
-	  if (value)
-	    {
-	      int j, argc;
-	      char **argv;
-	      int rc = 0;
-
-	      if ((rc = argcv_get (repl->argv[i], "", NULL, &argc, &argv)))
-		{
-		  error (_("argcv_get failed: %s"), strerror (rc));
-		  return 1;
-		}
-	      rc = 1;
-	      for (j = 0; rc == 1 && j < argc; j++)
-		if (strcmp (argv[j], value) == 0)
-		  rc = 0;
-	      argcv_free (argc, argv);
-	      return rc;
-	    }
-	  return 0;
-	}
-    }
-  return 1;
-}
-
 static int
 name_cmp (void *item, void *data)
 {
@@ -247,37 +206,35 @@ name_cmp (void *item, void *data)
 }
 
 char *
-find_capa_v (struct smtp_reply *repl, const char *name, ANUBIS_LIST * list)
+find_capa_v (ANUBIS_SMTP_REPLY repl, const char *name, ANUBIS_LIST *list)
 {
-  int i;
-  for (i = 0; i < repl->argc; i++)
+  size_t n;
+  if (smtp_reply_has_capa (repl, name, &n))
     {
-      char *p = skipword (repl->argv[i]);
-      if (strncmp (name, repl->argv[i], p - repl->argv[i]) == 0)
+      const char *str = smtp_reply_line (repl, n);
+      int i, argc;
+      char **argv;
+      char *rv = NULL;
+      int rc;
+      
+      if ((rc = argcv_get (str, "", NULL, &argc, &argv)))
 	{
-	  int rc, j, argc;
-	  char **argv;
-	  char *rv = NULL;
-
-	  if ((rc = argcv_get (repl->argv[i], "", NULL, &argc, &argv)))
-	    {
-	      error (_("argcv_get failed: %s"), strerror (rc));
-	      return NULL;
-	    }
-
-	  if (!list)
-	    {
-	      if (argv[1])
-		rv = strdup (argv[1]);
-	    }
-	  else
-	    {
-	      for (j = 0; !rv && j < argc; j++)
-		rv = list_locate (list, argv[j], name_cmp);
-	    }
-	  argcv_free (argc, argv);
-	  return rv;
+	  error (_("argcv_get failed: %s"), strerror (rc));
+	  return NULL;
 	}
+
+      if (!list)
+	{
+	  if (argv[1])
+	    rv = xstrdup (argv[1]);
+	}
+      else
+	{
+	  for (i = 0; !rv && i < argc; i++)
+	    rv = list_locate (list, argv[i], name_cmp);
+	}
+      argcv_free (argc, argv);
+      return rv;
     }
   return NULL;
 }
@@ -305,96 +262,36 @@ send_line (char *buf)
   return rc;
 }
 
-int
-smtp_get_reply (struct smtp_reply *repl)
+static ssize_t
+_usr_reader (void *data, char **sptr, size_t *psize)
 {
-  char *buf = NULL;
-  size_t bufsize = 0;
-  char *p;
-  int i;
-  int cont = 0;
+  size_t n;
+  int rc = stream_getline (iostream, sptr, psize, &n);
 
-  memset (repl, 0, sizeof *repl);
-  do
+  if (rc)
     {
-      size_t n;
-      int rc = stream_getline (iostream, &buf, &bufsize, &n);
-
-      if (rc)
-	{
-	  error (_("read failed: %s"), stream_strerror (iostream, rc));
-	  exit (1);
-	}
-
-      VDETAIL (2, ("S: %*.*s", (int) n, (int) n, buf));
-      if (!cont)
-	{
-	  int code;
-	  if (n < 4)
-	    break;
-	  code = strtoul (buf, &p, 0);
-	  if (p - buf != 3 || (*p != '-' && *p != ' '))
-	    {
-	      error (_("Unexpected reply from server: %s"), buf);
-	      abort ();
-	    }
-	  if (repl->code == 0)
-	    repl->code = code;
-	  else if (repl->code != code)
-	    {
-	      error (_("Unexpected reply code from server: %d"), code);
-	      abort ();
-	    }
-	}
-
-      if (buf[n - 1] == '\n')
-	{
-	  cont = 0;
-	  n--;
-	  if (buf[n - 1] == '\r')
-	    n--;
-	  buf[n++] = 0;
-	  if (n - 4 && buf[4])
-	    obstack_grow (&input_stk, buf + 4, n - 4);
-	  else
-	    obstack_grow (&input_stk, "\r", 2);
-	  repl->argc++;
-	}
-      else
-	{
-	  cont = 1;
-	  obstack_grow (&input_stk, buf, n);
-	}
+      error (_("read failed: %s"), stream_strerror (iostream, rc));
+      exit (1);
     }
-  while (cont || *p == '-');
-  free (buf);
-  obstack_1grow (&input_stk, 0);
-  repl->base = obstack_finish (&input_stk);
 
-  repl->argv = xmalloc ((repl->argc + 1) * sizeof (repl->argv[0]));
-  for (i = 0, p = repl->base; p[0]; p += strlen (p) + 1, i++)
-    {
-      if (p[0] == '\r')
-	p[0] = 0;
-      repl->argv[i] = p;
-    }
-  repl->argv[i] = NULL;
-  return 0;
+  VDETAIL (2, ("S: %*.*s", (int) n, (int) n, *sptr));
+  return n;
+}
+  
+void
+smtp_get_reply (ANUBIS_SMTP_REPLY repl)
+{
+  smtp_reply_read (repl, _usr_reader, NULL);
 }
 
 void
-smtp_free_reply (struct smtp_reply *repl)
+smtp_print_reply (FILE * fp, ANUBIS_SMTP_REPLY repl)
 {
-  obstack_free (&input_stk, repl->base);
-  memset (repl, 0, sizeof *repl);
-}
+  size_t i;
+  const char *p;
 
-void
-smtp_print_reply (FILE * fp, struct smtp_reply *repl)
-{
-  int i;
-  for (i = 0; i < repl->argc; i++)
-    fprintf (fp, "%s\n", repl->argv[i]);
+  for (i = 0; (p = smtp_reply_line (repl, i)); i++)
+    fprintf (fp, "%s\n", p);
   fflush (fp);
 }
 
@@ -402,14 +299,14 @@ smtp_print_reply (FILE * fp, struct smtp_reply *repl)
 void
 smtp_ehlo (int xelo)
 {
-  struct smtp_reply repl;
+  ANUBIS_SMTP_REPLY repl = smtp_reply_new ();
 
   send_line (xelo ? "XELO localhost" : "EHLO localhost");
-  smtp_get_reply (&repl);
-  if (repl.code != 250)
+  smtp_get_reply (repl);
+  if (!smtp_reply_code_eq (repl, "250"))
     {
       error (_("Server refused handshake"));
-      smtp_print_reply (stderr, &repl);
+      smtp_print_reply (stderr, repl);
       exit (1);
     }
   smtp_capa = repl;
@@ -701,10 +598,10 @@ callback (Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 void
 smtp_quit (void)
 {
-  struct smtp_reply repl;
+  ANUBIS_SMTP_REPLY repl = smtp_reply_new ();
   send_line ("QUIT");
-  smtp_get_reply (&repl);
-  smtp_free_reply (&repl);	/* There's no use checking */
+  smtp_get_reply (repl);
+  smtp_reply_free (repl);	/* There's no use checking */
 }
 
 
@@ -716,7 +613,7 @@ do_gsasl_auth (Gsasl *ctx, char *mech)
   char *output;
   int rc;
   Gsasl_session *sess_ctx = NULL;
-  struct smtp_reply repl;
+  ANUBIS_SMTP_REPLY repl;
   char buf[LINEBUFFER + 1];
 
   snprintf (buf, sizeof buf, "AUTH %s", mech);
@@ -730,18 +627,22 @@ do_gsasl_auth (Gsasl *ctx, char *mech)
     }
 
   output = NULL;
-  memset (&repl, 0, sizeof repl);
-  smtp_get_reply (&repl);
-  if (repl.code != 334)
+  repl = smtp_reply_new ();
+  smtp_get_reply (repl);
+  if (!smtp_reply_code_eq (repl, "334"))
     {
       error (_("GSASL handshake aborted"));
-      smtp_print_reply (stderr, &repl);
+      smtp_print_reply (stderr, repl);
       exit (1);
     }
 
   do
     {
-      rc = gsasl_step64 (sess_ctx, repl.base, &output);
+      char *str;
+      
+      smtp_reply_get_line (repl, 0, &str, NULL);
+      rc = gsasl_step64 (sess_ctx, str + 4, &output);
+      free (str);
       if (rc != GSASL_NEEDS_MORE && rc != GSASL_OK)
 	break;
 
@@ -749,12 +650,11 @@ do_gsasl_auth (Gsasl *ctx, char *mech)
 
       if (rc == GSASL_OK)
 	break;
-      smtp_free_reply (&repl);
-      smtp_get_reply (&repl);
-      if (repl.code != 334)
+      smtp_get_reply (repl);
+      if (!smtp_reply_code_eq (repl, "334"))
 	{
 	  error (_("GSASL handshake aborted"));
-	  smtp_print_reply (stderr, &repl);
+	  smtp_print_reply (stderr, repl);
 	  exit (1);
 	}
     }
@@ -768,24 +668,23 @@ do_gsasl_auth (Gsasl *ctx, char *mech)
       exit (1);
     }
 
-  smtp_free_reply (&repl);
-  smtp_get_reply (&repl);
+  smtp_get_reply (repl);
 
-  if (repl.code == 334)
+  if (smtp_reply_code_eq (repl, "334"))
     {
       /* Additional data. Do we need it? */
-      smtp_free_reply (&repl);
-      smtp_get_reply (&repl);
+      smtp_get_reply (repl);
     }
 
-  if (repl.code != 235)
+  if (!smtp_reply_code_eq (repl, "235"))
     {
       error (_("Authentication failed"));
-      smtp_print_reply (stderr, &repl);
+      smtp_print_reply (stderr, repl);
       smtp_quit ();
       exit (1);
     }
 
+  smtp_reply_free (repl);
   VDETAIL (1, (_("Authentication successful\n")));
 
   if (sess_ctx)
@@ -801,7 +700,7 @@ smtp_auth (void)
   char *mech;
   int rc;
 
-  mech = find_capa_v (&smtp_capa, "AUTH", auth_mech_list);
+  mech = find_capa_v (smtp_capa, "AUTH", auth_mech_list);
   if (!mech)
     {
       error (_("No suitable authentication mechanism found"));
@@ -869,12 +768,15 @@ rc_name (void)
 #define CMP_ERROR     2
 
 int
-diff (char *file, struct smtp_reply *repl)
+diff (char *file, ANUBIS_SMTP_REPLY repl)
 {
+  const char *input = smtp_reply_line (repl, 0) + 4;
   unsigned char sample[MD5_DIGEST_BYTES];
   unsigned char digest[MD5_DIGEST_BYTES];
   int len;
-  int fd = open (file, O_RDONLY);
+  int fd;
+
+  fd = open (file, O_RDONLY);
   if (fd == -1)
     {
       error (_("Cannot open file %s: %s"), file, strerror (errno));
@@ -883,13 +785,13 @@ diff (char *file, struct smtp_reply *repl)
   anubis_md5_file (digest, fd);
   close (fd);
 
-  len = strlen (repl->argv[0]);
+  len = strlen (input);
   if (len != sizeof digest * 2)
     {
-      error (_("Invalid MD5 digest: %s"), repl->argv[0]);
+      error (_("Invalid MD5 digest: %s"), input);
       return CMP_ERROR;
     }
-  string_hex_to_bin (sample, (unsigned char*)repl->argv[0], len);
+  string_hex_to_bin (sample, (unsigned char*)input, len);
 
   return memcmp (digest, sample, sizeof digest) == 0 ?
                  CMP_UNCHANGED : CMP_CHANGED;
@@ -899,7 +801,7 @@ void
 smtp_upload (char *rcname)
 {
   FILE *fp;
-  struct smtp_reply repl;
+  ANUBIS_SMTP_REPLY repl;
   char *buf = NULL;
   size_t n;
 
@@ -912,16 +814,17 @@ smtp_upload (char *rcname)
 
   VDETAIL (1, (_("Uploading %s\n"), rcname));
 
+  repl = smtp_reply_new ();
   send_line ("XDATABASE UPLOAD");
-  smtp_get_reply (&repl);
-  if (repl.code != 354)
+  smtp_get_reply (repl);
+  if (!smtp_reply_code_eq (repl, "354"))
     {
       error (_("UPLOAD failed"));
-      smtp_print_reply (stderr, &repl);
+      smtp_print_reply (stderr, repl);
       fclose (fp);
+      smtp_reply_free (repl);
       return;
     }
-  smtp_free_reply (&repl);
 
   while (getline (&buf, &n, fp) > 0 && n > 0)
     {
@@ -933,13 +836,12 @@ smtp_upload (char *rcname)
   send_line (".");
 
   fclose (fp);
-  smtp_get_reply (&repl);
-  if (repl.code != 250)
+  smtp_get_reply (repl);
+  if (!smtp_reply_code_eq (repl, "250"))
     {
-      smtp_print_reply (stderr, &repl);
-      return;
+      smtp_print_reply (stderr, repl);
     }
-  smtp_free_reply (&repl);
+  smtp_reply_free (repl);
 }
 
 
@@ -951,7 +853,7 @@ synch (void)
   int fd;
   int rc;
   struct sockaddr_in addr;
-  struct smtp_reply repl;
+  ANUBIS_SMTP_REPLY repl;
   char *rcname;
 
   obstack_init (&input_stk);
@@ -979,19 +881,21 @@ synch (void)
   stream_create (&iostream);
   stream_set_io (iostream, (void *) fd, NULL, NULL, NULL, NULL, NULL);
 
-  smtp_get_reply (&repl);
-  if (repl.code != 220)
+  repl = smtp_reply_new ();
+  smtp_get_reply (repl);
+  if (!smtp_reply_code_eq (repl, "220"))
     {
       error (_("Server refused connection"));
-      smtp_print_reply (stderr, &repl);
+      smtp_print_reply (stderr, repl);
+      smtp_reply_free (repl);
       return 1;
     }
-  smtp_free_reply (&repl);
+  smtp_reply_free (repl);
 
   smtp_ehlo (1);
 
 #ifdef HAVE_TLS
-  if (enable_tls && find_capa (&smtp_capa, "STARTTLS", NULL) == 0)
+  if (enable_tls && smtp_reply_has_capa (smtp_capa, "STARTTLS", NULL))
     {
       starttls ();
       smtp_ehlo (0);
@@ -1002,7 +906,7 @@ synch (void)
   /* Get the capabilities */
   smtp_ehlo (0);
 
-  if (find_capa (&smtp_capa, "XDATABASE", NULL))
+  if (!smtp_reply_has_capa (smtp_capa, "XDATABASE", NULL))
     {
       error (_("Remote party does not reveal XDATABASE capability"));
       smtp_quit ();
@@ -1011,26 +915,28 @@ synch (void)
 
   
   send_line ("XDATABASE EXAMINE");
-  smtp_get_reply (&repl);
-  switch (repl.code)
+  smtp_get_reply (repl);
+  if (smtp_reply_code_eq (repl, "300"))
     {
-    case 300:
       rcname = rc_name ();
       rc = CMP_CHANGED;
-      break;
-	
-    case 250:
+    }
+  else if (smtp_reply_code_eq (repl, "250"))
+    {
       rcname = rc_name ();
-      rc = diff (rcname, &repl);
-      break;
-      
-    default:
+      rc = diff (rcname, repl);
+    }
+  else
+    {
       error (_("EXAMINE failed"));
-      smtp_print_reply (stderr, &repl);
+      smtp_print_reply (stderr, repl);
+      smtp_reply_free (repl);
       smtp_quit ();
       return 1;
     }
 
+  smtp_reply_free (repl);
+  
   if (rc == CMP_CHANGED)
     {
       VDETAIL (1, (_("File changed\n")));

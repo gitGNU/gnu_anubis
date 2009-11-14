@@ -141,6 +141,7 @@
 #include <argcv.h>
 #include <keyword.h>
 #include "list.h"
+#include "smtprepl.h"
 
 #include <sysexits.h>
 
@@ -211,7 +212,7 @@ typedef enum anubis_mode
 ANUBIS_MODE;
 
 /* bit values for topt */
-#define T_DISABLE_SYSLOG    0x00000001 /* Used to be T_ERROR */
+#define T_DISABLE_SYSLOG    0x00000001
 #define T_SOCKS             0x00000002
 #define T_SOCKS_V4          0x00000004
 #define T_SOCKS_AUTH        0x00000008
@@ -225,7 +226,7 @@ ANUBIS_MODE;
 #define T_SSL_CKCLIENT      0x00000800
 #define T_NAMES             0x00001000
 #define T_LOCAL_MTA         0x00002000
-#define T_ALLOW_LOCAL_MTA   0x00004000
+/* Not used (ex T_ALLOW_LOCAL_MTA)   0x00004000 */
 #define T_TRANSLATION_MAP   0x00008000
 #define T_DROP_UNKNOWN_USER 0x00010000
 #define T_USER_NOTPRIVIL    0x00020000
@@ -280,6 +281,16 @@ typedef struct message_struct MESSAGE;
 		p = NULL; \
 	}\
      while (0)
+
+#define ASSERT_MTA_CONFIG()						\
+  do									\
+    {									\
+      if (!(topt & T_LOCAL_MTA) && !session.mta)			\
+	anubis_error (EX_CONFIG, 0,					\
+		      _("MTA has not been specified. "			\
+			"Set the `remote-mta' or `local-mta'."));	\
+    }									\
+  while (0)
 
 /* stream.c */
 
@@ -345,7 +356,7 @@ void filelog (char *, char *);
 /* net.c */
 NET_STREAM make_remote_connection (char *, unsigned int);
 int bind_and_listen (char *, unsigned int);
-void swrite (int, NET_STREAM, char *);
+void swrite (int, NET_STREAM, const char *);
 void send_eol (int method, NET_STREAM sd);
 int recvline (int method, NET_STREAM sd, char **vptr, size_t * maxlen);
 void get_response_smtp (int, NET_STREAM, char **, size_t *);
@@ -354,6 +365,7 @@ void close_socket (int sd);
 void net_create_stream (NET_STREAM * str, int fd);
 void net_close_stream (NET_STREAM * sd);
 
+void smtp_reply_get (int method, NET_STREAM sd, ANUBIS_SMTP_REPLY reply);
 /* daemon.c */
 void daemonize (void);
 void loop (int);
@@ -372,7 +384,8 @@ void translate_section_init (void);
 /* tunnel.c */
 void smtp_session (void);
 void smtp_session_transparent (void);
-void set_ehlo_domain (char *domain);
+void set_ehlo_domain (const char *domain, size_t len);
+char *get_ehlo_domain (void);
 void transfer_header (ANUBIS_LIST *);
 void transfer_body (MESSAGE *);
 void collect_headers (MESSAGE * msg, char *init_line);
@@ -403,7 +416,7 @@ char *exec_argv (int *, char *, char **, char *, char *, int);
 void cleanup_children (void);
 
 /* esmtp.c */
-int esmtp_auth (NET_STREAM *, char *);
+int esmtp_auth (NET_STREAM *, const char *);
 void anubis_set_client_mech_list (ANUBIS_LIST *list);
 void anubis_set_encryption_mech_list (ANUBIS_LIST *list);
 
@@ -603,13 +616,13 @@ void install_gsasl_stream (Gsasl_session *sess_ctx, NET_STREAM * stream);
 
 /* gsasl_srv.c */
 int anubis_name_cmp (void *item, void *data);
-ANUBIS_LIST *auth_method_list (char *input);
+ANUBIS_LIST *auth_method_list (const char *input);
 void anubis_set_mech_list (ANUBIS_LIST **out, ANUBIS_LIST *list);
 void anubis_set_server_mech_list (ANUBIS_LIST *list);
 
 /* xdatabase.c */
 int xdatabase (char *command);
-void xdatabase_capability (char **preply, size_t *preply_size);
+void xdatabase_capability (ANUBIS_SMTP_REPLY reply);
 void xdatabase_enable (void);
 
 /* md5.c */

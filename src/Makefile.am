@@ -82,6 +82,8 @@ libanubisdb_a_SOURCES = \
  pgsql.c \
  sql.h \
  sql.c \
+ smtprepl.c \
+ smtprepl.h \
  stream.c \
  tls.c \
  url.c 

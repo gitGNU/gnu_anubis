@@ -12,6 +12,7 @@ src/exec.c
 src/gpg.c
 src/gsasl.c
 src/guile.c
+src/headers.h
 src/help.c
 src/ident.c
 src/main.c

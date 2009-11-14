@@ -28,13 +28,13 @@
 static int transfer_command (MESSAGE *, char *);
 static int process_command (MESSAGE *, char *);
 static void process_data (MESSAGE *);
-static int handle_ehlo (char *, char **);
+static int handle_ehlo (ANUBIS_SMTP_REPLY );
 
 
 
 static char *smtp_ehlo_domain_name = NULL;
 
-static char *
+char *
 get_ehlo_domain (void)
 {
   return smtp_ehlo_domain_name ? smtp_ehlo_domain_name : get_localname ();
@@ -306,44 +306,44 @@ smtp_session_transparent (void)
 {
   char *command = NULL;
   size_t size = 0;
+  ANUBIS_SMTP_REPLY reply;
   MESSAGE msg;
 
   /*
      First of all, transfer a welcome message.
    */
 
+  reply = smtp_reply_new ();
   info (VERBOSE, _("Transferring messages..."));
-  get_response_smtp (CLIENT, remote_server, &command, &size);
+  smtp_reply_get (CLIENT, remote_server, reply);
 
-  if (command &&
-      strncmp (command, "220 ", 4) == 0 && strstr (command, version) == 0)
+  if (smtp_reply_code_eq (reply, "220")
+      && !smtp_reply_has_string (reply, 0, version, NULL))
     {
-      char *ptr = 0;
-      char *banner_ptr = 0;
-      char host[65];
-      char banner_backup[LINEBUFFER + 1];
-
-      safe_strcpy (banner_backup, command);
-
-      if ((banner_ptr = strchr (banner_backup, ' ')))
-	{
-	  banner_ptr++;
-	  safe_strcpy (host, banner_ptr);
-	  if ((ptr = strchr (host, ' ')))
-	    *ptr = '\0';
-	  do
-	    {
-	      banner_ptr++;
-	    }
-	  while (*banner_ptr != ' ');
-	  banner_ptr++;
-	  command = xmalloc (4 + strlen (host) + 2 + strlen (version) + 2
-			     + strlen (banner_ptr) + 1);
-	  sprintf (command, "220 %s (%s) %s", host, version, banner_ptr);
-	}
+      char *banner_copy;
+      char *host;
+      char *rest;
+      char *str;
+      
+      smtp_reply_get_line (reply, 0, &banner_copy, 0);
+      for (host = banner_copy + 4; *host && *host == ' '; host++);
+      rest = strchr (host, ' ');
+      if (rest)
+	*rest++ = 0;
+      else
+	rest = "";
+      
+      str = xmalloc (4 + strlen (host) + 2 + strlen (version) + 2
+		     + strlen (rest) + 1);
+      sprintf (str, "%s (%s) %s", host, version, rest);
+      
+      smtp_reply_replace_line (reply, 0, str);
+      free (str);
+      free (banner_copy);
     }
-  swrite (SERVER, remote_client, command);
-
+  swrite (SERVER, remote_client, smtp_reply_string (reply));
+  smtp_reply_free (reply);
+  
   /*
      Then process the commands...
    */
@@ -367,20 +367,18 @@ smtp_session_transparent (void)
 void
 smtp_begin (void)
 {
-  char *command = NULL;
-  size_t size;
-  char *reply;
+  ANUBIS_SMTP_REPLY reply;
   
   /* first get an mta banner */
-  get_response_smtp (CLIENT, remote_server, &command, &size);
+  reply = smtp_reply_new ();
+  smtp_reply_get (CLIENT, remote_server, reply);
 
   /* now send the ehlo command */
   swrite (CLIENT, remote_server, "EHLO ");
   swrite (CLIENT, remote_server, get_ehlo_domain ());
   send_eol (CLIENT, remote_server);
-  handle_ehlo (command, &reply);
-  free (command);
-  free (reply);
+  handle_ehlo (reply);
+  smtp_reply_free (reply);
 }
 
 void
@@ -480,22 +478,24 @@ handle_starttls (char *command)
   if (!(topt & T_LOCAL_MTA))
     {
       NET_STREAM stream;
-      char *reply = NULL;
-      size_t size = 0;
+      ANUBIS_SMTP_REPLY reply = smtp_reply_new ();
+      const char *rstr;
+      
       swrite (CLIENT, remote_server, "STARTTLS" CRLF);
+      smtp_reply_get (CLIENT, remote_server, reply);
 
-      get_response_smtp (CLIENT, remote_server, &reply, &size);
-
-      if (!isdigit ((unsigned char) reply[0])
-	  || (unsigned char) reply[0] > '3')
+      rstr = smtp_reply_string (reply);
+      /* FIXME: Use smtp_reply_eq */
+      if (!isdigit ((unsigned char) rstr[0])
+	  || (unsigned char) rstr[0] > '3')
 	{
-	  remcrlf (reply);
-	  info (VERBOSE, _("WARNING: %s"), reply);
-	  free (reply);
+	  /* FIXME: Display complete response */
+	  info (VERBOSE, _("WARNING: %s"), smtp_reply_line (reply, 0));
+	  smtp_reply_free (reply);
 	  anubis_error (0, 0, _("STARTTLS command failed."));
 	  return 0;
 	}
-      free (reply);
+      smtp_reply_free (reply);
 
       stream = start_ssl_client (remote_server,
 				 secure.cafile,
@@ -573,16 +573,18 @@ process_command (MESSAGE * msg, char *command)
 }
 
 void
-set_ehlo_domain (char *domain)
+set_ehlo_domain (const char *domain, size_t len)
 {
   xfree (smtp_ehlo_domain_name);
-  smtp_ehlo_domain_name = strdup (domain);
+  smtp_ehlo_domain_name = xmalloc (len + 1);
+  memcpy (smtp_ehlo_domain_name, domain, len);
+  smtp_ehlo_domain_name[len] = 0;
 }
 
 static void
-save_ehlo_domain (char *command)
+save_ehlo_domain (const char *command)
 {
-  char *p, *endp;
+  const char *p, *endp;
   
   for (p = command + 5 /* length of EHLO + initial space */;
        *p && isspace (*p);
@@ -591,35 +593,31 @@ save_ehlo_domain (char *command)
 
   for (endp = p + strlen (p) - 1; endp >= p && isspace(*endp); endp--)
     ;
-  endp[1] = 0;
-  set_ehlo_domain (p);
+  set_ehlo_domain (p, endp - p + 1);
 }
 
 static int
-handle_ehlo (char *command, char **reply)
+handle_ehlo (ANUBIS_SMTP_REPLY reply)
 {
-  size_t reply_size = 0;
-  
-  *reply = NULL;
   if (!smtp_ehlo_domain_name)
-    save_ehlo_domain (command);
+    save_ehlo_domain (smtp_reply_line (reply, 0));
     
-  get_response_smtp (CLIENT, remote_server, reply, &reply_size);
+  smtp_reply_get (CLIENT, remote_server, reply);
 
-  if (strstr (*reply, "STARTTLS"))
+  if (smtp_reply_has_capa (reply, "STARTTLS", NULL))
     topt |= T_STARTTLS;		/* Yes, we can use the TLS/SSL
 				   encryption. */
 
-  xdatabase_capability (reply, &reply_size);
+  xdatabase_capability (reply);
 
 #ifdef USE_SSL
   if ((topt & T_SSL_ONEWAY)
       && (topt & T_STARTTLS) && !(topt & T_SSL_FINISHED))
     {
       NET_STREAM stream;
-      char *newreply = NULL;
-      size_t nsize = 0;
-
+      ANUBIS_SMTP_REPLY newreply = smtp_reply_new ();
+      const char *rstr;
+      
       /*
          The 'ONEWAY' method is used when your MUA doesn't
          support the TLS/SSL, but your MTA does.
@@ -631,19 +629,20 @@ handle_ehlo (char *command, char **reply)
       info (NORMAL,
 	    _("Using TLS/SSL encryption between Anubis and remote MTA only..."));
       swrite (CLIENT, remote_server, "STARTTLS" CRLF);
-      get_response_smtp (CLIENT, remote_server, &newreply, &nsize);
+      smtp_reply_get (CLIENT, remote_server, newreply);
 
-      if (!isdigit ((unsigned char) newreply[0])
-	  || (unsigned char) newreply[0] > '3')
+      rstr = smtp_reply_string (newreply);
+      if (!isdigit ((unsigned char) rstr[0])
+	  || (unsigned char) rstr[0] > '3')
 	{
-	  remcrlf (newreply);
-	  info (VERBOSE, _("WARNING: %s"), newreply);
-	  free (newreply);
+	  info (VERBOSE, _("WARNING: %s"), smtp_reply_line (newreply, 0));
+	  smtp_reply_free (newreply);
 	  anubis_error (0, 0, _("STARTTLS (ONEWAY) command failed."));
 	  topt &= ~T_SSL_ONEWAY;
-	  swrite (SERVER, remote_client, *reply);
+	  swrite (SERVER, remote_client, smtp_reply_string (reply));
 	  return 1;
 	}
+      smtp_reply_free (newreply);
 
       stream = start_ssl_client (remote_server,
 				 secure.cafile,
@@ -651,7 +650,7 @@ handle_ehlo (char *command, char **reply)
       if (!stream)
 	{
 	  topt &= ~T_SSL_ONEWAY;
-	  swrite (SERVER, remote_client, *reply);
+	  swrite (SERVER, remote_client, smtp_reply_string (reply));
 	  return 1;
 	}
 
@@ -665,7 +664,7 @@ handle_ehlo (char *command, char **reply)
       swrite (CLIENT, remote_server, "EHLO ");
       swrite (CLIENT, remote_server, get_ehlo_domain ());
       send_eol (CLIENT, remote_server);
-      get_response_smtp (CLIENT, remote_server, reply, &reply_size);
+      smtp_reply_get (CLIENT, remote_server, reply);
     }
 #endif /* USE_SSL */
 
@@ -677,12 +676,9 @@ handle_ehlo (char *command, char **reply)
 
   if ((topt & T_STARTTLS) && (!(topt & T_SSL) || (topt & T_SSL_ONEWAY)))
     {
-      char *starttls1 = "250-STARTTLS";
-      char *starttls2 = "STARTTLS";
-      if (strstr (*reply, starttls1))
-	remline (*reply, starttls1);
-      else if (strstr (*reply, starttls2))
-	remline (*reply, starttls2);
+      size_t n;
+      if (smtp_reply_has_capa (reply, "STARTTLS", &n))
+	smtp_reply_remove_line (reply, n);
     }
 
   /*
@@ -691,15 +687,12 @@ handle_ehlo (char *command, char **reply)
 
   if (topt & T_ESMTP_AUTH)
     {
-      char *p = strstr (*reply, "AUTH ");
-      if (p && (p[-1] == '-' || p[-1] == ' ') && memcmp (p-4, "250", 3) == 0)
+      size_t n;
+      if (smtp_reply_has_capa (reply, "AUTH", &n))
 	{
-	  char *q = strchr (p, '\r');
-	  if (q)
-	    *q++ = 0;
+	  const char *p = smtp_reply_line (reply, n);
 	  esmtp_auth (&remote_server, p + 5);
-	  if (q)
-	    memmove (p - 4, q + 1, strlen (q + 1) + 1);
+	  smtp_reply_remove_line (reply, n);
 	}
     }
   
@@ -710,7 +703,7 @@ handle_ehlo (char *command, char **reply)
 #define CMD_RCPT_TO "rcpt to:"
 
 static void
-strip_inter_ws(char *buf, size_t len, size_t pfxlen)
+strip_inter_ws (char *buf, size_t len, size_t pfxlen)
 {
   if (isspace (buf[pfxlen]))
     {
@@ -736,13 +729,13 @@ is_prefix(char *buf, char *pfx)
 }
 
 static int
-transfer_command (MESSAGE * msg, char *command)
+transfer_command (MESSAGE *msg, char *command)
 {
-  char *reply = NULL;
-  size_t reply_size = 0;
   char *buf = NULL;
   int rc = 1; /* OK */
   size_t len;
+  ANUBIS_SMTP_REPLY reply = smtp_reply_new ();
+  const char *rstr;
   
   assign_string (&buf, command);
   make_lowercase (buf);
@@ -760,18 +753,20 @@ transfer_command (MESSAGE * msg, char *command)
 
   if (!strncmp (buf, "ehlo", 4))
     {
-      if (handle_ehlo (command, &reply))
+      smtp_reply_set (reply, command);
+      if (handle_ehlo (reply))
 	{
-	  free (reply);
+	  smtp_reply_free (reply);
 	  return 0;
 	}
     }
   else
-    get_response_smtp (CLIENT, remote_server, &reply, &reply_size);
+    smtp_reply_get (CLIENT, remote_server, reply);
 
-  swrite (SERVER, remote_client, reply);
-
-  if (isdigit ((unsigned char) reply[0]) && (unsigned char) reply[0] < '4')
+  swrite (SERVER, remote_client, smtp_reply_string (reply));
+  /* FIXME */
+  rstr = smtp_reply_string (reply);
+  if (isdigit ((unsigned char) rstr[0]) && (unsigned char) rstr[0] < '4')
     {
       if (strncmp (buf, "quit", 4) == 0)
 	rc = 0;		/* The QUIT command */
@@ -786,7 +781,7 @@ transfer_command (MESSAGE * msg, char *command)
 	}
     }
   free (buf);
-  free (reply);
+  smtp_reply_free (reply);
   return rc;
 }
 
