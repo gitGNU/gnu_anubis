@@ -239,14 +239,11 @@ bind_and_listen (char *host, unsigned int port)
 ***************/
 
 void
-swrite (int method, NET_STREAM sd, const char *ptr)
+swrite_n (int method, NET_STREAM sd, const char *ptr, size_t nleft)
 {
   int rc;
-  size_t nleft, nwritten = 0;
+  size_t nwritten = 0;
 
-  if (ptr == NULL || (nleft = strlen (ptr)) == 0)
-    return;
-  
   rc = stream_write (sd, ptr, nleft, &nwritten);
   if (rc)
     socket_error (stream_strerror (sd, rc));
@@ -256,6 +253,16 @@ swrite (int method, NET_STREAM sd, const char *ptr)
       /* Should not happen */
       anubis_error (EXIT_FAILURE, 0, _("Short write"));
     }
+}
+
+void
+swrite (int method, NET_STREAM sd, const char *ptr)
+{
+  size_t nleft;
+  
+  if (ptr == NULL || (nleft = strlen (ptr)) == 0)
+    return;
+  swrite_n (method, sd, ptr, nleft);
 }
 
 void

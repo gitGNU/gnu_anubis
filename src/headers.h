@@ -266,7 +266,7 @@ ANUBIS_MODE;
 
 typedef struct rc_regex RC_REGEX;
 typedef struct assoc ASSOC;
-typedef struct message_struct MESSAGE;
+typedef struct message_struct *MESSAGE;
 
 #define xfree(p) do\
 	if (p) { \
@@ -357,6 +357,7 @@ void filelog (char *, char *);
 NET_STREAM make_remote_connection (char *, unsigned int);
 int bind_and_listen (char *, unsigned int);
 void swrite (int, NET_STREAM, const char *);
+void swrite_n (int, NET_STREAM, const char *, size_t);
 void send_eol (int method, NET_STREAM sd);
 int recvline (int method, NET_STREAM sd, char **vptr, size_t * maxlen);
 void get_response_smtp (int, NET_STREAM, char **, size_t *);
@@ -386,10 +387,10 @@ void smtp_session (void);
 void smtp_session_transparent (void);
 void set_ehlo_domain (const char *domain, size_t len);
 char *get_ehlo_domain (void);
-void transfer_header (ANUBIS_LIST *);
-void transfer_body (MESSAGE *);
-void collect_headers (MESSAGE * msg, char *init_line);
-void collect_body (MESSAGE * msg);
+void transfer_header (ANUBIS_LIST);
+void transfer_body (MESSAGE);
+void collect_headers (MESSAGE  msg, char *init_line);
+void collect_body (MESSAGE  msg);
 
 /* proclist.c */
 void proclist_register (pid_t pid);
@@ -398,15 +399,32 @@ void proclist_init (void);
 size_t proclist_count (void);
 
 /* message.c */
-void message_add_body (MESSAGE *, char *, char *);
-void message_add_header (MESSAGE *, char *, char *);
-void message_remove_headers (MESSAGE *, RC_REGEX *);
-void message_modify_headers (MESSAGE *, RC_REGEX *, char *, char *);
-void message_modify_body (MESSAGE *, RC_REGEX *, char *);
-void message_external_proc (MESSAGE *, char **);
-void message_init (MESSAGE *);
-void message_free (MESSAGE *);
-void message_copy (MESSAGE *dst, MESSAGE *src);
+MESSAGE message_new (void);
+
+ANUBIS_LIST message_get_header (MESSAGE);
+ANUBIS_LIST message_get_commands (MESSAGE);
+const char *message_get_body (MESSAGE msg);
+const char *message_get_boundary (MESSAGE msg);
+ANUBIS_LIST message_get_mime_header (MESSAGE msg);
+
+void message_replace_header (MESSAGE msg, ANUBIS_LIST list);
+void message_replace_body (MESSAGE msg, char *body);
+void message_replace_boundary (MESSAGE msg, char *boundary);
+
+void message_add_body (MESSAGE, char *, char *);
+void message_add_header (MESSAGE, char *, char *);
+void message_add_command (MESSAGE, ASSOC *);
+void message_append_mime_header (MESSAGE, const char *);
+
+void message_remove_headers (MESSAGE, RC_REGEX *);
+void message_modify_headers (MESSAGE, RC_REGEX *, char *, char *);
+void message_modify_body (MESSAGE, RC_REGEX *, char *);
+void message_proc_body (MESSAGE msg, int (*proc) (char **, char *, void *),
+			void *param);
+void message_external_proc (MESSAGE, char **);
+void message_reset (MESSAGE);
+void message_free (MESSAGE);
+MESSAGE message_dup (MESSAGE msg);
 
 /* exec.c */
 char **gen_execargs (const char *);
@@ -417,16 +435,18 @@ void cleanup_children (void);
 
 /* esmtp.c */
 int esmtp_auth (NET_STREAM *, const char *);
-void anubis_set_client_mech_list (ANUBIS_LIST *list);
-void anubis_set_encryption_mech_list (ANUBIS_LIST *list);
+void anubis_set_client_mech_list (ANUBIS_LIST list);
+void anubis_set_encryption_mech_list (ANUBIS_LIST list);
 
 /* misc.c */
 int anubis_free_list_item (void *item, void *data);
 void assoc_free (ASSOC *);
 ASSOC *header_assoc (char *);
 int anubis_assoc_cmp (void *item, void *data);
-void destroy_assoc_list (ANUBIS_LIST **);
-void destroy_string_list (ANUBIS_LIST **);
+ANUBIS_LIST assoc_list_dup (ANUBIS_LIST);
+void destroy_assoc_list (ANUBIS_LIST *);
+ANUBIS_LIST string_list_dup (ANUBIS_LIST orig);
+void destroy_string_list (ANUBIS_LIST *);
 void parse_mtaport (char *, char **, unsigned int *);
 void parse_mtahost (char *, char **, unsigned int *);
 void remline (char *, char *);
@@ -440,11 +460,11 @@ void assign_string (char **pstr, const char *s);
 void assign_string_n (char **pstr, const char *s, size_t length);
 
 /* mime.c */
-void message_append_text_file (MESSAGE *, char *);
-void message_append_signature_file (MESSAGE *);
+void message_append_text_file (MESSAGE, char *, char *);
+void message_append_signature_file (MESSAGE);
 
 /* regex.c */
-int anubis_regex_match (RC_REGEX *, char *, int *, char ***);
+int anubis_regex_match (RC_REGEX *, const char *, int *, char ***);
 RC_REGEX *anubis_regex_compile (char *, int);
 void anubis_regex_free (RC_REGEX **);
 char *anubis_regex_source (RC_REGEX *);
@@ -457,14 +477,14 @@ void rc_system_init (void);
 void auth_tunnel (void);
 void open_rcfile (int);
 void process_rcfile (int);
-void rcfile_process_section (int, char *, void *, MESSAGE *);
-void rcfile_call_section (int, char *, void *, MESSAGE *);
+void rcfile_process_section (int, char *, void *, MESSAGE);
+void rcfile_call_section (int, char *, void *, MESSAGE);
 char *user_rcfile_name (void);
 
 typedef struct eval_env *EVAL_ENV;
 struct rc_loc const *eval_env_locus (EVAL_ENV);
 int eval_env_method (EVAL_ENV);
-MESSAGE *eval_env_message (EVAL_ENV);
+MESSAGE eval_env_message (EVAL_ENV);
 void *eval_env_data (EVAL_ENV);
 void eval_error (int retcode, EVAL_ENV env, const char *fmt, ...)
   ANUBIS_PRINTFLIKE(3,4);
@@ -562,7 +582,7 @@ typedef int (*anubis_db_io_t) (void *d, const char *key, ANUBIS_USER * rec,
 			       int *ecode);
 typedef const char *(*anubis_db_strerror_t) (void *d, int rc);
 typedef int (*anubis_db_delete_t) (void *d, const char *key, int *ecode);
-typedef int (*anubis_db_get_list_t) (void *d, ANUBIS_LIST * list, int *ecode);
+typedef int (*anubis_db_get_list_t) (void *d, ANUBIS_LIST  list, int *ecode);
 
 int anubis_db_register (const char *dbid,
 			anubis_db_open_t _db_open,
@@ -578,7 +598,7 @@ int anubis_db_close (void **dptr);
 int anubis_db_get_record (void *dptr, const char *key, ANUBIS_USER * rec);
 int anubis_db_put_record (void *dptr, const char *key, ANUBIS_USER * rec);
 int anubis_db_delete_record (void *dptr, const char *key);
-int anubis_db_get_list (void *dptr, ANUBIS_LIST ** list);
+int anubis_db_get_list (void *dptr, ANUBIS_LIST * list);
 const char *anubis_db_strerror (void *dptr);
 void anubis_db_free_record (ANUBIS_USER * rec);
 
@@ -616,9 +636,9 @@ void install_gsasl_stream (Gsasl_session *sess_ctx, NET_STREAM * stream);
 
 /* gsasl_srv.c */
 int anubis_name_cmp (void *item, void *data);
-ANUBIS_LIST *auth_method_list (const char *input);
-void anubis_set_mech_list (ANUBIS_LIST **out, ANUBIS_LIST *list);
-void anubis_set_server_mech_list (ANUBIS_LIST *list);
+ANUBIS_LIST auth_method_list (const char *input);
+void anubis_set_mech_list (ANUBIS_LIST *out, ANUBIS_LIST list);
+void anubis_set_server_mech_list (ANUBIS_LIST list);
 
 /* xdatabase.c */
 int xdatabase (char *command);

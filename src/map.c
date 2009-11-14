@@ -2,7 +2,7 @@
    map.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2005, 2007 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2005, 2007, 2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -82,7 +82,7 @@ struct rc_kwdef translate_kw[] = {
 
 
 void
-translate_parser (EVAL_ENV env, int key, ANUBIS_LIST *arglist, void *inv_data)
+translate_parser (EVAL_ENV env, int key, ANUBIS_LIST arglist, void *inv_data)
 {
   struct translate_env *xlat_env = eval_env_data (env);
   char *p = 0;

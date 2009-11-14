@@ -59,16 +59,6 @@ struct session_struct
 #endif				/* USE_SOCKS_PROXY */
 };
 
-struct message_struct
-{
-  ANUBIS_LIST *commands;	/* Associative list of SMTP commands */
-  ANUBIS_LIST *header;		/* Associative list of RFC822 headers */
-  ANUBIS_LIST *mime_hdr;	/* List of lines before the first boundary
-				   marker */
-  char *body;			/* Message body */
-  char *boundary;		/* Additional data */
-};
-
 #ifdef USE_SSL
 struct secure_struct
 {

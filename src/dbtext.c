@@ -2,7 +2,7 @@
    dbtext.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2004, 2007 The Anubis Team.
+   Copyright (C) 2003, 2004, 2007, 2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -188,7 +188,7 @@ dbtext_put (void *d, const char *key, ANUBIS_USER *rec, int *errp)
 }
 
 static int
-dbtext_list (void *d, ANUBIS_LIST * list, int *ecode)
+dbtext_list (void *d, ANUBIS_LIST  list, int *ecode)
 {
   FILE *fp = d;
   char buf[512], *p;

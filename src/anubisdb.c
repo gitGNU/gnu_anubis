@@ -2,7 +2,7 @@
    anubisdb.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2004, 2007 The Anubis Team.
+   Copyright (C) 2003, 2004, 2007, 2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -42,7 +42,7 @@ struct anubis_db_instance
   void *db_handle;
 };
 
-static ANUBIS_LIST /* of anubis_db_type */  * dbtab;
+static ANUBIS_LIST /* of anubis_db_type */ dbtab;
 
 static int
 dbid_cmp (void *item, void *data)
@@ -164,7 +164,7 @@ anubis_db_delete_record (void *dptr, const char *key)
 }
 
 int
-anubis_db_get_list (void *dptr, ANUBIS_LIST ** list)
+anubis_db_get_list (void *dptr, ANUBIS_LIST *list)
 {
   struct anubis_db_instance *inst = dptr;
   *list = list_create ();

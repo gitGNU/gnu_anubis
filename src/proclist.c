@@ -2,7 +2,7 @@
    proclist.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2005, 2007, 2008 The Anubis Team.
+   Copyright (C) 2005, 2007, 2008, 2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -44,7 +44,7 @@ struct process_status
   int status;             /* When running == 0, status returned by waitpid */
 };
 
-static ANUBIS_LIST *process_list; /* A list of processes. Separate for each
+static ANUBIS_LIST process_list; /* A list of processes. Separate for each
 				     Anubis instance. */
 
 /* list_iterator_t update_process_status. Used to update status of the

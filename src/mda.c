@@ -2,7 +2,7 @@
    mda.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2005, 2007 The Anubis Team.
+   Copyright (C) 2005, 2007, 2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -125,8 +125,9 @@ static char *smtp_client_state_descr[] =
 
 struct smtp_client_context
 {
-  MESSAGE *msg;
+  MESSAGE msg;
   enum smtp_client_state state;
+  int rcpt;
   int status;
   ANUBIS_SMTP_REPLY reply;
 };
@@ -249,20 +250,15 @@ smtp_client_mail (struct smtp_client_context *ctx)
 void
 smtp_client_rcpt (struct smtp_client_context *ctx)
 {
-  int i;
-
-  for (i = 0; i < x_argc; i++)
+  char *addr = x_argv[ctx->rcpt]; /* FIXME: normalize */
+  swrite (CLIENT, remote_server, "RCPT TO:<");
+  swrite (CLIENT, remote_server, addr);
+  swrite (CLIENT, remote_server, ">"CRLF);
+  smtp_reply_get (CLIENT, remote_server, ctx->reply);
+  if (!smtp_reply_code_eq (ctx->reply, "250"))
     {
-      char *addr = x_argv[i]; /* FIXME: normalize */
-      swrite (CLIENT, remote_server, "RCPT TO:<");
-      swrite (CLIENT, remote_server, addr);
-      swrite (CLIENT, remote_server, ">"CRLF);
-      smtp_reply_get (CLIENT, remote_server, ctx->reply);
-      if (!smtp_reply_code_eq (ctx->reply, "250"))
-	{
-	  smtp_client_failure (ctx);
-	  return;
-	}
+      smtp_client_failure (ctx);
+      return;
     }
   ctx->state = smtp_client_state_data;
 }
@@ -270,7 +266,7 @@ smtp_client_rcpt (struct smtp_client_context *ctx)
 void
 smtp_client_data (struct smtp_client_context *ctx)
 {
-  /*MESSAGE *tmp;*/
+  MESSAGE tmp;
   
   swrite (CLIENT, remote_server, "DATA"CRLF);
   smtp_reply_get (CLIENT, remote_server, ctx->reply);
@@ -279,16 +275,16 @@ smtp_client_data (struct smtp_client_context *ctx)
       smtp_client_failure (ctx);
       return;
     }
-  
+
   open_rcfile (CF_CLIENT);
   process_rcfile (CF_CLIENT);
   
-  /* FIXME: Copy message */
-  /*message_copy (msg, tmp);*/
-  rcfile_call_section (CF_CLIENT, incoming_mail_rule, NULL, ctx->msg);
+  tmp = message_dup (ctx->msg);
+  rcfile_call_section (CF_CLIENT, incoming_mail_rule, NULL, tmp);
       
-  transfer_header (ctx->msg->header);
-  transfer_body (ctx->msg);
+  transfer_header (message_get_header (tmp));
+  transfer_body (tmp);
+  message_free (tmp);
   
   swrite (CLIENT, remote_server, "." CRLF);
   smtp_reply_get (CLIENT, remote_server, ctx->reply);
@@ -303,22 +299,30 @@ smtp_client_data (struct smtp_client_context *ctx)
 void
 smtp_client_quit (struct smtp_client_context *ctx)
 {
-  swrite (CLIENT, remote_server, "QUIT"CRLF);
-  smtp_reply_get (CLIENT, remote_server, ctx->reply);
-  if (smtp_reply_code_eq (ctx->reply, "2"))
-    ctx->state = smtp_client_state_stop;
+  if (++ctx->rcpt < x_argc)
+    {
+      ctx->state = smtp_client_state_mail;
+    }
   else
-    smtp_client_failure (ctx);
+    {
+      swrite (CLIENT, remote_server, "QUIT"CRLF);
+      smtp_reply_get (CLIENT, remote_server, ctx->reply);
+      if (smtp_reply_code_eq (ctx->reply, "2"))
+	ctx->state = smtp_client_state_stop;
+      else
+	smtp_client_failure (ctx);
+    }
 }
 
 static int
-deliver_remote (MESSAGE *msg)
+deliver_remote (MESSAGE msg)
 {
   struct smtp_client_context ctx;
   remote_server = make_remote_connection (session.mta, session.mta_port);
 
   ctx.msg = msg;
   ctx.state = smtp_client_state_init;
+  ctx.rcpt = 0;
   ctx.status = 0;
   ctx.reply = smtp_reply_new ();
 
@@ -369,7 +373,7 @@ deliver_remote (MESSAGE *msg)
 
 
 static void
-deliver_local_child (const char *recipient, MESSAGE *msg)
+deliver_local_child (const char *recipient, MESSAGE msg)
 {
   int i;
   char **argv;
@@ -405,7 +409,7 @@ deliver_local_child (const char *recipient, MESSAGE *msg)
   
   rcfile_call_section (CF_CLIENT, incoming_mail_rule, NULL, msg);
       
-  transfer_header (msg->header);
+  transfer_header (message_get_header (msg));
   transfer_body (msg);
   stream_close (remote_server);
   stream_destroy (&remote_server);
@@ -437,7 +441,7 @@ deliver_local_child (const char *recipient, MESSAGE *msg)
 
 /* Deliver message to the recipient */
 static void
-deliver_local (const char *recipient, MESSAGE *msg)
+deliver_local (const char *recipient, MESSAGE msg)
 {
   int status;
   pid_t pid;
@@ -508,11 +512,12 @@ save_sender_address (char *from_line)
 
 /* Ensure from_address is set. */
 static void
-ensure_sender_address (MESSAGE *msg)
+ensure_sender_address (MESSAGE msg)
 {
   if (!from_address)
     {
-      ASSOC *p = list_locate (msg->header, "From", anubis_assoc_cmp);
+      ASSOC *p = list_locate (message_get_header (msg),
+			      "From", anubis_assoc_cmp);
       if (p)
 	{
 	  /* Find the email address itself. It is a rather simplified
@@ -570,7 +575,7 @@ mda ()
   
   create_stdio_stream (&remote_client);
 
-  message_init (&msg);
+  msg = message_new ();
 
   /* Read eventual From line */
   if (recvline (SERVER, remote_client, &buf, &size) == 0)
@@ -580,10 +585,10 @@ mda ()
   else
     assign_string (&line, buf);
   
-  collect_headers (&msg, line);
+  collect_headers (msg, line);
   free (buf);
-  ensure_sender_address (&msg);
-  collect_body (&msg);
+  ensure_sender_address (msg);
+  collect_body (msg);
 
   signal (SIGCHLD, SIG_DFL);
   if (!x_argc)
@@ -592,12 +597,12 @@ mda ()
   if (topt & T_LOCAL_MTA)
     {
       for (p = x_argv; *p; p++)
-	deliver_local (*p, &msg);
+	deliver_local (*p, msg);
     }
   else
-    rc = deliver_remote (&msg);
+    rc = deliver_remote (msg);
   
-  message_free (&msg);
+  message_free (msg);
   
   exit (rc);
 }

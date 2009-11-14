@@ -2,7 +2,7 @@
    gsasl_srv.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2004, 2007, 2008 The Anubis Team.
+   Copyright (C) 2003, 2004, 2007, 2008, 2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -30,14 +30,14 @@ char *anubis_sasl_hostname;
 #if defined(WITH_GSASL)
 
 static Gsasl *ctx;
-static ANUBIS_LIST *anubis_mech_list;
+static ANUBIS_LIST anubis_mech_list;
 
 /* Converts the auth method list from a textual representation to
    a ANUBIS_LIST of string values */
-ANUBIS_LIST *
+ANUBIS_LIST 
 auth_method_list (const char *input)
 {
-  ANUBIS_LIST *list = list_create ();
+  ANUBIS_LIST list = list_create ();
 
   while (*input)
     {
@@ -57,9 +57,9 @@ auth_method_list (const char *input)
 /* Converts the authentication method ANUBIS_LIST to its textual
    representation. */
 static void
-auth_list_to_string (ANUBIS_LIST * list, char *buf, size_t bufsize)
+auth_list_to_string (ANUBIS_LIST  list, char *buf, size_t bufsize)
 {
-  ITERATOR *itr = iterator_create (list);
+  ITERATOR itr = iterator_create (list);
   char *p;
 
   if (!itr)
@@ -81,9 +81,9 @@ auth_list_to_string (ANUBIS_LIST * list, char *buf, size_t bufsize)
 /* Sets the list of allowed authentication mechanisms from its
    argument */
 void
-anubis_set_mech_list (ANUBIS_LIST **out, ANUBIS_LIST *list)
+anubis_set_mech_list (ANUBIS_LIST *out, ANUBIS_LIST list)
 {
-  ITERATOR *itr = iterator_create (list);
+  ITERATOR itr = iterator_create (list);
   char *p;
 
   if (!itr)
@@ -95,7 +95,7 @@ anubis_set_mech_list (ANUBIS_LIST **out, ANUBIS_LIST *list)
 }
 
 void
-anubis_set_server_mech_list (ANUBIS_LIST *list)
+anubis_set_server_mech_list (ANUBIS_LIST list)
 {
   anubis_set_mech_list (&anubis_mech_list, list);
 }
@@ -118,13 +118,13 @@ auth_gsasl_capa_init ()
   if (anubis_mech_list)
     {
       size_t size = strlen (listmech);
-      ANUBIS_LIST *mech = auth_method_list (listmech);
+      ANUBIS_LIST mech = auth_method_list (listmech);
 
       /* Compute intersection of both lists. Make sure we compute
 	 (anubis_mech_list X mech), not (mech X anubis_mech_list),
 	 so that the resulting list preserves the ordering of
 	 anubis_mech_list */
-      ANUBIS_LIST *p = list_intersect (anubis_mech_list, mech,
+      ANUBIS_LIST p = list_intersect (anubis_mech_list, mech,
 				       anubis_name_cmp);
       auth_list_to_string (p, listmech, size);
       list_destroy (&p, NULL, NULL);

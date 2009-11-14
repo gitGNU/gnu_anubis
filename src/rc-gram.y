@@ -3,7 +3,7 @@
    rcfile.y
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2004, 2007 The Anubis Team.
+   Copyright (C) 2003, 2004, 2007, 2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -122,7 +122,7 @@ static struct rc_secdef *rc_secdef;
   } msgpart;
   RC_LOC loc;
   char *begin_sec;
-  ANUBIS_LIST *list;
+  ANUBIS_LIST list;
   int eq;
 };
 
@@ -740,7 +740,7 @@ struct strobj {
 };
 
 /* A list of string objects */
-static ANUBIS_LIST /* of struct strobj */ *string_list;
+static ANUBIS_LIST /* of struct strobj */ string_list;
 
 static int
 string_comparator (void *item, void *data)
@@ -1343,12 +1343,12 @@ struct disabled_keyword
 };
 
 
-static ANUBIS_LIST *disabled_keyword_list;
+static ANUBIS_LIST disabled_keyword_list;
 
 void
 rc_disable_keyword (int mask, const char *kw)
 {
-  ITERATOR *itr;
+  ITERATOR itr;
   struct disabled_keyword *p;
   
   if (!disabled_keyword_list)
@@ -1380,7 +1380,7 @@ rc_keyword_is_disabled (int mask, const char *kw)
   int rc = 0;
   if (disabled_keyword_list)
     {
-      ITERATOR *itr = iterator_create (disabled_keyword_list);
+      ITERATOR itr = iterator_create (disabled_keyword_list);
       struct disabled_keyword *p;
 
       for (p = iterator_first (itr); p; p = iterator_next (itr))
@@ -1399,7 +1399,7 @@ struct eval_env
   int method;
   int cmp_method;
   struct rc_secdef_child *child;
-  MESSAGE *msg;
+  MESSAGE msg;
   void *data;
   int refcnt;
   char **refstr;
@@ -1420,7 +1420,7 @@ eval_env_method (struct eval_env *env)
   return env->method;
 }
 
-MESSAGE *
+MESSAGE 
 eval_env_message (struct eval_env *env)
 {
   return env->msg;
@@ -1552,8 +1552,8 @@ asgn_eval (struct eval_env *env, RC_ASGN *asgn)
   if (env->refstr)
     {
       char *s;
-      ANUBIS_LIST *arg = list_create ();
-      ITERATOR *itr = iterator_create (asgn->rhs);
+      ANUBIS_LIST arg = list_create ();
+      ITERATOR itr = iterator_create (asgn->rhs);
       for (s = iterator_first (itr); s; s = iterator_next (itr))
 	{
 	  char *str = substitute (s, env->refstr);
@@ -1570,10 +1570,10 @@ asgn_eval (struct eval_env *env, RC_ASGN *asgn)
 
 int
 re_eval_list (struct eval_env *env, char *key, char *sep,
-	      RC_REGEX *re, ANUBIS_LIST *list)
+	      RC_REGEX *re, ANUBIS_LIST list)
 {
   ASSOC *p;
-  ITERATOR *itr;
+  ITERATOR itr;
   int rc = 0;
 
   itr = iterator_create (list);
@@ -1626,7 +1626,7 @@ re_eval_list (struct eval_env *env, char *key, char *sep,
 }
 
 int
-re_eval_text (struct eval_env *env, RC_REGEX *re, char *text)
+re_eval_text (struct eval_env *env, RC_REGEX *re, const char *text)
 {
   /* FIXME */
   return anubis_regex_match (re, text, &env->refcnt, &env->refstr);
@@ -1648,15 +1648,16 @@ expr_eval (struct eval_env *env, RC_EXPR *expr)
     {
     case COMMAND:
       rc = re_eval_list (env, expr->key, expr->sep, expr->re,
-			 env->msg->commands);
+			 message_get_commands (env->msg));
       break;
     
     case HEADER:
-      rc = re_eval_list (env, expr->key, expr->sep, expr->re, env->msg->header);
+      rc = re_eval_list (env, expr->key, expr->sep, expr->re,
+			 message_get_header (env->msg));
       break;
     
     case BODY:
-      rc = re_eval_text (env, expr->re, env->msg->body);
+      rc = re_eval_text (env, expr->re, message_get_body (env->msg));
       break;
     
     default:
@@ -1770,7 +1771,7 @@ stmt_list_eval (struct eval_env *env, RC_STMT *stmt)
 
 void
 eval_section (int method, RC_SECTION *sec, struct rc_secdef *secdef,
-	      void *data, MESSAGE *msg)
+	      void *data, MESSAGE msg)
 {
   struct eval_env env;
   env.method = method;
@@ -1794,7 +1795,7 @@ eval_section (int method, RC_SECTION *sec, struct rc_secdef *secdef,
 
 void
 rc_run_section (int method, RC_SECTION *sec, struct rc_secdef *secdef,
-		void *data, MESSAGE *msg)
+		void *data, MESSAGE msg)
 {
   if (!sec)
     return;
@@ -1812,7 +1813,7 @@ rc_run_section (int method, RC_SECTION *sec, struct rc_secdef *secdef,
 
 void
 rc_call_section (int method, RC_SECTION *sec, struct rc_secdef *secdef,
-		 void *data, MESSAGE *msg)
+		 void *data, MESSAGE msg)
 {
   if (!sec)
 	  return;

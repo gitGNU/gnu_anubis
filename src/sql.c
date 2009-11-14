@@ -2,7 +2,7 @@
    sql.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2004, 2007 The Anubis Team.
+   Copyright (C) 2003, 2004, 2007, 2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -125,7 +125,7 @@ sql_db_get (void *d, const char *key, ANUBIS_USER * rec, int *errp)
 }
 
 static int
-sql_db_list (void *d, ANUBIS_LIST * list, int *ecode)
+sql_db_list (void *d, ANUBIS_LIST  list, int *ecode)
 {
   struct anubis_sql_db *amp = d;
   size_t nrows, i;

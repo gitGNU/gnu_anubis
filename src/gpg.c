@@ -2,7 +2,7 @@
    gpg.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004, 2007, 2008 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2007, 2008, 2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -432,10 +432,17 @@ gpg_sign_encrypt (char *gpg_data)
   return se_data;
 }
 
-void
-gpg_proc (MESSAGE * msg, char *(*proc) (char *input))
+static int
+_gpg_funcall (char **output, char *input, void *param)
 {
-  char *buf;
+  char *(*fun) (char *input) = param;
+  *output = fun (input);
+  return 1;
+}
+
+void
+gpg_proc (MESSAGE msg, char *(*fun) (char *input))
+{
 #if defined(HAVE_SETENV) || defined(HAVE_PUTENV)
   char homedir_s[MAXPATHLEN + 1];	/* SUPERVISOR */
   char homedir_c[MAXPATHLEN + 1];	/* CLIENT */
@@ -445,9 +452,7 @@ gpg_proc (MESSAGE * msg, char *(*proc) (char *input))
   setenv ("HOME", homedir_c, 1);
 #endif /* HAVE_SETENV or HAVE_PUTENV */
 
-  buf = proc (msg->body);
-  xfree (msg->body);
-  msg->body = buf;
+  message_proc_body (msg, _gpg_funcall, fun);
 
 #if defined(HAVE_SETENV) || defined(HAVE_PUTENV)
   setenv ("HOME", homedir_s, 1);
@@ -473,7 +478,7 @@ gpg_free (void)
 #define KW_GPG_HOME               5
 
 void
-gpg_parser (EVAL_ENV env, int key, ANUBIS_LIST *arglist, void *inv_data)
+gpg_parser (EVAL_ENV env, int key, ANUBIS_LIST arglist, void *inv_data)
 {
   char *arg = list_item (arglist, 0);
   switch (key)

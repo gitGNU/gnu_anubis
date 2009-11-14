@@ -2,7 +2,7 @@
    gdbm.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2004, 2007, 2008 The Anubis Team.
+   Copyright (C) 2003, 2004, 2007, 2008, 2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -118,7 +118,7 @@ gdbm_db_get (void *d, const char *keystr, ANUBIS_USER * rec, int *errp)
 }
 
 static int
-gdbm_db_list (void *d, ANUBIS_LIST * list, int *ecode)
+gdbm_db_list (void *d, ANUBIS_LIST  list, int *ecode)
 {
   datum key, content;
 

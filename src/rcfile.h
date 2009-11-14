@@ -2,7 +2,7 @@
    rcfile.h
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2007 The Anubis Team.
+   Copyright (C) 2003, 2007, 2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -72,7 +72,7 @@ enum rc_stmt_type
 struct rc_asgn
 {				/* Assignment */
   char *lhs;			/* Left-hand side: A keyword */
-  ANUBIS_LIST *rhs;		/* Right-hand side: A list of character strings */
+  ANUBIS_LIST rhs;		/* Right-hand side: A list of character strings */
   int flags;			/* Flags control various aspects of assignment
 				   functionality */
 };
@@ -167,7 +167,7 @@ struct rc_stmt
 
 /* Semantic handler tables */
 
-typedef void (*rc_kw_parser_t) (EVAL_ENV env, int key, ANUBIS_LIST *arg,
+typedef void (*rc_kw_parser_t) (EVAL_ENV env, int key, ANUBIS_LIST arg,
 				void *inv_data);
 
 /* Keyword flags */
@@ -230,9 +230,9 @@ void rc_section_list_destroy (RC_SECTION **);
 int rc_run_cond (char *, int, char *);
 void rc_run_section_list (int, RC_SECTION *, struct rc_secdef *);
 void rc_run_section (int, RC_SECTION *, struct rc_secdef *, void *,
-		     MESSAGE *);
+		     MESSAGE);
 void rc_call_section (int, RC_SECTION *, struct rc_secdef *, void *,
-		      MESSAGE *);
+		      MESSAGE);
 void rc_set_debug_level (char *);
 int rc_open (char *);
 struct rc_secdef *anubis_add_section (char *);

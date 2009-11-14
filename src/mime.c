@@ -2,7 +2,7 @@
    mime.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004, 2007 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2007, 2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -25,20 +25,27 @@
   FIXME: Will add here further MIME support (see TODO file).
 */
 
-static void
-_append_text_file (MESSAGE * msg, char *filename, char *prefix)
+struct append_closure
 {
+  const char *prefix;
+  const char *filename;
+};
+
+static int
+_append_proc (char **output, char *input, void *param)
+{
+  struct append_closure *clos = param;
   FILE *fptxt;
   char buf[LINEBUFFER + 1];
-  unsigned long nbytes;
-  unsigned long nlines = 0;
+  size_t nbytes;
+  size_t nlines = 0;
   char *p;
 
-  fptxt = fopen (filename, "r");
+  fptxt = fopen (clos->filename, "r");
   if (fptxt == 0)
     {
-      anubis_error (0, errno, "%s", filename);
-      return;
+      anubis_error (0, errno, "%s", clos->filename);
+      return -1;
     }
   while (fgets (buf, LINEBUFFER, fptxt) != 0)
     nlines++;
@@ -47,15 +54,17 @@ _append_text_file (MESSAGE * msg, char *filename, char *prefix)
   clearerr (fptxt);
   nbytes = ftell (fptxt);
   rewind (fptxt);
-  nbytes = strlen (msg->body)
-    + (prefix ? strlen (prefix) : 0) + nbytes + nlines + 1;
+  
+  nbytes = strlen (input)
+            + (clos->prefix ? strlen (clos->prefix) : 0) + nbytes + nlines + 1;
 
-  msg->body = (char *) xrealloc ((char *) msg->body, nbytes);
-  p = msg->body + strlen (msg->body);
-  if (prefix)
+  input = xrealloc (input, nbytes);
+  *output = input;
+  p = input + strlen (input);
+  if (clos->prefix)
     {
-      strcpy (p, prefix);
-      p += strlen (prefix);
+      strcpy (p, clos->prefix);
+      p += strlen (clos->prefix);
     }
   while (fgets (buf, LINEBUFFER - 1, fptxt) != 0)
     {
@@ -63,18 +72,20 @@ _append_text_file (MESSAGE * msg, char *filename, char *prefix)
       p += strlen (buf);
     }
   *p = 0;
-  fclose (fptxt);
-  return;
+  return 0;
 }
 
 void
-message_append_text_file (MESSAGE * msg, char *filename)
+message_append_text_file (MESSAGE msg, char *filename, char *prefix)
 {
-  _append_text_file (msg, filename, NULL);
+  struct append_closure clos;
+  clos.filename = filename;
+  clos.prefix = prefix;
+  message_proc_body (msg, _append_proc, &clos);
 }
 
 void
-message_append_signature_file (MESSAGE * msg)
+message_append_signature_file (MESSAGE msg)
 {
   char homedir[MAXPATHLEN + 1];
   char signature_file[] = DEFAULT_SIGFILE;
@@ -87,7 +98,7 @@ message_append_signature_file (MESSAGE * msg)
   signature_path = xmalloc (n);
   snprintf (signature_path, n - 1, "%s/%s", homedir, signature_file);
 
-  _append_text_file (msg, signature_path, "-- \n");
+  message_append_text_file (msg, signature_path, "-- \n");
   free (signature_path);
   return;
 }

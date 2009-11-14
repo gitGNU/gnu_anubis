@@ -2,7 +2,7 @@
    list.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2007 The Anubis Team.
+   Copyright (C) 2003, 2007, 2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -36,7 +36,7 @@ struct list
 struct iterator
 {
   struct iterator *next;
-  ANUBIS_LIST *list;
+  ANUBIS_LIST list;
   struct list_entry *cur;
   int advanced;
 };
@@ -72,7 +72,7 @@ list_destroy (struct list **plist, list_iterator_t user_free, void *data)
 }
 
 void *
-iterator_current (ITERATOR *ip)
+iterator_current (ITERATOR ip)
 {
   if (!ip)
     return NULL;
@@ -80,7 +80,7 @@ iterator_current (ITERATOR *ip)
 }
 
 static void
-_iterator_attach (ANUBIS_LIST *list, ITERATOR *itr)
+_iterator_attach (ANUBIS_LIST list, ITERATOR itr)
 {
   itr->list = list;
   itr->cur = NULL;
@@ -90,9 +90,9 @@ _iterator_attach (ANUBIS_LIST *list, ITERATOR *itr)
 }
 
 static int
-_iterator_detach (ITERATOR *ip)
+_iterator_detach (ITERATOR ip)
 {
-  ITERATOR *itr, *prev;
+  ITERATOR itr, prev;
 
   if (!ip)
     return 1;
@@ -111,10 +111,10 @@ _iterator_detach (ITERATOR *ip)
 }
      
 
-ITERATOR *
-iterator_create (ANUBIS_LIST *list)
+ITERATOR 
+iterator_create (ANUBIS_LIST list)
 {
-  ITERATOR *itr;
+  ITERATOR itr;
 
   if (!list)
     return NULL;
@@ -124,7 +124,7 @@ iterator_create (ANUBIS_LIST *list)
 }
 
 void
-iterator_destroy (ITERATOR **ip)
+iterator_destroy (ITERATOR *ip)
 {
   if (!ip || !*ip)
     return;
@@ -136,7 +136,7 @@ iterator_destroy (ITERATOR **ip)
 }
 
 void *
-iterator_first (ITERATOR *ip)
+iterator_first (ITERATOR ip)
 {
   if (!ip)
     return NULL;
@@ -146,7 +146,7 @@ iterator_first (ITERATOR *ip)
 }
 
 void *
-iterator_next (ITERATOR *ip)
+iterator_next (ITERATOR ip)
 {
   if (!ip || !ip->cur)
     return NULL;
@@ -157,7 +157,7 @@ iterator_next (ITERATOR *ip)
 }
 
 static void
-_iterator_advance (ITERATOR *ip, struct list_entry *e)
+_iterator_advance (ITERATOR ip, struct list_entry *e)
 {
   for (; ip; ip = ip->next)
     {
@@ -269,7 +269,7 @@ list_remove (struct list *list, void *data, list_comp_t cmp)
 void
 list_iterate (struct list *list, list_iterator_t func, void *data)
 {
-  ITERATOR itr;
+  struct iterator itr;
   void *p;
 
   if (!list)
@@ -301,11 +301,11 @@ list_locate (struct list *list, void *data, list_comp_t cmp)
    contains elements from the list A that are also encountered
    in the list B. Elements are compared using function CMP.
    The resulting list preserves the ordering of A. */
-ANUBIS_LIST *
-list_intersect (ANUBIS_LIST *a, ANUBIS_LIST *b, list_comp_t cmp)
+ANUBIS_LIST 
+list_intersect (ANUBIS_LIST a, ANUBIS_LIST b, list_comp_t cmp)
 {
-  ANUBIS_LIST *res;
-  ITERATOR *itr = iterator_create (a);
+  ANUBIS_LIST res;
+  ITERATOR itr = iterator_create (a);
   void *p;
 
   if (!itr)

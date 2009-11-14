@@ -2,7 +2,7 @@
    rcfile.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -95,7 +95,7 @@ struct file_id
 
 /* A list of struct file_id used to prevent duplicate parsing of the
    same file */
-static ANUBIS_LIST *file_id_list;
+static ANUBIS_LIST file_id_list;
 
 /* Comparator for two struct file_id */
 static int
@@ -260,11 +260,11 @@ process_rcfile (int method)
 #define KW_LOG_TAG                  35
 
 char **
-list_to_argv (ANUBIS_LIST * list)
+list_to_argv (ANUBIS_LIST  list)
 {
   int i, argc;
   char **argv, *p;
-  ITERATOR *itr;
+  ITERATOR itr;
 
   argc = list_count (list);
   argv = xmalloc ((argc + 1) * sizeof (argv[0]));
@@ -324,10 +324,10 @@ parse_log_facility (const char *arg)
 static volatile unsigned long _anubis_hang;
 
 /* List of users who are allowed to use HANG in their profiles */
-ANUBIS_LIST *allow_hang_users; 
+ANUBIS_LIST allow_hang_users; 
 
 void
-control_parser (EVAL_ENV env, int key, ANUBIS_LIST *arglist, void *inv_data)
+control_parser (EVAL_ENV env, int key, ANUBIS_LIST arglist, void *inv_data)
 {
   char *arg = list_item (arglist, 0);
   int method = eval_env_method (env);
@@ -587,7 +587,7 @@ control_parser (EVAL_ENV env, int key, ANUBIS_LIST *arglist, void *inv_data)
     case KW_ALLOW_HANG:
       {
 	char *p;
-	ITERATOR *itr = iterator_create (arglist);
+	ITERATOR itr = iterator_create (arglist);
 	
 	allow_hang_users = list_create ();
 	for (p = iterator_first (itr); p; p = iterator_next (itr))
@@ -723,7 +723,7 @@ static struct rc_secdef_child control_sect_child = {
 #define KW_SSL_CAFILE          5
 
 void
-tls_parser (EVAL_ENV env, int key, ANUBIS_LIST *arglist, void *inv_data)
+tls_parser (EVAL_ENV env, int key, ANUBIS_LIST arglist, void *inv_data)
 {
   char *arg = list_item (arglist, 0);
   switch (key)
@@ -802,9 +802,9 @@ control_section_init (void)
 #define KW_BODY_CLEAR               5
 
 void
-rule_parser (EVAL_ENV env, int key, ANUBIS_LIST *arglist, void *inv_data)
+rule_parser (EVAL_ENV env, int key, ANUBIS_LIST arglist, void *inv_data)
 {
-  MESSAGE *msg = eval_env_message (env);
+  MESSAGE msg = eval_env_message (env);
   char *arg = list_item (arglist, 0);
   char **argv;
 
@@ -816,18 +816,16 @@ rule_parser (EVAL_ENV env, int key, ANUBIS_LIST *arglist, void *inv_data)
       break;
       
     case KW_BODY_APPEND:
-      message_append_text_file (msg, arg);
+      message_append_text_file (msg, arg, NULL);
       break;
       
     case KW_BODY_CLEAR:
-      xfree (msg->body);
-      msg->body = strdup ("");
+      message_replace_body (msg, xstrdup (""));
       break;
       
     case KW_BODY_CLEAR_APPEND:
-      xfree (msg->body);
-      msg->body = strdup ("");
-      message_append_text_file (msg, arg);
+      message_replace_body (msg, xstrdup (""));
+      message_append_text_file (msg, arg, NULL);
       break;
       
     case KW_EXTERNAL_BODY_PROCESSOR:
@@ -889,7 +887,7 @@ rc_system_init (void)
 }
 
 void
-rcfile_process_section (int method, char *name, void *data, MESSAGE *msg)
+rcfile_process_section (int method, char *name, void *data, MESSAGE msg)
 {
   RC_SECTION *sec;
 
@@ -899,7 +897,7 @@ rcfile_process_section (int method, char *name, void *data, MESSAGE *msg)
 }
 
 void
-rcfile_call_section (int method, char *name, void *data, MESSAGE *msg)
+rcfile_call_section (int method, char *name, void *data, MESSAGE msg)
 {
   RC_SECTION *sec = rc_section_lookup (parse_tree, name);
   if (!sec)

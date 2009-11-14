@@ -2,7 +2,7 @@
    authmode.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2004, 2005, 2007, 2008 The Anubis Team.
+   Copyright (C) 2003, 2004, 2005, 2007, 2008, 2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -25,7 +25,7 @@
 #ifdef WITH_GSASL
 
 static char *smtp_greeting_message;
-static ANUBIS_LIST *smtp_help_message;
+static ANUBIS_LIST smtp_help_message;
 static int helo_count; /* report possible SMTP attack */
 
 
@@ -125,7 +125,7 @@ asmtp_greet (void)
   asmtp_reply (220, "%s %s", name, smtp_greeting_message);
 }
 
-static ANUBIS_LIST *asmtp_capa;
+static ANUBIS_LIST asmtp_capa;
 
 void
 asmtp_capa_add (char *name)
@@ -171,7 +171,7 @@ asmtp_capa_init (void)
 static void
 asmtp_capa_report (void)
 {
-  ITERATOR *itr = iterator_create (asmtp_capa);
+  ITERATOR itr = iterator_create (asmtp_capa);
   char *p = iterator_first (itr);
 
   while (p)
@@ -258,7 +258,7 @@ asmtp_help (void)
   if (smtp_help_message)
     {
       char *s;
-      ITERATOR *itr = iterator_create (smtp_help_message);
+      ITERATOR itr = iterator_create (smtp_help_message);
       for (s = iterator_first (itr); s; s = iterator_next (itr))
 	asmtp_reply (R_CONT | 214, "%s", s);
       iterator_destroy (&itr);
@@ -615,7 +615,7 @@ anubis_authenticate_mode (struct sockaddr_in *addr)
 #define KW_SMTP_HELP_MESSAGE     7
 
 static void
-rc_parser (EVAL_ENV env, int key, ANUBIS_LIST *arglist, void *inv_data)
+rc_parser (EVAL_ENV env, int key, ANUBIS_LIST arglist, void *inv_data)
 {
   char *arg = list_item (arglist, 0);
 

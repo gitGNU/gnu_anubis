@@ -35,7 +35,8 @@
  Regular Expressions support
 *****************************/
 
-typedef int (*_match_fp) (RC_REGEX *, char *, int *, char ***, int *, int *);
+typedef int (*_match_fp) (RC_REGEX *, const char *,
+			  int *, char ***, int *, int *);
 typedef int (*_refcnt_fp) (RC_REGEX *);
 typedef int (*_compile_fp) (RC_REGEX *, char *, int);
 typedef void (*_free_fp) (RC_REGEX *);
@@ -51,17 +52,20 @@ struct regex_vtab
 
 static int exact_compile (RC_REGEX *, char *, int);
 static void exact_free (RC_REGEX *);
-static int exact_match (RC_REGEX *, char *, int *, char ***, int *, int *);
+static int exact_match (RC_REGEX *, const char *,
+			int *, char ***, int *, int *);
 static int exact_refcnt (RC_REGEX *);
 
 static int posix_compile (RC_REGEX *, char *, int);
 static void posix_free (RC_REGEX *);
-static int posix_match (RC_REGEX *, char *, int *, char ***, int *, int *);
+static int posix_match (RC_REGEX *, const char *,
+			int *, char ***, int *, int *);
 static int posix_refcnt (RC_REGEX *);
 #ifdef HAVE_PCRE
 static int perl_compile (RC_REGEX *, char *, int);
 static void perl_free (RC_REGEX *);
-static int perl_match (RC_REGEX *, char *, int *, char ***, int *, int *);
+static int perl_match (RC_REGEX *, const char *,
+		       int *, char ***, int *, int *);
 static int perl_refcnt (RC_REGEX *);
 #endif /* HAVE_PCRE */
 
@@ -128,14 +132,14 @@ regex_print_flags (int flags)
 }
 
 void
-anubis_regex_print (RC_REGEX * re)
+anubis_regex_print (RC_REGEX *re)
 {
   regex_print_flags (re->flags);
   printf (" [%s]", anubis_regex_source (re));
 }
 
 int
-anubis_regex_match (RC_REGEX * re, char *line, int *refc, char ***refv)
+anubis_regex_match (RC_REGEX *re, const char *line, int *refc, char ***refv)
 {
   int so, eo;
   struct regex_vtab *vp;
@@ -145,7 +149,7 @@ anubis_regex_match (RC_REGEX * re, char *line, int *refc, char ***refv)
 }
 
 char *
-anubis_regex_replace (RC_REGEX * re, char *line, char *repl)
+anubis_regex_replace (RC_REGEX *re, char *line, char *repl)
 {
   int so, eo;
   int refc;
@@ -217,7 +221,7 @@ anubis_regex_replace (RC_REGEX * re, char *line, char *repl)
 }
 
 int
-anubis_regex_refcnt (RC_REGEX * re)
+anubis_regex_refcnt (RC_REGEX *re)
 {
   struct regex_vtab *vp;
 
@@ -247,7 +251,7 @@ anubis_regex_compile (char *line, int opt)
 }
 
 void
-anubis_regex_free (RC_REGEX ** pre)
+anubis_regex_free (RC_REGEX **pre)
 {
   struct regex_vtab *vp;
 
@@ -260,7 +264,7 @@ anubis_regex_free (RC_REGEX ** pre)
 }
 
 char *
-anubis_regex_source (RC_REGEX * re)
+anubis_regex_source (RC_REGEX *re)
 {
   if (!re)
     return NULL;
@@ -270,20 +274,20 @@ anubis_regex_source (RC_REGEX * re)
 
 /* **************************** Exact strings ***************************** */
 static int
-exact_compile (RC_REGEX * regex, char *line, int opt)
+exact_compile (RC_REGEX *regex, char *line, int opt)
 {
   return 0;
 }
 
 static void
-exact_free (RC_REGEX * regex)
+exact_free (RC_REGEX *regex)
 {
   /* nothing */
 }
 
 
 static int
-exact_match (RC_REGEX * regex, char *line, int *refc, char ***refv,
+exact_match (RC_REGEX *regex, const char *line, int *refc, char ***refv,
 	     int *so, int *eo)
 {
   int code;
@@ -300,7 +304,7 @@ exact_match (RC_REGEX * regex, char *line, int *refc, char ***refv,
 }
 
 static int
-exact_refcnt (RC_REGEX * regex)
+exact_refcnt (RC_REGEX *regex)
 {
   return 0;
 }
@@ -310,7 +314,7 @@ exact_refcnt (RC_REGEX * regex)
 /* ********************* POSIX Regular Expressions ************************ */
 
 static int
-posix_compile (RC_REGEX * regex, char *line, int opt)
+posix_compile (RC_REGEX *regex, char *line, int opt)
 {
   int rc;
   int cflags = 0;
@@ -331,13 +335,13 @@ posix_compile (RC_REGEX * regex, char *line, int opt)
 }
 
 static void
-posix_free (RC_REGEX * regex)
+posix_free (RC_REGEX *regex)
 {
   regfree (&regex->v.re);
 }
 
 static int
-posix_match (RC_REGEX * regex, char *line, int *refc, char ***refv,
+posix_match (RC_REGEX *regex, const char *line, int *refc, char ***refv,
 	     int *so, int *eo)
 {
   regmatch_t *rmp;
@@ -378,7 +382,7 @@ posix_match (RC_REGEX * regex, char *line, int *refc, char ***refv,
 }
 
 static int
-posix_refcnt (RC_REGEX * regex)
+posix_refcnt (RC_REGEX *regex)
 {
   return regex->v.re.re_nsub;
 }
@@ -389,7 +393,7 @@ posix_refcnt (RC_REGEX * regex)
 #ifdef HAVE_PCRE
 
 static int
-perl_compile (RC_REGEX * regex, char *line, int opt)
+perl_compile (RC_REGEX *regex, char *line, int opt)
 {
   const char *error;
   int error_offset;
@@ -409,13 +413,13 @@ perl_compile (RC_REGEX * regex, char *line, int opt)
 }
 
 static void
-perl_free (RC_REGEX * regex)
+perl_free (RC_REGEX *regex)
 {
   pcre_free (regex->v.pre);
 }
 
 static int
-perl_match (RC_REGEX * regex, char *line, int *refc, char ***refv,
+perl_match (RC_REGEX *regex, const char *line, int *refc, char ***refv,
 	    int *so, int *eo)
 {
   int rc;
@@ -470,7 +474,7 @@ perl_match (RC_REGEX * regex, char *line, int *refc, char ***refv,
 }
 
 static int
-perl_refcnt (RC_REGEX * regex)
+perl_refcnt (RC_REGEX *regex)
 {
   int count = 0;
 

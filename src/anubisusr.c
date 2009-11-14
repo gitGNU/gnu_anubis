@@ -1,7 +1,7 @@
 /*
    anubisusr.c
    
-   Copyright (C) 2004, 2005, 2007, 2008 The Anubis Team.
+   Copyright (C) 2004, 2005, 2007, 2008, 2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -186,7 +186,7 @@ parse_host (char *host, int port, struct sockaddr_in *addr)
 
 /* GSASL mechanisms */
 
-static ANUBIS_LIST *auth_mech_list;
+static ANUBIS_LIST auth_mech_list;
 
 void
 add_mech (char *arg)
@@ -206,7 +206,7 @@ name_cmp (void *item, void *data)
 }
 
 char *
-find_capa_v (ANUBIS_SMTP_REPLY repl, const char *name, ANUBIS_LIST *list)
+find_capa_v (ANUBIS_SMTP_REPLY repl, const char *name, ANUBIS_LIST list)
 {
   size_t n;
   if (smtp_reply_has_capa (repl, name, &n))

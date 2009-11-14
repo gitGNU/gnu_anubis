@@ -2,7 +2,7 @@
    message.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2007 The Anubis Team.
+   Copyright (C) 2003, 2007, 2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -25,8 +25,117 @@
 #define obstack_chunk_free free
 #include <obstack.h>
 
+struct message_struct
+{
+  ANUBIS_LIST commands;	        /* Associative list of SMTP commands */
+  ANUBIS_LIST header;		/* Associative list of RFC822 headers */
+  ANUBIS_LIST mime_hdr;	        /* List of lines before the first boundary
+				   marker */
+  char *body;			/* Message body */
+  char *boundary;		/* Additional data */
+};
+
+MESSAGE 
+message_new ()
+{
+  MESSAGE msg = xzalloc (sizeof (*msg));
+  msg->header = list_create ();
+  msg->commands = list_create ();
+  return msg;
+}
+
 void
-message_add_header (MESSAGE * msg, char *hdr, char *value)
+message_reset (MESSAGE msg)
+{
+  destroy_assoc_list (&msg->commands);
+  destroy_assoc_list (&msg->header);
+  destroy_string_list (&msg->mime_hdr);
+
+  free (msg->body);
+  free (msg->boundary);
+
+  memset (msg, 0, sizeof (*msg));
+  msg->header = list_create ();
+  msg->commands = list_create ();
+}  
+
+/* FIXME: Implement copy-on-write */
+void
+message_free (MESSAGE msg)
+{
+  destroy_assoc_list (&msg->commands);
+  destroy_assoc_list (&msg->header);
+  destroy_string_list (&msg->mime_hdr);
+
+  free (msg->body);
+  free (msg->boundary);
+  free (msg);
+}
+
+MESSAGE
+message_dup (MESSAGE msg)
+{
+  MESSAGE newmsg = message_new ();
+  newmsg->commands = assoc_list_dup (msg->commands);
+  newmsg->header = assoc_list_dup (msg->header);
+  msg->mime_hdr = string_list_dup (msg->mime_hdr);
+  
+  newmsg->body = msg->body ? xstrdup (msg->body): NULL;
+  newmsg->boundary = msg->boundary ? xstrdup (msg->boundary) : NULL;
+  return newmsg;
+}
+
+
+static char *
+expand_ampersand (char *value, char *old_value)
+{
+  char *p;
+
+  p = strchr (value, '&');
+  if (!p)
+    {
+      free (old_value);
+      p = strdup (value);
+    }
+  else
+    {
+      struct obstack stk;
+      int old_length = strlen (old_value);
+
+      obstack_init (&stk);
+      for (; *value; value++)
+	{
+	  switch (*value)
+	    {
+	    case '\\':
+	      value++;
+	      if (*value != '&')
+		obstack_1grow (&stk, '\\');
+	      obstack_1grow (&stk, *value);
+	      break;
+	    case '&':
+	      obstack_grow (&stk, old_value, old_length);
+	      break;
+	    default:
+	      obstack_1grow (&stk, *value);
+	    }
+	}
+      obstack_1grow (&stk, 0);
+      p = strdup (obstack_finish (&stk));
+      obstack_free (&stk, NULL);
+    }
+  return p;
+}
+
+
+ANUBIS_LIST 
+message_get_header (MESSAGE msg)
+{
+  return msg->header;
+}
+
+void
+message_add_header (MESSAGE msg, char *hdr, char *value)
 {
   ASSOC *asc = xmalloc (sizeof (*asc));
   asc->key = strdup (hdr);
@@ -35,25 +144,10 @@ message_add_header (MESSAGE * msg, char *hdr, char *value)
 }
 
 void
-message_add_body (MESSAGE * msg, char *key, char *value)
-{
-  if (!key)
-    {
-      msg->body = xrealloc (msg->body,
-			    strlen (msg->body) + strlen (value) + 1);
-      strcat (msg->body, value);
-    }
-  else
-    {
-     /*FIXME*/
-    }
-}
-
-void
-message_remove_headers (MESSAGE * msg, RC_REGEX * regex)
+message_remove_headers (MESSAGE msg, RC_REGEX *regex)
 {
   ASSOC *asc;
-  ITERATOR *itr;
+  ITERATOR itr;
 
   itr = iterator_create (msg->header);
   for (asc = iterator_first (itr); asc; asc = iterator_next (itr))
@@ -73,7 +167,77 @@ message_remove_headers (MESSAGE * msg, RC_REGEX * regex)
 }
 
 void
-message_modify_body (MESSAGE * msg, RC_REGEX * regex, char *value)
+message_replace_header (MESSAGE msg, ANUBIS_LIST list)
+{
+  destroy_assoc_list (&msg->header);
+  msg->header = list;
+}
+
+void
+message_modify_headers (MESSAGE msg, RC_REGEX *regex, char *key2,
+			char *value)
+{
+  ASSOC *asc;
+  ITERATOR itr;
+
+  itr = iterator_create (msg->header);
+  for (asc = iterator_first (itr); asc; asc = iterator_next (itr))
+    {
+      char **rv;
+      int rc;
+
+      if (asc->key && anubis_regex_match (regex, asc->key, &rc, &rv))
+	{
+	  if (key2)
+	    {
+	      free (asc->key);
+	      if (rc)
+		asc->key = substitute (key2, rv);
+	      else
+		asc->key = strdup (key2);
+	    }
+	  if (value)
+	    {
+	      asc->value = expand_ampersand (value, asc->value);
+	    }
+	}
+      if (rc)
+	argcv_free (-1, rv);
+    }
+  iterator_destroy (&itr);
+}
+
+
+const char *
+message_get_body (MESSAGE msg)
+{
+  return msg->body;
+}
+
+void
+message_add_body (MESSAGE msg, char *key, char *value)
+{
+  if (!key)
+    {
+      msg->body = xrealloc (msg->body,
+			    strlen (msg->body) + strlen (value) + 1);
+      strcat (msg->body, value);
+    }
+  else
+    {
+     /*FIXME*/
+    }
+}
+
+void
+message_replace_body (MESSAGE msg, char *body)
+{
+  free (msg->body);
+  msg->body = body;
+}
+
+void
+message_modify_body (MESSAGE msg, RC_REGEX *regex, char *value)
 {
   if (!value)
     value = "";
@@ -151,83 +315,21 @@ message_modify_body (MESSAGE * msg, RC_REGEX * regex, char *value)
     }
 }
 
-static char *
-expand_ampersand (char *value, char *old_value)
+void
+message_proc_body (MESSAGE msg, int (*proc) (char **, char *, void *),
+		   void *param)
 {
-  char *p;
-
-  p = strchr (value, '&');
-  if (!p)
-    {
-      free (old_value);
-      p = strdup (value);
-    }
-  else
-    {
-      struct obstack stk;
-      int old_length = strlen (old_value);
-
-      obstack_init (&stk);
-      for (; *value; value++)
-	{
-	  switch (*value)
-	    {
-	    case '\\':
-	      value++;
-	      if (*value != '&')
-		obstack_1grow (&stk, '\\');
-	      obstack_1grow (&stk, *value);
-	      break;
-	    case '&':
-	      obstack_grow (&stk, old_value, old_length);
-	      break;
-	    default:
-	      obstack_1grow (&stk, *value);
-	    }
-	}
-      obstack_1grow (&stk, 0);
-      p = strdup (obstack_finish (&stk));
-      obstack_free (&stk, NULL);
-    }
-  return p;
+  char *buf;
+  int rc = proc (&buf, msg->body, param);
+  if (rc < 0)
+    return;
+  if (rc > 0)
+    xfree (msg->body);
+  msg->body = buf;
 }
 
 void
-message_modify_headers (MESSAGE * msg, RC_REGEX * regex, char *key2,
-			char *value)
-{
-  ASSOC *asc;
-  ITERATOR *itr;
-
-  itr = iterator_create (msg->header);
-  for (asc = iterator_first (itr); asc; asc = iterator_next (itr))
-    {
-      char **rv;
-      int rc;
-
-      if (asc->key && anubis_regex_match (regex, asc->key, &rc, &rv))
-	{
-	  if (key2)
-	    {
-	      free (asc->key);
-	      if (rc)
-		asc->key = substitute (key2, rv);
-	      else
-		asc->key = strdup (key2);
-	    }
-	  if (value)
-	    {
-	      asc->value = expand_ampersand (value, asc->value);
-	    }
-	}
-      if (rc)
-	argcv_free (-1, rv);
-    }
-  iterator_destroy (&itr);
-}
-
-void
-message_external_proc (MESSAGE * msg, char **argv)
+message_external_proc (MESSAGE msg, char **argv)
 {
   int rc = 0;
   char *extbuf = 0;
@@ -238,24 +340,44 @@ message_external_proc (MESSAGE * msg, char **argv)
       msg->body = extbuf;
     }
 }
-
-void
-message_init (MESSAGE * msg)
+
+ANUBIS_LIST 
+message_get_commands (MESSAGE msg)
 {
-  memset (msg, 0, sizeof (*msg));
-  msg->header = list_create ();
-  msg->commands = list_create ();
+  return msg->commands;
 }
 
 void
-message_free (MESSAGE * msg)
+message_add_command (MESSAGE msg, ASSOC *p)
 {
-  destroy_assoc_list (&msg->commands);
-  destroy_assoc_list (&msg->header);
-  destroy_string_list (&msg->mime_hdr);
+  list_append (msg->commands, p);
+}
+
+const char *
+message_get_boundary (MESSAGE msg)
+{
+  return msg->boundary;
+}
+  
+void
+message_replace_boundary (MESSAGE msg, char *boundary)
+{
+  free (msg->boundary);
+  msg->boundary = boundary;
+}
+
+ANUBIS_LIST 
+message_get_mime_header (MESSAGE msg)
+{
+  return msg->mime_hdr;
+}
 
-  xfree (msg->body);
-  xfree (msg->boundary);
+void
+message_append_mime_header (MESSAGE msg, const char *buf)
+{
+  if (!msg->mime_hdr)
+    msg->mime_hdr = list_create ();
+  list_append (msg->mime_hdr, xstrdup (buf));
 }
 
 /* EOF */

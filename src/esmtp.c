@@ -2,7 +2,7 @@
    esmtp.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004, 2007 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2007, 2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -23,9 +23,9 @@
 
 #if defined(WITH_GSASL)
 
-ANUBIS_LIST *anubis_client_mech_list;     /* List of auth methods allowed by
+ANUBIS_LIST anubis_client_mech_list;     /* List of auth methods allowed by
 					     the client */
-ANUBIS_LIST *anubis_encryption_mech_list; /* List of auth methods that require
+ANUBIS_LIST anubis_encryption_mech_list; /* List of auth methods that require
 					     using encrypted channel */
 char *anon_token;                         /* Anonymous token */
 char *authorization_id;       
@@ -39,13 +39,13 @@ char *auth_passcode;
 char *auth_realm;
 
 void
-anubis_set_client_mech_list (ANUBIS_LIST *list)
+anubis_set_client_mech_list (ANUBIS_LIST list)
 {
   anubis_set_mech_list (&anubis_client_mech_list, list);
 }
 
 void
-anubis_set_encryption_mech_list (ANUBIS_LIST *list)
+anubis_set_encryption_mech_list (ANUBIS_LIST list)
 {
   anubis_set_mech_list (&anubis_encryption_mech_list, list);
 }
@@ -231,8 +231,8 @@ esmtp_auth (NET_STREAM *pstr, const char *input)
 {
   Gsasl *ctx;
   int rc;
-  ANUBIS_LIST *isect;
-  ANUBIS_LIST *mech_list = auth_method_list (input);
+  ANUBIS_LIST isect;
+  ANUBIS_LIST mech_list = auth_method_list (input);
   char *mech;
   
   if (list_count (mech_list) == 0)

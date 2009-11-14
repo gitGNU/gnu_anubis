@@ -136,7 +136,7 @@ guile_ports_close ()
 SCM
 guile_load_path_append_handler (void *data)
 {
-  ANUBIS_LIST *arglist = data;
+  ANUBIS_LIST arglist = data;
   char *path = list_item (arglist, 0);
   SCM scm, path_scm, *pscm;
   path_scm = SCM_VARIABLE_REF (scm_c_lookup ("%load-path"));
@@ -161,7 +161,7 @@ guile_load_path_append_handler (void *data)
 }
 
 void
-guile_load_path_append (ANUBIS_LIST *arglist, MESSAGE *msg /* unused */)
+guile_load_path_append (ANUBIS_LIST arglist, MESSAGE msg /* unused */)
 {
   guile_safe_exec (guile_load_path_append_handler, arglist, NULL);
 }
@@ -185,7 +185,7 @@ load_path_handler (void *data)
 }
 
 void
-guile_load_program (ANUBIS_LIST *arglist, MESSAGE *msg /* unused */)
+guile_load_program (ANUBIS_LIST arglist, MESSAGE msg /* unused */)
 {
   struct load_closure clos;
   clos.filename = list_item (arglist, 0);
@@ -194,10 +194,10 @@ guile_load_program (ANUBIS_LIST *arglist, MESSAGE *msg /* unused */)
   guile_safe_exec (load_path_handler, &clos, NULL);
 }
 
-static ANUBIS_LIST *
+static ANUBIS_LIST 
 guile_to_anubis (SCM cell)
 {
-  static ANUBIS_LIST *list;
+  static ANUBIS_LIST list;
 
   list = list_create ();
   for (; cell != SCM_EOL; cell = SCM_CDR (cell))
@@ -216,10 +216,10 @@ guile_to_anubis (SCM cell)
 }
 
 static SCM
-anubis_to_guile (ANUBIS_LIST * list)
+anubis_to_guile (ANUBIS_LIST  list)
 {
   ASSOC *asc;
-  ITERATOR *itr;
+  ITERATOR itr;
   SCM head = SCM_EOL, tail = SCM_EOL;
 
   itr = iterator_create (list);
@@ -247,10 +247,10 @@ anubis_to_guile (ANUBIS_LIST * list)
 }
 
 static SCM
-list_to_args (ANUBIS_LIST *arglist)
+list_to_args (ANUBIS_LIST arglist)
 {
   char *p;
-  ITERATOR *itr;
+  ITERATOR itr;
   SCM head = SCM_EOL, tail = SCM_EOL;
   SCM val;
 
@@ -301,22 +301,22 @@ list_to_args (ANUBIS_LIST *arglist)
 struct proc_handler_closure
 {
   SCM procsym;
-  ANUBIS_LIST *arglist;
-  MESSAGE *msg;
+  ANUBIS_LIST arglist;
+  MESSAGE msg;
 };
   
 SCM
 guile_process_proc_handler (void *data)
 {
   struct proc_handler_closure *clp = data;
-  ANUBIS_LIST *arglist = clp->arglist;
-  MESSAGE *msg = clp->msg;
+  ANUBIS_LIST arglist = clp->arglist;
+  MESSAGE msg = clp->msg;
   SCM arg_hdr, arg_body;
   SCM invlist, rest_arg;
 
   /* Prepare the required arguments */
-  arg_hdr = anubis_to_guile (msg->header);
-  arg_body = scm_makfrom0str (msg->body);
+  arg_hdr = anubis_to_guile (message_get_header (msg));
+  arg_body = scm_makfrom0str (message_get_body (msg));
 
   /* Prepare the optional arguments */
   rest_arg = list_to_args (arglist);
@@ -332,7 +332,7 @@ guile_process_proc_handler (void *data)
 }
 
 void
-guile_process_proc (ANUBIS_LIST *arglist, MESSAGE *msg)
+guile_process_proc (ANUBIS_LIST arglist, MESSAGE msg)
 {
   struct proc_handler_closure clos;
   SCM procsym;
@@ -360,7 +360,6 @@ guile_process_proc (ANUBIS_LIST *arglist, MESSAGE *msg)
   if (guile_safe_exec (guile_process_proc_handler, &clos, &res))
     return;
 
-
   if (SCM_IMP (res) && SCM_BOOLP (res))
     {
       /* FIXME 1 */ ;
@@ -377,8 +376,7 @@ guile_process_proc (ANUBIS_LIST *arglist, MESSAGE *msg)
       else if (SCM_NIMP (ret_hdr) && SCM_CONSP (ret_hdr))
 	{
 	  /* Replace them */
-	  destroy_assoc_list (&msg->header);
-	  msg->header = guile_to_anubis (ret_hdr);
+	  message_replace_header (msg, guile_to_anubis (ret_hdr));
 	}
       else
 	anubis_error (0, 0, _("Bad car type in return from %s"), procname);
@@ -390,14 +388,12 @@ guile_process_proc (ANUBIS_LIST *arglist, MESSAGE *msg)
       else if (ret_body == SCM_BOOL_F)
 	{
 	  /* Delete it */
-	  free (msg->body);
-	  msg->body = strdup ("");
+	  message_replace_body (msg, strdup (""));
 	}
       else if (scm_is_string (ret_body))
 	{
 	  /* Replace with the given string */
-	  xfree (msg->body);
-	  msg->body = scm_to_locale_string (ret_body);
+	  message_replace_body (msg, scm_to_locale_string (ret_body));
 	}
       else
 	anubis_error (0, 0, _("Bad cdr type in return from %s"), procname);
@@ -437,9 +433,9 @@ static struct rc_kwdef guile_rule_kw[] = {
 
 struct inner_closure
 {
-  ANUBIS_LIST *arglist;
-  MESSAGE *msg;
-  void (*fun) (ANUBIS_LIST *arglist, MESSAGE *msg);
+  ANUBIS_LIST arglist;
+  MESSAGE msg;
+  void (*fun) (ANUBIS_LIST arglist, MESSAGE msg);
 };
 
 static SCM
@@ -453,7 +449,7 @@ inner_catch_body (void *data)
 }
 
 void
-guile_parser (EVAL_ENV env, int key, ANUBIS_LIST *arglist, void *inv_data)
+guile_parser (EVAL_ENV env, int key, ANUBIS_LIST arglist, void *inv_data)
 {
   char *arg = list_item (arglist, 0);
   struct inner_closure closure;

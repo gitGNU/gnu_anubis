@@ -2,7 +2,7 @@
    misc.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2005, 2007 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2005, 2007, 2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -39,11 +39,31 @@ anubis_name_cmp (void *item, void *data)
 /* String lists */
 
 void
-destroy_string_list (ANUBIS_LIST ** plist)
+destroy_string_list (ANUBIS_LIST * plist)
 {
   list_destroy (plist, anubis_free_list_item, NULL);
 }
 
+static int
+_string_dup (void *item, void *data)
+{
+  list_append (data, xstrdup ((char*) item));
+  return 0;
+}
+
+ANUBIS_LIST 
+string_list_dup (ANUBIS_LIST orig)
+{
+  if (orig)
+    {
+      ANUBIS_LIST ptr = list_create ();
+      list_iterate (orig, _string_dup, ptr);
+      return ptr;
+    }
+  return NULL;
+}
+
+
 static int
 _assoc_free (void *item, void *data)
 {
@@ -52,7 +72,7 @@ _assoc_free (void *item, void *data)
 }
 
 void
-destroy_assoc_list (ANUBIS_LIST ** plist)
+destroy_assoc_list (ANUBIS_LIST *plist)
 {
   list_destroy (plist, _assoc_free, NULL);
 }
@@ -63,6 +83,30 @@ assoc_free (ASSOC * asc)
   free (asc->key);
   free (asc->value);
   free (asc);
+}
+
+static int
+_assoc_dup (void *item, void *data)
+{
+  ASSOC *elt = item;
+  ASSOC *newelt = xmalloc (sizeof (*newelt));
+
+  newelt->key = xstrdup (elt->key);
+  newelt->value = xstrdup (elt->value);
+  list_append (data, newelt);
+  return 0;
+}
+  
+ANUBIS_LIST 
+assoc_list_dup (ANUBIS_LIST orig)
+{
+  if (orig)
+    {
+      ANUBIS_LIST ptr = list_create ();
+      list_iterate (orig, _assoc_dup, ptr);
+      return ptr;
+    }
+  return NULL;
 }
 
 ASSOC *

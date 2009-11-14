@@ -2,7 +2,7 @@
    tunnel.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -25,9 +25,9 @@
 #define obstack_chunk_free free
 #include <obstack.h>
 
-static int transfer_command (MESSAGE *, char *);
-static int process_command (MESSAGE *, char *);
-static void process_data (MESSAGE *);
+static int transfer_command (MESSAGE, char *);
+static int process_command (MESSAGE, char *);
+static void process_data (MESSAGE);
 static int handle_ehlo (ANUBIS_SMTP_REPLY );
 
 
@@ -50,10 +50,11 @@ get_ehlo_domain (void)
    and sent in multiline lines. */
 
 static void
-get_boundary (MESSAGE * msg, char *line)
+get_boundary (MESSAGE msg, char *line)
 {
   char boundary_buf[LINEBUFFER + 1], *p;
-
+  char *boundary;
+  
   if (strncmp (line, "Content-Type:", 13))
     return;
 
@@ -74,12 +75,13 @@ get_boundary (MESSAGE * msg, char *line)
       if (*q)
 	*q = 0;
     }
-  msg->boundary = xmalloc (strlen (p) + 3);
-  sprintf (msg->boundary, "--%s", p);
+  boundary = xmalloc (strlen (p) + 3);
+  sprintf (boundary, "--%s", p);
+  message_replace_boundary (msg, boundary);
 }
 
 static void
-add_header (ANUBIS_LIST * list, char *line)
+add_header (ANUBIS_LIST list, char *line)
 {
   ASSOC *asc = header_assoc (line);
   list_append (list, asc);
@@ -101,7 +103,7 @@ add_header (ANUBIS_LIST * list, char *line)
 }
 
 void
-collect_headers (MESSAGE * msg, char *line)
+collect_headers (MESSAGE msg, char *line)
 {
   char *buf = NULL;
   size_t size = 0;
@@ -123,9 +125,9 @@ collect_headers (MESSAGE * msg, char *line)
 	{
 	  if (line)
 	    {
-	      if (!(topt & T_ENTIRE_BODY) && msg->boundary == NULL)
+	      if (!(topt & T_ENTIRE_BODY) && message_get_boundary (msg))
 		get_boundary (msg, line);
-	      add_header (msg->header, line);
+	      add_header (message_get_header (msg), line);
 	      xfree (line);
 	    }
 	  if (buf[0] == 0)
@@ -150,7 +152,7 @@ write_header_line (NET_STREAM sd_server, char *line)
 }
 
 static void
-write_assoc (NET_STREAM sd_server, ASSOC * entry)
+write_assoc (NET_STREAM sd_server, ASSOC *entry)
 {
   if (entry->key)
     {
@@ -163,10 +165,10 @@ write_assoc (NET_STREAM sd_server, ASSOC * entry)
 }
 
 void
-send_header (NET_STREAM sd_server, ANUBIS_LIST * list)
+send_header (NET_STREAM sd_server, ANUBIS_LIST list)
 {
   ASSOC *p;
-  ITERATOR *itr = iterator_create (list);
+  ITERATOR itr = iterator_create (list);
 
   for (p = iterator_first (itr); p; p = iterator_next (itr))
     write_assoc (sd_server, p);
@@ -174,10 +176,10 @@ send_header (NET_STREAM sd_server, ANUBIS_LIST * list)
 }
 
 void
-send_string_list (NET_STREAM sd_server, ANUBIS_LIST * list)
+send_string_list (NET_STREAM sd_server, ANUBIS_LIST list)
 {
   char *p;
-  ITERATOR *itr = iterator_create (list);
+  ITERATOR itr = iterator_create (list);
 
   for (p = iterator_first (itr); p; p = iterator_next (itr))
     write_header_line (sd_server, p);
@@ -202,7 +204,7 @@ send_string_list (NET_STREAM sd_server, ANUBIS_LIST * list)
 #define ST_DONE  3
 
 void
-collect_body (MESSAGE * msg)
+collect_body (MESSAGE msg)
 {
   int nread;
   char *buf = NULL;
@@ -210,12 +212,10 @@ collect_body (MESSAGE * msg)
   struct obstack stk;
   int state = 0;
   int len;
-
-  if (msg->boundary)
-    {
-      len = strlen (msg->boundary);
-      msg->mime_hdr = list_create ();
-    }
+  const char *boundary = message_get_boundary (msg);
+  
+  if (boundary)
+    len = strlen (boundary);
   obstack_init (&stk);
   while (state != ST_DONE
 	 && (nread = recvline (SERVER, remote_client, &buf, &size)))
@@ -225,12 +225,12 @@ collect_body (MESSAGE * msg)
       if (strcmp (buf, ".") == 0)	/* EOM */
 	break;
 
-      if (msg->boundary)
+      if (boundary)
 	{
 	  switch (state)
 	    {
 	    case ST_INIT:
-	      if (strcmp (buf, msg->boundary) == 0)
+	      if (strcmp (buf, boundary) == 0)
 		state = ST_HDR;
 	      break;
 
@@ -238,11 +238,11 @@ collect_body (MESSAGE * msg)
 	      if (buf[0] == 0)
 		state = ST_BODY;
 	      else
-		list_append (msg->mime_hdr, strdup (buf));
+		message_append_mime_header (msg, buf);
 	      break;
 
 	    case ST_BODY:
-	      if (strncmp (buf, msg->boundary, len) == 0)
+	      if (strncmp (buf, boundary, len) == 0)
 		state = ST_DONE;
 	      else
 		{
@@ -259,39 +259,41 @@ collect_body (MESSAGE * msg)
     }
   free (buf);
   obstack_1grow (&stk, 0);
-  msg->body = strdup (obstack_finish (&stk));
+  /* FIXME: Use message_proc_body to avoid spurious reallocations */
+  message_replace_body (msg, xstrdup (obstack_finish (&stk)));
   obstack_free (&stk, NULL);
 }
 
 void
-send_body (MESSAGE * msg, NET_STREAM sd_server)
+send_body (MESSAGE msg, NET_STREAM sd_server)
 {
-  char *p;
-
-  if (msg->boundary)
+  const char *p;
+  const char *boundary = message_get_boundary (msg);
+  
+  if (boundary)
     {
-      swrite (CLIENT, sd_server, msg->boundary);
+      swrite (CLIENT, sd_server, boundary);
       send_eol (CLIENT, sd_server);
-      send_string_list (sd_server, msg->mime_hdr);
+      send_string_list (sd_server, message_get_mime_header (msg));
       send_eol (CLIENT, sd_server);
     }
 
-  for (p = msg->body; *p;)
+  for (p = message_get_body (msg); *p;)
     {
-      char *q = strchr (p, '\n');
-      if (q)
-	*q++ = 0;
+      size_t len = strcspn (p, "\n");
+      
+      swrite_n (CLIENT, sd_server, p, len);
+      send_eol (CLIENT, sd_server);
+      p += len;
+      if (*p)
+	p++;
       else
-	q = p + strlen (p);
-
-      swrite (CLIENT, sd_server, p);
-      send_eol (CLIENT, sd_server);
-      p = q;
+	break;
     }
-
-  if (msg->boundary)
+      
+  if (boundary)
     {
-      swrite (CLIENT, sd_server, msg->boundary);
+      swrite (CLIENT, sd_server, boundary);
       send_eol (CLIENT, sd_server);
     }
 }
@@ -348,20 +350,20 @@ smtp_session_transparent (void)
      Then process the commands...
    */
 
-  message_init (&msg);
+  msg = message_new ();
   while (recvline (SERVER, remote_client, &command, &size))
     {
       remcrlf (command);
 
-      if (process_command (&msg, command))
+      if (process_command (msg, command))
 	continue;
 
-      if (transfer_command (&msg, command) == 0)
+      if (transfer_command (msg, command) == 0)
 	break;
     }
   free (command);
 
-  message_free (&msg);
+  message_free (msg);
 }
 
 void
@@ -392,19 +394,19 @@ smtp_session (void)
   smtp_begin ();
   info (VERBOSE, _("Transferring messages..."));
 
-  message_init (&msg);
+  msg = message_new ();
   while (recvline (SERVER, remote_client, &command, &size))
     {
       remcrlf (command);
       
-      if (process_command (&msg, command))
+      if (process_command (msg, command))
 	continue;
 
-      if (transfer_command (&msg, command) == 0)
+      if (transfer_command (msg, command) == 0)
 	break;
     }
   free (command);
-  message_free (&msg);
+  message_free (msg);
 }
 
 /********************
@@ -412,7 +414,7 @@ smtp_session (void)
 *********************/
 
 static void
-save_command (MESSAGE * msg, char *line)
+save_command (MESSAGE msg, char *line)
 {
   int i;
   ASSOC *asc = xmalloc (sizeof (*asc));
@@ -445,7 +447,7 @@ save_command (MESSAGE * msg, char *line)
     asc->value = strdup (&line[i]);
   else
     asc->value = NULL;
-  list_append (msg->commands, asc);
+  message_add_command (msg, asc);
 }
 
 static int
@@ -556,7 +558,7 @@ handle_starttls (char *command)
 }
 
 static int
-process_command (MESSAGE * msg, char *command)
+process_command (MESSAGE msg, char *command)
 {
   char buf[LINEBUFFER + 1];
 
@@ -729,7 +731,7 @@ is_prefix(char *buf, char *pfx)
 }
 
 static int
-transfer_command (MESSAGE *msg, char *command)
+transfer_command (MESSAGE msg, char *command)
 {
   char *buf = NULL;
   int rc = 1; /* OK */
@@ -772,8 +774,7 @@ transfer_command (MESSAGE *msg, char *command)
 	rc = 0;		/* The QUIT command */
       else if (strncmp (buf, "rset", 4) == 0)
 	{
-	  message_free (msg);
-	  message_init (msg);
+	  message_reset (msg);
 	}
       else if (strncmp (buf, "data", 4) == 0)
 	{
@@ -786,7 +787,7 @@ transfer_command (MESSAGE *msg, char *command)
 }
 
 void
-process_data (MESSAGE * msg)
+process_data (MESSAGE msg)
 {
   char *buf = NULL;
   size_t size = 0;
@@ -798,7 +799,7 @@ process_data (MESSAGE * msg)
 
   rcfile_call_section (CF_CLIENT, outgoing_mail_rule, NULL, msg);
 
-  transfer_header (msg->header);
+  transfer_header (message_get_header (msg));
   transfer_body (msg);
 
   if (recvline (CLIENT, remote_server, &buf, &size))
@@ -810,13 +811,12 @@ process_data (MESSAGE * msg)
     }
   free (buf);
 
-  message_free (msg);
-  message_init (msg);
+  message_reset (msg);
   alarm (0);
 }
 
 void
-transfer_header (ANUBIS_LIST * header_buf)
+transfer_header (ANUBIS_LIST header_buf)
 {
   send_header (remote_server, header_buf);
   send_eol (CLIENT, remote_server);
@@ -843,9 +843,9 @@ raw_transfer (void)
 }
 
 void
-transfer_body (MESSAGE * msg)
+transfer_body (MESSAGE msg)
 {
-  if (msg->boundary)
+  if (message_get_boundary (msg))
     {
       send_body (msg, remote_server);
 
