@@ -306,7 +306,7 @@ esmtp_auth (NET_STREAM *pstr, const char *input)
 }
 #else
 int
-esmtp_auth (NET_STREAM *pstr, char *input)
+esmtp_auth (NET_STREAM *pstr, const char *input)
 {
   anubis_warning (0, _("ESMTP AUTH is not supported"));
   return 1;
