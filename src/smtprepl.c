@@ -311,7 +311,7 @@ smtp_reply_replace_line (ANUBIS_SMTP_REPLY reply, size_t index,
   p[3] = (index != reply->line_count - 1) ? '-' : ' ';
   memcpy (p + 4, str, new_len);
   reply->line_vec[index].len = 4 + new_len;
-  memcpy (__smtp_reply_line_end (reply, index), CRLF, 2);
+  memcpy (__smtp_reply_line_end (reply, index), CRLF, 3);
 }
 
 void

@@ -244,6 +244,8 @@ swrite_n (int method, NET_STREAM sd, const char *ptr, size_t nleft)
   int rc;
   size_t nwritten = 0;
 
+  if (nleft == 0)
+    return;
   rc = stream_write (sd, ptr, nleft, &nwritten);
   if (rc)
     socket_error (stream_strerror (sd, rc));
