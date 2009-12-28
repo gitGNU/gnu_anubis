@@ -2,7 +2,8 @@
    tunnel.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008,
+   2009 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -25,7 +26,7 @@
 #define obstack_chunk_free free
 #include <obstack.h>
 
-static int transfer_command (MESSAGE, char *);
+static int transfer_command (MESSAGE);
 static int process_command (MESSAGE, char *);
 static void process_data (MESSAGE);
 static int handle_ehlo (ANUBIS_SMTP_REPLY );
@@ -358,7 +359,7 @@ smtp_session_transparent (void)
       if (process_command (msg, command))
 	continue;
 
-      if (transfer_command (msg, command) == 0)
+      if (transfer_command (msg) == 0)
 	break;
     }
   free (command);
@@ -402,7 +403,7 @@ smtp_session (void)
       if (process_command (msg, command))
 	continue;
 
-      if (transfer_command (msg, command) == 0)
+      if (transfer_command (msg) == 0)
 	break;
     }
   free (command);
@@ -414,7 +415,7 @@ smtp_session (void)
 *********************/
 
 static void
-save_command (MESSAGE msg, char *line)
+save_command (MESSAGE msg, const char *line)
 {
   int i;
   ASSOC *asc = xmalloc (sizeof (*asc));
@@ -425,14 +426,14 @@ save_command (MESSAGE msg, char *line)
   if (i == 4)
     {
       char *expect = NULL;
-      if (memcmp (line, "mail", 4) == 0)
+      if (strncasecmp (line, "mail", 4) == 0)
 	expect = " from:";
-      else if (memcmp (line, "rcpt", 4) == 0)
+      else if (strncasecmp (line, "rcpt", 4) == 0)
 	expect = " to:";
       if (expect)
 	{
 	  int n = strlen (expect);
-	  if (strncmp (&line[i], expect, n) == 0)
+	  if (strncasecmp (&line[i], expect, n) == 0)
 	    i += n;
 	}
     }
@@ -440,6 +441,8 @@ save_command (MESSAGE msg, char *line)
   asc->key = xmalloc (i + 1);
   memcpy (asc->key, line, i);
   asc->key[i] = 0;
+  make_uppercase (asc->key);
+  
   for (; line[i] && isspace ((u_char) line[i]); i++)
     ;
 
@@ -560,17 +563,11 @@ handle_starttls (char *command)
 static int
 process_command (MESSAGE msg, char *command)
 {
-  char buf[LINEBUFFER + 1];
-
-  safe_strcpy (buf, command);	/* make a back-up */
-  make_lowercase (buf);
-  save_command (msg, buf);
-
-  if (!strncmp (buf, "starttls", 8))
-    return handle_starttls (buf);
-  else if (!strncmp (buf, "xdatabase", 9))
-    return xdatabase (buf + 9);
-
+  save_command (msg, command);
+  if (!strncasecmp (command, "starttls", 8))
+    return handle_starttls (command);
+  else if (!strncasecmp (command, "xdatabase", 9))
+    return xdatabase (command + 9);
   return 0;
 }
 
@@ -701,55 +698,29 @@ handle_ehlo (ANUBIS_SMTP_REPLY reply)
   return 0;
 }
 
-#define CMD_MAIL_FROM "mail from:"
-#define CMD_RCPT_TO "rcpt to:"
-
-static void
-strip_inter_ws (char *buf, size_t len, size_t pfxlen)
-{
-  if (isspace (buf[pfxlen]))
-    {
-      size_t i;
-      for (i = pfxlen; i < len && isspace (buf[i]); i++)
-	;
-      memmove (buf + pfxlen, buf + i, len - i + 1);
-    }
-}
-
 static int
-is_prefix(char *buf, char *pfx)
-{
-  while (*pfx)
-    {
-      int b = *buf++;
-      int c = *pfx++;
-      
-      if (!b || toupper (c) != toupper (b))
-	return 0;
-    }
-  return 1;
-}
-
-static int
-transfer_command (MESSAGE msg, char *command)
+transfer_command (MESSAGE msg)
 {
   char *buf = NULL;
   int rc = 1; /* OK */
-  size_t len;
   ANUBIS_SMTP_REPLY reply = smtp_reply_new ();
   const char *rstr;
-  
+  ASSOC *asc;
+  char *command;
+
+  rcfile_call_section (CF_CLIENT, smtp_command_rule, NULL, msg);
+  asc = list_tail_item (message_get_commands (msg));
+  if (!asc->value)
+    command = strdup (asc->key);
+  else if (strcasecmp (asc->key, "mail from:") == 0
+	   || strcasecmp (asc->key, "rcpt to:") == 0)
+    asprintf (&command, "%s%s", asc->key, asc->value);
+  else
+    asprintf (&command, "%s %s", asc->key, asc->value);
+	    
   assign_string (&buf, command);
   make_lowercase (buf);
 
-  len = strlen (command);
-  if (len > sizeof (CMD_MAIL_FROM)
-      && is_prefix (command, CMD_MAIL_FROM))
-    strip_inter_ws (command, len, sizeof (CMD_MAIL_FROM) - 1);
-  else if (len > sizeof (CMD_RCPT_TO)
-	   && is_prefix (command, CMD_RCPT_TO))
-    strip_inter_ws (command, len, sizeof (CMD_RCPT_TO) - 1);
-  
   swrite (CLIENT, remote_server, command);
   swrite (CLIENT, remote_server, CRLF);
 
@@ -759,6 +730,7 @@ transfer_command (MESSAGE msg, char *command)
       if (handle_ehlo (reply))
 	{
 	  smtp_reply_free (reply);
+	  free (command);
 	  return 0;
 	}
     }
@@ -782,6 +754,7 @@ transfer_command (MESSAGE msg, char *command)
 	}
     }
   free (buf);
+  free (command);
   smtp_reply_free (reply);
   return rc;
 }

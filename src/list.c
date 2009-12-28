@@ -180,6 +180,20 @@ list_item (struct list *list, size_t n)
   return p->data;
 }
 
+void *
+list_head_item (struct list *list)
+{
+  struct list_entry *p = list->head;
+  return p ? p->data : NULL;
+}
+
+void *
+list_tail_item (struct list *list)
+{
+  struct list_entry *p = list->tail;
+  return p ? p->data : NULL;
+}
+
 size_t
 list_count (struct list * list)
 {

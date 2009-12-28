@@ -1,6 +1,6 @@
 %{
 /*
-   rcfile.y
+   rc-gram.y
 
    This file is part of GNU Anubis.
    Copyright (C) 2003, 2004, 2007, 2009 The Anubis Team.
@@ -39,7 +39,7 @@ static void rc_section_print (RC_SECTION *);
 static void rc_asgn_destroy (RC_ASGN *);
 static void rc_bool_destroy (RC_BOOL *);
 static void rc_level_print (int, char *);
- static RC_NODE *rc_node_create (enum rc_node_type, struct rc_loc *loc);
+static RC_NODE *rc_node_create (enum rc_node_type, struct rc_loc *loc);
 static void rc_node_destroy (RC_NODE *);
 static void rc_node_print (RC_NODE *);
 static void rc_rule_destroy (RC_RULE *);
@@ -105,7 +105,8 @@ static struct rc_secdef *rc_secdef;
   char *string;
   RC_SECTION *section;
   RC_STMT *stmt;
-  struct {
+  struct
+  {
     RC_STMT *head;
     RC_STMT *tail;
   } stmtlist;
@@ -114,7 +115,8 @@ static struct rc_secdef *rc_secdef;
   RC_NODE *node;
   RC_REGEX *regex;
   int num;
-  struct {
+  struct
+  {
     int part;
     RC_REGEX *key;
     char *string;
@@ -561,6 +563,12 @@ inst_stmt: STOP
 	     if (!is_prog_allowed (&@1.beg))
 	       YYERROR;
 
+	     if ($2.part == COMMAND)
+	       {
+		 parse_error (&@2.beg, _("command part is not allowed"));
+		 YYERROR;
+	       }
+	     
 	     $$ = rc_stmt_create (rc_stmt_inst, &@1.beg);
 	     $$->v.inst.opcode = inst_add;
 	     $$->v.inst.part = $2.part;
@@ -573,6 +581,12 @@ inst_stmt: STOP
 	     if (!is_prog_allowed (&@1.beg))
 	       YYERROR;
 
+	     if ($2.part == COMMAND)
+	       {
+		 parse_error (&@2.beg, _("command part is not allowed"));
+		 YYERROR;
+	       }
+	     
 	     $$ = rc_stmt_create (rc_stmt_inst, &@1.beg);
 	     $$->v.inst.opcode = inst_remove;
 	     $$->v.inst.part = $2.part;
@@ -602,10 +616,7 @@ inst_stmt: STOP
 	     $$->v.inst.part = $2.part;
 	     $$->v.inst.key  = $2.key;
 	     if ($3 == NULL && anubis_regex_refcnt ($2.key))
-	       {
-		 /* FIXME: Perhaps --line? */
-		 parse_error (&@2.end, _("missing replacement value"));
-	       }
+	       parse_error (&@2.end, _("missing replacement value"));
 	     $$->v.inst.key2 = $3;
 	     $$->v.inst.arg  = NULL;
 	   }
@@ -1495,25 +1506,34 @@ inst_eval (struct eval_env *env, RC_INST *inst)
     
     case inst_add:
       tracefile (&env->loc, _("ADD %s [%s] %s"),
-		 (inst->part == BODY) ? "BODY" : "HEADER",
+		 part_string (inst->part),
 		 VALID_STR (inst->key2), arg);
       if (inst->part == BODY) 
 	message_add_body (env->msg, inst->key2, arg);
-      else
+      else if (inst->part == HEADER)
 	message_add_header (env->msg, inst->key2, arg);
       break;
     
     case inst_modify:
       tracefile (&env->loc, _("MODIFY %s [%s] [%s] %s"),
-		 (inst->part == BODY) ? "BODY" : "HEADER",
+		 part_string (inst->part),
 		 anubis_regex_source (inst->key), 
 		 VALID_STR (inst->key2), arg);
-    
-      if (inst->part == BODY)
-	message_modify_body (env->msg, inst->key, arg);
-      else
-	message_modify_headers (env->msg, inst->key,
-				inst->key2, arg);
+
+      switch (inst->part)
+	{
+	case BODY:
+	  message_modify_body (env->msg, inst->key, arg);
+	  break;
+	  
+	case HEADER:
+	  message_modify_headers (env->msg, inst->key, inst->key2, arg);
+	  break;
+
+	case COMMAND:
+	  message_modify_command (env->msg, inst->key, inst->key2, arg);
+	  break;
+	}
       break;
     
     case inst_remove:

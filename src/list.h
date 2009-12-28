@@ -28,6 +28,8 @@ ANUBIS_LIST list_create (void);
 void list_destroy (ANUBIS_LIST *, list_iterator_t, void *);
 void list_iterate (ANUBIS_LIST, list_iterator_t, void *);
 void *list_item (ANUBIS_LIST, size_t);
+void *list_head_item (struct list *list);
+void *list_tail_item (struct list *list);
 size_t list_count (ANUBIS_LIST);
 void list_append (ANUBIS_LIST, void *);
 void list_prepend (ANUBIS_LIST, void *);

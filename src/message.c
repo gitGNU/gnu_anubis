@@ -207,6 +207,34 @@ message_modify_headers (MESSAGE msg, RC_REGEX *regex, char *key2,
   iterator_destroy (&itr);
 }
 
+void
+message_modify_command (MESSAGE msg, RC_REGEX *regex, char *key,
+			char *value)
+{
+  char **rv;
+  int rc;
+  ASSOC *asc = list_tail_item (msg->commands);
+
+  if (!asc)
+    return;
+
+  if (asc->key && anubis_regex_match (regex, asc->key, &rc, &rv))
+    {
+      if (key)
+	{
+	  free (asc->key);
+	  if (rc)
+	    asc->key = substitute (key, rv);
+	  else
+	    asc->key = strdup (key);
+	}
+      if (value)
+	asc->value = expand_ampersand (value, asc->value);
+    }
+  if (rc)
+    argcv_free (-1, rv);
+}
+
 
 const char *
 message_get_body (MESSAGE msg)

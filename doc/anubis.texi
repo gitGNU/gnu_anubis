@@ -108,8 +108,8 @@ Database URL
 
 Managing the Database
 
-* Administrators::      The Administrator's View
-* Users::               The User's View
+* Administrators::      Administrator's View
+* Users::               User's View
 
 Administrators
 
@@ -152,11 +152,12 @@ Conditional Statements
 
 Action List
 
-* Stop Action::            Stopping the Processing
+* Stop Action::            Stopping Processing
 * Call Action::            Invoking Another Section
 * Adding Headers or Text:: How to add a new header or body line(s).
 * Removing Headers::       How to remove a message header line(s).
 * Modifying Messages::     How to modify a message contents on-the-fly.
+* Modifying SMTP Commands::
 * Inserting Files::        How to append text files to an outgoing message.
 * Mail Encryption::        How to encrypt a message on-the-fly.
 * External Processor::     How to process a message body using an external tool.
@@ -1298,6 +1299,12 @@ Declares the name of command section for outgoing mail. Default is
 configuration file.
 @end deffn
 
+@deffn Option smtp-command-rule @var{string}
+Declares the name of command section for rewriting @acronym{SMTP}
+commands. Default is @samp{SMTP}. This option is available only
+for system configuration file. @xref{Modifying SMTP Commands}.
+@end deffn
+
 @deffn Option log-tag @var{string}
 Tag syslog messages with @var{string}. Default is @samp{anubis}.
 @end deffn
@@ -2187,6 +2194,7 @@ can use for instance: @samp{add} or @samp{ADD} or @samp{AdD}, and so on.
 * Adding Headers or Text:: How to add a new header or body line(s).
 * Removing Headers::       How to remove a message header line(s).
 * Modifying Messages::     How to modify a message contents on-the-fly.
+* Modifying SMTP Commands::
 * Inserting Files::        How to append text files to an outgoing message.
 * Mail Encryption::        How to encrypt a message on-the-fly.
 * External Processor::     How to process a message body using an external tool.
@@ -2387,6 +2395,73 @@ modify body :extended ["the old \([[:alnum:]]+\)"] "the new \1"
 @end smallexample
 @end deffn
 
+@node Modifying SMTP Commands
+@subsection Modifying SMTP Commands
+
+GNU Anubis makes it possible to modify arguments of
+the @acronym{SMTP} commands. To do so, define a section
+named @samp{SMTP}. Anubis will call this section each time
+it receives an @acronym{SMTP} command. This section may contain
+any statements allowed for @samp{RULE} section, plus the
+following special flavors of the @samp{modify} statement:
+
+@deffn Command modify [@var{flags}] command @samp{[}@var{cmd}@samp{]} @var{value}
+If the current @acronym{SMTP} command matches @var{cmd}, rewrite it by
+using @var{value} as its argument.
+@end deffn
+
+For example, this is how to force using @samp{my.host.org} as the
+@samp{EHLO} argument:
+
+@smallexample
+@group
+BEGIN SMTP
+modify command [ehlo] "my.host.org"
+END
+@end group
+@end smallexample
+
+The following points are worth mentioning:
+
+@enumerate 1
+@item As usual, you may use conditional expressions to decide what
+to modify and how. For example, the code below replaces the domain
+part of each @samp{MAIL FROM} command with @samp{gnu.org}:
+
+@smallexample
+BEGIN SMTP
+if command ["mail from:"] "<(.*)@@(.*)>(.*)"
+  modify command ["mail from:"] "<\1@@gnu.org>\2"
+fi
+END
+@end smallexample
+
+@item Each @samp{modify command} statement applies only if
+the current command matches its @var{cmd} argument. In particular,
+this means that you cannot modify already transferred @acronym{SMTP}
+commands nor the commands to be transferred. For example, the
+following code will not work:
+
+@smallexample
+@group
+BEGIN SMTP
+# @r{Wrong!}
+if command ["mail from:"] "<>(.*)"
+  modify command [ehlo] "domain.net"
+fi
+END
+@end group
+@end smallexample
+
+It is because by the time @samp{MAIL FROM} is received, the
+@samp{EHLO} command has already been processed and send to
+the server.
+@end enumerate
+
+The final point to notice is that you may use another than the
+default name for that section (if you really want to). To do
+so, define the new name via the @samp{smtp-command-rule} option in the
+@samp{CONTROL} section (@pxref{Basic Settings,,smtp-command-rule}).
 
 @node Inserting Files
 @subsection Inserting Files

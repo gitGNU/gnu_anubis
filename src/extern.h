@@ -100,6 +100,7 @@ extern char **x_argv;
 
 extern char *incoming_mail_rule;
 extern char *outgoing_mail_rule;
+extern char *smtp_command_rule;
 
 extern char *log_tag;
 extern int log_facility;

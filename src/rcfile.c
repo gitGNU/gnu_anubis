@@ -254,10 +254,11 @@ process_rcfile (int method)
 #define KW_ESMTP_REQUIRE_ENCRYPTION 29
 #define KW_INCOMING_MAIL_RULE       30
 #define KW_OUTGOING_MAIL_RULE       31
-#define KW_HANG                     32
-#define KW_ALLOW_HANG               33
-#define KW_LOG_FACILITY             34
-#define KW_LOG_TAG                  35
+#define KW_SMTP_COMMAND_RULE        32
+#define KW_HANG                     33
+#define KW_ALLOW_HANG               34
+#define KW_LOG_FACILITY             35
+#define KW_LOG_TAG                  36
 
 char **
 list_to_argv (ANUBIS_LIST  list)
@@ -575,7 +576,11 @@ control_parser (EVAL_ENV env, int key, ANUBIS_LIST arglist, void *inv_data)
     case KW_OUTGOING_MAIL_RULE:
       outgoing_mail_rule = strdup (arg);
       break;
-      
+
+    case KW_SMTP_COMMAND_RULE:
+      smtp_command_rule = strdup (arg);
+      break;
+	
     case KW_LOG_FACILITY:
       parse_log_facility (arg);
       break;
@@ -633,6 +638,7 @@ static struct rc_kwdef init_kw[] = {
   { "mode",         KW_MODE },
   { "incoming-mail-rule", KW_INCOMING_MAIL_RULE },
   { "outgoing-mail-rule", KW_OUTGOING_MAIL_RULE },
+  { "smtp-command-rule", KW_SMTP_COMMAND_RULE },
   { "log-facility", KW_LOG_FACILITY },
   { "log-tag", KW_LOG_TAG },
   { "ALLOW-HANG",   KW_ALLOW_HANG },
@@ -901,7 +907,7 @@ rcfile_call_section (int method, char *name, void *data, MESSAGE msg)
 {
   RC_SECTION *sec = rc_section_lookup (parse_tree, name);
   if (!sec)
-    anubis_error (0, 0, _("No such section: %s"), name);
+    info (VERBOSE, _("No such section: %s"), name);
   rc_call_section (method, sec, anubis_rc_sections, data, msg);
 }
 

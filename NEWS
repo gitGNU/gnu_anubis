@@ -14,6 +14,20 @@ Please send your bug reports to <bug-anubis@gnu.org>.
 Command line options take precedence over configuration file
 statements.
 
+* SMTP section
+
+The new rule section "SMTP" is invoked each time an SMTP command
+is received. This section may alter the command's argument, using the
+"modify command", e.g.:
+
+BEGIN SMTP
+regex :extended
+modify command [ehlo] "foo.bar.net"
+if command ["mail from:"] "<(.*)>(.*)"
+  modify command ["mail from:"] "<root@bar.net>\2"
+fi
+END
+
 * New keywords: log-facility and log-tag
 
 * Guile output

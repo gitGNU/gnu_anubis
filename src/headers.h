@@ -419,6 +419,8 @@ void message_append_mime_header (MESSAGE, const char *);
 void message_remove_headers (MESSAGE, RC_REGEX *);
 void message_modify_headers (MESSAGE, RC_REGEX *, char *, char *);
 void message_modify_body (MESSAGE, RC_REGEX *, char *);
+void message_modify_command (MESSAGE msg, RC_REGEX *regex, char *key,
+			     char *value);
 void message_proc_body (MESSAGE msg, int (*proc) (char **, char *, void *),
 			void *param);
 void message_external_proc (MESSAGE, char **);

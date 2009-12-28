@@ -36,6 +36,7 @@ NET_STREAM remote_server;
 char *anubis_domain;      /* Local domain for EHLO in authentication mode */
 char *incoming_mail_rule; /* Name of section for incoming mail processing */
 char *outgoing_mail_rule; /* Name of section for outgoing mail processing */
+char *smtp_command_rule;  /* Name of section for rewriting SMTP commands */
 
 void
 xalloc_die ()
@@ -88,6 +89,7 @@ main (int argc, char *argv[])
   anubis_getlogin (&session.supervisor);
   assign_string (&incoming_mail_rule, "INCOMING");
   assign_string (&outgoing_mail_rule, "RULE");
+  assign_string (&smtp_command_rule, "SMTP");
   
   /*
      Initialize various database formats
