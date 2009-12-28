@@ -191,6 +191,7 @@ WITH_SQL=no
 WITH_MYSQL=no
 WITH_POSTGRES=no
 WITH_GDBM=no
+WITH_GSASL=no
 
 dnl Use option --with-gsasl to compile GSASL library support.
 MU_CHECK_GSASL(0.2.3, [

@@ -119,15 +119,14 @@ gpgme_error_t
 passphrase_cb (void *hook, const char *uid_hint, const char *passphrase_info, 
 	       int prev_was_bad, int fd)
 {
-  if (!passphrase_info)
-    return 0;
-  
-  size_t len = strlen(gpg.passphrase);
-  if (write (fd, gpg.passphrase, len) != len)
-    return gpg_error(GPG_ERR_CANCELED);
-  if (write (fd, "\n", 1) != 1)
-    return gpg_error(GPG_ERR_CANCELED);
-        
+  if (passphrase_info)
+    {
+      size_t len = strlen(gpg.passphrase);
+      if (write (fd, gpg.passphrase, len) != len)
+	return gpg_error(GPG_ERR_CANCELED);
+      if (write (fd, "\n", 1) != 1)
+	return gpg_error(GPG_ERR_CANCELED);
+    }
   return 0;
 }
 
