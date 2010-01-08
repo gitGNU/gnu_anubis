@@ -62,6 +62,8 @@ create_msgid (char *idbuf)
   snprintf(&idbuf[8], sizeof(idbuf) - 8, "%06lu",
 	   (unsigned long) getpid ());
   seq++;
+  if (seq >= IDSEQLEN * IDSEQLEN)
+    seq = 0;
   return idbuf;
 }
 
