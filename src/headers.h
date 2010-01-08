@@ -3,7 +3,7 @@
 
    This file is part of GNU Anubis.
    Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008,
-   2009 The Anubis Team.
+   2009, 2010 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -292,6 +292,10 @@ typedef struct message_struct *MESSAGE;
     }									\
   while (0)
 
+/* Message ID constants */
+#define MSGIDLEN 14
+#define MSGIDBOUND (MSGIDLEN + 1)
+
 /* stream.c */
 
 typedef struct net_stream *NET_STREAM;
@@ -400,6 +404,7 @@ size_t proclist_count (void);
 
 /* message.c */
 MESSAGE message_new (void);
+const char *message_id (MESSAGE msg);
 
 ANUBIS_LIST message_get_header (MESSAGE);
 ANUBIS_LIST message_get_commands (MESSAGE);

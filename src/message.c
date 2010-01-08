@@ -2,7 +2,7 @@
    message.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2007, 2009 The Anubis Team.
+   Copyright (C) 2003, 2007, 2009, 2010 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -27,6 +27,7 @@
 
 struct message_struct
 {
+  char id[MSGIDBOUND];          /* Message ID */
   ANUBIS_LIST commands;	        /* Associative list of SMTP commands */
   ANUBIS_LIST header;		/* Associative list of RFC822 headers */
   ANUBIS_LIST mime_hdr;	        /* List of lines before the first boundary
@@ -35,12 +36,43 @@ struct message_struct
   char *boundary;		/* Additional data */
 };
 
+
+#define IDSEQLEN      60
+#define IDTIMLEN      62
+
+/* Create new message ID. IDBUF must be at least MSGIDBOUND bytes long */
+char *
+create_msgid (char *idbuf)
+{
+  time_t t;
+  struct tm *tm;
+  static const char xchr[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  static unsigned seq = 0;
+
+  time (&t);
+  tm = gmtime (&t);
+  idbuf[0] = xchr[tm->tm_year % IDSEQLEN];
+  idbuf[1] = xchr[tm->tm_mon];
+  idbuf[2] = xchr[tm->tm_mday];
+  idbuf[3] = xchr[tm->tm_hour];
+  idbuf[4] = xchr[tm->tm_min % IDTIMLEN];
+  idbuf[5] = xchr[tm->tm_sec % IDTIMLEN];
+  idbuf[6] = xchr[seq / IDSEQLEN];
+  idbuf[7] = xchr[seq % IDSEQLEN];
+  snprintf(&idbuf[8], sizeof(idbuf) - 8, "%06lu",
+	   (unsigned long) getpid ());
+  seq++;
+  return idbuf;
+}
+
+
 MESSAGE 
 message_new ()
 {
   MESSAGE msg = xzalloc (sizeof (*msg));
   msg->header = list_create ();
   msg->commands = list_create ();
+  create_msgid (msg->id);
   return msg;
 }
 
@@ -55,6 +87,7 @@ message_reset (MESSAGE msg)
   free (msg->boundary);
 
   memset (msg, 0, sizeof (*msg));
+  create_msgid (msg->id);
   msg->header = list_create ();
   msg->commands = list_create ();
 }  
@@ -236,6 +269,12 @@ message_modify_command (MESSAGE msg, RC_REGEX *regex, char *key,
 }
 
 
+const char *
+message_id (MESSAGE msg)
+{
+  return msg->id;
+}
+
 const char *
 message_get_body (MESSAGE msg)
 {

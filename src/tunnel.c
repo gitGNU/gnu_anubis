@@ -3,7 +3,7 @@
 
    This file is part of GNU Anubis.
    Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008,
-   2009 The Anubis Team.
+   2009, 2010 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -707,7 +707,8 @@ transfer_command (MESSAGE msg)
   const char *rstr;
   ASSOC *asc;
   char *command;
-
+  int len;
+  
   rcfile_call_section (CF_CLIENT, smtp_command_rule, NULL, msg);
   asc = list_tail_item (message_get_commands (msg));
   if (!asc->value)
@@ -738,7 +739,12 @@ transfer_command (MESSAGE msg)
     smtp_reply_get (CLIENT, remote_server, reply);
 
   swrite (SERVER, remote_client, smtp_reply_string (reply));
-  /* FIXME */
+
+  rstr = smtp_reply_line_ptr (reply, 0);
+  len = strcspn (rstr, "\r\n");
+  info (NORMAL, "%s: %s <=> %*.*s",
+	message_id (msg), command,
+	len, len, rstr);
   rstr = smtp_reply_string (reply);
   if (isdigit ((unsigned char) rstr[0]) && (unsigned char) rstr[0] < '4')
     {
@@ -781,6 +787,8 @@ process_data (MESSAGE msg)
       
       swrite (SERVER, remote_client, buf);
       send_eol (SERVER, remote_client);
+
+      info (NORMAL, "%s: dot <=> %s", message_id (msg), buf);
     }
   free (buf);
 

@@ -2,7 +2,7 @@
    transmode.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2004, 2005, 2007, 2008 The Anubis Team.
+   Copyright (C) 2003, 2004, 2005, 2007, 2008, 2010 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -58,8 +58,8 @@ session_prologue ()
 {
   ASSERT_MTA_CONFIG ();
   if (!(topt & T_LOCAL_MTA)
-      && string_to_ipaddr (session.mta)
-         == string_to_ipaddr (session.anubis)
+      && session.anubis 
+      && string_to_ipaddr (session.mta) == string_to_ipaddr (session.anubis)
       && session.anubis_port == session.mta_port)
     anubis_error (EXIT_FAILURE, 0, _("remote-mta loops back to Anubis"));
   
@@ -153,7 +153,6 @@ anubis_proxy_mode (struct sockaddr_in *addr)
   set_unprivileged_user ();
 
   info (NORMAL, _("Initiated proxy mode."));
-
   session_prologue ();
   smtp_session_transparent ();
   alarm (0);

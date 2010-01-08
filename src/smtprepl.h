@@ -3,7 +3,7 @@
 
    This file is part of GNU Anubis.
    Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008,
-   2009 The Anubis Team.
+   2009, 2010 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -42,5 +42,7 @@ void smtp_reply_remove_line (ANUBIS_SMTP_REPLY reply, size_t index);
 
 int smtp_reply_get_line (ANUBIS_SMTP_REPLY reply, size_t index,
 			 char **pstr, size_t *psize);
+
+const char *smtp_reply_line_ptr (ANUBIS_SMTP_REPLY reply, size_t index);
 
 
