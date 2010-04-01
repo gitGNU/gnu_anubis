@@ -1,5 +1,7 @@
 Makefile
 Makefile.in
+arg-nonnull.h
+c++defs.h
 config.guess
 config.rpath
 config.sub
@@ -12,4 +14,5 @@ mdate-sh
 missing
 mkinstalldirs
 texinfo.tex
+warn-on-use.h
 ylwrap

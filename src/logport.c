@@ -2,7 +2,7 @@
    Log and info output ports for Guile.
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2004, 2005, 2007, 2008, 2009 The Anubis Team.
+   Copyright (C) 2003, 2004, 2005, 2007, 2008, 2009, 2010 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -24,8 +24,12 @@
 
 #ifdef WITH_GUILE
 
-static long scm_tc16_anubis_error_port;
-static long scm_tc16_anubis_info_port;
+#ifndef HAVE_SCM_T_OFF
+typedef off_t scm_t_off;
+#endif
+
+static scm_t_bits scm_tc16_anubis_error_port;
+static scm_t_bits scm_tc16_anubis_info_port;
 
 typedef void (*log_flush_fn) (int flag, char *, size_t);
 
@@ -63,11 +67,10 @@ _make_anubis_log_port (long type, const char *descr, int flag,
   dp = scm_gc_malloc (sizeof (struct _anubis_error_port), descr);
   dp->flag = flag;
   dp->flush = flush;
-  port = scm_cell (type, 0);
-  pt = scm_add_to_port_table (port);
-  SCM_SETPTAB_ENTRY (port, pt);
-  pt->rw_random = 0;
 
+  port = scm_new_port_table_entry (type);
+  pt = SCM_PTAB_ENTRY(port);
+  pt->rw_random = 0;
   pt->write_buf = scm_gc_malloc (ANUBIS_ERROR_PORT_BUFSIZE, "port buffer");
   pt->write_pos = pt->write_buf;
   pt->write_buf_size = ANUBIS_ERROR_PORT_BUFSIZE;
@@ -188,8 +191,8 @@ _anubis_error_port_write (SCM port, const void *data, size_t size)
     _anubis_error_port_flush (port);
 }
 
-static off_t
-_anubis_error_port_seek (SCM port, off_t offset, int whence)
+static scm_t_off
+_anubis_error_port_seek (SCM port, scm_t_off offset, int whence)
 {
   return -1;
 }

@@ -2,7 +2,7 @@
    guile.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2004, 2005, 2007, 2008, 2009 The Anubis Team.
+   Copyright (C) 2003, 2004, 2005, 2007, 2008, 2009, 2010 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -70,19 +70,21 @@ guile_safe_exec (SCM (*handler) (void *data), void *data, SCM *result)
 void
 guile_debug (int val)
 {
+#ifdef GUILE_DEBUG_MACROS
   SCM_DEVAL_P = val;
   SCM_BACKTRACE_P = val;
   SCM_RECORD_POSITIONS_P = val;
   SCM_RESET_DEBUG_MODE;
+#endif
 }
 
 void
 init_guile ()
 {
-	scm_init_guile ();
-	scm_load_goops ();
-	guile_init_anubis_info_port ();
-	guile_init_anubis_error_port ();
+  scm_init_guile ();
+  scm_load_goops ();
+  guile_init_anubis_info_port ();
+  guile_init_anubis_error_port ();
 }
 
 
@@ -140,7 +142,7 @@ guile_load_path_append_handler (void *data)
   char *path = list_item (arglist, 0);
   SCM scm, path_scm, *pscm;
   path_scm = SCM_VARIABLE_REF (scm_c_lookup ("%load-path"));
-  for (scm = path_scm; scm != SCM_EOL; scm = SCM_CDR (scm))
+  for (scm = path_scm; !scm_is_null (scm); scm = SCM_CDR (scm))
     {
       SCM val = SCM_CAR (scm);
       if (scm_is_string (val))
@@ -180,7 +182,7 @@ load_path_handler (void *data)
   struct load_closure *lp = data;
     
   scm_set_program_arguments (lp->argc, lp->argv, lp->filename);
-  scm_primitive_load_path (scm_makfrom0str (lp->filename));
+  scm_primitive_load_path (scm_from_locale_string (lp->filename));
   return SCM_UNDEFINED;
 }
 
@@ -200,10 +202,10 @@ guile_to_anubis (SCM cell)
   static ANUBIS_LIST list;
 
   list = list_create ();
-  for (; cell != SCM_EOL; cell = SCM_CDR (cell))
+  for (; !scm_is_null (cell); cell = SCM_CDR (cell))
     {
       SCM car = SCM_CAR (cell);
-      if (SCM_NIMP (car) && SCM_CONSP (car))
+      if (scm_is_pair (car))
 	{
 	  ASSOC *asc = xmalloc (sizeof (*asc));
 
@@ -228,11 +230,11 @@ anubis_to_guile (ANUBIS_LIST  list)
       SCM cell, car, cdr;
 
       if (asc->key)
-	car = scm_makfrom0str (asc->key);
+	car = scm_from_locale_string (asc->key);
       else
 	car = SCM_BOOL_F;
 
-      cdr = scm_makfrom0str (asc->value);
+      cdr = scm_from_locale_string (asc->value);
 
       cell = scm_cons (scm_cons (car, cdr), SCM_EOL);
       if (head == SCM_EOL)
@@ -282,7 +284,7 @@ list_to_args (ANUBIS_LIST arglist)
 	    }
 	}
       else
-	val = scm_makfrom0str (p);
+	val = scm_from_locale_string (p);
 
       cell = scm_cons (val, SCM_EOL);
 
@@ -312,23 +314,16 @@ guile_process_proc_handler (void *data)
   ANUBIS_LIST arglist = clp->arglist;
   MESSAGE msg = clp->msg;
   SCM arg_hdr, arg_body;
-  SCM invlist, rest_arg;
+  SCM rest_arg;
 
   /* Prepare the required arguments */
   arg_hdr = anubis_to_guile (message_get_header (msg));
-  arg_body = scm_makfrom0str (message_get_body (msg));
+  arg_body = scm_from_locale_string (message_get_body (msg));
 
   /* Prepare the optional arguments */
   rest_arg = list_to_args (arglist);
 
-  invlist = scm_append
-               (scm_list_2
-		(scm_list_3 (clp->procsym,
-			       scm_cons (SCM_IM_QUOTE, arg_hdr),
-			       arg_body),
-		   rest_arg));
-  
-  return scm_primitive_eval (invlist);
+  return scm_apply_2 (clp->procsym, arg_hdr, arg_body, rest_arg);
 }
 
 void
@@ -360,11 +355,11 @@ guile_process_proc (ANUBIS_LIST arglist, MESSAGE msg)
   if (guile_safe_exec (guile_process_proc_handler, &clos, &res))
     return;
 
-  if (SCM_IMP (res) && SCM_BOOLP (res))
+  if (scm_is_bool (res))
     {
       /* FIXME 1 */ ;
     }
-  else if (SCM_NIMP (res) && SCM_CONSP (res))
+  else if (scm_is_pair (res))
     {
       SCM ret_hdr = SCM_CAR (res);
       SCM ret_body = SCM_CDR (res);
@@ -373,7 +368,7 @@ guile_process_proc (ANUBIS_LIST arglist, MESSAGE msg)
 	{
 	  /* Preserve the headers */ ;
 	}
-      else if (SCM_NIMP (ret_hdr) && SCM_CONSP (ret_hdr))
+      else if (scm_is_pair (ret_hdr))
 	{
 	  /* Replace them */
 	  message_replace_header (msg, guile_to_anubis (ret_hdr));

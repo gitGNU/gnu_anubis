@@ -24,6 +24,8 @@ getpass.h
 gettext.h
 gnulib.mk
 intprops.h
+langinfo.h
+langinfo.in.h
 localcharset.c
 localcharset.h
 lseek.c
@@ -33,6 +35,7 @@ malloca.h
 malloca.valgrind
 mbrtowc.c
 mbsinit.c
+nl_langinfo.c
 obstack.c
 obstack.h
 realloc.c

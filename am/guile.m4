@@ -1,101 +1,85 @@
 dnl This file is part of GNU mailutils.
-dnl Copyright (C) 2001, 2003, 2004, 2007 Free Software Foundation, Inc.
+dnl Copyright (C) 2001, 2006, 2007, 2010 Free Software Foundation, Inc.
 dnl
-dnl This program is free software; you can redistribute it and/or modify it
-dnl under the terms of the GNU General Public License as published by the
-dnl Free Software Foundation; either version 3 of the License, or (at your
-dnl option) any later version.
+dnl This program is free software; you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation; either version 3 of the License, or
+dnl (at your option) any later version.
 dnl
 dnl This program is distributed in the hope that it will be useful,
 dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 dnl GNU General Public License for more details.
 dnl
-dnl You should have received a copy of the GNU General Public License along
-dnl with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program; if not, write to the Free Software Foundation,
+dnl Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 dnl
 
-dnl MU_RESULT_ACTIONS -- generate shell code for the result of a test
-dnl   $1 -- CVAR  -- cache variable to check
-dnl   $2 -- NAME  -- if not empty, used to generate a default value TRUE:
-dnl                  `AC_DEFINE(HAVE_NAME)'
-dnl   $2 -- TRUE  -- what to do if the CVAR is not `no'
-dnl   $3 -- FALSE -- what to do otherwise; defaults to `:'
-
-AC_DEFUN([MU_RESULT_ACTIONS], [
-[if test "$$1" != "" -a "$$1" != no; then
-  ]ifelse([$3], ,
-          [AC_DEFINE(HAVE_]translit($2, [a-z ./<>], [A-Z___])[,1,[FIXME])],
-          [$3])[
-else
-  ]ifelse([$4], , [:], [$4])[
-fi]])dnl
-
+dnl MU_CHECK_GUILE(minversion, [act-if-found], [ac-if-not-found])
+dnl                    $1            $2               $3
 AC_DEFUN([MU_CHECK_GUILE],
 [
- if test "x$mu_cv_lib_guile" = x; then
-   cached=""
-   AC_PATH_PROG(GUILE_CONFIG, guile-config, no, $PATH)
-   if test $GUILE_CONFIG = no; then
-     mu_cv_lib_guile=no
-   else
-     GUILE_INCLUDES=`guile-config compile`
-     GUILE_LIBS=`guile-config link`
-   fi
+  AS_VAR_SET([mu_cv_guile], [no])
+  AC_PATH_PROG(GUILE_CONFIG, guile-config, no, $PATH)
+  if test "$GUILE_CONFIG" = no; then
+    m4_if([$3],,[AC_MSG_ERROR(cannot find Guile)], [$3])
+  else
+    AC_SUBST(GUILE_INCLUDES)
+    AC_SUBST(GUILE_LIBS)
+    AC_SUBST(GUILE_VERSION)
+    AC_SUBST(GUILE_VERSION_NUMBER)
+  
+    GUILE_INCLUDES=`$GUILE_CONFIG compile`
+    GUILE_LIBS=`$GUILE_CONFIG link`
+    GUILE_VERSION=`($GUILE_CONFIG --version 2>&1; echo '')|sed 's/guile-config [[^0-9]]* \([[0-9]][[0-9.]]*\)$/\1/'`
+    VEX=`echo $GUILE_VERSION | sed 's/\./ \\\\* 1000 + /;s/\./ \\\\* 100 + /'`
+    GUILE_VERSION_NUMBER=`eval expr "$VEX"`
 
-   if test $GUILE_CONFIG != no; then
-     AC_MSG_CHECKING(for guile version 1.8 or higher)
-     GUILE_VERSION=`($GUILE_CONFIG --version 2>&1; echo '')|sed -n 's/guile-config - Guile version \([[0-9]][[0-9]]*\)\.\([[0-9]][[0-9]]*\).*/\1\2/p'`
-     case "x$GUILE_VERSION" in
-     x[[0-9]]*)
-       if test $GUILE_VERSION -lt 18; then
-         AC_MSG_RESULT(Nope. Version number too low.)
-         mu_cv_lib_guile=no
-       else
-         AC_DEFINE_UNQUOTED(GUILE_VERSION, $GUILE_VERSION,
-                            [Guile version number: MAX*10 + MIN])
-         AC_MSG_RESULT(OK)
-         save_LIBS=$LIBS
-         save_CFLAGS=$CFLAGS
-         LIBS="$LIBS $GUILE_LIBS"
-         CFLAGS="$CFLAGS $GUILE_INCLUDES"
-         AC_TRY_LINK([#include <libguile.h>],
-                     ifelse([$1], , scm_shell(0, NULL);, [$1]),
-                     [mu_cv_lib_guile=yes],
-                     [mu_cv_lib_guile=no])
-         LIBS=$save_LIBS
-         CFLAGS=$save_CFLAGS
-       fi ;;
-     *) AC_MSG_RESULT(Nope. Unknown version number)
-        mu_cv_lib_guile=no;;
-     esac
-   fi
- else
-   cached=" (cached) "
-   GUILE_INCLUDES=`guile-config compile`
-   GUILE_LIBS=`guile-config link`
- fi
- AC_MSG_CHECKING(whether to build guile support)
- MU_RESULT_ACTIONS([mu_cv_lib_guile],[LIBGUILE],[$2],[$3])
- AC_MSG_RESULT(${cached}$mu_cv_lib_guile)
- if test $mu_cv_lib_guile = yes; then
-    if test $GUILE_VERSION -gt 16; then
-      LIBS="$LIBS $GUILE_LIBS"
-      CFLAGS="$CFLAGS $GUILE_INCLUDES"
-      AC_CHECK_FUNCS(scm_long2num scm_cell scm_list_1 scm_list_n scm_c_define\
-                     scm_c_lookup)
-      if test $ac_cv_func_scm_cell = no; then
-         AC_MSG_CHECKING(for inline scm_cell)
-         AC_TRY_LINK([#include <libguile.h>],
-                     [scm_cell(SCM_EOL, SCM_EOL)],
-                     [ac_cv_func_scm_cell=yes
-                     AC_DEFINE(HAVE_SCM_CELL,1,
-                               Define if you have scm_cell function)])
-         AC_MSG_RESULT($ac_cv_func_scm_cell)
-      fi
-      CFLAGS=$save_CFLAGS
-      LIBS=$save_LIBS
+    m4_if([$1],,,[
+      VEX=`echo $1 | sed 's/\./ \\\\* 1000 + /;s/\./ \\\\* 100 + /'`
+      min=`eval expr "$VEX"`
+      if test $GUILE_VERSION_NUMBER -lt $min; then
+        m4_if([$3],,
+	        [AC_MSG_ERROR([Guile version too old; required is at least ]$1)],
+	        [$3])
+      fi])
+
+    save_LIBS=$LIBS
+    save_CFLAGS=$CFLAGS
+    LIBS="$LIBS $GUILE_LIBS"
+    CFLAGS="$CFLAGS $GUILE_INCLUDES"
+    AC_TRY_LINK([#include <libguile.h>],
+                 m4_if([$1], , scm_shell(0, NULL);, [$1]),
+                [AS_VAR_SET([mu_cv_guile], $GUILE_VERSION)])
+    LIBS=$save_LIBS
+    CFLAGS=$save_CFLAGS
+  fi
+
+  if test $mu_cv_guile = no; then
+    GUILE_INCLUDES=
+    GUILE_LIBS=
+    GUILE_VERSION=
+    GUILE_VERSION_NUMBER=
+    m4_if($3,,[AC_MSG_ERROR(required library libguile not found)], [$3])
+  else
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <libguile.h>]],
+                      [SCM_DEVAL_P = 1;
+                       SCM_BACKTRACE_P = 1;
+                       SCM_RECORD_POSITIONS_P = 1;
+                       SCM_RESET_DEBUG_MODE;])],
+                      [mu_cv_guile_debug=yes],
+                      [mu_cv_guile_debug=no])
+    if test $mu_cv_guile_debug = yes; then
+      AC_DEFINE_UNQUOTED([GUILE_DEBUG_MACROS], 1,
+                         [Define to 1 if SCM_DEVAL_P, SCM_BACKTRACE_P, SCM_RECORD_POSITIONS_P and SCM_RESET_DEBUG_MODE are defined])
     fi
- fi
-])
+    AC_CHECK_TYPES([scm_t_off],[],[],[#include <libguile.h>])
+    AC_DEFINE_UNQUOTED([GUILE_VERSION], "$GUILE_VERSION",
+                       [Guile version number])
+    AC_DEFINE_UNQUOTED([GUILE_VERSION_NUMBER], $GUILE_VERSION_NUMBER,
+                       [Guile version number: MAX*10 + MIN])
+    m4_if([$2],,,[$2])
+  fi
+])     
 
