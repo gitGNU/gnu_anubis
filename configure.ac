@@ -82,10 +82,10 @@ AH_BOTTOM([
 AC_CHECK_LIB(socket, socket)
 AC_CHECK_LIB(nsl, gethostbyaddr)
 
-AC_SUBST(INCLUDES)
+AC_SUBST(ADD_INCLUDES)
 case $build in
   *-apple-darwin*)
-    INCLUDES="$INCLUDES -I/usr/include" ;;
+    ADD_INCLUDES="$ADD_INCLUDES -I/usr/include" ;;
 esac
 
 dnl Internationalization macros.
@@ -103,26 +103,14 @@ case "${withval}" in
   *)   AC_MSG_ERROR(bad value ${withval} for --without-guile) ;;
 esac],[useguile=yes])
 
-AC_SUBST(M4_DEFS)
-
-AC_SUBST(GUILE_INCLUDES)
-AC_SUBST(GUILE_LIBS)
-AC_SUBST(GUILE_BINDIR)
-AC_SUBST(GUILE_SNARF_VERSION)
-AC_SUBST(GUILE_SCRIPTS)
+AC_SUBST([M4_DEFS])
+AC_SUBST([GUILE_SCRIPTS])
 if test x"$useguile" = x"yes"; then
-  MU_CHECK_GUILE(,[
-    AC_DEFINE(WITH_GUILE,1,[Enable Guile support])
-    GUILE_INCLUDES=`guile-config compile`
-    GUILE_LIBS=`guile-config link`
-    GUILE_BINDIR=`guile-config info bindir`
-    GUILE_SCRIPTS='$(GUILE_SCM)'
-    M4_DEFS="$M4_DEFS -DWITH_GUILE"
-    case "$GUILE_VERSION" in
-    16|17) GUILE_SNARF_VERSION="1.6";;
-    *) GUILE_SNARF_VERSION="1.6";;
-    esac
-   ],[useguile=no])
+  GINT_INIT([gint],[1.8 nodoc std-site-dir],
+            [AC_DEFINE(WITH_GUILE,1,[Enable Guile support])
+             GUILE_SCRIPTS='$(GUILE_SCM)'
+             M4_DEFS="$M4_DEFS -DWITH_GUILE"],
+	    [useguile=no])
 fi
 if test x"$useguile" = x"no"; then
  AC_MSG_RESULT([Disabling GUILE support...])
@@ -148,7 +136,7 @@ else
  findgpgmedir() { :
   if test -f "$1/include/gpgme.h"; then
    gpgmedir=1
-   INCLUDES="$INCLUDES -I$1/include"
+   ADD_INCLUDES="$ADD_INCLUDES -I$1/include"
    AC_MSG_CHECKING(for $1/include/gpgme.h)
    AC_MSG_RESULT([yes])
    return 0
@@ -414,6 +402,7 @@ AC_CONFIG_FILES([Makefile
  build/Makefile
  build/guile-1.6/Makefile
  contrib/Makefile
+ gint/Makefile
  doc/Makefile
  elisp/Makefile
  examples/Makefile

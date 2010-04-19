@@ -38,15 +38,13 @@ struct scheme_exec_data
 {
   SCM (*handler) (void *data);
   void *data;
-  SCM result;
 };
 
 static SCM
 scheme_safe_exec_body (void *data)
 {
   struct scheme_exec_data *ed = data;
-  ed->result = ed->handler (ed->data);
-  return SCM_BOOL_F;
+  return ed->handler (ed->data);
 }
 
 static int
@@ -54,16 +52,18 @@ guile_safe_exec (SCM (*handler) (void *data), void *data, SCM *result)
 {
   jmp_buf jmp_env;
   struct scheme_exec_data ed;
-	
+  SCM res;
+  
   if (setjmp(jmp_env))
     return 1;
   ed.handler = handler;
   ed.data = data;
-  scm_internal_lazy_catch (SCM_BOOL_T,
-			   scheme_safe_exec_body, (void*)&ed,
-			   eval_catch_handler, &jmp_env);
+  res= scm_c_catch (SCM_BOOL_T,
+		    scheme_safe_exec_body, (void*)&ed,
+		    eval_catch_handler, &jmp_env,
+		    NULL, NULL);
   if (result)
-    *result = ed.result;
+    *result = res;
   return 0;
 }
 

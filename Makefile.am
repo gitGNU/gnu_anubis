@@ -18,8 +18,8 @@
 ## with GNU Anubis.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
-ACLOCAL_AMFLAGS = -I m4 -I am
-SUBDIRS = build lib src po doc scripts examples guile contrib \
+ACLOCAL_AMFLAGS = -I m4 -I am -I gint
+SUBDIRS = build lib gint src po doc scripts examples guile contrib \
 	  elisp testsuite
 
 .PHONY: make-ChangeLog
