@@ -92,27 +92,16 @@ dnl Internationalization macros.
 AM_GNU_GETTEXT([external], [need-formatstring-macros])
 AM_GNU_GETTEXT_VERSION([0.16])
 
-dnl Use option --without-guile to NOT compile Guile support.
-AC_ARG_WITH([guile],
-            AC_HELP_STRING([--without-guile],
-	    [without Guile support]),
-            [
-case "${withval}" in
-  yes) useguile=yes ;;
-  no)  useguile=no ;;
-  *)   AC_MSG_ERROR(bad value ${withval} for --without-guile) ;;
-esac],[useguile=yes])
-
 AC_SUBST([M4_DEFS])
 AC_SUBST([GUILE_SCRIPTS])
-if test x"$useguile" = x"yes"; then
-  GINT_INIT([gint],[1.8 nodoc std-site-dir],
-            [AC_DEFINE(WITH_GUILE,1,[Enable Guile support])
-             GUILE_SCRIPTS='$(GUILE_SCM)'
-             M4_DEFS="$M4_DEFS -DWITH_GUILE"],
-	    [useguile=no])
-fi
-if test x"$useguile" = x"no"; then
+GINT_INIT([gint],[1.8 with-guile nodoc std-site-dir],
+          [useguile=yes
+	   AC_DEFINE(WITH_GUILE,1,[Enable Guile support])
+           GUILE_SCRIPTS='$(GUILE_SCM)'
+           M4_DEFS="$M4_DEFS -DWITH_GUILE"],
+          [useguile=no])
+
+if test "$useguile" = "no"; then
  AC_MSG_RESULT([Disabling GUILE support...])
 fi
 
