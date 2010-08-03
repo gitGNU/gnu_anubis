@@ -104,10 +104,10 @@ std.pat: std.pin
 SUFFIXES=.in .rc .pin .pat
 
 .in.rc:
-	m4 -DTOP_SRCDIR=`cd $(top_srcdir); pwd` \
+	$(AM_V_GEN) m4 -DTOP_SRCDIR=`cd $(top_srcdir); pwd` \
            -DTESTDIR=`cd ..; pwd` @M4_DEFS@ $< > $@
 
 .pin.pat:
-	m4 -DTOP_SRCDIR=`cd $(top_srcdir); pwd` \
+	$(AM_V_GEN) m4 -DTOP_SRCDIR=`cd $(top_srcdir); pwd` \
            -DTESTDIR=`cd ..; pwd` \
            @M4_DEFS@ $< > $@

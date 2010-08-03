@@ -133,11 +133,13 @@ smtp_reply_read (ANUBIS_SMTP_REPLY reply,
       lc++;
     }
   while (line[3] == '-');
-  reply->buffer[reply->reply_length] = 0;
-
   free (line);
 
-  smtp_reply_scan (reply, lc);
+  if (reply->reply_length)
+    {
+      reply->buffer[reply->reply_length] = 0;
+      smtp_reply_scan (reply, lc);
+    }
 }
 
 void

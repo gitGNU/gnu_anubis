@@ -25,7 +25,7 @@ noinst_PROGRAMS = mta findport
 SUBDIRS = . etc data
 
 mta_LDADD = @LIBGNUTLS_LIBS@
-INCLUDES = @LIBGNUTLS_CFLAGS@
+INCLUDES = @LIBGNUTLS_INCLUDES@
 
 dist-hook:
 	here=`cd $(top_builddir)/$(subdir) && pwd`; \

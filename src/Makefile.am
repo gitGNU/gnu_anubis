@@ -70,6 +70,10 @@ anubisadm_LDADD = ./libanubisdb.a $(top_builddir)/lib/libanubis.a @LIBINTL@
 anubisusr_SOURCES = anubisusr.c anubisusr.h usr.c
 anubisusr_LDADD = ./libanubisdb.a $(top_builddir)/lib/libanubis.a @LIBINTL@ @LIBGNUTLS_LIBS@ @GSASL_LIBS@ 
 
+if TLS_COND
+ TLS_C=tls.c
+endif
+
 libanubisdb_a_SOURCES = \
  anubisdb.c \
  dbtext.c \
@@ -85,7 +89,7 @@ libanubisdb_a_SOURCES = \
  smtprepl.c \
  smtprepl.h \
  stream.c \
- tls.c \
+ $(TLS_C) \
  url.c 
 
 AM_YFLAGS = -dtv
@@ -96,7 +100,7 @@ BUILT_SOURCES = env.c
 
 localedir = $(datadir)/locale
 DEFS = @DEFS@ -DLOCALEDIR=\"$(localedir)\"
-INCLUDES = @ADD_INCLUDES@ @LIBGNUTLS_CFLAGS@ -I$(top_srcdir)/lib
+INCLUDES = @ADD_INCLUDES@ @LIBGNUTLS_INCLUDES@ -I$(top_srcdir)/lib
 SUFFIXES=.opt .c
 
 .opt.c:

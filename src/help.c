@@ -40,9 +40,9 @@ static char *config_opts[] = {
 #ifdef WITH_GUILE
   "GUILE",
 #endif				/* WITH_GUILE */
-#ifdef HAVE_TLS
+#ifdef USE_GNUTLS
   "GNUTLS",
-#endif				/* HAVE_TLS */
+#endif				/* USE_GNUTLS */
 #ifdef HAVE_GPG
   "GPG",
 #endif				/* HAVE_GPG */

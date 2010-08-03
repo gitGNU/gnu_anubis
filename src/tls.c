@@ -25,7 +25,6 @@
 #include "headers.h"
 #include "extern.h"
 
-#ifdef HAVE_TLS
 static gnutls_session initialize_tls_session (void);
 static void generate_dh_params (void);
 static void verify_certificate (gnutls_session);
@@ -430,7 +429,7 @@ print_x509_certificate_info (gnutls_session session)
 	       ctime (&activet));
       fprintf (stderr, _("- Certificate expires: %s"), ctime (&expiret));
 
-      if (gnutls_x509_fingerprint (GNUTLS_DIG_MD5,
+      if (gnutls_fingerprint (GNUTLS_DIG_MD5,
 				   &cert_list[0], digest, &digest_size) >= 0)
 	{
 	  fprintf (stderr, _("- Certificate fingerprint: "));
@@ -480,7 +479,5 @@ print_x509_certificate_info (gnutls_session session)
       gnutls_x509_crt_deinit (cert);
     }
 }
-
-#endif /* HAVE_TLS */
 
 /* EOF */

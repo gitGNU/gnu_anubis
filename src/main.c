@@ -25,9 +25,9 @@ const char version[] = "GNU Anubis v" VERSION;
 
 struct options_struct options;
 struct session_struct session;
-#if defined(HAVE_TLS) || defined(HAVE_SSL)
+#if defined(USE_GNUTLS)
 struct secure_struct secure;
-#endif /* HAVE_TLS or HAVE_SSL */
+#endif /* USE_GNUTLS */
 
 unsigned long topt;
 NET_STREAM remote_client;

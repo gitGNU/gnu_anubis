@@ -29,10 +29,10 @@
 #define obstack_chunk_free free
 #include <obstack.h>
 
-#if defined(USE_GNUTLS) && defined(HAVE_GNUTLS_GNUTLS_H)
+#if defined(USE_GNUTLS)
 # include <gnutls/gnutls.h>
 # define HAVE_TLS
-#endif /* USE_GNUTLS and HAVE_GNUTLS_GNUTLS_H */
+#endif /* USE_GNUTLS */
 
 extern char *tls_cafile;
 extern int enable_tls;

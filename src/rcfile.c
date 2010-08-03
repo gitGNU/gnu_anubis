@@ -721,7 +721,7 @@ static struct rc_secdef_child control_sect_child = {
 };
 
 /* FIXME: This belongs to another file */
-#if defined(HAVE_TLS) || defined(HAVE_SSL)
+#if defined(USE_GNUTLS)
 #define KW_SSL                 1
 #define KW_SSL_ONEWAY          2
 #define KW_SSL_CERT            3
@@ -784,7 +784,7 @@ static struct rc_secdef_child tls_sect_child = {
   tls_parser,
   NULL
 };
-#endif /* HAVE_TLS or HAVE_SSL */
+#endif /* USE_GNUTLS */
 
 void
 control_section_init (void)
@@ -795,7 +795,7 @@ control_section_init (void)
   rc_secdef_add_child (sp, &init_supervisor_sect_child);
   rc_secdef_add_child (sp, &client_sect_child);
   rc_secdef_add_child (sp, &control_sect_child);
-#if defined(HAVE_TLS) || defined(HAVE_SSL)
+#if defined(USE_GNUTLS)
   rc_secdef_add_child (sp, &tls_sect_child);
 #endif
 }

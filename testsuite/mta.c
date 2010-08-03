@@ -67,15 +67,14 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#if defined(USE_GNUTLS) && defined(HAVE_GNUTLS_GNUTLS_H)
+#if defined(USE_GNUTLS) 
 # include <gnutls/gnutls.h>
-# define HAVE_TLS
-#endif /* USE_GNUTLS and HAVE_GNUTLS_GNUTLS_H */
+#endif /* USE_GNUTLS */
 
 FILE *diag = NULL;		/* diagnostic output */
 int port = 0;			/* Port number (for smtp mode) */
 
-#ifdef HAVE_TLS
+#ifdef USE_GNUTLS
 char *tls_cert;			/* TLS sertificate */
 char *tls_key;			/* TLS key */
 char *tls_cafile;
@@ -86,7 +85,7 @@ void tls_init (void);
 
 gnutls_dh_params dh_params;
 static gnutls_certificate_server_credentials x509_cred;
-#endif /* HAVE_TLS */
+#endif /* USE_GNUTLS */
 
 char *progname;
 
@@ -136,7 +135,7 @@ main (int argc, char **argv)
 	}
 	break;
 
-#ifdef HAVE_TLS
+#ifdef USE_GNUTLS
       case 'c':
 	tls_cert = optarg;
 	break;
@@ -159,7 +158,7 @@ main (int argc, char **argv)
 	break;
 	
       default:
-	error ("unknown option");
+	error ("unknown option: -%c", c);
 	exit (1);
       }
     }
@@ -187,7 +186,7 @@ main (int argc, char **argv)
       exit (1);
     }
 
-#ifdef HAVE_TLS
+#ifdef USE_GNUTLS
   tls_init ();
 #endif
   status = mta_mode (argc, argv);
@@ -251,7 +250,7 @@ int (*_mta_write) (void *, char *, size_t, size_t *) = _def_write;
 int (*_mta_close) (void *) = _def_close;
 const char *(*_mta_strerror) (int) = _def_strerror;
 
-#ifdef HAVE_TLS
+#ifdef USE_GNUTLS
 
 static void
 _tls_cleanup_x509 (void)
@@ -418,7 +417,7 @@ smtp_starttls (void)
     smtp_reply (530, "TLS negotiation failed");
 }
 
-#endif /* HAVE_TLS */
+#endif /* USE_GNUTLS */
 
 void
 smtp_reply (int code, char *fmt, ...)
@@ -561,7 +560,7 @@ argcv_free (int argc, char **argv)
 }
 
 char *mta_capa[] = {
-#ifdef HAVE_TLS
+#ifdef USE_GNUTLS
   "STARTTLS",
 #endif
   NULL
@@ -718,7 +717,7 @@ smtp (void)
 	    smtp_reply (501, "Syntax error");
 	  break;
 
-#ifdef HAVE_TLS
+#ifdef USE_GNUTLS
 	case KW_STARTTLS:
 	  smtp_starttls ();
 	  break;

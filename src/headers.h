@@ -36,9 +36,6 @@
 # define ANUBIS_NORETURN __attribute__((__noreturn__))
 #endif
 
-# if defined(HAVE_GNUTLS_GNUTLS_H)
-#  define HAVE_GNUTLS
-# endif	/* HAVE_GNUTLS_GNUTLS_H */
 # if defined(HAVE_LIBGPGME) && defined(HAVE_GPGME_H) && !defined(NOGPG)
 #  define HAVE_GPG
 # endif	/* HAVE_LIBGPGME and HAVE_GPGME_H and not NOGPG */
@@ -101,11 +98,11 @@
 # include <arpa/inet.h>
 #endif /* HAVE_ARPA_INET_H */
 
-#if defined(USE_GNUTLS) && defined(HAVE_GNUTLS)
+#if defined(USE_GNUTLS) 
 # include <gnutls/gnutls.h>
 # include <gnutls/x509.h>
 # define HAVE_TLS
-#endif /* USE_GNUTLS and HAVE_GNUTLS */
+#endif /* USE_GNUTLS */
 
 #if defined(HAVE_TLS) || defined(HAVE_SSL)
 # define USE_SSL

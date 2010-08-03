@@ -38,11 +38,11 @@ sig_timeout (int code)
 void
 free_mem (void)
 {
-#ifdef USE_SSL
+#ifdef USE_GNUTLS
   xfree (secure.cafile);
   xfree (secure.cert);
   xfree (secure.key);
-#endif /* HAVE_TLS or HAVE_SSL */
+#endif /* USE_GNUTLS */
 
 #ifdef HAVE_GPG
   gpg_free ();

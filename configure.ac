@@ -20,7 +20,7 @@ dnl with GNU Anubis.  If not, see <http://www.gnu.org/licenses/>.
 dnl
 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT([GNU Anubis], [4.1.90], [bug-anubis@gnu.org])
+AC_INIT([GNU Anubis], [4.1.91], [bug-anubis@gnu.org])
 AC_PREREQ([2.63])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([build])
@@ -248,32 +248,10 @@ MU_CHECK_GSASL(0.2.3, [
 
     AC_LIBOBJ(lbuf)])
 
-dnl Use option --without-gnutls to NOT compile GnuTLS library support.
-AC_ARG_WITH(gnutls,
-	AC_HELP_STRING([--without-gnutls],
-	[without GnuTLS library support]),
-	[with_gnutls=${withval}],
-	[with_gnutls=yes])
-
-if test $with_gnutls = yes; then
-  AC_CHECK_HEADERS(gnutls/gnutls.h)
-  if test $ac_cv_header_gnutls_gnutls_h != no; then
-    AM_PATH_LIBGNUTLS("1.0.0",
-                      [M4_DEFS="$M4_DEFS -DWITH_SSL -DWITH_GNUTLS"
-                      AC_DEFINE(USE_GNUTLS, 1,
-                                [Define to 1 if USE_GNUTLS is requested.])],
-                                [with_gnutls = no
-                                 AC_MSG_RESULT([Disabling GnuTLS support...])])
-    if test $with_gnutls = yes; then
-	# Accomodate for incompatibilities of gnults 1.0.16 (and,
-	# eventually, newer versions)
-	AC_CHECK_FUNC(gnutls_x509_fingerprint,:
-                      [AH_BOTTOM([
-#define gnutls_x509_fingerprint gnutls_fingerprint
-])])
-    fi
-  fi
-fi
+ANUBIS_CHECK_TLS([
+ M4_DEFS="$M4_DEFS -DWITH_SSL -DWITH_GNUTLS"
+ AC_DEFINE(USE_GNUTLS, 1, [Define to 1 if USE_GNUTLS is requested.])])
+AM_CONDITIONAL([TLS_COND], [test $anubis_cv_gnutls = yes])
 
 dnl Use option --with-socks-proxy to compile SOCKS v4/5 proxy support.
 AC_ARG_WITH(socks-proxy,
@@ -380,7 +358,7 @@ WITH_SQL=$WITH_SQL
 WITH_MYSQL=$WITH_MYSQL
 WITH_POSTGRES=$WITH_POSTGRES
 WITH_GSASL=$WITH_GSASL
-with_gnutls=$with_gnutls
+with_gnutls=$anubis_cv_gnutls
 with_socks_proxy=$with_socks_proxy
 with_pcre=$with_pcre
 with_pam=$with_pam

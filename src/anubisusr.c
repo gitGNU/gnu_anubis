@@ -19,10 +19,10 @@
 
 #include <anubisusr.h>
 
-#ifdef HAVE_TLS
+#ifdef USE_GNUTLS
 char *tls_cafile;
 int enable_tls = 1;
-#endif /* HAVE_TLS */
+#endif /* USE_GNUTLS */
 
 char *progname;
 
@@ -64,7 +64,7 @@ error (const char *fmt, ...)
 NET_STREAM iostream;
 
 
-#ifdef HAVE_TLS
+#ifdef USE_GNUTLS
 
 void
 info (int mode, const char *fmt, ...)
@@ -115,7 +115,7 @@ starttls (void)
       exit (1);
     }
 }
-#endif /* HAVE_TLS */
+#endif /* USE_GNUTLS */
 
 
 /* Auxiliary functions */
@@ -857,7 +857,7 @@ synch (void)
   char *rcname;
 
   obstack_init (&input_stk);
-#ifdef HAVE_TLS
+#ifdef USE_GNUTLS
   init_ssl_libs ();
 #endif
 
@@ -894,7 +894,7 @@ synch (void)
 
   smtp_ehlo (1);
 
-#ifdef HAVE_TLS
+#ifdef USE_GNUTLS
   if (enable_tls && smtp_reply_has_capa (smtp_capa, "STARTTLS", NULL))
     {
       starttls ();
