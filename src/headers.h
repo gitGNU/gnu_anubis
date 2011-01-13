@@ -3,7 +3,7 @@
 
    This file is part of GNU Anubis.
    Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008,
-   2009, 2010 The Anubis Team.
+   2009, 2010, 2011 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -239,6 +239,7 @@ ANUBIS_MODE;
 #define T_TRACEFILE_USR     0x08000000
 #define T_XELO              0x10000000
 #define T_LOCATION_COLUMN   0x20000000
+#define T_ESMTP_AUTH_DELAYED 0x40000000
 
 /* Regexp modifiers */
 /* Basic types */
@@ -476,13 +477,13 @@ int anubis_regex_refcnt (RC_REGEX *);
 char *anubis_regex_replace (RC_REGEX *, char *, char *);
 void anubis_regex_print (RC_REGEX *);
 
-/* rc.c */
+/* rcfile.c */
 void rc_system_init (void);
 void auth_tunnel (void);
 void open_rcfile (int);
 void process_rcfile (int);
 void rcfile_process_section (int, char *, void *, MESSAGE);
-void rcfile_call_section (int, char *, void *, MESSAGE);
+void rcfile_call_section (int, char *, char *, void *, MESSAGE);
 char *user_rcfile_name (void);
 
 typedef struct eval_env *EVAL_ENV;

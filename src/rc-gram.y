@@ -3,7 +3,7 @@
    rc-gram.y
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2004, 2007, 2009 The Anubis Team.
+   Copyright (C) 2003, 2004, 2007, 2009, 2011 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -1500,7 +1500,7 @@ inst_eval (struct eval_env *env, RC_INST *inst)
     
     case inst_call:
       tracefile (&env->loc, _("Calling %s"), inst->arg);
-      rcfile_call_section (env->method, inst->arg,
+      rcfile_call_section (env->method, inst->arg, "RULE",
 			   env->data, env->msg);
       break;
     
@@ -1815,14 +1815,17 @@ eval_section (int method, RC_SECTION *sec, struct rc_secdef *secdef,
 
 void
 rc_run_section (int method, RC_SECTION *sec, struct rc_secdef *secdef,
+		const char *class_name, 
 		void *data, MESSAGE msg)
 {
   if (!sec)
     return;
-
+  if (!class_name)
+    class_name = sec->name;
+  
   for (; secdef->name; secdef++)
     {
-      if (!strcmp (sec->name, secdef->name))
+      if (!strcmp (secdef->name, class_name))
 	{
 	  eval_section (method, sec, secdef, data, msg);
 	  return;
@@ -1831,30 +1834,6 @@ rc_run_section (int method, RC_SECTION *sec, struct rc_secdef *secdef,
   anubis_error (0, 0, _("Unknown section: %s"), sec->name);
 }
 
-void
-rc_call_section (int method, RC_SECTION *sec, struct rc_secdef *secdef,
-		 void *data, MESSAGE msg)
-{
-  if (!sec)
-	  return;
-
-  for (; secdef->name; secdef++)
-    {
-      if (!strcmp (secdef->name, "RULE"))
-	{
-	  eval_section (method, sec, secdef, data, msg);
-	  return;
-	}
-    }
-}
-
-void
-rc_run_section_list (int method, RC_SECTION *sec,
-		     struct rc_secdef *secdef)
-{
-  for (; sec; sec = sec->next)
-    rc_run_section (method, sec, secdef, NULL, NULL);
-}
 
 static int
 check_kw (char *ident, int *flags)

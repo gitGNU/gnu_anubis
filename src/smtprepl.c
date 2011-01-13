@@ -1,5 +1,5 @@
 /* This file is part of GNU Anubis.
-   Copyright (C) 2009 The Anubis Team.
+   Copyright (C) 2009, 2011 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -49,9 +49,12 @@ smtp_reply_new ()
 void
 smtp_reply_free (ANUBIS_SMTP_REPLY reply)
 {
-  free (reply->buffer);
-  free (reply->line_vec);
-  free (reply);
+  if (reply)
+    {
+      free (reply->buffer);
+      free (reply->line_vec);
+      free (reply);
+    }
 }
 
 static void

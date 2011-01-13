@@ -2,7 +2,8 @@
    rcfile.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2009 The Anubis Team.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2009,
+   2011 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -259,6 +260,7 @@ process_rcfile (int method)
 #define KW_ALLOW_HANG               34
 #define KW_LOG_FACILITY             35
 #define KW_LOG_TAG                  36
+#define KW_ESMTP_AUTH_DELAYED       37
 
 char **
 list_to_argv (ANUBIS_LIST  list)
@@ -326,6 +328,106 @@ static volatile unsigned long _anubis_hang;
 
 /* List of users who are allowed to use HANG in their profiles */
 ANUBIS_LIST allow_hang_users; 
+
+static struct rc_kwdef esmtp_kw[] = {
+  { "esmtp-auth",   KW_ESMTP_AUTH, KWF_HIDDEN },
+  { "esmtp-anonymous-token", KW_ESMTP_ANONYMOUS_TOKEN, KWF_HIDDEN },
+  { "esmtp-auth-id", KW_ESMTP_AUTH_ID, KWF_HIDDEN },
+  { "esmtp-authz-id", KW_ESMTP_AUTHZ_ID, KWF_HIDDEN },
+  { "esmtp-password", KW_ESMTP_PASSWORD, KWF_HIDDEN },
+  { "esmtp-service",  KW_ESMTP_SERVICE, KWF_HIDDEN },
+  { "esmtp-hostname", KW_ESMTP_HOSTNAME, KWF_HIDDEN },
+  { "esmtp-generic-service", KW_ESMTP_SERVICE, KWF_HIDDEN },
+  { "esmtp-passcode", KW_ESMTP_PASSCODE, KWF_HIDDEN },
+  { "esmtp-realm", KW_ESMTP_REALM, KWF_HIDDEN },
+  { "esmtp-allowed-mech", KW_ESMTP_ALLOWED_MECH },
+  { "esmtp-require-encryption", KW_ESMTP_REQUIRE_ENCRYPTION },
+  { NULL }
+};
+
+static int
+parse_esmtp_kv (int key, ANUBIS_LIST arglist)
+{
+  char *arg = list_item (arglist, 0);
+  switch (key)
+    {
+#if defined (WITH_GSASL)
+    case KW_ESMTP_AUTH:
+      {
+	char *p = strchr (arg, ':');
+	if (p)
+	  {
+	    *p++ = 0;
+	    auth_password = strdup (p);
+	    authentication_id = strdup (arg);
+	    authorization_id = strdup (arg);
+	    topt |= T_ESMTP_AUTH;
+	  }
+	else
+	  topt &= ~T_ESMTP_AUTH;
+      }
+      break;
+      
+    case KW_ESMTP_ANONYMOUS_TOKEN:
+      anon_token = strdup (arg);
+      topt |= T_ESMTP_AUTH;
+      break;
+      
+    case KW_ESMTP_AUTH_ID:
+      authentication_id = strdup (arg);
+      topt |= T_ESMTP_AUTH;
+      break;
+      
+    case KW_ESMTP_AUTHZ_ID:
+      authorization_id = strdup (arg);
+      topt |= T_ESMTP_AUTH;
+      break;
+      
+    case KW_ESMTP_PASSWORD:
+      auth_password = strdup (arg);
+      topt |= T_ESMTP_AUTH;
+      break;
+      
+    case KW_ESMTP_SERVICE:
+      auth_service = strdup (arg);
+      topt |= T_ESMTP_AUTH;
+      break;
+      
+    case KW_ESMTP_HOSTNAME:
+      auth_hostname = strdup (arg);
+      topt |= T_ESMTP_AUTH;
+      break;
+      
+    case KW_ESMTP_GENERIC_SERVICE:
+      generic_service_name = strdup (arg);
+      topt |= T_ESMTP_AUTH;
+      break;
+      
+    case KW_ESMTP_PASSCODE:
+      auth_passcode = strdup (arg);
+      topt |= T_ESMTP_AUTH;
+      break;
+      
+    case KW_ESMTP_REALM:
+      auth_realm = strdup (arg);
+      topt |= T_ESMTP_AUTH;
+      break;
+      
+    case KW_ESMTP_ALLOWED_MECH:
+      anubis_set_client_mech_list (arglist);
+      topt |= T_ESMTP_AUTH;
+      break;
+      
+    case KW_ESMTP_REQUIRE_ENCRYPTION:
+      anubis_set_encryption_mech_list (arglist);
+      break;
+
+    default:
+      return 1;
+#endif 
+    }
+  return 0;
+}
 
 void
 control_parser (EVAL_ENV env, int key, ANUBIS_LIST arglist, void *inv_data)
@@ -450,77 +552,6 @@ control_parser (EVAL_ENV env, int key, ANUBIS_LIST arglist, void *inv_data)
       topt |= T_LOCAL_MTA;
       break;
       
-#if defined (WITH_GSASL)
-    case KW_ESMTP_AUTH:
-      {
-	char *p = strchr (arg, ':');
-	if (p)
-	  {
-	    *p++ = 0;
-	    auth_password = strdup (p);
-	    authentication_id = strdup (arg);
-	    authorization_id = strdup (arg);
-	    topt |= T_ESMTP_AUTH;
-	  }
-      }
-      break;
-      
-    case KW_ESMTP_ANONYMOUS_TOKEN:
-      anon_token = strdup (arg);
-      topt |= T_ESMTP_AUTH;
-      break;
-      
-    case KW_ESMTP_AUTH_ID:
-      authentication_id = strdup (arg);
-      topt |= T_ESMTP_AUTH;
-      break;
-      
-    case KW_ESMTP_AUTHZ_ID:
-      authorization_id = strdup (arg);
-      topt |= T_ESMTP_AUTH;
-      break;
-      
-    case KW_ESMTP_PASSWORD:
-      auth_password = strdup (arg);
-      topt |= T_ESMTP_AUTH;
-      break;
-      
-    case KW_ESMTP_SERVICE:
-      auth_service = strdup (arg);
-      topt |= T_ESMTP_AUTH;
-      break;
-      
-    case KW_ESMTP_HOSTNAME:
-      auth_hostname = strdup (arg);
-      topt |= T_ESMTP_AUTH;
-      break;
-      
-    case KW_ESMTP_GENERIC_SERVICE:
-      generic_service_name = strdup (arg);
-      topt |= T_ESMTP_AUTH;
-      break;
-      
-    case KW_ESMTP_PASSCODE:
-      auth_passcode = strdup (arg);
-      topt |= T_ESMTP_AUTH;
-      break;
-      
-    case KW_ESMTP_REALM:
-      auth_realm = strdup (arg);
-      topt |= T_ESMTP_AUTH;
-      break;
-      
-    case KW_ESMTP_ALLOWED_MECH:
-      anubis_set_client_mech_list (arglist);
-      topt |= T_ESMTP_AUTH;
-      break;
-      
-    case KW_ESMTP_REQUIRE_ENCRYPTION:
-      anubis_set_encryption_mech_list (arglist);
-      break;
-      
-#endif 
-
     case KW_LOCAL_DOMAIN:
       anubis_domain = strdup (arg);
       break;
@@ -622,13 +653,19 @@ control_parser (EVAL_ENV env, int key, ANUBIS_LIST arglist, void *inv_data)
 			_("Command HANG is not allowed for user `%s'"),
 			session.clientname);
       break;
-      
+#if defined (WITH_GSASL)
+    case KW_ESMTP_AUTH_DELAYED:
+      topt |= T_ESMTP_AUTH;
+      setbool (env, arg, topt, T_ESMTP_AUTH_DELAYED);
+      break;
+#endif
     default:
-      eval_error (2, env,
-		  _("INTERNAL ERROR at %s:%d: unhandled key %d; "
-		    "please report"),
-		  __FILE__, __LINE__,
-		  key);
+      if (parse_esmtp_kv (key, arglist))
+	eval_error (2, env,
+		    _("INTERNAL ERROR at %s:%d: unhandled key %d; "
+		      "please report"),
+		    __FILE__, __LINE__,
+		    key);
     }
 }
 
@@ -703,6 +740,7 @@ struct rc_kwdef control_kw[] = {
   { "esmtp-realm", KW_ESMTP_REALM, KWF_HIDDEN },
   { "esmtp-allowed-mech", KW_ESMTP_ALLOWED_MECH },
   { "esmtp-require-encryption", KW_ESMTP_REQUIRE_ENCRYPTION },
+  { "esmtp-auth-delayed", KW_ESMTP_AUTH_DELAYED },
 #ifdef USE_SOCKS_PROXY
   { "socks-proxy",  KW_SOCKS_PROXY },
   { "socks-v4",     KW_SOCKS_V4 },
@@ -875,12 +913,96 @@ rule_section_init (void)
   rc_secdef_add_child (sp, &rule_sect_child);
 }
 
+
+void
+smtp_rule_parser (EVAL_ENV env, int key, ANUBIS_LIST arglist, void *inv_data)
+{
+  MESSAGE msg = eval_env_message (env);
+  char *arg = list_item (arglist, 0);
+  char **argv;
+
+  switch (key)
+    {
+    case KW_SIGNATURE_FILE_APPEND:
+      if (strcasecmp ("no", arg))
+	message_append_signature_file (msg);
+      break;
+      
+    case KW_BODY_APPEND:
+      message_append_text_file (msg, arg, NULL);
+      break;
+      
+    case KW_BODY_CLEAR:
+      message_replace_body (msg, xstrdup (""));
+      break;
+      
+    case KW_BODY_CLEAR_APPEND:
+      message_replace_body (msg, xstrdup (""));
+      message_append_text_file (msg, arg, NULL);
+      break;
+      
+    case KW_EXTERNAL_BODY_PROCESSOR:
+      argv = list_to_argv (arglist);
+      message_external_proc (msg, argv);
+      argcv_free (-1, argv);
+      break;
+      
+    default:
+      if (parse_esmtp_kv (key, arglist))
+	eval_error (2, env,
+		    _("INTERNAL ERROR at %s:%d: unhandled key %d; "
+		      "please report"),
+		    __FILE__, __LINE__,
+		    key);
+    }
+}
+
+struct rc_kwdef smtp_rule_kw[] = {
+  { "signature-file-append",   KW_SIGNATURE_FILE_APPEND },
+  { "body-append",             KW_BODY_APPEND },
+  { "body-clear-append",       KW_BODY_CLEAR_APPEND },
+  { "body-clear",              KW_BODY_CLEAR },
+  { "external-body-processor", KW_EXTERNAL_BODY_PROCESSOR },
+  /* FIXME: It is supposed that none of the KW_ESMTP defines coincides
+     with any of the above */
+  { "esmtp-auth",              KW_ESMTP_AUTH, KWF_HIDDEN },
+  { "esmtp-anonymous-token",   KW_ESMTP_ANONYMOUS_TOKEN, KWF_HIDDEN },
+  { "esmtp-auth-id",           KW_ESMTP_AUTH_ID, KWF_HIDDEN },
+  { "esmtp-authz-id",          KW_ESMTP_AUTHZ_ID, KWF_HIDDEN },
+  { "esmtp-password",          KW_ESMTP_PASSWORD, KWF_HIDDEN },
+  { "esmtp-service",           KW_ESMTP_SERVICE, KWF_HIDDEN },
+  { "esmtp-hostname",          KW_ESMTP_HOSTNAME, KWF_HIDDEN },
+  { "esmtp-generic-service",   KW_ESMTP_SERVICE, KWF_HIDDEN },
+  { "esmtp-passcode",          KW_ESMTP_PASSCODE, KWF_HIDDEN },
+  { "esmtp-realm",             KW_ESMTP_REALM, KWF_HIDDEN },
+  { "esmtp-allowed-mech",      KW_ESMTP_ALLOWED_MECH },
+  { NULL }
+};
+
+static struct rc_secdef_child smtp_rule_sect_child = {
+  NULL,
+  CF_CLIENT,
+  smtp_rule_kw,
+  smtp_rule_parser,
+  NULL
+};
+
+void
+smtp_rule_section_init (void)
+{
+  struct rc_secdef *sp = anubis_add_section ("SMTP");
+  sp->allow_prog = 1;
+  sp->prio = prio_system;
+  rc_secdef_add_child (sp, &smtp_rule_sect_child);
+}
+
 void
 rc_system_init (void)
 {
   control_section_init ();
   translate_section_init ();
   rule_section_init ();
+  smtp_rule_section_init ();
 #ifdef WITH_GUILE
   guile_section_init ();
 #endif
@@ -899,16 +1021,17 @@ rcfile_process_section (int method, char *name, void *data, MESSAGE msg)
 
   for (sec = rc_section_lookup (parse_tree, name);
        sec; sec = rc_section_lookup (sec->next, name))
-    rc_run_section (method, sec, anubis_rc_sections, data, msg);
+    rc_run_section (method, sec, anubis_rc_sections, NULL, data, msg);
 }
 
 void
-rcfile_call_section (int method, char *name, void *data, MESSAGE msg)
+rcfile_call_section (int method, char *name, char *class,
+		     void *data, MESSAGE msg)
 {
   RC_SECTION *sec = rc_section_lookup (parse_tree, name);
   if (!sec)
     info (VERBOSE, _("No such section: %s"), name);
-  rc_call_section (method, sec, anubis_rc_sections, data, msg);
+  rc_run_section (method, sec, anubis_rc_sections, class, data, msg);
 }
 
 char *

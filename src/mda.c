@@ -2,7 +2,7 @@
    mda.c
 
    This file is part of GNU Anubis.
-   Copyright (C) 2005, 2007, 2009 The Anubis Team.
+   Copyright (C) 2005, 2007, 2009, 2011 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -280,7 +280,7 @@ smtp_client_data (struct smtp_client_context *ctx)
   process_rcfile (CF_CLIENT);
   
   tmp = message_dup (ctx->msg);
-  rcfile_call_section (CF_CLIENT, incoming_mail_rule, NULL, tmp);
+  rcfile_call_section (CF_CLIENT, incoming_mail_rule, "RULE", NULL, tmp);
       
   transfer_header (message_get_header (tmp));
   transfer_body (tmp);
@@ -407,7 +407,7 @@ deliver_local_child (const char *recipient, MESSAGE msg)
   open_rcfile (CF_CLIENT);
   process_rcfile (CF_CLIENT);
   
-  rcfile_call_section (CF_CLIENT, incoming_mail_rule, NULL, msg);
+  rcfile_call_section (CF_CLIENT, incoming_mail_rule, "RULE", NULL, msg);
       
   transfer_header (message_get_header (msg));
   transfer_body (msg);

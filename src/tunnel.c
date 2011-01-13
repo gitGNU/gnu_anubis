@@ -3,7 +3,7 @@
 
    This file is part of GNU Anubis.
    Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008,
-   2009, 2010 The Anubis Team.
+   2009, 2010, 2011 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -34,6 +34,7 @@ static int handle_ehlo (ANUBIS_SMTP_REPLY );
 
 
 static char *smtp_ehlo_domain_name = NULL;
+static ANUBIS_SMTP_REPLY ehlo_reply = NULL;
 
 char *
 get_ehlo_domain (void)
@@ -600,14 +601,16 @@ handle_ehlo (ANUBIS_SMTP_REPLY reply)
 {
   if (!smtp_ehlo_domain_name)
     save_ehlo_domain (smtp_reply_line (reply, 0));
-    
-  smtp_reply_get (CLIENT, remote_server, reply);
+		   
+  smtp_reply_free (ehlo_reply);
+  ehlo_reply = smtp_reply_new ();
+  smtp_reply_get (CLIENT, remote_server, ehlo_reply);
 
-  if (smtp_reply_has_capa (reply, "STARTTLS", NULL))
+  if (smtp_reply_has_capa (ehlo_reply, "STARTTLS", NULL))
     topt |= T_STARTTLS;		/* Yes, we can use the TLS/SSL
 				   encryption. */
 
-  xdatabase_capability (reply);
+  xdatabase_capability (ehlo_reply);
 
 #ifdef USE_SSL
   if ((topt & T_SSL_ONEWAY)
@@ -638,7 +641,7 @@ handle_ehlo (ANUBIS_SMTP_REPLY reply)
 	  smtp_reply_free (newreply);
 	  anubis_error (0, 0, _("STARTTLS (ONEWAY) command failed."));
 	  topt &= ~T_SSL_ONEWAY;
-	  swrite (SERVER, remote_client, smtp_reply_string (reply));
+	  swrite (SERVER, remote_client, smtp_reply_string (ehlo_reply));
 	  return 1;
 	}
       smtp_reply_free (newreply);
@@ -649,7 +652,7 @@ handle_ehlo (ANUBIS_SMTP_REPLY reply)
       if (!stream)
 	{
 	  topt &= ~T_SSL_ONEWAY;
-	  swrite (SERVER, remote_client, smtp_reply_string (reply));
+	  swrite (SERVER, remote_client, smtp_reply_string (ehlo_reply));
 	  return 1;
 	}
 
@@ -663,7 +666,7 @@ handle_ehlo (ANUBIS_SMTP_REPLY reply)
       swrite (CLIENT, remote_server, "EHLO ");
       swrite (CLIENT, remote_server, get_ehlo_domain ());
       send_eol (CLIENT, remote_server);
-      smtp_reply_get (CLIENT, remote_server, reply);
+      smtp_reply_get (CLIENT, remote_server, ehlo_reply);
     }
 #endif /* USE_SSL */
 
@@ -676,8 +679,8 @@ handle_ehlo (ANUBIS_SMTP_REPLY reply)
   if ((topt & T_STARTTLS) && (!(topt & T_SSL) || (topt & T_SSL_ONEWAY)))
     {
       size_t n;
-      if (smtp_reply_has_capa (reply, "STARTTLS", &n))
-	smtp_reply_remove_line (reply, n);
+      if (smtp_reply_has_capa (ehlo_reply, "STARTTLS", &n))
+	smtp_reply_remove_line (ehlo_reply, n);
     }
 
   /*
@@ -687,14 +690,22 @@ handle_ehlo (ANUBIS_SMTP_REPLY reply)
   if (topt & T_ESMTP_AUTH)
     {
       size_t n;
-      if (smtp_reply_has_capa (reply, "AUTH", &n))
+      if (smtp_reply_has_capa (ehlo_reply, "AUTH", &n))
 	{
-	  const char *p = smtp_reply_line (reply, n);
-	  esmtp_auth (&remote_server, p + 5);
-	  smtp_reply_remove_line (reply, n);
+	  if (!(topt & T_ESMTP_AUTH_DELAYED))
+	    {
+	      const char *p = smtp_reply_line (ehlo_reply, n);
+	      esmtp_auth (&remote_server, p + 9);
+	      smtp_reply_remove_line (ehlo_reply, n);
+	      topt &= ~T_ESMTP_AUTH;
+	    }
 	}
+      else
+	topt &= ~T_ESMTP_AUTH;
     }
-  
+
+  smtp_reply_set (reply, smtp_reply_string (ehlo_reply));
+
   return 0;
 }
 
@@ -709,12 +720,26 @@ transfer_command (MESSAGE msg)
   char *command;
   int len;
   
-  rcfile_call_section (CF_CLIENT, smtp_command_rule, NULL, msg);
+  rcfile_call_section (CF_CLIENT, smtp_command_rule, "SMTP", NULL, msg);
   asc = list_tail_item (message_get_commands (msg));
   if (!asc->value)
     command = strdup (asc->key);
-  else if (strcasecmp (asc->key, "mail from:") == 0
-	   || strcasecmp (asc->key, "rcpt to:") == 0)
+  else if (strcasecmp (asc->key, "mail from:") == 0)
+    {
+      if (topt & T_ESMTP_AUTH)
+	{
+	  size_t n;
+	  if (smtp_reply_has_capa (ehlo_reply, "AUTH", &n))
+	    {
+	      const char *p = smtp_reply_line (ehlo_reply, n);
+	      esmtp_auth (&remote_server, p + 9);
+	      smtp_reply_remove_line (ehlo_reply, n);
+	    }
+	  topt &= ~T_ESMTP_AUTH;
+	}
+      asprintf (&command, "%s%s", asc->key, asc->value);
+    }
+  else if (strcasecmp (asc->key, "rcpt to:") == 0)
     asprintf (&command, "%s%s", asc->key, asc->value);
   else
     asprintf (&command, "%s %s", asc->key, asc->value);
@@ -737,7 +762,7 @@ transfer_command (MESSAGE msg)
     }
   else
     smtp_reply_get (CLIENT, remote_server, reply);
-
+  
   swrite (SERVER, remote_client, smtp_reply_string (reply));
 
   rstr = smtp_reply_line_ptr (reply, 0);
@@ -776,7 +801,7 @@ process_data (MESSAGE msg)
   collect_headers (msg, NULL);
   collect_body (msg);
 
-  rcfile_call_section (CF_CLIENT, outgoing_mail_rule, NULL, msg);
+  rcfile_call_section (CF_CLIENT, outgoing_mail_rule, "RULE", NULL, msg);
 
   transfer_header (message_get_header (msg));
   transfer_body (msg);

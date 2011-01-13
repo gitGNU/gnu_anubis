@@ -22,7 +22,7 @@
 :RETCODE 0
 :PATTERN
 :EXPECT 220
-HELO localhost		
+HELO localhost
 :EXPECT 250
 MAIL FROM:<polak@gnu.org>
 :EXPECT 250

@@ -2,7 +2,7 @@
    rcfile.h
 
    This file is part of GNU Anubis.
-   Copyright (C) 2003, 2007, 2009 The Anubis Team.
+   Copyright (C) 2003, 2007, 2009, 2011 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -228,11 +228,8 @@ RC_SECTION *rc_parse (char *);
 RC_SECTION *rc_parse_ep (char *name, RC_ERROR_PRINTER errprn, void *data);
 void rc_section_list_destroy (RC_SECTION **);
 int rc_run_cond (char *, int, char *);
-void rc_run_section_list (int, RC_SECTION *, struct rc_secdef *);
-void rc_run_section (int, RC_SECTION *, struct rc_secdef *, void *,
-		     MESSAGE);
-void rc_call_section (int, RC_SECTION *, struct rc_secdef *, void *,
-		      MESSAGE);
+void rc_run_section (int, RC_SECTION *, struct rc_secdef *, const char *,
+		     void *, MESSAGE);
 void rc_set_debug_level (char *);
 int rc_open (char *);
 struct rc_secdef *anubis_add_section (char *);

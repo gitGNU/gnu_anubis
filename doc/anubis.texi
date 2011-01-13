@@ -14,7 +14,7 @@
 @syncodeindex fn cp
 
 @copying
-Copyright @copyright{} 2001, 2002, 2003, 2004, 2007, 2008, 2009
+Copyright @copyright{} 2001, 2002, 2003, 2004, 2007, 2008, 2009, 2011
 Wojciech Polak and Sergey Poznyakoff.
 
 Permission is granted to copy, distribute and/or modify this document
@@ -1444,6 +1444,9 @@ The following options set authentication credentials for @acronym{ESMTP}
 authentication. They are useful, for example, if your @acronym{MTA}
 requires such an authentication, but your @acronym{MUA} does not support it.
 
+You can also use these statements in a @samp{SMTP} section. 
+@xref{Modifying SMTP Commands}, for a detailed description of this feature.
+
 @deffn Option esmtp-allowed-mech @var{mech-list}
 Defines the list of allowed authentication mechanisms. @var{Mech-list}
 is a list of valid authentication mechanism names separated by
@@ -1483,6 +1486,16 @@ esmtp-require-encryption LOGIN PLAIN
 @noindent
 This prevents sending user password over an unencrypted connection.
 
+@end deffn
+
+@deffn Option esmtp-auth-delayed @var{yes-or-no}
+By default, ESMTP authentication is attempted as early as
+possible, normally while handling the client @samp{EHLO} command.
+
+When this statement is set to @samp{yes}, authentication is delayed
+until the client issued the @samp{MAIL} command. This allows you
+to select authentication credentials depending on the sender email.
+For a detailed description of this feature, see @ref{Modifying SMTP Commands}.
 @end deffn
 
 @deffn Option esmtp-auth-id @var{authentication-id}
@@ -2398,12 +2411,12 @@ modify body :extended ["the old \([[:alnum:]]+\)"] "the new \1"
 @node Modifying SMTP Commands
 @subsection Modifying SMTP Commands
 
-GNU Anubis makes it possible to modify arguments of
-the @acronym{SMTP} commands. To do so, define a section
-named @samp{SMTP}. Anubis will call this section each time
+GNU Anubis is able to modify arguments of the @acronym{SMTP} commands.
+To instruct it to do so, define a section named @samp{SMTP}.
+Anubis will call this section each time
 it receives an @acronym{SMTP} command. This section may contain
 any statements allowed for @samp{RULE} section, plus the
-following special flavors of the @samp{modify} statement:
+following special flavor of the @samp{modify} statement:
 
 @deffn Command modify [@var{flags}] command @samp{[}@var{cmd}@samp{]} @var{value}
 If the current @acronym{SMTP} command matches @var{cmd}, rewrite it by
@@ -2420,6 +2433,40 @@ modify command [ehlo] "my.host.org"
 END
 @end group
 @end smallexample
+
+Additionally, the ESMTP authentication settings (@pxref{ESMTP
+Authentication Settings}) can be used as actions in this section.
+To do so, you must first set @code{esmtp-auth-delayed} to @samp{yes}
+in the @samp{CONTROL} section (@pxref{ESMTP Authentication Settings,
+esmtp-auth-delayed}).  Changes in the settings take effect if they
+occur either before the @samp{MAIL} @acronym{SMTP} command, or while
+handling this command.  
+
+Consider, for example, the following configuration:
+
+@smallexample
+BEGIN CONTROL
+ mode transparent
+ bind 25
+ remote-mta mail.example.com
+ esmtp-auth-delayed yes
+END
+
+BEGIN SMTP
+if command ["mail from:"] "<smith(\+.*)?@@example.net>"
+  esmtp-auth-id smith
+  esmtp-password guessme
+else
+  esmtp-auth no
+fi
+END
+@end smallexample
+
+It delays ESMTP authentication until the receipt of the @code{MAIL}
+command from the client. Authentication is used only if the mail
+is being sent from @email{smith@@example.net} or any additional mailbox
+of that user (e.g. @email{smith+mbox@@example.net}). Otherwise,
+authentication is disabled.
 
 The following points are worth mentioning:
 
@@ -2458,10 +2505,10 @@ It is because by the time @samp{MAIL FROM} is received, the
 the server.
 @end enumerate
 
-The final point to notice is that you may use another than the
-default name for that section (if you really want to). To do
-so, define the new name via the @samp{smtp-command-rule} option in the
-@samp{CONTROL} section (@pxref{Basic Settings,,smtp-command-rule}).
+The final point to notice is that you may use an alternative name for
+that section (if you really want to). To do so, define the new name
+via the @samp{smtp-command-rule} option in the @samp{CONTROL} section
+(@pxref{Basic Settings,,smtp-command-rule}).
 
 @node Inserting Files
 @subsection Inserting Files
