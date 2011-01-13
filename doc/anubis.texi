@@ -1870,7 +1870,7 @@ syntax is:
 
 @smallexample
 if @var{condition}
-  @var{action-list-1}
+  @var{action-list-1}  
 else
   @var{action-list-2}
 fi
@@ -1901,6 +1901,37 @@ The effect of this statement is: depending on the value of
 @code{List-Id} header, prepend the @code{Subject} header with an
 identification string, or add an @code{X-Passed} header if no known
 @code{List-Id} was found.
+
+To simplify writing such nested conditional statements, the
+@samp{elif} keyword is provided:
+
+@smallexample
+if @var{condition-1}
+  @var{action-list-1}
+elif @var{condition-2}  
+  @var{action-list-2}
+else
+  @var{action-list-3}
+fi
+@end smallexample
+
+This statement is equivalent to:
+
+@smallexample
+if @var{condition}
+  @var{action-list-1}
+else
+  if @var{condition-2}  
+    @var{action-list-2}
+  else
+    @var{action-list-3}
+  fi
+fi
+@end smallexample
+
+Any number of @samp{elif} branches may appear in a conditional
+statement, the only requirement being that they appear before
+the @samp{else} statement, if it is used.
 
 @menu
 * Concatenations::

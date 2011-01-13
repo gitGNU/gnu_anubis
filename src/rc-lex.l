@@ -128,6 +128,7 @@ END |
 [iI][fF]                     return IF;
 [fF][iI]                     return FI;
 [eE][lL][sS][eE]             return ELSE;
+[eE][lL][iI][fF]             return ELIF;
 [rR][uU][lL][eE]             return RULE;
 [tT][rR][iI][gG][gG][eE][rR] return RULE;
 [dD][oO][nN][eE]             return DONE;

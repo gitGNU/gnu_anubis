@@ -129,7 +129,7 @@ static struct rc_secdef *rc_secdef;
 };
 
 %token EOL T_BEGIN T_END AND OR NE
-%token IF FI ELSE RULE DONE
+%token IF FI ELSE ELIF RULE DONE
 %token CALL STOP ADD REMOVE MODIFY
 %token <string> IDENT STRING REGEX D_BEGIN
 %token <num> T_MSGPART
@@ -141,7 +141,7 @@ static struct rc_secdef *rc_secdef;
 %type <string> keyword string modifier arg string_key opt_sep
 %type <section> section seclist
 %type <stmtlist> stmtlist
-%type <stmt> stmt asgn_stmt cond_stmt rule_stmt inst_stmt modf_stmt
+%type <stmt> stmt asgn_stmt cond_stmt else_cond rule_stmt inst_stmt modf_stmt
 %type <num> modlist opt_modlist
 %type <node> rule_start cond expr
 %type <msgpart> msgpart s_msgpart r_msgpart key opt_key
@@ -303,21 +303,31 @@ arglist  : arg
 arg      : string
          ;
 
-cond_stmt: if cond stmtlist fi
+cond_stmt: if cond stmtlist else_cond FI
            {
 	     $$ = rc_stmt_create (rc_stmt_cond, &@1.beg);
 	     $$->v.cond.node = $2;
 	     $$->v.cond.iftrue = $3.head;
-	     $$->v.cond.iffalse = NULL;
-	   }
-         | if cond stmtlist else stmtlist fi
-           {
-	     $$ = rc_stmt_create (rc_stmt_cond, &@1.beg);
-	     $$->v.cond.node = $2;
-	     $$->v.cond.iftrue = $3.head;
-	     $$->v.cond.iffalse = $5.head;
+	     $$->v.cond.iffalse = $4;
 	   }
 	 ;
+
+else_cond: /* empty */
+           {
+	     $$ = NULL;
+	   }
+         | ELIF cond stmtlist else_cond
+	   {
+	     $$ = rc_stmt_create (rc_stmt_cond, &@1.beg);
+	     $$->v.cond.node = $2;
+	     $$->v.cond.iftrue = $3.head;
+	     $$->v.cond.iffalse = $4;
+	   }
+         | ELSE stmtlist
+	   {
+	     $$ = $2.head;
+	   }
+         ;
 
 cond     : expr
          | '(' cond ')'
@@ -497,12 +507,6 @@ if       : IF
 	     if (!is_prog_allowed (&@1.beg))
 	       YYERROR;
 	   }
-         ;
-
-fi       : FI
-         ;
- 
-else     : ELSE 
          ;
 
 rule_stmt: rule_start EOL stmtlist DONE
