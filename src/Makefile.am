@@ -100,7 +100,7 @@ BUILT_SOURCES = env.c
 
 localedir = $(datadir)/locale
 DEFS = @DEFS@ -DLOCALEDIR=\"$(localedir)\"
-INCLUDES = @ADD_INCLUDES@ @LIBGNUTLS_INCLUDES@ -I$(top_srcdir)/lib
+AM_CPPFLAGS = @ADD_INCLUDES@ @LIBGNUTLS_INCLUDES@ -I$(top_srcdir)/lib
 SUFFIXES=.opt .c
 
 .opt.c:
