@@ -293,13 +293,16 @@ start_ssl_server (NET_STREAM sd_client, const char *cafile, const char *cert,
 static void
 verify_certificate (gnutls_session session)
 {
-  int status = gnutls_certificate_verify_peers (session);
+  int status, rc;
 
-  if (status == GNUTLS_E_NO_CERTIFICATE_FOUND)
+  rc = gnutls_certificate_verify_peers2 (session, status);
+  if (rc)
     {
-      info (VERBOSE, _("No certificate was sent."));
+      info (VERBOSE, "gnutls_certificate_verify_peers2: %s",
+	    gnutls_strerror (rc));
       return;
     }
+
   if (status & GNUTLS_CERT_INVALID || status & GNUTLS_CERT_REVOKED)
     {
       info (VERBOSE, _("The certificate is not trusted."));

@@ -99,7 +99,6 @@ build_aux=build-aux
 # Extra files from gnulib, which override files from other sources.
 gnulib_extra_files="
 	$build_aux/install-sh
-	$build_aux/missing
 	$build_aux/mdate-sh
 	$build_aux/texinfo.tex
 	$build_aux/depcomp

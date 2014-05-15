@@ -1,5 +1,4 @@
-dnl
-dnl configure.ac
+dnl configure.ac -*- autoconf-*-
 dnl
 dnl This file is part of GNU Anubis.
 dnl Copyright (C) 2001,2002,2003,2004,2005,2006,2007,2008,2009,
@@ -117,6 +116,7 @@ if test "$with_gpgme" = "no"; then
 else
  AM_PATH_GPGME([1.0.0], with_gpgme=yes, with_gpgme=no)
  AC_CHECK_LIB(gpgme, main,, with_gpgme=no)
+ LIBS="$LIBS -lgpg-error"
 fi
 if test "$with_gpgme" = "no"; then
  AC_MSG_RESULT([Disabling GPGME support...])
