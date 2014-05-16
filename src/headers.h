@@ -514,9 +514,8 @@ int check_socks_proxy (int, char *, unsigned int);
 /* tls.c */
 #ifdef USE_SSL
 void init_ssl_libs (void);
-NET_STREAM start_ssl_client (NET_STREAM str, const char *cafile, int verbose);
-NET_STREAM start_ssl_server (NET_STREAM str, const char *cafile,
-			     const char *cert, const char *key, int verbose);
+NET_STREAM start_ssl_client (NET_STREAM str, int verbose);
+NET_STREAM start_ssl_server (NET_STREAM str, int verbose);
 #endif /* USE_SSL */
 
 /* gpg.c */

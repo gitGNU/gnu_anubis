@@ -25,14 +25,14 @@
 #include "headers.h"
 #include "extern.h"
 
-static gnutls_session initialize_tls_session (void);
+static gnutls_session_t initialize_tls_session (void);
 static void generate_dh_params (void);
-static void verify_certificate (gnutls_session);
-static void print_x509_certificate_info (gnutls_session);
-static int cipher_info (gnutls_session);
+static void verify_certificate (gnutls_session_t);
+static void print_x509_certificate_info (gnutls_session_t);
+static int cipher_info (gnutls_session_t);
 
 #define DH_BITS 768
-gnutls_dh_params dh_params;
+gnutls_dh_params_t dh_params;
 
 static gnutls_certificate_client_credentials xcred;
 static gnutls_certificate_server_credentials x509_cred;
@@ -105,7 +105,7 @@ _tls_cleanup_x509 ()
 }
 
 static ssize_t
-_tls_fd_pull (gnutls_transport_ptr fd, void *buf, size_t size)
+_tls_fd_pull (gnutls_transport_ptr_t fd, void *buf, size_t size)
 {
   NET_STREAM stream = fd;
   int rc;
@@ -122,7 +122,7 @@ _tls_fd_pull (gnutls_transport_ptr fd, void *buf, size_t size)
 }
 
 static ssize_t
-_tls_fd_push (gnutls_transport_ptr fd, const void *buf, size_t size)
+_tls_fd_push (gnutls_transport_ptr_t fd, const void *buf, size_t size)
 {
   NET_STREAM stream = fd;
 
@@ -145,40 +145,35 @@ init_ssl_libs (void)
   atexit (gnutls_global_deinit);
 }
 
+static char *default_priority_string = "NORMAL";
+
 NET_STREAM
-start_ssl_client (NET_STREAM sd_server, const char *cafile, int verbose)
+start_ssl_client (NET_STREAM sd_server, int verbose)
 {
   NET_STREAM stream;
   int rs;
-  gnutls_session session = 0;
-  const int protocol_priority[] = { GNUTLS_TLS1, GNUTLS_SSL3, 0 };
-  const int kx_priority[] = { GNUTLS_KX_RSA, 0 };
-  const int cipher_priority[] = { GNUTLS_CIPHER_3DES_CBC,
-    GNUTLS_CIPHER_ARCFOUR_128,
-    0
-  };
-  const int comp_priority[] = { GNUTLS_COMP_NULL, 0 };
-  const int mac_priority[] = { GNUTLS_MAC_SHA, GNUTLS_MAC_MD5, 0 };
+  gnutls_session_t session = 0;
 
-  info (VERBOSE, _("Initializing the TLS/SSL connection with MTA..."));
+  info (VERBOSE, _("Initializing TLS/SSL connection with MTA..."));
 
   gnutls_init (&session, GNUTLS_CLIENT);
-  gnutls_protocol_set_priority (session, protocol_priority);
-  gnutls_cipher_set_priority (session, cipher_priority);
-  gnutls_compression_set_priority (session, comp_priority);
-  gnutls_kx_set_priority (session, kx_priority);
-  gnutls_mac_set_priority (session, mac_priority);
+  gnutls_priority_set_direct (session,
+			      secure.prio
+			        ? secure.prio
+			        : default_priority_string,
+			      NULL);
+  
 
   gnutls_certificate_allocate_credentials (&xcred);
-  if (cafile)
+  if (secure.cafile)
     {
       rs = gnutls_certificate_set_x509_trust_file (xcred,
-						   cafile,
+						   secure.cafile,
 						   GNUTLS_X509_FMT_PEM);
       if (rs < 0)
 	{
 	  anubis_error (0, 0, _("TLS error reading `%s': %s"),
-			cafile, gnutls_strerror (rs));
+			secure.cafile, gnutls_strerror (rs));
 	  return 0;
 	}
     }
@@ -188,7 +183,7 @@ start_ssl_client (NET_STREAM sd_server, const char *cafile, int verbose)
 
   gnutls_transport_set_pull_function (session, _tls_fd_pull);
   gnutls_transport_set_push_function (session, _tls_fd_push);
-  gnutls_transport_set_ptr (session, (gnutls_transport_ptr) sd_server);
+  gnutls_transport_set_ptr (session, (gnutls_transport_ptr_t) sd_server);
 
   rs = gnutls_handshake (session);
   if (rs < 0)
@@ -199,7 +194,7 @@ start_ssl_client (NET_STREAM sd_server, const char *cafile, int verbose)
       return NULL;
     }
 
-  if (cafile)
+  if (secure.cafile)
     verify_certificate (session);
   if (verbose)
     cipher_info (session);
@@ -222,10 +217,10 @@ generate_dh_params (void)
   gnutls_dh_params_generate2 (dh_params, DH_BITS);
 }
 
-static gnutls_session
+static gnutls_session_t
 initialize_tls_session (void)
 {
-  gnutls_session session = 0;
+  gnutls_session_t session = 0;
 
   gnutls_init (&session, GNUTLS_SERVER);
   gnutls_set_default_priority (session);
@@ -233,35 +228,35 @@ initialize_tls_session (void)
   gnutls_certificate_server_set_request (session, GNUTLS_CERT_REQUEST);
   gnutls_dh_set_prime_bits (session, DH_BITS);
 
-  return (gnutls_session) session;
+  return (gnutls_session_t) session;
 }
 
 NET_STREAM
-start_ssl_server (NET_STREAM sd_client, const char *cafile, const char *cert,
-		  const char *key, int verbose)
+start_ssl_server (NET_STREAM sd_client, int verbose)
 {
   NET_STREAM stream;
   int rs;
-  gnutls_session session = 0;
+  gnutls_session_t session = 0;
 
   info (VERBOSE, _("Initializing the TLS/SSL connection with MUA..."));
 
   gnutls_certificate_allocate_credentials (&x509_cred);
   atexit (_tls_cleanup_x509);
-  if (cafile)
+  if (secure.cafile)
     {
       rs = gnutls_certificate_set_x509_trust_file (x509_cred,
-						   cafile,
+						   secure.cafile,
 						   GNUTLS_X509_FMT_PEM);
       if (rs < 0)
 	{
 	  anubis_error (0, 0, _("TLS error reading `%s': %s"),
-			cafile, gnutls_strerror (rs));
+			secure.cafile, gnutls_strerror (rs));
 	  return 0;
 	}
     }
   gnutls_certificate_set_x509_key_file (x509_cred,
-					cert, key, GNUTLS_X509_FMT_PEM);
+					secure.cert, secure.key,
+					GNUTLS_X509_FMT_PEM);
 
   generate_dh_params ();
   gnutls_certificate_set_dh_params (x509_cred, dh_params);
@@ -271,7 +266,7 @@ start_ssl_server (NET_STREAM sd_client, const char *cafile, const char *cert,
   gnutls_transport_set_pull_function (session, _tls_fd_pull);
   gnutls_transport_set_push_function (session, _tls_fd_push);
 
-  gnutls_transport_set_ptr (session, (gnutls_transport_ptr) sd_client);
+  gnutls_transport_set_ptr (session, (gnutls_transport_ptr_t) sd_client);
   rs = gnutls_handshake (session);
   if (rs < 0)
     {
@@ -291,11 +286,11 @@ start_ssl_server (NET_STREAM sd_client, const char *cafile, const char *cert,
 }
 
 static void
-verify_certificate (gnutls_session session)
+verify_certificate (gnutls_session_t session)
 {
   int status, rc;
 
-  rc = gnutls_certificate_verify_peers2 (session, status);
+  rc = gnutls_certificate_verify_peers2 (session, &status);
   if (rc)
     {
       info (VERBOSE, "gnutls_certificate_verify_peers2: %s",
@@ -320,7 +315,7 @@ verify_certificate (gnutls_session session)
     }
   if (gnutls_certificate_type_get (session) == GNUTLS_CRT_X509)
     {
-      const gnutls_datum *cert_list;
+      const gnutls_datum_t *cert_list;
       unsigned int cert_list_size;
       cert_list = gnutls_certificate_get_peers (session, &cert_list_size);
       if (cert_list == 0)
@@ -343,11 +338,11 @@ verify_certificate (gnutls_session session)
 	PRINTX( "E:", X.email)
 
 static int
-cipher_info (gnutls_session session)
+cipher_info (gnutls_session_t session)
 {
   const char *tmp;
-  gnutls_credentials_type cred;
-  gnutls_kx_algorithm kx;
+  gnutls_credentials_type_t cred;
+  gnutls_kx_algorithm_t kx;
   int bits;
 
   kx = gnutls_kx_get (session);
@@ -399,7 +394,7 @@ cipher_info (gnutls_session session)
 }
 
 static void
-print_x509_certificate_info (gnutls_session session)
+print_x509_certificate_info (gnutls_session_t session)
 {
   char dn[128];
   char digest[20];
@@ -412,8 +407,8 @@ print_x509_certificate_info (gnutls_session session)
   unsigned i;
   unsigned bits;
   unsigned cert_list_size = 0;
-  const gnutls_datum *cert_list;
-  gnutls_x509_crt cert;
+  const gnutls_datum_t *cert_list;
+  gnutls_x509_crt_t cert;
 
   cert_list = gnutls_certificate_get_peers (session, &cert_list_size);
 

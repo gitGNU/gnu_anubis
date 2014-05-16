@@ -502,9 +502,7 @@ handle_starttls (char *command)
 	}
       smtp_reply_free (reply);
 
-      stream = start_ssl_client (remote_server,
-				 secure.cafile,
-				 options.termlevel > NORMAL);
+      stream = start_ssl_client (remote_server, options.termlevel > NORMAL);
       if (!stream)
 	return 0;
       remote_server = stream;
@@ -542,10 +540,7 @@ handle_starttls (char *command)
     check_filemode (secure.key);
 
   swrite (SERVER, remote_client, "220 2.0.0 Ready to start TLS" CRLF);
-  stream = start_ssl_server (remote_client,
-			     secure.cafile,
-			     secure.cert,
-			     secure.key, options.termlevel > NORMAL);
+  stream = start_ssl_server (remote_client, options.termlevel > NORMAL);
   if (!stream)
     {
       swrite (SERVER, remote_client, "454 4.3.3 TLS not available" CRLF);
@@ -645,9 +640,7 @@ handle_ehlo (ANUBIS_SMTP_REPLY reply)
 	}
       smtp_reply_free (newreply);
 
-      stream = start_ssl_client (remote_server,
-				 secure.cafile,
-				 options.termlevel > NORMAL);
+      stream = start_ssl_client (remote_server, options.termlevel > NORMAL);
       if (!stream)
 	{
 	  topt &= ~T_SSL_ONEWAY;

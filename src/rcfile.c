@@ -764,6 +764,7 @@ static struct rc_secdef_child control_sect_child = {
 #define KW_SSL_CERT            3
 #define KW_SSL_KEY             4
 #define KW_SSL_CAFILE          5
+#define KW_SSL_PRIORITIES      6
 
 void
 tls_parser (EVAL_ENV env, int key, ANUBIS_LIST arglist, void *inv_data)
@@ -795,6 +796,11 @@ tls_parser (EVAL_ENV env, int key, ANUBIS_LIST arglist, void *inv_data)
       xfree (secure.cafile);
       secure.cafile = xstrdup (arg);
       break;
+
+    case KW_SSL_PRIORITIES:
+      xfree (secure.prio);
+      secure.prio = xstrdup (arg);
+      break;
       
     default:
       eval_error (2, env,
@@ -806,11 +812,12 @@ tls_parser (EVAL_ENV env, int key, ANUBIS_LIST arglist, void *inv_data)
 }
 
 static struct rc_kwdef tls_kw[] = {
-  { "ssl",        KW_SSL },
-  { "ssl-oneway", KW_SSL_ONEWAY },
-  { "ssl-cert",   KW_SSL_CERT },
-  { "ssl-key",    KW_SSL_KEY },
-  { "ssl-cafile", KW_SSL_CAFILE },
+  { "ssl",            KW_SSL },
+  { "ssl-oneway",     KW_SSL_ONEWAY },
+  { "ssl-cert",       KW_SSL_CERT },
+  { "ssl-key",        KW_SSL_KEY },
+  { "ssl-cafile",     KW_SSL_CAFILE },
+  { "ssl-priorities", KW_SSL_PRIORITIES },
   { NULL }
 };
 

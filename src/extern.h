@@ -62,6 +62,7 @@ struct session_struct
 #ifdef USE_SSL
 struct secure_struct
 {
+  char *prio;
   char *cafile;
   char *cert;
   char *key;

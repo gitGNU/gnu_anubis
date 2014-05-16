@@ -1573,6 +1573,14 @@ this option does not require setting the @samp{ssl-key} and
 @samp{ssl-cert} options. 
 @end deffn
 
+@deffn Option ssl-priorities @var{list}
+Sets cipher suite preferences to use.  The @var{list} argument may
+contain a single initial keyword or be a colon-separated list of TLS
+keywords.  The description of TLS keywords is well beyond the scope of
+this document.  Please refer to @ref{Priority Strings,Priority
+Strings,,gnutls,GnuTLS Manual}, for a detailed discussion.
+@end deffn
+
 @deffn Option ssl-cert @var{file-name}
 Specify the certificate for the @acronym{TLS/SSL} encryption.
 
