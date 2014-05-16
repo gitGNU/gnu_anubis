@@ -1,6 +1,6 @@
 dnl
 dnl This file is part of GNU Anubis.
-dnl Copyright (C) 2001, 2002, 2003, 2004, 2007 The Anubis Team.
+dnl Copyright (C) 2001-2014 The Anubis Team.
 dnl
 dnl GNU Anubis is free software; you can redistribute it and/or modify it
 dnl under the terms of the GNU General Public License as published by the

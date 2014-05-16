@@ -1,7 +1,7 @@
 /*
    anubisusr.h
    
-   Copyright (C) 2004, 2005, 2007, 2008 The Anubis Team.
+   Copyright (C) 2004-2014 The Anubis Team.
 
    GNU Anubis is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
