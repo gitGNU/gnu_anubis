@@ -33,7 +33,7 @@ OPTION(tls-cafile,C,FILE,
        Use given CA file.)
 BEGIN
 #ifdef HAVE_TLS
-       tls_cafile = optarg;
+       secure.cafile = optarg;
 #endif
 END
 

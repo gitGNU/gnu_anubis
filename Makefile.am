@@ -22,6 +22,15 @@ ACLOCAL_AMFLAGS = -I m4 -I am -I gint
 SUBDIRS = build lib gint src po doc scripts examples guile contrib \
 	  elisp testsuite
 
+AM_DISTCHECK_CONFIGURE_FLAGS =\
+ --with-gsasl\
+ --with-mysql\
+ --with-postgres\
+ --with-pam\
+ --with-tcp-wrappers\
+ --with-socks-proxy\
+ --with-pcre
+
 .PHONY: make-ChangeLog
 make-ChangeLog:
 	if test -d .git; then                                           \

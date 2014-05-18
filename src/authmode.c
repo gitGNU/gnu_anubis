@@ -354,11 +354,7 @@ asmtp_ehlo (enum asmtp_state state, ANUBIS_USER * usr)
 	  }
 
 	asmtp_reply (220, "Ready to start TLS");
-	stream = start_ssl_server (remote_client,
-				   secure.cafile,
-				   secure.cert,
-				   secure.key,
-				   options.termlevel > NORMAL);
+	stream = start_ssl_server (remote_client, options.termlevel > NORMAL);
 	if (!stream)
 	  {
 	    asmtp_reply (454, "TLS not available" CRLF);

@@ -442,20 +442,16 @@ _gpg_funcall (char **output, char *input, void *param)
 void
 gpg_proc (MESSAGE msg, char *(*fun) (char *input))
 {
-#if defined(HAVE_SETENV) || defined(HAVE_PUTENV)
   char homedir_s[MAXPATHLEN + 1];	/* SUPERVISOR */
   char homedir_c[MAXPATHLEN + 1];	/* CLIENT */
 
   get_homedir (session.supervisor, homedir_s, sizeof (homedir_s));
   get_homedir (session.clientname, homedir_c, sizeof (homedir_c));
   setenv ("HOME", homedir_c, 1);
-#endif /* HAVE_SETENV or HAVE_PUTENV */
 
   message_proc_body (msg, _gpg_funcall, fun);
 
-#if defined(HAVE_SETENV) || defined(HAVE_PUTENV)
   setenv ("HOME", homedir_s, 1);
-#endif /* HAVE_SETENV or HAVE_PUTENV */
 }
 
 void

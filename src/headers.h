@@ -323,11 +323,6 @@ int stream_destroy (NET_STREAM *);
 /* main.c */
 void anubis (char *);
 
-/* setenv.c */
-#if !defined(HAVE_SETENV) && defined(HAVE_PUTENV)
-int setenv (const char *, const char *, int);
-#endif
-
 /* env.c */
 void get_options (int, char *[]);
 void get_homedir (char *, char *, int);

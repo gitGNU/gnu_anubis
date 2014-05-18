@@ -20,7 +20,7 @@
 #include <anubisusr.h>
 
 #ifdef USE_GNUTLS
-char *tls_cafile;
+struct secure_struct secure;
 int enable_tls = 1;
 #endif /* USE_GNUTLS */
 
@@ -107,7 +107,7 @@ starttls (void)
       exit (1);
     }
   smtp_reply_free (reply);
-  iostream = start_ssl_client (iostream, tls_cafile, verbose > 2);
+  iostream = start_ssl_client (iostream, verbose > 2);
   if (!iostream)
     {
       error (_("TLS negotiation failed"));

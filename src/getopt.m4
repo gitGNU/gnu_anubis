@@ -452,7 +452,7 @@ print_usage(void)
 const char version_etc_copyright[] =
   /* Do *not* mark this string for translation.  %s is a copyright
      symbol suitable for this locale. */
-  "Copyright %s 2001, 2002, 2003, 2004, 2005, 2007, 2008 The Anubis Team.";
+  "Copyright %s 2001-2014 The Anubis Team.";
 
 void
 print_version_only(const char *program_version, FILE *stream)

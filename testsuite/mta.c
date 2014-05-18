@@ -83,7 +83,7 @@ char *tls_cafile;
 #define enable_tls() (tls_cafile != NULL || (tls_cert != NULL && tls_key != NULL))
 void tls_init (void);
 
-gnutls_dh_params dh_params;
+gnutls_dh_params_t dh_params;
 static gnutls_certificate_server_credentials x509_cred;
 #endif /* USE_GNUTLS */
 
@@ -297,7 +297,7 @@ tls_init (void)
 }
 
 static ssize_t
-_tls_fd_pull (gnutls_transport_ptr fd, void *buf, size_t size)
+_tls_fd_pull (gnutls_transport_ptr_t fd, void *buf, size_t size)
 {
   int rc;
   do
@@ -309,7 +309,7 @@ _tls_fd_pull (gnutls_transport_ptr fd, void *buf, size_t size)
 }
 
 static ssize_t
-_tls_fd_push (gnutls_transport_ptr fd, const void *buf, size_t size)
+_tls_fd_push (gnutls_transport_ptr_t fd, const void *buf, size_t size)
 {
   int rc;
   do
@@ -367,10 +367,10 @@ _tls_close (void *sd)
   return 0;
 }
 
-static gnutls_session
+static gnutls_session_t
 tls_session_init (void)
 {
-  gnutls_session session = 0;
+  gnutls_session_t session = 0;
   int rc;
 
   gnutls_init (&session, GNUTLS_SERVER);
@@ -383,8 +383,8 @@ tls_session_init (void)
   gnutls_transport_set_push_function (session, _tls_fd_push);
 
   gnutls_transport_set_ptr2 (session,
-			     (gnutls_transport_ptr) in,
-			     (gnutls_transport_ptr) out);
+			     (gnutls_transport_ptr_t) in,
+			     (gnutls_transport_ptr_t) out);
   rc = gnutls_handshake (session);
   if (rc < 0)
     {
@@ -393,13 +393,13 @@ tls_session_init (void)
       return 0;
     }
 
-  return (gnutls_session) session;
+  return session;
 }
 
 void
 smtp_starttls (void)
 {
-  gnutls_session session;
+  gnutls_session_t session;
 
   smtp_reply (220, "Ready to start TLS");
 

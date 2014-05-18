@@ -31,7 +31,7 @@
 #include "rcfile.h"
 
 extern int yylex (void);
-int yyerror (char *s);
+int yyerror (const char *s);
 
 static RC_SECTION *rc_section_create (char *, RC_LOC *, RC_STMT *);
 static void rc_section_destroy (RC_SECTION **);
@@ -678,7 +678,7 @@ parse_error (struct rc_loc *loc, const char *fmt, ...)
 }
 
 int
-yyerror (char *s)
+yyerror (const char *s)
 {
   parse_error (NULL, "%s", s);
   return 0;
