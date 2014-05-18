@@ -37,6 +37,13 @@ BEGIN
 #endif
 END
 
+OPTION(tls-priorities,,PRIO,Set TLS priorities)
+BEGIN
+#ifdef HAVE_TLS
+       secure.prio = optarg;
+#endif
+END
+
 OPTION(file,f,FILE,
        Set user configuration file name.)
 BEGIN

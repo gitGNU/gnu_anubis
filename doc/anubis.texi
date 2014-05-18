@@ -609,45 +609,75 @@ given by @acronym{URL} parameters. All of them have reasonable
 default values, so you'll have to specify only those parameters that
 differ from the default. The following parameters are defined:
 
-@table @var
-@item @var{port}=@var{number}
+@table @option
+@item port=@var{number}
 Specifies port number the database server is listening on.
-If it is not given, the behavior depends on the value of
-@var{socket} parameter (see below). If @var{socket} is not present, the
+If it is not given, the behavior depends on the value of the
+@option{socket} parameter (see below). If @option{socket} is not present, the
 program will use the default port number for the given protocol
 (i.e. 3306 for @samp{mysql} and 5432 for @samp{pgsql}.
 
-@item @var{socket}=@var{string}
+@item socket=@var{string}
 Specifies the UNIX file name of the socket to connect to. This
-parameter cannot be used together with @var{port} (see above).
+parameter cannot be used together with @option{port} (see above).
 
-@item @var{bufsize}=@var{number}
+@item bufsize=@var{number}
 Sets length of the buffer for storing SQL queries. Default is
 1024 bytes.
 
-@item @var{table}=@var{string}
+@item table=@var{string}
 Specifies name of the database table with the authentication
 data. Default is @samp{users}.
 
-@item @var{authid}=@var{string}
-Specifies the name of a column in @var{table} which holds 
+@item authid=@var{string}
+Specifies the name of a column in @option{table} which holds 
 @samp{AUTHID} value. Default is @samp{authid}.
 
-@item @var{passwd}=@var{string}
-Specifies the name of a column in @var{table} which holds 
+@item passwd=@var{string}
+Specifies the name of a column in @option{table} which holds 
 the user password. Default is @samp{passwd}.
 
-@item @var{account}=@var{string}
-Specifies the name of a column in @var{table} which holds
+@item account=@var{string}
+Specifies the name of a column in @option{table} which holds
 the name of system account to be used for this @samp{AUTHID}. Default
 is @samp{account}.
 
-@item @var{rcfile}=@var{string}
-Specifies the name of a column in @var{table} which holds
+@item rcfile=@var{string}
+Specifies the name of a column in @option{table} which holds
 the path to the user's configuration file. Default is @samp{rcfile}.
 
 @FIXME{An example, please.}
+@end table
 
+@cindex options file, MySQL
+@findex my.cnf
+@findex /etc/my.cnf
+When using a MySQL database (@samp{mysql://}), database parameters and
+access credentials are first read from the file @file{/etc/my.cnf}, if
+it exists.  This file called @dfn{option file} in @samp{MySQL} parlance
+@ifhtml
+(see @uref{http://dev.mysql.com/doc/refman/5.0/en/option-files.html,
+option files}).
+@end ifhtml
+@ifnothtml
+(@pxref{option-files, Using Option Files,,mysql,MySQL Manual})
+@end ifnothtml
+is organized in groups, each group beginning with the group name in
+square brackets on a separate line.  Within a group, each non-empty
+line consists of a MySQL option name, optionally followed by an equal
+sign and the value.  By default, the values from the @samp{anubis}
+group are read.
+
+Two additional parameters are provided to fine-tune this behavior:
+
+@table @option
+@item options-file=@var{file}
+Read options from @var{file} instead of @file{/etc/my.cnf}.  An
+empty value (@samp{options-file=}), disables using the options file.
+
+@item options-group=@var{name}
+Set the name of the group in the MySQL configuration file, from
+which to read configuration options.     
 @end table
 
 @node Managing the Database
@@ -953,11 +983,46 @@ found, it will prompt you to supply them.
 Use the SASL mechanism @var{mech}. Give this option several times
 to set a list of allowed mechanisms.
 
+@item --file=@var{file}
+@itemx -f @var{file}
+Sets the user configuration file name (default is @file{.anubisrc}).
+
+@item --netrc+@var{file}
+@itemx -n @var{file}
+Sets the name of the automatic login configuration file (default is
+@file{.netrc}).
+
 @item -v
 @itemx --verbose
 Verbose output. Multiple options increase verbosity. Maximum verbosity
 level is 3.
+@end table
 
+Options controlling encryption:
+  
+@table @option  
+@item --disable-tls
+@itemx -d
+Disable the use of TLS encryption.
+
+@item --tls-cafile=@var{file}
+@itemx -C @var{file}
+Sets the name of certificate authority file to use when verifying the
+server certificate.
+
+@item --tls-priorities=@var{list}
+Sets cipher suite preferences to use.  The @var{list} argument may
+contain a single initial keyword or be a colon-separated list of TLS
+keywords.  The description of TLS keywords is well beyond the scope of
+this document.  Please refer to @ref{Priority Strings,Priority
+Strings,,gnutls,GnuTLS Manual}, for a detailed discussion.
+
+Default priority list is @samp{NORMAL}.
+@end table
+  
+Informational options:  
+
+@table @option
 @item --version
 Display program version number and exit.
 
@@ -1579,6 +1644,8 @@ contain a single initial keyword or be a colon-separated list of TLS
 keywords.  The description of TLS keywords is well beyond the scope of
 this document.  Please refer to @ref{Priority Strings,Priority
 Strings,,gnutls,GnuTLS Manual}, for a detailed discussion.
+
+Default priority list is @samp{NORMAL}.
 @end deffn
 
 @deffn Option ssl-cert @var{file-name}

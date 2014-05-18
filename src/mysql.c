@@ -123,8 +123,8 @@ mysql_db_open (void **dp, ANUBIS_URL * url, enum anubis_db_mode mode,
   const char *passwd = anubis_url_get_arg (url, "passwd");
   const char *user = anubis_url_get_arg (url, "account");
   const char *rcfile = anubis_url_get_arg (url, "rcfile");
-  const char *portstr = anubis_url_get_arg (url, "port");
-  const char *s = anubis_url_get_arg (url, "bufsize");
+  const char *s;
+  char *optfile;
   int port = 0;
   size_t bufsize = 1024;
   struct mysql_db_data *mdata;
@@ -141,6 +141,7 @@ mysql_db_open (void **dp, ANUBIS_URL * url, enum anubis_db_mode mode,
   if (!rcfile)
     rcfile = "rcfile";
 
+  s = anubis_url_get_arg (url, "bufsize");
   if (s)
     {
       char *p;
@@ -152,10 +153,11 @@ mysql_db_open (void **dp, ANUBIS_URL * url, enum anubis_db_mode mode,
 	}
     }
 
-  if (portstr)
+  s = anubis_url_get_arg (url, "port");
+  if (s)
     {
       char *p;
-      port = strtoul (portstr, &p, 10);
+      port = strtoul (s, &p, 10);
       if (*p)
 	{
 	  *errp = sql_open_error_text (ERR_BADPORT);
@@ -169,6 +171,19 @@ mysql_db_open (void **dp, ANUBIS_URL * url, enum anubis_db_mode mode,
   mdata = xmalloc (sizeof (*mdata));
   amp->data = mdata;
   mysql_init (&mdata->mysql);
+
+  s = anubis_url_get_arg (url, "options-file");
+  if (!s) {
+	  if (access ("/etc/my.cnf", F_OK) == 0)
+		  s = "/etc/my.cnf";
+  }
+  
+  if (s && *s) {
+	  mysql_options (&mdata->mysql, MYSQL_READ_DEFAULT_FILE, s);
+	  mysql_options(&mdata->mysql, MYSQL_READ_DEFAULT_GROUP,
+			s ? s : "anubis");
+  }
+  
   if (!mysql_real_connect (&mdata->mysql,
 			   url->host, url->user, url->passwd,
 			   url->path, port,
