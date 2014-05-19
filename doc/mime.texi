@@ -25,7 +25,7 @@ the rest of message is usually passed to the MTA verbatim. Thus, this
 part can be processed by the user program only if it is in plain text:
 parts encoded by quoted-printable or, worse yet, base-64 encoding
 cannot be processed this way. The only way for the user to process
-non plain-text multi-part messages is by using some extension procedures
+non-plaintext multi-part messages is by using some extension procedures
 (usually external scripts).
 
 A special configuration setting @code{read-entire-body} (@pxref{Basic
@@ -73,7 +73,7 @@ This brings following implications:
 will handle recursive descent to the messages of determined MIME type.
 At least messages having @code{multipart/*} and @code{message/rfc822}
 contents must be handled. These entries must be configurable, thus
-giving final user a possibility to disable some of any of
+giving final user a possibility to disable some of
 them. Preferably there should exist a way of specifying new recursive
 types as well. 
 
@@ -87,11 +87,11 @@ The structure of MIME dispatcher table should allow for flexible
 search of user program entries depending on MIME type of the
 part being processed. It is important also that it allows for
 a @dfn{default entry}, i.e. an entry that will be used for processing
-a part whose type is not explicitely mentioned in the table. An
+a part whose type is not explicitely mentioned in the table. The
 absence of such default entry should be taken as indication that the
 part must be transferred verbatim.
 
-Thus, each entry of the dispatcher table must contain at least
+Thus, each entry of the dispatcher table must contain at least the
 following members.
 
 @table @code
@@ -99,7 +99,7 @@ following members.
 Specifies regular expressions describing MIME type this entry handles.
 For the sake of clarity this memo uses shell-style regular expressions
 (see @code{glob(7)} or @code{fnmatch(3)}). However, Anubis
-implementation may use any other regular expression style it deems
+implementation can use any other regular expression style it deems
 appropriate.
 
 @item entry point
@@ -112,7 +112,7 @@ procession of message parts, or, finally, it is a code index of
 a user-defined rule section.
 @end table
 
-Dispatcher table may contain several entries matching a given
+The dispatcher table can contain several entries matching a given
 MIME type. In this case, the @code{entry point} of each of them
 must be invoked in turn. For example, consider this dispatcher table:
 
@@ -124,9 +124,10 @@ must be invoked in turn. For example, consider this dispatcher table:
 
 @noindent
 When processing a part of type @code{text/plain} using this dispatcher
-table, first section named @code{plaintext} is called, then its output is
-gathered and used as input while calling section named @code{anytext}.
-Such approach allows for building flexible structured user programs.
+table, first the section named @code{plaintext} is called, then
+its output is gathered and used as input for the section named
+@code{anytext}. Such approach allows for building flexible structured
+user programs.
 
 @item CONFIGURATION ENTITIES
 
@@ -134,7 +135,7 @@ This memo proposes addition of following configuration entities
 to @code{CONTROL} section of Anubis configuration file. These
 entries may be used in both system-wide and user-specific
 configuration files, the order of their priority being
-determined as usual by @code{rule-priority} statement (@pxref{Security
+determined as usual by the @code{rule-priority} statement (@pxref{Security
 Settings}).
 
 @deffn Option clear-dispatch-table
@@ -164,7 +165,7 @@ such an entry is found, its @code{entry code} field is replaced with
 one is constructed:
 
 @smallexample
-(@var{section-id} . @var{re})
+(@var{re} . @var{section-id})
 @end smallexample
 
 @noindent
@@ -224,10 +225,10 @@ multi-part messages to @var{number}.
 @item TEXT vs BINARY MIME PARTS
 
 This memo does not determine how exactly is Anubis supposed to discern
-between text and binary messages. The siplest way is possibly using
+between text and binary messages. The simplest way is by using the
 @code{Content-Type} header: if it contains @code{charset=} then it
 describes a text part. Otherwise it describes a binary part. Probably
-some more sophisticated methods should be provided.
+some more sophisticated methods should be implemented.
 
 To avoid dependency on any particular charset, text parts must be
 decoded to UTF-8. Correspondingly, any literals used in Anubis
@@ -262,10 +263,10 @@ END
 @end group
 @end smallexample
 
-This sample configuration shows the idea of using @code{external-body-processor}
-statement for binary part processing. Following version of
-@code{resize-message} script uses @command{convert} program for
-reducing image size to 120x120 pixels: 
+This example configuration shows the idea of using
+@code{external-body-processor} statement for binary part
+processing. The following version of @code{resize-message} script uses
+@command{convert} program for reducing image size to 120x120 pixels: 
 
 @smallexample
 #! /bin/sh
