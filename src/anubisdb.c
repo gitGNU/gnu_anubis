@@ -84,7 +84,8 @@ anubis_db_register (const char *dbid,
 
 
 int
-anubis_db_open (char *arg, enum anubis_db_mode mode, void **dptr, char **err)
+anubis_db_open (char *arg, enum anubis_db_mode mode, void **dptr,
+		char const **err)
 {
   struct anubis_db_instance *inst;
   ANUBIS_URL *url;

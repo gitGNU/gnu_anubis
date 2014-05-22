@@ -34,7 +34,7 @@
 
 static int
 gdbm_db_open (void **dp, ANUBIS_URL * url, enum anubis_db_mode mode,
-	      char **errp)
+	      char const **errp)
 {
   GDBM_FILE dbf;
   int flags;

@@ -501,7 +501,7 @@ anubis_get_db_record (const char *username, ANUBIS_USER * usr)
 {
   void *db;
   int rc;
-  char *errtext;
+  char const *errtext;
 
   if (!anubis_dbarg)
     {

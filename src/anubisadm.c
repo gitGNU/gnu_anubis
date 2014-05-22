@@ -53,7 +53,7 @@ int
 opendb (void **dptr, int argc, char **argv, enum anubis_db_mode mode)
 {
   int rc;
-  char *err;
+  char const *err;
 
   if (argc == 0)
     {
@@ -233,7 +233,7 @@ op_add_or_modify (char *database, int code, char *errmsg)
 {
   ANUBIS_USER rec;
   void *db;
-  char *err;
+  char const *err;
   int rc;
 
   if (!authid)

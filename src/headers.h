@@ -574,7 +574,7 @@ enum anubis_db_mode
 				   only) */
 
 typedef int (*anubis_db_open_t) (void **d, ANUBIS_URL * url,
-				 enum anubis_db_mode mode, char **errp);
+				 enum anubis_db_mode mode, char const **errp);
 typedef int (*anubis_db_close_t) (void *d);
 typedef int (*anubis_db_io_t) (void *d, const char *key, ANUBIS_USER * rec,
 			       int *ecode);
@@ -591,7 +591,7 @@ int anubis_db_register (const char *dbid,
 			anubis_db_get_list_t _db_list,
 			anubis_db_strerror_t _db_strerror);
 int anubis_db_open (char *arg, enum anubis_db_mode mode, void **dptr,
-		    char **errp);
+		    char const **errp);
 int anubis_db_close (void **dptr);
 int anubis_db_get_record (void *dptr, const char *key, ANUBIS_USER * rec);
 int anubis_db_put_record (void *dptr, const char *key, ANUBIS_USER * rec);

@@ -26,7 +26,7 @@
 /* Open the plaintext database. ARG is the full pathname to the file */
 static int
 dbtext_open (void **dp, ANUBIS_URL * url, enum anubis_db_mode mode,
-	     char **errp)
+	     char const **errp)
 {
   FILE *fp;
   char *tmode;

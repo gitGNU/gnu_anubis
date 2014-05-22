@@ -115,7 +115,7 @@ my_sql_get_column (struct anubis_sql_db *amp, size_t i)
 /* Open the plaintext database. ARG is the full pathname to the file */
 static int
 mysql_db_open (void **dp, ANUBIS_URL * url, enum anubis_db_mode mode,
-	       char **errp)
+	       char const **errp)
 {
   struct anubis_sql_db *amp = NULL;
   const char *table = anubis_url_get_arg (url, "table");

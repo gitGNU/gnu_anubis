@@ -573,7 +573,7 @@ control_parser (EVAL_ENV env, int key, ANUBIS_LIST arglist, void *inv_data)
 	  {
 	    *p++ = 0;
 	    assign_string (&session.socks_password, p);
-	    assign_string (session.socks_username, arg);
+	    assign_string (&session.socks_username, arg);
 	    topt |= T_SOCKS_AUTH;
 	  }
 	break;
