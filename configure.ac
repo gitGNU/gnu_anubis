@@ -18,7 +18,7 @@ dnl with GNU Anubis.  If not, see <http://www.gnu.org/licenses/>.
 dnl
 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT([GNU Anubis], [4.1.92], [bug-anubis@gnu.org])
+AC_INIT([GNU Anubis], [4.2], [bug-anubis@gnu.org])
 AC_PREREQ([2.63])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([build])

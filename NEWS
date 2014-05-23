@@ -1,20 +1,20 @@
-GNU Anubis NEWS -- history of user-visible changes. 2014-05-18
+GNU Anubis NEWS -- history of user-visible changes. 2014-05-23
 Copyright (C) 2001-2014 The Anubis Team.
 
 See the end of file for copying conditions.
 Please send your bug reports to <bug-anubis@gnu.org>.
 
 
-* Version 4.1.92 (Git)
+* Version 4.2, 2014-05-23
 
-* New operation mode: proxy
+** New operation mode: proxy
 
-* Command line option precedence
+** Command line option precedence
 
 Command line options take precedence over configuration file
 statements.
 
-* elif statement
+** elif statement
 
 A familiar `elif' statement is supported, e.g.:
 
@@ -28,14 +28,14 @@ else
   action-list-4
 fi
   
-* New CONTROL statement esmtp-auth-delayed.
+** New CONTROL statement esmtp-auth-delayed.
 
 When set to `yes', this statement instructs Anubis to postpone ESMTP
 authentication until MAIL command is issued by the client.  This
 allows to change authentication credentials in the SMTP section (see
 below).
 
-* SMTP section
+** SMTP section
 
 The new section "SMTP" is invoked each time an SMTP command
 is received. This section may alter the command's argument, using the
@@ -64,14 +64,14 @@ else
 fi
 END
 
-* New keywords: log-facility and log-tag
+** New keywords: log-facility and log-tag
 
-* Guile output
+** Guile output
 
 By default Scheme's standard error and output ports are redirected to
 syslog, using priorities `err' and `warning' correspondingly.
 
-* MySQL options file
+** MySQL options file
 
 When using MySQL for Anubis user database, the database parameters and
 access credentials are read from the file /etc/my.cnf, section
